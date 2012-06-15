@@ -15,6 +15,9 @@ APP = """
     copyright   = "",
 """
 
+VE_NEW_PROJECT_ROLE = 0
+VE_OPEN_PROJECT_ROLE = 1
+
 class MyDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
@@ -39,14 +42,12 @@ class MyDialog(QDialog):
 
         create a painting canvas"""
 
-
 # Could use QWizard, but this is simpler
 class Wizard():
     
     # font 
     font = QFont()
     font.setPointSize(10)
-
 
     def __init__(self, mainWindow = None):
         self.mainWindow = mainWindow
@@ -56,6 +57,21 @@ class Wizard():
 
     def filesToOpen(self):
         return self.openList
+
+    def warningMsg(self, title = "Warning", message=None):
+        if message is not None:
+            msg = QMessageBox()
+            msg.setText(message)
+            msg.addButton("New Project" , VE_NEW_PROJECT_ROLE)
+            msg.addButton("Open Project" , VE_OPEN_PROJECT_ROLE)
+            msg.setWindowTitle(title)
+            ret = msg.exec_()
+            if ret == VE_NEW_PROJECT_ROLE:
+                self.mainWindow.newProject()
+            elif ret == VE_OPEN_PROJECT_ROLE:
+                self.mainWindow.openProject()
+            return 
+
     
     def start(self, path, openApp=False, newApp=False):
         self.openList = None
@@ -69,35 +85,18 @@ class Wizard():
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
                 if len(files) <= 0:
-                    msg = QMessageBox()
-                    msg.setText('Directory "' + dir +
-                    '" does not contain an "app" file and a "main.lua" file.')
-                    msg.setWindowTitle("Error")
-                    msg.exec_()
+                    #self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file and a "main.lua" file.')
+                    self.warningMsg("Error", 'Directory "' + dir + '" is not valid. it does not contain an "app" file and a "main.lua" file.')
                     return 
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return dir
                     else:
-                        msg = QMessageBox()
-                        msg.setText('Directory "' + dir +
-                        '" does not contain an "app" file or a "main.lua" file.')
-                        msg.setWindowTitle("Error")
-                        msg.exec_()
+                        self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file or a "main.lua" file.')
                         return 
-                        #sys.exit('Error >> ' + dir +
-                                 #' does not contain an app file and a main.lua file.')
             else:
                 #TODO: add dialog box for openApp or newApp 
-                msg = QMessageBox()
-                msg.setText('Directory "' + dir +
-                '" does not exist.')
-                msg.setWindowTitle("Error")
-                msg.exec_()
-                #self.mainWindow.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ Unsaved Project ]"), None, QApplication.UnicodeUTF8)
-                self.mainWindow.setWindowTitle("TrickPlay VE2 [ Unsaved Project ]")
-                self.mainWindow.currentProject = "unsaved_temp"
-
+                self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
                 return 
 
 	    # Get a path from the user
@@ -122,13 +121,7 @@ class Wizard():
                         #return self.start(path, True, False)
                         return userPath
                     else:
-                        msg = QMessageBox()
-                        msg.setText('Directory "' + os.path.basename(str(userPath)) +
-                                    '" does not contain an "app" file and a "main.lua" file.')
-                        msg.setInformativeTet('If you pick an empty directory, you will be '
-                                               'prompted to create a new app there.');
-                        msg.setWindowTitle("Error")
-                        msg.exec_()
+                        self.warningMsg("Error", 'Directory "' + os.path.basename(str(userPath)) + '" does not contain an "app" file and a "main.lua" file.')
                         return self.start(None)
         
         # Path was given on command line
@@ -136,13 +129,7 @@ class Wizard():
             if os.path.exists(path) and os.path.isdir(path):
                 files = os.listdir(path)
                 if len(files) <= 0:
-                    msg = QMessageBox()
-                    msg.setText('Directory "' + os.path.basename(str(path)) +
-                    '" does not contain an "app" file and a "main.lua" file.')
-                    #msg.setInformativeText('If you pick an empty directory, you will be '
-                    #                       'prompted to create a new app there.');
-                    msg.setWindowTitle("Error")
-                    msg.exec_()
+                    self.warningMsg("Error", 'Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
                     return 
                     #return self.createAppDialog(path)
                 else:
@@ -150,13 +137,7 @@ class Wizard():
                         return path
                     else:
                         #print('[VDBG] Error - ' + path + ' does not contain an app file and a main.lua file.')
-                        msg = QMessageBox()
-                        msg.setText('Directory "' + os.path.basename(str(path)) +
-                                    '" does not contain an "app" file and a "main.lua" file.')
-                        #msg.setInformativeText('If you pick an empty directory, you will be '
-                        #                       'prompted to create a new app there.');
-                        msg.setWindowTitle("Error")
-                        msg.exec_()
+                        self.warningMsg("Error", 'Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
                         return 
 
             else:
@@ -241,12 +222,7 @@ class Wizard():
         	    self.new = False                
 
         	if -1 == result:
-        	    msg = QMessageBox()
-        	    msg.setText('Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
-        	    msg.setInformativeText('If you pick an empty directory, you will be ' 'prompted to create a new app there.');
-        	    msg.setWindowTitle("Error")
-        	    msg.exec_()
-        
+        	    self.warningMsg("Error", 'Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
         return result
         
 
@@ -269,21 +245,13 @@ class Wizard():
         
         result = self.adjustDialog(path, directory)
         if result == -4:
-            msg = QMessageBox()
-            msg.setText('\'' + os.path.basename(str(path)) + '\' is not a valid directory. Please select another empty directory to create a new app.')
-            msg.setWindowTitle("Warning")
-            msg.exec_()
+            self.warningMsg("Warning", '\'' + os.path.basename(str(path)) + '\' is not a valid directory. Please select another empty directory to create a new app.')
         else:
+            print path, "!!!"
             self.ui.directory.setText(path)
             self.ui.id.setReadOnly(False)
             self.ui.name.setReadOnly(False)
             self.new = True
-            """
-            msg = QMessageBox()
-            msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
-            msg.setWindowTitle("Warning")
-            msg.exec_()
-            """
         return path
         
     # whenever user edit id and name line editor, change the label-selfe.ui.projectDirName.
@@ -360,11 +328,11 @@ class Wizard():
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
 
-            # set the path to path+project dir name 
-            path = str(os.path.join(str(path), str(self.id+"."+self.name)))
-            
             if '' == id or '' == name or '' == path:
                 return self.createAppDialog(path, id, name)
+            
+            # set the path to path+project dir name 
+            path = str(os.path.join(str(path), str(self.id+"."+self.name)))
             
             if self.new:
                 # create project directory id.name and create app and main.lua there 

@@ -39,18 +39,20 @@ def main(argv):
         
         apath = os.path.join(apath, os.path.dirname(str(argv[0])))
         main = MainWindow(app, apath)
+        main.show()
+        main.raise_()
 
         wizard = Wizard(main)
         app.main = main
         path = wizard.start(path)
         if path:
             settings = QSettings()
-            settings.setValue('path', path)
+            settings.setValue('path', path) 
             app.setActiveWindow(main)
             main.start(path, wizard.filesToOpen())
 
-        main.show()
-        main.raise_()
+        #main.show()
+        #main.raise_()
 
         sys.exit(app.exec_())
 
