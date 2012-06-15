@@ -90,6 +90,16 @@ public:
 
     void advanced_ui_event( const char * json );
 
+    void streaming_video_connected( const char * address );
+
+    void streaming_video_failed( const char * address, const char * reason );
+
+    void streaming_video_dropped( const char * address, const char * reason );
+
+    void streaming_video_ended( const char * address, const char * who );
+
+    void streaming_video_status( const char * status, const char * arg );
+
     //.........................................................................
 
     class Delegate
@@ -119,6 +129,11 @@ public:
         virtual void cancel_audio_clip( void ) = 0;
         virtual void advanced_ui_ready( void ) = 0;
         virtual void advanced_ui_event( const char * json ) = 0;
+        virtual void streaming_video_connected( const char * address ) = 0;
+        virtual void streaming_video_failed( const char * address, const char * reason ) = 0;
+        virtual void streaming_video_dropped( const char * address, const char * reason ) = 0;
+        virtual void streaming_video_ended( const char * address, const char * who ) = 0;
+        virtual void streaming_video_status( const char * status, const char * arg ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -192,6 +207,12 @@ public:
     bool show_virtual_remote();
 
     bool hide_virtual_remote();
+
+    bool streaming_video_start_call( const String & address );
+
+    bool streaming_video_end_call( const String & address );
+
+    bool streaming_video_send_status();
 
     inline bool wants_accelerometer_events() const
     {
@@ -334,6 +355,11 @@ private:
     friend void tp_controller_advanced_ui_ready( TPController * controller );
     friend void tp_controller_advanced_ui_event( TPController * controller , const char * json );
     friend void tp_controller_scroll( TPController * controller , int direction , unsigned long int modifiers );
+    friend void tp_controller_streaming_video_connected( TPController * controller, const char * address );
+    friend void tp_controller_streaming_video_failed( TPController * controller, const char * address, const char * reason );
+    friend void tp_controller_streaming_video_dropped( TPController * controller, const char * address, const char * reason );
+    friend void tp_controller_streaming_video_ended( TPController * controller, const char * address, const char * who );
+    friend void tp_controller_streaming_video_status( TPController * controller, const char * status, const char * arg );
 
     //.........................................................................
 

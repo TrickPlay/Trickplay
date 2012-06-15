@@ -1678,6 +1678,60 @@ interface Controller [[ControllerDelegate*]]
 
     callback on_advanced_ui_event;
 
+    /*
+        Event Handler: on_streaming_video_connected
+
+        *Arguments:*
+
+            address - the address that was connected to
+    */
+
+    callback on_streaming_video_connected;
+
+    /*
+        Event Handler: on_streaming_video_failed
+
+        *Arguments:*
+
+            address - the address that was connected to
+            reason - the reason for the failure
+    */
+
+    callback on_streaming_video_failed;
+
+    /*
+        Event Handler: on_streaming_video_dropped
+
+        *Arguments:*
+
+            address - the address that was connected to
+            reason - the reason the call was dropped
+    */
+
+    callback on_streaming_video_dropped;
+
+    /*
+        Event Handler: on_streaming_video_ended
+
+        *Arguments:*
+
+            address - the address that was connected to
+            who - who terminated the call
+    */
+
+    callback on_streaming_video_ended;
+
+    /*
+        Event Handler: on_streaming_video_status
+
+        *Arguments:*
+
+            status - the current status
+            arg - possible argument, depending on status
+    */
+
+    callback on_streaming_video_status;
+
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
 
     bool save_key_map( table map )
