@@ -106,13 +106,15 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
-        self.sendLuaCommand("openFile", '_VE_.openFile("'+self.path+'")')
+        #self.sendLuaCommand("openFile", '_VE_.openFile("'+self.path+'")')
+        self.sendLuaCommand("openFile", '_VE_.openFile("'+str(os.path.join(self.path, 'screens'))+'")')
         return True
     
     def setAppPath(self):
         #if self.path.startswith('/'):
             #self.path = self.path[1:]
-        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+self.path+'")')
+        #self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+self.path+'")')
+        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'screens'))+'")')
         return True
 
     def newLayer(self):
@@ -134,6 +136,8 @@ class MainWindow(QMainWindow):
             self.start(path)
             self.setAppPath()
             self.run()
+            self.command = "newProject"
+            self.inspector.screens = {"_AllScreens":[],"Default":[]}
             return True
 
     def openProject(self):

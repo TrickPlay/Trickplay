@@ -409,6 +409,7 @@ class TrickplayInspector(QWidget):
         Change UI Element visibility using checkboxes
         """     
           
+        print ("inspectorDataChanged")
         if not self.preventChanges:
             
             self.preventChanges = True

@@ -47,6 +47,7 @@ def main(argv):
         path = wizard.start(path)
         if path:
             settings = QSettings()
+            #settings.setValue('path', None) 
             settings.setValue('path', path) 
             app.setActiveWindow(main)
             main.start(path, wizard.filesToOpen())
