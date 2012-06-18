@@ -178,28 +178,28 @@ _VE_.openFile = function(path)
     end
 
     s = load_layer(layer)
-    --screen:add(s)
 
     for i,j in ipairs(s.children) do
-        if j.subscribe_to then  
-            j:subscribe_to(nil, function()  _VE_.repUIInfo(j) end)
-        end 
-        function j.on_button_down( j , x , y , button )
-            dragging = { j , x - j.x , y - j.y }
-            if button == 3 then
-                _VE_.openInspector(j.gid)
-            end
-        end
-    
-        function j.on_button_up( j , x , y , button )
-            dragging = nil
-        end
-    
         if string.find(j.name, "Layer") ~= nil then 
-            j.reactive = true 
+            for l,m in ipairs(j.children) do 
+                if m.subscribe_to then  
+                    m:subscribe_to(nil, function()  _VE_.repUIInfo(m) end)
+                end 
+                function m.on_button_down( m , x , y , button )
+                    dragging = { m , x - m.x , y - m.y }
+                    if button == 3 then
+                        _VE_.openInspector(m.gid)
+                    end
+                end
+        
+                function m.on_button_up( m , x , y , button )
+                    dragging = nil
+                end
+            
+                m.reactive = true 
+            end
         end 
 
-        --_VE_.repUIInfo(j)
         j:unparent()
         screen:add(j)
     end
