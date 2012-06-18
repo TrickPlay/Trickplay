@@ -27,6 +27,7 @@ World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_met
     velocity_iterations( 6 ),
     position_iterations( 2 ),
     idle_source( 0 ),
+    repaint_source( 0 ),
     timer( g_timer_new() ),
     screen( CLUTTER_ACTOR( g_object_ref( _screen ) ) ),
     debug_draw( 0 )
@@ -76,7 +77,8 @@ void World::start( int _velocity_iterations , int _position_iterations )
         return;
     }
 
-    idle_source = clutter_threads_add_idle( on_idle , this );
+    repaint_source = clutter_threads_add_repaint_func( on_idle , this, NULL );
+    idle_source = clutter_threads_add_idle( on_idle, this );
 
     g_timer_start( timer );
 
@@ -93,9 +95,11 @@ void World::stop()
         return;
     }
 
+    clutter_threads_remove_repaint_func( repaint_source );
     g_source_remove( idle_source );
 
     idle_source = 0;
+    repaint_source = 0;
 }
 
 //.............................................................................
@@ -874,7 +878,7 @@ void World::DrawTransform(const b2Transform& xf)
 gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world )
 {
     world->debug_cairo = cr;
-    
+
     cairo_scale( cr , world->ppm , world->ppm );
 
     world->b2DebugDraw::SetFlags(
@@ -892,7 +896,7 @@ gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , Wo
     world->world.SetDebugDraw( 0 );
 
     world->debug_cairo = 0;
-    
+
     return TRUE;
 }
 
@@ -935,20 +939,20 @@ void World::draw_debug( int opacity )
 
 
     gulong handler = g_signal_connect( debug_draw , "draw" , GCallback( on_debug_draw ) , this );
-    
+
     clutter_cairo_texture_invalidate( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
-    
+
     g_signal_handler_disconnect( debug_draw , handler );
 
 #else
 
     cairo_t * c = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
-    
+
     on_debug_draw( CLUTTER_CAIRO_TEXTURE( debug_draw ) , c , this );
-    
+
     cairo_destroy( c );
-    
-#endif    
+
+#endif
 
 }
 
