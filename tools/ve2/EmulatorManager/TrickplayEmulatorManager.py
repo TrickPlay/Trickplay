@@ -1,4 +1,4 @@
-import os, telnetlib, base64, sys, random, json
+import os, telnetlib, base64, sys, random, json, time
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -20,13 +20,6 @@ class TrickplayEmulatorManager(QWidget):
         QObject.connect(self.trickplay, SIGNAL('readyRead()'), self.app_ready_read)
 
         self.manager = QNetworkAccessManager()
-
-        self.http_port = None
-        self.console_port = None
-
-        self.name = 'Emulator'  
-        self.port = '6789'
-        self.address = 'localhost'
         self.pdata = None
         
         self.run()
@@ -78,10 +71,6 @@ class TrickplayEmulatorManager(QWidget):
     
     def app_started(self):
 		print "[VE] APP Started"
-
-    def readDebugResponse(self):
-		while self.debug_socket.waitForReadyRead(1100) :
-			print self.debug_socket.read(self.debug_socket.bytesAvailable())
 
     def app_ready_read(self):
 
@@ -148,7 +137,6 @@ class TrickplayEmulatorManager(QWidget):
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repUIInfo":
 				        self.pdata = json.loads(s[9:])
-				        #print self.pdata
 				    elif luaCmd == "repStInfo" :
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "getStInfo" :
@@ -231,6 +219,7 @@ class TrickplayEmulatorManager(QWidget):
 				    if sdata is not None and self.pdata is not None:
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
+				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
                         
 				elif s is not None:
 				    #print(">> %s"%s)

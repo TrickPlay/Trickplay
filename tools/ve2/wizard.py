@@ -19,7 +19,6 @@ VE_NEW_PROJECT_ROLE = 0
 VE_OPEN_PROJECT_ROLE = 1
 
 # To add dialog background image later ?
-
 class MyDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
@@ -73,7 +72,6 @@ class Wizard():
             elif ret == VE_OPEN_PROJECT_ROLE:
                 self.mainWindow.openProject()
             return 
-
     
     def start(self, path, openApp=False, newApp=False):
         self.openList = None
@@ -82,7 +80,7 @@ class Wizard():
         settings = QSettings()
         dir = str(settings.value('path', '').toString())
 
-        # If no app path was passed in
+        # If path is None
         if not path and newApp == False:
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
@@ -97,7 +95,6 @@ class Wizard():
                         self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file or a "main.lua" file.')
                         return 
             else:
-                #TODO: add dialog box for openApp or newApp 
                 self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
                 return 
 

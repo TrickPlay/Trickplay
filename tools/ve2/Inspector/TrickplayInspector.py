@@ -333,12 +333,12 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
-        print("screenChanged")
-        if self.old_screen_name == "":
-            return
         self.screen_textChanged = True
-        self.currentScreenName = str(self.ui.screenCombo.itemText(self.ui.screenCombo.currentIndex()))        
+        self.currentScreenName = str(self.ui.screenCombo.itemText(index))
+        print("screenChanged", self.currentScreenName, index)
         if self.screens.has_key(self.currentScreenName) == False :
+            if self.old_screen_name == "":
+                return
             self.screens[self.currentScreenName] = []
             for layerName in self.screens[self.old_screen_name][:]:
                 self.screens[self.currentScreenName].append(layerName)
@@ -351,6 +351,9 @@ class TrickplayInspector(QWidget):
             for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked 
                 theItem = self.search(theLayer, 'name')
+                if theItem is None:
+                    return
+
                 if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
                     self.sendData(theItem['gid'], "is_visible", True)
                     theItem.setCheckState(Qt.Checked)
