@@ -195,7 +195,10 @@ _VE_.openFile = function(path)
             dragging = nil
         end
     
-        j.reactive = true 
+        if string.find(j.name, "Layer") ~= nil then 
+            j.reactive = true 
+        end 
+
         --_VE_.repUIInfo(j)
         j:unparent()
         screen:add(j)
