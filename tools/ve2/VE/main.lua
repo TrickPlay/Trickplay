@@ -233,8 +233,14 @@ end
 
 
 _VE_.newLayer = function()
+    for m,n in ipairs (screen.children) do
+        if n.name == "Layer"..layerNum then 
+            layerNum = layerNum + 1
+        end
+    end 
     screen:add(Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
+
     --_VE_.repUIInfo()
     _VE_.getUIInfo()
     _VE_.getStInfo()
@@ -277,8 +283,12 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     
     if uiElementCreate_map[uiTypeStr] then
         uiInstance = uiElementCreate_map[uiTypeStr](self)
+        for m,n in ipairs (screen.children) do
+            if n.name == uiTypeStr:lower()..uiNum then 
+                uiNum = uiNum + 1
+            end
+        end 
         uiInstance.name = uiTypeStr:lower()..uiNum
-        --TODO : need to check if ui.name is existing 
         uiNum = uiNum + 1
     else
         print "error"
