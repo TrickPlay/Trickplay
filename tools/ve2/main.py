@@ -111,6 +111,10 @@ class MainWindow(QMainWindow):
             self.setAppPath()
             self.run()
             self.command = "newProject"
+            while self.inspector.ui.screenCombo.count() > 0 :
+                curIdx = self.inspector.ui.screenCombo.currentIndex()
+                self.inspector.ui.screenCombo.removeItem(curIdx)
+            self.inspector.ui.screenCombo.addItem("Default")
             self.inspector.screens = {"_AllScreens":[],"Default":[]}
             return True
 
