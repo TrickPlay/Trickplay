@@ -157,15 +157,26 @@ class TrickplayEmulatorManager(QWidget):
 				                self.inspector.currentScreenName = scrData[0][i] 
 				                self.inspector.old_screen_name = ""
 
+				        """
 				        while True:
 				            idx = self.inspector.ui.screenCombo.count()
 				            if idx == 0 :
 				                break
 				            self.inspector.ui.screenCombo.removeItem(idx - 1)
+				        """
+				        while self.inspector.ui.screenCombo.count() > 0 :
+				            curIdx = self.inspector.ui.screenCombo.currentIndex()
+				            self.inspector.ui.screenCombo.removeItem(curIdx)
 
+				        self.inspector.addItemToScreens = True
 				        for scrName in screenNames:
 				            if self.inspector.ui.screenCombo.findText(scrName) < 0 and scrName != "_AllScreens":
 				                self.inspector.ui.screenCombo.addItem(scrName)
+				        self.inspector.addItemToScreens = False
+
+				        print ("LLL", self.inspector.currentScreenName)
+				        print ("LLL", self.inspector.screens)
+				        
 
 				        #self.inspector.ui.screenCombo.setCurrentIndex(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				    else:
