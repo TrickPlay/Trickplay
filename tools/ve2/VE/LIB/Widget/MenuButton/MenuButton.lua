@@ -20,7 +20,7 @@ MenuButton = function(parameters)
     ----------------------------------------------------------------------------
 	--The ButtonPicker Object inherits from LayoutManager
 	
-    local button = Button{w=300}
+    local button = Button{style = false,w=300}
     
     local popup = LayoutManager()
     
@@ -89,7 +89,7 @@ MenuButton = function(parameters)
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
 		function(oldf,self,v)  
-            print("dir")
+            
             if not possible_directions[v] then
                 error("MenuButton.direction expects 'up', 'down', 'left', or 'right'. Received: "..v,2)
             end
@@ -114,6 +114,18 @@ MenuButton = function(parameters)
         
     end
     
+    ----------------------------------------------------------------------------
+	
+	local instance_on_style_changed
+    local function instance_on_style_changed()
+        
+        button.style:set(instance.style.attributes)
+	end
+	
+    
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
     ----------------------------------------------------------------------------
     
 	instance:set(parameters)

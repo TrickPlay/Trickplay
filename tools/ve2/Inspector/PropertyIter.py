@@ -104,7 +104,6 @@ PROP_LIST = [
     'vertical_cell_spacing', 
     'cell_timing', 
     'cell_timing_offset', 
-    'cells', 
     'cells_focusable', 
     # Text Input
     # Progress Bar
@@ -149,17 +148,64 @@ PROP_LIST = [
     'selected_item',
     'derection',
     # Tab Bar
-    'direction',
+    'direction', #"horizontal"
     'dist_from_pane',
     'focus_opens_tab',
+    """
+    # ArrowPane
+    'cell_w', 
+    'cell_h', 
+    'children_want_focus', 
+    'clip',
+    'clip_to_size',
+    'count',
+    'depth',
+    'has_clip',
+    'horizontal_alignment',
+    'horizontal_spacing',
+    'is_animating',
+    'is_rotated',
+    'is_scaled',
+    'move_by',
+    'note_constructor',
+    'number_of_cols',
+    'pane_h', 
+    'pane_w', 
+    'placeholder', 
+    'request_mode', # "HEIGHT_FOR_WIDTH"
+    'vertical_alignment', 
+    'vertical_spacing', 
+    'virtual_w',
+    'virtual_h',
+    'virtual_x',
+    'virtual_y',
+    # ScroolPane
+    'slider_thickness',
+    # TabBar
+    'length',
+    'tab_h',
+    'tab_location',
+    'tab_w',
+    # ButtonPicker
+    'orientation',
+    'spacing', # horizontal_spacing, vertical_spacing, 'horizontal_cell_spacing', 'vertical_cell_spacing', 
+    'visible', # is_visible ??
+    'window_w', # is_visible ??
+    'window_h', # is_visible ??
+    # MenuButton
+    'item_spacing', 
+    'popup_offset', 
+
+    """
+
     # Scroll Pane
     'horizontal_slider',
     'vertical_slider',
     # Slider 
     'value', 
     'ratio',
-    'grip',
-    'track',
+    'grip', # userdata ? 
+    'track', #userdata ?
     # Clippig Region
     'virtual_width',
     'virtual_height',
@@ -190,4 +236,21 @@ NESTED_PROP_LIST = {
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
     'tile' : ['x', 'y'], 
+
+    """
+    #Arrow Pane
+    'cells' : [], 
+    'center' : ['',''], 
+    'children' : [], 
+    'constraints' : [], 
+    'min_size' : [], 
+    'natural_size' : [], 
+    #Arrow Pane
+    'tabs' : [], 
+    #ButtonPicker
+    'items' : [], 
+    """
+
+
+
 }

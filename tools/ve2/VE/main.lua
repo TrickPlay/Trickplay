@@ -13,12 +13,24 @@ if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner
 if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
 if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
 
+if not RADIOBUTTONGROUP  then dofile("LIB/Widget/RadioButtonGroup/RadioButtonGroup.lua") end
+if not GRIDMANAGER       then dofile("LIB/Widget/__UTILITIES/ListManagement.lua")   end
+if not NINESLICE         then dofile("LIB/Widget/NineSlice/NineSlice.lua")          end
+if not CLIPPINGREGION    then dofile("LIB/Widget/ClippingRegion/ClippingRegion.lua")end
+if not SLIDER            then dofile("LIB/Widget/Slider/Slider.lua")                end
+if not LAYOUTMANAGER     then dofile("LIB/Widget/LayoutManager/LayoutManager.lua")  end
+if not SCROLLPANE        then dofile("LIB/Widget/ScrollPane/ScrollPane.lua")        end
+if not ARROWPANE         then dofile("LIB/Widget/ArrowPane/ArrowPane.lua")          end
+if not BUTTONPICKER      then dofile("LIB/Widget/ButtonPicker/ButtonPicker.lua")    end
+if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")        end
+if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
+
 g = Group{name="Layer1"}
 
 dofile("LIB/VE/ve_runtime")
 loadfile("test1.lua")(g)
 
-local function dump_properties( o )
+function dump_properties( o )
         local t = {}
         local l = 0
         for k , v in pairs( getmetatable( o ).__getters__ ) do
@@ -280,6 +292,13 @@ local uiElementCreate_map =
     ['ProgressSpinner'] = function() return ProgressSpinner() end,
     ['OrbittingDots'] = function() return OrbittingDots() end,
     ['TextInput'] = function() return TextInput() end,
+    ['LayoutManager'] = function()  return LayoutManager() end, 
+    ['Slider'] = function()  return Slider() end, 
+    ['ArrowPane'] = function()  return ArrowPane() end, 
+    ['ScrollPane'] = function()  return ScrollPane() end, 
+    ['TabBar'] = function()  return TabBar() end, 
+    ['ButtonPicker'] = function()  return ButtonPicker() end, 
+    ['MenuButton'] = function()  return MenuButton() end, 
 }
 
 _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
@@ -317,6 +336,10 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     function uiInstance.on_button_up( uiInstance , x , y , button )
         dragging = nil
     end
+
+    uiInstance.reactive = true
+
+    --dump_properties(uiInstance)
 
     devtools:gid(curLayerGid):add(uiInstance)
     --screen:add(uiInstance)

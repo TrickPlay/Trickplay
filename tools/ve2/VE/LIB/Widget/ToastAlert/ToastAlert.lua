@@ -200,7 +200,11 @@ ToastAlert = function(parameters)
 	)
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size","separator_y","icon"},
+		{
+            "h","w","width","height","size","separator_y","icon",
+            "horizontal_message_padding","vertical_message_padding",
+            "horizontal_icon_padding","vertical_icon_padding"
+        },
 		function()
 			
 			--reposition icon

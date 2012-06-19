@@ -26,7 +26,7 @@ local create_fg = function(self)
 	return c:Image()
 	
 end
-local create_arrow = function(old_function,self,state)
+local create_arrow = function(self,state)
 	
 	local c = Canvas(self.w,self.h)
 	
@@ -35,7 +35,7 @@ local create_arrow = function(old_function,self,state)
     c:line_to(c.w,   c.h)
     c:line_to(0,   c.h/2)
     
-	c:set_source_color( self.style.arrow.colors[state] )     c:fill(true)
+	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
 	
 	return c:Image()
 	
@@ -58,14 +58,22 @@ ButtonPicker = function(parameters)
 	
     local text = Group()
     local window = Widget_Group{children={bg,text,fg}}
-	local instance = LayoutManager(parameters)
     local prev_arrow = Button{
+        style = false,
         label = "",
         create_canvas = create_arrow,
     }
     local next_arrow = Button{
+        style = false,
         label = "",
         create_canvas = create_arrow,
+    }
+	local instance = ListManager{
+        cells = {
+            prev_arrow,
+            window,
+            next_arrow
+        },
     }
     local bg,fg
     
@@ -268,33 +276,15 @@ ButtonPicker = function(parameters)
             
             if undo_prev_function then undo_prev_function() end
             if undo_next_function then undo_next_function() end
-            print("pos")
+            
             if v == "horizontal" then
                 prev_arrow:set{z_rotation={  0,0,0}}
                 next_arrow:set{z_rotation={180,0,0}}
-                instance:set{
-                    number_of_rows = 1,
-                    number_of_cols = 3,
-                    cells = {
-                        prev_arrow,
-                        window,
-                        next_arrow
-                    },
-                }
                 undo_prev_function = instance:add_key_handler(keys.Left, prev_i)
                 undo_next_function = instance:add_key_handler(keys.Right,next_i)
             elseif v == "vertical" then
                 prev_arrow:set{z_rotation={ 90,0,0}}
                 next_arrow:set{z_rotation={270,0,0}}
-                instance:set{
-                    number_of_rows = 3,
-                    number_of_cols = 1,
-                    cells = {
-                        {prev_arrow},
-                        {window},
-                        {next_arrow},
-                    },
-                }
                 undo_prev_function = instance:add_key_handler(keys.Up,  prev_i)
                 undo_next_function = instance:add_key_handler(keys.Down,next_i)
             else
@@ -303,6 +293,7 @@ ButtonPicker = function(parameters)
                 
             end
             orientation = v
+            instance.direction = v
         end
 	)
     
@@ -315,7 +306,6 @@ ButtonPicker = function(parameters)
     ---[[
     local function update_labels()
         for i,item in items.pairs() do
-            print(i)
             item:set(   instance.style.text:get_table()   )
             item.color = instance.style.text.colors.default
         end
@@ -337,16 +327,19 @@ ButtonPicker = function(parameters)
                 instance.style.arrow.size/2
             },
         }
+        instance.spacing = instance.style.arrow.offset
     end
     local function arrow_colors_on_changed() 
-        prev_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
-        next_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
+        
+        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        
     end 
 	local instance_on_style_changed
     function instance_on_style_changed()
         
         instance.style.arrow:subscribe_to(      nil, arrow_on_changed )
-        instance.style.arrow.colors:subscribe_to(      nil, arrow_on_changed )
+        instance.style.arrow.colors:subscribe_to(      nil, arrow_colors_on_changed )
         instance.style.border:subscribe_to(      nil, redo_fg )
         instance.style.fill_colors:subscribe_to( nil, redo_bg )
         instance.style.text:subscribe_to( nil, update_labels )

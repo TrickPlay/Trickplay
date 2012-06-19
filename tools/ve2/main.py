@@ -52,6 +52,14 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionOrbitting_Dots, SIGNAL("triggered()"),  self.orbittingdots)
         QObject.connect(self.ui.actionTextInput, SIGNAL("triggered()"),  self.textinput)
 
+        QObject.connect(self.ui.actionSlider, SIGNAL("triggered()"),  self.slider)
+        QObject.connect(self.ui.actionLayoutManager, SIGNAL("triggered()"),  self.layoutmanager)
+        QObject.connect(self.ui.actionScrollPane, SIGNAL("triggered()"),  self.scrollpane)
+        QObject.connect(self.ui.actionTabBar, SIGNAL("triggered()"),  self.tabbar)
+        QObject.connect(self.ui.actionArrowPane, SIGNAL("triggered()"),  self.arrowpane)
+        QObject.connect(self.ui.actionButtonPicker, SIGNAL("triggered()"),  self.buttonpicker)
+        QObject.connect(self.ui.actionMenuButton, SIGNAL("triggered()"),  self.menubutton)
+
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
@@ -153,6 +161,28 @@ class MainWindow(QMainWindow):
         self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         print("_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        return True
+
+    def slider(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Slider')")
+        return True
+    def layoutmanager(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'LayoutManager')")
+        return True
+    def scrollpane(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ScrollPane')")
+        return True
+    def tabbar(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TabBar')")
+        return True
+    def arrowpane(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ArrowPane')")
+        return True
+    def buttonpicker(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ButtonPicker')")
+        return True
+    def menubutton(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'MenuButton')")
         return True
 
     def textinput(self):
