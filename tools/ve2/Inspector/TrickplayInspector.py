@@ -51,6 +51,7 @@ class TrickplayInspector(QWidget):
         self.screens = {"_AllScreens":[],"Default":[]}
         self.cbStyle_textChanged = False
         self.screen_textChanged = False
+        self.addItemToScreens = False
         
         # Models
         self.inspectorModel = TrickplayElementModel(self)
@@ -333,6 +334,8 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
+        if index < 0 or self.addItemToScreens is True:
+            return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
         print("screenChanged", self.currentScreenName, index)

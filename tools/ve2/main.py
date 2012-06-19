@@ -131,6 +131,10 @@ class MainWindow(QMainWindow):
             settings = QSettings()
             if settings.value('path') is not None:
                 self.stop()
+            while self.inspector.ui.screenCombo.count() > 0 :
+                curIdx = self.inspector.ui.screenCombo.currentIndex()
+                self.inspector.ui.screenCombo.removeItem(curIdx)
+            self.inspector.ui.screenCombo.addItem("Default")
             settings.setValue('path', path)
             self.setCurrentProject(str(path))
             self.setAppPath()
