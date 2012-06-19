@@ -87,12 +87,19 @@
      <property name="title">
       <string>Insert UI Element</string>
      </property>
+     <addaction name="actionArrowPane"/>
      <addaction name="action_Button"/>
+     <addaction name="actionButtonPicker"/>
      <addaction name="actionDialog_Box"/>
-     <addaction name="actionToastAlert"/>
+     <addaction name="actionLayoutManager"/>
+     <addaction name="actionMenuButton"/>
      <addaction name="actionProgressSpinner"/>
      <addaction name="actionOrbitting_Dots"/>
+     <addaction name="actionScrollPane"/>
+     <addaction name="actionSlider"/>
+     <addaction name="actionTabBar"/>
      <addaction name="actionTextInput"/>
+     <addaction name="actionToastAlert"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
    </widget>
@@ -564,6 +571,41 @@
   <action name="actionSave_Project">
    <property name="text">
     <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionSlider">
+   <property name="text">
+    <string>Slider</string>
+   </property>
+  </action>
+  <action name="actionLayoutManager">
+   <property name="text">
+    <string>LayoutManager</string>
+   </property>
+  </action>
+  <action name="actionScrollPane">
+   <property name="text">
+    <string>ScrollPane</string>
+   </property>
+  </action>
+  <action name="actionTabBar">
+   <property name="text">
+    <string>TabBar</string>
+   </property>
+  </action>
+  <action name="actionArrowPane">
+   <property name="text">
+    <string>ArrowPane</string>
+   </property>
+  </action>
+  <action name="actionButtonPicker">
+   <property name="text">
+    <string>ButtonPicker</string>
+   </property>
+  </action>
+  <action name="actionMenuButton">
+   <property name="text">
+    <string>MenuButton</string>
    </property>
   </action>
  </widget>

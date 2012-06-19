@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Jun 15 14:12:42 2012
+# Created: Tue Jun 19 10:37:06 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -232,6 +232,20 @@ class Ui_MainWindow(object):
         self.actionOpen_Project.setObjectName(_fromUtf8("actionOpen_Project"))
         self.actionSave_Project = QtGui.QAction(MainWindow)
         self.actionSave_Project.setObjectName(_fromUtf8("actionSave_Project"))
+        self.actionSlider = QtGui.QAction(MainWindow)
+        self.actionSlider.setObjectName(_fromUtf8("actionSlider"))
+        self.actionLayoutManager = QtGui.QAction(MainWindow)
+        self.actionLayoutManager.setObjectName(_fromUtf8("actionLayoutManager"))
+        self.actionScrollPane = QtGui.QAction(MainWindow)
+        self.actionScrollPane.setObjectName(_fromUtf8("actionScrollPane"))
+        self.actionTabBar = QtGui.QAction(MainWindow)
+        self.actionTabBar.setObjectName(_fromUtf8("actionTabBar"))
+        self.actionArrowPane = QtGui.QAction(MainWindow)
+        self.actionArrowPane.setObjectName(_fromUtf8("actionArrowPane"))
+        self.actionButtonPicker = QtGui.QAction(MainWindow)
+        self.actionButtonPicker.setObjectName(_fromUtf8("actionButtonPicker"))
+        self.actionMenuButton = QtGui.QAction(MainWindow)
+        self.actionMenuButton.setObjectName(_fromUtf8("actionMenuButton"))
         self.menuOpen.addAction(self.actionLua_File_Engine_UI_Elements)
         self.menuOpen.addAction(self.actionJSON_New_UI_Elements)
         self.menuFile.addAction(self.actionNew_Project)
@@ -242,12 +256,19 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.action_Exit)
         self.menuRun.addAction(self.action_Run)
         self.menuRun.addAction(self.action_Stop)
+        self.menuInsert_UI_Element.addAction(self.actionArrowPane)
         self.menuInsert_UI_Element.addAction(self.action_Button)
+        self.menuInsert_UI_Element.addAction(self.actionButtonPicker)
         self.menuInsert_UI_Element.addAction(self.actionDialog_Box)
-        self.menuInsert_UI_Element.addAction(self.actionToastAlert)
+        self.menuInsert_UI_Element.addAction(self.actionLayoutManager)
+        self.menuInsert_UI_Element.addAction(self.actionMenuButton)
         self.menuInsert_UI_Element.addAction(self.actionProgressSpinner)
         self.menuInsert_UI_Element.addAction(self.actionOrbitting_Dots)
+        self.menuInsert_UI_Element.addAction(self.actionScrollPane)
+        self.menuInsert_UI_Element.addAction(self.actionSlider)
+        self.menuInsert_UI_Element.addAction(self.actionTabBar)
         self.menuInsert_UI_Element.addAction(self.actionTextInput)
+        self.menuInsert_UI_Element.addAction(self.actionToastAlert)
         self.menuEdit.addAction(self.menuInsert_UI_Element.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -341,4 +362,11 @@ class Ui_MainWindow(object):
         self.actionNew_Project.setText(QtGui.QApplication.translate("MainWindow", "New Project...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen_Project.setText(QtGui.QApplication.translate("MainWindow", "Open Project...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_Project.setText(QtGui.QApplication.translate("MainWindow", "Save Project", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSlider.setText(QtGui.QApplication.translate("MainWindow", "Slider", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionLayoutManager.setText(QtGui.QApplication.translate("MainWindow", "LayoutManager", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionScrollPane.setText(QtGui.QApplication.translate("MainWindow", "ScrollPane", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTabBar.setText(QtGui.QApplication.translate("MainWindow", "TabBar", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionArrowPane.setText(QtGui.QApplication.translate("MainWindow", "ArrowPane", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionButtonPicker.setText(QtGui.QApplication.translate("MainWindow", "ButtonPicker", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionMenuButton.setText(QtGui.QApplication.translate("MainWindow", "MenuButton", None, QtGui.QApplication.UnicodeUTF8))
 

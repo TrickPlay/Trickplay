@@ -63,11 +63,17 @@ local function Widgetize(instance)
     end
     
     ----------------------------------------------------------------------------
+    local enabled_upval
     local __call = function(t,...) 
         
-        if not instance.enabled then return end
+        enabled_upval = instance.enabled
         
-        for f,_ in pairs(t) do   f(...)   end
+        for f,ignore_enabled in pairs(t) do   
+            
+            if enabled_upval or ignore_enabled then 
+                f(...)   
+            end
+        end
         
     end
     
@@ -98,7 +104,7 @@ local function Widgetize(instance)
         )
     end
     
-    function instance:add_mouse_handler(event,func)
+    function instance:add_mouse_handler(event,func,ignore_enabled)
         
         if not event or not mouse_functions[event] then
             
@@ -112,10 +118,11 @@ local function Widgetize(instance)
             
         end
         
-        mouse_functions[event][func] = true
+        if ignore_enabled ~= true then ignore_enabled = false end
+        
+        mouse_functions[event][func] = ignore_enabled
         
         return function()  mouse_functions[event][func] = nil  end
-        
     end
     
     ----------------------------------------------------------------------------
@@ -213,8 +220,14 @@ local function Widgetize(instance)
 		function()   return style    end,
 		function(oldf,self,v) 
             
-			style = matches_nil_table_or_type(Style, "STYLE", v)
-            
+            if v == false then
+                
+                local attr = style.attributes
+                attr.name = nil
+                style = Style{name=false}:set(attr)
+            else
+                style = matches_nil_table_or_type(Style, "STYLE", v)
+            end
         end
 	)
     
