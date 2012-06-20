@@ -151,7 +151,6 @@ PROP_LIST = [
     'direction', #"horizontal"
     'dist_from_pane',
     'focus_opens_tab',
-    """
     # ArrowPane
     'cell_w', 
     'cell_h', 
@@ -169,16 +168,19 @@ PROP_LIST = [
     'move_by',
     'note_constructor',
     'number_of_cols',
+    'number_of_rows',
     'pane_h', 
     'pane_w', 
     'placeholder', 
     'request_mode', # "HEIGHT_FOR_WIDTH"
     'vertical_alignment', 
     'vertical_spacing', 
-    'virtual_w',
-    'virtual_h',
     'virtual_x',
     'virtual_y',
+    'virtual_w',
+    'virtual_h',
+
+    """
     # ScroolPane
     'slider_thickness',
     # TabBar
@@ -235,22 +237,16 @@ NESTED_PROP_LIST = {
     'x_rotation' : ['angle', 'y center', 'z center'],
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
-    'tile' : ['x', 'y'], 
-
-    """
+    'tile' : ['x', 'y']
     #Arrow Pane
-    'cells' : [], 
-    'center' : ['',''], 
-    'children' : [], 
-    'constraints' : [], 
-    'min_size' : [], 
-    'natural_size' : [], 
+    #'cells' : [], 
+    #'center' : ['',''], 
+    #'children' : [], 
+    #'constraints' : [], 
+    #'min_size' : [], 
+    #'natural_size' : [], 
     #Arrow Pane
-    'tabs' : [], 
+    #'tabs' : [], 
     #ButtonPicker
-    'items' : [], 
-    """
-
-
-
+    #'items' : [], 
 }
