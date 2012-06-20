@@ -111,6 +111,22 @@
         [delegate do_HV];
     } else if ([command compare:@"PI"] == NSOrderedSame) {
         [delegate do_PI:args];
+    } else if ([command compare:@"SVCC"] == NSOrderedSame) {
+        [delegate do_SVCC:args];
+    } else if ([command compare:@"SVCF"] == NSOrderedSame) {
+        [delegate do_SVCF:args];
+    } else if ([command compare:@"SVCD"] == NSOrderedSame) {
+        [delegate do_SVCD:args];
+    } else if ([command compare:@"SVCE"] == NSOrderedSame) {
+        [delegate do_SVCE:args];
+    } else if ([command compare:@"SVCS"] == NSOrderedSame) {
+        [delegate do_SVCS:args];
+    } else if ([command compare:@"SVSC"] == NSOrderedSame) {
+        [delegate do_SVSC:args];
+    } else if ([command compare:@"SVEC"] == NSOrderedSame) {
+        [delegate do_SVEC:args];
+    } else if ([command compare:@"SVSS"] == NSOrderedSame) {
+        [delegate do_SVSS];
     } else {
         NSLog(@"Command not recognized %@", command);
     }
