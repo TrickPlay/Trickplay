@@ -1164,7 +1164,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
         return;
     }
     VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
-    context = nil;
     if (!context) {
         NSLog(@"Could not start Streaming Video Call, invalid addresss");
         NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@", [args objectAtIndex:0], @"Invalid Streaming Video Call address provided"];
