@@ -7,6 +7,7 @@ module physics_module;
 
 #include "physics.h"
 #include "clutter_util.h"
+#include "util.h"
 ]]
 
 /*===========================================================================*/
@@ -918,6 +919,24 @@ interface Body [[ ClutterActor * ]]
 
                 lua_pushnumber( L , f->GetRestitution() );
                 lua_setfield( L , -2 , "bounce" );
+
+                // We are going to create a sub-table for the filter
+                const b2Filter & filter = f->GetFilterData();
+
+                lua_newtable( L );
+
+                lua_pushinteger( L, filter.groupIndex );
+                lua_setfield( L, -2, "group" );
+
+                lua_pushinteger( L, filter.categoryBits );
+                Util::convert_bitmask_to_table( L );
+                lua_setfield( L, -2, "category" );
+
+                lua_pushinteger( L, filter.maskBits );
+                Util::convert_bitmask_to_table( L );
+                lua_setfield( L, -2, "mask" );
+
+                lua_setfield( L, -2, "filter" );
 
                 lua_rawseti( L , t , i );
             }
