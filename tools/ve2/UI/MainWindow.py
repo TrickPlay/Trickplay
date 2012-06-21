@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Jun 19 10:37:06 2012
+# Created: Wed Jun 20 14:23:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,8 +38,6 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
-        self.menuOpen = QtGui.QMenu(self.menuFile)
-        self.menuOpen.setObjectName(_fromUtf8("menuOpen"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
         self.menuRun = QtGui.QMenu(self.menubar)
@@ -246,13 +244,10 @@ class Ui_MainWindow(object):
         self.actionButtonPicker.setObjectName(_fromUtf8("actionButtonPicker"))
         self.actionMenuButton = QtGui.QAction(MainWindow)
         self.actionMenuButton.setObjectName(_fromUtf8("actionMenuButton"))
-        self.menuOpen.addAction(self.actionLua_File_Engine_UI_Elements)
-        self.menuOpen.addAction(self.actionJSON_New_UI_Elements)
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
         self.menuFile.addAction(self.actionNew_Layer)
-        self.menuFile.addAction(self.menuOpen.menuAction())
         self.menuFile.addAction(self.action_Exit)
         self.menuRun.addAction(self.action_Run)
         self.menuRun.addAction(self.action_Stop)
@@ -281,7 +276,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay Visual Editor ", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuOpen.setTitle(QtGui.QApplication.translate("MainWindow", "Open ", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))

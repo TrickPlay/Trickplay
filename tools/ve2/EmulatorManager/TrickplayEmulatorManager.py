@@ -34,7 +34,6 @@ class TrickplayEmulatorManager(QWidget):
             inputCmd = str("Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
             inputCmd = str("Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
-
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
@@ -132,7 +131,6 @@ class TrickplayEmulatorManager(QWidget):
 				gid = None
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
-				    #print luaCmd
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repUIInfo":
@@ -157,13 +155,6 @@ class TrickplayEmulatorManager(QWidget):
 				                self.inspector.currentScreenName = scrData[0][i] 
 				                self.inspector.old_screen_name = ""
 
-				        """
-				        while True:
-				            idx = self.inspector.ui.screenCombo.count()
-				            if idx == 0 :
-				                break
-				            self.inspector.ui.screenCombo.removeItem(idx - 1)
-				        """
 				        while self.inspector.ui.screenCombo.count() > 0 :
 				            curIdx = self.inspector.ui.screenCombo.currentIndex()
 				            self.inspector.ui.screenCombo.removeItem(curIdx)
@@ -174,15 +165,10 @@ class TrickplayEmulatorManager(QWidget):
 				                self.inspector.ui.screenCombo.addItem(scrName)
 				        self.inspector.addItemToScreens = False
 
-				        print ("LLL", self.inspector.currentScreenName)
-				        print ("LLL", self.inspector.screens)
-				        
-
-				        #self.inspector.ui.screenCombo.setCurrentIndex(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				    else:
 				        pass
 
-				    if gid is not None:
+				    if gid is not None and luaCmd == "openInspc":
 					try:
 					    try:
 					        gid = int(gid)
@@ -201,39 +187,31 @@ class TrickplayEmulatorManager(QWidget):
 					    print("error :(")
 
 				    if luaCmd == "repStInfo":
-				        print sdata
 				        self.inspector.inspectorModel.styleData = sdata
+				        self.inspector.preventChanges = True
 				        self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+				        self.inspector.preventChanges = False
 				        return
 
 				    elif luaCmd == "repUIInfo":
-				        self.inspector.clearTree()
-				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
-				        """
+				        if self.main.command == "openFile" :
+				            return 
 				        self.pdata = self.pdata[0]
-				        #print self.inspector.inspectorModel.findItems(str(self.pdata['gid']), Qt.MatchStartsWith), "OOO"#.setTPJSON(self.pdata)
-				        result = self.inspector.search(self.pdata['gid'], 'gid')
-				        result.setTPJSON(self.pdata)
-				        print result.index(), result.index().row(), result.index().column() , "WOWOWOWOW"
-				        """
-				        """
-				        if result:
-				            print result.TPJSON(), "8989898"
-				            result.setTPJSON(self.pdata)
-				            print result.TPJSON(), "77777777"
-				            #self.inspector.selectItem(result)
-				        """
-
-				        #print self.inspector.inspectorModel.findItems("Group", Qt.MatchStartsWith)[0]., "Group"#.setTPJSON(self.pdata)
+				        self.inspector.curData = self.pdata
+				        self.inspector.preventChanges = True
+				        self.inspector.propertyFill(self.inspector.curData)
+				        self.inspector.preventChanges = False
 				        return
 
 				    if sdata is not None and self.pdata is not None:
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
+				        if self.main.command == "openFile":
+				            self.main.command = ""
+
                         
 				elif s is not None:
-				    #print(">> %s"%s)
 				    pass
 				
                  
