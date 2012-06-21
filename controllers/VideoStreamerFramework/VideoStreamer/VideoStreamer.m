@@ -59,6 +59,27 @@
     return [self initWithUserName:nil password:nil remoteUserName:nil serverHostName:nil serverPort:0 clientPort:0];
 }
 
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)remoteAddress serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
+    if (!user || !password || !remoteAddress) {
+        return nil;
+    }
+    
+    NSArray *components = [remoteAddress componentsSeparatedByString:@":"];
+    if (components.count != 2) {
+        return nil;
+    }
+    NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip", we'll just ignore it
+    NSString *userAndHost = [components objectAtIndex:1];
+    components = [userAndHost componentsSeparatedByString:@"%@"];
+    if (components.count != 2) {
+        return nil;
+    }
+    NSString *remoteUser = [components objectAtIndex:0];
+    NSString *host = [components objectAtIndex:1];
+    
+    return [self initWithUserName:user password:password remoteUserName:remoteUser serverHostName:host serverPort:serverPort clientPort:clientPort];
+}
+
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     if (!user || !password || !remoteUser || !hostName) {
         return nil;
@@ -72,7 +93,7 @@
         SIPServerHostName = [hostName retain];
         SIPServerPort = serverPort;
         // TODO: May want to figure out something better to do for ports. I.E. if two different devices
-        // on the same network decide to use 5060, SIP packets with be directed to only one of
+        // on the same network decide to use 5060, SIP packets will be directed to only one of
         // them from FreeSwitch
         if (SIPServerPort < 1025 || SIPServerPort > 65355) {
             SIPServerPort = 5060;
@@ -131,6 +152,12 @@
 }
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)address serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
@@ -207,8 +234,12 @@
     
     VideoStreamerContext *streamerContext;
     
+    enum CONNECTION_STATUS status;
+    
     id <VideoStreamerDelegate> delegate;
 }
+
+@property (nonatomic, retain) AVCaptureSession *captureSession;
 
 @end
 
@@ -216,17 +247,10 @@
 
 @implementation _VideoStreamer
 
+@synthesize captureSession;
+
 #pragma mark -
 #pragma mark properties
-
-- (AVCaptureSession *)captureSession {
-    return captureSession;
-}
-
-- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
-    [captureSession release];
-    captureSession = [_captureSession retain];
-}
 
 - (CALayer *)customLayer {
     return customLayer;
@@ -284,6 +308,7 @@
     
     if (self) {
         streamerContext = [_streamerContext retain];
+        status = INITIATING;
         self.delegate = _delegate;
     }
     
@@ -300,6 +325,7 @@
         networkMan.delegate = self;
         [delegate videoStreamerInitiatingChat:self];
     } else {
+        status = DISCONNECTED;
         [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure"];
     }
 }
@@ -380,6 +406,8 @@
     if (pxbuffer) {
         CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     }
+    
+    status = DISCONNECTED;
     
     [delegate videoStreamer:self chatEndedWithInfo:info];
 }
@@ -520,6 +548,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (void)networkManagerEncoderReady:(NetworkManager *)networkManager {
     if (networkManager == networkMan) {
+        status = CONNECTED;
         [networkMan startEncoder];
         [captureSession startRunning];
     } else {
@@ -648,13 +677,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     }
 }
 
-- (AVCaptureSession *)captureSession {
+- (enum CONNECTION_STATUS)status {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
 
-- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
+- (void)setStatus:(enum CONNECTION_STATUS)status {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
