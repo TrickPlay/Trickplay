@@ -177,9 +177,6 @@ class TrickplayInspector(QWidget):
         result = self.search(text, property)
         
         if result:
-            #print('Found', result['gid'], result['name'])
-            #self.lastSearchedText = text
-            #self.lastSearchedItem = item
             self.selectItem(result)
         else:
             print('UI Element not found')
@@ -304,7 +301,6 @@ class TrickplayInspector(QWidget):
 
         scrJSON = scrJSON + "," + '\"' + "currentScreenName" + '\": \"'+self.currentScreenName+'\"'
         scrJSON = scrJSON + '}]'
-        #print scrJSON
 
         return scrJSON
 
@@ -338,7 +334,6 @@ class TrickplayInspector(QWidget):
             return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
-        print("screenChanged", self.currentScreenName, index)
         if self.screens.has_key(self.currentScreenName) == False :
             if self.old_screen_name == "":
                 return
@@ -388,6 +383,7 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
         self.ui.screenCombo.setEditable (False)
+
         if not self.preventChanges:
             self.preventChanges = True
             
@@ -416,7 +412,6 @@ class TrickplayInspector(QWidget):
         Change UI Element visibility using checkboxes
         """     
           
-        print ("inspectorDataChanged")
         if not self.preventChanges:
             
             self.preventChanges = True
@@ -444,7 +439,6 @@ class TrickplayInspector(QWidget):
                                     del self.screens[self.currentScreenName][index]
                                     break
                                 index = index + 1 
-                        #print(self.screens)
             
             self.preventChanges = False
     
@@ -479,7 +473,6 @@ class TrickplayInspector(QWidget):
     def getParentInfo(self, item):
         n = self.ui.property.indexFromItem(item).row()
         while self.ui.property.indexOfTopLevelItem(item) < 0 :
-            #print "*", item.text(0)
             item = self.ui.property.itemAbove(item) 
         return n, item
 

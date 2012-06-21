@@ -102,6 +102,7 @@ class MainWindow(QMainWindow):
 
     def newLayer(self):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def newProject(self):
@@ -191,22 +192,27 @@ class MainWindow(QMainWindow):
 
     def orbittingdots(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def progressspinner(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def toastalert(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def dialogbox(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def stop(self, serverStoped=False, exit=False):
