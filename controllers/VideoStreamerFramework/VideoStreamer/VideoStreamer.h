@@ -41,15 +41,21 @@
 @property (nonatomic, readonly) UInt16 SIPClientPort;
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort;
+// Address must be in the form: <protocol>:<user name>@<host name> i.e. sip:phone@<destination>.com
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)remoteAddress serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort;
 
 @end
 
-
+enum CONNECTION_STATUS {
+    INITIATING,
+    CONNECTED,
+    DISCONNECTED
+};
 
 @interface VideoStreamer : UIViewController 
 
-@property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) CALayer *customLayer;
+@property (nonatomic, readonly) enum CONNECTION_STATUS status;
 @property (nonatomic, assign) id <VideoStreamerDelegate> delegate;
 
 - (id)initWithContext:(VideoStreamerContext *)streamerContext delegate:(id <VideoStreamerDelegate>)delegate;
