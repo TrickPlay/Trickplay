@@ -361,7 +361,6 @@ void Util::convert_bitmask_to_table( lua_State * L )
 {
     // Top of the table is an unsigned integer that we wish to convert to a bitmask in a table
     lua_Integer number = lua_tointeger( L, -1 );
-    g_warning(" Converting integer %ld to table", number );
     lua_pop( L, 1 );
 
     lua_newtable ( L );
