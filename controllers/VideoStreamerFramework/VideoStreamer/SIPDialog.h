@@ -159,6 +159,14 @@
 
 @end
 
+#pragma mark -
+#pragma mark BYE
+
+@interface ByeDialog : SIPDialog
+
+- (void)receivedBye:(NSDictionary *)byePacket fromAddr:(NSData *)remoteAddr;
+
+@end
 
 #pragma mark -
 #pragma mark INVITE
