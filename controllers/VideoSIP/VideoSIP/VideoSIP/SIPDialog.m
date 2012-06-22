@@ -171,12 +171,13 @@
 }
 
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
-    NSLog(@"This method should be overwritten");
+    NSLog(@"This method should be overwritten: SIPDialog.m line 174");
 }
 
 - (void)cancel {
     // TODO: Send BYE messages and whatnot to other UAS/UAC. Only Dialogs that need to send
     // BYE should override this method.
+    NSLog(@"This method should be overwritten: SIPDialog.m line 180");
 }
 
 #pragma mark -
@@ -298,6 +299,10 @@
     }
 }
 
+- (void)cancel {
+    // Do nothing
+}
+
 @end
 
 
@@ -377,6 +382,38 @@
 @end
 
 
+@implementation ByeDialog
+
+- (void)receivedBye:(NSDictionary *)byePacket fromAddr:(NSData *)remoteAddr {
+    // respond to the packet
+    struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
+    char ip_string[INET_ADDRSTRLEN];
+    
+    inet_ntop(AF_INET, &(addr->sin_addr), ip_string, INET_ADDRSTRLEN);
+    
+    NSArray *remoteVia = [[byePacket objectForKey:@"Via"] componentsSeparatedByString:@";"];
+    
+    // TODO: malformed received packets that have different information could crash this.
+    // copied from vippie
+    NSString *response = [NSString stringWithFormat:@"SIP/2.0 481 Dialog/Transaction Does Not Exist\r\n"
+                          @"Via: %@;rport=%d;received=%s;%@\r\n"
+                          @"From: %@\r\n"
+                          @"To: %@;tag=%@\r\n"
+                          @"Call-ID: %@\r\n"
+                          @"CSeq: %@\r\n"
+                          @"Content-Length: 0\r\n\r\n",
+                          [remoteVia objectAtIndex:0], ntohs(addr->sin_port), ip_string, [remoteVia objectAtIndex:2],
+                          [byePacket objectForKey:@"From"],
+                          [byePacket objectForKey:@"To"], [from objectForKey:@"tag"],
+                          [byePacket objectForKey:@"Call-ID"],
+                          [byePacket objectForKey:@"CSeq"]];
+    
+    NSLog(@"BYE Response: %@\n", response);
+    
+    [delegate dialog:self wantsToSendData:[response dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+@end
 
 
 @implementation InviteDialog
@@ -398,6 +435,35 @@
     }
     
     return self;
+}
+
+- (void)cancel {
+    // Send a BYE packet
+    NSString *bye = [NSString stringWithFormat:@"BYE %@ SIP/2.0\r\n"
+                     @"Via: %@ %@:%d;rport;branch=%@\r\n"
+                     @"Max-Forwards: %d\r\n"
+                     @"From: %@;tag=%@\r\n"
+                     @"To: %@\r\n"
+                     @"Call-ID: %@\r\n"
+                     @"CSeq: %d BYE\r\n"
+                     @"Contact: %@\r\n"
+                     @"User-Agent: %@\r\n"
+                     @"Allow: %@\r\n"
+                     @"Supported %@\r\n",
+                     sipURI,
+                     [via objectForKey:@"protocol"], [via objectForKey:@"clientIP"], [[via objectForKey:@"clentPort"] unsignedIntValue], branch,
+                     maxForwards,
+                     [from objectForKey:@"sender"], [from objectForKey:@"tag"],
+                     [to objectForKey:@"remoteContact"],
+                     callID,
+                     cseq,
+                     contact,
+                     userAgent,
+                     allow,
+                     supported];
+    
+    NSLog(@"\nBYE Request:\n%@\n", bye);
+    [delegate dialog:self wantsToSendData:[bye dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 #pragma mark -
@@ -542,8 +608,8 @@
 }
 
 
-// TODO: Respond to all BYE Requests, not just the first one. May need to use
-// some 400 error to get Freeswitch to shut up.
+// TODO: Respond to all BYE Requests, not just the first one.
+// Send a 481 error to get Freeswitch to shut up.
 - (void)byeResponse:(NSDictionary *)request fromAddr:(NSData *)remoteAddr {
     struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
     char ip_string[INET_ADDRSTRLEN];

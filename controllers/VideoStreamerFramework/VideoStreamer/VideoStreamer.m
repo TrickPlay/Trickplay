@@ -13,6 +13,7 @@
 
 @interface _VideoStreamerContext : VideoStreamerContext {
 @private
+    NSString *fullAddress;
     NSString *SIPPassword;
     NSString *SIPUserName;
     NSString *SIPRemoteUserName;
@@ -27,6 +28,10 @@
 
 #pragma mark -
 #pragma mark Property Getters
+
+- (NSString *)fullAddress {
+    return fullAddress;
+}
 
 - (NSString *)SIPPassword {
     return SIPPassword;
@@ -68,7 +73,7 @@
     if (components.count != 2) {
         return nil;
     }
-    NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip", we'll just ignore it
+    //NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip", we'll just ignore it
     NSString *userAndHost = [components objectAtIndex:1];
     components = [userAndHost componentsSeparatedByString:@"%@"];
     if (components.count != 2) {
@@ -87,6 +92,7 @@
     
     self = [super init];
     if (self) {
+        fullAddress = [[NSString stringWithFormat:@"sip:%@@%@", remoteUser, hostName] retain];
         SIPUserName = [user retain];
         SIPPassword = [password retain];
         SIPRemoteUserName = [remoteUser retain];
@@ -107,7 +113,8 @@
     return self;
 }
 
-- (void)dealloc {    
+- (void)dealloc {
+    [fullAddress release];
     [SIPUserName release];
     [SIPPassword release];
     [SIPRemoteUserName release];
@@ -159,6 +166,12 @@
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)address serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)fullAddress {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException 
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
@@ -235,7 +248,7 @@
     VideoStreamerContext *streamerContext;
     
     enum CONNECTION_STATUS status;
-    
+        
     id <VideoStreamerDelegate> delegate;
 }
 
@@ -259,6 +272,14 @@
 - (void)setCustomLayer:(CALayer *)_customLayer {
     [_customLayer release];
     customLayer = [_customLayer retain];
+}
+
+- (VideoStreamerContext *)streamerContext {
+    return streamerContext;
+}
+
+- (enum CONNECTION_STATUS)status {
+    return status;
 }
 
 - (id <VideoStreamerDelegate>)delegate {
@@ -677,13 +698,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     }
 }
 
-- (enum CONNECTION_STATUS)status {
+- (VideoStreamerContext *)streamerContext {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
 
-- (void)setStatus:(enum CONNECTION_STATUS)status {
+- (enum CONNECTION_STATUS)status {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

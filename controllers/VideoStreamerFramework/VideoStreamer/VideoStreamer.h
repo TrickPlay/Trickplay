@@ -33,6 +33,8 @@
 
 @interface VideoStreamerContext : NSObject
 
+// only SIP for now
+@property (nonatomic, readonly) NSString *fullAddress;
 @property (nonatomic, readonly) NSString *SIPPassword;
 @property (nonatomic, readonly) NSString *SIPUserName;
 @property (nonatomic, readonly) NSString *SIPRemoteUserName;
@@ -54,7 +56,8 @@ enum CONNECTION_STATUS {
 
 @interface VideoStreamer : UIViewController 
 
-@property (nonatomic, retain) CALayer *customLayer;
+@property (nonatomic, readonly) CALayer *customLayer;
+@property (nonatomic, readonly) VideoStreamerContext *streamerContext;
 @property (nonatomic, readonly) enum CONNECTION_STATUS status;
 @property (nonatomic, assign) id <VideoStreamerDelegate> delegate;
 

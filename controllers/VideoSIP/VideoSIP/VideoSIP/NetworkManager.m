@@ -284,7 +284,7 @@ void *get_in_addr(struct sockaddr *sa) {
     
     //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
     
-    AVCParameters *params = [[[AVCParameters alloc] init] autorelease];
+    AVCParameters *params = [[AVCParameters alloc] init];
     //params.outWidth = 640;
     //params.outHeight = 480;
     //params.bps = 60000;
