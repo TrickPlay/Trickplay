@@ -12,7 +12,8 @@
 #import <sys/types.h>
 #import <sys/socket.h>
 
-#define STUN_HOST "stun.xten.com"
+//#define STUN_HOST "stun.xten.com"
+#define STUN_HOST "stun.ekiga.net"
 #define STUN_PORT 3478
 
 // Header values
