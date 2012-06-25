@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Jun 20 14:23:21 2012
+# Created: Fri Jun 22 12:25:15 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -244,6 +244,12 @@ class Ui_MainWindow(object):
         self.actionButtonPicker.setObjectName(_fromUtf8("actionButtonPicker"))
         self.actionMenuButton = QtGui.QAction(MainWindow)
         self.actionMenuButton.setObjectName(_fromUtf8("actionMenuButton"))
+        self.actionWidgetText = QtGui.QAction(MainWindow)
+        self.actionWidgetText.setObjectName(_fromUtf8("actionWidgetText"))
+        self.actionWidgetImage = QtGui.QAction(MainWindow)
+        self.actionWidgetImage.setObjectName(_fromUtf8("actionWidgetImage"))
+        self.actionWidgetRectangle = QtGui.QAction(MainWindow)
+        self.actionWidgetRectangle.setObjectName(_fromUtf8("actionWidgetRectangle"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -264,6 +270,9 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionTabBar)
         self.menuInsert_UI_Element.addAction(self.actionTextInput)
         self.menuInsert_UI_Element.addAction(self.actionToastAlert)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetText)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetImage)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
         self.menuEdit.addAction(self.menuInsert_UI_Element.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -363,4 +372,7 @@ class Ui_MainWindow(object):
         self.actionArrowPane.setText(QtGui.QApplication.translate("MainWindow", "ArrowPane", None, QtGui.QApplication.UnicodeUTF8))
         self.actionButtonPicker.setText(QtGui.QApplication.translate("MainWindow", "ButtonPicker", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMenuButton.setText(QtGui.QApplication.translate("MainWindow", "MenuButton", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetText.setText(QtGui.QApplication.translate("MainWindow", "WidgetText", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetImage.setText(QtGui.QApplication.translate("MainWindow", "WidgetImage", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetRectangle.setText(QtGui.QApplication.translate("MainWindow", "WidgetRectangle", None, QtGui.QApplication.UnicodeUTF8))
 

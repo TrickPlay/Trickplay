@@ -77,6 +77,48 @@ fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group"
 
 --fake_style_json = '{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"offset":10,"size":20},"border":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"corner_radius":10,"width":2},"fill_colors":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"name":"Style","text":{"alignment":"CENTER","colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"font":"Sans 40px","justify":true,"wrap":true,"x_offset":0,"y_offset":0}}}'
 
+
+local function editor_text(uiText)
+
+    uiText.position ={200, 200, 0}
+	uiText.wants_enter = true
+	uiText.editable = true
+	uiText.text = "AA"
+    uiText.font= "FreeSans Medium 30px"
+    uiText.color = {100,255,255,255}
+    --wrap=true, wrap_mode="CHAR", 
+	--extra = {org_x = 200, org_y = 200}
+
+    uiText.grab_key_focus(uiText)
+
+    function uiText:on_key_down(key,u,t,m)
+
+    	if key == keys.Return then 
+			uiText:set{cursor_visible = false}
+        	screen.grab_key_focus(screen)
+			uiText:set{editable= false}
+			local text_len = string.len(uiText.text) 
+			local font_len = string.len(uiText.font) 
+	        local font_sz = tonumber(string.sub(uiText.font, font_len - 3, font_len -2))	
+			local total = math.floor((font_sz * text_len / uiText.w) * font_sz *2/3) 
+			if(total > uiText.h) then 
+				uiText.h = total 
+			end 
+			return true
+	    end 
+
+	end 
+
+	function uiText:on_button_down()
+		if uiText.on_key_down then 
+	          uiText:on_key_down(keys.Return)
+		end 
+
+		return true
+	end 
+
+end 
+
 _VE_ = {}
 
 -- GET 
@@ -300,6 +342,9 @@ end
 local uiElementCreate_map = 
 {
     ['Button'] = function()  return Button() end, 
+    ['Text'] = function()  return Widget_Text() end, 
+    ['Image'] = function()  return Widget_Image() end, 
+    ['Rectangle'] = function()  return Widget_Rectangle() end, 
     ['DialogBox'] = function() return DialogBox() end,
     ['ToastAlert'] = function() return ToastAlert() end,
     ['ProgressSpinner'] = function() return ProgressSpinner() end,
@@ -328,6 +373,11 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
         uiNum = uiNum + 1
     else
         print "error"
+    end
+
+    if uiTypeStr == "Text" then 
+        print(uiTypeStr)
+        editor_text(uiInstance)
     end
 
     function uiInstance.on_motion (self,x,y)
@@ -363,8 +413,14 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
         -- not nil because there is no in_use property supported
         uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
     end 
-end
+    if uiTypeStr == "Text" then 
+        uiInstance:grab_key_focus()
+	    uiText.editable = true
 
+    end
+
+
+end
 --[[
 function screen.on_motion( screen , x , y )
     if dragging then

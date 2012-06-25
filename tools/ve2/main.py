@@ -60,6 +60,10 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionButtonPicker, SIGNAL("triggered()"),  self.buttonpicker)
         QObject.connect(self.ui.actionMenuButton, SIGNAL("triggered()"),  self.menubutton)
 
+        QObject.connect(self.ui.actionWidgetText, SIGNAL("triggered()"),  self.text)
+        QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
+        QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
+
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
@@ -207,6 +211,26 @@ class MainWindow(QMainWindow):
 
     def dialogbox(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
+        return True
+
+    def button(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
+        return True
+
+    def text(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Text')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
+        return True
+
+    def image(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Image')")
+        print ("PreventChanges : ", self.inspector.preventChanges)
+        return True
+
+    def rectangle(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Rectangle')")
         print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
