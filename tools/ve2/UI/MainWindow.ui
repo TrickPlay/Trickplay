@@ -92,6 +92,9 @@
      <addaction name="actionTabBar"/>
      <addaction name="actionTextInput"/>
      <addaction name="actionToastAlert"/>
+     <addaction name="actionWidgetText"/>
+     <addaction name="actionWidgetImage"/>
+     <addaction name="actionWidgetRectangle"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
    </widget>
@@ -598,6 +601,21 @@
   <action name="actionMenuButton">
    <property name="text">
     <string>MenuButton</string>
+   </property>
+  </action>
+  <action name="actionWidgetText">
+   <property name="text">
+    <string>WidgetText</string>
+   </property>
+  </action>
+  <action name="actionWidgetImage">
+   <property name="text">
+    <string>WidgetImage</string>
+   </property>
+  </action>
+  <action name="actionWidgetRectangle">
+   <property name="text">
+    <string>WidgetRectangle</string>
    </property>
   </action>
  </widget>
