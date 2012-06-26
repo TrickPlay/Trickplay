@@ -57,6 +57,7 @@ class TrickplayInspector(QWidget):
         self.inspectorModel = TrickplayElementModel(self)
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
+        self.ui.inspector.setIndentation(10)
 
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
@@ -72,6 +73,7 @@ class TrickplayInspector(QWidget):
 
         self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
         self.ui.property.setHeaderLabels(['Property', 'Value'])
+        self.ui.property.setIndentation(10)
         
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
@@ -345,7 +347,7 @@ class TrickplayInspector(QWidget):
                 del self.screens[self.old_screen_name]
                 self.ui.screenCombo.removeItem(curIdx-1)
         else:
-            #TODO: show the screen items 
+            # show the screen items 
             for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked 
                 theItem = self.search(theLayer, 'name')
@@ -359,6 +361,9 @@ class TrickplayInspector(QWidget):
                 elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
                     self.sendData(theItem['gid'], "is_visible", False)
                     theItem.setCheckState(Qt.Unchecked)
+
+            self.curLayerGid = theItem['gid'] 
+            self.ui.inspector.setCurrentIndex(theItem.index())
                     
     def styleActivated(self, index):
         self.cbStyle.setEditable (True)
