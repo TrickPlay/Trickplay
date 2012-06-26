@@ -187,6 +187,8 @@ class TrickplayEmulatorManager(QWidget):
 					    print("error :(")
 
 				    if luaCmd == "repStInfo":
+				        if self.main.command == "openFile" :
+				            return 
 				        self.inspector.inspectorModel.styleData = sdata
 				        self.inspector.preventChanges = True
 				        self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
@@ -207,6 +209,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
+
 				        if self.main.command == "openFile":
 				            self.main.command = ""
 
