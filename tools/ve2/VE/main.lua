@@ -376,7 +376,6 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     end
 
     if uiTypeStr == "Text" then 
-        print(uiTypeStr)
         editor_text(uiInstance)
     end
 
@@ -392,6 +391,12 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
         _VE_.openInspector(uiInstance.gid)
         uiInstance:grab_pointer()
+        if uiTypeStr == "Text" then 
+            uiInstance.cursor_visible = true
+            uiInstance.editable= true
+            uiInstance:grab_key_focus()
+            return true
+        end 
     end
 
     function uiInstance.on_button_up( uiInstance , x , y , button )
