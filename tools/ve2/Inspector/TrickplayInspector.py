@@ -206,6 +206,7 @@ class TrickplayInspector(QWidget):
             QItemSelectionModel.SelectCurrent)
     
     def propertyFill(self, data, styleIndex=None):
+
         self.cbStyle_textChanged = False
         self.ui.property.clear()
         self.ui.property.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
@@ -215,12 +216,16 @@ class TrickplayInspector(QWidget):
         style_n = 0 
         #self.ui.property.setUniformRowHeights(False)
         for p in PropertyIter(None):
-            if data.has_key(str(p)) == True:
+            p = str(p)
+            if data.has_key(p) == True:
                 i = QTreeWidgetItem() 
-                p = str(p)
                 #i.setText (0, p[:1].upper()+p[1:])
                 i.setText (0, p)
-                i.setText (1, str(data[str(p)]))
+                i.setText (1, str(data[p]))
+                
+                #print ("PROPERTY[%s]"%p)
+                #print ("    value : %s"%str(data[p]))
+
                 if p == "source":
                     i.setText (1, summarizeSource(data[str(p)]))
                 if p == "style":
@@ -242,7 +247,10 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
 
-                if p in NESTED_PROP_LIST: # is 'z_rotation' :
+                if p == "text" and type(data[p]) is not list:
+                    i.setFlags(i.flags() ^Qt.ItemIsEditable)
+
+                elif p in NESTED_PROP_LIST: # is 'z_rotation' :
                     z = data[str(p)]
                     if type(z) ==  list :
                         idx = 0

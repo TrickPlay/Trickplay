@@ -109,14 +109,6 @@ local function editor_text(uiText)
 
 	end 
 
-	function uiText:on_button_down()
-		if uiText.on_key_down then 
-	          uiText:on_key_down(keys.Return)
-		end 
-
-		return true
-	end 
-
 end 
 
 _VE_ = {}
@@ -420,7 +412,7 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     end 
     if uiTypeStr == "Text" then 
         uiInstance:grab_key_focus()
-	    uiText.editable = true
+	    uiInstance.editable = true
 
     end
 
