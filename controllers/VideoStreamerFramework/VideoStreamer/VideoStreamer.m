@@ -234,6 +234,7 @@
 
 
 @interface _VideoStreamer : VideoStreamer <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
+    
     NetworkManager *networkMan;
     
     AVCaptureSession *captureSession;
@@ -249,6 +250,7 @@
 }
 
 @property (nonatomic, retain) AVCaptureSession *captureSession;
+@property (nonatomic, retain) CALayer *customLayer;
 
 - (void)initCapture;
 - (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code;

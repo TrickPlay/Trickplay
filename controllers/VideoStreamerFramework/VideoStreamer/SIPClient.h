@@ -19,6 +19,17 @@
 @class SIPClient;
 @class VideoStreamerContext;
 
+/**
+ * This enumeration provides reasons for a SIPClient to terminate
+ * its thread and thus all outside SIP communication.
+ *
+ * NO_ERROR:        No error occurred; SIP tore down smoothly.
+ * SOCKET_SETUP:    There was an error either obtaining the public IP via STUN
+ *                  or could not reach the SIP server.
+ * SOCKET_WRITE:    There was an error writing to the socket sending to the SIP server.
+ * SOCKET_READ:     There was an error reading from the socket connected to the SIP server.
+ * RUNLOOP_FAILURE: An error occurred while executing the SIPClient's thread's runloop.
+ */
 
 enum sip_client_error_t {
     NO_ERROR = 0,
@@ -28,7 +39,13 @@ enum sip_client_error_t {
     RUNLOOP_FAILURE = 4
 };
 
-
+/**
+ * The SIPClientDelegate protocol informs the delegate of when a SIP session
+ * terminates and reason for termination. Also, this protocol informs
+ * when SIP has performed correct handshaking to allow an RTP media session
+ * to commence or to inform the delegate that an active RTP media session
+ * should tear down.
+ */
 
 @protocol SIPClientDelegate <NSObject>
 
@@ -40,28 +57,40 @@ enum sip_client_error_t {
 
 
 @interface SIPClient : NSObject <SIPDialogDelegate> {
-    // all SIP stuff is handled in this thread
+    // All SIP stuff is handled in this thread
     NSThread *sipThread;
-    // this variable belongs to sipThread
+    // This variable belongs to sipThread
     BOOL exit_thread;
-    // determines if this SIPClient is working
+    // Determines if this SIPClient is working
     BOOL valid;
-    // if there was an error then this was set
+    // If there was an error then this was set
     enum sip_client_error_t current_error;
-    
+    // An array of all active SIP Dialogs
     NSMutableDictionary *sipDialogs;
     
+    // The socket which sends/receives from the SIP server
     CFSocketRef sipSocket;
+    // A queue for all packets pending send to the SIP server
     NSMutableArray *writeQueue;
     
+    // This iOS Devices IP address as seen behind NAT
     NSString *clientPrivateIP;
+    // This iOS Devices IP address as seen publically on the
+    // Internet
     NSString *clientPublicIP;
     
+    // The Session Parameter Set that this iOS Device will
+    // use for H.264 streaming over RTP
     NSData *sps;
+    // The Picture Parameter Set that this iOS Device will
+    // use for H.264 streaming over RTP
     NSData *pps;
     
+    // The VideoStreamerContext containing all necessary
+    // connection information
     VideoStreamerContext *streamerContext;
     
+    // This class's delegate
     id <SIPClientDelegate> delegate;
 }
 
