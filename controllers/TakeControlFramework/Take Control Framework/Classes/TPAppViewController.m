@@ -345,6 +345,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
         camera = nil;
+        videoStreamer = nil;
         
         // For audio playback
         audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
@@ -1146,11 +1147,26 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
  */
 - (void)do_SVSC:(NSArray *)args {
     NSLog(@"Streaming Video Start Call");
+    if ([self.navigationController visibleViewController] != self) {
+        NSLog(@"Could not start Streaming Video Call, app is not visible on device");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video failed, app is not visible on device"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Check the arguments
+    if (args.count < 1) {
+        NSLog(@"Could not start Streaming Video Call, invalid address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video failed can not connect, invalid address provided"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
     // Make sure that the camera is not in use first. (Camera should destroy itself when not in use)
     if (camera) {
         NSLog(@"Could not start Streaming Video Call, the Camera is currently in use!");
         // Send Streaming Video Call Failed <address> <reason>
-        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@", [args objectAtIndex:0], @"Camera is currently in use"];
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, camera is currently in use"];
         [socketManager sendData:[sentData UTF8String] 
                   numberOfBytes:[sentData length]];
         return;
@@ -1158,15 +1174,16 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     // Make sure there isn't already a Streaming Video session
     if (videoStreamer) {
         NSLog(@"Could not start Streaming Video Call, Streaming Video currently in session");
-        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@", [args objectAtIndex:0], @"Streaming Video Call is currently in session"];
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, call is currently in session"];
         [socketManager sendData:[sentData UTF8String] 
                   numberOfBytes:[sentData length]];
         return;
     }
-    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteAddress:[args objectAtIndex:0] serverPort:5060 clientPort:50160] autorelease];
     if (!context) {
-        NSLog(@"Could not start Streaming Video Call, invalid addresss");
-        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@", [args objectAtIndex:0], @"Invalid Streaming Video Call address provided"];
+        NSLog(@"Could not start Streaming Video Call, invalid address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, invalid address provided"];
         [socketManager sendData:[sentData UTF8String] 
                   numberOfBytes:[sentData length]];
         return;
@@ -1174,7 +1191,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     videoStreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
     if (!videoStreamer) {
         NSLog(@"Could not start Streaming Video Call, VideoStreamer failed to launch on Device");
-        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@", [args objectAtIndex:0], @"Video Streamer component failed to launch on device"];
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video module failed to launch on device"];
         [socketManager sendData:[sentData UTF8String] 
                   numberOfBytes:[sentData length]];
         return;
@@ -1211,9 +1228,15 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     NSLog(@"Streaming Video Send Status");
     NSString *sentData;
     if (videoStreamer) {
-        sentData = [NSString stringWithFormat:@"SVCS\t%@\t%@", @"CONNECTED", videoStreamer]; //replace with videoStremer.address once address format is figured out
+        if (videoStreamer.status == CONNECTED) {
+            sentData = [NSString stringWithFormat:@"SVCS\tCONNECTED\t%@\n", videoStreamer.streamerContext.fullAddress];
+        } else if(videoStreamer.status == INITIATING) {
+            sentData = @"SVCS\tWAIT\tWAIT\n";
+        } else {
+            sentData = @"SVCS\tREADY\tREADY\n";
+        }
     } else {
-        sentData = [NSString stringWithFormat:@"SVCS\t%@\t%@", @"READY", @""];
+        sentData = @"SVCS\tREADY\tREADY\n";
     }
     [socketManager sendData:[sentData UTF8String] 
               numberOfBytes:[sentData length]];
@@ -1226,11 +1249,34 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 }
 
 - (void)videoStreamerChatStarted:(id)_videoStreamer {
-    
+    NSLog(@"Streaming Video Call Connected");
+    NSString *sentData = [NSString stringWithFormat:@"SVCC\t%@\n", videoStreamer.streamerContext.fullAddress];
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-- (void)videoStreamer:(id)_videoStreamer chatEndedWithInfo:(NSString *)reason {
+- (void)videoStreamer:(VideoStreamer *)_videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code {
     
+    NSLog(@"Streaming Video Call Ended: %@", reason);
+    
+    NSString *sentData;
+    switch (code) {
+        case CALL_ENDED_BY_CALLEE:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_ENDED_BY_CALLER:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLER\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_FAILED:
+            sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+        case CALL_DROPPED:
+            sentData = [NSString stringWithFormat:@"SVCD\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+            
+        default:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+    }
 }
 
 #pragma mark -
@@ -1352,6 +1398,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     if (camera) {
         [camera release];
         camera = nil;
+    }
+    
+    if (videoStreamer) {
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     
     /*
@@ -1641,6 +1692,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     }
     if (camera) {
         [camera release];
+    }
+    if (videoStreamer) {
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     if (virtualRemote) {
         [virtualRemote release];
