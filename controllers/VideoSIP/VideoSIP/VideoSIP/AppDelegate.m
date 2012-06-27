@@ -96,8 +96,9 @@
     NSLog(@"Chat Started");
 }
 
-- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason {
+- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code {
     NSLog(@"Chat Ended: %@", reason);
+    NSLog(@"Network Code: %d", code);
     UIViewController *presented = self.viewController.presentedViewController;
     [self.viewController dismissViewControllerAnimated:YES completion:^(void){
         // TODO: figure out why this never gets called

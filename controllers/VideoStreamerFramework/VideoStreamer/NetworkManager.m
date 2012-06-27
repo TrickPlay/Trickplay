@@ -40,7 +40,7 @@ typedef enum avtype AVType;
 
 
 @interface NetworkManager()
-    - (void)setUpAvcEncoder;
+    - (BOOL)setUpAvcEncoder;
 @end
 
 
@@ -82,7 +82,17 @@ void *get_in_addr(struct sockaddr *sa) {
     [avcEncoder encode:sampleBuffer];
 }
 
-- (void)invalidate {
+/**
+ * Stop all encoders.
+ */
+- (void)invalidate:(enum NETWORK_TERMINATION_CODE)code {
+    if (sipClient) {
+        sipClient.delegate = nil;
+        [sipClient disconnectFromService];
+        [sipClient release];
+        sipClient = nil;
+    }
+    
     if (avcEncoder) {
         [avcEncoder stop];
         // TODO: AVCEncoder should do this automatically.
@@ -94,9 +104,18 @@ void *get_in_addr(struct sockaddr *sa) {
         rtp_done(avc_session);
         avc_session = NULL;
     }
-    [sipClient setDelegate:nil];
+    // TODO: Add audio encoder invalidation
     
-    [delegate networkManagerInvalid:self];
+    if (socket_queue) {
+        dispatch_release(socket_queue);
+        socket_queue = nil;
+    }
+        
+    [delegate networkManagerInvalid:self endedWithCode:code];
+}
+
+- (void)endChat {
+    [sipClient disconnectFromService];
 }
 
 #pragma mark -
@@ -136,7 +155,9 @@ void *get_in_addr(struct sockaddr *sa) {
         
         if(avc_session == NULL) {
             // TODO: handle this gracefully
-			NSLog(@"Session is NULL");
+			NSLog(@"AVC session is NULL");
+            [self invalidate:CALL_FAILED];
+            return;
 		}
     }
     /*
@@ -149,38 +170,24 @@ void *get_in_addr(struct sockaddr *sa) {
     [delegate networkManagerEncoderReady:self];
 }
 
+/**
+ * This delegate is called when the callee decides to send BYE over the network, formorally
+ * ending the RTP session.
+ */
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
-    /*
-    MediaDescription *video = [mediaDest objectForKey:@"video"];
-    
-    if (video) {
-        // TODO: consider wrapping this part in a block and sending it to socket_queue.
-        //
-        // If send_nal is called at the same time as rtp_done then we will crash.
-        //
-        // However, [avcEncoder stop] prevents callbacks which post to socket_queue so
-        // thorough testing will determine this and there is the cost of having
-        // avc_session split amongst too many threads if we do this.
-        [avcEncoder stop];
-        if (avc_session) {
-            rtp_send_bye(avc_session);
-            rtp_done(avc_session);
-            avc_session = NULL;
-        }
-        // TODO: AVCEncoder should do this automatically.
-        Block_release(avcEncoder.callback);
-        avcEncoder.callback = nil;
-    }
-    
-    [delegate networkManagerInvalid:self];
-    */
-    
-    [self invalidate];
+    [self invalidate:CALL_ENDED_BY_CALLEE];
 }
 
-- (void)client:(SIPClient *)client finishedWithError:(enum sip_client_error_t)error {
+/**
+ * SIP can end for a variety of reasons.
+ */
+- (void)client:(SIPClient *)client sipFinishedWithError:(enum sip_client_error_t)error {
     NSLog(@"SIP Client finished with error: %@", [client errorDescription:error]);
-    [self invalidate];
+    if (error == NO_ERROR) {
+        [self invalidate:CALL_ENDED_BY_CALLER];
+    } else {
+        [self invalidate:CALL_FAILED];
+    }
 }
 
 #pragma mark -
@@ -209,19 +216,13 @@ void *get_in_addr(struct sockaddr *sa) {
         
         avQueue = [[NSMutableArray alloc] initWithCapacity:100];
         avcEncoder = [[AVCEncoder alloc] init];
-        [self setUpAvcEncoder];
+        if (![self setUpAvcEncoder]) {
+            [self release];
+            return nil;
+        }
         
         avc_session = NULL;
         pcmu_session = NULL;
-        
-        //TODO:
-        /*
-        avc_session = rtp_init_udp(RTSP_HOST, 5002, [[ports objectAtIndex:0] intValue], 60, 2000, rtp_avc_session_callback, self);
-		
-		if(avc_session == NULL) {
-			NSLog(@"Session is NULL");
-		}
-        */
         
         sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps context:streamerContext delegate:self];
         if (!sipClient) {
@@ -235,7 +236,7 @@ void *get_in_addr(struct sockaddr *sa) {
     return self;
 }
 
-- (void)setUpAvcEncoder {
+- (BOOL)setUpAvcEncoder {
     AVCEncoderCallback cb = ^(const void* buffer, uint32_t length, CMTime pts) {
 		
 		NSData *data = [[NSData alloc] initWithBytes:buffer length:length];
@@ -268,22 +269,25 @@ void *get_in_addr(struct sockaddr *sa) {
             
                     int ret = send_nal(avc_session, sendPacket->time, avc_session_id, (uint8_t*) [sendPacket->data bytes], sendPacket->size, &timeout);
                     
-                    if (ret || !ret) {  // this gets rid of dead store warning
-                        //fprintf(stderr, "ret: %d\n", ret);
-                    }
+                    //fprintf(stderr, "ret: %d\n", ret);
             
                     [sendPacket release];
+                    
+                    if (ret == -1) {
+                        fprintf(stderr, "RTP socket write error\n");
+                        dispatch_async(dispatch_get_main_queue(), ^(void) {
+                            [self invalidate:CALL_DROPPED];
+                        });
+                    }
                 }
             }
         });
         
     };
-    // TODO: Fix AVCEncoder and includ Block_copy and Block_release at appropriate moments.
+    // TODO: Fix AVCEncoder and include Block_copy and Block_release at appropriate moments.
     // This will include adding a method - (void)setCallback to AVCEncoder.
     avcEncoder.callback = Block_copy(cb);
-    
-    //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
-    
+        
     AVCParameters *params = [[AVCParameters alloc] init];
     //params.outWidth = 640;
     //params.outHeight = 480;
@@ -302,20 +306,16 @@ void *get_in_addr(struct sockaddr *sa) {
     [params release];
     
     if(![avcEncoder prepareEncoder]) {
-        // TODO: handle this gracefully
         NSLog(@"Encoder Error: %@", avcEncoder.error);
+        return NO;
     }
     
-    spspps = avcEncoder.spspps;
-    pps = avcEncoder.pps;
-    sps = avcEncoder.sps;
-    
-    //[avcEncoder start];
+    return YES;
 }
 
 - (void)startEncoder {
-    fprintf(stderr, "sps packet size: %d\n", send_sps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)sps.bytes, sps.length, &timeout));
-    fprintf(stderr, "pps packet size: %d\n", send_pps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)pps.bytes, pps.length, &timeout));
+    fprintf(stderr, "sps packet size: %d\n", send_sps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)avcEncoder.sps.bytes, avcEncoder.sps.length, &timeout));
+    fprintf(stderr, "pps packet size: %d\n", send_pps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)avcEncoder.pps.bytes, avcEncoder.pps.length, &timeout));
     [avcEncoder start];
 }
 
@@ -323,26 +323,9 @@ void *get_in_addr(struct sockaddr *sa) {
 #pragma mark Memory
 
 - (void)dealloc {
-    if (socket_queue) {
-        dispatch_release(socket_queue);
-    }
+    self.delegate = nil;
     
-    if (sipClient) {
-        [sipClient disconnectFromService];
-        [sipClient release];
-        sipClient = nil;
-    }
-    
-    if (avcEncoder) {
-        [avcEncoder stop];
-        [avcEncoder release];
-        avcEncoder = nil;
-    }
-    
-    if (avc_session) {
-        rtp_done(avc_session);
-        avc_session = NULL;
-    }
+    [self invalidate:CALL_ENDED_BY_CALLER];
     
     if (avQueue) {
         [avQueue release];
