@@ -247,7 +247,9 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
 
-                if p == "text" and type(data[p]) is not list:
+                if p == "baseline" or p == "selected_text": #readonly 
+                    pass
+                elif p == "text" and type(data[p]) is not list:
                     i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 elif p in NESTED_PROP_LIST: # is 'z_rotation' :
@@ -263,7 +265,7 @@ class TrickplayInspector(QWidget):
                             j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
                     else:
-                        #TODO: find Style name from combo box  
+                        #find Style name from combo box  
                         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
                         z = self.inspectorModel.styleData[0][self.style_name]
                         for sp in PropertyIter(p):
@@ -521,14 +523,14 @@ class TrickplayInspector(QWidget):
         
         if self.is_this_style(item) is True:
             return
-            
-        if str(item.text(0)) in NESTED_PROP_LIST :
+
+        if str(item.text(0)) in NESTED_PROP_LIST and str(item.text(0)) != "text" :
             return
+
         if self.is_this_subItem(item) is True:
             n, pItem = self.getParentInfo(item)
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
             self.sendData(self.getGid(), str(pItem.text(0)), tValue)
-            #self.sendData(self.getGid(), str(pItem.text(0))+str(item.text(0)), str(item.text(1)))
         else :
             self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
 
@@ -564,7 +566,7 @@ class TrickplayInspector(QWidget):
         """
         Send changed properties to Trickplay device
         """
-        if not property in NESTED_PROP_LIST or property == 'style':
+        if not property in NESTED_PROP_LIST or property == 'style' or property == 'text':
             try:    
                 property, value = modelToData(property, value)
             except BadDataException, (e):
