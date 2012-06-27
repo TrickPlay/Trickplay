@@ -11,6 +11,7 @@
 
 #import "rtpenc_h264.h"
 
+
 @interface _VideoStreamerContext : VideoStreamerContext {
 @private
     NSString *fullAddress;
@@ -114,6 +115,8 @@
 }
 
 - (void)dealloc {
+    NSLog(@"VideoStreamerContext dealloc");
+    
     [fullAddress release];
     [SIPUserName release];
     [SIPPassword release];
@@ -229,13 +232,6 @@
 
 
 
-@interface VideoStreamer()
-
-- (void)initCapture;
-- (void)terminateCaptureWithInfo:(NSString *)info;
-
-@end
-
 
 @interface _VideoStreamer : VideoStreamer <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
     NetworkManager *networkMan;
@@ -253,6 +249,9 @@
 }
 
 @property (nonatomic, retain) AVCaptureSession *captureSession;
+
+- (void)initCapture;
+- (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code;
 
 @end
 
@@ -288,6 +287,46 @@
 
 - (void)setDelegate:(id <VideoStreamerDelegate>)_delegate {
     delegate = _delegate;
+}
+
+#pragma mark -
+#pragma mark code descriptions
+
+// TODO: Provide better descriptions of how or why the called did what it did
+- (NSString *)networkTerminationDescription:(enum NETWORK_TERMINATION_CODE)code {
+    switch (code) {
+        case CALL_FAILED:
+            return @"CALL_FAILED";
+            
+        case CALL_DROPPED:
+            return @"CALL_DROPPED";
+            
+        case CALL_ENDED_BY_CALLEE:
+            return @"CALL_ENDED_BY_CALLEE";
+            
+        case CALL_ENDED_BY_CALLER:
+            return @"CALL_ENDED_BY_CALLER";
+            
+        default:
+            return @"CALL_ENDED";
+    }
+}
+
+// TODO: Provide better state descriptions
+- (NSString *)connectionStatusDescription:(enum CONNECTION_STATUS)_status {
+    switch (_status) {
+        case CONNECTED:
+            return @"CONNECTED";
+
+        case INITIATING:
+            return @"INITIATING";
+            
+        case DISCONNECTED:
+            return @"DISCONNECTED";
+            
+        default:
+            return @"DISCONNECTED";
+    }
 }
 
 #pragma mark -
@@ -347,12 +386,12 @@
         [delegate videoStreamerInitiatingChat:self];
     } else {
         status = DISCONNECTED;
-        [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure"];
+        [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure" networkCode:CALL_FAILED];
     }
 }
 
 - (void)endChat {
-    [self terminateCaptureWithInfo:@"Call to method '- (void)endChat'"];
+    [networkMan endChat];
 }
 
 #pragma mark -
@@ -414,7 +453,7 @@
     //[captureSession startRunning];
 }
 
-- (void)terminateCaptureWithInfo:(NSString *)info {
+- (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code {
     if (networkMan) {
         [networkMan release];
         networkMan = nil;
@@ -430,7 +469,7 @@
     
     status = DISCONNECTED;
     
-    [delegate videoStreamer:self chatEndedWithInfo:info];
+    [delegate videoStreamer:self chatEndedWithInfo:info networkCode:code];
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
@@ -573,12 +612,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         [networkMan startEncoder];
         [captureSession startRunning];
     } else {
-        [self terminateCaptureWithInfo:@"Network Connection Failure"];
+        [self terminateCaptureWithInfo:@"Network Connection Failure" networkCode:CALL_FAILED];
     }
 }
 
-- (void)networkManagerInvalid:(NetworkManager *)networkManager {
-    [self terminateCaptureWithInfo:@"Chat Ended"];
+- (void)networkManagerInvalid:(NetworkManager *)networkManager endedWithCode:(enum NETWORK_TERMINATION_CODE)code {
+    [self terminateCaptureWithInfo:@"Chat Ended" networkCode:code];
 }
 
 #pragma mark - 
@@ -599,7 +638,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     
-    [self terminateCaptureWithInfo:@"Chat Ended: VideoStreamer UIView Did Unload"];
+    [self terminateCaptureWithInfo:@"Chat Ended: VideoStreamer UIView Did Unload" networkCode:CALL_FAILED];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -642,6 +681,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 - (void)dealloc {
+    NSLog(@"VideoStreamer dealloc");
+    
     if (networkMan) {
         [networkMan release];
         networkMan = nil;
@@ -658,6 +699,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (pxbuffer) {
         CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     }
+    
+    self.delegate = nil;
     
     [super dealloc];
 }
@@ -753,6 +796,18 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                  userInfo:nil];
 }
 
+- (NSString *)networkTerminationDescription:(enum NETWORK_TERMINATION_CODE)code {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)connectionStatusDescription:(enum CONNECTION_STATUS)_status {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
 #pragma mark -
 #pragma User Chat controls
 
@@ -763,21 +818,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 - (void)endChat {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-#pragma mark -
-#pragma Video Capture
-
-- (void)initCapture {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (void)terminateCaptureWithInfo:(NSString *)info {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

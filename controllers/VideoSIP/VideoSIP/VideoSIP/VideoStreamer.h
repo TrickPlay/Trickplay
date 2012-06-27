@@ -17,15 +17,33 @@
 @class VideoStreamer;
 @class NetworkManager;
 
+/**
+ * This enumeration represents the three different reasons
+ * the network may terminate a video streaming chat.
+ */
+enum NETWORK_TERMINATION_CODE {
+    CALL_ENDED_BY_CALLEE,                     // Call ended safely
+    CALL_ENDED_BY_CALLER,
+    CALL_FAILED,                    // Call could not connect
+    CALL_DROPPED                    // Call dropped midway through a call
+};
+
+/**
+ * These are the three states that the VideoStreamer's network component
+ * may be in.
+ */
+enum CONNECTION_STATUS {
+    INITIATING,                     // Trying to contact the network
+    CONNECTED,                      // Connected to the network
+    DISCONNECTED                    // Disconnected from the network
+};
+
 
 @protocol VideoStreamerDelegate <NSObject>
 
 - (void)videoStreamerInitiatingChat:(VideoStreamer *)videoStreamer;
 - (void)videoStreamerChatStarted:(VideoStreamer *)videoStreamer;
-// TODO: Change info to some Macro NSUInteger value corresponding to an error code.
-// Then add a function in the library that you can pass the value too to get an
-// explanation printed to console.
-- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason;
+- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code;
 
 @end
 
@@ -48,11 +66,8 @@
 
 @end
 
-enum CONNECTION_STATUS {
-    INITIATING,
-    CONNECTED,
-    DISCONNECTED
-};
+
+
 
 @interface VideoStreamer : UIViewController 
 
@@ -65,6 +80,9 @@ enum CONNECTION_STATUS {
 
 - (void)startChat;
 - (void)endChat;
+
+- (NSString *)networkTerminationDescription:(enum NETWORK_TERMINATION_CODE)code;
+- (NSString *)connectionStatusDescription:(enum CONNECTION_STATUS)status;
 
 @end
 

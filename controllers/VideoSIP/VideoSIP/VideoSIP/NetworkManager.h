@@ -19,6 +19,9 @@
 @class NetworkManager;
 
 
+enum NETWORK_TERMINATION_CODE;
+
+
 @protocol NetworkManagerDelegate <NSObject>
 
 /**
@@ -30,7 +33,7 @@
  * Informs the Delegate that this NetworkManager no longer is good
  * for use.
  */
-- (void)networkManagerInvalid:(NetworkManager *)networkManager;
+- (void)networkManagerInvalid:(NetworkManager *)networkManager endedWithCode:(enum NETWORK_TERMINATION_CODE)code;
 
 @end
 
@@ -73,6 +76,7 @@ void *get_in_addr(struct sockaddr *sa);
 
 - (id)initWithContext:(VideoStreamerContext *)streamerContext;
 - (void)startEncoder;
+- (void)endChat;
 - (void)packetize:(CMSampleBufferRef)sampleBuffer;
 
 @end

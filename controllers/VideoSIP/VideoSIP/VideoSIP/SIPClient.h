@@ -34,7 +34,7 @@ enum sip_client_error_t {
 
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
-- (void)client:(SIPClient *)client finishedWithError:(enum sip_client_error_t)error;
+- (void)client:(SIPClient *)client sipFinishedWithError:(enum sip_client_error_t)error;
 
 @end
 
