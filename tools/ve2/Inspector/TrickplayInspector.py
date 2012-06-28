@@ -206,6 +206,7 @@ class TrickplayInspector(QWidget):
             QItemSelectionModel.SelectCurrent)
     
     def propertyFill(self, data, styleIndex=None):
+        readonly_list = ["baseline", "selected_text", "base_size", "loaded", "tags"]
 
         self.cbStyle_textChanged = False
         self.ui.property.clear()
@@ -222,10 +223,6 @@ class TrickplayInspector(QWidget):
                 #i.setText (0, p[:1].upper()+p[1:])
                 i.setText (0, p)
                 i.setText (1, str(data[p]))
-                
-                #print ("PROPERTY[%s]"%p)
-                #print ("    value : %s"%str(data[p]))
-
                 if p == "source":
                     i.setText (1, summarizeSource(data[str(p)]))
                 if p == "style":
@@ -246,8 +243,11 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+                
+                # readonly properties :: 
 
-                if p == "baseline" or p == "selected_text": #readonly 
+                #if p == "baseline" or p == "selected_text" :
+                if p in readonly_list:
                     pass
                 elif p == "text" and type(data[p]) is not list:
                     i.setFlags(i.flags() ^Qt.ItemIsEditable)
@@ -262,7 +262,9 @@ class TrickplayInspector(QWidget):
                             j.setText (0, sp)
                             #j.setText (0, sp[:1].upper()+sp[1:])
                             j.setText (1, str(z[idx]))
-                            j.setFlags(j.flags() ^Qt.ItemIsEditable)
+                            #if p ~= "base_size": #read_only 
+                            if not p in readonly_list :
+                                j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
                     else:
                         #find Style name from combo box  
@@ -471,7 +473,17 @@ class TrickplayInspector(QWidget):
         pValueString = pValueString.split(",")
         for i in range(0, len(pValueString)):
             if i == n :
-                pValueString[i] = str(value)
+                if str(value) == "True" : 
+                    pValueString[i] =  "true"
+                elif str(value) == "False" :
+                    pValueString[i] =  "false"
+                else:
+                    pValueString[i] = str(value)
+            else :
+                if str(pValueString[i]) == "True" : 
+                    pValueString[i] =  "true"
+                elif str(pValueString[i]) == "False" :
+                    pValueString[i] =  "false"
                 
             pNewValueString = pNewValueString + pValueString[i]
             if i < len(pValueString) - 1 :

@@ -27,6 +27,8 @@ if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")            
 
 
 dofile("LIB/VE/ve_runtime")
+screen_ui = dofile("screen_ui")
+hdr = dofile("LIB/VE/header")
 
 g = Group{name="Layer1"}
 loadfile("test1.lua")(g)
@@ -220,12 +222,22 @@ _VE_.openFile = function(path)
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
+    -- Image !!! 
+
+    q,w = string.find(path, "/screens")
+    path = string.sub(path, 1, q - 1)
+    path = path.."/assets/images/"
+    print (path)
+    editor:change_app_path(path)
+
     s = load_layer(layer)
 
     for i,j in ipairs(s.children) do
         if string.find(j.name, "Layer") ~= nil then 
             for l,m in ipairs(j.children) do 
                 m.created = false
+
+
                 if m.subscribe_to then  
                     m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
                 end 
@@ -351,14 +363,24 @@ local uiElementCreate_map =
     ['MenuButton'] = function()  return MenuButton() end, 
 }
 
-_VE_.insertUIElement = function(curLayerGid, uiTypeStr)
+_VE_.insertUIElement = function(curLayerGid, uiTypeStr, path)
     
     local uiInstance, dragging = nil 
+
+    if uiTypeStr == "Rectangle" then 
+        input_mode = hdr.S_RECTANGLE 
+        screen:grab_key_focus()
+    end 
+
     if uiElementCreate_map[uiTypeStr] then
         uiInstance = uiElementCreate_map[uiTypeStr](self)
         for m,n in ipairs (screen.children) do
-            if n.name == uiTypeStr:lower()..uiNum then 
-                uiNum = uiNum + 1
+            if string.find(n.name, "Layer") then  
+                for k,l in ipairs (n.children) do 
+                    if l.name == uiTypeStr:lower()..uiNum then 
+                        uiNum = uiNum + 1
+                    end
+                end
             end
         end 
         uiInstance.name = uiTypeStr:lower()..uiNum
@@ -366,6 +388,10 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     else
         print "error"
     end
+
+    if uiTypeStr == "Image" then 
+        uiInstance.src = path
+    end 
 
     if uiTypeStr == "Text" then 
         editor_text(uiInstance)
@@ -419,12 +445,79 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
 
 end
 --[[
-function screen.on_motion( screen , x , y )
-    if dragging then
-        local actor , dx , dy = unpack( dragging )
-        actor.position = { x - dx , y - dy  }
+
+
+	function screen:on_button_down(x,y,button,num_clicks,m)
+
+      	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
+
+		if current_focus and input_mode ~=  hdr.S_RECTANGLE then -- for closing menu button or escaping from text editting 
+			current_focus.clear_focus()
+			screen:grab_key_focus()
+			return
+		end 
+
+      	if(input_mode == hdr.S_RECTANGLE) then 
+	       editor.rectangle( x, y) 
+		   return
+	  	end
+
+		if button == 3 and g.extra.video ~= nil and current_inspector == nil then
+        	editor.inspector(g.extra.video)
+			return
+        end 
+
+		screen_ui.multi_select(x,y)
+
     end
-end
+
+	local move 
+	function screen:on_button_up(x,y,button,clicks_count, m)
+
+		-- for dragging timepoint 
+		screen_ui.dragging_up(x,y)
+
+	  	dragging = nil
+
+        if (mouse_state == hdr.BUTTON_DOWN) then
+            if input_mode == hdr.S_RECTANGLE then 
+	           editor.rectangle_done(x, y) 
+	           input_mode = hdr.S_SELECT 
+	      	else
+				screen_ui.multi_select_done(x,y)
+				if move == nil then
+					screen_ui.n_selected_all()
+				end
+				move = nil
+	      	end 
+       	end
+
+       	mouse_state = hdr.BUTTON_UP
+
+	end
+
+    function screen:on_motion(x,y)
+
+	  	if control == true then 
+			screen_ui.draw_selected_container_border(x,y) 
+		end 
+	 
+	 	screen_ui.cursor_setting()
+	 	screen_ui.dragging(x,y)
+
+        if(mouse_state == hdr.BUTTON_DOWN) then
+            if (input_mode == hdr.S_RECTANGLE) then 
+				editor.rectangle_move(x, y) 
+			end
+            if (input_mode == hdr.S_SELECT) then 
+		    	screen_ui.multi_select_move(x, y) 
+				move = true
+			end
+        end
+	end
+
+
+
 ]]
 
 screen.reactive = true

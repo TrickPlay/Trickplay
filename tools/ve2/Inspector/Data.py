@@ -9,14 +9,16 @@ modelToDataTable = {
     'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
     #'scalex': lambda v: ('scale-x',  toFloat(v['x'])),
     #'scaley': lambda v: ('scale-y',  toFloat(v['y'])),
-    'scalex': lambda v: ('scale',  toFloat(v)),
-    'scaley': lambda v: ('scale',  toFloat(v)),
+    #'scalex': lambda v: ('scale',  toFloat(v)),
+    #'scaley': lambda v: ('scale',  toFloat(v)),
+    #'tilex': lambda v: ('tile', toBool(v)),
+    #'tiley': lambda v: ('tile', toBool(v)),
     #'clipx': lambda v: ('clip',  clip(v)),
     #'clipy': lambda v: ('clip',  clip(v)),
     #'tilex': lambda v: ('repeat-x', bool(v)),
     #'tiley': lambda v: ('repeat-y', bool(v)),
-    'tilex': lambda v: ('repeat-x', toBool(v)),
-    'tiley': lambda v: ('repeat-y', toBool(v)),
+    #'tilex': lambda v: ('repeat-x', toBool(v)),
+    #'tiley': lambda v: ('repeat-y', toBool(v)),
     'focused': lambda v: ('focused', toBool(v)),
     'enabled': lambda v: ('enabled', toBool(v)),
     'editable': lambda v: ('editable', toBool(v)),
@@ -24,6 +26,12 @@ modelToDataTable = {
     'single_line': lambda v: ('single_line', toBool(v)),
     'use_markup': lambda v: ('use_markup', toBool(v)),
     'wants_enter': lambda v: ('wants_enter', toBool(v)),
+    'async': lambda v: ('async', toBool(v)),
+    'read_tags': lambda v: ('read_tags', toBool(v)),
+    'selection_colorr': lambda v: ('selection_color', color(v)),
+    'selection_colorg': lambda v: ('selection_color', color(v)),
+    'selection_colorb': lambda v: ('selection_color', color(v)),
+    'selection_colora': lambda v: ('selection_color', color(v)),
     'colorr': lambda v: ('color', color(v)),
     'colorg': lambda v: ('color', color(v)),
     'colorb': lambda v: ('color', color(v)),
@@ -90,6 +98,7 @@ dataToModelTable = {
     'source': lambda v: ('source', summarizeSource(v)),
     'type': lambda v: ('type', typeTextureToImage(v)), 
     'is_visible': lambda v: ('visible', bool(v)), 
+    #'tile': lambda v: ('tile', tileToBool(v)), 
     'tile': lambda v: ('tile', tileToBool(v)), 
     'source': lambda v: ('source', summarizeSource(v)),
     'scale': lambda v: ('scale', scaleToFloat(v)),
@@ -104,6 +113,7 @@ def colors(v):
     v = v[:len(v)-1] 
     v = "{"+v+"}"
     return v
+
 def toString(v):
      return "'"+str(v)+"'"
 
@@ -116,6 +126,11 @@ def scaleToFloat(v):
     v['y'] = float(v['y'])
     return v
     
+#def tileToBool(v):
+    #v['x'] = bool(v['x'])
+    #v['y'] = bool(v['y'])
+    #return v
+#
 def summarizeSource(v):
     """
     Summarize clone data into a string
@@ -134,8 +149,9 @@ def summarizeSource(v):
         return '' 
 
 def tileToBool(v):
-    v['x'] = bool(v['x'])
-    v['y'] = bool(v['y'])
+    print "asljdddddddddddddddddddddddddddddkdfhajklshdfjkld"
+    v['x'] = toBool(v['x'])
+    v['y'] = toBool(v['y'])
     return v
 
 def typeTextureToImage(v):
