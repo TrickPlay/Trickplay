@@ -56,6 +56,15 @@ enum sip_client_error_t {
 @end
 
 
+/**
+ * The SIPClient manages all SIP Dialogs with the SIP server and
+ * connected UACs. During initialization, this class first uses
+ * STUN to discover this iOS Device's public IP address. If successful
+ * SIPClient spawns a thread and sets up a socket to the SIP server.
+ * All activity of SIPClient, from that point forward, will execute
+ * on its private thread.
+ */
+
 @interface SIPClient : NSObject <SIPDialogDelegate> {
     // All SIP stuff is handled in this thread
     NSThread *sipThread;
@@ -99,16 +108,28 @@ enum sip_client_error_t {
 // public
 - (id)initWithSPS:(NSData *)sps PPS:(NSData *)pps context:(VideoStreamerContext *)context delegate:(id <SIPClientDelegate>)delegate;
 
+/**
+ * Call this to connect to a SIP server via REGISTER.
+ */
 - (void)connectToService;
+/**
+ * Initiates a video call by sending INVITE.
+ */
 - (void)initiateVideoCall;
+/**
+ * Ends a video call by sending BYE. Currently doesn't work.
+ */
 - (void)hangUp;
+/**
+ * End all video calls by sending BYE and disconnect from the SIP server.
+ */
 - (void)disconnectFromService;
 /**
- * Returns YES if the SIPClient is valid, NO otherwise
+ * Returns YES if the SIPClient is valid, NO otherwise.
  */
 - (BOOL)isValid;
 /**
- * Gives the caller a description of the error
+ * Gives the caller a description of the error.
  */
 - (NSString *)errorDescription:(enum sip_client_error_t)error;
 

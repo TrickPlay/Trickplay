@@ -16,6 +16,21 @@
 @class VideoStreamerContext;
 @class SIPDialog;
 
+/**
+ * The SIPDialogDelegate protocol is used by SIPDialog Objects to inform a delegate
+ * (likely a SIPClient object) of data (SIP Requests/Responses) to send over the
+ * network. Additionally, this protocol informs the delegate of when a new Dialog
+ * Session begins/ends and when a Call has been established/ended, thus, indicating time
+ * to begin/end an RTP stream for the Call.
+ *
+ * SIPDialog Objects are only capable of forming and disassembling SIP packets and
+ * interpretting SIP packets. This protocol is used to send SIP packets assembled by
+ * the SIPDialog (I.E. SIPDialog assembles an INVITE packet and needs to send it
+ * over the network) or to inform the delegate of actions to be taken based off of a
+ * parsed SIP packet (I.E. a BYE packet was received and therefore the delegate should
+ * close an associated RTP stream).
+ */
+
 @protocol SIPDialogDelegate <NSObject>
 @required
 - (void)dialogSessionStarted:(SIPDialog *)dialog;
@@ -26,6 +41,20 @@
 
 @end
 
+/**
+ * SIPDialog is an abstract class for all SIP packet types. INVITE, REGISTER, OPTIONS, etc.
+ * packets are all created via SIPDialog subclasses. These subclasses peform the task of
+ * forming SIP Request/Response packets to send over the network, parsing received SIP
+ * Requests and/or Responses, and interpretting the received SIP packets.
+ *
+ * SIPDialog objects do not natively have any network architecture, but rely on delegate methods
+ * to inform a delegate (likely a SIPClient) of what information has been interpretted.
+ * Additionally, SIPDialog objects may build Request and/or Response packets and hand them
+ * off to the delegate assuming the delegate should have the required network architecture
+ * to send the Request and/or Response packets to the required destination.
+ *
+ * Refer to RFC 3261 - SIP:Session Initiation Protocol for more information.
+ */
 
 @interface SIPDialog : NSObject {
     // This is our user name
@@ -86,9 +115,13 @@
     // support any of it, but SIP packets analyzed from other sources
     // all seem to have this so we'll include it for now
     NSString *supported;
-    
+    // SIP branch. Every Dialog has a branch transaction ID
     NSString *branch;
+    // This is the line you put in the authorization during
+    // REGISTER or INVITE requests
     NSString *authLine;
+    // This contains all the data (passwords, md5, etc.) to form
+    // authLine.
     NSMutableDictionary *auth;
     
     // Delegate to SIPClient
@@ -125,9 +158,9 @@
 // methods
 
 - (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP delegate:(id <SIPDialogDelegate>)_delegate;
-
+// Interpret a parsed SIP packet and do something
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr;
-
+// Cancel this dialog. Not all dialogs cancel, and should overwrite this function
 - (void)cancel;
 
 @end

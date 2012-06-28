@@ -587,6 +587,9 @@
     NSLog(@"\nACK with packet:\n%@\n", ack);
 }
 
+/**
+ * Queues up a response to a received BYE message.
+ */
 - (void)byeResponse:(NSDictionary *)request fromAddr:(NSData *)remoteAddr {
     struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
     char ip_string[INET_ADDRSTRLEN];
@@ -668,6 +671,9 @@
     return mediaDest;
 }
 
+/**
+ * This method figures out what to do based on a received SIP packet.
+ */
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
     NSString *statusLine = [parsedPacket objectForKey:@"Status-Line"];
     if (!statusLine) {

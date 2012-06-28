@@ -606,6 +606,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 #pragma mark -
 #pragma mark Thread Agnostic Methods
 
+/**
+ * Returns whether or not this SIPClient is still functioning.
+ * This method is thread safe.
+ */
 - (BOOL)isValid {
     BOOL temp;
     @synchronized(self) {
