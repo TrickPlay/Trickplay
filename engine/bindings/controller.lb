@@ -1063,6 +1063,37 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
     /*
+
++    bool streaming_video_end_call( const String & address );
++
++    bool streaming_video_send_status();
+
+        UndocumentedFunction: streaming_video_start_call
+
+        Tells the controller to start a video call. The app will receive callbacks on call progress.
+
+        Arguments:
+
+            address -   This should be a URL to connect the video stream endpoint to, such as "sip:craig@asterisk-1.asterisk.trickplay.com"
+
+    */
+
+    bool streaming_video_start_call( string address )
+        [[
+            result=self->get_controller()->streaming_video_start_call( String( address ) );
+        ]];
+
+    bool streaming_video_end_call( string address )
+        [[
+            result=self->get_controller()->streaming_video_end_call( String( address ) );
+        ]];
+
+    bool streaming_video_send_status()
+        [[
+            result=self->get_controller()->streaming_video_send_status();
+        ]];
+
+    /*
         InternalFunction: advanced_ui
 
         *** This function is used by the "Advanced UI" Lua library to communicate with the TakeControl framework running on an external device. It should never be called directly by a TrickPlay application. Therefore, it will remain undocumented to the public.
