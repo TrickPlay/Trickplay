@@ -23,7 +23,7 @@
  */
 
 enum NETWORK_TERMINATION_CODE {
-    CALL_ENDED_BY_CALLEE,                     // Call ended safely
+    CALL_ENDED_BY_CALLEE,           // Call ended safely
     CALL_ENDED_BY_CALLER,
     CALL_FAILED,                    // Call could not connect
     CALL_DROPPED                    // Call dropped midway through a call
@@ -95,7 +95,15 @@ enum CONNECTION_STATUS {
 @end
 
 
-
+/**
+ * The VideoStreamer Class allows a caller to begin and end an RTP based video chat with
+ * a SIP client connected to a TrickPlay SIP server. Simply create a VideoStreamerContext
+ * with all necessary connection information, initialize a newly created VideoStreamer
+ * with the VideoStreamerContext, and call startChat on the VideoStreamer object.
+ *
+ * Provide the VideoStreamer with a delegate object in order to receive callbacks
+ * when a chat initiates, begins, and ends.
+ */
 
 @interface VideoStreamer : UIViewController 
 

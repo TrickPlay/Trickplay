@@ -1156,8 +1156,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     }
     // Check the arguments
     if (args.count < 1) {
-        NSLog(@"Could not start Streaming Video Call, invalid address provided!");
-        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video failed can not connect, invalid address provided"];
+        NSLog(@"Could not start Streaming Video Call, no address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t<NOTHING>\t%@\n", @"Streaming Video failed can not connect, invalid address provided"];
         [socketManager sendData:[sentData UTF8String] 
                   numberOfBytes:[sentData length]];
         return;

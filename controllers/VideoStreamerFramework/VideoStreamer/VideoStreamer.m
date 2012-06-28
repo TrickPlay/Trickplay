@@ -67,17 +67,24 @@
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)remoteAddress serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     if (!user || !password || !remoteAddress) {
+        [self release];
         return nil;
     }
     
     NSArray *components = [remoteAddress componentsSeparatedByString:@":"];
     if (components.count != 2) {
+        [self release];
         return nil;
     }
-    //NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip", we'll just ignore it
+    NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip"
+    if ([protocol compare:@"sip"] != NSOrderedSame) {
+        [self release];
+        return nil;
+    }
     NSString *userAndHost = [components objectAtIndex:1];
-    components = [userAndHost componentsSeparatedByString:@"%@"];
+    components = [userAndHost componentsSeparatedByString:@"@"];
     if (components.count != 2) {
+        [self release];
         return nil;
     }
     NSString *remoteUser = [components objectAtIndex:0];
@@ -88,6 +95,7 @@
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     if (!user || !password || !remoteUser || !hostName) {
+        [self release];
         return nil;
     }
     
