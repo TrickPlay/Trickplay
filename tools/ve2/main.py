@@ -196,47 +196,41 @@ class MainWindow(QMainWindow):
 
     def orbittingdots(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def progressspinner(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def toastalert(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def dialogbox(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def text(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Text')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def image(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Image')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
+        path = QFileDialog.getOpenFileName(None, 'Set Image Source', str(os.path.join(self.path, 'assets/images')), "*.jpg *.gif *.png")
+        path = os.path.basename(str(path))
+        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Image', "+"'"+str(path)+"')")
         return True
 
     def rectangle(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Rectangle')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def stop(self, serverStoped=False, exit=False):

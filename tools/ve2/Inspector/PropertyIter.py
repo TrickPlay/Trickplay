@@ -230,6 +230,13 @@ PROP_LIST = [
     'use_markup',
     'wants_enter',
     'wrap_mote',
+    
+    # Widget Image
+    'async',
+    'loaded',
+    'read_tags',
+    'tags',
+
     # Hidden
     #'type',
     #'children', 
@@ -244,10 +251,11 @@ NESTED_PROP_LIST = {
     'text' : ['alignment', 'colors', 'font', 'justify', 'wrap', 'x_offset', 'y_offset'], 
     'position' : ['x', 'y', 'z'], 
     'size' : ['w', 'h'],
+    'base_size' : ['w', 'h'],
     'new_attr' : ['a', 'b','c'],
     'color' : ['r', 'g', 'b', 'a'],
     'cursor_color' : ['r', 'g', 'b', 'a'],
-    'selected_color' : ['r', 'g', 'b', 'a'],
+    'selection_color' : ['r', 'g', 'b', 'a'],
     'message_color' : ['r', 'g', 'b', 'a'],
     'border_color' : ['r', 'g', 'b', 'a'],
     'anchor_point' : ['x', 'y'],
