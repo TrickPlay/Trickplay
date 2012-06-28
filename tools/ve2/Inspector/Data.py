@@ -3,22 +3,8 @@ modelToDataTable = {
     'activation': lambda v: ('activation', colors(v)), 
     'default': lambda v: ('default', colors(v)),
     'focus': lambda v: ('focus', colors(v)),
-    #'anchor_pointx': lambda v: ('anchor-x',  toFloat(v['x'])),
-    #'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
     'anchor_pointx': lambda v: ('anchor',  toFloat(v['x'])),
     'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
-    #'scalex': lambda v: ('scale-x',  toFloat(v['x'])),
-    #'scaley': lambda v: ('scale-y',  toFloat(v['y'])),
-    #'scalex': lambda v: ('scale',  toFloat(v)),
-    #'scaley': lambda v: ('scale',  toFloat(v)),
-    #'tilex': lambda v: ('tile', toBool(v)),
-    #'tiley': lambda v: ('tile', toBool(v)),
-    #'clipx': lambda v: ('clip',  clip(v)),
-    #'clipy': lambda v: ('clip',  clip(v)),
-    #'tilex': lambda v: ('repeat-x', bool(v)),
-    #'tiley': lambda v: ('repeat-y', bool(v)),
-    #'tilex': lambda v: ('repeat-x', toBool(v)),
-    #'tiley': lambda v: ('repeat-y', toBool(v)),
     'focused': lambda v: ('focused', toBool(v)),
     'enabled': lambda v: ('enabled', toBool(v)),
     'editable': lambda v: ('editable', toBool(v)),
@@ -64,8 +50,6 @@ modelToDataTable = {
     'line_spacing': lambda v: ('line_spacing',  toFloat(v)),
     'max_length': lambda v: ('max_length',  toFloat(v)),
     'password_char': lambda v: ('password_char',  toFloat(v)),
-    #'sizew': lambda v: ('width',  toFloat(v['w'])), 
-    #'sizeh': lambda v: ('height',  toFloat(v['h'])), 
     'corner_radius': lambda v: ('corner_radius',  toFloat(v)), 
     'sizew': lambda v: ('width',  toFloat(v)), 
     'width': lambda v: ('width',  toFloat(v)), 
@@ -98,7 +82,6 @@ dataToModelTable = {
     'source': lambda v: ('source', summarizeSource(v)),
     'type': lambda v: ('type', typeTextureToImage(v)), 
     'is_visible': lambda v: ('visible', bool(v)), 
-    #'tile': lambda v: ('tile', tileToBool(v)), 
     'tile': lambda v: ('tile', tileToBool(v)), 
     'source': lambda v: ('source', summarizeSource(v)),
     'scale': lambda v: ('scale', scaleToFloat(v)),
@@ -126,11 +109,6 @@ def scaleToFloat(v):
     v['y'] = float(v['y'])
     return v
     
-#def tileToBool(v):
-    #v['x'] = bool(v['x'])
-    #v['y'] = bool(v['y'])
-    #return v
-#
 def summarizeSource(v):
     """
     Summarize clone data into a string
@@ -149,7 +127,6 @@ def summarizeSource(v):
         return '' 
 
 def tileToBool(v):
-    print "asljdddddddddddddddddddddddddddddkdfhajklshdfjkld"
     v['x'] = toBool(v['x'])
     v['y'] = toBool(v['y'])
     return v
