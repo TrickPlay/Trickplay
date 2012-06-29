@@ -63,17 +63,23 @@ local function Widgetize(instance)
     end
     
     ----------------------------------------------------------------------------
-    local enabled_upval
+    local enabled_upval, retval
     local __call = function(t,...) 
         
         enabled_upval = instance.enabled
         
+        retval = false
+        
         for f,ignore_enabled in pairs(t) do   
             
             if enabled_upval or ignore_enabled then 
-                f(...)   
+                
+                retval = f(...) or retval
+                
             end
         end
+        
+        return retval
         
     end
     

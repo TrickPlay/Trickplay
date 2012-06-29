@@ -325,7 +325,8 @@ class TrickplayInspector(QWidget):
         return scrJSON
 
     def itemSelectionChanged(self):
-        self.cbStyle.setEditable (False)
+        if self.cbStyle :
+            self.cbStyle.setEditable (False)
 
     def removeScreen(self):
         if self.currentScreenName is not "Default":
