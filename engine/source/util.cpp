@@ -357,6 +357,26 @@ String Util::describe_lua_value( lua_State * L , int index )
 
 }
 
+void Util::convert_bitmask_to_table( lua_State * L )
+{
+    // Top of the table is an unsigned integer that we wish to convert to a bitmask in a table
+    lua_Integer number = lua_tointeger( L, -1 );
+    lua_pop( L, 1 );
+
+    lua_newtable ( L );
+
+    unsigned int pos=1;
+
+    for(int i=0; number > 0; number>>=1, i++)
+    {
+        if((number & 1) == 1)
+        {
+            lua_pushinteger( L, i );
+            lua_rawseti( L, -2, pos++ );
+        }
+    }
+}
+
 gpointer Util::g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout )
 {
 #if GLIB_CHECK_VERSION(2,32,0)

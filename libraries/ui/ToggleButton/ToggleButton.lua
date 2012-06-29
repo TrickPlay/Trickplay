@@ -10,7 +10,7 @@ local press = function(old_function,self)
     
 end
 
-local create_canvas = function(old_function,self,state)
+local create_canvas = function(self,state)
 	
 	local c = Canvas(self.w,self.h)
 	

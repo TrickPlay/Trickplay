@@ -417,6 +417,26 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 			break;
 		}
 
+        case TP_CONTROLLER_COMMAND_VIDEO_START_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVSC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_END_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVEC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS:
+        {
+            server->write_printf( connection, "SVSS\n" );
+            break;
+        }
+
         case TP_CONTROLLER_COMMAND_ADVANCED_UI:
         {
             if ( ! info->aui_connection )
@@ -603,6 +623,16 @@ static inline bool cmp2( const char * a, const char * b )
     return ( a[0] == b[0] ) && ( a[1] == b[1] );
 }
 
+static inline bool cmp3( const char * a, const char * b )
+{
+    return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] );
+}
+
+static inline bool cmp4( const char * a, const char * b )
+{
+    return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] ) && ( a[3] == b[3] );
+}
+
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
     guint count = g_strv_length( parts );
@@ -741,6 +771,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 else if ( cmp2( cap , "VR" ) )
                 {
                 	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
+                }
+                else if ( cmp2( cap , "SV" ) )
+                {
+                	spec.capabilities |= TP_CONTROLLER_HAS_STREAMING_VIDEO;
                 }
                 else
                 {
@@ -1076,6 +1110,66 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         // Now, generate the event that it is ready
 
         tp_controller_advanced_ui_ready( parent_info->controller );
+    }
+    else if ( cmp4( cmd, "SVCC" ) )
+    {
+        // Streaming video call connected
+        // SVCC <address>
+
+        if ( count < 2 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_connected( info.controller, parts[1] );
+    }
+    else if ( cmp4( cmd, "SVCF" ) )
+    {
+        // Streaming video call failed
+        // SVCF <address> <reason>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_failed( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCD" ) )
+    {
+        // Streaming video call was dropped
+        // SVCD <address> <reason>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_dropped( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCE" ) )
+    {
+        // Streaming video call ended
+        // SVCE <address> <who>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_ended( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCS" ) )
+    {
+        // Streaming video call status
+        // SVCS <status> <address>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_status( info.controller, parts[1], parts[2] );
     }
     else
     {

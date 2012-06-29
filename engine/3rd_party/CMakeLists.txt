@@ -9,10 +9,10 @@ list( APPEND 3RD_PARTY_SOURCE_FILES
 
 add_definitions( -DZIP_STD=1 )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils ) 
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils )
 
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/Box2D_v2.1.2/Box2D ) 
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/Box2D_v2.1.2/Box2D )
 
 set(BOX2D_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/Box2D_v2.1.2/Box2D/Box2D)
 
@@ -73,6 +73,9 @@ set( BUILD_NVIDIA_OPENCL_DEMOS OFF )
 set( BUILD_EXTRAS OFF )
 
 add_definitions( -DBT_NO_PROFILE=1 )
+
+set( BUILD_DEMOS OFF )
+set( BUILD_EXTRAS OFF )
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79 )
 

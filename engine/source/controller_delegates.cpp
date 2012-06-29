@@ -31,6 +31,11 @@ extern int invoke_Controller_on_touch_move( lua_State * , ControllerDelegate * ,
 extern int invoke_Controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_scroll( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_ui_event( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_streaming_video_connected( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_failed( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_dropped( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_ended( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_status( lua_State *, ControllerDelegate *, int, int );
 
 extern int invoke_controllers_on_controller_connected( lua_State * , ControllerListDelegate * , int , int );
 
@@ -381,6 +386,51 @@ void ControllerDelegate::advanced_ui_event( const char * json )
 
     invoke_Controller_on_advanced_ui_event( L , this , 1 , 0 );
 }
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_connected(const char *address)
+{
+    lua_pushstring(L, address);
+    invoke_Controller_on_streaming_video_connected(L, this, 1, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_failed(const char *address, const char *reason)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, reason);
+    invoke_Controller_on_streaming_video_failed(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_dropped(const char *address, const char *reason)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, reason);
+    invoke_Controller_on_streaming_video_dropped(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_ended(const char *address, const char *who)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, who);
+    invoke_Controller_on_streaming_video_ended(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_status(const char *status, const char *arg)
+{
+    lua_pushstring(L, status);
+    lua_pushstring(L, arg);
+    invoke_Controller_on_streaming_video_status(L, this, 2, 0);
+}
+
 
 //=============================================================================
 

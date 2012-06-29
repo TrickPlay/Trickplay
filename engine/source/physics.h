@@ -179,8 +179,8 @@ namespace Physics
 
         //.........................................................................
 
-        static gboolean on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world );        
-        
+        static gboolean on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world );
+
         //.........................................................................
 
         lua_State *     L;
@@ -193,6 +193,7 @@ namespace Physics
         int             position_iterations;
 
         guint           idle_source;
+        guint           repaint_source;
         GTimer *        timer;
 
         ClutterActor *  screen;
@@ -203,7 +204,7 @@ namespace Physics
         typedef std::list< b2Body * > b2BodyList;
 
         b2BodyList      to_destroy;
-        
+
     };
 
     //=========================================================================

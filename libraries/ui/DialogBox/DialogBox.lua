@@ -185,7 +185,7 @@ DialogBox = function(parameters)
 			
 			separator_y = v
 			
-			if canvas then flag_for_redraw = false end
+			if canvas then flag_for_redraw = true end
 			
 		end
 	)
