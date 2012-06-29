@@ -1014,7 +1014,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
  */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
-    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName) {
+    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName || videoStreamer) {
         [self canceledPickingImage];
         return;
     }
@@ -1114,27 +1114,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 #pragma mark -
 #pragma mark Video Streaming
 
-// Video Streaming Controller->Server
-- (void)do_SVCC:(NSArray *)args {
-    
-}
-
-- (void)do_SVCF:(NSArray *)args {
-    
-}
-
-- (void)do_SVCD:(NSArray *)args {
-    
-}
-
-- (void)do_SVCE:(NSArray *)args {
-    
-}
-
-- (void)do_SVCS:(NSArray *)args {
-    
-}
-
 // Video Streaming Server->Controller
 
 /**
@@ -1196,6 +1175,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
                   numberOfBytes:[sentData length]];
         return;
     }
+    videoStreamer.view.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:.5];
     [videoStreamer startChat];
     [delegate tpAppViewController:self wantsToPresentCamera:videoStreamer];
 }
@@ -1211,11 +1191,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
  */
 - (void)do_SVEC:(NSArray *)args {
     NSLog(@"Streaming Video End Call");
-    if (videoStreamer) {
-        [videoStreamer endChat];
-        [videoStreamer release];
-    }
-    videoStreamer = nil;
+
+    [videoStreamer endChat];
 }
 
 /**
@@ -1277,6 +1254,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
             sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
             break;
     }
+    
+    [videoStreamer dismissViewControllerAnimated:YES completion:^(void){
+        NSLog(@"VideoStreamer dismissed");
+        [videoStreamer release];
+        videoStreamer = nil;
+    }];
 }
 
 #pragma mark -
@@ -1401,6 +1384,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     }
     
     if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
         [videoStreamer release];
         videoStreamer = nil;
     }
@@ -1694,6 +1679,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
         [camera release];
     }
     if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
         [videoStreamer release];
         videoStreamer = nil;
     }
