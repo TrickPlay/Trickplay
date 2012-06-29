@@ -79,6 +79,9 @@ void *get_in_addr(struct sockaddr *sa) {
  * Tell the AVCEncoder to encode the sample.
  */
 - (void)packetize:(CMSampleBufferRef)sampleBuffer {
+    if (!avcEncoder) {
+        return;
+    }
     [avcEncoder encode:sampleBuffer];
 }
 
@@ -88,6 +91,9 @@ void *get_in_addr(struct sockaddr *sa) {
 - (void)invalidate:(enum NETWORK_TERMINATION_CODE)code {
     if (sipClient) {
         sipClient.delegate = nil;
+        // Must call disconnectFromService! SIPClient objects
+        // have their own thread that retains "self" and this is
+        // the only way to stop the thread and release "self"
         [sipClient disconnectFromService];
         [sipClient release];
         sipClient = nil;
@@ -95,9 +101,10 @@ void *get_in_addr(struct sockaddr *sa) {
     
     if (avcEncoder) {
         [avcEncoder stop];
-        // TODO: AVCEncoder should do this automatically.
+        // TODO: AVCEncoder should Block_release automatically.
         Block_release(avcEncoder.callback);
         avcEncoder.callback = nil;
+        self.avcEncoder = nil;
     }
     if (avc_session) {
         rtp_send_bye(avc_session);
@@ -121,6 +128,10 @@ void *get_in_addr(struct sockaddr *sa) {
 #pragma mark -
 #pragma mark SIPClientDelegate Protocol
 
+/**
+ * This is a hack method used to send PCMU noise at even intervals of 160 ms.
+ * Use this method for testing the RTP stream.
+ */
 - (void)sendAudio:(NSTimer *)timer {
     dispatch_async(socket_queue, ^(void) {
         char buff[122];
@@ -132,6 +143,10 @@ void *get_in_addr(struct sockaddr *sa) {
     rtp_audio_ts += 160;
 }
 
+/**
+ * sipClient callback stating that the Call handshake succeeded and it is time to
+ * begin the RTP stream.
+ */
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
     // If no current RTP sessions and 
     if (avc_session || pcmu_session) {
@@ -179,7 +194,7 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 /**
- * SIP can end for a variety of reasons.
+ * SIP can end for a variety of reasons. This callback informs you of those reasons.
  */
 - (void)client:(SIPClient *)client sipFinishedWithError:(enum sip_client_error_t)error {
     NSLog(@"SIP Client finished with error: %@", [client errorDescription:error]);
@@ -236,6 +251,12 @@ void *get_in_addr(struct sockaddr *sa) {
     return self;
 }
 
+/**
+ * Hooks up the callback from the AVCEncoder. This callback returns to
+ * NetworkManager whenever a frame has finished encoding. buffer is the
+ * encoded frame, length is the size of the frame, pts is the RTP timestamp
+ * to use.
+ */
 - (BOOL)setUpAvcEncoder {
     AVCEncoderCallback cb = ^(const void* buffer, uint32_t length, CMTime pts) {
 		
@@ -287,7 +308,8 @@ void *get_in_addr(struct sockaddr *sa) {
     // TODO: Fix AVCEncoder and include Block_copy and Block_release at appropriate moments.
     // This will include adding a method - (void)setCallback to AVCEncoder.
     avcEncoder.callback = Block_copy(cb);
-        
+    
+    // You can adjust the AVCEncoder's paramters here!
     AVCParameters *params = [[AVCParameters alloc] init];
     //params.outWidth = 640;
     //params.outHeight = 480;
@@ -323,6 +345,9 @@ void *get_in_addr(struct sockaddr *sa) {
 #pragma mark Memory
 
 - (void)dealloc {
+    // Set the delegate to nil before invalidating to prevent
+    // calling back on the object that's trying to delete this
+    // NetworkManager.
     self.delegate = nil;
     
     [self invalidate:CALL_ENDED_BY_CALLER];

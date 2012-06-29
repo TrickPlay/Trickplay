@@ -253,12 +253,20 @@
     VideoStreamerContext *streamerContext;
     
     enum CONNECTION_STATUS status;
-        
+    
+    NSString *terminationInfo;
+    enum NETWORK_TERMINATION_CODE terminationCode;
+            
     id <VideoStreamerDelegate> delegate;
 }
 
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) CALayer *customLayer;
+
+// AVCaptureSessions cleanup asynchronously after a call to stopRunning.
+// This callback is thus called after the AVCaptureSession cleans up
+// its internal stuff.
+void capture_cleanup(void *context);
 
 - (void)initCapture;
 - (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code;
@@ -270,6 +278,24 @@
 @implementation _VideoStreamer
 
 @synthesize captureSession;
+
+void capture_cleanup(void *context) {
+    _VideoStreamer *self = (_VideoStreamer *)context;
+    if (self->networkMan) {
+        [self->networkMan release];
+        self->networkMan = nil;
+    }
+    
+    self.customLayer = nil;
+    
+    self.captureSession = nil;
+    
+    if (self->pxbuffer) {
+        CVPixelBufferUnlockBaseAddress(self->pxbuffer, 0);
+    }
+        
+    [self.delegate videoStreamer:self chatEndedWithInfo:self->terminationInfo networkCode:self->terminationCode];
+}
 
 #pragma mark -
 #pragma mark properties
@@ -379,6 +405,8 @@
     if (self) {
         streamerContext = [_streamerContext retain];
         status = INITIATING;
+        terminationCode = CALL_ENDED_BY_CALLEE;
+        terminationInfo = nil;
         self.delegate = _delegate;
     }
     
@@ -413,7 +441,7 @@
     
     AVCaptureDeviceInput *captureInput = [AVCaptureDeviceInput deviceInputWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] error:nil];
     
-    AVCaptureVideoDataOutput *captureOutput = [[AVCaptureVideoDataOutput alloc] init];
+    AVCaptureVideoDataOutput *captureOutput = [[[AVCaptureVideoDataOutput alloc] init] autorelease];
     
     /*
      if ([self setUpNetwork] != 0) {
@@ -426,6 +454,8 @@
     
     dispatch_queue_t video_capture_queue;
     video_capture_queue = dispatch_queue_create("video_capture_queue", NULL);
+    dispatch_set_context(video_capture_queue, self);
+    dispatch_set_finalizer_f(video_capture_queue, (dispatch_function_t)capture_cleanup);
     [captureOutput setSampleBufferDelegate:self queue:video_capture_queue];
     dispatch_release(video_capture_queue);
     
@@ -464,22 +494,15 @@
 }
 
 - (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code {
-    if (networkMan) {
-        [networkMan release];
-        networkMan = nil;
-    }
-    
-    self.customLayer = nil;
-    
-    self.captureSession = nil;
-    
-    if (pxbuffer) {
-        CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
-    }
-    
     status = DISCONNECTED;
+    terminationInfo = [info retain];
+    terminationCode = code;
     
-    [delegate videoStreamer:self chatEndedWithInfo:info networkCode:code];
+    // By calling stopRunning the capture_cleanup
+    // handler will be called when the iOS internal
+    // video processing block cleans up.
+    [captureSession stopRunning];
+    self.captureSession = nil;
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
@@ -607,7 +630,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
     //CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     
-    [networkMan.avcEncoder encode:sampleBuffer];
+    [networkMan packetize:sampleBuffer];
     //});
     
     [pool drain];
@@ -709,6 +732,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (pxbuffer) {
         CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     }
+    
+    [terminationInfo release];
     
     self.delegate = nil;
     

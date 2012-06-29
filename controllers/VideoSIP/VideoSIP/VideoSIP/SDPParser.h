@@ -73,6 +73,11 @@
 
 @class MediaDescription;
 
+/**
+ * This class parses SDP messages and discovers the IP address and ports
+ * to use to establish an RTP audio or video stream.
+ */
+
 @interface SDPParser : NSObject {
     NSArray *owner;
     NSString *sessionName;

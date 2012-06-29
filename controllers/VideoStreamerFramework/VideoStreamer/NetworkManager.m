@@ -79,6 +79,9 @@ void *get_in_addr(struct sockaddr *sa) {
  * Tell the AVCEncoder to encode the sample.
  */
 - (void)packetize:(CMSampleBufferRef)sampleBuffer {
+    if (!avcEncoder) {
+        return;
+    }
     [avcEncoder encode:sampleBuffer];
 }
 
@@ -101,6 +104,7 @@ void *get_in_addr(struct sockaddr *sa) {
         // TODO: AVCEncoder should Block_release automatically.
         Block_release(avcEncoder.callback);
         avcEncoder.callback = nil;
+        self.avcEncoder = nil;
     }
     if (avc_session) {
         rtp_send_bye(avc_session);
