@@ -26,10 +26,17 @@ if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")    
 if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
 
 dofile("LIB/VE/ve_runtime")
+-- The asset cache
+assets = dofile( "assets-cache" )
 
 hdr = dofile("header")
+ui = {
+      assets  = assets,
+      factory = dofile( "ui-factory" ),
+    } 
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
+
 
 --[[ test engine ui element 
 
@@ -127,7 +134,14 @@ local rect_init_y = 0
 
 local uiRectangle = nil
 
+function tt ()
+
+    _VE_.insertUIElement(2, "Rectangle")
+
+end
+
 local function create_mouse_event_handler(uiInstance, uiTypeStr)
+
     function uiInstance:on_motion(x,y)
         if dragging then
             local actor , dx , dy = unpack( dragging )
@@ -136,10 +150,46 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
     end
 
 
-    function uiInstance:on_button_down(x , y , button, num_clicks, modifiers)
+    function uiInstance:on_button_down(x , y , button, num_clicks, m)
+
+		if m and m.control then control = true else control = false end 
+
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
         uiInstance:grab_pointer()
+
         _VE_.openInspector(uiInstance.gid)
+
+	    if input_mode == hdr.S_SELECT then
+            --[[
+		    if uiInstance.is_in_group == true and control == false then 
+		        local p_obj = uiInstance.parent 
+
+			    while p_obj.is_in_group == true do
+				    p_obj = p_obj.parent
+			    end 
+
+	            if p_obj.selected == false then 
+		     	    screen_ui.selected(p_obj)
+	            elseif (p_obj.selected == true) then 
+		     	    screen_ui.n_select(p_obj)
+		    	end
+
+	            --org_object = util.copy_obj(p_obj)
+
+		    	if uiInstance.lock == false then 
+           	        dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+		    	end 
+
+           	    return true
+	      	else 
+            ]]
+	            if(uiInstance.selected == false) then 
+		     	    screen_ui.selected(uiInstance) 
+		    	elseif(uiInstance.selected == true) then 
+				    screen_ui.n_select(uiInstance) 
+	       		end
+        end
+
 
         if uiTypeStr == "Text" then 
             uiInstance.cursor_visible = true
@@ -164,13 +214,47 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
                 return true
             end
         end 
+        return true
     end
 
     function uiInstance:on_button_up(x , y , button)
+        
+		if m  and m.control then 
+			control = true 
+		else 
+			control = false 
+		end 
+
+		if screen:find_child("multi_select_border") then
+			return 
+		end 
+
+	    if(input_mode == hdr.S_SELECT) then
+	        local border = screen:find_child(uiInstance.name.."border")
+		    local am = screen:find_child(uiInstance.name.."a_m") 
+		    local group_pos
+	       	if(border ~= nil) then 
+                local actor , dx , dy = unpack( dragging )
+		        if (uiInstance.is_in_group == true) then
+			        --group_pos = util.get_group_position(uiInstance)
+			        group_pos = nil
+			        if group_pos then 
+			            if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
+	                    if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
+			        end
+		        else 
+	                border.position = {x -dx, y -dy}
+			        if am then 
+	                    am.position = {x -dx, y -dy}
+			        end
+		        end 
+	        end 
+	    end 
+
         dragging = nil
         uiInstance:ungrab_pointer()
         uiInstance:set{}
-    end
+	end 
 end 
 
 local function assign_right_name (uiInstance, uiTypeStr)
@@ -193,6 +277,10 @@ end
 local function addIntoLayer (uiInstance)
 
     uiInstance.reactive = true
+
+    uiInstance.lock = false
+    uiInstance.selected = false
+    uiInstance.is_in_group = false
 
     devtools:gid(curLayerGid):add(uiInstance)
 
@@ -266,8 +354,7 @@ local function editor_text(uiText)
 	--uiText.wants_enter = true
 	uiText.editable = true
 	uiText.text = "Hello World"
-    --uiText.font= "FreeSans Medium 30px"
-    uiText.font= "DejaVu Sans 96px"
+    uiText.font= "FreeSans Medium 30px"
     uiText.color = "white"
     uiText.reactive = true
     --uiText.wrap=true 
@@ -422,11 +509,20 @@ _VE_.openFile = function(path)
         if string.find(j.name, "Layer") ~= nil then 
             for l,m in ipairs(j.children) do 
                 m.created = false
-
-
                 if m.subscribe_to then  
                     m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
                 end 
+
+                local uiTypeStr =""
+                if m.widget_type == "Widget" then 
+                    uiTypeStr = m.type
+                else 
+                    uiTypeStr = m.widget_type
+                end 
+
+                create_mouse_event_handler(m, uiTypeStr)
+
+                --[[
                 function m.on_motion ( m, x , y )
                     if dragging then 
                         local actor , dx , dy = unpack( dragging )
@@ -445,7 +541,11 @@ _VE_.openFile = function(path)
                     m:ungrab_pointer()
                     m:set{}
                 end
+                ]]
                 m.reactive = true 
+                m.lock = false
+                m.selected = false
+                m.is_in_group = false
             end
         end 
         j:unparent()
@@ -577,6 +677,7 @@ end
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
 
 		if current_focus and input_mode ~=  hdr.S_RECTANGLE then -- for closing menu button or escaping from text editting 
+            print("shfskdfhskfh")
 			current_focus.clear_focus()
 			screen:grab_key_focus()
 			return
@@ -605,6 +706,7 @@ end
 	      	else
 				screen_ui.multi_select_done(x,y)
 				if move == nil then
+                    print("QUQUQU")
 					screen_ui.n_selected_all()
 				end
 				move = nil
