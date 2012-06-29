@@ -9,7 +9,7 @@ if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
-if not BUTTON            then dofile("Button/Button.lua")                   end
+if not BUTTON            then dofile("Button/Button.lua")                 end
 
 local test_group = Group()
 

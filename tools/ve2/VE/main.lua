@@ -127,7 +127,7 @@ local rect_init_y = 0
 
 local uiRectangle = nil
 
-local function create_mouse_event_handler(uiInstance)
+local function create_mouse_event_handler(uiInstance, uiTypeStr)
     function uiInstance:on_motion(x,y)
         if dragging then
             local actor , dx , dy = unpack( dragging )
@@ -136,15 +136,33 @@ local function create_mouse_event_handler(uiInstance)
     end
 
 
-    function uiInstance:on_button_down(x , y , button)
+    function uiInstance:on_button_down(x , y , button, num_clicks, modifiers)
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
-        _VE_.openInspector(uiInstance.gid)
         uiInstance:grab_pointer()
+        _VE_.openInspector(uiInstance.gid)
+
         if uiTypeStr == "Text" then 
             uiInstance.cursor_visible = true
             uiInstance.editable= true
+            uiInstance.wants_enter= true
             uiInstance:grab_key_focus()
-            return true
+
+            if(num_clicks == 2) then
+                uiInstance.cursor_position = 0
+                uiInstance.selection_end = -1
+            else
+                for i=1,string.len(uiInstance.text) do
+                    local offset = uiInstance:position_to_coordinates(i-1)[1] + uiInstance.anchor_point[1] + uiInstance.x
+                    if(offset >= x ) then
+                        uiInstance.cursor_position = i-1
+                        uiInstance.selection_end = i-1
+                        return true
+                    end
+                end
+                uiInstance.cursor_position = -1
+                uiInstance.selection_end = -1
+                return true
+            end
         end 
     end
 
@@ -206,7 +224,7 @@ local function editor_rectangle(x, y)
     uiRectangle.org_x = x
     uiRectangle.org_y = y
 
-    create_mouse_event_handler(uiRectangle)
+    create_mouse_event_handler(uiRectangle,"Rectangle")
 
     addIntoLayer(uiRectangle)
 
@@ -244,16 +262,19 @@ end
 
 local function editor_text(uiText)
 
-    uiText.position ={200, 200, 0}
-	uiText.wants_enter = true
+    uiText.position ={0, 0, 0}
+	--uiText.wants_enter = true
 	uiText.editable = true
-	uiText.text = "AA"
-    uiText.font= "FreeSans Medium 30px"
-    uiText.color = {100,255,255,255}
-    --wrap=true, wrap_mode="CHAR", 
+	uiText.text = "Hello World"
+    --uiText.font= "FreeSans Medium 30px"
+    uiText.font= "DejaVu Sans 96px"
+    uiText.color = "white"
+    uiText.reactive = true
+    --uiText.wrap=true 
+    --uiText.wrap_mode="CHAR" 
 	--extra = {org_x = 200, org_y = 200}
 
-    uiText.grab_key_focus(uiText)
+    uiText:grab_key_focus()
 
     function uiText:on_key_down(key,u,t,m)
 
@@ -272,7 +293,6 @@ local function editor_text(uiText)
 	    end 
 
 	end 
-
 end 
 
 ---------------------------------------------------------------------------
@@ -541,7 +561,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 	    uiInstance.editable = true
     end
 
-    create_mouse_event_handler(uiInstance)
+    create_mouse_event_handler(uiInstance,uiTypeStr)
 
     addIntoLayer(uiInstance)
 
@@ -550,7 +570,7 @@ end
 ---------------------------------------------------------------------------
 ---           Global  Screen Mouse Event Handler Functions              ---
 ---------------------------------------------------------------------------
----[[
+----[[
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
