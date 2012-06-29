@@ -146,9 +146,14 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
         if dragging then
             local actor , dx , dy = unpack( dragging )
             actor.position = { x - dx , y - dy  }
+            if uiInstance.selected == true then 
+                local border= screen:find_child(uiInstance.name.."border")
+                border.position = { x - dx , y - dy  }
+                local anchor_mark= screen:find_child(uiInstance.name.."a_m")
+                anchor_mark.position = { x - dx , y - dy  }
+            end 
         end
     end
-
 
     function uiInstance:on_button_down(x , y , button, num_clicks, m)
 
@@ -160,36 +165,12 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
         _VE_.openInspector(uiInstance.gid)
 
 	    if input_mode == hdr.S_SELECT then
-            --[[
-		    if uiInstance.is_in_group == true and control == false then 
-		        local p_obj = uiInstance.parent 
-
-			    while p_obj.is_in_group == true do
-				    p_obj = p_obj.parent
-			    end 
-
-	            if p_obj.selected == false then 
-		     	    screen_ui.selected(p_obj)
-	            elseif (p_obj.selected == true) then 
-		     	    screen_ui.n_select(p_obj)
-		    	end
-
-	            --org_object = util.copy_obj(p_obj)
-
-		    	if uiInstance.lock == false then 
-           	        dragging = {p_obj, x - p_obj.x, y - p_obj.y }
-		    	end 
-
-           	    return true
-	      	else 
-            ]]
-	            if(uiInstance.selected == false) then 
-		     	    screen_ui.selected(uiInstance) 
-		    	elseif(uiInstance.selected == true) then 
-				    screen_ui.n_select(uiInstance) 
-	       		end
+	        if(uiInstance.selected == false) then 
+		        screen_ui.selected(uiInstance) 
+		    elseif(uiInstance.selected == true) then 
+			    screen_ui.n_select(uiInstance) 
+	        end
         end
-
 
         if uiTypeStr == "Text" then 
             uiInstance.cursor_visible = true
