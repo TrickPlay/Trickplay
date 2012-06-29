@@ -21,7 +21,7 @@ public:
         return controller;
     }
 
-    inline bool has_cap( unsigned int cap )
+    inline bool has_cap( unsigned long long cap )
     {
         return controller->get_capabilities( ) & cap;
     }
@@ -52,6 +52,11 @@ public:
     virtual void cancel_audio_clip( void );
     virtual void advanced_ui_ready( void );
     virtual void advanced_ui_event( const char * json );
+    virtual void streaming_video_connected( const char * address );
+    virtual void streaming_video_failed( const char * address, const char * reason );
+    virtual void streaming_video_dropped( const char * address, const char * reason );
+    virtual void streaming_video_ended( const char * address, const char * who );
+    virtual void streaming_video_status( const char * status, const char * arg );
 
     bool declare_resource( const String & name , const String & uri );
 

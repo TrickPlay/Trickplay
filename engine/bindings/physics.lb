@@ -7,13 +7,12 @@ module physics_module;
 
 #include "physics.h"
 #include "clutter_util.h"
+#include "util.h"
 ]]
 
 /*===========================================================================*/
 /*
 	Title: The physics Global Variable and Body Interface
-
-*NOTE:* The 2D physics environment described in this section is EXPERIMENTAL and in-progress. Significant changes may occur to the environment's properties, functions and event handlers prior to its official release.
 
 The physics global variable places one or more UIElement-based objects in a two-dimensional environment where they are affected by physics-based forces, such as gravity and collisions.
 
@@ -23,81 +22,48 @@ Objects added to the physics variable are based on the UIElement interface, such
 
 When the physics world has been configured and the desired objects added to it, the physics simulation can begin by calling the variable's start() function.
 
-The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, it eventually hits and lands on the static ground object.
+The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, the Rectangle falls until it eventually lands on the static ground object.
 
 	(code)
 	-- Basic 2D Physics Application
-	--
-	-- *********************************************************
-	function
-	displayMainScreen()
 
-		-- Use a simple colored background
-		local background = Rectangle( {
-								size     = { screen.width, screen.height },
-								position = { 0, 0, 0 },
-								color    = "azure3",
-		} )
-		screen:add( background )
+	-- Create a simple rectangle and add it to the screen
+	local gBox01 = Rectangle( {
+						size     = { 100, 100 },
+						position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
+						color    = "SaddleBrown",
+	} )
+	screen:add( gBox01 )
 
-	end
+	-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
+	gBox01 = physics:Body( gBox01, { } )
 
-	-- *********************************************************
-	function
-	createPhysicsWorld()
+	-- Create a ground so the rectangle doesn't fall off the screen
+	local gGround = Rectangle( {
+						size     = { screen.width / 2, 2 },
+						position = { screen.width / 4, screen.height - (screen.height / 4) },
+						color    = "AntiqueWhite",
+	} )
+	screen:add( gGround )
 
-		-- Create a simple rectangle and add it to the screen
-		local gBox01 = Rectangle( { 
-							size     = { 100, 100 },
-							position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
-							color    = "SaddleBrown",
-		} )
-		screen:add( gBox01 )
-	
-		-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
-		gBox01 = physics:Body( gBox01, { } )
-	
-		-- Create a ground so the rectangle doesn't fall off the screen
-		local gGround = Rectangle( {
-							size     = { screen.width / 2, 1 },
-							position = { screen.width / 4, screen.height - (screen.height / 4) },
-							color    = "black",
-		} )
-		screen:add( gGround )
-	
-		-- Make the ground an immobile static object in the physics world
-		gGround = physics:Body( gGround,
-								{ type = "static",
-		} )
-	
-		-- Show the screen
-		screen:show()
-		
-		-- Start the physics simulation
-		physics:start()
+	-- Make the ground an immobile static object in the physics world
+	gGround = physics:Body( gGround, { type = "static" } )
 
-	end
+	-- Show the screen
+	screen:show()
 
-	-- *********************************************************
-	-- Program's main entry point
-
-		-- Show the main background screen
-		displayMainScreen()
-
-		-- Create "boxes" that will be affected by gravity
-		createPhysicsWorld()
-
-	-- *********************************************************
+	-- Start the physics simulation
+	physics:start()
 	(end)
-	
+
 
 */
 
 /*
 	InternalInterface: Shape
-	
+
 	The Shape interface is used internally by the Box2D physics engine. It is used to specify the shape of a fixture that is attached to a Body. Shapes can be created by calling the physics global variable's Box(), Edge(), Polygon() and Circle() functions. The Shape object is assigned to the fixture by passing it to the Body interface's add_fixture() function.
-	
+
 */
 
 interface Shape [[ b2Shape * ]]
@@ -136,13 +102,13 @@ interface Body [[ ClutterActor * ]]
 
 	See Also: the <on_begin_contact>, <on_end_contact>, <on_pre_solve_contact> and <on_post_solve_contact> event handlers
 */
-	
+
 	readonly int handle
         [[
             Physics::Body * me = Physics::Body::get( self );
             handle = me->handle;
         ]];
-		
+
 /***************************************
 	Property: type
 
@@ -156,7 +122,7 @@ interface Body [[ ClutterActor * ]]
 
 	*Default Setting:* "dynamic"
 */
-	
+
 	string type
 	    [[
             Physics::Body * me = Physics::Body::get( self );
@@ -206,7 +172,7 @@ interface Body [[ ClutterActor * ]]
                 }
             }
 	    ]];
-	    
+
 /***************************************
 	Property: awake
 
@@ -217,7 +183,7 @@ interface Body [[ ClutterActor * ]]
 	*Default Setting:* true
 
 	*See Also:* the <sleeping_allowed> property
-*/	    
+*/
 
 	bool awake
 		[[
@@ -228,17 +194,17 @@ interface Body [[ ClutterActor * ]]
             Physics::Body * me = Physics::Body::get( self );
 			me->body->SetAwake( awake );
 		]];
-		
+
 /***************************************
 	Property: active
 
 	The active property is a boolean flag indicating whether or not the Body/UIElement object is active in the physics simulation (true==active). An inactive object is ignored by the physics simulation, which reduces the simulation's computational requirements.
-	
+
 	*Default Setting:* true
-	
-	*See Also:* the <awake> property 
+
+	*See Also:* the <awake> property
 */
-	
+
 	bool active
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -253,12 +219,12 @@ interface Body [[ ClutterActor * ]]
 	Property: position
 
 	The position property is a table that contains the current X,Y screen coordinates of the center of the Body/UIElement object.
-	
+
 	*Default Setting:* { X, Y } coordinates of the object's center at the time the Body is created
-	
+
 	*See Also:* the <x>, <y>, <z> and <depth> properties
 */
-	
+
 	table position
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -291,12 +257,12 @@ interface Body [[ ClutterActor * ]]
 	Property: x
 
 	The x property specifies the current screen position on the X axis of the center of the Body/UIElement object.
-	
+
 	*Default Setting:* 0
-	
-	*See Also:* the <y> and <position> properties
+
+	*See Also:* the <y>, <z> and <position> properties
 */
-	
+
 	double x
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -321,12 +287,14 @@ interface Body [[ ClutterActor * ]]
 	Property: y
 
 	The y property specifies the current screen position on the Y axis of the center of the Body/UIElement object.
-	
+
+	The physics variable implements a two-dimensional physics environment that uses the X/Y plane by default. A program can alternatively use the X/Z plane; refer to the physics variable's z_for_y property for details.
+
 	*Default Setting:* 0
-	
-	*See Also:* the <x> and <position> properties
+
+	*See Also:* the <x>, <z>, <position> and <physics.z_for_y> properties
 */
-	
+
     double y
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -361,12 +329,17 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+/***************************************
+	Property: z
 
-    /*
-        Property: z
+	The z property specifies the current screen position on the Z axis of the center of the Body/UIElement object.
 
-        The Z coordinate of the body's center.
-    */
+	The two-dimensional environment controlled by the physics variable does not normally use the Z axis; the physics simulation occurs entirely on the X/Y plane. A program can, however, substitute the X/Y plane with the X/Z plane, causing the physics simulation to occur in depth. Refer to the physics variable's z_for_y property for details.
+
+	*Default Setting:* 0
+
+	*See Also:* the <x>, <y>, <depth> and <physics.z_for_y> properties
+*/
 
     double z
         [[
@@ -402,11 +375,13 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-    /*
-        Property: depth
+/***************************************
+	Property: depth
 
-        The Z coordinate of the body's center.
-    */
+	The depth property is equivalent to the <z> property; it specifies the current screen position on the Z axis of the center of the Body/UIElement object. Refer to the description of the <z> property for further details.
+
+	*See Also:* the <x>, <y>, and <z> properties
+*/
 
     double depth
         [[
@@ -442,11 +417,17 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-	/*
-		Property: angle
+/***************************************
+	Property: angle
 
-		The angle of rotation (in degrees) along the Z axis.
-	*/
+	The angle property specifies the object's rotation in degrees along the Z axis.
+
+	If the physics variable's z_for_y property is true, the object rotates along the Y axis.
+
+	*Default Setting:* 0
+
+	*See Also:* the <rotation> and <physics.z_for_y> properties
+*/
 
 	double angle
 		[[
@@ -463,11 +444,13 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
-	/*
-		Property: rotation
+/***************************************
+	Property: rotation
 
-		Same as <angle>.
-	*/
+	The rotation property is equivalent to the <angle> property; it specifies the object's rotation in degrees along the Z axis. Refer to the <angle> property for details.
+
+	*See Also:* the <angle> property
+*/
 
     double rotation
         [[
@@ -484,11 +467,15 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
-	/*
-		Property: world_center
+/***************************************
+	Property: world_center
 
-		A table of X and Y coordinates for the world center of this body.
-	*/
+	The world_center property is a table containing the { X, Y } coordinates of the center position in the physics environment of the object's mass. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from its screen position, which is based on the center of its Body.
+
+	*Format:* { center-of-mass X coordinate, center-of-mass Y coordinate } where each coordinate is relative to the physics environment
+
+	*See Also:* the <local_center> and <position> properties
+*/
 
     readonly table world_center
         [[
@@ -501,11 +488,15 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
-	/*
-		Property: local_center
+/***************************************
+	Property: local_center
 
-	    A table of X and Y coordinates for this body's center.
-	*/
+	The local_center property is a table containing the { X, Y } coordinates of the center position of the object's mass relative to the center of its Body. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from the center of its Body.
+
+	*Format:* { center-of-mass X coordinate, center-of-mass Y coordinate } where each coordinate is relative to the center of the object's Body
+
+	*See Also:* the <world_center> and <position> properties
+*/
 
 	readonly table local_center
         [[
@@ -518,11 +509,25 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
-	/*
-		Property: linear_velocity
+/***************************************
+	Property: linear_velocity
 
-		A table of velocity in X and Y direction.
-	*/
+	The linear_velocity property is a table containing the amount of continuous linear velocity to apply along the X and/or Y axis.
+
+	Negative X values push the object to the left; positive X values push it to the right. Negative Y values push the object up; positive Y values push it down.
+
+	To apply a temporary force upon an object, call the <apply_force>() function.
+
+	*Format:* { X-axis velocity, Y-axis velocity }
+
+	*Code Example:* Apply a linear_velocity force to an object to push it up
+
+		(code)
+		gBox01.linear_velocity = { 0, -10 }
+		(end)
+
+	*See Also:* the <angular_velocity> property and <apply_force> function
+*/
 
 	table linear_velocity
 		[[
@@ -546,11 +551,17 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 2 );
 		]];
 
-	/*
-		Property: angular_velocity
+/***************************************
+	Property: angular_velocity
 
-		The velocity of the body's rotation around the Z axis.
-	*/
+	The angular_velocity property is a double value specifying the object's continuous rotation in degrees around the Z-axis.
+
+	Positive values rotate in a clockwise direction; negative values rotate counter-clockwise.
+
+	To apply a temporary torque to the object, call the <apply_torque>() function.
+
+	*See Also:* the <linear_velocity> property and <apply_torque> function
+*/
 
 	double angular_velocity
 		[[
@@ -564,11 +575,13 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
-	/*
-		Property: mass
+/***************************************
+	Property: mass
 
-		The mass of the body.
-	*/
+	The mass property specifies the mass of the object. Mass is calculated automatically and depends on the density of the body's fixtures.
+
+	*See Also:* the <add_fixture> function
+*/
 
 	readonly double mass
         [[
@@ -577,13 +590,19 @@ interface Body [[ ClutterActor * ]]
             mass = me->body->GetMass();
         ]];
 
-	/* TODO: mass_data */
+/***************************************
+	TODO: mass_data
+*/
 
-	/*
-		Property: linear_damping
+/***************************************
+	Property: linear_damping
 
-		Damping value for the body's linear velocity.
-	*/
+	The linear_damping property specifies the damping factor to apply to the object's linear velocity. The range of valid settings is 0 to infinity, but common settings are between 0.0 and 0.1.
+
+	*Default Setting:* 0.0
+
+	*See Also:* the <linear_velocity> property
+*/
 
 	double linear_damping
         [[
@@ -597,11 +616,15 @@ interface Body [[ ClutterActor * ]]
             me->body->SetLinearDamping( linear_damping );
         ]];
 
-	/*
-		Property: angular_damping
+/***************************************
+	Property: angular_damping
 
-		Damping value for the body's angular velocity.
-	*/
+	The angular_damping property specifies the damping factor to apply to the object's angular velocity. The range of valid settings is 0 to infinity, but common settings are between 0.0 and 0.1.
+
+	*Default Setting:* 0.0
+
+	*See Also:* the <angular_velocity> property
+*/
 
 	double angular_damping
         [[
@@ -615,13 +638,17 @@ interface Body [[ ClutterActor * ]]
             me->body->SetAngularDamping( angular_damping );
         ]];
 
-	/*
-		Property: bullet
+/***************************************
+	Property: bullet
 
-		Whether this body is considered a bullet (a very fast-moving body). This
-		has implications on collision detection for the body; extra work is performed
-		to avoid tunneling.
-	*/
+	The bullet property is a boolean flag indicating whether or not the object should be processed as a fast-moving bullet (true=is bullet).
+
+	A fast-moving object can move a long distance between steps of the physics simulation. Because of this speed, it's possible for the object to pass through other objects without a collision being detected. This event is called "tunneling." To prevent tunneling, the fast-moving object should be flagged as a "bullet" to enable "continuous collision detection" (CCD). With CCD enabled, collisions are detected for even fast-moving objects. For performance reasons, CCD is disabled by default.
+
+	The bullet property affects Body objects of type "dynamic" only.
+
+	*Default Setting:* false, i.e., is not a fast-moving object
+*/
 
 	bool bullet
         [[
@@ -635,11 +662,15 @@ interface Body [[ ClutterActor * ]]
             me->body->SetBullet( bullet );
         ]];
 
-	/*
-		Property: sleeping_allowed
+/***************************************
+	Property: sleeping_allowed
 
-		Whether the body is allowed to go to sleep when it comes to rest.
-	*/
+	The sleeping_allowed property is a boolean flag indicating whether or not an object that has stopped moving can enter a sleep mode in which the object can be temporarily removed from the physics simulation so as to improve performance (true=sleeping allowed). The object will exit sleep mode automatically if it is involved in a collision or some other force is acted upon it.
+
+	*Default Setting:* true, i.e., can automatically enter sleep mode when inactive
+
+	*See Also:* the <awake> property
+*/
 
 	bool sleeping_allowed
         [[
@@ -653,12 +684,17 @@ interface Body [[ ClutterActor * ]]
             me->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
-	/*
-		Property: fixed_rotation
+/***************************************
+	UndocumentedProperty: fixed_rotation
 
-		If fixed rotation is set to true, the body will not rotate
-		along the Z axis.
-	*/
+	Note: The fixed_rotation property has no effect. With fixed_rotation set to true, the object will still rotate by setting the angular_velocity property.  Grep'ing the Box2D source code shows no calls to the underlying SetFixedRotation() and IsFixedRotation() functions. Also, on-line forums also show people claiming that SetFixedRotation() has no effect. Until this property can be shown to work as expected, it will remain undocumented.
+
+	The fixed_rotation property is a boolean flag indicating whether or not the body can rotate around the Z axis (true==cannot rotate).
+
+	*Default Setting:* false, i.e., the object can rotate
+
+	*See Also:* the <angular_velocity> property
+*/
 
 	bool fixed_rotation
         [[
@@ -672,12 +708,34 @@ interface Body [[ ClutterActor * ]]
             me->body->SetFixedRotation( fixed_rotation );
         ]];
 
-	/*
-		Property: contacts
+/***************************************
+	Property: contacts
 
-		A table of current contacts for this body (touch points
-		with other bodies).
-	*/
+	The contacts property is a table that contains the points on the object where it is touching other Body objects. If the object is not touching any objects, the property's value is nil.
+
+	Each entry in the contacts table includes the following keys.
+
+		enabled - boolean flag indicating whether or not the contact is enabled (true==enabled). A contact can be disabled in the physics global variable's <on_pre_solve_contact> event handler.
+		touching - boolean flag indicating whether or not the two objects are touching (true==touching). Note: Contact may occur between the bounding boxes of two objects, but the actual objects do not touch.
+		point - table containing two keys. Key "1" contains the contact point's X coordinate. Key "2" contains the contact point's Y coordinate.
+		bodies - table containing two keys. Key "1" contains the <handle> for one of the objects. Key "2" contains the handle for the other object.
+		other_body - table containing two keys. One key is the <handle> of the current object; its value is the handle of the other object. The second key is the handle of the other object; its value is the handle of the current object. For example, if the object with handle 2 is touching the object with handle 4, the other_body table for the object with handle 2 would contain { 2=4, 4=2 }. This table enables the program to access the other object by using the current object's handle as an index, as in contactObject = Object2.contacts.other_body[ Object2.handle ].
+		fixtures - table containing two keys. Key "1" contains the fixture handle for one of the fixtures. Key "2" contains the fixture handle for the other fixture. The fixture handle is returned by the <add_fixture> function.
+		other_fixture - table containing two keys. One key is the fixture handle of the current fixture; its value is the fixture handle of the other fixture. The second key is the fixture handle of the other fixture; its value is the fixture handle of the current fixture. For example, if the fixture with handle 3 is touching the fixture with handle 5, the other_fixture table for the fixture with handle 3 would contain { 3=5, 5=3 }. This table enables the program to access the other fixture by using the current fixture's handle as an index, as in contactFixture = ObjectX.contacts.other_fixture[ ObjectXFixtureHandle ].
+
+	*Default Setting:* nil
+
+	*Code Example:*
+
+		(code)
+		-- Display the complete contents of an object's contacts table
+		if( Object.contacts ~= nil )then
+			dumptable( Object.contacts )
+		end
+		(end)
+
+	*See Also:* the <handle> property, the <add_fixture> function, and the <on_pre_solve_contact> event handler
+*/
 
 	readonly table contacts
         [[
@@ -686,11 +744,17 @@ interface Body [[ ClutterActor * ]]
             me->world->push_contact_list( me->body->GetContactList() );
         ]];
 
-	/*
-		Function: synchronize
+/***************************************
+	Function: synchronize
 
-		Explicitly insures that this body and its UIElement are in synch.
-	*/
+	The synchronize() function forces the Body's position and rotation to match that of its related UIElement-based object.
+
+	The synchronize() function may alter the following Body properties: <x>, <y>, <position>, <angle> and <rotation>.
+
+	*Return Value:* None
+
+	*See Also:* the <x>, <y>, <position>, <angle> and <rotation> properties
+*/
 
 	synchronize( )
         [[
@@ -699,17 +763,35 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_body();
         ]];
 
-	/*
-		Function: apply_force
+/***************************************
+	Function: apply_force
 
-		Apply a force to the body.
+	The apply_force() function applies a temporary directional force on an object.
 
-		force - A table of X and Y forces.
-		point - The point, on the body where the force should be applied. This is a
-		        table of X and Y coordinates.
-	*/
+	Applying force on an object is similar to setting the object's <linear_velocity>, but linear velocity is continuous and always applied to the center of the object's mass, while force is temporary and can be applied to any X,Y coordinate. If force is applied anywhere other than the center of the object's mass, a torque is created which may cause the object to rotate.
 
-	apply_force( table force , table point )
+	*Arguments:*
+
+		force - table containing the amount of force to apply along the X and Y axes. The format is { X-axis-force, Y-axis-force }. A negative X-axis force pushes the object to the left; positive X-axis force pushes to the right. A negative Y-axis force pushes the object up; a positive Y-axis force pushes the object down.
+		point - table of { X, Y } coordinates at which to apply the force
+
+	*Code Example:*
+
+		(code)
+		-- Use force to push object up
+		gObject:apply_force( { 0, -500 }, { gObject.x, gObject.y } )
+
+		-- Use force to push object left
+		gObject:apply_force( { 100, 0 }, { gObject.x, gObject.y } )
+
+		-- Apply an off-center, upward force, creating torque and causing the object to rotate
+		gObject:apply_force( { 0, -500 }, { gObject.x - 10, gObject.y } )
+		(end)
+
+	*See Also:* the <linear_velocity> property
+*/
+
+	apply_force( table force, table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
 
@@ -727,11 +809,19 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 4 );
 		]];
 
-	/*
-		Function: apply_torque
+/***************************************
+	Function: apply_torque
 
-		A force to apply that will cause the body to rotate.
-	*/
+	The apply_torque() function applies a temporary torque upon the object, which, depending upon other forces, can cause the object to rotate.
+
+	Applying torque on an object is similar to setting the object's <angular_velocity>, but angular velocity is continuous, while torque is temporary.
+
+	*Arguments:*
+
+		torque - double value specifying the amount of torque to apply on the object. A positive value applies a clockwise torque; a negative value applies a counter-clockwise torque.
+
+	*See Also:* the <angular_velocity> property and <apply_angular_impulse> function
+*/
 
 	apply_torque( double torque )
 		[[
@@ -740,17 +830,37 @@ interface Body [[ ClutterActor * ]]
             me->body->ApplyTorque( torque );
 		]];
 
-	/*
-		Function: apply_linear_impulse
+/***************************************
+	Function: apply_linear_impulse
 
-		A linear impulse to apply to the body.
+	The apply_linear_impulse() function applies a temporary, directional force to the object.
 
-		force - X and Y force values.
-		point - The point, on the body, where the impulse should be applied. This is a
-		        table of X and Y coordinates.
-	*/
+	Applying a linear impulse on an object is similar to applying a force using the <apply_force>() function, but a linear impulse is a sharp and sudden force, like a hammer hitting an object, while a force is a steady pressure, like a person pushing an automobile.
 
-	apply_linear_impulse( table force , table point )
+	If a linear impulse is applied anywhere other than the center of the object's mass, a torque is created which may cause the object to rotate.
+
+	*Arguments:*
+
+		force - table containing the amount of impulse to apply along the X and Y axes. The format is { X-axis-impulse, Y-axis-impulse }. A negative X-axis impulse pushes the object to the left; positive X-axis impulse pushes to the right. A negative Y-axis impulse pushes the object up; a positive Y-axis impulse pushes the object down.
+		point - table of { X, Y } coordinates at which to apply the impulse
+
+	*Code Example:*
+
+		(code)
+		-- Use impulse to push object up
+		gObject:apply_force( { 0, -5 }, { gObject.x, gObject.y } )
+
+		-- Use force to push object left
+		gObject:apply_force( { 100, 0 }, { gObject.x, gObject.y } )
+
+		-- Apply an off-center, upward force, creating torque and causing the object to rotate
+		gObject:apply_force( { 0, -500 }, { gObject.x - 10, gObject.y } )
+		(end)
+
+	*See Also:* the <apply_force> function
+*/
+
+	apply_linear_impulse( table force, table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
 
@@ -768,11 +878,21 @@ interface Body [[ ClutterActor * ]]
             lua_pop( L , 4 );
 		]];
 
-	/*
-		Function: apply_angular_impulse
+/***************************************
+	Function: apply_angular_impulse
 
-		An impulse that will rotate the body.
-	*/
+	The apply_angular_impulse() function applies a temporary torque upon the object, which, depending upon other forces, can cause the object to rotate.
+
+	Applying an angular impulse on an object is similar to setting the object's <angular_velocity>, but angular velocity is continuous, while angular impulse is temporary.
+
+	Angular impulse is also similar to torque, as set by the <apply_torque>() function, but angular impulse is a sharp and sudden force, like a hammer striking the object; a torque is a steady pressure, like a person pushing a heavy crate.
+
+	*Arguments:*
+
+		impulse - double value specifying the amount of angular impulse to apply on the object. A positive value applies a clockwise impulse; a negative value applies a counter-clockwise impulse.
+
+	*See Also:* the <angular_velocity> property and <apply_torque> function
+*/
 
 	apply_angular_impulse( double impulse )
         [[
@@ -782,22 +902,33 @@ interface Body [[ ClutterActor * ]]
         ]];
 
 
-    #-------------------------------------------------------------------------
+#===============================================================================
     # Fixtures
 
-	/*
-		Property: fixtures
+/***************************************
+	Property: fixtures
 
-		Returns a table of all fixtures belonging to this body. For each fixture, the
-		following keys are provided:
+	The fixtures property is a read-only table containing all the fixtures attached to the Body. Each Body object must have one or more fixtures attached to it. Each fixture defines one part of the Body, including its shape, size, density, and other characteristics. When a Body object is created by the <physics.Body> function, a fixture can be specified in the function's arguments. Additional fixtures can be attached to the object by calling the <add_fixture> function.
 
-		handle - An integer that uniquely identifies the fixture.
-		type - "circle" or "polygon".
-		sensor - Boolean indicating whether the fixture is a sensor.
-		density - The density of the fixture.
-		friction - The friction of the fixture.
-		bounce - Restitution value for the fixture.
-	*/
+	Each fixture entry contains the keys shown below.
+
+		handle - unique integer ID value assigned to the fixture. The ID value is generated automatically when the fixture is created by the <add_fixture> function.
+		type - string specifying the fixture type. Supported strings are "circle" and "polygon". The string is "circle" if the fixture was created using the <physics.Circle> function. Fixtures of all other shapes have type strings of "polygon."
+		density - double value specifying how heavy the fixture is in relation to its area
+		friction - double value specifying how slippery the fixture is
+		bounce - double value specifying the fixture's springiness or level of rebound when a collision occurs
+		sensor - boolean flag indicating whether or not the fixture is a sensor (true==sensor)
+		filter - table containing the settings of the collision-filter keys "group", "category" and "mask". Refer to the <add_fixture> function for information about the collision filter.
+
+	*Code Examples:* To access the property for a particular fixture entry in the fixtures table, use the following syntax.
+
+		(code)
+		-- Retrieve the density setting for the object's first fixture
+		objDensity = bodyObj.fixtures[ 1 ].density
+		(end)
+
+	*See Also:* the <add_fixture> and <physics.Body> functions
+*/
 
     readonly table fixtures
         [[
@@ -842,15 +973,43 @@ interface Body [[ ClutterActor * ]]
                 lua_pushnumber( L , f->GetRestitution() );
                 lua_setfield( L , -2 , "bounce" );
 
+                // We are going to create a sub-table for the filter
+                const b2Filter & filter = f->GetFilterData();
+
+                lua_newtable( L );
+
+                lua_pushinteger( L, filter.groupIndex );
+                lua_setfield( L, -2, "group" );
+
+                lua_pushinteger( L, filter.categoryBits );
+                Util::convert_bitmask_to_table( L );
+                lua_setfield( L, -2, "category" );
+
+                lua_pushinteger( L, filter.maskBits );
+                Util::convert_bitmask_to_table( L );
+                lua_setfield( L, -2, "mask" );
+
+                lua_setfield( L, -2, "filter" );
+
                 lua_rawseti( L , t , i );
             }
         ]];
 
-	/*
-		Function: remove_fixture()
+/***************************************
+	Function: remove_fixture()
 
-		Removes the given fixture from the body.
-	*/
+	The remove_fixture() function detaches a specified fixture from the Body object.
+
+	After a fixture is removed, its old property values become invalid and undefined; if an application has references or variables to the removed fixture, it should not access them or assume they are still at their previous settings.
+
+	*Arguments:*
+
+		fixture_handle - handle of the fixture to remove. The fixture handle is returned by the <add_fixture> function that created the fixture.
+
+	*Return Value:* boolean flag indicating the operation's success or failure (true==fixture was removed)
+
+	*See Also:* the <fixtures> property and <add_fixture> and <remove_all_fixtures> functions
+*/
 
     bool remove_fixture( int fixture_handle )
         [[
@@ -869,11 +1028,19 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-	/*
-		Function: remove_all_fixtures
+/***************************************
+	Function: remove_all_fixtures
 
-		Removes all fixtures from the body.
-	*/
+	The remove_all_fixtures() function detaches all fixtures currently attached to the Body object.
+
+	After a fixture is removed, its old property values become invalid and undefined; if an application has references or variables to the removed fixture, it should not access them or assume they are still at their previous settings.
+
+	*Arguments:* None
+
+	*Return Value:* None
+
+	*See Also:* the <add_fixture> and <remove_fixture> functions
+*/
 
     remove_all_fixtures()
         [[
@@ -890,20 +1057,73 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
-	/*
-		Function: add_fixture
+/***************************************
+	Function: add_fixture
 
-		Adds a new fixture to the body. A fixture can have the following properties:
+	The add_fixture() function creates a new fixture and attaches it to the Body object. The new fixture is automatically assigned a unique integer handle, which is returned by the function. Other properties of the fixture can be defined in a table passed to the argument.
 
-		friction - Between 0 (slippery) and 1 (not slippery at all).
-		restitution or bounce - Between 0 (not bouncy) and 1 (perfectly elastic).
-		density - The density of the fixture.
-		sensor - Whether the fixture is a sensor. A sensor fixture does not affect
-		          other fixtures but detects contacts.
-        filter - Collision filtering. (TODO: Complicated, need full explanation).
-        shape - The shape for the fixture, this can be created using the <Box>,
-                <Edge>, <Polygon> or <Circle> functions on the <physics> global.
-	*/
+	*Argument:*
+
+		properties - table of key/setting pairs that define the fixture's properties. Supported keys are described below.
+
+	*Supported Property Keys:*
+
+		The properties argument can include any of these keys.
+
+		shape - a Shape object specifying the fixture's shape. A Shape object is returned by the Box(), Edge(), Polygon() and Circle() functions of the <physics> global variable. A single Shape object can be used to create multiple fixtures, provided the Shape's properties are identical for each fixture. Default value: A Box shape large enough to surround the entire object.
+		density - double value specifying the heaviness of the fixture in relation to its area. Valid Range: 0(no density) to infinity(maximum density). Default: 1.0
+		friction - double value specifying how slippery the fixture is. Valid Range: 0.0(very slippery) to 1.0(not slippery). Default: 0.2
+		bounce - double value specifying the fixture's springiness or level of rebound when a collision occurs. Valid Range: 0.0(not springy) to 1.0(maximum springiness). Default: 0.0
+		sensor - boolean flag indicating whether or not the fixture is a sensor (true==sensor). A sensor can share space with another object without colliding into it, such as in a top-down view of a bird flying over a tree. Although collisions do not occur, the sensor still generates on_contact()-type events when interacting with other objects. Default: false
+		filter - collision filtering. For details, refer to the explanation below.
+
+	*Return Value:* unique integer fixture handle
+
+	*Collision Filtering:*
+
+		By default, a Body fixture will collide with all other Body fixtures. If a fixture's sensor property is true, then the fixture will not collide with any other fixture. Collisions can be more finely tuned by defining a filter property in the add_fixture() function's argument.
+
+		The filter property is a table with the following keys.
+
+			group - signed integer specifying the fixture's group. Default: 0
+			category - 16-bit integer specifying the fixture's category ID or table of integers specifying the fixture's category IDs. Each bit in the integer identifies a single category; therefore, an application may have a maximum of 16 category IDs. Valid Range: 0-15 where the value specifies the bit position; 0 is the right-most bit, 15 is the left-most bit. To clear all bits and set to zero, specify an empty table. Default Category ID: 0. Default Category Value: 0x0001. Note: The default Category ID 0 is represented by bit 0 in the category integer. Thus, ID 0 sets bit 0, which results in a category value of 1. Category ID 1 sets bit 1, which results in a category value of 2. ID 2 sets bit 2, which results in a category value of 4. And so on. Got it?
+			mask - 16-bit integer specifying the categories the fixture will collide with. Each bit in the integer identifies a collidable category. Valid Range: 0-15 where the value specifies the bit position; 0 is the right-most bit, 15 is the left-most bit. To clear all bits so that the object will not collide with any object, specify an empty table. Default: 0xFFFF (i.e., will collide with all other fixtures)
+
+		The category and mask keys contain 16-bit bit-flag values. The two keys work together to determine whether or not two touching objects are colliding. The category setting identifies the fixture's category. Normally, a fixture belongs to only a single category, but it's possible to place the fixture in multiple categories. The mask setting specifies the categories that the fixture will collide with. An example setting is shown below.
+
+		(code)
+		-- Create a fixture in category 3 that will collide with fixtures in categories 3 and 5
+		gObj01:add_fixture( { filter = { category = 3, mask = { 3, 5 } } } )
+
+		-- Add a Body to a UIElement object. This will automatically attach a fixture to the Body.
+		-- The fixture can be initialized at this point, as well
+		gObj02:Body( gObj02, { filter = { category = 3, mask = { 3, 5 } } } )
+		(end)
+
+		In order for two touching objects to collide, the category and mask collision determination must be true *for both objects.* For example, assume there are two objects, where one is in category 1 and the other is in category 2. The first is initialized to collide with objects in categories 1 and 2 (i.e., its mask is set to { 1, 2 }), so it will collide with the second object. The second object is initialized to collide with objects in category 2 only (its mask is set to 2), so it will not collide with the first object. If the two objects touch, a collision does *not* occur because both objects do not arrive at a positive collision determination (the first can collide, but the second cannot).
+
+		The group key can be used to organize objects that should either always collide or never collide. If the group key conditions are met, then the group overrides any category and mask settings. The group key is a signed integer and not a bit-flag integer like the category and mask keys. The rules for determining collisions between two objects when using the group key are shown below.
+
+		- If the group key for either object is 0 then the category/mask settings are used to determine the collision
+		- If the group keys for both objects are different, the category/mask settings determine collision
+		- If the group keys for both objects are the same and positive, the objects collide
+		- If the group keys for both objects are the same and negative, the objects do not collide
+
+		(code)
+		-- Create a fixture that will never collide with other objects in its group
+		gObj01:add_fixture( { filter = { group = -1 } } )
+
+		-- Add a Body to a UIElement object. Define the associated fixture to always collide with
+		-- other objects in its group.
+		gObj02:Body( gObj02, { filter = { group = 1 } } )
+		(end)
+
+		A Body/UIElement object may have multiple fixtures, and these fixtures can overlap each other. Collisions between fixtures are determined on an individual basis. For example, assume a Body object with multiple fixtures that do not overlap. One of the object's fixtures makes contact with another object's fixture. The collision determination is dependent upon the two touching fixtures only; the other fixtures are irrelevant.
+
+		Now assume a Body object with two fixtures that completely overlap each other, i.e., two fixtures having the same size and location. Each fixture, however, may have different collision-filtering settings. When this object makes contact with another, it always touches the other object with both fixtures, simultaneously. Collision determinations occur separately for each fixture. If collision conditions are positively met for the first fixture, a collision occurs, regardless of the collision determination for the second overlapping fixture. If collision conditions are positively met for both fixtures, two collisions occur.
+
+	*See Also:* the <fixtures> property and the <remove_fixture> function
+*/
 
     int add_fixture( table properties )
         [[
@@ -925,14 +1145,18 @@ interface Body [[ ClutterActor * ]]
             me->body->CreateFixture( & fd );
         ]];
 
-    #..........................................................................
+#===============================================================================
     # Joints
 
-	/*
-		Function: remove_joint
+/***************************************
+	Function: remove_joint
+
+
+
+
 
 		Removes a joint from the body.
-	*/
+*/
 
     bool remove_joint( int joint_handle )
         [[
@@ -1530,6 +1754,15 @@ global physics [[ Physics::World * ]]
 	Body Body( UIElement element , table properties )
 		[[
             lb_check_udata_type( L , element , "actor" );
+
+            // Use default density of 1, because 0 is stupid
+            lua_getfield( L , properties , "density" );
+            if ( lua_isnil( L , -1 ) )
+            {
+                lua_pushnumber( L , 1.0 );
+                lua_setfield( L , properties , "density" );
+            }
+            lua_pop( L , 1 );
 
             int n = self->create_body( element , properties , BODY_METATABLE );
 

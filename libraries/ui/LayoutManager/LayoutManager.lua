@@ -52,20 +52,25 @@ ListManager = function(parameters)
     
     local assign_neighbors = function(cell,i,cells)
         
+        items[cell].neighbors.up = nil
+        items[cell].neighbors.down = nil
+        items[cell].neighbors.left = nil
+        items[cell].neighbors.right = nil
+        
         if i ~= 1 then
             if direction == "vertical" then
-                items[cell].neighbors.up = cells[i-1] print("assign")
+                items[cell].neighbors.up = cells[i-1]
             elseif direction == "horizontal" then
-                items[cell].neighbors.left = cells[i-1] print("assign")
+                items[cell].neighbors.left = cells[i-1]
             else
                 error("direction is invalid",2)
             end
         end
         if i ~= cells.length then
             if direction == "vertical" then
-                items[cell].neighbors.down = cells[i+1] print("assign")
+                items[cell].neighbors.down = cells[i+1]
             elseif direction == "horizontal" then
-                items[cell].neighbors.right = cells[i+1] print("assign")
+                items[cell].neighbors.right = cells[i+1]
             else
                 error("direction is invalid",2)
             end
@@ -86,7 +91,6 @@ ListManager = function(parameters)
                 cell.y = cell.y + cells[j].h + spacing
             end
         end
-        
         local ap = {0,0}
         if direction == "vertical" then
             if horizontal_alignment == "left" then
@@ -98,6 +102,9 @@ ListManager = function(parameters)
                 ap[1] = cell.w
                 cell:move_by(max_w,0)
             end
+        else
+            ap[1] = cell.w/2
+            cell:move_by(cell.w/2,0)
         end
         if direction == "horizontal" then
             if vertical_alignment == "top" then
@@ -109,6 +116,9 @@ ListManager = function(parameters)
                 ap[2] = cell.h
                 cell:move_by(0,max_h)
             end
+        else
+            ap[2] = cell.h/2
+            cell:move_by(0,cell.h/2)
         end
         cell.anchor_point = ap
         
@@ -123,8 +133,8 @@ ListManager = function(parameters)
     local set_size = function(self)
         local last_cell = self[self.length]
         if last_cell then
-            instance.w = last_cell.x + last_cell.w - last_cell.anchor_point[1]
-            instance.h = last_cell.y + last_cell.h - last_cell.anchor_point[2]
+            instance.w = last_cell.x + max_w - last_cell.anchor_point[1]
+            instance.h = last_cell.y + max_h - last_cell.anchor_point[2]
         end
     end
     ----------------------------------------------------------------------------
@@ -203,7 +213,6 @@ ListManager = function(parameters)
             if type(v) ~= "function" then
                 error("Expected function. Received "..type(v),2)
             end
-            print("garrrr")
             on_entries_changed = v 
         end
 	)
@@ -212,7 +221,6 @@ ListManager = function(parameters)
     cells = ArrayManager{  
         
         node_constructor=function(obj)
-            print("NODE1",obj)
             if node_constructor then
                 
                 obj = node_constructor(obj)
@@ -227,32 +235,27 @@ ListManager = function(parameters)
                 elseif obj.parent then  obj:unparent()  end
             end
             instance:add(obj)
-            print("NODE2",obj)
             
             items[obj] = {
                 neighbors = { },
                 key_functions = {
                     up    = obj:add_key_handler(keys.Up,   function() 
                         if  items[obj].neighbors.up then 
-                        print("up")
                             items[obj].neighbors.up:grab_key_focus() 
                         end 
                     end),
                     down  = obj:add_key_handler(keys.Down, function() 
                         if  items[obj].neighbors.down then 
-                        print("down")
                             items[obj].neighbors.down:grab_key_focus() 
                         end 
                     end),
                     left  = obj:add_key_handler(keys.Left, function() 
                         if  items[obj].neighbors.left then 
-                        print("left")
                             items[obj].neighbors.left:grab_key_focus() 
                         end 
                     end),
                     right = obj:add_key_handler(keys.Right,function() 
                         if  items[obj].neighbors.right then 
-                        print("right")
                             items[obj].neighbors.right:grab_key_focus() 
                         end 
                     end),
@@ -283,7 +286,6 @@ ListManager = function(parameters)
             max_w = 0
             for_each(self,widths_of_cols)
             max_h = 0
-            print(max_w,max_h)
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
             set_size(self)
@@ -366,6 +368,8 @@ LayoutManager = function(parameters)
     
     local node_constructor
 	local cells
+    local w = 0
+    local h = 0
     local cell_w, cell_h
     local horizontal_spacing = 0
     local vertical_spacing   = 0
@@ -388,10 +392,27 @@ LayoutManager = function(parameters)
             row_heights[r] = cell.h
         end
     end
+    local find_w = function(cell,r,c)
+        
+        if w < cell.x + cell.w - cell.anchor_point[1] then 
+            w = cell.x + cell.w - cell.anchor_point[1]
+        end
+    end
+    local find_h = function(cell,r,c)
+        
+        if h < cell.y + cell.h - cell.anchor_point[2] then 
+            h = cell.y + cell.h - cell.anchor_point[2]
+        end
+    end
     local vertical_alignment   = "center"
     local horizontal_alignment = "center"
     
     local assign_neighbors = function(cell,r,c,cells)
+        items[cell].neighbors.up = nil
+        items[cell].neighbors.down = nil
+        items[cell].neighbors.left = nil
+        items[cell].neighbors.right = nil
+        
         if r ~= 1 then
             items[cell].neighbors.up = cells[r-1][c]
         end
@@ -407,7 +428,6 @@ LayoutManager = function(parameters)
         end
     end
     local position_cell = function(cell,r,c)
-        
         --if not cells[r][c-1] then
             cell.x = 0
             for i = 1, c-1 do
@@ -454,7 +474,6 @@ LayoutManager = function(parameters)
     local for_each = function(self,f)
         for r = 1, self.number_of_rows do
             for c = 1, self.number_of_cols do
-                print(r,c)
                 if self[r][c] then f(self[r][c],r,c,self) end
             end
         end
@@ -463,8 +482,8 @@ LayoutManager = function(parameters)
     local set_size = function(self)
         local last_cell = self[self.number_of_rows] and self[self.number_of_rows][self.number_of_cols]
         if last_cell then
-            instance.w = last_cell.x + last_cell.w - last_cell.anchor_point[1]
-            instance.h = last_cell.y + last_cell.h - last_cell.anchor_point[2]
+            instance.w = last_cell.x + (cell_w or col_widths[self.number_of_cols]  or last_cell.w) - last_cell.anchor_point[1]
+            instance.h = last_cell.y + (cell_h or row_heights[self.number_of_rows] or last_cell.h) - last_cell.anchor_point[2]
         end
     end
     ----------------------------------------------------------------------------
@@ -515,6 +534,21 @@ LayoutManager = function(parameters)
 		function(oldf)   return vertical_alignment     end,
 		function(oldf,self,v)   vertical_alignment = v end
 	)
+    local placeholders = {}
+	override_property(instance,"placeholder",
+		function(oldf)   return placeholder     end,
+		function(oldf,self,v)   
+            instance:add(v)
+            v:hide()
+            
+            for obj, _ in pairs(placeholders) do
+                obj.source = v
+            end
+            
+            placeholder:unparent()
+            placeholder = v 
+        end
+	)
     
     instance:subscribe_to( 
         {
@@ -524,7 +558,7 @@ LayoutManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            set_size(cells)
+            --set_size(cells)
         end
     )
     ----------------------------------------------------------------------------
@@ -549,7 +583,19 @@ LayoutManager = function(parameters)
         end
 	)
     ----------------------------------------------------------------------------
-    
+    local children_want_focus = true
+	override_property(instance,"children_want_focus",
+		function(oldf)   return children_want_focus     end,
+		function(oldf,self,v)   
+            if type(v) ~= "boolean" then
+                error("Expected boolean. Received "..type(v),2)
+            end
+            children_want_focus = v 
+        end
+	)
+    ----------------------------------------------------------------------------
+    local in_on_entries = false
+    local focused_child = nil
     cells = GridManager{  
         
         node_constructor=function(obj)
@@ -558,8 +604,12 @@ LayoutManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
-                if obj == nil then  obj = Widget_Clone{source=placeholder}
                 
+                if obj == nil then  
+                    
+                    obj = Widget_Clone{source=placeholder}
+                    placeholders[obj] = true
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -567,30 +617,35 @@ LayoutManager = function(parameters)
                 elseif obj.parent then  obj:unparent()  end
             end
             
-            
-            instance:add(obj)
+            --TODO: fix this hack
+            -- the add method is overwritten in some Widgets, screen holds a handle to the original
+            screen.add(instance,obj)
             
             items[obj] = {
                 neighbors = { },
                 key_functions = {
                     up    = obj:add_key_handler(keys.Up,   function() 
                         if  items[obj].neighbors.up then 
-                            items[obj].neighbors.up:grab_key_focus() 
+                            items[obj].neighbors.up:grab_key_focus()
+                            focused_child = items[obj].neighbors.up 
                         end 
                     end),
                     down  = obj:add_key_handler(keys.Down, function() 
                         if  items[obj].neighbors.down then 
                             items[obj].neighbors.down:grab_key_focus() 
+                            focused_child = items[obj].neighbors.down
                         end 
                     end),
                     left  = obj:add_key_handler(keys.Left, function() 
                         if  items[obj].neighbors.left then 
                             items[obj].neighbors.left:grab_key_focus() 
+                            focused_child = items[obj].neighbors.left
                         end 
                     end),
                     right = obj:add_key_handler(keys.Right,function() 
                         if  items[obj].neighbors.right then 
                             items[obj].neighbors.right:grab_key_focus() 
+                            focused_child = items[obj].neighbors.right
                         end 
                     end),
                 }
@@ -598,7 +653,9 @@ LayoutManager = function(parameters)
             if obj.subscribe_to then
                 obj:subscribe_to(
                     {"h","w","width","height","size"},
-                    function()
+                    function(...)
+                        if in_on_entries then return end
+                        
                         cells:on_entries_changed()
                     end
                 )
@@ -607,27 +664,52 @@ LayoutManager = function(parameters)
             return obj
         end,
         
-        node_destructor=function(obj) 
-            
+        node_destructor=function(obj,r,c) 
+            if obj == focused_child then 
+                focused_child = 
+                    items[obj].neighbors.up or 
+                    items[obj].neighbors.left or
+                    items[obj].neighbors.right or
+                    items[obj].neighbors.down 
+            end
             for _,f in pairs(items[obj].key_functions) do f() end
             items[obj] = nil
             obj:unparent() 
+            placeholders[obj] = nil
         end,
         
         on_entries_changed = function(self)
+            if in_on_entries then return end
+            in_on_entries = true
+            if children_want_focus and focused_child == nil and 
+                self.number_of_rows > 0 and self.number_of_cols > 0 then 
+                focused_child = self[1][1] 
+                focused_child:grab_key_focus()
+            end
             col_widths  = {}
             row_heights = {}
+            w = 0
+            h = 0
             for_each(self,widths_of_cols)
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
-            set_size(self)
+            for_each(self,find_w)
+            for_each(self,find_h)
+            --set_size(self)
+            instance.size = {w,h}
             for_each(self,assign_neighbors)
-            on_entries_changed()
+            on_entries_changed(self)
+            in_on_entries = false
         end
     }
 	override_property(instance,"cells",
 		function(oldf) return   cells           end,
-		function(oldf,self,v)   cells:set(v) end
+		function(oldf,self,v)   
+            cells:set(v) 
+            
+            focused_child = cells[1][1] 
+            focused_child:grab_key_focus()
+        end
 	)
     
     
@@ -655,12 +737,12 @@ LayoutManager = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
-            t.number_of_cols = instance.number_of_cols
-            t.number_of_rows = instance.number_of_rows
-            t.vertical_alignment = instance.vertical_alignment
+            t.number_of_cols       = instance.number_of_cols
+            t.number_of_rows       = instance.number_of_rows
+            t.vertical_alignment   = instance.vertical_alignment
             t.horizontal_alignment = instance.horizontal_alignment
-            t.vertical_spacing = instance.vertical_spacing
-            t.horizontal_spacing = instance.horizontal_spacing
+            t.vertical_spacing     = instance.vertical_spacing
+            t.horizontal_spacing   = instance.horizontal_spacing
             t.cell_h = instance.cell_h
             t.cell_w = instance.cell_w
             t.cells = {}
@@ -678,6 +760,15 @@ LayoutManager = function(parameters)
     )
     
     ----------------------------------------------------------------------------
+    
+	function instance:on_key_focus_in()    
+        if children_want_focus and focused_child then 
+            dolater(function()
+                focused_child:grab_key_focus() 
+            end)
+        end
+        
+    end 
     
 	instance:set(parameters)
 	
