@@ -140,10 +140,6 @@
     }
 }
 
-- (NSString *)genSDP {
-    return [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 7078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 9078 RTP/AVP 99\r\nb=AS:1372\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPz,aM4jyA==\r\nmpeg4-esid:201\r\n", clientPublicIP, user, clientPublicIP];
-}
-
 /**
  * When a SIP Header from over the network asks for Authentication
  * this method parses that SIP line and adds all Authentication
@@ -250,20 +246,6 @@
     }
     
     registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, @"Content-Length: 0\r\n\r\n"];
-    /*
-    registerHdr = [NSString stringWithFormat:@"REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0\r\n"
-                    "Call-ID: 15ab29652ca513810373e17405589e9e@0:0:0:0:0:0:0:0\r\n"
-                    "CSeq: 688 REGISTER\r\n"
-                    "From: \"rex_1002\" <sip:1002@asterisk-1.asterisk.trickplay.com>;tag=18f73da4\r\n"
-                    "To: \"rex_1002\" <sip:1002@asterisk-1.asterisk.trickplay.com>\r\n"
-                    "Via: SIP/2.0/UDP %@:%d;branch=z9hG4bK-393838-a71ebeabb1522eb20bae8d6057a784ff\r\n"
-                    "Max-Forwards: 70\r\n"
-                    "Expires: 0\r\n"
-                    "Contact: \"rex_1002\" <sip:1002@%@:%d;transport=udp;registering_acc=asterisk-1_asterisk_trickplay_com>\r\n"
-                    "Authorization: Digest username=\"1002\",realm=\"asterisk-1.asterisk.trickplay.com\",nonce=\"bbd759dc-7ace-11e1-96d5-c57250bac8c9\",uri=\"sip:asterisk-1.asterisk.trickplay.com\",response=\"9a115d9f40510c8e39147d157c7fcd8a\",algorithm=MD5,qop=auth,cnonce=\"xyz\",nc=00000001\r\n"
-                    "User-Agent: Jitsi1.0-beta1-nightly.build.3820Mac OS X\r\n"
-                   "Content-Length: 0\r\n\r\n", @"10.0.190.55", 5060, @"10.0.190.55", 5060]; //udpClientIP, udpClientPort, udpClientIP, udpClientPort];
-    */
     
     NSLog(@"Register packet:\n%@", registerHdr);
     
@@ -517,8 +499,6 @@
                                     //udpClientIP, user, udpClientIP];//, b64sps, b64pps];
                                     publicIP, user, publicIP, publicVideoPort];//, b64sps, b64pps];
     
-    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 profile-level-id=42000A;packetization-mode=0\r\n", udpClientIP, user, udpClientIP];
-    
     return sdp;
 }
 
@@ -607,9 +587,9 @@
     NSLog(@"\nACK with packet:\n%@\n", ack);
 }
 
-
-// TODO: Respond to all BYE Requests, not just the first one.
-// Send a 481 error to get Freeswitch to shut up.
+/**
+ * Queues up a response to a received BYE message.
+ */
 - (void)byeResponse:(NSDictionary *)request fromAddr:(NSData *)remoteAddr {
     struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
     char ip_string[INET_ADDRSTRLEN];
@@ -691,6 +671,9 @@
     return mediaDest;
 }
 
+/**
+ * This method figures out what to do based on a received SIP packet.
+ */
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
     NSString *statusLine = [parsedPacket objectForKey:@"Status-Line"];
     if (!statusLine) {

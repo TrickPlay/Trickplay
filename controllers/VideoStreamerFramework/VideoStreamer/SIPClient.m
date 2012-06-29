@@ -646,11 +646,9 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 #pragma mark Memory
 
 - (void)dealloc {
-    // Technically this shouldn't need to be called since dealloc isn't called until
-    // sipThread exits (FYI: NSThread -initWithTarget: retains the target).
-    // Thus, [self stop] should be called somewhere else on the main
-    // Thread in order to dealloc. But no harm done having it here.
-    [self stop];
+    // DO NOT EVER put [self stop] here! Causes a DEADLOCK!
+    // [self stop] had to have been called sometime earlier anyway because
+    // sipThread retains 'self'.
     
     if (sipDialogs) {
         [sipDialogs release];
