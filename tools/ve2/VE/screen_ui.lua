@@ -348,7 +348,7 @@ function screen_ui.multi_select_done(x,y)
 
 	for k, l in pairs(screen.children) do  -- VE2 : g -> screen
         if l.children then
-	    for i, v in pairs(l.children) do  -- VE2 : g -> screen
+	    for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
 			m_slt_flag = true 
@@ -363,7 +363,7 @@ function screen_ui.multi_select_done(x,y)
 
     for k, l in pairs(screen.children) do -- VE2 : g -> screen
         if l.children then
-        for i, v in pairs(l.children) do -- VE2 : g -> screen
+        for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
 			if(v.extra.selected == false) then 
@@ -477,7 +477,9 @@ function screen_ui.dragging(x,y)
 	      border = screen:find_child(actor.name.."border")
 	      if(border ~= nil) then 
 		  	  if (actor.extra.is_in_group == true) then
-				 for i, c in pairs(screen.children) do -- VE2 : g -> screen
+				 for k, l in pairs(screen.children) do -- VE2 : g -> screen
+                    if l.children then
+				    for i, c in pairs(l.children) do 
 					if actor.name == c.name then 
 						break
 					else 
@@ -504,6 +506,8 @@ function screen_ui.dragging(x,y)
 								end 
 							end 
 						end
+					end
+					end
 					end
     			 end -- for 
 
