@@ -237,6 +237,9 @@ PROP_LIST = [
     'read_tags',
     'tags',
 
+    # Widget Rectangle
+    'border_width',
+
     # Hidden
     #'type',
     #'children', 

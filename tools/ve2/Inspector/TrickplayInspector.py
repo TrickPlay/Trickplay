@@ -206,7 +206,9 @@ class TrickplayInspector(QWidget):
             QItemSelectionModel.SelectCurrent)
     
     def propertyFill(self, data, styleIndex=None):
+        
         readonly_list = ["baseline", "selected_text", "base_size", "loaded", "tags"]
+        engine_widget_list = ["Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group"]
 
         self.cbStyle_textChanged = False
         self.ui.property.clear()
@@ -215,16 +217,20 @@ class TrickplayInspector(QWidget):
         items = []
         n = 0 
         style_n = 0 
-        #self.ui.property.setUniformRowHeights(False)
+
         for p in PropertyIter(None):
+
             p = str(p)
-            if data.has_key(p) == True:
+
+            if str(data["type"]) in engine_widget_list and p == "style":
+                pass
+            elif data.has_key(p) == True:
                 i = QTreeWidgetItem() 
                 #i.setText (0, p[:1].upper()+p[1:])
                 i.setText (0, p)
                 i.setText (1, str(data[p]))
                 if p == "source":
-                    i.setText (1, summarizeSource(data[str(p)]))
+                    i.setText (1, summarizeSource(data[p]))
                 if p == "style":
                         style_n = n
                         self.cbStyle = QComboBox()
@@ -232,7 +238,7 @@ class TrickplayInspector(QWidget):
                         cbStyle_idx = 0
                         for x in self.inspectorModel.styleData[0]:
                             self.cbStyle.addItem(x)
-                            if x == str(data[str(p)]):
+                            if x == str(data[p]):
                                 cbStyle_idx = idx 
                             idx = idx + 1
 
@@ -253,7 +259,7 @@ class TrickplayInspector(QWidget):
                     i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 elif p in NESTED_PROP_LIST: # is 'z_rotation' :
-                    z = data[str(p)]
+                    z = data[p]
                     if type(z) ==  list :
                         idx = 0
                         for sp in PropertyIter(p):

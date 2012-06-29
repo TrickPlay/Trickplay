@@ -72,7 +72,6 @@ local uiElementCreate_map =
     ['Button'] = function()  return Button() end, 
     ['Text'] = function()  return Widget_Text() end, 
     ['Image'] = function()  return Widget_Image() end, 
-    --['Rectangle'] = function()  return Widget_Rectangle() end, 
     ['DialogBox'] = function() return DialogBox() end,
     ['ToastAlert'] = function() return ToastAlert() end,
     ['ProgressSpinner'] = function() return ProgressSpinner() end,
@@ -173,9 +172,27 @@ local function assign_right_name (uiInstance, uiTypeStr)
 
 end 
 
+local function addIntoLayer (uiInstance)
+
+    uiInstance.reactive = true
+
+    devtools:gid(curLayerGid):add(uiInstance)
+
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
+
+    if uiInstance.subscribe_to then  
+
+        uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
+    end 
+
+    return
+end 
+
 local function editor_rectangle(x, y)
 
     local dragging = nil 
+
     rect_init_x = x 
     rect_init_y = y 
     
@@ -183,44 +200,15 @@ local function editor_rectangle(x, y)
 
     assign_right_name(uiRectangle, "Rectangle")
 
-    --[[
-    for m,n in ipairs (screen.children) do
-        if string.find(n.name, "Layer") then  
-            for k,l in ipairs (n.children) do 
-                if l.name == "rectangle"..uiNum then 
-                    uiNum = uiNum + 1
-                end
-            end
-        end
-    end 
-    uiRectangle.name = "rectangle"..uiNum
-    uiNum = uiNum + 1
-    ]]
-
     uiRectangle.size = {1,1}
     uiRectangle.color= hdr.DEFAULT_COLOR
     uiRectangle.position = {x,y,0}
     uiRectangle.org_x = x
     uiRectangle.org_y = y
 
-
     create_mouse_event_handler(uiRectangle)
 
-    uiRectangle.reactive = true
-
-    --dump_properties(uiRectangle)
-
-    devtools:gid(curLayerGid):add(uiRectangle)
-
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
-
-    if uiRectangle.subscribe_to then  
-        -- not nil because there is no in_use property supported
-        uiRectangle:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiRectangle) end end) 
-    end 
-
-    uiRectangle.reactive = true
+    addIntoLayer(uiRectangle)
 
     return uiRectangle
 end 
@@ -530,66 +518,32 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     curLayerGid = layerGid
 
     if uiTypeStr == "Rectangle" then 
+
         input_mode = hdr.S_RECTANGLE 
         screen:grab_key_focus()
         return
-    end 
 
-    if uiElementCreate_map[uiTypeStr] then
+    elseif uiElementCreate_map[uiTypeStr] then
+
         uiInstance = uiElementCreate_map[uiTypeStr](self)
+
     end 
 
     assign_right_name(uiInstance, uiTypeStr)
 
-    --[[
-    if uiElementCreate_map[uiTypeStr] then
-        uiInstance = uiElementCreate_map[uiTypeStr](self)
-        for m,n in ipairs (screen.children) do
-            if string.find(n.name, "Layer") then  
-                for k,l in ipairs (n.children) do 
-                    if l.name == uiTypeStr:lower()..uiNum then 
-                        uiNum = uiNum + 1
-                    end
-                end
-            end
-        end 
-        uiInstance.name = uiTypeStr:lower()..uiNum
-        uiNum = uiNum + 1
-    else
-        print "error"
-    end
-
-    ]]
 
     if uiTypeStr == "Image" then 
         uiInstance.src = path
-    end 
-
-    if uiTypeStr == "Text" then 
+    elseif uiTypeStr == "Text" then 
         editor_text(uiInstance)
+    elseif uiTypeStr == "Text" then 
+        uiInstance:grab_key_focus()
+	    uiInstance.editable = true
     end
 
     create_mouse_event_handler(uiInstance)
 
-    uiInstance.reactive = true
-
-    --dump_properties(uiInstance)
-
-    devtools:gid(curLayerGid):add(uiInstance)
-
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
-
-    if uiInstance.subscribe_to then  
-        -- not nil because there is no in_use property supported
-        uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
-    end 
-    if uiTypeStr == "Text" then 
-        uiInstance:grab_key_focus()
-	    uiInstance.editable = true
-
-    end
-
+    addIntoLayer(uiInstance)
 
 end
 
