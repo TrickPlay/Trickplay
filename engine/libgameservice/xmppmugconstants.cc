@@ -6,12 +6,19 @@
 namespace libgameservice {
 
 
+const std::string NS_IQ_REGISTER("jabber:iq:register");
 
 const std::string NS_MUG("http://jabber.org/protocol/mug");
 const std::string NS_MUG_USER("http://jabber.org/protocol/mug#user");
 const std::string NS_MUG_OWNER("http://jabber.org/protocol/mug#owner");
 const std::string NS_MUG_TURNBASED("http://jabber.org/protocol/mug/generic-turn-based-game");
 
+const txmpp::QName QN_IQ_REGISTER_QUERY(true, NS_IQ_REGISTER, "query");
+const txmpp::QName QN_IQ_REGISTER_REGISTERED_TAG(true, NS_IQ_REGISTER, "registered");
+const txmpp::QName QN_IQ_REGISTER_USERNAME_TAG(true, NS_IQ_REGISTER, "username");
+const txmpp::QName QN_IQ_REGISTER_PASSWORD_TAG(true, NS_IQ_REGISTER, "password");
+const txmpp::QName QN_IQ_REGISTER_EMAIL_TAG(true, NS_IQ_REGISTER, "email");
+const txmpp::QName QN_IQ_REGISTER_NAME_TAG(true, NS_IQ_REGISTER, "name");
 
 
 const txmpp::QName QN_MUG_QUERY(true, NS_MUG, "query");
@@ -74,5 +81,13 @@ const txmpp::QName QN_MUG_USER_TURN_TAG(true, NS_MUG_USER, "turn");
 const txmpp::QName QN_MUG_USER_NEWSTATE_TAG(true, NS_MUG_USER, "newstate");
 const txmpp::QName QN_MUG_USER_TERMINATE_TAG(true, NS_MUG_USER, "terminate");
 const txmpp::QName QN_MUG_USER_NEXT_TAG(true, NS_MUG_USER, "next");
+
+
+const std::string NS_XDATA("jabber:x:data");
+const txmpp::QName QN_XDATA_X(true, NS_XDATA, "x");
+const txmpp::QName QN_XDATA_FIELD(true, NS_XDATA, "field");
+const txmpp::QName QN_XDATA_VALUE(true, NS_XDATA, "value");
+const txmpp::QName QN_XDATA_REQUIRED(true, NS_XDATA, "required");
+
 
 }

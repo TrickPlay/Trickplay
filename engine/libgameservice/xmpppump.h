@@ -8,6 +8,7 @@
 #include <xmppclient.h>
 #include <xmppengine.h>
 #include <xmpptask.h>
+#include "xmppregisterclient.h"
 
 namespace libgameservice {
 
@@ -36,6 +37,28 @@ class XmppPump : public txmpp::MessageHandler, public txmpp::TaskRunner {
 
   private:
     txmpp::XmppClient *client_;
+    txmpp::XmppEngine::State state_;
+    XmppPumpNotify *notify_;
+};
+
+class XmppRegisterPump : public txmpp::MessageHandler, public txmpp::TaskRunner {
+  public:
+    XmppRegisterPump(XmppPumpNotify * notify = NULL);
+
+    txmpp::XmppRegisterClient *client() { return client_; }
+    txmpp::XmppReturnStatus SendStanza(const txmpp::XmlElement *stanza);
+    int64 CurrentTime();
+
+    void DoConnect(const txmpp::XmppClientSettings & xcs,
+                 txmpp::XmppAsyncSocket* socket);
+    void DoDisconnect();
+    void WakeTasks();
+
+    void OnStateChange(txmpp::XmppEngine::State state);
+    void OnMessage(txmpp::Message *pmsg);
+
+  private:
+    txmpp::XmppRegisterClient *client_;
     txmpp::XmppEngine::State state_;
     XmppPumpNotify *notify_;
 };

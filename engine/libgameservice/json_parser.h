@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _JSON_H
-#define _JSON_H
+#ifndef _JSON_PARSER_H_
+#define _JSON_PARSER_H_
 
 #ifndef json_char
    #define json_char char

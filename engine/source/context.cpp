@@ -30,6 +30,7 @@
 #include "ansi_color.h"
 
 #ifdef TP_WITH_GAMESERVICE
+#include "libgameservice.h"
 #include "gameservice_support.h"
 #endif
 
@@ -748,7 +749,11 @@ int TPContext::run()
     //.........................................................................
     // connect to gameservice server
 #ifdef TP_WITH_GAMESERVICE
-    gameservice_support = new GameServiceSupport(this);
+    if ( get_bool( TP_GAMESERVICE_ENABLED ) )
+    {
+		libgameservice::setGameServiceXmppDomain(get(TP_GAMESERVICE_DOMAIN));
+		gameservice_support = new GameServiceSupport(this);
+    }
 #endif
     //.........................................................................
 
@@ -1731,6 +1736,10 @@ void TPContext::load_external_configuration()
         TP_APP_ANIMATIONS_ENABLED,
         TP_DEBUGGER_PORT,
         TP_START_DEBUGGER,
+        TP_GAMESERVICE_ENABLED,
+        TP_GAMESERVICE_DOMAIN,
+        TP_GAMESERVICE_HOST,
+        TP_GAMESERVICE_PORT,
 
         NULL
     };
@@ -1916,6 +1925,35 @@ void TPContext::validate_configuration()
     String resources_path_s = Util::canonical_external_path( resources_path );
 
     set( TP_RESOURCES_PATH , resources_path_s );
+
+    // gameservice configuration variable validation
+    if ( !get( TP_GAMESERVICE_ENABLED ) )
+    {
+        set( TP_GAMESERVICE_ENABLED,  TP_GAMESERVICE_ENABLED_DEFAULT);
+    }
+    g_debug( "USING TP_GAMESERVICE_ENABLED: '%s'", get( TP_GAMESERVICE_ENABLED ) );
+
+    if ( get( TP_GAMESERVICE_ENABLED ) )
+    {
+		if ( !get( TP_GAMESERVICE_DOMAIN ) )
+		{
+			set( TP_GAMESERVICE_DOMAIN,  TP_GAMESERVICE_DOMAIN_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_DOMAIN: '%s'", get( TP_GAMESERVICE_DOMAIN ) );
+
+		if ( !get( TP_GAMESERVICE_HOST ) )
+		{
+			set( TP_GAMESERVICE_HOST,  TP_GAMESERVICE_HOST_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_HOST: '%s'", get( TP_GAMESERVICE_HOST ) );
+
+		if ( !get( TP_GAMESERVICE_PORT, 0 ) )
+		{
+			set( TP_GAMESERVICE_PORT,  TP_GAMESERVICE_PORT_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_PORT: '%s'", get( TP_GAMESERVICE_PORT ) );
+    }
+
 
     // Allowed secure objects
 

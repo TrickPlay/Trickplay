@@ -9,7 +9,10 @@
 
 namespace libgameservice {
 
-const txmpp::Jid JID_MUG_SERVICE("mug.internal.trickplay.com");
+extern const txmpp::Jid getMugServiceJid();
+
+
+//const txmpp::Jid JID_MUG_SERVICE("mug.internal.trickplay.com");
 
 
 // MUG message listener
@@ -239,7 +242,7 @@ int ListGamesTask::ProcessStart() {
 	// set_task_id(GetClient()->NextId());
 
 	txmpp::scoped_ptr<txmpp::XmlElement> disco_info_iq(
-			MakeIq("get", JID_MUG_SERVICE, task_id()));
+			MakeIq("get", getMugServiceJid(), task_id()));
 	txmpp::XmlElement *query =
 			new txmpp::XmlElement(txmpp::QN_DISCO_INFO_QUERY);
 	disco_info_iq->AddElement(query);
@@ -293,7 +296,7 @@ bool ListGamesTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 	//std::cout << "ListGamesTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 
-	if (MatchResponseIq(stanza, JID_MUG_SERVICE, task_id())) {
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
 		QueueStanza(stanza);
 		return true;
 	}
@@ -316,7 +319,7 @@ int RegisterAppTask::ProcessStart() {
 	std::cout << "RegisterAppTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
-			MakeIq("set", JID_MUG_SERVICE, task_id()));
+			MakeIq("set", getMugServiceJid(), task_id()));
 	txmpp::XmlElement *registerAppElement = new txmpp::XmlElement(
 			QN_MUG_OWNER_REGISTER_APP);
 	txmpp::XmlElement *nameElement = new txmpp::XmlElement(
@@ -369,7 +372,7 @@ bool RegisterAppTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 	//std::cout << "ListGamesTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 
-	if (MatchResponseIq(stanza, JID_MUG_SERVICE, task_id())) {
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
 		QueueStanza(stanza);
 		return true;
 	}
@@ -392,7 +395,7 @@ int RegisterGameTask::ProcessStart() {
 	std::cout << "RegisterGameTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
-			MakeIq("set", JID_MUG_SERVICE, task_id()));
+			MakeIq("set", getMugServiceJid(), task_id()));
 	txmpp::XmlElement *registerGameElement = new txmpp::XmlElement(
 			QN_MUG_OWNER_REGISTER_GAME);
 	txmpp::XmlElement *appElement = new txmpp::XmlElement(QN_MUG_OWNER_APP_TAG);
@@ -522,7 +525,7 @@ bool RegisterGameTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 	//std::cout << "ListGamesTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 
-	if (MatchResponseIq(stanza, JID_MUG_SERVICE, task_id())) {
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
 		QueueStanza(stanza);
 		return true;
 	}
@@ -543,7 +546,7 @@ OpenAppTask::~OpenAppTask() {
 int OpenAppTask::ProcessStart() {
 
 	txmpp::scoped_ptr<txmpp::XmlElement> presence(new txmpp::XmlElement(txmpp::QN_PRESENCE));
-	presence->AddAttr(txmpp::QN_TO, JID_MUG_SERVICE.Str());
+	presence->AddAttr(txmpp::QN_TO, getMugServiceJid().Str());
 
 	txmpp::XmlElement *appElement = new txmpp::XmlElement(
 			QN_MUG_APP_TAG);
@@ -579,7 +582,7 @@ CloseAppTask::~CloseAppTask() {
 int CloseAppTask::ProcessStart() {
 
 	txmpp::scoped_ptr<txmpp::XmlElement> presence(new txmpp::XmlElement(txmpp::QN_PRESENCE));
-	presence->AddAttr(txmpp::QN_TO, JID_MUG_SERVICE.Str());
+	presence->AddAttr(txmpp::QN_TO, getMugServiceJid().Str());
 	presence->AddAttr(txmpp::QN_TYPE, txmpp::STR_UNAVAILABLE);
 	txmpp::XmlElement *appElement = new txmpp::XmlElement(
 			QN_MUG_APP_TAG);
@@ -617,7 +620,7 @@ int AssignMatchTask::ProcessStart() {
 	std::cout << "AssignMatchTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
-			MakeIq("set", JID_MUG_SERVICE, task_id()));
+			MakeIq("set", getMugServiceJid(), task_id()));
 	txmpp::XmlElement *matchRequestElement = new txmpp::XmlElement(
 			QN_MUG_ASSIGNMATCH_TAG);
 	matchRequestElement->AddAttr(QN_GAMEID_ATTR, match_request_.game_id());
@@ -684,7 +687,7 @@ bool AssignMatchTask::HandleStanza(const txmpp::XmlElement *stanza) {
 	//std::cout << "ListGamesTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 	 txmpp::Jid from(stanza->Attr(txmpp::QN_FROM));
 
-	if (stanza->Attr(txmpp::QN_ID) == task_id() && from.domain() == JID_MUG_SERVICE.domain()) {
+	if (stanza->Attr(txmpp::QN_ID) == task_id() && from.domain() == getMugServiceJid().domain()) {
 		QueueStanza(stanza);
 		return true;
 	}

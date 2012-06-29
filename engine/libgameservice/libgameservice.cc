@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include "jid.h"
 #include "libgameservice.h"
 
 namespace libgameservice {
@@ -34,6 +36,7 @@ static const char* kStatusCodeStrings[] = {
 	"FAILED",
 	"LOGIN_FAILED",
 	"NOT_CONNECTED",
+	"INVALID_STATE",
 	"APP_OPEN",
 	"APP_ALREADY_OPEN",
 	"APP_NOT_OPEN",
@@ -41,6 +44,9 @@ static const char* kStatusCodeStrings[] = {
 	"INVALID_APP_ID",
 	"INVALID_ROLE",
 	"INVALID_MATCH_REQUEST",
+	"ALREADY_REGISTERED",
+	"USER_ID_CONFLICT",
+	"REQUIRED_FIELD_MISSING",
 };
 
 const char* statusToString(StatusCode sc) {
@@ -113,5 +119,32 @@ MatchStatus stringToMatchStatus(const std::string& str) {
 
 	return unknown;
 }
+
+const txmpp::Jid JID_XMPP_SERVER("internal.trickplay.com");
+const txmpp::Jid JID_MUG_SERVICE("mug.internal.trickplay.com");
+
+static std::string gameServiceXmppDomain("internal.trickplay.com");
+
+void setGameServiceXmppDomain(const char* domain) {
+	gameServiceXmppDomain = domain;
+}
+/*
+ * check the environment to see if JID_MUG_SERVICE is defined. otherwise return hardcoded string
+ */
+const txmpp::Jid getMugServiceJid(  ) {
+	return txmpp::Jid(std::string("mug.") + gameServiceXmppDomain);
+	//return JID_MUG_SERVICE.BareJid().Str().c_str();
+	//return JID_MUG_SERVICE;
+}
+
+/*
+ * check the environment to see if JID_XMPP_SERVER is defined. otherwise return hardcoded string
+ */
+const txmpp::Jid getXmppServerJid(  ) {
+	return txmpp::Jid(gameServiceXmppDomain);
+	//return JID_XMPP_SERVER.BareJid().Str().c_str();
+//	return JID_XMPP_SERVER;
+}
+
 
 }

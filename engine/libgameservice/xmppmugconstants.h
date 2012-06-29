@@ -7,10 +7,18 @@
 
 namespace libgameservice {
 
+extern const std::string NS_IQ_REGISTER;
 extern const std::string NS_MUG;
 extern const std::string NS_MUG_USER;
 extern const std::string NS_MUG_OWNER;
 extern const std::string NS_MUG_TURNBASED;
+
+extern const txmpp::QName QN_IQ_REGISTER_QUERY;
+extern const txmpp::QName QN_IQ_REGISTER_REGISTERED_TAG;
+extern const txmpp::QName QN_IQ_REGISTER_USERNAME_TAG;
+extern const txmpp::QName QN_IQ_REGISTER_PASSWORD_TAG;
+extern const txmpp::QName QN_IQ_REGISTER_EMAIL_TAG;
+extern const txmpp::QName QN_IQ_REGISTER_NAME_TAG;
 
 extern const txmpp::QName QN_MUG_QUERY;
 extern const txmpp::QName QN_MUG_GAME;
@@ -72,6 +80,13 @@ extern const txmpp::QName QN_MUG_USER_TURN_TAG;
 extern const txmpp::QName QN_MUG_USER_NEWSTATE_TAG;
 extern const txmpp::QName QN_MUG_USER_TERMINATE_TAG;
 extern const txmpp::QName QN_MUG_USER_NEXT_TAG;
+
+extern const std::string NS_XDATA;
+extern const txmpp::QName QN_XDATA_X;
+extern const txmpp::QName QN_XDATA_FIELD;
+extern const txmpp::QName QN_XDATA_REQUIRED;
+extern const txmpp::QName QN_XDATA_VALUE;
+
 
 }
 

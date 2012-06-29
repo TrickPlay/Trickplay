@@ -23,6 +23,7 @@
 #include "presencepushtask.h"
 #include "xmpppump.h"
 #include "xmpptasks.h"
+#include "registeraccounttask.h"
 
 
 namespace libgameservice {
@@ -41,7 +42,7 @@ static GameServiceClientNotify::ConnectionState convertToConnectionState(txmpp::
 	case XmppEngine::STATE_CLOSED:
 			return GameServiceClientNotify::STATE_CLOSED;
 	default:
-		GameServiceClientNotify::STATE_NONE;
+		return GameServiceClientNotify::STATE_NONE;
 	}
 }
 
@@ -68,6 +69,7 @@ enum {
 	MSG_STATE_CHANGE,
 	MSG_STATUS_UPDATE,
 	MSG_STATUS_ERROR,
+	MSG_REGISTER_ACCOUNT_RESPONSE,
 	MSG_REGISTER_APP_RESPONSE,
 	MSG_REGISTER_GAME_RESPONSE,
 	MSG_OPEN_APP_RESPONSE,
@@ -89,13 +91,207 @@ enum {
 	MSG_XMPP_OUTPUT
 };
 
+struct StringData: public txmpp::MessageData {
+	StringData(std::string s) :
+		s_(s) {
+	}
+	std::string s_;
+};
+
+struct StateChangeData: public txmpp::MessageData {
+	StateChangeData(txmpp::XmppEngine::State state) :
+		s_(state) {
+	}
+	txmpp::XmppEngine::State s_;
+};
+
+struct ResponseStatusData: public txmpp::MessageData {
+	ResponseStatusData(const ResponseStatus & rs) :
+		rs_(rs) {
+	}
+	ResponseStatus rs_;
+};
+
+class GameServiceRegisterClientWorker:
+		public txmpp::MessageHandler,
+		public XmppPumpNotify,
+		public txmpp::has_slots<> {
+public:
+	GameServiceRegisterClientWorker(txmpp::Thread* main_thread, GameServiceClientNotify *notify) :
+		main_thread_(main_thread), worker_thread_(NULL), notify_(notify) {
+
+		assert(main_thread_ != NULL);
+
+		pump_.reset(new XmppRegisterPump(this));
+
+		pump_->client()->SignalLogInput.connect(this,
+				&GameServiceRegisterClientWorker::OnInputDebug);
+
+		pump_->client()->SignalLogOutput.connect(this,
+				&GameServiceRegisterClientWorker::OnOutputDebug);
+
+	}
+
+	~GameServiceRegisterClientWorker() {
+		if (worker_thread_) {
+			worker_thread_->Send(this, MSG_DISCONNECT);
+			delete worker_thread_;
+		}
+	}
+
+	void OnMessage(txmpp::Message *msg) {
+	//	std::cout << "Inside GameServiceRegisterClientWorker::OnMessage()" << std::endl;
+			switch (msg->message_id) {
+			case MSG_START:
+				ConnectW();
+				break;
+			case MSG_DISCONNECT:
+				DisconnectW();
+				break;
+			case MSG_REGISTER_ACCOUNT_RESPONSE:
+				OnRegisterAccountResponseW( static_cast<ResponseStatusData*>(msg->pdata)->rs_ );
+				delete msg->pdata;
+				break;
+			case MSG_STATE_CHANGE:
+				OnStateChangeW(static_cast<StateChangeData*> (msg->pdata)->s_);
+				delete msg->pdata;
+				break;
+			case MSG_XMPP_OUTPUT:
+				OnOutputDebugW(static_cast<StringData*> (msg->pdata)->s_);
+				delete msg->pdata;
+				break;
+			case MSG_XMPP_INPUT:
+				OnInputDebugW(static_cast<StringData*> (msg->pdata)->s_);
+				delete msg->pdata;
+				break;
+			}
+	}
+
+	void Connect(const txmpp::XmppClientSettings & xcs, const AccountInfo& account_info, void* cb_data) {
+
+			xcs_.set_host(xcs.host());
+			xcs_.set_server(xcs.server());
+			xcs_.set_use_tls(xcs.use_tls());
+
+			account_info_ = account_info;
+
+
+			cb_data_ = cb_data;
+
+			worker_thread_ = new txmpp::Thread(&pss_);
+			worker_thread_->Start();
+			worker_thread_->Send(this, MSG_START);
+	}
+
+	void OnStateChange(txmpp::XmppEngine::State state) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		switch (state) {
+		case txmpp::XmppEngine::STATE_OPEN: {
+			std::cout << "creating register account task. account_info = " << account_info_.Str() << std::endl;
+			std::cout << "pump client != NULL is " << (bool)(pump_->client() != NULL) << std::endl;
+			std::cout << "typepid(client) = " << typeid(pump_->client()).name() << std::endl;
+			RegisterAccountTask * register_account_task_ = new RegisterAccountTask(pump_->client(), account_info_);
+			std::cout << "created register account task" << std::endl;
+			register_account_task_->SignalDone.connect(this, &GameServiceRegisterClientWorker::OnRegisterAccountResponse);
+			std::cout << "starting register account task" << std::endl;
+			register_account_task_->Start();
+			break;
+		}
+		case txmpp::XmppEngine::STATE_CLOSED:
+			// may be there was an error...
+			//
+			break;
+		default:
+			break;
+		}
+	}
+
+
+private:
+
+	void OnStateChangeW(txmpp::XmppEngine::State state) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		if (notify_)
+			notify_->OnStateChange(convertToConnectionState(state));
+	}
+
+	void OnInputDebugW(const std::string &data) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+	//	std::cout << "Inside OnInputDebugW." << std::endl;
+		if (notify_)
+			notify_->OnXmppInput(data);
+	}
+
+	void OnInputDebug(const char *data, int len) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+	//	std::cout << "Inside OnInputDebug." << std::endl;
+		main_thread_->Post(this, MSG_XMPP_INPUT,
+				new StringData(std::string(data, len)));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void OnOutputDebugW(const std::string &data) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+//		std::cout << "Inside OnOutputDebugW." << std::endl;
+		if (notify_)
+			notify_->OnXmppOutput(data);
+	}
+
+	void OnOutputDebug(const char *data, int len) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+	//	std::cout << "Inside OnOutputDebug." << std::endl;
+		main_thread_->Post(this, MSG_XMPP_OUTPUT,
+				new StringData(std::string(data, len)));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void ConnectW() {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		pump_->DoConnect(xcs_, new txmpp::XmppAsyncSocketImpl(true));
+	}
+
+	void DisconnectW() {
+		assert(txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		pump_->DoDisconnect();
+	}
+
+
+	void OnRegisterAccountResponse(const ResponseStatus& rs) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		main_thread_->Post(this, MSG_REGISTER_ACCOUNT_RESPONSE,
+				new ResponseStatusData(rs));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void OnRegisterAccountResponseW(const ResponseStatus& rs) {
+		assert (txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		if (notify_)
+			notify_->OnRegisterAccountResponse(rs, account_info_, cb_data_);
+		delete this;
+	}
+
+
+	txmpp::Thread *main_thread_;
+	txmpp::Thread *worker_thread_;
+
+	GameServiceClientNotify *notify_;
+	txmpp::PhysicalSocketServer pss_;
+	txmpp::XmppClientSettings xcs_;
+	AccountInfo account_info_;
+	void* cb_data_;
+
+	txmpp::scoped_ptr<XmppRegisterPump> pump_;
+};
+
 class GameServiceClientWorker: public txmpp::MessageHandler,
 		public XmppPumpNotify,
 		public txmpp::has_slots<> {
 public:
-	GameServiceClientWorker(GameServiceAsyncInterface *gsc,
-			GameServiceClientNotify *notify) :
-		worker_thread_(NULL), gsc_(gsc), notify_(notify), ppt_(NULL),
+	GameServiceClientWorker(GameServiceClientNotify *notify) :
+		worker_thread_(NULL), notify_(notify), ppt_(NULL),
 				presence_listener_task_(NULL), message_listener_task_(NULL),
 				is_test_login_(false) {
 
@@ -110,6 +306,8 @@ public:
 				&GameServiceClientWorker::OnOutputDebug);
 
 	}
+
+	txmpp::Thread* main_thread() { return main_thread_.get(); }
 
 	~GameServiceClientWorker() {
 		if (worker_thread_) {
@@ -344,6 +542,8 @@ public:
 		worker_thread_->Send(this, MSG_START);
 	}
 
+
+
 	void SendPresence(const Status & s) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		worker_thread_->Post(this, MSG_SEND_PRESENCE, new SendPresenceData(s));
@@ -400,10 +600,12 @@ public:
 	}
 
 	bool DoCallbacks(uint wait_millis) {
+	//	std::cout << "Inside GameServiceClientWorker::DoCallbacks" << std::endl;
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		bool dispatched = false;
 		txmpp::Message m;
 		while (main_thread_->Get(&m, wait_millis)) {
+		//	std::cout << "Inside GameServiceClientWorker::DoCallbacks. dispatching" << std::endl;
 			main_thread_->Dispatch(&m);
 			if (wait_millis != 0)
 				wait_millis = 0;
@@ -413,13 +615,6 @@ public:
 	}
 
 private:
-
-	struct StringData: public txmpp::MessageData {
-		StringData(std::string s) :
-			s_(s) {
-		}
-		std::string s_;
-	};
 
 	void OnInputDebugW(const std::string &data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
@@ -448,13 +643,6 @@ private:
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
-
-	struct StateChangeData: public txmpp::MessageData {
-		StateChangeData(txmpp::XmppEngine::State state) :
-			s_(state) {
-		}
-		txmpp::XmppEngine::State s_;
-	};
 
 	void OnStateChange(txmpp::XmppEngine::State state) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
@@ -1099,7 +1287,6 @@ private:
 	txmpp::scoped_ptr<txmpp::Thread> main_thread_;
 	txmpp::Thread *worker_thread_;
 
-	GameServiceAsyncInterface *gsc_;
 	GameServiceClientNotify *notify_;
 	txmpp::XmppClientSettings xcs_;
 	txmpp::PhysicalSocketServer pss_;
@@ -1118,6 +1305,8 @@ public:
 	/* Provide the constructor with your interface. */
 	GameServiceClient(GameServiceClientNotify * notify);
 	~GameServiceClient();
+
+	StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data);
 
 	/* Logs in and starts doing stuff
 	 *"127.0.0.1", 5222)
@@ -1173,16 +1362,30 @@ private:
 
 	GameServiceClientWorker * worker_;
 	AppId current_app_;
+	GameServiceClientNotify * notify_;
 };
 
-GameServiceClient::GameServiceClient(GameServiceClientNotify *notify) {
-	worker_ = new GameServiceClientWorker(this, notify);
+GameServiceClient::GameServiceClient(GameServiceClientNotify *notify) :
+	notify_(notify) {
+	worker_ = new GameServiceClientWorker(notify);
 }
 
 GameServiceClient::~GameServiceClient() {
 	delete worker_;
 	worker_ = NULL;
 }
+
+StatusCode GameServiceClient::RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data) {
+//StatusCode GameServiceClient::Login(const txmpp::XmppClientSettings & xcs) {
+	txmpp::XmppClientSettings xcs;
+	xcs.set_host(domain);
+	xcs.set_server(txmpp::SocketAddress(host, port));
+
+	GameServiceRegisterClientWorker* worker = new GameServiceRegisterClientWorker(worker_->main_thread(), notify_);
+	worker->Connect(xcs, account_info, cb_data); // will be deleted when the task finishes
+	return OK;
+}
+
 
 StatusCode GameServiceClient::Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) {
 //StatusCode GameServiceClient::Login(const txmpp::XmppClientSettings & xcs) {

@@ -334,6 +334,11 @@ bool SystemDatabase::insert_initial_data()
         {
             return false;
         }
+
+        if ( !set( TP_DB_FIRST_PROFILE_ID, id ) )
+        {
+            return false;
+        }
     }
 
     // There are profiles, lets make sure the current profile id is set to one

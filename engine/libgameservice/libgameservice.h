@@ -17,6 +17,7 @@ enum StatusCode {
 	FAILED,
 	LOGIN_FAILED,
 	NOT_CONNECTED,
+	INVALID_STATE,
 	APP_OPEN,
 	APP_ALREADY_OPEN,
 	APP_NOT_OPEN,
@@ -24,11 +25,15 @@ enum StatusCode {
 	INVALID_APP_ID,
 	INVALID_ROLE,
 	INVALID_MATCH_REQUEST,
+	ALREADY_REGISTERED,
+	USER_ID_CONFLICT,
+	REQUIRED_FIELD_MISSING,
 };
 
 enum MatchStatus { unknown = -1, created, active, paused, inactive, completed, aborted };
 
 enum Affiliation { owner, member, none };
+
 
 extern const char* statusToString(StatusCode sc);
 extern const std::string& affiliationToString(Affiliation affiliation);
@@ -38,6 +43,8 @@ extern MatchStatus stringToMatchStatus(const std::string& str);
 inline bool isValidMatchStatus(MatchStatus status) {
 	return status >= created && status <= aborted;
 }
+
+extern void setGameServiceXmppDomain(const char* domain);
 
 class ResponseStatus {
 public:
