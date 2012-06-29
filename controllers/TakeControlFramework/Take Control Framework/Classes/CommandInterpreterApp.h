@@ -39,12 +39,6 @@
 - (void)do_SAT:(NSArray *)args;
 - (void)do_PAT:(NSArray *)args;
 
-// Video Streaming Controller->Server
-- (void)do_SVCC:(NSArray *)args;
-- (void)do_SVCF:(NSArray *)args;
-- (void)do_SVCD:(NSArray *)args;
-- (void)do_SVCE:(NSArray *)args;
-- (void)do_SVCS:(NSArray *)args;
 // Video Streaming Server->Controller
 - (void)do_SVSC:(NSArray *)args;
 - (void)do_SVEC:(NSArray *)args;

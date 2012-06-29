@@ -30,6 +30,12 @@
     }];
 }
 
+- (void)endChat:(id)object {
+    VideoStreamer *videoStreamer = (VideoStreamer *)object;
+
+    [videoStreamer endChat];
+}
+
 - (void)startVideoStreamer:(id)object {
     VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
     VideoStreamer *videostreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
@@ -38,6 +44,7 @@
     [self.viewController presentViewController:videostreamer animated:YES completion:^(void) {
         [videostreamer startChat];
         //[self performSelector:@selector(removeVC:) withObject:nil afterDelay:5.0];
+        [self performSelector:@selector(endChat:) withObject:videostreamer afterDelay:15];
     }];
 }
 
@@ -141,7 +148,7 @@
     //NSLog(@"presented: %@", presented);
     [self.viewController dismissViewControllerAnimated:YES completion:^(void){
         NSLog(@"Video Streamer Dismissed");
-        [presented autorelease];
+        [presented release];
     }];
 }
 
