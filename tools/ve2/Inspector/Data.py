@@ -54,6 +54,7 @@ modelToDataTable = {
     'sizew': lambda v: ('width',  toFloat(v)), 
     'width': lambda v: ('width',  toFloat(v)), 
     'sizeh': lambda v: ('height',  toFloat(v)), 
+    'border_width': lambda v: ('border_width',  int(v)), 
     'new_attra': lambda v: ('a attr',  toFloat(v['a'])), 
     'new_attrb': lambda v: ('b attr',  toFloat(v['b'])), 
     'new_attrc': lambda v: ('c attr',  v['c']), 
