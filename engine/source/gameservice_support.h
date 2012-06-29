@@ -27,14 +27,18 @@ extern int invoke_gameservice_on_match_updated(lua_State*L,GameServiceSupport* s
 #define TP_NOTIFICATION_GAMESERVICE_APP_READY           "gameservice-app-ready"
 #define TP_NOTIFICATION_GAMESERVICE_APP_ERROR           "gameservice-app-error"
 
+#define GAMESERVICE_USER_ID_KEY							"com.trickplay.gameservice.user_id"
+#define GAMESERVICE_PASSWORD_KEY						"com.trickplay.gameservice.password"
+
+
 class GameServiceSupport : public GameServiceClientNotify, public GameServiceAsyncInterface, public Notify {
 
 public:
 
 	enum State {
-		NO_CONNECTION = 0,
+		LOGIN_FAILED = 0,
+		NO_CONNECTION,
 		LOGIN_IN_PROGRESS,
-		LOGIN_FAILED,
 		LOGIN_SUCCESSFUL,
 		APP_OPENING,
 		APP_OPEN,
@@ -44,6 +48,8 @@ public:
 	GameServiceSupport(TPContext * context);
 
 	State state() const { return state_; }
+
+	virtual StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data);
 
 	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port);
 
@@ -98,6 +104,9 @@ public:
 
 	/* Called when a status update results in an error */
 	virtual void OnStatusError(const std::string &error_string);
+
+	virtual void OnRegisterAccountResponse(const ResponseStatus& rs,
+			const AccountInfo& account_info, void* cb_data);
 
 	virtual void OnRegisterAppResponse(const ResponseStatus& rs,
 			const AppId& app_id);
@@ -158,6 +167,8 @@ public:
 	friend class OpenAppAction;
 
 private:
+	void init();
+
 	inline lua_State * get_lua_state() {
 		return tpcontext_->get_current_app()->get_lua_state();
 	}
@@ -166,6 +177,7 @@ private:
 	TPContext * tpcontext_;
 	State state_;
 	AppId app_id_;
+	bool login_after_register_flag_;
 };
 
 #endif /* _GAMESERVICE_SUPPORT_H_ */

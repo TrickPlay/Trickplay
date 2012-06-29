@@ -16,17 +16,25 @@ include_directories(
 )
 
 add_library( gameservice SHARED 
+    xmppengineimpl_register.cc
+    xmppengineimpl_register_iq.cc
+    xmppregistertask.cc
+    xmppregisterclient.cc
+    xmppconnecttask.cc
+    receivetask.cc
+    registeraccounttask.cc
+    
+	json_parser.c 	
+	xmppmugconstants.cc
+	libgameservice.cc
 	status.cc
-        game.cc
-        gameserviceclient.cc
-        libgameservice.cc
-        presenceouttask.cc
-        presencepushtask.cc
-        receivetask.cc
-        xmppmugconstants.cc
-        xmpppump.cc
-        xmpptasks.cc
-	json_parser.c
+	game.cc
+	presenceouttask.cc
+	presencepushtask.cc
+	receivetask.cc
+	xmpppump.cc
+	xmpptasks.cc
+	gameserviceclient.cc
 )
 
 target_link_libraries (

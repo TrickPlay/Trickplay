@@ -1162,12 +1162,16 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 #endif
 
 #ifdef TP_WITH_GAMESERVICE
-    if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end()) {
-    	g_info("Performing luaopen_gameservice()");
-    	luaopen_gameservice( L );
+    if ( context->get_bool( TP_GAMESERVICE_ENABLED ) )
+    {
+		if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end())
+		{
+			g_info("Performing luaopen_gameservice()");
+			luaopen_gameservice( L );
 
-    	g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
-    	context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
+			g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
+			context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
+		}
     }
 #endif
 

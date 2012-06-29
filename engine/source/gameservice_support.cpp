@@ -3,6 +3,7 @@
 #include "gameservice_support.h"
 #include "gameservice_util.h"
 #include "util.h"
+#include "sysdb.h"
 
 using namespace libgameservice;
 
@@ -108,10 +109,51 @@ private:
 };
 
 GameServiceSupport::GameServiceSupport(TPContext * context)
-: tpcontext_(context), state_(NO_CONNECTION) {
+: tpcontext_(context), state_(NO_CONNECTION), login_after_register_flag_(false) {
+
+	init();
+}
+
+void GameServiceSupport::init() {
+
+	SystemDatabase * db = tpcontext_->get_db();
+
+	int current_profile_id = db->get_current_profile().id;
+	int first_profile_id = db->get_int(TP_DB_FIRST_PROFILE_ID, -1);
+
+	// we only support one profile for now
+	if ( first_profile_id != current_profile_id )
+		return;
+
 	delegate_ = newGameServiceAsyncImpl(this);
 
+	String user_id = db->get_string(GAMESERVICE_USER_ID_KEY, "");
+	String password = db->get_string(GAMESERVICE_PASSWORD_KEY, "");
 
+	// retrieve domain, host and port information from the configuration
+	String domain = tpcontext_->get(TP_GAMESERVICE_DOMAIN);
+	String host = tpcontext_->get(TP_GAMESERVICE_HOST);
+	int port = tpcontext_->get_int(TP_GAMESERVICE_PORT, 5222);
+
+	if (user_id.empty()) {
+		login_after_register_flag_ = true;
+		// create a new account
+		user_id = Util::make_v1_uuid();
+		if (user_id.empty()) {
+			std::cout << "Failed to create default gameservice user account. "
+					<< "Trickplay system uuid is NULL." << std::endl;
+			return;
+		}
+
+		password = Util::make_v1_uuid();
+		AccountInfo ainfo(user_id, user_id, password, user_id + "@" + domain);
+		RegisterAccount(ainfo, domain, host, port, NULL);
+	}
+	else
+	{
+		Login(user_id, password, domain, host, port);
+	}
+	/*
 	std::string user_id("p2");
 	std::string password("saywhat");
 	std::string domain("internal.trickplay.com");
@@ -120,13 +162,24 @@ GameServiceSupport::GameServiceSupport(TPContext * context)
 	std::string host("127.0.0.1");
 	int port = 5222;
 
-	Login(user_id, password, domain, host, port);
+	init();
 
+	*/
+}
+
+
+
+StatusCode GameServiceSupport::RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data) {
+	delegate_->RegisterAccount(account_info, domain, host, port, cb_data);
+	return OK;
 }
 
 StatusCode GameServiceSupport::Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) {
 	// set up a idle handler to monitor Login state
 
+	if (state_ > NO_CONNECTION) {
+		return INVALID_STATE;
+	}
 	state_ = LOGIN_IN_PROGRESS;
 	::Action::post(new MonitorLoginAction( this ));
 	return delegate_->Login(user_id, password, domain, host, port);
@@ -137,7 +190,7 @@ StatusCode GameServiceSupport::OpenApp(const AppId& app_id) {
 	if (state_ == APP_OPEN)
 		return libgameservice::APP_ALREADY_OPEN;
 
-	if (state_ == LOGIN_FAILED || state_ == NO_CONNECTION)
+	if (state_ <= NO_CONNECTION)
 		return libgameservice::NOT_CONNECTED;
 
 	if (state_ != LOGIN_SUCCESSFUL && state_ != LOGIN_IN_PROGRESS)
@@ -149,7 +202,7 @@ StatusCode GameServiceSupport::OpenApp(const AppId& app_id) {
 }
 
 StatusCode GameServiceSupport::CloseApp() {
-	if (state_ == LOGIN_FAILED || state_ == NO_CONNECTION)
+	if (state_ <= NO_CONNECTION)
 			return libgameservice::NOT_CONNECTED;
 
 	if (state_ != APP_OPEN)
@@ -249,6 +302,35 @@ void GameServiceSupport::OnXmppOutput(const std::string &output) {
 void GameServiceSupport::OnXmppInput(const std::string &input) {
 	std::cout << "<<<<<<<<" << std::endl << input << std::endl
 			<< "<<<<<<<<" << std::endl;
+}
+
+void GameServiceSupport::OnRegisterAccountResponse(const ResponseStatus& rs,
+		const AccountInfo& account_info, void* cb_data) {
+	std::cout << "OnRegisterAccountResponse(). status_code:" << statusToString(
+				rs.status_code()) << ", account_info:" << account_info.Str() << std::endl;
+
+	if (rs.status_code() == OK) {
+
+		if (login_after_register_flag_) {
+			login_after_register_flag_ = false;
+
+			SystemDatabase * db = tpcontext_->get_db();
+			String user_id = db->get_string(GAMESERVICE_USER_ID_KEY, "");
+			if (user_id.empty()) {
+				db->set(GAMESERVICE_USER_ID_KEY, account_info.user_id());
+				db->set(GAMESERVICE_PASSWORD_KEY, account_info.password());
+			}
+
+			if (state_ <= NO_CONNECTION) {
+				// retrieve domain, host and port information from the configuration
+				String domain = tpcontext_->get(TP_GAMESERVICE_DOMAIN);
+				String host = tpcontext_->get(TP_GAMESERVICE_HOST);
+				int port = tpcontext_->get_int(TP_GAMESERVICE_PORT, 5222);
+
+				Login(account_info.user_id(), account_info.password(), domain, host, port);
+			}
+		}
+	}
 }
 
 void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id) {

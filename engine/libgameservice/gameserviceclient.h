@@ -12,6 +12,7 @@
 #include "turn.h"
 #include "participant.h"
 #include "item.h"
+#include "accountinfo.h"
 
 namespace libgameservice {
 
@@ -47,6 +48,9 @@ public:
 
 	/* Called when a status update results in an error */
 	virtual void OnStatusError(const std::string &error_string) = 0;
+
+	virtual void OnRegisterAccountResponse(const ResponseStatus& rs,
+			const AccountInfo& account_info, void* cb_data) = 0;
 
 	virtual void OnRegisterAppResponse(const ResponseStatus& rs,
 			const AppId& app_id) = 0;
@@ -108,6 +112,8 @@ public:
 class GameServiceAsyncInterface {
 
 public:
+
+	virtual StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data) = 0;
 
 	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) = 0;
 
