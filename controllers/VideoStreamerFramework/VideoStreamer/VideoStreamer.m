@@ -436,19 +436,9 @@ void capture_cleanup(void *context) {
 #pragma Video Capture
 
 - (void)initCapture {
-    //glEnable(GL_TEXTURE_2D);
-	//glDisable(GL_DEPTH_TEST);
-    
     AVCaptureDeviceInput *captureInput = [AVCaptureDeviceInput deviceInputWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] error:nil];
     
     AVCaptureVideoDataOutput *captureOutput = [[[AVCaptureVideoDataOutput alloc] init] autorelease];
-    
-    /*
-     if ([self setUpNetwork] != 0) {
-     NSLog(@"could not set up network");
-     return;
-     }
-     //*/
     
     captureOutput.alwaysDiscardsLateVideoFrames = YES;
     
@@ -488,9 +478,6 @@ void capture_cleanup(void *context) {
      prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
      [self.view.layer addSublayer:prevLayer];
      */
-    
-    //[networkMan startEncoder];
-    //[captureSession startRunning];
 }
 
 - (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code {

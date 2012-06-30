@@ -623,6 +623,8 @@
  *
  * TODO: Get rid of this Auth Header and authenticate in a different way so the method can
  * be reduced to just "invite"
+ *
+ * TODO: If packet does not generate, send bubble up failure
  */
 - (void)inviteWithAuthHeader:(NSString *)key {
     self.authLine = [self generateAuthLine:@"INVITE" headerKey:key];
