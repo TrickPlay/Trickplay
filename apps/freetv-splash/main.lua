@@ -1,160 +1,301 @@
-if not OVERRIDEMETATABLE then dofile("lib/__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("lib/__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("lib/__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("lib/__UTILITIES/Canvas.lua")              end
-if not MISC              then dofile("lib/__UTILITIES/Misc.lua")                end
-if not COLORSCHEME       then dofile("lib/__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("lib/__CORE/Style.lua")                    end
-if not WIDGET            then dofile("lib/__CORE/Widget.lua")                   end
-if not PROGRESSBAR       then dofile("lib/ProgressBar/ProgressBar.lua")         end
+-- Based on demo video at https://www.dropbox.com/s/g37078405oxlnlm/OOBE%20Screen%205c.mp4
+
+--[[
+
+    This animation is split into phases (which overlap slightly):
+
+    1. "Welcome to" "FREE TV!" zooms out from middle of TV and fades
+    2. Movie posters accordion out from center of screen to the sides, growing and rotating slightly in y-axis
+    3. "Hundreds of" "MOVIES" zooms out from middle of TV and fades
+    4. TV show posters fly out from center of screen to all edges, growing as they go
+    5. "Enjoy your favorite" "TV SHOWS" zooms out from middle of TV and fades
+    6. "The Best" "MUSIC" zooms out from middle of TV and fades
+    7. Album covers fly out from middle of TV, rotated at jaunty angles in x & y axes
+    8. "Welcome to" "FREE TV!" zooms back in to middle of screen
+
+]]--
+
+dofile("widget_helper.lua")
+
+local background = Image { src = "assets/background/bg-1.jpg" }
+screen:add(background)
+
+local movie_posters = assert(loadfile("posters.lua"))("assets/movie_posters/")
+screen:add(unpack(movie_posters))
+
+local welcome_to, free_tv, welcome_to_free_tv = assert(loadfile("small_text_big_text.lua"))("Welcome to", "FREE TV!")
+screen:add(welcome_to_free_tv)
+
+local hundreds_of, movies, hundreds_of_movies = assert(loadfile("small_text_big_text.lua"))("Hundreds of", "MOVIES")
+screen:add(hundreds_of_movies)
 
 
-if not OVERRIDEMETATABLE then dofile("lib/__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("lib/__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("lib/__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("lib/__UTILITIES/Canvas.lua")              end
-if not MISC              then dofile("lib/__UTILITIES/Misc.lua")                end
-if not COLORSCHEME       then dofile("lib/__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("lib/__CORE/Style.lua")                    end
-if not WIDGET            then dofile("lib/__CORE/Widget.lua")                   end
-if not LISTMANAGER       then dofile("lib/__UTILITIES/ListManagement.lua")      end
-if not LAYOUTMANAGER     then dofile("lib/LayoutManager/LayoutManager.lua")     end
-if not NINESLICE         then dofile("lib/NineSlice/NineSlice.lua")             end
+
+local tv_posters = assert(loadfile("posters.lua"))("assets/tv_posters/")
+screen:add(unpack(tv_posters))
+
+local tv_logos = assert(loadfile("posters.lua"))("assets/tv_logos/")
+screen:add(unpack(tv_logos))
+
+local enjoy_your_favorite, tv_shows, enjoy_your_favorite_tv_shows = assert(loadfile("small_text_big_text.lua"))("Enjoy your favorite","TV SHOWS")
+screen:add(enjoy_your_favorite_tv_shows)
 
 
-local pb = ProgressBar {
-                            width = screen.w,
-                            h = 110,
-                            x = 0,
-                            y = screen.h-110,
-                            style = {
-                                fill_colors = {
-                                            focus_upper = { 72, 97, 123 },
-                                            focus_lower = { 30, 58, 86 },
-                                            default_upper   = "gray24",
-                                            default_lower   = "grey15",
-                                },
-                                border = {
-                                    width = 0,
-                                    corner_radius = 0,
-                                },
-                            },
-            }
 
-local MY_TEXT = "<span weight='600'>Updating Guide Data...</span>"
+local album_covers = assert(loadfile("posters.lua"))("assets/music_posters/")
+screen:add(unpack(album_covers))
 
-local pb_text = Text {
-                    color = "white",
-                    markup = MY_TEXT,
-                    font = "FreeSans "..(13*pb.h/36).."px",
-                    x = 60,
-                    y = pb.y + pb.h/2,
-                }
-
-pb_text.anchor_point = { 0, pb_text.h/2 }
-
-local pb_text_bg = Text {
-                    color = "black",
-                    opacity = 255 * 0.7,
-                    markup = MY_TEXT,
-                    font = pb_text.font,
-                    x = pb_text.x - 2,
-                    y = pb_text.y - 2,
-                }
-pb_text_bg.anchor_point = { 0, pb_text.h/2 }
+local the_best, music, the_best_music = assert(loadfile("small_text_big_text.lua"))("The Best","MUSIC")
+screen:add(the_best_music)
 
 
-local movie_poster = NineSlice{
-    anchor_point = { 150, 200 },
-    x = screen.w/2,
-    y = screen.h/2,
-    w = 300,
-    h = 400,
-    scale = { 0.1, 0.1 },
-    cells = {
-        default = {
-            {
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-            },
-            {
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-                Widget_Image { src = "assets/movie_posters/Kick_Ass.jpg" },
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-            },
-            {
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-                Widget_Rectangle{w=3,h=3,color="white", opacity=255 * 0.7},
-            },
-        },
-    }
-}
 
-
-screen:add(movie_poster)
+local pb,pb_text,pb_text_bg = dofile("progress_bar.lua")
 screen:add(pb)
 screen:add(pb_text_bg)
 screen:add(pb_text)
-screen:show()
 
-local strings = {
-                    "Updating Guide Data...",
-                    "Calibrating Capacitors...",
-                    "Going to Warp Speed...",
-                    "Done",
+-- Now we'll build up the animation in stages, working one object/property at a time
+local animator_properties = {}
+local ANIMATION_DURATION = 20000
+
+
+-- NOTE: I'm wrapping all of these in functions so my text editor will let me fold/unfold and jump to the right section easily
+
+-- Welcome to FREE TV text bit
+function welcome_to_free_tv_setup()
+table.insert(animator_properties,
+                {
+                    source = free_tv,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0,   "LINEAR", 0 },                 -- Start transparent
+                        { 0.025, "LINEAR", 255 },               -- Fade in over first 0.5s
+                        { 0.15,  "LINEAR", 255 },               -- Fade in over first 0.5s
+                        { 0.25,  "EASE_OUT_SINE", 0 },                 -- Fade out by 1/4 through
+                    },
                 }
+            )
+table.insert(animator_properties,
+                {
+                    source = welcome_to,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0,   "LINEAR", 0 },                 -- Start transparent
+                        { 0.025, "LINEAR", 255 },               -- Fade in over first 0.5s
+                        { 0.1,   "LINEAR", 255 },               -- Fade in over first 0.5s
+                        { 0.15,  "EASE_OUT_SINE", 0 },                 -- Fade out by 15% through
+                    },
+                }
+            )
+table.insert(animator_properties,
+                {
+                    source = free_tv,
+                    name = "scale",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", { 0.5, 0.5 } },        -- Start small
+                        { 0.25, "EASE_OUT_SINE", { 2.0, 2.0 } },       -- Grow until 1/4 through
+                    },
+                }
+            )
+table.insert(animator_properties,
+                {
+                    source = welcome_to,
+                    name = "scale",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", { 0.5, 0.5 } },        -- Start small
+                        { 0.25, "EASE_OUT_SINE", { 2.0, 2.0 } },       -- Grow until 1/4 through
+                    },
+                }
+            )
+end
 
-local as = AnimationState {
-                    duration = 2000,            -- default transition duration
-                    mode = "LINEAR",  -- default Ease mode for all transitions
-                    transitions = {
-                        {
-                          source = "*",
-                          target = "1",
-                          keys = {
-                                { pb, "x", 0 },
-                          }
-                        },
-                        {
-                          source = "*",
-                          target = "2",
-                          keys = {
-                                { movie_poster, "x", 2*(math.random(0,screen.w)-screen.w/2) },
-                                { movie_poster, "y", math.random(-screen.h-movie_poster.h, screen.h+movie_poster.h) },
-                                { movie_poster, "scale", { 1.0, 1.0 } },
-                          }
-                        },
-                        {
-                          source = "*",
-                          target = "3",
-                          keys = {
-                                { pb, "x", 0 },
-                          }
-                        },
-                        {
-                          source = "*",
-                          target = "4",
-                          keys = {
-                                { pb, "x", 0 },
-                          }
+-- Movie posters
+function movie_posters_setup()
+for n,i in ipairs(movie_posters) do
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "opacity",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", 0 },
+                            { 0.15, "LINEAR", 0 },
+                            { 0.2, "EASE_OUT_EXP", 255 },
                         },
                     }
+                )
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "x",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", screen.w/2 },
+                            { 0.15, "LINEAR", screen.w/2 },
+                            { 0.35, "EASE_IN_EXP", -i.w+i.w*n/2 },
+                            { 0.4, "EASE_OUT_SINE", -i.w+i.w*n/2 },
+                        },
+                    }
+                )
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "y_rotation",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", 0 },
+                            { 0.15, "LINEAR", 45 },
+                            { 0.35, "EASE_OUT_SINE", 0 },
+                            { 0.4, "EASE_OUT_SINE", 0 },
+                        },
+                    }
+                )
+end
+end
+
+-- Hundreds of MOVIES text
+function hundreds_of_movies_setup()
+table.insert(animator_properties,
+                {
+                    source = hundreds_of,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
                 }
-
-function as:on_completed()
-    pb_text_bg.markup = "<span weight='600'>"..strings[as.state+0].."</span>"
-    pb_text.markup = "<span weight='600'>"..strings[as.state+0].."</span>"
-    local next_state = (as.state+1)
-    if(strings[next_state]) then as.state = next_state end
+            )
+table.insert(animator_properties,
+                {
+                    source = movies,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
+                }
+            )
 end
 
-function as.timeline:on_new_frame(ms, p)
-    collectgarbage("collect")
-    local num_strings = #strings-1
-    local start = as.state - 2
-    pb.progress = (p + start)/num_strings
+-- TV show posters
+function tv_posters_setup()
+for _,i in ipairs(tv_posters) do
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "opacity",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", 0 },
+                        },
+                    }
+                )
+end
 end
 
-as:warp("1")
+-- TV logos
+function tv_logos_setup()
+for _,i in ipairs(tv_logos) do
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "opacity",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", 0 },
+                        },
+                    }
+                )
+end
+end
+
+-- Enjoy your favorite TV SHOWS
+function enjoy_your_favorite_tv_shows_setup()
+table.insert(animator_properties,
+                {
+                    source = enjoy_your_favorite,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
+                }
+            )
+table.insert(animator_properties,
+                {
+                    source = tv_shows,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
+                }
+            )
+end
+
+-- Album covers
+function album_covers_setup()
+for _,i in ipairs(album_covers) do
+    table.insert(animator_properties,
+                    {
+                        source = i,
+                        name = "opacity",
+                        ease_in = false,
+                        keys = {
+                            { 0.0, "LINEAR", 0 },
+                        },
+                    }
+                )
+end
+end
+
+-- The Best MUSIC
+function the_best_music_setup()
+table.insert(animator_properties,
+                {
+                    source = the_best,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
+                }
+            )
+table.insert(animator_properties,
+                {
+                    source = music,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 0 },
+                    },
+                }
+            )
+end
+
+
+-- Call all the animator setup functions
+welcome_to_free_tv_setup()
+movie_posters_setup()
+hundreds_of_movies_setup()
+tv_posters_setup()
+tv_logos_setup()
+enjoy_your_favorite_tv_shows_setup()
+album_covers_setup()
+the_best_music_setup()
+
+local my_animation = Animator {
+                        duration = ANIMATION_DURATION,
+                        properties = animator_properties,
+                    }
+
+
+
+my_animation:start()
+
+screen:show()
