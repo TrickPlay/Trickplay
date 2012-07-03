@@ -15,13 +15,14 @@ text = "This is a sample message. This is a sample message. This is a sample mes
 screen:show()
 
 
-t1 = TextInput()
+t1 = TextInput{style = false}
 
 t1.style.fill_colors.default = "660000"
 
-t2 = TextInput{h=400,x = 200}
+t2 = TextInput{style = false,h=400,x = 200,text = "default"}
 
-t2.text = "default"
+t2.style.text.colors.default = "00d000"
+--t2.style.text.single_line = false
 
 screen:add(t1,t2)
 

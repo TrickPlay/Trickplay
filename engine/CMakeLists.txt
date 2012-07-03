@@ -13,7 +13,7 @@ set( ENGINE_LIBRARY_NAMES )
 set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
 
-include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
+include_directories( ${ENGINE_SRC}/lua/lua-5.2.0/src )
 include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
 include_directories( ${PROJECT_BINARY_DIR}/engine )
 
@@ -468,7 +468,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/keyboard.lb
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
-    
+    ${BINDINGS_SRC}/physics_bullet.lb
 )
 
 if (TP_WITH_GAMESERVICE)
@@ -575,6 +575,7 @@ list( APPEND
     ${ENGINE_SRC}/source/app_resource.cpp
     ${ENGINE_SRC}/source/plugin.cpp
     ${ENGINE_SRC}/source/desktop_controller.cpp
+    ${ENGINE_SRC}/source/physics_bullet.cpp
 )
 
 if (TP_WITH_GAMESERVICE)
@@ -651,6 +652,11 @@ target_link_libraries(
     tplua
     tptxmpp
     clutteralphamode
+
+    LinearMath
+    BulletDynamics
+    BulletCollision
+    BulletSoftBody
 )
 
 else (TP_WITH_GAMESERVICE)
@@ -664,6 +670,11 @@ target_link_libraries(
     dl
     tplua
     clutteralphamode
+    
+    LinearMath
+    BulletDynamics
+    BulletCollision
+    BulletSoftBody
 )
 
 endif(TP_WITH_GAMESERVICE)

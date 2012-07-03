@@ -124,55 +124,36 @@ ToastAlert = function(parameters)
 		function(oldf,self,v)   animate_out_duration = v end
 	)
     
-    
     ----------------------------------------------------------------------------
-    ---[=[
-    local widget_to_json = instance.to_json
 	
-    
-	instance.to_json = function(_,t)
-		
-		t.message                    = instance.message
-		t.message_color              = instance.message_color
-		t.horizontal_message_padding = instance.horizontal_message_padding
-		t.vertical_message_padding   = instance.vertical_message_padding
-		t.horizontal_icon_padding    = instance.horizontal_icon_padding
-		t.vertical_icon_padding      = instance.vertical_icon_padding
-		t.on_screen_duration         = instance.on_screen_duration
-		t.animate_in_duration        = instance.animate_in_duration
-		t.animate_out_duration       = instance.animate_out_duration
-		
-		if (not canvas) and image.src and image.src ~= "[canvas]" then 
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.message                    = self.message
+            t.message_font               = self.message_font
+            t.message_color              = self.message_color
+            t.horizontal_message_padding = self.horizontal_message_padding
+            t.vertical_message_padding   = self.vertical_message_padding
+            t.horizontal_icon_padding    = self.horizontal_icon_padding
+            t.vertical_icon_padding      = self.vertical_icon_padding
+            t.on_screen_duration         = self.on_screen_duration
+            t.animate_in_duration        = self.animate_in_duration
+            t.animate_out_duration       = self.animate_out_duration
             
-            t.image = image.src
-			
-		end
-		t.type = t.type or "OrbittingDots"
-		
-		return t
-		
-	end
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("OrbittingDots.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
-    --]=]
-    ----------------------------------------------------------------------------
-	
+            if (not canvas) and image.src and image.src ~= "[canvas]" then 
+                
+                t.image = image.src
+                
+            end
+            t.type = "ToastAlert"
+            
+            return t
+        end
+    )
     
+    ----------------------------------------------------------------------------
+	
     local animating = false
 	override_function(instance,"popup",
 		function(oldf,self,v) 
@@ -219,7 +200,11 @@ ToastAlert = function(parameters)
 	)
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size","separator_y","icon"},
+		{
+            "h","w","width","height","size","separator_y","icon",
+            "horizontal_message_padding","vertical_message_padding",
+            "horizontal_icon_padding","vertical_icon_padding"
+        },
 		function()
 			
 			--reposition icon
