@@ -1,14 +1,14 @@
 local small, big = ...
 
 local big_text = Text {
-                        color = "grey69",
+                        color = "grey90",
                         text = big,
                         font = "FreeSans bold 196px",
                     }
 big_text.anchor_point = { big_text.w/2, big_text.h/2 }
 
 local small_text = Text {
-                            color = "grey69",
+                            color = "grey90",
                             text = small,
                             font = "FreeSans 96px",
                             x = big_text.x,

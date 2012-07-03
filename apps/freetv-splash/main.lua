@@ -19,34 +19,43 @@ dofile("widget_helper.lua")
 
 local background = Image { src = "assets/background/bg-1.jpg" }
 screen:add(background)
+print("bg")
 
 local movie_posters = assert(loadfile("posters.lua"))("assets/movie_posters/")
 for i = #movie_posters, 1, -1 do screen:add( movie_posters[i] ) end
+print("movies")
 
 local welcome_to, free_tv, welcome_to_free_tv = assert(loadfile("small_text_big_text.lua"))("Welcome to", "FREE TV!")
 screen:add(welcome_to_free_tv)
+print("freetv")
 
 local hundreds_of, movies, hundreds_of_movies = assert(loadfile("small_text_big_text.lua"))("Hundreds of", "MOVIES")
 screen:add(hundreds_of_movies)
+print("hundreds")
 
 
 
 local tv_posters = assert(loadfile("posters.lua"))("assets/tv_posters/")
 for i = #tv_posters, 1, -1 do screen:add( tv_posters[i] ) end
+print("tv_poster")
 
 local tv_logos = assert(loadfile("posters.lua"))("assets/tv_logos/")
 for i = #tv_logos, 1, -1 do screen:add( tv_logos[i] ) end
+print("tv_logo")
 
 local enjoy_your_favorite, tv_shows, enjoy_your_favorite_tv_shows = assert(loadfile("small_text_big_text.lua"))("Enjoy your favorite","TV SHOWS")
 screen:add(enjoy_your_favorite_tv_shows)
+print("enjoy")
 
 
 
 local album_covers = assert(loadfile("posters.lua"))("assets/music_posters/")
-screen:add(unpack(album_covers))
+for i = #album_covers, 1, -1 do screen:add( album_covers[i] ) end
+print("album")
 
 local the_best, music, the_best_music = assert(loadfile("small_text_big_text.lua"))("The Best","MUSIC")
 screen:add(the_best_music)
+print("best music")
 
 
 
@@ -469,8 +478,8 @@ function album_covers_setup()
                             ease_in = false,
                             keys = {
                                 { 0.0, "LINEAR", 0 },
-                                { ((12.30-10.13) * n/#album_covers + 10.13)/17, "LINEAR", 0 },
-                                { ((12.30-10.13) * n/#album_covers + 10.63)/17, "EASE_IN_EXPO", 255 },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", 0 },
+                                { ((12.30-10.16) * n/#album_covers + 10.63)/17, "EASE_IN_EXPO", 255 },
                             },
                         }
                     )
@@ -481,8 +490,8 @@ function album_covers_setup()
                             ease_in = false,
                             keys = {
                                 { 0.0, "LINEAR", { 1.0, 1.0 } },
-                                { ((12.30-10.13) * n/#album_covers + 10.13)/17, "LINEAR", { 1.0, 1.0 } },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 1.5, 1.5 } },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", { 1.0, 1.0 } },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 1.5, 1.5 } },
                             },
                         }
                     )
@@ -495,8 +504,8 @@ function album_covers_setup()
                             ease_in = false,
                             keys = {
                                 { 0.0, "LINEAR", screen.w/2 },
-                                { ((12.30-10.13) * n/#album_covers + 10.13)/17, "LINEAR", screen.w/2 },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_x },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", screen.w/2 },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_x },
                             },
                         }
                     )
@@ -507,8 +516,8 @@ function album_covers_setup()
                             ease_in = false,
                             keys = {
                                 { 0.0, "LINEAR", screen.h/2 },
-                                { ((12.30-10.13) * n/#album_covers + 3.86)/17, "LINEAR", screen.h/2 },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_y },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", screen.h/2 },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_y },
                             },
                         }
                     )
