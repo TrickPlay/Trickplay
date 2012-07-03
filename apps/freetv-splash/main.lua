@@ -57,8 +57,7 @@ screen:add(pb_text)
 
 -- Now we'll build up the animation in stages, working one object/property at a time
 local animator_properties = {}
-local ANIMATION_DURATION = 17000
-
+local ANIMATION_DURATION = 20000
 
 -- NOTE: I'm wrapping all of these in functions so my text editor will let me fold/unfold and jump to the right section easily
 
@@ -483,7 +482,7 @@ function album_covers_setup()
                             keys = {
                                 { 0.0, "LINEAR", { 1.0, 1.0 } },
                                 { ((12.30-10.13) * n/#album_covers + 10.13)/17, "LINEAR", { 1.0, 1.0 } },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 2.0, 2.0 } },
+                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 1.5, 1.5 } },
                             },
                         }
                     )
@@ -497,7 +496,7 @@ function album_covers_setup()
                             keys = {
                                 { 0.0, "LINEAR", screen.w/2 },
                                 { ((12.30-10.13) * n/#album_covers + 10.13)/17, "LINEAR", screen.w/2 },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_EXPO", target_x },
+                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_x },
                             },
                         }
                     )
@@ -509,7 +508,7 @@ function album_covers_setup()
                             keys = {
                                 { 0.0, "LINEAR", screen.h/2 },
                                 { ((12.30-10.13) * n/#album_covers + 3.86)/17, "LINEAR", screen.h/2 },
-                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_EXPO", target_y },
+                                { ((12.30-10.13) * n/#album_covers + 12.23)/17, "EASE_IN_SINE", target_y },
                             },
                         }
                     )
@@ -586,12 +585,27 @@ album_covers_setup()
 the_best_music_setup()
 
 local my_animation = Animator {
-                        duration = ANIMATION_DURATION,
+                duration = ANIMATION_DURATION,
                         properties = animator_properties,
                     }
 
-
-
+local t = my_animation.timeline
+function t:on_marker_reached(marker, ms)
+    -- pb.progress should be updated in on_new_frame, but progressbar is leaking badly, so can't
+    pb.progress = ms/ANIMATION_DURATION
+    pb_text_bg.markup = "<span weight='600'>"..marker.."</span>"
+    pb_text.markup = "<span weight='600'>"..marker.."</span>"
+end
+t:add_marker("Updating Guide Data...", ANIMATION_DURATION * 1/10)
+t:add_marker("Updating Guide Data... ", ANIMATION_DURATION * 2/10)
+t:add_marker("Updating Guide Data...  ", ANIMATION_DURATION * 3/10)
+t:add_marker("Updating Guide Data...   ", ANIMATION_DURATION * 4/10)
+t:add_marker("Calibrating Capacitors...", ANIMATION_DURATION * 5/10)
+t:add_marker("Calibrating Capacitors... ", ANIMATION_DURATION * 6/10)
+t:add_marker("Calibrating Capacitors...  ", ANIMATION_DURATION * 7/10)
+t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
+t:add_marker("Going to Warp Speed... ", ANIMATION_DURATION * 9/10)
+t:add_marker("Done", ANIMATION_DURATION)
 my_animation:start()
 
 screen:show()

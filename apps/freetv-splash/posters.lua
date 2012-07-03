@@ -8,24 +8,24 @@ for i=1,#poster_names do
     posters[i] = NineSlice{
         x = screen.w/2,
         y = screen.h/2,
-        w = my_image.w + 2 + 2,
-        h = my_image.h + 2 + 2,
+        w = my_image.w + 1 + 1,
+        h = my_image.h + 1 + 1,
         cells = {
             default = {
                 {
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
                 },
                 {
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
                     my_image,
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
                 },
                 {
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
-                    Widget_Rectangle{ w=2,h=2,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
+                    Widget_Rectangle{ w=1,h=1,color="white", opacity=64 },
                 },
             },
         }
