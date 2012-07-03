@@ -93,10 +93,10 @@ function welcome_to_free_tv_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },        -- Start small
-                            { 2.06/17, "EASE_IN_SINE", { 2.0, 2.0 } },       -- Grow until 1/4 through
-                            { 12.83/17, "LINEAR", { 2.0, 2.0 } },
-                            { 1.0, "EASE_OUT_SINE", { 1.0, 1.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },        -- Start small
+                            { 2.06/17, "EASE_IN_SINE", { 1.0, 1.0 } },       -- Grow until 1/4 through
+                            { 12.83/17, "LINEAR", { 1.0, 1.0 } },
+                            { 1.0, "EASE_OUT_SINE", { 0.5, 0.5 } },
                         },
                     }
                 )
@@ -120,10 +120,10 @@ function welcome_to_free_tv_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },        -- Start small
-                            { 2.06/17, "EASE_IN_SINE", { 2.0, 2.0 } },       -- Grow until 1/4 through
-                            { 12.83/17, "LINEAR", { 2.0, 2.0 } },
-                            { 1.0, "EASE_OUT_SINE", { 1.0, 1.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },        -- Start small
+                            { 2.06/17, "EASE_IN_SINE", { 1.0, 1.0 } },       -- Grow until 1/4 through
+                            { 12.83/17, "LINEAR", { 1.0, 1.0 } },
+                            { 1.0, "EASE_OUT_SINE", { 0.5, 0.5 } },
                         },
                     }
                 )
@@ -235,7 +235,7 @@ function hundreds_of_movies_setup()
                         keys = {
                             { 0.0, "LINEAR", { 0.5, 0.5 } },
                             { 0.17, "LINEAR", { 0.5, 0.5 } },
-                            { 0.235, "EASE_OUT_SINE", { 2.0, 2.0 } },
+                            { 0.235, "EASE_OUT_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
@@ -260,7 +260,7 @@ function hundreds_of_movies_setup()
                         keys = {
                             { 0.0, "LINEAR", { 0.5, 0.5 } },
                             { 0.17, "LINEAR", { 0.5, 0.5 } },
-                            { 0.3, "EASE_OUT_SINE", { 2.0, 2.0 } },
+                            { 0.3, "EASE_OUT_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
@@ -313,7 +313,31 @@ function tv_posters_setup()
                             keys = {
                                 { 0.0, "LINEAR", { 1.0, 1.0 } },
                                 { ((9.13-3.86) * n/#tv_posters + 3.86)/17, "LINEAR", { 1.0, 1.0 } },
-                                { ((9.13-3.86) * n/#tv_posters + 5.36)/17, "EASE_OUT_SINE", { 2.0, 2.0 } },
+                                { ((9.13-3.86) * n/#tv_posters + 5.36)/17, "EASE_OUT_SINE", { 1.4, 1.4 } },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "x_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((9.13-3.86) * n/#tv_posters + 3.86)/17, "LINEAR", 0 },
+                                { ((9.13-3.86) * n/#tv_posters + 5.36)/17, "EASE_OUT_SINE", math.random(-20,20) },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "y_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((9.13-3.86) * n/#tv_posters + 3.86)/17, "LINEAR", 0 },
+                                { ((9.13-3.86) * n/#tv_posters + 5.36)/17, "EASE_OUT_SINE", math.random(-20,20) },
                             },
                         }
                     )
@@ -373,7 +397,31 @@ function tv_logos_setup()
                             keys = {
                                 { 0.0, "LINEAR", { 1.0, 1.0 } },
                                 { ((10.23-8.53) * n/#tv_logos + 8.53)/17, "LINEAR", { 1.0, 1.0 } },
-                                { ((10.23-8.53) * n/#tv_logos + 9.56)/17, "EASE_OUT_SINE", { 2.0, 2.0 } },
+                                { ((10.23-8.53) * n/#tv_logos + 9.56)/17, "EASE_OUT_SINE", { 1.4, 1.4 } },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "x_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((10.23-8.53) * n/#tv_logos + 8.53)/17, "LINEAR", 0 },
+                                { ((10.23-8.53) * n/#tv_logos + 9.56)/17, "EASE_OUT_SINE", math.random(-20,20) },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "y_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((10.23-8.53) * n/#tv_logos + 8.53)/17, "LINEAR", 0 },
+                                { ((10.23-8.53) * n/#tv_logos + 9.56)/17, "EASE_OUT_SINE", math.random(-20,20) },
                             },
                         }
                     )
@@ -431,9 +479,9 @@ function enjoy_your_favorite_tv_shows_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },
-                            { 6.60/17, "LINEAR", { 1.0, 1.0 } },
-                            { 7.76/17, "EASE_IN_SINE", { 2.0, 2.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },
+                            { 6.60/17, "LINEAR", { 0.5, 0.5 } },
+                            { 7.76/17, "EASE_IN_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
@@ -456,9 +504,9 @@ function enjoy_your_favorite_tv_shows_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },
-                            { 6.60/17, "LINEAR", { 1.0, 1.0 } },
-                            { 8.63/17, "EASE_IN_SINE", { 2.0, 2.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },
+                            { 6.60/17, "LINEAR", { 0.5, 0.5 } },
+                            { 8.63/17, "EASE_IN_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
@@ -491,7 +539,31 @@ function album_covers_setup()
                             keys = {
                                 { 0.0, "LINEAR", { 1.0, 1.0 } },
                                 { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", { 1.0, 1.0 } },
-                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 1.5, 1.5 } },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", { 1.4, 1.4 } },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "x_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", 0 },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", math.random(-20,20) },
+                            },
+                        }
+                    )
+        table.insert(animator_properties,
+                        {
+                            source = i,
+                            name = "y_rotation",
+                            ease_in = false,
+                            keys = {
+                                { 0.0, "LINEAR", 0 },
+                                { ((12.30-10.16) * n/#album_covers + 10.16)/17, "LINEAR", 0 },
+                                { ((12.30-10.16) * n/#album_covers + 12.23)/17, "EASE_OUT_SINE", math.random(-20,20) },
                             },
                         }
                     )
@@ -549,9 +621,9 @@ function the_best_music_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },
-                            { 10.90/17, "LINEAR", { 1.0, 1.0 } },
-                            { 12.70/17, "EASE_IN_SINE", { 2.0, 2.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },
+                            { 10.90/17, "LINEAR", { 0.5, 0.5 } },
+                            { 12.70/17, "EASE_IN_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
@@ -574,9 +646,9 @@ function the_best_music_setup()
                         name = "scale",
                         ease_in = false,
                         keys = {
-                            { 0.0, "LINEAR", { 1.0, 1.0 } },
-                            { 10.90/17, "LINEAR", { 1.0, 1.0 } },
-                            { 12.70/17, "EASE_IN_SINE", { 2.0, 2.0 } },
+                            { 0.0, "LINEAR", { 0.5, 0.5 } },
+                            { 10.90/17, "LINEAR", { 0.5, 0.5 } },
+                            { 12.70/17, "EASE_IN_SINE", { 1.0, 1.0 } },
                         },
                     }
                 )
