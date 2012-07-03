@@ -142,7 +142,7 @@ end
 
 local function create_mouse_event_handler(uiInstance, uiTypeStr)
 
-    function uiInstance:on_motion(x,y)
+    uiInstance:add_mouse_handler("on_motion",function(self, x,y)--:on_motion(x,y)
         if dragging then
             local actor , dx , dy = unpack( dragging )
             actor.position = { x - dx , y - dy  }
@@ -153,9 +153,9 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
                 anchor_mark.position = { x - dx , y - dy  }
             end 
         end
-    end
+    end,true)
 
-    function uiInstance:on_button_down(x , y , button, num_clicks, m)
+    uiInstance:add_mouse_handler("on_button_down",function(self, x , y , button, num_clicks, m)--:on_button_down(x , y , button, num_clicks, m)
 
 		if m and m.control then control = true else control = false end 
 
@@ -196,9 +196,9 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
             end
         end 
         return true
-    end
+    end,true)
 
-    function uiInstance:on_button_up(x , y , button)
+    uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)--:on_button_up(x , y , button)
         
 		if m  and m.control then 
 			control = true 
@@ -235,7 +235,7 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
         dragging = nil
         uiInstance:ungrab_pointer()
         uiInstance:set{}
-	end 
+	end,true) 
 end 
 
 local function assign_right_name (uiInstance, uiTypeStr)
