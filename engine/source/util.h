@@ -468,6 +468,8 @@ namespace Util
 
 
 	String describe_lua_value( lua_State * L , int index );
+
+    void convert_bitmask_to_table( lua_State * L );
 }
 
 #endif // _TRICKPLAY_UTIL_H

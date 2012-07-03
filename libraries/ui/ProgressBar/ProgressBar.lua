@@ -15,11 +15,11 @@ local create_fill = function(self)
         c:add_source_pattern_color_stop( 1 , self.style.fill_colors.focus_lower )
         c:fill()
         
-        return c:Image()
+        return c:Image{name = "fill"} 
         
     else
         
-        return Rectangle{size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
         
     end
     
@@ -71,7 +71,7 @@ local create_shell = function(self)
         
     end
     
-    return c:Image() 
+    return c:Image{name = "shell"} 
     
 end
 
@@ -119,12 +119,7 @@ ProgressBar = function(parameters)
 	)
     
     local expand_fill = function() 
-        fill.clip = {
-            0,
-            0,
-            fill.w*progress,
-            fill.h
-        }
+        fill.w = (shell.w-2*instance.style.border.width)*progress
     end
 	override_property(instance,"progress",
 		function(oldf) return progress end,
@@ -169,19 +164,32 @@ ProgressBar = function(parameters)
 	)
     
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.progress = self.progress
+            
+            t.type = "ProgressBar"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
     local set_redraw_shell = function() redraw_shell = true end
     local set_redraw_both  = function() redraw_shell = true redraw_fill  = true end
     
     
-	local function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, set_redraw_both  )
-		instance.style.border:on_changed(         instance, set_redraw_shell )
-		instance.style.border.colors:on_changed(  instance, set_redraw_shell )
-		
-		set_redraw_both()
+	local instance_on_style_changed
+    function instance_on_style_changed()
         
+        instance.style.border:subscribe_to(      nil, set_redraw_shell )
+        instance.style.fill_colors:subscribe_to( nil, set_redraw_both )
+        
+		set_redraw_both()
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
@@ -190,6 +198,8 @@ ProgressBar = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
+	redraw_shell = true 
+    redraw_fill  = true 
 	instance:set(parameters)
 	
 	return instance

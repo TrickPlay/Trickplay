@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4433AEE41587CF1400BC2135 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4433AEE31587CF1400BC2135 /* CoreMotion.framework */; };
+		4437300A15882D9700DCC706 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD32EAE315757CF400A3BA7B /* TakeControl.framework */; };
 		4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F758143F8368002809DB /* background@2x~iphone.png */; };
 		4452F75B143F8368002809DB /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F759143F8368002809DB /* background~iphone.png */; };
 		4452F75E143F836E002809DB /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F75D143F836E002809DB /* background.png */; };
@@ -19,6 +21,10 @@
 		4476FE0015212E8900B6CB4A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4476FDFF15212E8900B6CB4A /* libz.dylib */; };
 		44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B48F801457335F00C14A7D /* libTestFlight.a */; };
 		CD2D3149145B84A2009DA3D7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */; };
+		CD32EAC51574757A00A3BA7B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC41574757A00A3BA7B /* CoreMedia.framework */; };
+		CD32EAC71574758000A3BA7B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC61574758000A3BA7B /* CoreVideo.framework */; };
+		CD32EAC91574758700A3BA7B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC81574758700A3BA7B /* Security.framework */; };
+		CD32EAE415757CF400A3BA7B /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAE315757CF400A3BA7B /* TakeControl.framework */; };
 		CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E95143A748A0073BB88 /* UIKit.framework */; };
 		CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E97143A748A0073BB88 /* Foundation.framework */; };
 		CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E99143A748A0073BB88 /* CoreGraphics.framework */; };
@@ -34,11 +40,10 @@
 		CD4B2F2E143A76B30073BB88 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F23143A76500073BB88 /* AudioToolbox.framework */; };
 		CD4B2F2F143A76B30073BB88 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F21143A76450073BB88 /* QuartzCore.framework */; };
 		CD4B2F30143A76B30073BB88 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F1F143A76290073BB88 /* AssetsLibrary.framework */; };
-		CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
-		CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4433AEE31587CF1400BC2135 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		4452F758143F8368002809DB /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background@2x~iphone.png"; path = "Backgrounds/background@2x~iphone.png"; sourceTree = "<group>"; };
 		4452F759143F8368002809DB /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background~iphone.png"; path = "Backgrounds/background~iphone.png"; sourceTree = "<group>"; };
 		4452F75D143F836E002809DB /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = background.png; path = Backgrounds/background.png; sourceTree = "<group>"; };
@@ -52,6 +57,10 @@
 		44B48F801457335F00C14A7D /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTestFlight.a; path = TestFlight/libTestFlight.a; sourceTree = SOURCE_ROOT; };
 		44B48F811457335F00C14A7D /* TestFlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestFlight.h; path = TestFlight/TestFlight.h; sourceTree = SOURCE_ROOT; };
 		CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		CD32EAC41574757A00A3BA7B /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		CD32EAC61574758000A3BA7B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		CD32EAC81574758700A3BA7B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		CD32EAE315757CF400A3BA7B /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = Library/TakeControl.framework; sourceTree = SDKROOT; };
 		CD4B2E91143A74890073BB88 /* TakeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TakeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4B2E95143A748A0073BB88 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CD4B2E97143A748A0073BB88 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -72,7 +81,6 @@
 		CD4B2F25143A76590073BB88 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		CD4B2F27143A76650073BB88 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		CD4B2F29143A76710073BB88 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
-		CD66806214479AEA00232938 /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = Library/TakeControl.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +88,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD32EAC91574758700A3BA7B /* Security.framework in Frameworks */,
+				CD32EAC71574758000A3BA7B /* CoreVideo.framework in Frameworks */,
+				CD32EAC51574757A00A3BA7B /* CoreMedia.framework in Frameworks */,
+				CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */,
 				4476FE0015212E8900B6CB4A /* libz.dylib in Frameworks */,
 				CD2D3149145B84A2009DA3D7 /* AVFoundation.framework in Frameworks */,
 				CD4B2F2B143A76B30073BB88 /* MobileCoreServices.framework in Frameworks */,
@@ -90,9 +102,9 @@
 				CD4B2F30143A76B30073BB88 /* AssetsLibrary.framework in Frameworks */,
 				CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */,
 				CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */,
-				CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */,
-				CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */,
 				44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */,
+				4433AEE41587CF1400BC2135 /* CoreMotion.framework in Frameworks */,
+				CD32EAE415757CF400A3BA7B /* TakeControl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +152,11 @@
 		CD4B2E94143A748A0073BB88 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CD66806214479AEA00232938 /* TakeControl.framework */,
+				4433AEE31587CF1400BC2135 /* CoreMotion.framework */,
+				CD32EAE315757CF400A3BA7B /* TakeControl.framework */,
+				CD32EAC81574758700A3BA7B /* Security.framework */,
+				CD32EAC61574758000A3BA7B /* CoreVideo.framework */,
+				CD32EAC41574757A00A3BA7B /* CoreMedia.framework */,
 				CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */,
 				CD4B2F29143A76710073BB88 /* MobileCoreServices.framework */,
 				CD4B2F27143A76650073BB88 /* MediaPlayer.framework */,
@@ -230,7 +246,7 @@
 		CD4B2E88143A74890073BB88 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = CD4B2E8B143A74890073BB88 /* Build configuration list for PBXProject "TakeControlApp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -254,7 +270,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */,
 				CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */,
 				CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */,
 				CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */,
@@ -267,6 +282,7 @@
 				4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */,
 				4452F75B143F8368002809DB /* background~iphone.png in Resources */,
 				4452F75E143F836E002809DB /* background.png in Resources */,
+				4437300A15882D9700DCC706 /* TakeControl.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +301,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/TakeControl.Framework/TakeControl\"\n\n\nGIT_REVISION=`git --git-dir=\"${PROJECT_DIR}/../../.git\" --work-tree=\"${PROJECT_DIR}/../..\" describe --tags --dirty`\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\"\n\ndefaults write \"${INFO_PLIST}\" CFBundleShortVersionString \"${GIT_REVISION}\"";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -332,22 +349,10 @@
 		44FE8A57143FAAC100F10442 /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				GCC_THUMB_SUPPORT = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -355,9 +360,7 @@
 				);
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Distribution;
 		};
@@ -365,22 +368,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlight\"",
-				);
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-all_load",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/TestFlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -389,17 +385,8 @@
 		CD4B2EB1143A748A0073BB88 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -407,17 +394,13 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				GCC_THUMB_SUPPORT = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
-				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -425,31 +408,17 @@
 		CD4B2EB2143A748A0073BB88 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				GCC_THUMB_SUPPORT = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
-				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -460,20 +429,13 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlight\"",
-				);
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-all_load",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/TestFlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -486,20 +448,13 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlight\"",
-				);
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-all_load",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/TestFlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

@@ -104,28 +104,14 @@ ColorScheme = function(parameters)
     local meta_getters = {
         name       = function() return name                     end,
         type       = function() return "COLORSCHEME"            end,
+        attributes = function() 
+            return recursive_overwrite({}, colors) 
+        end,
     }
     
     setmetatable(
         instance,
         {
-            __newindex = function(t,k,v)
-                
-                func_upval = meta_setters[k]
-                
-                if func_upval then
-                    
-                    func_upval(v)
-                    
-                else
-                    
-                    colors[k] = is_color(v)
-                    
-                    t:update()
-                    
-                end
-                
-            end,
             __index = function(t,k)
                 
                 func_upval = meta_getters[k]
@@ -136,12 +122,42 @@ ColorScheme = function(parameters)
                     
                 else
                     
-                    return colors[k] or "00000000"
+                    return colors[k]-- or "00000000"
                     
                 end
                 
             end
         }
+    )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        function(t,k,v)
+            
+            func_upval = meta_setters[k]
+            
+            if func_upval then
+                
+                func_upval(v)
+                
+            else
+                
+                colors[k] = is_color(v)
+                
+                t:update()
+                
+            end
+            
+        end,
+        
+        function(self,t)
+            
+            for k,v in pairs(t) do
+                
+                self[k] = v
+                
+            end
+            
+        end
     )
     
     if parameters.name == nil then instance.name = nil end
