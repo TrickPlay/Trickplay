@@ -1,5 +1,6 @@
 local r
 local add = function(self,...)
+    local arg = table.pack(...)
 	for _,v in ipairs(arg) do
 		self[v] = true
 	end
@@ -9,6 +10,7 @@ Set = Class {
 	shared = {
 		add = add,
 		drop = function(self,...)
+            local arg = table.pack(...)
 			for _,v in ipairs(arg) do
 				self[v] = nil
 			end
