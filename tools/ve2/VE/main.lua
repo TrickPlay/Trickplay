@@ -26,6 +26,7 @@ if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")    
 if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
 
 dofile("LIB/VE/ve_runtime")
+
 -- The asset cache
 assets = dofile( "assets-cache" )
 
@@ -280,7 +281,6 @@ local function addIntoLayer (uiInstance, group)
     devtools:gid(curLayerGid):add(uiInstance)
 
     if group == nil then
-        print ("addIntoLayer refresh() **************************")
         _VE_.refresh()
     end 
 
@@ -397,6 +397,43 @@ local function get_min_max ()
     return min_x, max_x, min_y, max_y
 end 
 
+local function editor_clone()
+
+	if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    curLayer = devtools:gid(curLayerGid)
+
+	for i, v in pairs(curLayer.children) do
+		if(v.selected == true) then
+		    screen_ui.n_selected(v)
+		    uiClone = Widget_Clone {
+		        source = v,
+                position = {v.x + 20, v.y +20}
+        	}
+            assign_right_name(uiClone, "Clone")
+
+            create_mouse_event_handler(uiClone, "Clone")
+
+            addIntoLayer(uiClone, true)
+
+			if v.extra.clone then 
+			    table.insert(v.extra.clone, uiClone.name)
+			else 
+			    v.extra.clone = {}
+			    table.insert(v.extra.clone, uiClone.name)
+			end 
+        end
+	end
+
+    _VE_.refresh()
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+end
 
 local function editor_group()
 
@@ -537,11 +574,185 @@ end
 -- Duplicate
 _VE_.duplicate = function(gid)
     --devtools:gid(gid)[property] = value 
+
+--[[
+    -- no selected object 
+	if(table.getn(selected_objs) == 0 )then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	for i, v in pairs(g.children) do
+		if util.is_this_selected(v) == true then 
+		    if ui.dup then
+		    	if ui.dup.name == v.name then 
+					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
+				else 
+					ui.dup = nil 
+					next_position = nil 
+			  	end 
+		    end 
+			 
+            ui.dup = dup_function(v)
+
+			if ui.dup then 
+            	table.insert(undo_list, {ui.dup.name, hdr.ADD, ui.dup})
+                g:add(ui.dup)
+
+                 ui.dup.reactive = true
+                 ui.dup.extra.lock = false
+                 util.create_on_button_down_f(ui.dup)
+                 item_num = item_num + 1
+			end --ui.dup
+		end --if selected == true
+    end -- for 
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+--]]
 end 
 
 -- Delete
 _VE_.delete = function(gid)
     --devtools:gid(gid)[property] = value 
+--[=[
+    if(table.getn(selected_objs) == 0 )then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	local delete_f = function(del_obj)
+
+		screen_ui.n_selected(del_obj)
+
+        table.insert(undo_list, {del_obj.name, hdr.DEL, del_obj})
+
+        if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
+	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
+        end
+
+		if util.need_stub_code(del_obj) == true then 
+			if current_fn then 
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
+			    local main = readfile("main.lua")
+			    if main then 
+			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
+			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
+				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
+				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
+				  		local main_last = string.sub(main, r+1, -1)
+				  		main = ""
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
+				  		editor_lb:writefile("main.lua",main, true)
+	       		    end 
+			     end 
+	       	end 
+	   end 
+    end 
+
+	for i, v in pairs(g.children) do
+		if(v.extra.selected == true) then
+			if v.extra.clone then 
+				if #v.extra.clone > 0 then
+					editor.error_message("017","",nil,nil,nil)
+        			screen:grab_key_focus()
+					input_mode = hdr.S_SELECT
+					return 
+				end 
+			end 
+
+			if v.type == "Clone" then 
+				util.table_remove_val(v.source.extra.clone, v.name)
+			end 
+			
+			if util.is_this_widget(v) == false then 
+				delete_f(v)
+		    	g:remove(v)
+			end 
+		end 
+	end 
+	
+
+	for i, j in pairs(selected_objs) do 
+		j = string.sub(j, 1,-7)
+		local bumo
+		local s_obj = g:find_child(j)
+
+		if s_obj then 
+			bumo = s_obj.parent 
+		else 
+			return 
+		end 
+
+		if bumo.name == nil then 
+				if (bumo.parent.name == "window") then -- AP, SP 
+			    	bumo = bumo.parent.parent
+					for j, k in pairs (bumo.content.children) do 
+			 			--if(k.extra.selected == true) then
+						if k.name == s_obj.name then 
+							delete_f(k) 
+        	     	    	bumo.content:remove(k)
+			 			end 
+					end 
+				elseif (bumo.parent.extra.type == "DialogBox") then
+					bumo = bumo.parent 
+					delete_f(s_obj)
+					bumo.content:remove(s_obj)
+				elseif (bumo.parent.extra.type == "TabBar") then
+					bumo = bumo.parent
+					for e,f in pairs (bumo.tabs) do 
+						for t,y in pairs (f.children) do 
+							if y.name == s_obj.name then 
+								delete_f(s_obj)
+								f:remove(y)
+							end 
+						end 
+					end 
+				end 
+		elseif bumo.extra.type == "LayoutManager" then  
+				for e, r in pairs (bumo.cells) do 
+					if r then 
+						for x, c in pairs (r) do 
+							if c.name == s_obj.name then 
+							 	delete_f(s_obj) 
+							 	bumo:replace(e,x,nil)
+							end 
+						end
+					end 
+				end
+		else -- Regular Group 
+				for p, q in pairs (bumo.children) do 
+					if q.name == s_obj.name then 
+						delete_f(s_obj) 
+						bumo:remove(s_obj)
+					end 
+				end 
+		end 
+	end 
+
+	if table.getn(g.children) == 0 then 
+	    if screen:find_child("timeline") then 
+			screen:remove(screen:find_child("timeline"))
+	    end 
+	end 
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+
+--]=]
 end 
 
 -- SET
@@ -732,8 +943,6 @@ _VE_.saveFile = function(scrJson)
 
 end 
 
-
-
 _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     local uiInstance, dragging = nil 
@@ -753,6 +962,13 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         if uiInstance == nil then 
             return
         end 
+
+    elseif uiTypeStr == "Clone" then 
+        
+        blockReport = true
+        editor_clone()
+        blockReport = false
+        return
 
     elseif uiElementCreate_map[uiTypeStr] then
 

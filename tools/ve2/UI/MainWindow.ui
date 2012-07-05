@@ -95,8 +95,6 @@
      <addaction name="actionWidgetText"/>
      <addaction name="actionWidgetImage"/>
      <addaction name="actionWidgetRectangle"/>
-     <addaction name="actionWidgetGroup"/>
-     <addaction name="actionWidgetClone"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
     <addaction name="actionDelete"/>

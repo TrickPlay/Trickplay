@@ -64,9 +64,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
         QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
 
-        QObject.connect(self.ui.actionWidgetGroup, SIGNAL("triggered()"),  self.group)
-        QObject.connect(self.ui.actionWidgetClone, SIGNAL("triggered()"),  self.clone)
-
         QObject.connect(self.ui.actionGroup, SIGNAL("triggered()"),  self.group)
         QObject.connect(self.ui.actionUngroup, SIGNAL("triggered()"),  self.ungroup)
         QObject.connect(self.ui.actionClone, SIGNAL("triggered()"),  self.clone)

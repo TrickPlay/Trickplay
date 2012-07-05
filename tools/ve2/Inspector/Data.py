@@ -113,9 +113,8 @@ def scaleToFloat(v):
 def summarizeSource(v):
     """
     Summarize clone data into a string
-    """
     print("summarize!!")
-    
+    """
     # Clone may not have source
     try:
         s = str(v['gid']) 
