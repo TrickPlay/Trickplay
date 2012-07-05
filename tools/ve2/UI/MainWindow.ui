@@ -99,6 +99,11 @@
      <addaction name="actionWidgetClone"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionDuplicate"/>
+    <addaction name="actionClone"/>
+    <addaction name="actionGroup"/>
+    <addaction name="actionUngroup"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -118,7 +123,7 @@
    <property name="minimumSize">
     <size>
      <width>325</width>
-     <height>45</height>
+     <height>81</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
@@ -628,6 +633,31 @@
   <action name="actionWidgetClone">
    <property name="text">
     <string>WidgetClone</string>
+   </property>
+  </action>
+  <action name="actionUngroup">
+   <property name="text">
+    <string>Ungroup</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionClone">
+   <property name="text">
+    <string>Clone</string>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="text">
+    <string>Group</string>
+   </property>
+  </action>
+  <action name="actionDuplicate">
+   <property name="text">
+    <string>Duplicate</string>
    </property>
   </action>
  </widget>

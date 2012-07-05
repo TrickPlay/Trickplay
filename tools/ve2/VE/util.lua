@@ -3,7 +3,27 @@
 -----------
 local util = {}
 
+--[[
+function util.getUITypeStr(v, type, widget_type)
+    "Widget_Rectangle" 
+    "Widget_Image"
+    "Widget_Group"
+    "Widget_Text"
+    "Button" .... 
+end 
+]]
 
+
+function util.is_this_group(v)
+
+	if v.extra then 
+		if v.widget_type and v.widget_type == "Widget" and v.type == "Group" then 
+			return true 
+		end 
+	end 
+	return false
+
+end 
 
 function util.color_to_string( color )
 
@@ -162,7 +182,14 @@ end
 
 function util.get_group_position(child_obj)
 
-     curLayer = child_obj.parent()
+     print ("get_group_position")
+     if child_obj then
+        print (child_obj.type)
+     else 
+        print ("ehheheheheh")
+     end 
+     curLayer = child_obj.parent
+     if curLayer == nil then print ("WHAHAHAHAHAH") end 
      for i, v in pairs(curLayer.children) do
           if curLayer:find_child(v.name) then
 	       		if (v.type == "Group") then 

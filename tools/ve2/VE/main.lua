@@ -73,6 +73,7 @@ local uiNum = 0
 local layerNum = 0
 local curLayerGid = nil
 local curLayer= nil
+local blockReport= false
 
 -- UI Element Creation Function Map 
 
@@ -228,7 +229,7 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 	        local border = screen:find_child(uiInstance.name.."border")
 		    local am = screen:find_child(uiInstance.name.."a_m") 
 		    local group_pos
-	       	if(border ~= nil) then 
+	       	if(border ~= nil and dragging ~= nil) then 
                 local actor , dx , dy = unpack( dragging )
 		        if (uiInstance.is_in_group == true) then
 			        --group_pos = util.get_group_position(uiInstance)
@@ -269,7 +270,7 @@ local function assign_right_name (uiInstance, uiTypeStr)
 
 end 
 
-local function addIntoLayer (uiInstance)
+local function addIntoLayer (uiInstance, group)
 
     uiInstance.reactive = true
     uiInstance.lock = false
@@ -278,8 +279,10 @@ local function addIntoLayer (uiInstance)
 
     devtools:gid(curLayerGid):add(uiInstance)
 
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
+    if group == nil then
+        print ("addIntoLayer refresh() **************************")
+        _VE_.refresh()
+    end 
 
     if uiInstance.subscribe_to then  
 
@@ -327,7 +330,6 @@ local function editor_rectangle_move(x,y)
 	end
 
 end
-
 
 
 local function editor_rectangle_done(x,y)
@@ -420,6 +422,7 @@ local function editor_group()
 			screen_ui.n_selected(v)
 			v:unparent()
 			v.is_in_group = true
+			v.reactive = false
 			v.group_position = uiGroup.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -433,42 +436,6 @@ local function editor_group()
     return uiGroup
 end
 
-
-
---[[
-function editor.ugroup()
-	if table.getn(selected_objs) == 0 then 
-		editor.error_message("016","",nil,nil,nil)
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-	for i, v in pairs(g.children) do
-    	--if g:find_child(v.name) then
-		  	if(v.extra.selected == true) then
-				if util.is_this_group(v) == true then
-			     	screen_ui.n_selected(v)
-			     	v.extra.children = {}
-			     	for i,c in pairs(v.children) do 
-				     	table.insert(v.extra.children, c.name) 
-						c:unparent()
-				     	c.extra.is_in_group = false
-				     	c.x = c.x + v.x 
-				     	c.y = c.y + v.y 
-						c.reactive = true	
-		     		    g:add(c)
-			     	end
-			     	g:remove(v)
-        		    table.insert(undo_list, {v.name, hdr.DEL, v})
-		        end 
-		   end 
-		--end
-	end
-    screen.grab_key_focus(screen)
-	input_mode = hdr.S_SELECT
-end
-]]
 
 ---------------------------------------------------------------------------
 ---            Global  Visual Editor Functions                          ---
@@ -517,6 +484,66 @@ _VE_.getUIInfo = function()
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 
+_VE_.refresh = function()
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
+end 
+
+-- UnGroup
+_VE_.ungroup = function(gid)
+    
+    curLayerGid = gid 
+    curLayer = devtools:gid(gid)
+
+    if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    blockReport = true
+    for i, v in pairs(curLayer.children) do
+        if curLayer:find_child(v.name) then
+		  	if(v.extra.selected == true) then
+				if util.is_this_group(v) == true then
+			     	screen_ui.n_selected(v)
+			     	for i,c in pairs(v.children) do 
+						c:unparent()
+				     	c.extra.is_in_group = false
+				     	c.x = c.x + v.x 
+				     	c.y = c.y + v.y 
+						c.reactive = true	
+                        if c.widget_type == "Widget" then 
+                            uiTypeStr = c.widget_type..c.type
+                        else 
+                            uiTypeStr = c.widget_type
+                        end
+                        create_mouse_event_handler(c, uiTypeStr)
+                        addIntoLayer(c, true)
+			     	end
+			     	curLayer:remove(v)
+                    _VE_.refresh()
+		        end 
+		   end 
+		end
+	end
+
+    screen.grab_key_focus(screen)
+	input_mode = hdr.S_SELECT
+    blockReport = false
+
+end 
+
+-- Duplicate
+_VE_.duplicate = function(gid)
+    --devtools:gid(gid)[property] = value 
+end 
+
+-- Delete
+_VE_.delete = function(gid)
+    --devtools:gid(gid)[property] = value 
+end 
+
 -- SET
 _VE_.setUIInfo = function(gid, property, value)
     devtools:gid(gid)[property] = value 
@@ -524,26 +551,16 @@ end
 
 -- REPORT 
 _VE_.repUIInfo = function(uiInstance)
-    --_VE_.getUIInfo()
-    --_VE_.getStInfo()
-    ---[[
+    if blockReport == true then 
+        return
+    end 
+
     local t = {}
     if uiInstance.to_json then 
         table.insert(t, json:parse(uiInstance:to_json()))
     end 
     print("repUIInfo"..json:stringify(t))
-    ---]] 
 end
-
---[[
-_VE_.repUIInfoWfakeJson = function(uiInstance)
-    local t = {}
-    if uiInstance.to_json then 
-        table.insert(t, json:parse(uiInstance.extra.to_json()))
-    end 
-    print("repUIInfo"..json_head..json:stringify(t)..json_tail)
-end
-]]
 
 _VE_.openInspector = function(gid)
     print("openInspc"..gid)
@@ -640,8 +657,7 @@ _VE_.openFile = function(path)
         screen:add(j)
     end
     
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
+    _VE_.refresh()
     
     --[[
     for i,j in ipairs(s.children) do
@@ -695,8 +711,7 @@ _VE_.newLayer = function()
     screen:add(Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
 
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
+    _VE_.refresh()
 end 
 
 _VE_.saveFile = function(scrJson)
@@ -733,11 +748,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     elseif uiTypeStr == "Group" then 
         
+        blockReport = true
         uiInstance = editor_group()
         if uiInstance == nil then 
             return
-        else 
-            print ("GRoup!!!!")
         end 
 
     elseif uiElementCreate_map[uiTypeStr] then
@@ -757,6 +771,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     create_mouse_event_handler(uiInstance, uiTypeStr)
 
     addIntoLayer(uiInstance)
+    blockReport = false
 
 end
 

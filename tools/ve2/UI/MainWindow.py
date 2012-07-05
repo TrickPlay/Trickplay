@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Jul  3 10:15:56 2012
+# Created: Thu Jul  5 11:45:35 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.InspectorDock.sizePolicy().hasHeightForWidth())
         self.InspectorDock.setSizePolicy(sizePolicy)
-        self.InspectorDock.setMinimumSize(QtCore.QSize(325, 45))
+        self.InspectorDock.setMinimumSize(QtCore.QSize(325, 81))
         self.InspectorDock.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.InspectorDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)
         self.InspectorDock.setObjectName(_fromUtf8("InspectorDock"))
@@ -254,6 +254,16 @@ class Ui_MainWindow(object):
         self.actionWidgetGroup.setObjectName(_fromUtf8("actionWidgetGroup"))
         self.actionWidgetClone = QtGui.QAction(MainWindow)
         self.actionWidgetClone.setObjectName(_fromUtf8("actionWidgetClone"))
+        self.actionUngroup = QtGui.QAction(MainWindow)
+        self.actionUngroup.setObjectName(_fromUtf8("actionUngroup"))
+        self.actionDelete = QtGui.QAction(MainWindow)
+        self.actionDelete.setObjectName(_fromUtf8("actionDelete"))
+        self.actionClone = QtGui.QAction(MainWindow)
+        self.actionClone.setObjectName(_fromUtf8("actionClone"))
+        self.actionGroup = QtGui.QAction(MainWindow)
+        self.actionGroup.setObjectName(_fromUtf8("actionGroup"))
+        self.actionDuplicate = QtGui.QAction(MainWindow)
+        self.actionDuplicate.setObjectName(_fromUtf8("actionDuplicate"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -280,6 +290,11 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionWidgetGroup)
         self.menuInsert_UI_Element.addAction(self.actionWidgetClone)
         self.menuEdit.addAction(self.menuInsert_UI_Element.menuAction())
+        self.menuEdit.addAction(self.actionDelete)
+        self.menuEdit.addAction(self.actionDuplicate)
+        self.menuEdit.addAction(self.actionClone)
+        self.menuEdit.addAction(self.actionGroup)
+        self.menuEdit.addAction(self.actionUngroup)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuRun.menuAction())
@@ -383,4 +398,9 @@ class Ui_MainWindow(object):
         self.actionWidgetRectangle.setText(QtGui.QApplication.translate("MainWindow", "WidgetRectangle", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetGroup.setText(QtGui.QApplication.translate("MainWindow", "WidgetGroup", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetClone.setText(QtGui.QApplication.translate("MainWindow", "WidgetClone", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionUngroup.setText(QtGui.QApplication.translate("MainWindow", "Ungroup", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionDelete.setText(QtGui.QApplication.translate("MainWindow", "Delete", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionClone.setText(QtGui.QApplication.translate("MainWindow", "Clone", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionGroup.setText(QtGui.QApplication.translate("MainWindow", "Group", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionDuplicate.setText(QtGui.QApplication.translate("MainWindow", "Duplicate", None, QtGui.QApplication.UnicodeUTF8))
 

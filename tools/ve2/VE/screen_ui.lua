@@ -166,7 +166,7 @@ function screen_ui.selected(obj)
 				end
 			end
     	end
-
+        print("here 1")
 		group_pos = util.get_group_position(obj)
 		--group_pos = obj.position
 		if bumo then 
@@ -516,6 +516,7 @@ function screen_ui.dragging(x,y)
 					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 	             	border.position = {cur_x, cur_y}
 				 else 
+                    print("here 2")
 				 	local group_pos = util.get_group_position(actor)
 	             	border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
 				 end 
@@ -547,6 +548,7 @@ function screen_ui.dragging(x,y)
 					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 	                anchor_mark.position = {cur_x, cur_y}
 				else 
+                    print ("here 3")
 			 		local group_pos = util.get_group_position(actor)
 	                anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
 				end 
