@@ -29,11 +29,6 @@
 #include "desktop_controller.h"
 #include "ansi_color.h"
 
-#ifdef TP_WITH_GAMESERVICE
-#include "libgameservice.h"
-#include "gameservice_support.h"
-#endif
-
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
 #define TP_DEFAULT_RESOURCES_PATH   "/usr/share/trickplay/resources"
@@ -59,9 +54,6 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
-#ifdef TP_WITH_GAMESERVICE
-    gameservice_support( NULL ),
-#endif
     media_player_constructor( NULL ),
     media_player( NULL ),
     http_trickplay_api_support( NULL ),
@@ -746,15 +738,6 @@ int TPContext::run()
         g_info( "MEDIA PLAYER IS DISABLED..." );
     }
 
-    //.........................................................................
-    // connect to gameservice server
-#ifdef TP_WITH_GAMESERVICE
-    if ( get_bool( TP_GAMESERVICE_ENABLED ) )
-    {
-		libgameservice::setGameServiceXmppDomain(get(TP_GAMESERVICE_DOMAIN));
-		gameservice_support = new GameServiceSupport(this);
-    }
-#endif
     //.........................................................................
 
     load_background();
@@ -1735,10 +1718,6 @@ void TPContext::load_external_configuration()
         TP_APP_ANIMATIONS_ENABLED,
         TP_DEBUGGER_PORT,
         TP_START_DEBUGGER,
-        TP_GAMESERVICE_ENABLED,
-        TP_GAMESERVICE_DOMAIN,
-        TP_GAMESERVICE_HOST,
-        TP_GAMESERVICE_PORT,
 
         NULL
     };
@@ -1925,35 +1904,6 @@ void TPContext::validate_configuration()
 
     set( TP_RESOURCES_PATH , resources_path_s );
 
-    // gameservice configuration variable validation
-    if ( !get( TP_GAMESERVICE_ENABLED ) )
-    {
-        set( TP_GAMESERVICE_ENABLED,  TP_GAMESERVICE_ENABLED_DEFAULT);
-    }
-    g_debug( "USING TP_GAMESERVICE_ENABLED: '%s'", get( TP_GAMESERVICE_ENABLED ) );
-
-    if ( get( TP_GAMESERVICE_ENABLED ) )
-    {
-		if ( !get( TP_GAMESERVICE_DOMAIN ) )
-		{
-			set( TP_GAMESERVICE_DOMAIN,  TP_GAMESERVICE_DOMAIN_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_DOMAIN: '%s'", get( TP_GAMESERVICE_DOMAIN ) );
-
-		if ( !get( TP_GAMESERVICE_HOST ) )
-		{
-			set( TP_GAMESERVICE_HOST,  TP_GAMESERVICE_HOST_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_HOST: '%s'", get( TP_GAMESERVICE_HOST ) );
-
-		if ( !get( TP_GAMESERVICE_PORT, 0 ) )
-		{
-			set( TP_GAMESERVICE_PORT,  TP_GAMESERVICE_PORT_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_PORT: '%s'", get( TP_GAMESERVICE_PORT ) );
-    }
-
-
     // Allowed secure objects
 
     const gchar * allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
@@ -2101,15 +2051,6 @@ Console * TPContext::get_console() const
 {
     return console;
 }
-
-//-----------------------------------------------------------------------------
-
-#ifdef TP_WITH_GAMESERVICE
-GameServiceSupport * TPContext::get_gameservice() const
-{
-    return gameservice_support;
-}
-#endif
 
 //-----------------------------------------------------------------------------
 
