@@ -26,6 +26,13 @@ if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 
 #------------------------------------------------------------------------------
+# enable TP_WITH_GAMESERVICE by default
+
+if (NOT TP_WITH_GAMESERVICE)
+	set( TP_WITH_GAMESERVICE 1 )
+endif(NOT TP_WITH_GAMESERVICE)
+
+#------------------------------------------------------------------------------
 
 include(util.cmake)
 
