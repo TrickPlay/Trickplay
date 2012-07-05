@@ -95,6 +95,8 @@
      <addaction name="actionWidgetText"/>
      <addaction name="actionWidgetImage"/>
      <addaction name="actionWidgetRectangle"/>
+     <addaction name="actionWidgetGroup"/>
+     <addaction name="actionWidgetClone"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
    </widget>
@@ -616,6 +618,16 @@
   <action name="actionWidgetRectangle">
    <property name="text">
     <string>WidgetRectangle</string>
+   </property>
+  </action>
+  <action name="actionWidgetGroup">
+   <property name="text">
+    <string>WidgetGroup</string>
+   </property>
+  </action>
+  <action name="actionWidgetClone">
+   <property name="text">
+    <string>WidgetClone</string>
    </property>
   </action>
  </widget>
