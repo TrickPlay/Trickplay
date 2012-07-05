@@ -9,6 +9,7 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
+
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -45,6 +46,10 @@
 #define TP_APP_PUSH_PORT_DEFAULT        	8888
 #define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
 #define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
+#define TP_GAMESERVICE_ENABLED_DEFAULT		false
+#define TP_GAMESERVICE_DOMAIN_DEFAULT	    "gameservice.trickplay.com"
+#define TP_GAMESERVICE_HOST_DEFAULT			"gameservice.trickplay.com"
+#define TP_GAMESERVICE_PORT_DEFAULT			5222
 
 // TODO: Don't like hard-coding this app id here
 
@@ -63,6 +68,11 @@ class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
 class HttpTrickplayApiSupport;
+
+#ifdef TP_WITH_GAMESERVICE
+class GameServiceSupport;
+#endif
+
 
 //-----------------------------------------------------------------------------
 
@@ -166,6 +176,12 @@ public:
     //.........................................................................
 
     Console * get_console() const;
+
+    //.........................................................................
+
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * get_gameservice() const;
+#endif
 
     //.........................................................................
 
@@ -349,6 +365,10 @@ private:
     Installer *                 installer;
 
     App *                       current_app;
+
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * gameservice_support;
+#endif
 
     String                      first_app_id;
 
