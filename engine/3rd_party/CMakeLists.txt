@@ -9,9 +9,8 @@ list( APPEND 3RD_PARTY_SOURCE_FILES
 
 add_definitions( -DZIP_STD=1 )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/txmpp)
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils ) 
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/Box2D_v2.1.2/Box2D )
 

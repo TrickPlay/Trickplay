@@ -278,15 +278,6 @@ typedef struct TPContext TPContext;
                                 app; instead it will start the engine and remain idle.
                                 Defaults to "0".
 
-    TP_GAMESERVICE_ENABLED - 	If set to true, gameservice support will be available. Default is false
-
-    TP_GAMESERVICE_DOMAIN - 	This is the default xmpp domain on which a gameservice user account exists.
-    							Defaults to tp-network.trickplay.com
-
-    TP_GAMESERVICE_HOST - 		The host on which the gameservice XMPP server runs on. Defaults to tp=network.trickplay.com
-
-    TP_GAMESERVICE_PORT -		The port on which gameservice XMPP server listens on. Defaults to 5222
-
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -341,10 +332,6 @@ typedef struct TPContext TPContext;
 #define TP_DEBUGGER_PORT				"debugger_port"
 #define TP_START_DEBUGGER				"start_debugger"
 #define TP_DONT_RUN_APP					"dont_run_app"
-#define TP_GAMESERVICE_ENABLED			"gameservice_enabled"
-#define TP_GAMESERVICE_DOMAIN			"gameservice_domain"
-#define TP_GAMESERVICE_HOST				"gameservice_host"
-#define TP_GAMESERVICE_PORT				"gameservice_port"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

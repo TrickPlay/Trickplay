@@ -27,7 +27,6 @@ import com.trickplay.gameservice.transferObj.GamePlayInvitationListTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationTO;
 import com.trickplay.gameservice.transferObj.GamePlayRequestTO;
-import com.trickplay.gameservice.transferObj.GamePlaySessionListTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
 import com.trickplay.gameservice.transferObj.GamePlayStateTO;
@@ -51,13 +50,10 @@ import com.trickplay.gameservice.transferObj.VendorTO;
 
 public class GameServiceClient {
 
-    /* local instance thru proxy. instance at localhost:9080 */
-	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest"; 
-	
-	/* game service on amazon aws thru proxy. instance at tp-gameservice-dev.elasticbeanstalk.com:80 */
-	//private static final String GS_ENDPOINT = "http://localhost:8091/rest"; 
-	
-	public static void main(String[] args) {
+	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest";
+    //private static final String GS_ENDPOINT = "http://localhost:8091/rest";
+
+		public static void main(String[] args) {
 			
 			RestTemplate restTemplate = getTemplate();
 			
@@ -158,8 +154,6 @@ public class GameServiceClient {
 			Long gameId = gmap.get("g10-v1-u1").getId();
 			GamePlaySessionRequestTO gpTO = new GamePlaySessionRequestTO(gameId);
 			GamePlaySessionTO gsTO = postCreateGameSession(restTemplate, gpTO, "u1", "u1");
-			
-			GamePlaySessionListTO sessionListTO = getGameSessionList(restTemplate, "u1", "u1");
 			/*
 			 * send a wild card game invitation
 			 */
@@ -462,17 +456,7 @@ public class GameServiceClient {
 			
 		}
 		
-        public static GamePlaySessionListTO getGameSessionList(RestTemplate rest, String username, String password) {
-            HttpEntity<String> entity = prepareJsonGet(username, password);
-            ResponseEntity<GamePlaySessionListTO> response = rest.exchange(
-                    GS_ENDPOINT+"/gameplay", HttpMethod.GET, entity, GamePlaySessionListTO.class);
-            
-            GamePlaySessionListTO output = response.getBody();
-            System.out.println("Number of Game Play sessions received: " + output.getGameSessionList().size());
-            return output;
-        }
-
-        public static GamePlaySessionTO postCreateGameSession(RestTemplate rest, GamePlaySessionRequestTO input, String username, String password) {
+		public static GamePlaySessionTO postCreateGameSession(RestTemplate rest, GamePlaySessionRequestTO input, String username, String password) {
 			HttpEntity<GamePlaySessionRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
 			ResponseEntity<GamePlaySessionTO> response = rest.postForEntity(
