@@ -63,8 +63,15 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionWidgetText, SIGNAL("triggered()"),  self.text)
         QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
         QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
+
         QObject.connect(self.ui.actionWidgetGroup, SIGNAL("triggered()"),  self.group)
         QObject.connect(self.ui.actionWidgetClone, SIGNAL("triggered()"),  self.clone)
+
+        QObject.connect(self.ui.actionGroup, SIGNAL("triggered()"),  self.group)
+        QObject.connect(self.ui.actionUngroup, SIGNAL("triggered()"),  self.ungroup)
+        QObject.connect(self.ui.actionClone, SIGNAL("triggered()"),  self.clone)
+        QObject.connect(self.ui.actionDuplicate, SIGNAL("triggered()"),  self.duplicate)
+        QObject.connect(self.ui.actionDelete, SIGNAL("triggered()"),  self.delete)
 
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
@@ -233,6 +240,18 @@ class MainWindow(QMainWindow):
 
     def group(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Group')")
+        return True
+
+    def ungroup(self):
+        self.sendLuaCommand("ungroup", "_VE_.ungroup("+str(self._inspector.curLayerGid)+")")
+        return True
+
+    def delete(self):
+        self.sendLuaCommand("delete", "_VE_.delete("+str(self._inspector.curLayerGid)+")")
+        return True
+
+    def duplicate(self):
+        self.sendLuaCommand("duplicate", "_VE_.duplicate("+str(self._inspector.curLayerGid)+")")
         return True
 
     def rectangle(self):
