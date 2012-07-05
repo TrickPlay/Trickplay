@@ -63,6 +63,8 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionWidgetText, SIGNAL("triggered()"),  self.text)
         QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
         QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
+        QObject.connect(self.ui.actionWidgetGroup, SIGNAL("triggered()"),  self.group)
+        QObject.connect(self.ui.actionWidgetClone, SIGNAL("triggered()"),  self.clone)
 
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
@@ -223,6 +225,14 @@ class MainWindow(QMainWindow):
         path = os.path.basename(str(path))
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Image', "+"'"+str(path)+"')")
+        return True
+
+    def clone(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Clone')")
+        return True
+
+    def group(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Group')")
         return True
 
     def rectangle(self):

@@ -168,6 +168,7 @@ function screen_ui.selected(obj)
     	end
 
 		group_pos = util.get_group_position(obj)
+		--group_pos = obj.position
 		if bumo then 
 			obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
 		else 

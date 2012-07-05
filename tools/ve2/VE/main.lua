@@ -30,6 +30,7 @@ dofile("LIB/VE/ve_runtime")
 assets = dofile( "assets-cache" )
 
 hdr = dofile("header")
+util = dofile("util")
 ui = {
       assets  = assets,
       factory = dofile( "ui-factory" ),
@@ -71,6 +72,7 @@ end
 local uiNum = 0
 local layerNum = 0
 local curLayerGid = nil
+local curLayer= nil
 
 -- UI Element Creation Function Map 
 
@@ -134,9 +136,21 @@ local rect_init_y = 0
 
 local uiRectangle = nil
 
+function ss ()
+
+    dumptable (selected_objs)
+
+end
+
 function tt ()
 
     _VE_.insertUIElement(2, "Rectangle")
+
+end
+
+function gg ()
+
+    _VE_.insertUIElement(2, "Group")
 
 end
 
@@ -258,7 +272,6 @@ end
 local function addIntoLayer (uiInstance)
 
     uiInstance.reactive = true
-
     uiInstance.lock = false
     uiInstance.selected = false
     uiInstance.is_in_group = false
@@ -362,6 +375,100 @@ local function editor_text(uiText)
 
 	end 
 end 
+	
+local function get_min_max () 
+     local min_x = screen.w
+     local max_x = 0
+     local min_y = screen.h
+     local max_y = 0
+
+     for i, v in pairs(curLayer.children) do
+          if curLayer:find_child(v.name) then
+	        if(v.extra.selected == true) then
+			if(v.x < min_x) then min_x = v.x end 
+			if(v.x > max_x) then max_x = v.x end
+			if(v.y < min_y) then min_y = v.y end 
+			if(v.y > max_y) then max_y = v.y end
+		end 
+          end
+    end
+    return min_x, max_x, min_y, max_y
+end 
+
+
+local function editor_group()
+
+	--if table.getn(selected_objs) == 0 then 
+	if #(selected_objs) == 0 then 
+		print ("there is no selected object !!")
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return nil
+   	end 
+
+    curLayer = devtools:gid(curLayerGid)
+
+    local min_x, max_x, min_y, max_y = get_min_max () 
+       
+    uiGroup = Widget_Group{
+        position = {min_x, min_y}
+    }
+
+
+	for i, v in pairs(curLayer.children) do
+		if(v.selected == true) then
+			screen_ui.n_selected(v)
+			v:unparent()
+			v.is_in_group = true
+			v.group_position = uiGroup.position
+			v.x = v.x - min_x
+			v.y = v.y - min_y
+        	uiGroup:add(v)
+		end 
+    end
+
+    screen:grab_key_focus()
+	input_mode = hdr.S_SELECT
+
+    return uiGroup
+end
+
+
+
+--[[
+function editor.ugroup()
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	for i, v in pairs(g.children) do
+    	--if g:find_child(v.name) then
+		  	if(v.extra.selected == true) then
+				if util.is_this_group(v) == true then
+			     	screen_ui.n_selected(v)
+			     	v.extra.children = {}
+			     	for i,c in pairs(v.children) do 
+				     	table.insert(v.extra.children, c.name) 
+						c:unparent()
+				     	c.extra.is_in_group = false
+				     	c.x = c.x + v.x 
+				     	c.y = c.y + v.y 
+						c.reactive = true	
+		     		    g:add(c)
+			     	end
+			     	g:remove(v)
+        		    table.insert(undo_list, {v.name, hdr.DEL, v})
+		        end 
+		   end 
+		--end
+	end
+    screen.grab_key_focus(screen)
+	input_mode = hdr.S_SELECT
+end
+]]
 
 ---------------------------------------------------------------------------
 ---            Global  Visual Editor Functions                          ---
@@ -624,6 +731,15 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         screen:grab_key_focus()
         return
 
+    elseif uiTypeStr == "Group" then 
+        
+        uiInstance = editor_group()
+        if uiInstance == nil then 
+            return
+        else 
+            print ("GRoup!!!!")
+        end 
+
     elseif uiElementCreate_map[uiTypeStr] then
 
         uiInstance = uiElementCreate_map[uiTypeStr](self)
@@ -632,17 +748,13 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     assign_right_name(uiInstance, uiTypeStr)
 
-
     if uiTypeStr == "Image" then 
         uiInstance.src = path
     elseif uiTypeStr == "Text" then 
         editor_text(uiInstance)
-    elseif uiTypeStr == "Text" then 
-        uiInstance:grab_key_focus()
-	    uiInstance.editable = true
     end
 
-    create_mouse_event_handler(uiInstance,uiTypeStr)
+    create_mouse_event_handler(uiInstance, uiTypeStr)
 
     addIntoLayer(uiInstance)
 

@@ -4,6 +4,7 @@
 local util = {}
 
 
+
 function util.color_to_string( color )
 
         if type( color ) == "string" then
@@ -39,7 +40,7 @@ end
 function util.table_move_up(t, itemNum)
 
 	local prev_i, prev_j 
-	for i,j in pairs (t) do 
+    for i,j in pairs (t) do 
 		if i == itemNum then 
 			if prev_i then 
 		     	t[prev_i] = j 
@@ -159,6 +160,21 @@ function util.values(t)
 
 end 
 
+function util.get_group_position(child_obj)
+
+     curLayer = child_obj.parent()
+     for i, v in pairs(curLayer.children) do
+          if curLayer:find_child(v.name) then
+	       		if (v.type == "Group") then 
+		    		if(v:find_child(child_obj.name)) then
+						return v.position 
+		    		end 
+	       		end 
+          end
+     end
+end 
+	
+--[=[
 function util.is_available(new_name)
 
     if(g:find_child(new_name) ~= nil) then 
@@ -1576,5 +1592,7 @@ function util.guideline_type(name)
     end 
     return ""
 end 
+
+--]=]
 
 return util

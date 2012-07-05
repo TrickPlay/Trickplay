@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Jun 22 12:25:15 2012
+# Created: Tue Jul  3 10:15:56 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -250,6 +250,10 @@ class Ui_MainWindow(object):
         self.actionWidgetImage.setObjectName(_fromUtf8("actionWidgetImage"))
         self.actionWidgetRectangle = QtGui.QAction(MainWindow)
         self.actionWidgetRectangle.setObjectName(_fromUtf8("actionWidgetRectangle"))
+        self.actionWidgetGroup = QtGui.QAction(MainWindow)
+        self.actionWidgetGroup.setObjectName(_fromUtf8("actionWidgetGroup"))
+        self.actionWidgetClone = QtGui.QAction(MainWindow)
+        self.actionWidgetClone.setObjectName(_fromUtf8("actionWidgetClone"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -273,6 +277,8 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionWidgetText)
         self.menuInsert_UI_Element.addAction(self.actionWidgetImage)
         self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetGroup)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetClone)
         self.menuEdit.addAction(self.menuInsert_UI_Element.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -375,4 +381,6 @@ class Ui_MainWindow(object):
         self.actionWidgetText.setText(QtGui.QApplication.translate("MainWindow", "WidgetText", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetImage.setText(QtGui.QApplication.translate("MainWindow", "WidgetImage", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetRectangle.setText(QtGui.QApplication.translate("MainWindow", "WidgetRectangle", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetGroup.setText(QtGui.QApplication.translate("MainWindow", "WidgetGroup", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetClone.setText(QtGui.QApplication.translate("MainWindow", "WidgetClone", None, QtGui.QApplication.UnicodeUTF8))
 
