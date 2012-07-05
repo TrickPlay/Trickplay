@@ -7,9 +7,9 @@ TP_FIND_INCLUDE( time.h   SYSTEM_INCLUDE_DIRS )
 
 message( "system_include_dirs = ${SYSTEM_INCLUDE_DIRS}" )
 
-include_directories( 
 
-	${SYSTEM_INCLUDE_DIRS}
+include_directories( 
+    AFTER
 	${CMAKE_BINARY_DIR}/engine/3rd_party/txmpp/include/txmpp
 	${ENGINE_SRC}/3rd_party/txmpp/txmpp-0.0.2/src 
 

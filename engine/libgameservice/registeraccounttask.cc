@@ -62,7 +62,7 @@ int RegisterAccountTask::ProcessResponse() {
 
 	const std::string& id = stanza->Attr(txmpp::QN_ID);
 	const char* id_str = id.c_str();
-	char* idx = NULL;
+	const char* idx = NULL;
 	if ((idx = strstr(id_str, REGISTER_ACCOUNT_PART_1_PREFIX.c_str())) != NULL && idx == id_str)
 	{
 		// check if the user is already registered. in this case return an error
