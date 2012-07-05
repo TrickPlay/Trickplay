@@ -2,11 +2,13 @@ Event = Class {
 	shared = {
 		trigger = function() end,
 		add = function(self,...)
+            local arg = table.pack(...)
 			for _,v in ipairs(arg) do
 				table.insert(self,1,v)
 			end
 		end,
 		drop = function(self,...)
+            local arg = table.pack(...)
 			for _,v in ipairs(arg) do
 				self[v] = nil
 			end
