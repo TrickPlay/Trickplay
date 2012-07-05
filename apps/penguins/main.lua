@@ -19,7 +19,7 @@ pi = math.pi
 max = math.max
 min = math.min
 sqrt = math.sqrt
-log10 = math.log10
+log10 = math.log10 or function(n) return math.log(n,10) end
 floor = math.floor
 
 math.randomseed(os.time())
