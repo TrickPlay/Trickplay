@@ -6,6 +6,8 @@
 #include "xmppmugconstants.h"
 #include "game.h"
 
+extern "C" int atoi(const char*);
+
 namespace libgameservice {
 
 static std::string kCorrespondence("correspondence");
