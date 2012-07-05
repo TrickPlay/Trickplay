@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -6,6 +5,8 @@
 #include "libgameservice.h"
 #include "xmppmugconstants.h"
 #include "game.h"
+
+extern "C" int atoi(const char*);
 
 namespace libgameservice {
 
