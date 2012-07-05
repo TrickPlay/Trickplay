@@ -24,7 +24,7 @@ add_library( gameservice SHARED
     receivetask.cc
     registeraccounttask.cc
     
-	json_parser.c 	
+#	json_parser.c 	
 	xmppmugconstants.cc
 	libgameservice.cc
 	status.cc
