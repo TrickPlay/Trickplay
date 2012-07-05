@@ -189,7 +189,7 @@ public:
 		case txmpp::XmppEngine::STATE_OPEN: {
 			std::cout << "creating register account task. account_info = " << account_info_.Str() << std::endl;
 			std::cout << "pump client != NULL is " << (bool)(pump_->client() != NULL) << std::endl;
-			std::cout << "typepid(client) = " << typeid(pump_->client()).name() << std::endl;
+			//std::cout << "typepid(client) = " << typeid(pump_->client()).name() << std::endl;
 			RegisterAccountTask * register_account_task_ = new RegisterAccountTask(pump_->client(), account_info_);
 			std::cout << "created register account task" << std::endl;
 			register_account_task_->SignalDone.connect(this, &GameServiceRegisterClientWorker::OnRegisterAccountResponse);
