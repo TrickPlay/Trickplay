@@ -26,5 +26,5 @@ private:
 
 }
 
-#endif _libgameservice_register_account_task_h_
+#endif //_libgameservice_register_account_task_h_
 
