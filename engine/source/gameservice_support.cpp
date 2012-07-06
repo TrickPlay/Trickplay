@@ -34,10 +34,10 @@ class MonitorLoginAction : public Action {
 public:
 	MonitorLoginAction(GameServiceSupport * game_service)
 	: game_service_(game_service) {
-		std::cout << "Inside MonitorLoginAction constructor" << std::endl;
+	//	std::cout << "Inside MonitorLoginAction constructor" << std::endl;
 	}
 	~MonitorLoginAction() {
-		std::cout << "Inside MonitorLoginAction destructor" << std::endl;
+	//	std::cout << "Inside MonitorLoginAction destructor" << std::endl;
 	}
 protected:
 	bool run() {
@@ -45,11 +45,11 @@ protected:
 		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS) {
 			game_service_->DoCallbacks();
 			if (game_service_->state() != GameServiceSupport::LOGIN_IN_PROGRESS) {
-				std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
+		//		std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
 				return false;
 			}
 		} else {
-			std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
+	//		std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
 		}
 		return true;
 	}
@@ -62,10 +62,10 @@ class DoCallbacksAction : public Action {
 public:
 	DoCallbacksAction(GameServiceSupport * game_service)
 	: game_service_(game_service) {
-		std::cout << "Inside DoCallbacksAction constructor" << std::endl;
+//		std::cout << "Inside DoCallbacksAction constructor" << std::endl;
 	}
 	~DoCallbacksAction() {
-		std::cout << "Inside DoCallbacksAction destructor" << std::endl;
+	//	std::cout << "Inside DoCallbacksAction destructor" << std::endl;
 	}
 protected:
 	bool run() {
@@ -306,8 +306,10 @@ void GameServiceSupport::OnXmppInput(const std::string &input) {
 
 void GameServiceSupport::OnRegisterAccountResponse(const ResponseStatus& rs,
 		const AccountInfo& account_info, void* cb_data) {
+	/*
 	std::cout << "OnRegisterAccountResponse(). status_code:" << statusToString(
 				rs.status_code()) << ", account_info:" << account_info.Str() << std::endl;
+				*/
 
 	if (rs.status_code() == OK) {
 
@@ -339,9 +341,11 @@ void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const A
 }
 
 void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const Game& game) {
+
 	std::cout << "OnRegisterGameResponse(). status_code:"
 			<< statusToString(rs.status_code()) << ", game_id:"
 			<< game.game_id().AsID() << std::endl;
+
 }
 
 void GameServiceSupport::OnListGamesResponse(const ResponseStatus& rs,
@@ -356,9 +360,10 @@ void GameServiceSupport::OnListGamesResponse(const ResponseStatus& rs,
 }
 
 void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+	/*
 	std::cout << "OnOpenAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
-
+*/
 	lua_State* L = get_lua_state();
 
 	if (rs.status_code() == OK) {
@@ -400,13 +405,14 @@ void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppI
  */
 void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 		const MatchRequest& match_request, const std::string& match_id, void* cb_data) {
-
+/*
 	std::cout << "OnAssignMatchResponse(). status_code:"
 			<< statusToString( rs.status_code() )
 			<< ", match_request:" << match_request.Str()
 			<< ", match_id:"
 			<< match_id
 			<< std::endl;
+			*/
 
 		lua_State* L = get_lua_state();
 
@@ -427,10 +433,11 @@ void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 }
 
 void GameServiceSupport::OnStartMatchResponse(const ResponseStatus& rs, void* cb_data) {
+	/*
 	std::cout << "OnStartMatchResponse(). status_code:"
 			<< statusToString( rs.status_code() )
 			<< std::endl;
-
+*/
 		lua_State* L = get_lua_state();
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
@@ -460,7 +467,7 @@ void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data)
 void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 		const std::string& match_id, const Participant& from,
 		const Item& item, void* cb_data) {
-
+/*
 	std::cout << "OnJoinMatchResponse(). status_code:"
 			<< statusToString( rs.status_code() )
 			<< ", match_id:"
@@ -470,6 +477,7 @@ void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 			<< ", item:"
 			<< item.Str()
 			<< std::endl;
+			*/
 
 		lua_State* L = get_lua_state();
 
@@ -492,10 +500,12 @@ void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 }
 
 void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb_data) {
+	/*
 	std::cout << "OnLeaveMatchResponse(). status_code:"
 			<< statusToString( rs.status_code() )
 			<< ". no lua callback "
 			<< std::endl;
+			*/
 
 	//	lua_State* L = get_lua_state();
 
@@ -506,12 +516,14 @@ void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb
 }
 
 void GameServiceSupport::OnStart(const std::string& match_id, const Participant& from) {
+	/*
 	std::cout << "OnStart()."
 			<< "match_id:"
 			<< match_id
 			<< ", from:"
 			<< from.Str()
 			<< std::endl;
+			*/
 
 		lua_State* L = get_lua_state();
 
@@ -525,12 +537,14 @@ void GameServiceSupport::OnStart(const std::string& match_id, const Participant&
 
 void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& from,
 		const Turn& turn_message) {
+	/*
 	std::cout << "OnTurn()."
 			<< "match_id:"
 			<< match_id
 			<< ", from:"
 			<< from.Str()
 			<< std::endl;
+			*/
 
 		lua_State* L = get_lua_state();
 
@@ -546,6 +560,7 @@ void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& 
 
 void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& from,
 		const Item& item) {
+	/*
 	std::cout << "OnJoin()."
 			<< "match_id:"
 			<< match_id
@@ -554,6 +569,7 @@ void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& 
 			<< ", item:"
 			<< item.Str()
 			<< std::endl;
+			*/
 
 		lua_State* L = get_lua_state();
 
@@ -569,13 +585,14 @@ void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& 
 }
 
 void GameServiceSupport::OnLeave(const std::string& match_id, const Participant& participant) {
+	/*
 	std::cout << "OnLeave()."
 			<< "match_id:"
 			<< match_id
 			<< ", participant:"
 			<< participant.Str()
 			<< std::endl;
-
+*/
 		lua_State* L = get_lua_state();
 
 
@@ -588,6 +605,7 @@ void GameServiceSupport::OnLeave(const std::string& match_id, const Participant&
 
 void GameServiceSupport::OnUnavailable(const std::string& match_id,
 		const Participant& participant) {
+	/*
 	std::cout << "OnUnavailable()."
 			<< "match_id:"
 			<< match_id
@@ -595,10 +613,12 @@ void GameServiceSupport::OnUnavailable(const std::string& match_id,
 			<< participant.Str()
 			<< ". no lua callback"
 			<< std::endl;
+			*/
 }
 
 void GameServiceSupport::OnNicknameChange(const std::string& match_id,
 		const Participant& participant, const std::string& new_nickname) {
+	/*
 	std::cout << "OnNicknameChange()."
 				<< "match_id:"
 				<< match_id
@@ -608,16 +628,19 @@ void GameServiceSupport::OnNicknameChange(const std::string& match_id,
 				<< new_nickname
 				<< ". no lua callback"
 				<< std::endl;
+				*/
 }
 
 void GameServiceSupport::OnCurrentMatchState(const std::string& match_id,
 		const MatchStatus& status, const MatchState& match_state) {
+	/*
 	std::cout << "OnCurrentMatchState()."
 				<< "match_id:"
 				<< match_id
 				<< ", status:"
 				<< libgameservice::matchStatusToString(status)
 				<< std::endl;
+				*/
 
 	lua_State* L = get_lua_state();
 
@@ -634,7 +657,9 @@ void GameServiceSupport::OnCurrentMatchState(const std::string& match_id,
 
 void GameServiceSupport::OnStatusUpdate(const Status &status) {
 	std::string from = status.jid();
+	/*
 	std::cout << from << " - " << status.status() << std::endl;
+	*/
 }
 
 void GameServiceSupport::OnStatusError(const std::string &stanza) {

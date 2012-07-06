@@ -22,7 +22,7 @@ MUGMessageListenerTask::MUGMessageListenerTask(txmpp::TaskParent *parent) :
 
 	//txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE) {
 
-		std::cout << "Inside MUGMessageListenerTask constructor" << std::endl;
+	//	std::cout << "Inside MUGMessageListenerTask constructor" << std::endl;
 }
 
 MUGMessageListenerTask::~MUGMessageListenerTask() {
@@ -45,10 +45,10 @@ int MUGMessageListenerTask::ProcessResponse() {
 
 	const txmpp::XmlElement *childElement = stanza->FirstElement();
 	if (childElement == NULL) {
-		std::cout << "MUGMessageListenerTask::ProcessResponse. childElement is NULL" << std::endl;
+	//	std::cout << "MUGMessageListenerTask::ProcessResponse. childElement is NULL" << std::endl;
 		return STATE_RESPONSE;
 	} else {
-		std::cout << "MUGMessageListenerTask::ProcessResponse. childElement:" << childElement->Str() << std::endl;
+		//std::cout << "MUGMessageListenerTask::ProcessResponse. childElement:" << childElement->Str() << std::endl;
 	}
 	if (QN_MUG_USER_START_TAG == childElement->Name()) {
 		SignalStart(match_id, participant);
@@ -56,7 +56,7 @@ int MUGMessageListenerTask::ProcessResponse() {
 		SignalLeave(match_id, participant);
 	} else { // must be turn tag
 		// extract newstate, terminate and next
-		std::cout << "MUGMessageListenerTask::ProcessResponse. received a turn message" << std::endl;
+	//	std::cout << "MUGMessageListenerTask::ProcessResponse. received a turn message" << std::endl;
 		Turn turn;
 		const txmpp::XmlElement* tmpElement = childElement->FirstNamed(QN_MUG_USER_NEWSTATE_TAG);
 		if (tmpElement != NULL)
@@ -76,7 +76,7 @@ int MUGMessageListenerTask::ProcessResponse() {
 }
 
 bool MUGMessageListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
-	std::cout << "Inside MUGMessageListenerTask::HandleStanza. " <<  std::endl;
+//	std::cout << "Inside MUGMessageListenerTask::HandleStanza. " <<  std::endl;
 
 	if (txmpp::QN_MESSAGE == stanza->Name() && stanza->HasAttr(txmpp::QN_FROM)) {
 		if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL)
@@ -104,7 +104,7 @@ bool MUGMessageListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 MUGPresenceListenerTask::MUGPresenceListenerTask(txmpp::TaskParent *parent) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_TYPE) {
-	std::cout << "Inside MUGPresenceListenerTask constructor" << std::endl;
+	//std::cout << "Inside MUGPresenceListenerTask constructor" << std::endl;
 }
 
 MUGPresenceListenerTask::~MUGPresenceListenerTask() {
@@ -116,7 +116,7 @@ int MUGPresenceListenerTask::ProcessStart() {
 
 int MUGPresenceListenerTask::ProcessResponse() {
 
-	std::cout << "Received a presence packet. processing it" << std::endl;
+	//std::cout << "Received a presence packet. processing it" << std::endl;
 
 	const txmpp::XmlElement* stanza = NextStanza();
 	if (stanza == NULL) {
@@ -129,7 +129,7 @@ int MUGPresenceListenerTask::ProcessResponse() {
 
 	const txmpp::XmlElement *gameElement = stanza->FirstNamed(QN_MUG_GAMEPRESENCE_TAG);
 	if (gameElement == NULL) {
-		std::cout << "invalid stanza: " << stanza->Str() << ". skipping it" << std::endl;
+	//	std::cout << "invalid stanza: " << stanza->Str() << ". skipping it" << std::endl;
 		return STATE_RESPONSE;
 	}
 
@@ -162,7 +162,7 @@ int MUGPresenceListenerTask::ProcessResponse() {
 			const txmpp::XmlElement* stateElement = gameElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
 
 			if (!isValidMatchStatus(status) || stateElement == NULL) {
-				std::cout << "invalid match state. stanza:" << stanza->Str() << ". skipping it" << std::endl;
+		//		std::cout << "invalid match state. stanza:" << stanza->Str() << ". skipping it" << std::endl;
 				return STATE_RESPONSE;
 			}
 
@@ -206,7 +206,7 @@ int MUGPresenceListenerTask::ProcessResponse() {
 
 bool MUGPresenceListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
-	std::cout << "Inside MUGPresenceListenerTask::HandleStanza. " <<  std::endl;
+//	std::cout << "Inside MUGPresenceListenerTask::HandleStanza. " <<  std::endl;
 	if (txmpp::QN_PRESENCE == stanza->Name()  && stanza->HasAttr(txmpp::QN_FROM)) {
 		if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL)
 			return false;
@@ -229,7 +229,7 @@ bool MUGPresenceListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 ListGamesTask::ListGamesTask(txmpp::TaskParent *parent) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE) {
 
-	std::cout << "Inside ListGamesTask constructor" << std::endl;
+//	std::cout << "Inside ListGamesTask constructor" << std::endl;
 }
 
 ListGamesTask::~ListGamesTask() {
@@ -237,7 +237,7 @@ ListGamesTask::~ListGamesTask() {
 
 int ListGamesTask::ProcessStart() {
 
-	std::cout << "ListGameTask taskid is " << task_id() << std::endl;
+	//std::cout << "ListGameTask taskid is " << task_id() << std::endl;
 
 	// set_task_id(GetClient()->NextId());
 
@@ -273,7 +273,7 @@ int ListGamesTask::ProcessResponse() {
 		const txmpp::XmlElement* featureElement = discoInfoResponse->FirstNamed(txmpp::QN_DISCO_FEATURE);
 		while (NULL != featureElement) {
 			const std::string& var = featureElement->Attr(txmpp::QN_VAR);
-			std::cout << "feature:" << var << std::endl;
+			//std::cout << "feature:" << var << std::endl;
 			GameId gid(GameId::parseGameId(var));
 			if (gid.is_valid()) {
 				game_id_vector.push_back(gid);
@@ -282,8 +282,8 @@ int ListGamesTask::ProcessResponse() {
 			featureElement = featureElement->NextNamed(txmpp::QN_DISCO_FEATURE);
 		}
 	}
-	std::cout << "game_id_vector.size()=" << game_id_vector.size() << std::endl;
-	std::cout << "emitting SignalListOfGames()" << std::endl;
+	//std::cout << "game_id_vector.size()=" << game_id_vector.size() << std::endl;
+	//std::cout << "emitting SignalListOfGames()" << std::endl;
 	ResponseStatus rs;
 	SignalListOfGames.emit(rs, game_id_vector);
 //	std::cout << "Discover Info IQ query results follow: " << std::endl;
@@ -308,7 +308,7 @@ bool ListGamesTask::HandleStanza(const txmpp::XmlElement *stanza) {
 RegisterAppTask::RegisterAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
 
-	std::cout << "Inside RegisterAppTask constructor" << std::endl;
+	//std::cout << "Inside RegisterAppTask constructor" << std::endl;
 }
 
 RegisterAppTask::~RegisterAppTask() {
@@ -316,7 +316,7 @@ RegisterAppTask::~RegisterAppTask() {
 
 int RegisterAppTask::ProcessStart() {
 
-	std::cout << "RegisterAppTask taskid is " << task_id() << std::endl;
+	//std::cout << "RegisterAppTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
 			MakeIq("set", getMugServiceJid(), task_id()));
@@ -353,8 +353,8 @@ int RegisterAppTask::ProcessResponse() {
 	if (stanza->HasAttr(txmpp::QN_FROM))
 		from = stanza->Attr(txmpp::QN_FROM);
 
-	std::cout << "RegisterApp results follow: " << std::endl;
-	std::cout << stanza->Str() << std::endl;
+	//std::cout << "RegisterApp results follow: " << std::endl;
+	//std::cout << stanza->Str() << std::endl;
 	bool got_error = false;
 	if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL) {
 		got_error = true;
@@ -384,7 +384,7 @@ bool RegisterAppTask::HandleStanza(const txmpp::XmlElement *stanza) {
 RegisterGameTask::RegisterGameTask(txmpp::TaskParent *parent, const Game & game) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_(game) {
 
-	std::cout << "Inside RegisterGameTask constructor" << std::endl;
+	//std::cout << "Inside RegisterGameTask constructor" << std::endl;
 }
 
 RegisterGameTask::~RegisterGameTask() {
@@ -392,7 +392,7 @@ RegisterGameTask::~RegisterGameTask() {
 
 int RegisterGameTask::ProcessStart() {
 
-	std::cout << "RegisterGameTask taskid is " << task_id() << std::endl;
+	//std::cout << "RegisterGameTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
 			MakeIq("set", getMugServiceJid(), task_id()));
@@ -504,8 +504,8 @@ int RegisterGameTask::ProcessResponse() {
 	if (stanza->HasAttr(txmpp::QN_FROM))
 		from = stanza->Attr(txmpp::QN_FROM);
 
-	std::cout << "RegisterGame results follow: " << std::endl;
-	std::cout << stanza->Str() << std::endl;
+	//std::cout << "RegisterGame results follow: " << std::endl;
+	//std::cout << stanza->Str() << std::endl;
 
 	bool got_error = false;
 	if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL) {
@@ -537,7 +537,7 @@ bool RegisterGameTask::HandleStanza(const txmpp::XmlElement *stanza) {
 OpenAppTask::OpenAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
 
-	std::cout << "Inside OpenAppTask constructor" << std::endl;
+	//std::cout << "Inside OpenAppTask constructor" << std::endl;
 }
 
 OpenAppTask::~OpenAppTask() {
@@ -573,7 +573,7 @@ int OpenAppTask::ProcessResponse() {
 CloseAppTask::CloseAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
 
-	std::cout << "Inside CloseAppTask constructor" << std::endl;
+	//std::cout << "Inside CloseAppTask constructor" << std::endl;
 }
 
 CloseAppTask::~CloseAppTask() {
@@ -609,7 +609,7 @@ int CloseAppTask::ProcessResponse() {
 AssignMatchTask::AssignMatchTask(txmpp::TaskParent *parent, const MatchRequest & match_request, void* cb_data) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), match_request_(match_request), cb_data_(cb_data) {
 
-	std::cout << "Inside AssignMatchTask constructor" << std::endl;
+	//std::cout << "Inside AssignMatchTask constructor" << std::endl;
 }
 
 AssignMatchTask::~AssignMatchTask() {
@@ -617,7 +617,7 @@ AssignMatchTask::~AssignMatchTask() {
 
 int AssignMatchTask::ProcessStart() {
 
-	std::cout << "AssignMatchTask taskid is " << task_id() << std::endl;
+	//std::cout << "AssignMatchTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
 			MakeIq("set", getMugServiceJid(), task_id()));
@@ -665,8 +665,8 @@ int AssignMatchTask::ProcessResponse() {
 	if (stanza->HasAttr(txmpp::QN_FROM))
 		from = stanza->Attr(txmpp::QN_FROM);
 
-	std::cout << "AssignMatch results follow: " << std::endl;
-	std::cout << stanza->Str() << std::endl;
+	//std::cout << "AssignMatch results follow: " << std::endl;
+	//std::cout << stanza->Str() << std::endl;
 
 	bool got_error = false;
 	if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL) {
@@ -699,7 +699,7 @@ bool AssignMatchTask::HandleStanza(const txmpp::XmlElement *stanza) {
 JoinMatchTask::JoinMatchTask(txmpp::TaskParent *parent, const JoinMatchRequest& match_request, void* cb_data) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), join_match_request_(match_request), cb_data_(cb_data) {
 
-	std::cout << "Inside JoinMatchTask constructor" << std::endl;
+	//std::cout << "Inside JoinMatchTask constructor" << std::endl;
 }
 
 JoinMatchTask::~JoinMatchTask() {
@@ -707,7 +707,7 @@ JoinMatchTask::~JoinMatchTask() {
 
 int JoinMatchTask::ProcessStart() {
 
-	std::cout << "JoinMatchTask taskid is " << task_id() << std::endl;
+	//std::cout << "JoinMatchTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> presence(new txmpp::XmlElement(txmpp::QN_PRESENCE));
 	presence->AddAttr(txmpp::QN_TO, join_match_request_.match_id() + "/" + join_match_request_.nick());
@@ -734,7 +734,7 @@ int JoinMatchTask::ProcessStart() {
 
 int JoinMatchTask::ProcessResponse() {
 
-	std::cout << "Inside ListGamesTask::ProcessResponse()" << std::endl;
+	//std::cout << "Inside ListGamesTask::ProcessResponse()" << std::endl;
 
 	const txmpp::XmlElement* stanza = NextStanza();
 
@@ -751,8 +751,8 @@ int JoinMatchTask::ProcessResponse() {
 
 	Participant p = Participant::parseParticipant(fromJid.resource());
 
-	std::cout << "JoinMatchTask::ProcessResponse. processing stanza: " << std::endl;
-	std::cout << stanza->Str() << std::endl;
+	//std::cout << "JoinMatchTask::ProcessResponse. processing stanza: " << std::endl;
+	//std::cout << stanza->Str() << std::endl;
 
 	bool got_error = false;
 	if (stanza->FirstNamed(txmpp::QN_ERROR) != NULL) {
@@ -767,9 +767,9 @@ int JoinMatchTask::ProcessResponse() {
 			const txmpp::XmlElement* itemElement = NULL;
 
 			if (NULL == (itemElement = gameElement->FirstNamed(QN_MUG_ITEM_TAG))) {
-				std::cout
+			/*	std::cout
 						<< "JoinMatchTask::ProcessResponse. invalid stanza. failed to find <item> tag"
-						<< std::endl;
+						<< std::endl; */
 				got_error = true;
 			} else {
 				if (itemElement->HasAttr(QN_ROLE_ATTR))
@@ -781,7 +781,7 @@ int JoinMatchTask::ProcessResponse() {
 				if (itemElement->HasAttr(QN_JID_ATTR))
 					item.set_jid(itemElement->Attr(QN_JID_ATTR));
 
-				std::cout << "Item:" << item.Str() << std::endl;
+			//	std::cout << "Item:" << item.Str() << std::endl;
 			}
 		}
 	}
@@ -794,7 +794,7 @@ int JoinMatchTask::ProcessResponse() {
 
 bool JoinMatchTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
-	std::cout << "JoinMatchTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+	//std::cout << "JoinMatchTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 	 txmpp::Jid from(stanza->Attr(txmpp::QN_FROM));
 
 	if (stanza->Name() == txmpp::QN_PRESENCE && from.BareJid() == txmpp::Jid(join_match_request_.match_id())) {
@@ -803,24 +803,24 @@ bool JoinMatchTask::HandleStanza(const txmpp::XmlElement *stanza) {
 		if (childElement != NULL) {
 			if (childElement->FirstNamed(QN_MUG_ITEM_TAG) != NULL
 					&& childElement->FirstNamed(QN_MUG_STATUS_TAG) != NULL) {
-				std::cout << "JoinMatchTask::HandleStanza. found element with <item> and <status> tags." << std::endl;
+			//	std::cout << "JoinMatchTask::HandleStanza. found element with <item> and <status> tags." << std::endl;
 				const txmpp::XmlElement* statusElement = childElement->FirstNamed(QN_MUG_STATUS_TAG);
-				std::cout << "status:" << statusElement->Str() << std::endl;
+				//std::cout << "status:" << statusElement->Str() << std::endl;
 				std::string code(statusElement->Attr(QN_CODE_ATTR));
 				if (code == "110") {
 					QueueStanza(stanza);
 					return true;
 				} else {
-					std::cout << "JoinMatchTask::HandleStanza. status.code is not 110. code:" << code << std::endl;
+					//std::cout << "JoinMatchTask::HandleStanza. status.code is not 110. code:" << code << std::endl;
 				}
 			} else {
-				std::cout << "JoinMatchTask::HandleStanza. did not find <status> tag" << std::endl;
+				//std::cout << "JoinMatchTask::HandleStanza. did not find <status> tag" << std::endl;
 			}
 		} else {
-			std::cout << "JoinMatchTask::HandleStanza. childElement does not have <game> tag" << std::endl;
+			//std::cout << "JoinMatchTask::HandleStanza. childElement does not have <game> tag" << std::endl;
 		}
 	}
-	std::cout << "JoinMatchTask::HandleStanza. finished processing" << std::endl;
+	//std::cout << "JoinMatchTask::HandleStanza. finished processing" << std::endl;
 
 	return false;
 }
@@ -829,7 +829,7 @@ bool JoinMatchTask::HandleStanza(const txmpp::XmlElement *stanza) {
 StartMatchTask::StartMatchTask(txmpp::TaskParent *parent, const std::string& match_id, void* cb_data) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), match_id_(match_id), cb_data_(cb_data) {
 
-	std::cout << "Inside StartMatchTask constructor" << std::endl;
+	//std::cout << "Inside StartMatchTask constructor" << std::endl;
 }
 
 StartMatchTask::~StartMatchTask() {
@@ -837,7 +837,7 @@ StartMatchTask::~StartMatchTask() {
 
 int StartMatchTask::ProcessStart() {
 
-	std::cout << "StartMatchTask taskid is " << task_id() << std::endl;
+	//std::cout << "StartMatchTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> message(
 					new txmpp::XmlElement(txmpp::QN_MESSAGE));
@@ -868,7 +868,7 @@ LeaveMatchTask::~LeaveMatchTask() {
 
 int LeaveMatchTask::ProcessStart() {
 
-	std::cout << "LeaveMatchTask taskid is " << task_id() << std::endl;
+	//std::cout << "LeaveMatchTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> message(
 					new txmpp::XmlElement(txmpp::QN_MESSAGE));
@@ -889,7 +889,7 @@ int LeaveMatchTask::ProcessStart() {
 TurnTask::TurnTask(txmpp::TaskParent *parent, const std::string& match_id, const Turn& turn, void* cb_data) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), match_id_(match_id), turn_(turn), cb_data_(cb_data) {
 
-	std::cout << "Inside TurnTask constructor" << std::endl;
+	//std::cout << "Inside TurnTask constructor" << std::endl;
 }
 
 TurnTask::~TurnTask() {
@@ -897,7 +897,7 @@ TurnTask::~TurnTask() {
 
 int TurnTask::ProcessStart() {
 
-	std::cout << "TurnTask taskid is " << task_id() << std::endl;
+	//std::cout << "TurnTask taskid is " << task_id() << std::endl;
 
 	txmpp::scoped_ptr<txmpp::XmlElement> message(
 					new txmpp::XmlElement(txmpp::QN_MESSAGE));

@@ -187,13 +187,13 @@ public:
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
 		switch (state) {
 		case txmpp::XmppEngine::STATE_OPEN: {
-			std::cout << "creating register account task. account_info = " << account_info_.Str() << std::endl;
-			std::cout << "pump client != NULL is " << (bool)(pump_->client() != NULL) << std::endl;
+		//	std::cout << "creating register account task. account_info = " << account_info_.Str() << std::endl;
+		//	std::cout << "pump client != NULL is " << (bool)(pump_->client() != NULL) << std::endl;
 			//std::cout << "typepid(client) = " << typeid(pump_->client()).name() << std::endl;
 			RegisterAccountTask * register_account_task_ = new RegisterAccountTask(pump_->client(), account_info_);
-			std::cout << "created register account task" << std::endl;
+		//	std::cout << "created register account task" << std::endl;
 			register_account_task_->SignalDone.connect(this, &GameServiceRegisterClientWorker::OnRegisterAccountResponse);
-			std::cout << "starting register account task" << std::endl;
+		//	std::cout << "starting register account task" << std::endl;
 			register_account_task_->Start();
 			break;
 		}
@@ -743,9 +743,10 @@ private:
 
 	void OnTurn(const std::string& match_id, const Participant& participant, const Turn& turn) {
 		assert(txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Received a turn message. match_id=" << match_id
+	/*	std::cout << "Received a turn message. match_id=" << match_id
 				<< ", participant=" << participant.Str()
 				<< std::endl;
+				*/
 		main_thread_->Post(this, MSG_HANDLE_TURN,
 						new IncomingTurnMessageData(match_id, participant, turn));
 		if (notify_)
@@ -972,7 +973,7 @@ private:
 
 	void OnListGamesResponse(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnListGamesResponse. called from worker thread. game_id_vector.size()=" << game_id_vector.size() << std::endl;
+	//	std::cout << "Inside OnListGamesResponse. called from worker thread. game_id_vector.size()=" << game_id_vector.size() << std::endl;
 		main_thread_->Post(this, MSG_LIST_GAMES_RESPONSE, new ListOfGamesResponseData(rs, game_id_vector));
 		if (notify_)
 			notify_->WakeupMainThread();
@@ -1059,7 +1060,7 @@ private:
 
 	void OnAssignMatchResponse(const ResponseStatus& rs, const MatchRequest& match_request, const std::string& match_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnAssignMatchResponse. called from worker thread. match_id=" << match_id << std::endl;
+	//	std::cout << "Inside OnAssignMatchResponse. called from worker thread. match_id=" << match_id << std::endl;
 		main_thread_->Post(this, MSG_ASSIGN_MATCH_RESPONSE, new AssignMatchResponseData(rs, match_request, match_id, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
@@ -1102,7 +1103,7 @@ private:
 
 	void OnJoinMatchResponse(const ResponseStatus& rs, const std::string& match_id, const Participant& p, const Item& item, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnJoinMatchResponse. called from worker thread. match_id=" << match_id << std::endl;
+	//	std::cout << "Inside OnJoinMatchResponse. called from worker thread. match_id=" << match_id << std::endl;
 		main_thread_->Post(this, MSG_JOIN_MATCH_RESPONSE, new JoinMatchResponseData(rs, match_id, p, item, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
@@ -1142,7 +1143,7 @@ private:
 
 	void OnStartMatchResponse(const ResponseStatus& rs, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnStartMatchResponse. called from worker thread. "<< std::endl;
+	//	std::cout << "Inside OnStartMatchResponse. called from worker thread. "<< std::endl;
 		main_thread_->Post(this, MSG_START_MATCH_RESPONSE, new StartMatchResponseData(rs, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
@@ -1182,7 +1183,7 @@ private:
 
 	void OnLeaveMatchResponse(const ResponseStatus& rs, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnLeaveMatchResponse. called from worker thread. " << std::endl;
+	//	std::cout << "Inside OnLeaveMatchResponse. called from worker thread. " << std::endl;
 		main_thread_->Post(this, MSG_LEAVE_MATCH_RESPONSE, new LeaveMatchResponseData(rs, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
@@ -1223,7 +1224,7 @@ private:
 
 	void OnTurnResponse(const ResponseStatus& rs, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		std::cout << "Inside OnTurnResponse. called from worker thread. " << std::endl;
+	//	std::cout << "Inside OnTurnResponse. called from worker thread. " << std::endl;
 		main_thread_->Post(this, MSG_TURN_RESPONSE, new TurnResponseData(rs, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
