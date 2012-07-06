@@ -6,6 +6,6 @@ app=
     name        = "JYP",
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc.",
-    attributes  = { "nolauncher", "gameservice" },
+    attributes  = { "nolauncher" },
 }
 
