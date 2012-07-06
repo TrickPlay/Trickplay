@@ -281,9 +281,9 @@ typedef struct TPContext TPContext;
     TP_GAMESERVICE_ENABLED - 	If set to true, gameservice support will be available. Default is false
 
     TP_GAMESERVICE_DOMAIN - 	This is the default xmpp domain on which a gameservice user account exists.
-    							Defaults to tp-network.trickplay.com
+    							Defaults to gameservice.trickplay.com
 
-    TP_GAMESERVICE_HOST - 		The host on which the gameservice XMPP server runs on. Defaults to tp=network.trickplay.com
+    TP_GAMESERVICE_HOST - 		The host on which the gameservice XMPP server runs on. Defaults to gameservice.trickplay.com
 
     TP_GAMESERVICE_PORT -		The port on which gameservice XMPP server listens on. Defaults to 5222
 
