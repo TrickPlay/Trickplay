@@ -114,6 +114,8 @@ namespace Physics
         //.........................................................................
 
         void destroy_body_later( b2Body * body );
+        void deactivate_body_later( b2Body * body );
+        void activate_body_later( b2Body * body );
 
         //.........................................................................
 
@@ -204,6 +206,8 @@ namespace Physics
         typedef std::list< b2Body * > b2BodyList;
 
         b2BodyList      to_destroy;
+        b2BodyList      to_deactivate;
+        b2BodyList      to_activate;
 
     };
 
