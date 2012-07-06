@@ -583,6 +583,15 @@ if (TP_WITH_GAMESERVICE)
 		${ENGINE_SRC}/source/gameservice_support.cpp
 		${ENGINE_SRC}/source/gameservice_util.cpp
 	)	
+	
+	list( APPEND
+
+	    ENGINE_LIBRARIES
+	
+	    gameservice
+	    tptxmpp
+	)
+	
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -639,27 +648,6 @@ set_target_properties(
     COMPILE_FLAGS -fvisibility=hidden
 )
 
-if (TP_WITH_GAMESERVICE)
-
-target_link_libraries(
-
-    tpcore
-
-    ${ENGINE_LIBRARIES}
-    gameservice
-    m
-    dl
-    tplua
-    tptxmpp
-    clutteralphamode
-
-    LinearMath
-    BulletDynamics
-    BulletCollision
-    BulletSoftBody
-)
-
-else (TP_WITH_GAMESERVICE)
 
 target_link_libraries(
 
@@ -676,8 +664,5 @@ target_link_libraries(
     BulletCollision
     BulletSoftBody
 )
-
-endif(TP_WITH_GAMESERVICE)
-
 
 
