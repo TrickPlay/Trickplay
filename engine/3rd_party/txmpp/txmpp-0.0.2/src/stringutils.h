@@ -229,6 +229,9 @@ size_t sprintfn(char* buffer, size_t buflen, const char* format, ...)
 GCC_ATTR(format(printf,3,4));
 */
 template<class CTYPE>
+size_t vsprintfn(CTYPE* buffer, size_t buflen, const CTYPE* format,
+                 va_list args);
+template<class CTYPE>
 size_t sprintfn(CTYPE* buffer, size_t buflen, const CTYPE* format, ...) {
   va_list args;
   va_start(args, format);

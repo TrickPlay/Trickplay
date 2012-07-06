@@ -301,7 +301,7 @@ namespace txmpp {
 		}
 	};
 
-	template<class mt_policy>
+	template<class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
 	class has_slots;
 
 	template<class mt_policy>
@@ -427,7 +427,7 @@ namespace txmpp {
 		virtual void slot_duplicate(const has_slots<mt_policy>* poldslot, has_slots<mt_policy>* pnewslot) = 0;
 	};
 
-	template<class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
+	template<class mt_policy>
 	class has_slots : public mt_policy 
 	{
 	private:
