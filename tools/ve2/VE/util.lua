@@ -11,6 +11,21 @@ function util.getUITypeStr(v, type, widget_type)
     "Widget_Text"
     "Button" .... 
 end 
+
+
+function util.is_this_widget(v)
+
+    if v.extra then 
+        if util.is_in_list(v.extra.type, hdr.uiElements) == true then 
+	    	return true
+        else 
+	    	return false
+        end 
+    else 
+        return false
+    end 
+
+end 
 ]]
 
 function util.is_this_selected(v)

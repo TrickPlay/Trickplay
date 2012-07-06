@@ -136,12 +136,8 @@ fake_style_json = '{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default"
 
 
 ---------------------------------------------------------------------------
----                 Local Editor Functions                              ---
+---                 Test Functions                                      ---
 ---------------------------------------------------------------------------
-
-local rect_init_x = 0
-local rect_init_y = 0
-
 
 function ll ()
 
@@ -155,9 +151,9 @@ function ss ()
 
 end
 
-function tt ()
+function rr (gid)
 
-    _VE_.insertUIElement(2, "Rectangle")
+    _VE_.insertUIElement(gid, "Rectangle")
 
 end
 
@@ -169,15 +165,24 @@ end
 
 function dd (gid)
 
-    _VE_.duplicate(gid)
+    _VE_.delete(gid)
 
 end
 
-function bb ()
+function bb (gid)
 
-    _VE_.insertUIElement(2, "Button")
+    _VE_.insertUIElement(gid, "Button")
 
 end
+
+---------------------------------------------------------------------------
+---                 Local Editor Functions                              ---
+---------------------------------------------------------------------------
+
+local rect_init_x = 0
+local rect_init_y = 0
+
+
 
 local function getTypeStr(m) 
     if m.widget_type == "Widget" then 
@@ -691,10 +696,8 @@ end
 
 -- Delete
 _VE_.delete = function(gid)
-    --devtools:gid(gid)[property] = value 
---[=[
-    if(table.getn(selected_objs) == 0 )then 
-		editor.error_message("016","",nil,nil,nil)
+
+    if #(selected_objs) == 0 then 
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
@@ -704,12 +707,13 @@ _VE_.delete = function(gid)
 
 		screen_ui.n_selected(del_obj)
 
-        table.insert(undo_list, {del_obj.name, hdr.DEL, del_obj})
-
+        --[[
         if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
 	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
         end
-
+        --]]
+        --[=[  
+        -- manage user stub code 
 		if util.need_stub_code(del_obj) == true then 
 			if current_fn then 
 				local a, b = string.find(current_fn,"screens") 
@@ -736,13 +740,18 @@ _VE_.delete = function(gid)
 			     end 
 	       	end 
 	   end 
+       ]=]
     end 
 
-	for i, v in pairs(g.children) do
+    getCurLayer(gid)
+
+    blockReport = true
+
+    for i, v in pairs(curLayer.children) do
 		if(v.extra.selected == true) then
 			if v.extra.clone then 
 				if #v.extra.clone > 0 then
-					editor.error_message("017","",nil,nil,nil)
+                    print (v.name,"can't be deleted. It has clone object")
         			screen:grab_key_focus()
 					input_mode = hdr.S_SELECT
 					return 
@@ -753,14 +762,13 @@ _VE_.delete = function(gid)
 				util.table_remove_val(v.source.extra.clone, v.name)
 			end 
 			
-			if util.is_this_widget(v) == false then 
-				delete_f(v)
-		    	g:remove(v)
-			end 
+			delete_f(v)
+		    curLayer:remove(v)
 		end 
 	end 
 	
-
+    blockReport = false
+    --[=[
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
 		local bumo
@@ -817,17 +825,11 @@ _VE_.delete = function(gid)
 				end 
 		end 
 	end 
-
-	if table.getn(g.children) == 0 then 
-	    if screen:find_child("timeline") then 
-			screen:remove(screen:find_child("timeline"))
-	    end 
-	end 
+    --]=]
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 
---]=]
 end 
 
 -- SET
@@ -904,35 +906,10 @@ _VE_.openFile = function(path)
                     m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
                 end 
 
-                local uiTypeStr =""
-                if m.widget_type == "Widget" then 
-                    uiTypeStr = m.type
-                else 
-                    uiTypeStr = m.widget_type
-                end 
+                local uiTypeStr = getTypeStr(m) 
 
                 create_mouse_event_handler(m, uiTypeStr)
 
-                --[[
-                function m.on_motion ( m, x , y )
-                    if dragging then 
-                        local actor , dx , dy = unpack( dragging )
-                        actor.position = { x - dx , y - dy  }
-                    end
-                end
-
-                function m.on_button_down( m , x , y , button )
-                    dragging = { m , x - m.x , y - m.y }
-                    _VE_.openInspector(m.gid)
-                    m:grab_pointer()
-                end
-        
-                function m.on_button_up( m , x , y , button )
-                    dragging = nil
-                    m:ungrab_pointer()
-                    m:set{}
-                end
-                ]]
                 m.reactive = true 
                 m.lock = false
                 m.selected = false
