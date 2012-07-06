@@ -106,8 +106,28 @@ void World::stop()
 
 void World::step( float32 time_step , int _velocity_iterations , int _position_iterations )
 {
-    // Bodies that we could not destroy during a callback are taken care of here.
+    // Bodies that we could not destroy/activate/de-activate during a callback are taken care of here.
     // We only destroy a few at a time.
+
+    if ( ! to_deactivate.empty() )
+    {
+        for( int i = 0; ! to_deactivate.empty() && i < 5; ++i )
+        {
+            to_deactivate.front()->SetActive( false );
+
+            to_deactivate.pop_front();
+        }
+    }
+
+    if ( ! to_activate.empty() )
+    {
+        for( int i = 0; ! to_activate.empty() && i < 5; ++i )
+        {
+            to_activate.front()->SetActive( true );
+
+            to_activate.pop_front();
+        }
+    }
 
     if ( ! to_destroy.empty() )
     {
@@ -749,6 +769,24 @@ void World::destroy_body_later( b2Body * body )
     to_destroy.push_back( body );
 }
 
+//.............................................................................
+
+void World::deactivate_body_later( b2Body * body )
+{
+    g_assert( body );
+
+    to_deactivate.push_back( body );
+}
+
+//.............................................................................
+
+void World::activate_body_later( b2Body * body )
+{
+    g_assert( body );
+
+    to_activate.push_back( body );
+}
+
 //=============================================================================
 // ContactListener callbacks
 
@@ -1032,8 +1070,6 @@ Body::~Body()
 
         body->SetUserData( 0 );
 
-        body->SetActive( false );
-
         // b2Bodies cannot be destroyed during callbacks. So, if an actor is
         // collected during a collision callback, for example, the call to destroy the
         // associated b2Body will fail. To get around this, we tell the
@@ -1187,7 +1223,18 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
     {
         bool mapped = CLUTTER_ACTOR_IS_MAPPED( self->actor );
 
-        self->body->SetActive( mapped );
+
+        if( self->body->GetWorld()->IsLocked() )
+        {
+            self->body->SetActive( mapped );
+        } else {
+            if( mapped )
+            {
+                self->world->activate_body_later( self->body );
+            } else {
+                self->world->deactivate_body_later( self->body );
+            }
+        }
 
         // The actor is back on the screen, we update the body's position
 
