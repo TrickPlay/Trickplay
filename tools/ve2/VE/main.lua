@@ -74,27 +74,33 @@ local uiNum = 0
 local layerNum = 0
 local curLayerGid = nil
 local curLayer= nil
+local uiDuplicate= nil
+local uiRectangle = nil
 local blockReport= false
 
 -- UI Element Creation Function Map 
 
 local uiElementCreate_map = 
 {
-    ['Button'] = function()  return Button() end, 
-    ['Text'] = function()  return Widget_Text() end, 
-    ['Image'] = function()  return Widget_Image() end, 
-    ['DialogBox'] = function() return DialogBox() end,
-    ['ToastAlert'] = function() return ToastAlert() end,
-    ['ProgressSpinner'] = function() return ProgressSpinner() end,
-    ['OrbittingDots'] = function() return OrbittingDots() end,
-    ['TextInput'] = function() return TextInput() end,
-    ['LayoutManager'] = function()  return LayoutManager() end, 
-    ['Slider'] = function()  return Slider() end, 
-    ['ArrowPane'] = function()  return ArrowPane() end, 
-    ['ScrollPane'] = function()  return ScrollPane() end, 
-    ['TabBar'] = function()  return TabBar() end, 
-    ['ButtonPicker'] = function()  return ButtonPicker() end, 
-    ['MenuButton'] = function()  return MenuButton() end, 
+    ['Clone'] = function(p)  return Widget_Clone(p) end, 
+    ['Group'] = function(p)  return Widget_Group(p) end, 
+    ['Rectangle'] = function(p)  return Widget_Rectangle(p) end, 
+
+    ['Text'] = function(p)  return Widget_Text(p) end, 
+    ['Image'] = function(p)  return Widget_Image(p) end, 
+    ['Button'] = function(p)  return Button(p) end, 
+    ['DialogBox'] = function(p) return DialogBox(p) end,
+    ['ToastAlert'] = function(p) return ToastAlert(p) end,
+    ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
+    ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
+    ['TextInput'] = function(p) return TextInput(p) end,
+    ['LayoutManager'] = function(p)  return LayoutManager(p) end, 
+    ['Slider'] = function(p)  return Slider(p) end, 
+    ['ArrowPane'] = function(p)  return ArrowPane(p) end, 
+    ['ScrollPane'] = function(p)  return ScrollPane(p) end, 
+    ['TabBar'] = function(p)  return TabBar(p) end, 
+    ['ButtonPicker'] = function(p)  return ButtonPicker(p) end, 
+    ['MenuButton'] = function(p)  return MenuButton(p) end, 
 }
 
 -- Layer JSON 
@@ -136,7 +142,12 @@ fake_style_json = '{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default"
 local rect_init_x = 0
 local rect_init_y = 0
 
-local uiRectangle = nil
+
+function ll ()
+
+    _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST2/TR.T11/screens")
+
+end 
 
 function ss ()
 
@@ -155,6 +166,33 @@ function gg ()
     _VE_.insertUIElement(2, "Group")
 
 end
+
+function dd (gid)
+
+    _VE_.duplicate(gid)
+
+end
+
+function bb ()
+
+    _VE_.insertUIElement(2, "Button")
+
+end
+
+local function getTypeStr(m) 
+    if m.widget_type == "Widget" then 
+        return m.type
+    else 
+        return m.widget_type
+    end 
+end 
+
+local function getCurLayer(gid) 
+
+    curLayerGid = gid 
+    curLayer = devtools:gid(gid)
+
+end 
 
 local function create_mouse_event_handler(uiInstance, uiTypeStr)
 
@@ -405,8 +443,6 @@ local function editor_clone()
 		return 
    	end 
 
-    curLayer = devtools:gid(curLayerGid)
-
 	for i, v in pairs(curLayer.children) do
 		if(v.selected == true) then
 		    screen_ui.n_selected(v)
@@ -444,8 +480,6 @@ local function editor_group()
 		input_mode = hdr.S_SELECT
 		return nil
    	end 
-
-    curLayer = devtools:gid(curLayerGid)
 
     local min_x, max_x, min_y, max_y = get_min_max () 
        
@@ -529,8 +563,7 @@ end
 -- UnGroup
 _VE_.ungroup = function(gid)
     
-    curLayerGid = gid 
-    curLayer = devtools:gid(gid)
+    getCurLayer(gid) 
 
     if #selected_objs == 0 then 
         screen:grab_key_focus()
@@ -572,46 +605,88 @@ _VE_.ungroup = function(gid)
 end 
 
 -- Duplicate
-_VE_.duplicate = function(gid)
-    --devtools:gid(gid)[property] = value 
 
---[[
+local function duplicate_child(new, org)
+
+    local uiTypeStr, n, l, m
+
+    for l,m in pairs (org.children) do 
+
+        uiTypeStr = getTypeStr(m) 
+
+        if uiElementCreate_map[uiTypeStr] then
+            n = uiElementCreate_map[uiTypeStr](m.attributes)
+        end 
+
+        assign_right_name(n, uiTypeStr)
+
+        n.reactive = false
+        n.lock = false
+        n.selected = false
+        n.is_in_group = true
+
+        if n.subscribe_to then  
+            n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
+        end 
+
+        if uiTypeStr == "Group" then  
+            duplicate_child(n, m)
+        end
+
+        new:add(n) 
+    end 
+
+end 
+
+
+_VE_.duplicate = function(gid)
+
     -- no selected object 
-	if(table.getn(selected_objs) == 0 )then 
-		editor.error_message("016","",nil,nil,nil)
+	if #(selected_objs) == 0 then 
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
    	end 
 
-	for i, v in pairs(g.children) do
+    getCurLayer(gid)
+
+    blockReport = true
+
+    for i, v in pairs(curLayer.children) do
 		if util.is_this_selected(v) == true then 
-		    if ui.dup then
-		    	if ui.dup.name == v.name then 
-					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
+		    if uiDuplicate then
+		    	if uiDuplicate.name == v.name then 
+					next_position = {2 * v.x - uiDuplicate.extra.position[1], 2 * v.y - uiDuplicate.extra.position[2]}
 				else 
-					ui.dup = nil 
+					uiDuplicate = nil 
 					next_position = nil 
 			  	end 
 		    end 
-			 
-            ui.dup = dup_function(v)
 
-			if ui.dup then 
-            	table.insert(undo_list, {ui.dup.name, hdr.ADD, ui.dup})
-                g:add(ui.dup)
+			uiTypeStr = getTypeStr(v) 
+            if uiElementCreate_map[uiTypeStr] then
+                uiDuplicate = uiElementCreate_map[uiTypeStr](v.attributes)
+            end 
 
-                 ui.dup.reactive = true
-                 ui.dup.extra.lock = false
-                 util.create_on_button_down_f(ui.dup)
-                 item_num = item_num + 1
-			end --ui.dup
+            uiDuplicate.position = {v.x + 20, v.y +20}
+
+            assign_right_name(uiDuplicate, uiTypeStr)
+            create_mouse_event_handler(uiDuplicate, uiTypeStr)
+
+            if uiTypeStr == "Group" then 
+                duplicate_child(uiDuplicate, v)
+            end 
+
+            addIntoLayer(uiDuplicate)
+
 		end --if selected == true
     end -- for 
 
+    blockReport = false
+
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
---]]
+
 end 
 
 -- Delete
@@ -947,7 +1022,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     local uiInstance, dragging = nil 
 
-    curLayerGid = layerGid
+    getCurLayer(layerGid)
 
     if uiTypeStr == "Rectangle" then 
 
@@ -972,7 +1047,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     elseif uiElementCreate_map[uiTypeStr] then
 
-        uiInstance = uiElementCreate_map[uiTypeStr](self)
+        uiInstance = uiElementCreate_map[uiTypeStr]()
 
     end 
 
@@ -1001,7 +1076,6 @@ end
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
 
 		if current_focus and input_mode ~=  hdr.S_RECTANGLE then -- for closing menu button or escaping from text editting 
-            print("shfskdfhskfh")
 			current_focus.clear_focus()
 			screen:grab_key_focus()
 			return
@@ -1030,7 +1104,6 @@ end
 	      	else
 				screen_ui.multi_select_done(x,y)
 				if move == nil then
-                    print("QUQUQU")
 					screen_ui.n_selected_all()
 				end
 				move = nil

@@ -13,6 +13,18 @@ function util.getUITypeStr(v, type, widget_type)
 end 
 ]]
 
+function util.is_this_selected(v)
+	local b_name = v.name.."border"
+
+	for i, j in pairs (selected_objs) do
+		if j == b_name then 
+			return true
+		end 
+	end 
+
+	return false
+end 
+
 
 function util.is_this_group(v)
 
@@ -287,18 +299,6 @@ function util.need_stub_code(v)
         return false
     end 
 
-end 
-
-function util.is_this_selected(v)
-	local b_name = v.name.."border"
-
-	for i, j in pairs (selected_objs) do
-		if j == b_name then 
-			return true
-		end 
-	end 
-
-	return false
 end 
 
 function util.is_this_widget(v)
