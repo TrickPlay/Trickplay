@@ -93,11 +93,11 @@ paddle:PrismaticJoint( pole , { 0 , 0 } , { 0 , 1 } ,
 
     {
         enable_limit = true,
-        lower_translation = 0 ,
-        upper_translation = POLE_HEIGHT ,
-        enable_motor = false,
-        motor_speed = 1,
-        max_motor_force = 1000
+        lower_translation = -POLE_HEIGHT / 2,
+        upper_translation = 0 ,
+        enable_motor = true,
+        motor_speed = 5,
+        max_motor_force = 40
     }
 )
 

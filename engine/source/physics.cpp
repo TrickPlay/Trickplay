@@ -22,7 +22,7 @@ World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_met
     z_for_y( false ),
     global_callbacks( 0 ),
     L( _LS ),
-    world( b2Vec2( 0.0f , 10.0f ) , true ),
+    world( b2Vec2( 0.0f , 10.0f ) ),
     next_handle( 1 ),
     velocity_iterations( 6 ),
     position_iterations( 2 ),
@@ -881,12 +881,12 @@ gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , Wo
 
     cairo_scale( cr , world->ppm , world->ppm );
 
-    world->b2DebugDraw::SetFlags(
-            b2DebugDraw::e_shapeBit
-            | b2DebugDraw::e_aabbBit
-            | b2DebugDraw::e_centerOfMassBit
-            | b2DebugDraw::e_jointBit
-            | b2DebugDraw::e_pairBit
+    world->b2Draw::SetFlags(
+            b2Draw::e_shapeBit
+            | b2Draw::e_jointBit
+            | b2Draw::e_aabbBit
+            | b2Draw::e_pairBit
+            | b2Draw::e_centerOfMassBit
             );
 
     world->world.SetDebugDraw( world );

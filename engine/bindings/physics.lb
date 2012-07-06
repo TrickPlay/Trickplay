@@ -274,7 +274,7 @@ interface Body [[ ClutterActor * ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( me->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().p );
 
             pos.x = me->world->screen_to_world( x );
 
@@ -319,7 +319,7 @@ interface Body [[ ClutterActor * ]]
             }
             else
             {
-                b2Vec2 pos( me->body->GetTransform().position );
+                b2Vec2 pos( me->body->GetTransform().p );
 
                 pos.y = me->world->screen_to_world( y );
 
@@ -365,7 +365,7 @@ interface Body [[ ClutterActor * ]]
             }
             else
             {
-                b2Vec2 pos( me->body->GetTransform().position );
+                b2Vec2 pos( me->body->GetTransform().p );
 
                 pos.y = me->world->screen_to_world( z );
 
@@ -407,7 +407,7 @@ interface Body [[ ClutterActor * ]]
             }
             else
             {
-                b2Vec2 pos( me->body->GetTransform().position );
+                b2Vec2 pos( me->body->GetTransform().p );
 
                 pos.y = me->world->screen_to_world( depth );
 
@@ -437,7 +437,7 @@ interface Body [[ ClutterActor * ]]
 		[[
             Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( me->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().p );
 
             me->body->SetTransform( pos , Physics::World::degrees_to_radians( angle ) );
 
@@ -460,7 +460,7 @@ interface Body [[ ClutterActor * ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
 
-            b2Vec2 pos( me->body->GetTransform().position );
+            b2Vec2 pos( me->body->GetTransform().p );
 
             me->body->SetTransform( pos , Physics::World::degrees_to_radians( rotation ) );
 
@@ -1836,14 +1836,14 @@ global physics [[ Physics::World * ]]
 
 	Shape Edge( table point_a , table point_b )
         [[
-            b2PolygonShape * shape = new b2PolygonShape();
+            b2EdgeShape * shape = new b2EdgeShape();
 
             lua_rawgeti( L , point_a , 1 );
             lua_rawgeti( L , point_a , 2 );
             lua_rawgeti( L , point_b , 1 );
             lua_rawgeti( L , point_b , 2 );
 
-            shape->SetAsEdge( b2Vec2( self->screen_to_world( lua_tonumber( L , -4 ) ) ,
+            shape->Set( b2Vec2( self->screen_to_world( lua_tonumber( L , -4 ) ) ,
                     self->screen_to_world( lua_tonumber( L , -3 ) ) ),
                     b2Vec2( self->screen_to_world( lua_tonumber( L , -2 ) ) ,
                             self->screen_to_world( lua_tonumber( L , -1 ) ) ) );
