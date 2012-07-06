@@ -420,9 +420,9 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Property: angle
 
-	The angle property specifies the object's rotation in degrees along the Z axis.
+	The angle property specifies the object's rotation in degrees about the Z axis.
 
-	If the physics variable's z_for_y property is true, the object rotates along the Y axis.
+	If the physics variable's z_for_y property is true, the object rotates about the Y axis.
 
 	*Default Setting:* 0
 
