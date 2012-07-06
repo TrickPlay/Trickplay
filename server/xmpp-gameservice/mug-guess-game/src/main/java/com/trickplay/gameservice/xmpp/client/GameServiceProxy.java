@@ -59,7 +59,7 @@ import com.trickplay.gameservice.xmpp.mug.TurnExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnMessage;
 
 public class GameServiceProxy {
-	private static final String MUGServiceId = "mug.internal.trickplay.com";
+	//private static final String MUGServiceId = "mug.internal.trickplay.com";
 	private static final String MUGownerns = "http://jabber.org/protocol/mug#owner";
 	private static final String MUGuserns = "http://jabber.org/protocol/mug#user";
 	private static final String MUGns = "http://jabber.org/protocol/mug";
@@ -81,7 +81,8 @@ public class GameServiceProxy {
 
 	private String server;
 	private int port;
-
+	private String domain;
+	
 	private ConnectionConfiguration config;
 	private XMPPConnection connection;
 
@@ -97,8 +98,17 @@ public class GameServiceProxy {
 	
 
 	public GameServiceProxy(String server, int port) {
+		this("internal.trickplay.com", server, port);
+	}
+
+	public GameServiceProxy(String domain, String server, int port) {
 		this.server = server;
 		this.port = port;
+		this.domain = domain;
+	}
+	
+	public String getMugServiceId() {
+		return "mug." + domain;
 	}
 
 	public void registerParticipantStatusListener(PlayerStatusListener listener) {
@@ -256,7 +266,7 @@ public class GameServiceProxy {
 					if (p == null)
 						return false;
 			//		System.out.println("packet filter processing packet with contents:"+p.toXML());
-					if (p.getFrom().contains(MUGServiceId)) {
+					if (p.getFrom().contains(getMugServiceId())) {
 						return true;
 					}
 						
@@ -325,7 +335,7 @@ public class GameServiceProxy {
 		ServiceDiscoveryManager discoManager = ServiceDiscoveryManager
 				.getInstanceFor(connection);
 
-		DiscoverInfo discoInfo = discoManager.discoverInfo(MUGServiceId);
+		DiscoverInfo discoInfo = discoManager.discoverInfo(getMugServiceId());
 
 		List<String> allGames = new ArrayList<String>();
 		for (Iterator<Feature> iter = discoInfo.getFeatures(); iter.hasNext();) {
@@ -362,7 +372,7 @@ public class GameServiceProxy {
 		};
 
 		iq.setType(org.jivesoftware.smack.packet.IQ.Type.SET);
-		iq.setTo(MUGServiceId);
+		iq.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(iq.getPacketID()));
@@ -395,7 +405,7 @@ public class GameServiceProxy {
 		};
 
 		iq.setType(org.jivesoftware.smack.packet.IQ.Type.SET);
-		iq.setTo(MUGServiceId);
+		iq.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(iq.getPacketID()));
@@ -438,7 +448,7 @@ public class GameServiceProxy {
 
 		};
 
-		createMatchIQ.setTo(MUGServiceId);
+		createMatchIQ.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(createMatchIQ
@@ -469,7 +479,7 @@ public class GameServiceProxy {
 
 		};
 
-		createMatchIQ.setTo(MUGServiceId);
+		createMatchIQ.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(createMatchIQ
@@ -497,7 +507,7 @@ public class GameServiceProxy {
 	public String openApp(final String appId) throws XMPPException {
 		Presence openAppPresence = new Presence(Type.available);
 		openAppPresence.addExtension(new OpenApp(appId));
-		openAppPresence.setTo(MUGServiceId);
+		openAppPresence.setTo(getMugServiceId());
 
 		connection.sendPacket(openAppPresence);
 		return openAppPresence.getPacketID();
@@ -506,7 +516,7 @@ public class GameServiceProxy {
 	public String closeApp(final String appId) throws XMPPException {
 		Presence closeAppPresence = new Presence(Type.unavailable);
 		closeAppPresence.addExtension(new OpenApp(appId));
-		closeAppPresence.setTo(MUGServiceId);
+		closeAppPresence.setTo(getMugServiceId());
 		connection.sendPacket(closeAppPresence);
 		return closeAppPresence.getPacketID();
 	}
@@ -569,7 +579,7 @@ public class GameServiceProxy {
 		};
 
 		matchdataIQ.setType(IQ.Type.GET);
-		matchdataIQ.setTo(MUGServiceId);
+		matchdataIQ.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(matchdataIQ
@@ -606,7 +616,7 @@ public class GameServiceProxy {
 		};
 
 		userDataIQ.setType(IQ.Type.GET);
-		userDataIQ.setTo(MUGServiceId);
+		userDataIQ.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(userDataIQ
@@ -643,7 +653,7 @@ public class GameServiceProxy {
 		};
 
 		userDataIQ.setType(IQ.Type.SET);
-		userDataIQ.setTo(MUGServiceId);
+		userDataIQ.setTo(getMugServiceId());
 
 		PacketCollector collector = connection
 				.createPacketCollector(new PacketIDFilter(userDataIQ

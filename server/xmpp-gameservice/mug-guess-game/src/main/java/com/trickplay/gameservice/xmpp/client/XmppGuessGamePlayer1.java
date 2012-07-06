@@ -26,6 +26,10 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		super();
 	}
 	
+	public XmppGuessGamePlayer1(String domain, String host, int port) throws Exception {
+		super(domain, host, port);
+	}
+	
 	public String registerGame(String appname, int version, String gamename) throws Exception {
 		List<String> allGames = xmppManager.getRegisteredGames();
 		
@@ -130,7 +134,7 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		XmppGuessGamePlayer1 p1 = null;
 		try {
 
-			p1 = new XmppGuessGamePlayer1();
+			p1 = new XmppGuessGamePlayer1("gameservice.trickplay.com", "gameservice1.gameservice.trickplay.com", 5222);
 			
 			String appId = p1.registerApp("tpapps", 1);
 			
