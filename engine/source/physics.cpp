@@ -1224,7 +1224,7 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
         bool mapped = CLUTTER_ACTOR_IS_MAPPED( self->actor );
 
 
-        if( self->body->GetWorld()->IsLocked() )
+        if( !self->body->GetWorld()->IsLocked() )
         {
             self->body->SetActive( mapped );
         } else {
