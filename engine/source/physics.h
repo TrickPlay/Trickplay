@@ -22,7 +22,7 @@ namespace Physics
 
     //=========================================================================
 
-    class World : private b2ContactListener , private b2DebugDraw
+    class World : private b2ContactListener , private b2Draw
     {
     public:
 
@@ -141,7 +141,7 @@ namespace Physics
         virtual void PostSolve( b2Contact * contact , const b2ContactImpulse * impulse );
 
         //.........................................................................
-        // b2DebugDraw methods
+        // b2Draw methods
 
         virtual void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
 
