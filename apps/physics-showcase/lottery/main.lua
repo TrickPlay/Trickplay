@@ -444,7 +444,7 @@ local function make_ball( i )
         Text
         {
             text = tostring( i ),
-            position = { 10 , 10 },
+            position = { 14 , 10 },
             color = "000000D0",
             font = "DejaVu Mono bold 70px",
         }
