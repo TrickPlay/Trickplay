@@ -48,7 +48,7 @@
 #define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
 #define TP_GAMESERVICE_ENABLED_DEFAULT		false
 #define TP_GAMESERVICE_DOMAIN_DEFAULT	    "gameservice.trickplay.com"
-#define TP_GAMESERVICE_HOST_DEFAULT			"gameservice1.gameservice.trickplay.com"
+#define TP_GAMESERVICE_HOST_DEFAULT			"gameservice.gameservice.trickplay.com"
 #define TP_GAMESERVICE_PORT_DEFAULT			5222
 
 // TODO: Don't like hard-coding this app id here
