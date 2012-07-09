@@ -1353,7 +1353,7 @@ interface Body [[ ClutterActor * ]]
 		TODO
 	*/
 
-    int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
+    int PrismaticJoint( Body other_body , table axis , table properties = 0 , table anchor = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
 
@@ -1371,13 +1371,23 @@ interface Body [[ ClutterActor * ]]
 
             // TODO: at least one of the bodies has to be dynamic with a non-fixed rotation
 
-            lua_rawgeti( L , anchor , 1 );
-            lua_rawgeti( L , anchor , 2 );
+            float32 x = 0;
+            float32 y = 0;
 
-            float32 x = me->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 y = me->world->screen_to_world( lua_tonumber( L , -1 ) );
+            if ( !anchor )
+            {
+                // Dy default, anchor point is  { 0, 0 } in the screen -- this only matters for relative rotation
+                x = me->world->screen_to_world( 0 );
+                y = me->world->screen_to_world( 0 );
+            } else {
+                lua_rawgeti( L , anchor , 1 );
+                lua_rawgeti( L , anchor , 2 );
 
-            lua_pop( L , 2 );
+                x = me->world->screen_to_world( lua_tonumber( L , -2 ) );
+                y = me->world->screen_to_world( lua_tonumber( L , -1 ) );
+
+                lua_pop( L , 2 );
+            }
 
             lua_rawgeti( L , axis , 1 );
             lua_rawgeti( L , axis , 2 );
