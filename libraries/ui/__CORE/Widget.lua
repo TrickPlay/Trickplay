@@ -412,11 +412,7 @@ Widget_Clone = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
-            for _,k in pairs(clone_properties) do
-                
-                t[k] = self[k]
-                
-            end
+            t.source = self.source.name
             
             t.type = "Widget_Clone"
             
