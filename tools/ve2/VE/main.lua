@@ -834,7 +834,15 @@ end
 
 -- SET
 _VE_.setUIInfo = function(gid, property, value)
-    devtools:gid(gid)[property] = value 
+    if property == 'source' then 
+        the_obj = screen:find_child(value) 
+        if the_obj ~= nil then 
+            devtools:gid(gid)[property] = the_obj 
+            devtools:gid(gid).extra.source = value
+        end 
+    else 
+        devtools:gid(gid)[property] = value 
+    end 
 end 
 
 -- REPORT 
