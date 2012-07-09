@@ -1,5 +1,6 @@
 modelToDataTable = {
     
+    'source': lambda v: ('source',  toString(v)),
     'activation': lambda v: ('activation', colors(v)), 
     'default': lambda v: ('default', colors(v)),
     'focus': lambda v: ('focus', colors(v)),
