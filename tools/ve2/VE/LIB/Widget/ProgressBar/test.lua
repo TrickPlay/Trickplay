@@ -63,7 +63,8 @@ screen:show()
 pb1 = ProgressBar()
 pb2 = ProgressBar{x = 250,progress = 1}
 pb3 = ProgressBar{x = 500,progress = .5,style = style}
-
+tl = Timeline{loop = true,on_new_frame = function(self,ms,p) pb1.progress = p end}
+tl:start()
 
 screen:add(Rectangle{size=screen.size,color="003300"},pb1,pb2,pb3)
 
