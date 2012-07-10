@@ -1063,6 +1063,37 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
     /*
+
++    bool streaming_video_end_call( const String & address );
++
++    bool streaming_video_send_status();
+
+        UndocumentedFunction: streaming_video_start_call
+
+        Tells the controller to start a video call. The app will receive callbacks on call progress.
+
+        Arguments:
+
+            address -   This should be a URL to connect the video stream endpoint to, such as "sip:craig@asterisk-1.asterisk.trickplay.com"
+
+    */
+
+    bool streaming_video_start_call( string address )
+        [[
+            result=self->get_controller()->streaming_video_start_call( String( address ) );
+        ]];
+
+    bool streaming_video_end_call( string address )
+        [[
+            result=self->get_controller()->streaming_video_end_call( String( address ) );
+        ]];
+
+    bool streaming_video_send_status()
+        [[
+            result=self->get_controller()->streaming_video_send_status();
+        ]];
+
+    /*
         InternalFunction: advanced_ui
 
         *** This function is used by the "Advanced UI" Lua library to communicate with the TakeControl framework running on an external device. It should never be called directly by a TrickPlay application. Therefore, it will remain undocumented to the public.
@@ -1677,6 +1708,60 @@ interface Controller [[ControllerDelegate*]]
     */
 
     callback on_advanced_ui_event;
+
+    /*
+        Event Handler: on_streaming_video_connected
+
+        *Arguments:*
+
+            address - the address that was connected to
+    */
+
+    callback on_streaming_video_connected;
+
+    /*
+        Event Handler: on_streaming_video_failed
+
+        *Arguments:*
+
+            address - the address that was connected to
+            reason - the reason for the failure
+    */
+
+    callback on_streaming_video_failed;
+
+    /*
+        Event Handler: on_streaming_video_dropped
+
+        *Arguments:*
+
+            address - the address that was connected to
+            reason - the reason the call was dropped
+    */
+
+    callback on_streaming_video_dropped;
+
+    /*
+        Event Handler: on_streaming_video_ended
+
+        *Arguments:*
+
+            address - the address that was connected to
+            who - who terminated the call
+    */
+
+    callback on_streaming_video_ended;
+
+    /*
+        Event Handler: on_streaming_video_status
+
+        *Arguments:*
+
+            status - the current status
+            arg - possible argument, depending on status
+    */
+
+    callback on_streaming_video_status;
 
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
 

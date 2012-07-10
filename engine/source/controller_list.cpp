@@ -63,7 +63,8 @@ struct Event
         POINTER_MOVE , POINTER_DOWN , POINTER_UP, POINTER_ACTIVE, POINTER_INACTIVE,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
-        ADVANCED_UI_READY, ADVANCED_UI_EVENT , SCROLL
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT , SCROLL,
+        STREAMING_VIDEO_CONNECTED, STREAMING_VIDEO_FAILED, STREAMING_VIDEO_DROPPED, STREAMING_VIDEO_ENDED, STREAMING_VIDEO_STATUS
     };
 
 public:
@@ -111,6 +112,26 @@ public:
 				g_free( event->data.data );
 				g_free( event->data.mime_type );
 				break;
+
+            case STREAMING_VIDEO_CONNECTED:
+                g_free( event->streaming_video.address );
+                break;
+
+            case STREAMING_VIDEO_FAILED:
+            case STREAMING_VIDEO_DROPPED:
+                g_free( event->streaming_video.address );
+                g_free( event->streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_ENDED:
+                g_free( event->streaming_video.address );
+                g_free( event->streaming_video.who );
+                break;
+
+            case STREAMING_VIDEO_STATUS:
+                g_free( event->streaming_video.status );
+                g_free( event->streaming_video.arg );
+                break;
 
 			default:
 				break;
@@ -231,6 +252,55 @@ public:
         return event;
     }
 
+    inline static Event * make_streaming_video_connected( Controller * controller, const char * address )
+    {
+        Event * event = make( STREAMING_VIDEO_CONNECTED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_failed( Controller * controller, const char * address, const char * reason )
+    {
+        Event * event = make( STREAMING_VIDEO_FAILED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.reason = g_strdup(reason);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_dropped( Controller * controller, const char * address, const char * reason )
+    {
+        Event * event = make( STREAMING_VIDEO_DROPPED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.reason = g_strdup(reason);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_ended( Controller * controller, const char * address, const char * who )
+    {
+        Event * event = make( STREAMING_VIDEO_ENDED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.who = g_strdup(who);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_status( Controller * controller, const char * status, const char * arg )
+    {
+        Event * event = make( STREAMING_VIDEO_STATUS, controller );
+
+        event->streaming_video.status = g_strdup(status);
+        event->streaming_video.arg = g_strdup(arg);
+
+        return event;
+    }
+
     inline void process()
     {
 
@@ -339,6 +409,26 @@ public:
             case POINTER_INACTIVE:
             	controller->pointer_inactive();
             	break;
+
+            case STREAMING_VIDEO_CONNECTED:
+                controller->streaming_video_connected( streaming_video.address );
+                break;
+
+            case STREAMING_VIDEO_FAILED:
+                controller->streaming_video_failed( streaming_video.address, streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_DROPPED:
+                controller->streaming_video_dropped( streaming_video.address, streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_ENDED:
+                controller->streaming_video_ended( streaming_video.address, streaming_video.who );
+                break;
+
+            case STREAMING_VIDEO_STATUS:
+                controller->streaming_video_status( streaming_video.status, streaming_video.arg );
+                break;
         }
     }
 
@@ -414,6 +504,15 @@ private:
         	unsigned int size;
         	char * mime_type;
         }							data;
+
+        struct
+        {
+            char * address;
+            char * reason;
+            char * who;
+            char * status;
+            char * arg;
+        }                           streaming_video;
     };
 };
 
@@ -502,7 +601,7 @@ String Controller::get_name() const
 
 //.............................................................................
 
-unsigned int Controller::get_capabilities() const
+unsigned long long Controller::get_capabilities() const
 {
     return spec.capabilities;
 }
@@ -1068,6 +1167,81 @@ void Controller::advanced_ui_event( const char * json )
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->advanced_ui_event( json );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_connected( const char * address )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_connected( address );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_failed( const char * address, const char * reason )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_failed( address, reason );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_dropped( const char * address, const char * reason )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_dropped( address, reason );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_ended( const char * address, const char * who )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_ended( address, who );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_status( const char * status, const char * arg )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_status( status, arg );
     }
 }
 
@@ -1674,6 +1848,48 @@ bool Controller::hide_virtual_remote()
                data ) == 0;
 }
 
+bool Controller::streaming_video_start_call( const String & address )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_START_CALL,
+                (void *)address.c_str(),
+                data ) == 0;
+}
+
+bool Controller::streaming_video_end_call( const String & address )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_END_CALL,
+                (void *)address.c_str(),
+                data ) == 0;
+}
+
+bool Controller::streaming_video_send_status()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS,
+                0,
+                data ) == 0;
+}
+
 //==============================================================================
 
 #define LOCK Util::GSRMutexLock _lock(&mutex)
@@ -2060,4 +2276,54 @@ void tp_controller_advanced_ui_event( TPController * controller , const char * j
 
 	TPController::check(controller);
     controller->list->post_event( Event::make_advanced_ui_event( controller->controller , json ) );
+}
+
+
+void tp_controller_streaming_video_connected( TPController * controller, const char * address )
+{
+    g_assert( address );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_connected( controller->controller, address ) );
+}
+
+void tp_controller_streaming_video_failed( TPController * controller, const char * address, const char * reason )
+{
+    g_assert( address );
+    g_assert( reason );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_failed( controller->controller, address, reason ) );
+}
+
+void tp_controller_streaming_video_dropped( TPController * controller, const char * address, const char * reason )
+{
+    g_assert( address );
+    g_assert( reason );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_dropped( controller->controller, address, reason ) );
+}
+
+void tp_controller_streaming_video_ended( TPController * controller, const char * address, const char * who )
+{
+    g_assert( address );
+    g_assert( who );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_ended( controller->controller, address, who ) );
+}
+
+void tp_controller_streaming_video_status( TPController * controller, const char * status, const char * arg )
+{
+    g_assert( status );
+    g_assert( arg );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_status( controller->controller, status, arg ) );
 }
