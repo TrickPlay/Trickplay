@@ -1,7 +1,24 @@
-Version 4.4
+Version 4.5
 -----------
 
+Summary of changes between 4.4 and 4.5
+--------------------------------------
+
+    Controller->Server:
+        Added SV (HAS STREAMING VIDEO) to handshake
+        Added SVCC Streaming Video Call Connected event
+        Added SVCF Streaming Video Call Failed event
+        Added SVCD Streaming Video Call Dropped event
+        Added SVCE Streaming Video Call Ended event
+        Added SVCS Streaming Video Call Status event
+
+    Server->Controller
+        Added SVSC Streaming Video Start Call request
+        Added SVEC Streaming Video End Call request
+        Added SVSS Streaming Video Send Status request
+
 Summary of changes between 4.3 and 4.4
+--------------------------------------
 
     Added SGY/PGY, SMM/PMM, SAT/PAT for start/stop of gyroscope, magnetometer, and attitude events
     Added GY, MM, AT for those events
@@ -91,7 +108,7 @@ Controller->Server
 
             KY  - HAS KEYS
             AX  - HAS ACCELEROMETER
-            FM  - HAS FULL MOTION
+            FM  - HAS FULL MOTION (Added in v4.4)
             TC  - HAS TOUCHES
             MC  - HAS MULTIPLE_CHOICE
             SD  - HAS SOUND
@@ -102,6 +119,7 @@ Controller->Server
             AC  - HAS AUDIO CLIPS (Added in v3.1)
             UX  - HAS ADVANCED UI (Added in v3.2)
             VR  - HAS VIRTUAL REMOTE (Added in v4.2)
+            SV  - HAS STREAMING VIDEO (Added in v4.5)
 
             CK  - HAS CLICKS (Removed in v3)
 
@@ -196,6 +214,44 @@ Controller->Server
             When the controller reads a complete UX message from the server, it should
             process it and write a reply synchronously. Then, it should start another
             asynchronous read - waiting for the next message.
+
+
+    Streaming Video (Added in v4.5)
+        SVCC <address>
+            This message tells the server that the requested call has connected.  Great news
+            everyone!  The RTP packets are flowing again!  The address is the address that was
+            connected to.
+
+        SVCF <address> <reason>
+            This message tells the server that the requested call failed to connect for some reason.
+            The address that was attempted is returned, along with a string which describes as well
+            as possible the failure condition.  This message should be sent instead of SVCC.  If
+            SVCC has been sent, then the controller should use SVCD instead to indicate subsequent
+            failure before SVCE.
+
+        SVCD <address> <reason>
+            This message tells the server that the call which was in-progress has been dropped (ie
+            disconnected unexpectedly).  The message includes the address that was connected, and
+            a string which describes as well as possible the failure condition.  This message should
+            be used instead of SVCF after the SVCC message has been sent and before SVCE.
+
+        SVCE <address> <who>
+            This message tells the server that the call was intentionally ended by either the caller
+            or the callee.  The address of the callee is passed in <address>, and <who> specifies
+            which side ended the call.  If the caller (ie the controller) ended the call, then <who>
+            should be "CALLER".  If the callee ended the call, then <who> should be "CALLEE".  If
+            the server initiates a hangup using SVEC, then <who> should be "CALLER".
+
+        SVCS <status> <arg>
+            This message notifies the server of the current streaming video status.  Possible
+            values of <status> are:
+
+            "READY"         -- <arg> should be "NA" and the controller is ready to make calls
+            "CONNECTED"     -- controller is currently streaming video to the address give by <arg>
+            "WAIT"          -- <arg> should be "NA" and the controller is not ready to make calls
+
+            This message may be sent at any time by the controller to notify the server of status
+            changes, and MUST be sent by the controller in response to a SVSS request from the server
 
 
 Server->Controller
@@ -370,5 +426,15 @@ Server->Controller
 
         HV
 
+    Streaming Video (Added in 4.5)
 
+        SVSC <address>
+            This message asks the controller to initiate a SIP call to <address>
 
+        SVEC <address>
+            This message asks the controller to end a call in progress to <address>, or to abort
+            the calling sequence if the call is not yet connected.
+
+        SVSS
+            This message asks the controller to send a SVCS event as soon as possible to indicate
+            the state of the streaming video system
