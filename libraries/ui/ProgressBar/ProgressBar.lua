@@ -146,12 +146,14 @@ ProgressBar = function(parameters)
 		function()
 			if redraw_shell then 
                 if shell then shell:unparent() end
+                redraw_shell = false
                 shell = create_shell(instance)
                 instance:add(shell)
                 shell:lower_to_bottom()
             end
             if redraw_fill then
                 if fill then fill:unparent() end
+                redraw_fill = false
                 fill = create_fill(instance)
                 instance:add(fill)
                 
