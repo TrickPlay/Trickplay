@@ -266,21 +266,22 @@ function hundreds_of_movies_setup()
                 )
 end
 
+local my_angle = math.random(0,359) - 45
 function get_target_x_y(i)
     -- Pick an angle to fly out on
-    local my_angle = math.random(0,359) - 45
+    my_angle = ( my_angle + math.random(90,270) ) % 360 - 45
     local target_x, target_y
     if(my_angle < 45) then
         target_x = (1 + math.tan(math.rad(my_angle))) * (screen.w+2*i.w)/2
-        target_y = -i.h
+        target_y = -2*i.h
     elseif(my_angle < 135) then
-        target_x = screen.w+i.w
+        target_x = screen.w+2*i.w
         target_y = (1 + math.tan(math.rad(my_angle-90))) * (screen.h+2*i.h)/2
     elseif(my_angle < 225) then
         target_x = (1 + math.tan(math.rad(180-my_angle))) * (screen.w+2*i.w)/2
-        target_y = screen.h+i.h
+        target_y = screen.h+2*i.h
     else
-        target_x = -i.w
+        target_x = -2*i.w
         target_y = (1 + math.tan(math.rad(270-my_angle))) * (screen.h+2*i.h)/2
     end
     return target_x, target_y
