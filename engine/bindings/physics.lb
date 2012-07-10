@@ -558,7 +558,7 @@ interface Body [[ ClutterActor * ]]
 
 	Positive values rotate in a clockwise direction; negative values rotate counter-clockwise.
 
-	To apply a temporary torque to the object, call the <apply_torque>() function.
+	To apply a temporary torque to the object, call the <apply_torque> function.
 
 	*See Also:* the <linear_velocity> property and <apply_torque> function
 */
@@ -685,13 +685,13 @@ interface Body [[ ClutterActor * ]]
         ]];
 
 /***************************************
-	UndocumentedProperty: fixed_rotation
+	Property: fixed_rotation
 
-	Note: The fixed_rotation property has no effect. With fixed_rotation set to true, the object will still rotate by setting the angular_velocity property.  Grep'ing the Box2D source code shows no calls to the underlying SetFixedRotation() and IsFixedRotation() functions. Also, on-line forums also show people claiming that SetFixedRotation() has no effect. Until this property can be shown to work as expected, it will remain undocumented.
+	The fixed_rotation property is a boolean flag indicating whether or not an off-center collision will cause the body to rotate around its Z axis (true=will not rotate).
 
-	The fixed_rotation property is a boolean flag indicating whether or not the body can rotate around the Z axis (true==cannot rotate).
+	Note: Setting an angular_velocity can still cause the object to rotate, regardless of the fixed_rotation setting.
 
-	*Default Setting:* false, i.e., the object can rotate
+	*Default Setting:* false, i.e., off-center collisions will cause the object to rotate
 
 	*See Also:* the <angular_velocity> property
 */
@@ -715,8 +715,8 @@ interface Body [[ ClutterActor * ]]
 
 	Each entry in the contacts table includes the following keys.
 
-		enabled - boolean flag indicating whether or not the contact is enabled (true==enabled). A contact can be disabled in the physics global variable's <on_pre_solve_contact> event handler.
-		touching - boolean flag indicating whether or not the two objects are touching (true==touching). Note: Contact may occur between the bounding boxes of two objects, but the actual objects do not touch.
+		enabled - boolean flag indicating whether or not the contact is enabled (true=enabled). A contact can be disabled in the physics global variable's <on_pre_solve_contact> event handler.
+		touching - boolean flag indicating whether or not the two objects are touching (true=touching). Note: Contact may occur between the bounding boxes of two objects, but the actual objects do not touch.
 		point - table containing two keys. Key "1" contains the contact point's X coordinate. Key "2" contains the contact point's Y coordinate.
 		bodies - table containing two keys. Key "1" contains the <handle> for one of the objects. Key "2" contains the handle for the other object.
 		other_body - table containing two keys. One key is the <handle> of the current object; its value is the handle of the other object. The second key is the handle of the other object; its value is the handle of the current object. For example, if the object with handle 2 is touching the object with handle 4, the other_body table for the object with handle 2 would contain { 2=4, 4=2 }. This table enables the program to access the other object by using the current object's handle as an index, as in contactObject = Object2.contacts.other_body[ Object2.handle ].
@@ -885,7 +885,7 @@ interface Body [[ ClutterActor * ]]
 
 	Applying an angular impulse on an object is similar to setting the object's <angular_velocity>, but angular velocity is continuous, while angular impulse is temporary.
 
-	Angular impulse is also similar to torque, as set by the <apply_torque>() function, but angular impulse is a sharp and sudden force, like a hammer striking the object; a torque is a steady pressure, like a person pushing a heavy crate.
+	Angular impulse is also similar to torque, as set by the <apply_torque> function, but angular impulse is a sharp and sudden force, like a hammer striking the object; a torque is a steady pressure, like a person pushing a heavy crate.
 
 	*Arguments:*
 
@@ -917,7 +917,7 @@ interface Body [[ ClutterActor * ]]
 		density - double value specifying how heavy the fixture is in relation to its area
 		friction - double value specifying how slippery the fixture is
 		bounce - double value specifying the fixture's springiness or level of rebound when a collision occurs
-		sensor - boolean flag indicating whether or not the fixture is a sensor (true==sensor)
+		sensor - boolean flag indicating whether or not the fixture is a sensor (true=sensor)
 		filter - table containing the settings of the collision-filter keys "group", "category" and "mask". Refer to the <add_fixture> function for information about the collision filter.
 
 	*Code Examples:* To access the property for a particular fixture entry in the fixtures table, use the following syntax.
@@ -1006,7 +1006,7 @@ interface Body [[ ClutterActor * ]]
 
 		fixture_handle - handle of the fixture to remove. The fixture handle is returned by the <add_fixture> function that created the fixture.
 
-	*Return Value:* boolean flag indicating the operation's success or failure (true==fixture was removed)
+	*Return Value:* boolean flag indicating the operation's success or failure (true=fixture was removed)
 
 	*See Also:* the <fixtures> property and <add_fixture> and <remove_all_fixtures> functions
 */
@@ -1074,7 +1074,7 @@ interface Body [[ ClutterActor * ]]
 		density - double value specifying the heaviness of the fixture in relation to its area. Valid Range: 0(no density) to infinity(maximum density). Default: 1.0
 		friction - double value specifying how slippery the fixture is. Valid Range: 0.0(very slippery) to 1.0(not slippery). Default: 0.2
 		bounce - double value specifying the fixture's springiness or level of rebound when a collision occurs. Valid Range: 0.0(not springy) to 1.0(maximum springiness). Default: 0.0
-		sensor - boolean flag indicating whether or not the fixture is a sensor (true==sensor). A sensor can share space with another object without colliding into it, such as in a top-down view of a bird flying over a tree. Although collisions do not occur, the sensor still generates on_contact()-type events when interacting with other objects. Default: false
+		sensor - boolean flag indicating whether or not the fixture is a sensor (true=sensor). A sensor can share space with another object without colliding into it, such as in a top-down view of a bird flying over a tree. Although collisions do not occur, the sensor still generates on_contact()-type events when interacting with other objects. Default: false
 		filter - collision filtering. For details, refer to the explanation below.
 
 	*Return Value:* unique integer fixture handle
@@ -1151,11 +1151,17 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Function: remove_joint
 
+	The remove_joint() function removes a specified joint from the Body and then destroys the joint.
 
+	When an application is cleaning up a Body and its joints, all the joints should be removed before dereferencing the Body/UIElement object.
 
+	*Argument:*
 
+		joint_handle - unique integer handle ID that identifies the joint to remove and destroy. The joint handle is returned by the function that created the joint, such as the <RevoluteJoint> function, among others.
 
-		Removes a joint from the body.
+	*Return Value:* boolean flag indicating the success or failure of the operation (true=joint was removed)
+
+	*See Also:* the <DistanceJoint>, <RevoluteJoint> and <PrismaticJoint> functions
 */
 
     bool remove_joint( int joint_handle )
@@ -1179,18 +1185,71 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-	/*
-		Function: DistanceJoint
+/***************************************
+	Function: DistanceJoint
 
-		Creates a distance joint on this body.
+	The DistanceJoint() function connects two Body objects and maintains a constant distance between them. The two attached objects should already be positioned at the desired distance at the time the joint is created. An anchor point is defined for each object. This type of joint is considered a "rigid" joint because the distance between the anchor points remains unchanged. The joint can be removed by calling the <remove_joint> function.
 
-		anchor - The X and Y coordinates for the joint's anchor on this body.
-		other_body - The other body this joint will be attached to.
-		other_anchor - The X and Y coordinates on the other body.
-		properties - "frequency" and "damping_ratio".
-	*/
+(see physics2dDistanceJoint.png)
 
-    int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
+	Note: It is possible to create a "soft" joint in which two or more objects are connected by DistanceJoints in a web-like structure. When one of the objects moves, the other objects in the web also move, but in a rubbery rather than rigid manner. To create a soft joint, specify values for the frequency and damping_ratio keys in the function's properties argument.
+
+	*Arguments:*
+
+		anchor - table of { X, Y } screen coordinates at which to connect this Body. This is Anchor1 in the diagram above.
+		other_body - attached Body object. This is Body2 in the diagram.
+		other_anchor - table of { X, Y } screen coordinates at which to connect the Body reference by the other_body argument. This is Anchor2 in the diagram.
+		properties - optional table of key/value settings that configure a "soft" distance joint. If using a rigid joint, these properties should not be changed. Supported keys are described below.
+
+	*Joint Properties:* The function's properties argument can contain the following keys.
+
+		frequency - double value specifying the soft joint's frequency in Hertz. The joint's frequency can be considered to be that of a harmonic oscillator or a vibrating guitar string. Typically, the frequency should be less than half the frequency of the physics simulation's time step.
+		damping_ratio - double value specifying the damping ratio. Range: 0.0-infinity, but typically 0.0-1.0 where 0.0 is no damping and 1.0 is critical damping where all oscillations should disappear. Default: 1.0
+
+	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+
+	*Code Example:* Connect two objects with a DistanceJoint
+
+		(code)
+		-- Create a static body on which we will attach a distance joint
+		gJointBody = Rectangle( {
+							size         = { 100, 100 },
+							position     = { screen.width / 2, screen.height / 5 },
+							color        = "AntiqueWhite",
+		} )
+		gJointBody.anchor_point = { 50, 50 }
+		screen:add( gJointBody )
+		gJointBody = physics:Body( gJointBody,
+			                       { type = "static",
+		} )
+
+		-- Make a rod-shaped rectangle
+		gRod = Rectangle( {	size         = { 30, 400 },
+							position     = { (screen.width / 2) + 100, (screen.height / 5) + 300 },
+							color        = "SlateGray2",
+		} )
+		gRod.anchor_point = { 15, 200 }
+		screen:add( gRod )
+		gRod = physics:Body( gRod, { density = 100 } )
+
+		-- Join the rod to the gJointBody
+		gJointBody:DistanceJoint( { gJointBody.x, gJointBody.y },	-- middle of gJointBody
+			                      gRod,
+			                      { gRod.x, gRod.y - 200 },			-- top and center of gRod
+			                      { }
+		)
+
+		-- Show everything on-screen
+		screen:show()
+
+		-- Start the physics simulation
+		physics:start()
+		(end)
+
+	*See Also:* the <remove_joint> function
+*/
+
+    int DistanceJoint( table anchor, Body other_body, table other_anchor, table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
 
@@ -1251,22 +1310,71 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
-	/*
-		Function: RevoluteJoint
+/***************************************
+	Function: RevoluteJoint
 
-		Creates a revolute joint on this body.
+	The RevoluteJoint() function attaches two Body objects together at a single point to create a revolving, hinge-type joint.
 
-		other_body - The other body to attach to.
-		anchor - Coordinates for the point where the joint is attached.
-		properties -  "enable_limit" (boolean)
-		              "lower_angle" (degrees)
-		              "upper_angle" (degrees)
-		              "enable_motor" (boolean)
-		              "motor_speed" (number)
-		              "max_motor_torque" (number)
-	*/
+	*Arguments:*
 
-    int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
+		other_body - attached Body object
+		anchor - table of { X, Y } screen coordinates at which to attach Body
+		properties - optional table of key/value settings that configure the joint. Supported keys are described below.
+
+	*Joint Properties:* The function's properties argument can contain the following keys.
+
+		enable_limit - boolean flag indicating whether or not the joint has an angular limit (true=has limit). If the enable_limit key is true, the limits are specified in the lower_angle and upper_angle keys. Note: The enable_limit key activates both the lower_limit and upper_limit keys. If you want only a single limit, the other limit should be set to something extremely high or low so that it will never realistically be reached.  Default: false, i.e., no limit.
+		lower_angle - signed double value specifying the lowest angle limit in degrees. Default: 0.0
+		upper_angle - signed double value specifying the highest angle limit in degrees. Default: 0.0
+		enable_motor -boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the level of force and torque to apply are specified in the motor_speed and max_motor_torque keys. Default: false, i.e., no force.
+		motor_speed - signed double value specifying the desired motor speed. Positive values revolve the attached object clockwise; negative values revolve counter-clockwise. Setting the motor_speed to 0.0 will act as a brake, causing the joint to attempt to stand still; this braking effect can be accentuated by also setting a low max_motor_torque value. Combining a motor_speed of 0.0 with a high max_motor_torque value will act to cause the joint to stop quickly and will also require a larger force to move the joint. Default: 0.0
+		max_motor_torque - signed double value specifying the maximum motor torque to apply to achieve the desired motor speed. Positive values apply a non-fluctuating torque; negative values apply an indefinitely-increasing torque. Setting a low torque value, the joint may require more time to get up to maximum speed. Default: 0.0
+
+	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+
+	*Code Example:* Create a revolving propeller using a RevoluteJoint
+
+	(code)
+	-- Create a static body on which we will attach a revolute joint
+	gJointBody = Rectangle( {
+						size         = { 100, 100 },
+						position     = { screen.width / 2, screen.height / 2 },
+						anchor_point = { 50, 50 },		-- middle of rectangle
+						color        = "AntiqueWhite",
+	} )
+	screen:add( gJointBody )
+	gJointBody = physics:Body( gJointBody,
+	                           { type = "static",
+	} )
+
+	-- Make a propeller-shaped rectangle
+	gPropeller = Rectangle( {
+						size         = { 700, 30 },
+						position     = { screen.width / 2, screen.height / 2 },
+						anchor_point = { 350, 15 },		-- middle of rectangle
+						color        = "SlateGray2",
+	} )
+	screen:add( gPropeller )
+	gPropeller = physics:Body( gPropeller, { } )
+
+	-- Join the propeller to the gJointBody
+	gJointBody:RevoluteJoint( gPropeller,
+	                          { gJointBody.x, gJointBody.y  },
+	                          { enable_motor = true,
+	                            motor_speed = 300,		-- clockwise
+	                            max_motor_torque = 100,	-- steady rate
+	                          } )
+	-- Show the screen
+	screen:show()
+
+	-- Start the physics simulation
+	physics:start()
+	(end)
+
+	*See Also:* the <remove_joint> function
+*/
+
+    int RevoluteJoint( Body other_body, table anchor, table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
 
@@ -1347,13 +1455,44 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
-	/*
-		Function: PrismaticJoint
+/***************************************
+	Function: PrismaticJoint
 
-		TODO
-	*/
+	The PrismaticJoint() function groups two Body objects and limits their movement to slide along the axis between them. It is also possible to define the range of movement along the axis for each object. At least one of the objects must be a Body of <type> "dynamic" with its <fixed_rotation> property set to false. The two objects may not revolve in relation to each other, but they can revolve together as a single unit.
 
-    int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
+	*Arguments:*
+
+		other_body - Body object to connect with.
+		axis - table of { X, Y } screen coordinates for other Body object's anchor. The anchor and axis coordinates define the axis along which the two Body object's will be able to move.
+		properties - optional table of key/value settings that configure the joint. Supported keys are described below. Default: Empty table.
+		anchor - table of { X, Y } coordinates reserved for future expansion. Do not specify; use the default setting. Default: { 0, 0 }
+
+	*Joint Properties:* The function's properties argument can contain the following keys.
+
+		enable_limit - boolean flag indicating whether or not the joint has a movement limit (true=has limit). If the enable_limit key is true, the limits are specified in the lower_translation and upper_translation keys. Note: The enable_limit key activates both the lower_translation and upper_translation keys. If you want only a single limit, the other limit should be set to something extremely high or low so that it will never realistically be reached. If enable_limit is true and the lower_translation and upper_translation properties contain the same value, the other_body will be locked in position and will not move. Default: false, i.e., no limit.
+		lower_translation - signed double value specifying the lowest movement limit in pixels. Default: 0.0
+		upper_translation - signed double value specifying the highest movement limit in degrees. Default: 0.0
+		enable_motor -boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the level of force and torque to apply are specified in the motor_speed and max_motor_force keys. Default: false, i.e., no force; objects can slide along the joint without any resistance.
+		motor_speed - signed double value specifying the desired motor speed. Positive values move the other_body object in the direction of the axis; negative values move it in the opposite direction. Setting the motor_speed to 0.0 will act as a brake, causing the joint to attempt to stand still; this braking effect can be accentuated by also setting a low max_motor_force value. Combining a motor_speed of 0.0 with a high max_motor_torque value will act to cause the joint to stop quickly and will also require a larger force to move the joint. Default: 0.0
+		max_motor_force - signed double value specifying the maximum motor force to apply to achieve the desired motor speed. Positive values apply a non-fluctuating force; negative values apply an indefinitely-increasing force. Setting a low force value, the joint may require more time to get up to maximum speed. Default: 0.0
+
+	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+
+	*Code Example:*
+
+
+	*See Also:* the <remove_joint> function
+
+
+	*** Undocumented Arguments and Joint Properties
+
+	The following arguments/properties are undocumented because they should not be necessary. Because the two Body objects should already be accurately positioned before starting the physics simulation, changing the other_body object's rotation via the reference_angle and (reference_)anchor settings should not be necessary.
+
+		reference_angle property - double value in degrees specifying the amount of rotation to perform upon the other_body object. The current Body object will not rotate. Positive values cause clockwise rotation. The rotation occurs at the point specified by the anchor parameter described below.
+		anchor parameter - a more-accurate name for this setting would be reference_anchor. It is a table of { X, Y } coordinates that specify the anchor point at which the other_body object will rotate. The coordinates are local to the object's anchor point. The amount of rotation is specified in the reference_angle property.
+*/
+
+    int PrismaticJoint( Body other_body, table axis, table properties = 0, table anchor = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
 
