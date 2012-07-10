@@ -1441,7 +1441,7 @@ interface Body [[ ClutterActor * ]]
                 lua_getfield( L , properties , "motor_speed" );
                 if ( ! lua_isnil( L , -1 ) )
                 {
-                    p.motorSpeed = Physics::World::degrees_to_radians( lua_tonumber( L , -1 ) );
+                    p.motorSpeed = lua_tonumber( L , -1 );
                 }
                 lua_pop( L , 1 );
 
