@@ -1392,8 +1392,8 @@ interface Body [[ ClutterActor * ]]
             lua_rawgeti( L , axis , 1 );
             lua_rawgeti( L , axis , 2 );
 
-            float32 ax = me->world->screen_to_world( lua_tonumber( L , -2 ) );
-            float32 ay = me->world->screen_to_world( lua_tonumber( L , -1 ) );
+            float32 ax = me->world->screen_to_world( -lua_tonumber( L , -2 ) );
+            float32 ay = me->world->screen_to_world( -lua_tonumber( L , -1 ) );
 
             lua_pop( L , 2 );
 
