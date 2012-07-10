@@ -89,14 +89,14 @@ local paddle = physics:Body(
 paddle.position = { pole.x , pole.y - POLE_HEIGHT / 2 }
 paddle.angle = 90
 
-paddle:PrismaticJoint( pole , { 0 , 1 } ,
+paddle:PrismaticJoint( pole , { 1 , 1 } ,
 
     {
         enable_limit = true,
-        lower_translation = -POLE_HEIGHT / 2,
-        upper_translation = 0 ,
+        lower_translation = 0,
+        upper_translation = POLE_HEIGHT / 2,
         enable_motor = true,
-        motor_speed = 5,
+        motor_speed = -5,
         max_motor_force = 40
     }
 )
