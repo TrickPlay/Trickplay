@@ -103,8 +103,44 @@
     <addaction name="actionGroup"/>
     <addaction name="actionUngroup"/>
    </widget>
+   <widget class="QMenu" name="menuArrange">
+    <property name="title">
+     <string>Arrange</string>
+    </property>
+    <widget class="QMenu" name="menu_align">
+     <property name="title">
+      <string>Align</string>
+     </property>
+     <addaction name="action_left"/>
+     <addaction name="action_right"/>
+     <addaction name="action_top"/>
+     <addaction name="action_bottom"/>
+     <addaction name="action_horizontalCenter"/>
+     <addaction name="action_verticalCenter"/>
+    </widget>
+    <widget class="QMenu" name="menu_distribute">
+     <property name="title">
+      <string>Distribute</string>
+     </property>
+     <addaction name="action_distributeHorizontally"/>
+     <addaction name="action_distributeVertically"/>
+    </widget>
+    <widget class="QMenu" name="menu_arrange">
+     <property name="title">
+      <string>Arrange</string>
+     </property>
+     <addaction name="action_bring_to_front"/>
+     <addaction name="action_bring_to_forward"/>
+     <addaction name="action_send_to_back"/>
+     <addaction name="action_send_backward"/>
+    </widget>
+    <addaction name="menu_align"/>
+    <addaction name="menu_distribute"/>
+    <addaction name="menu_arrange"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuArrange"/>
    <addaction name="menuRun"/>
    <addaction name="menuView"/>
   </widget>
@@ -656,6 +692,71 @@
   <action name="actionDuplicate">
    <property name="text">
     <string>Duplicate</string>
+   </property>
+  </action>
+  <action name="actionLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="action_left">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="action_right">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="action_top">
+   <property name="text">
+    <string>Top</string>
+   </property>
+  </action>
+  <action name="action_bottom">
+   <property name="text">
+    <string>Bottom</string>
+   </property>
+  </action>
+  <action name="action_horizontalCenter">
+   <property name="text">
+    <string>Horizontal Center</string>
+   </property>
+  </action>
+  <action name="action_verticalCenter">
+   <property name="text">
+    <string>Vertical Center</string>
+   </property>
+  </action>
+  <action name="action_distributeHorizontally">
+   <property name="text">
+    <string>Horizontally</string>
+   </property>
+  </action>
+  <action name="action_distributeVertically">
+   <property name="text">
+    <string>Vertically</string>
+   </property>
+  </action>
+  <action name="action_bring_to_front">
+   <property name="text">
+    <string>Bring to Front</string>
+   </property>
+  </action>
+  <action name="action_bring_to_forward">
+   <property name="text">
+    <string>Bring to Forward</string>
+   </property>
+  </action>
+  <action name="action_send_to_back">
+   <property name="text">
+    <string>Send to Back</string>
+   </property>
+  </action>
+  <action name="action_send_backward">
+   <property name="text">
+    <string>Send Backward</string>
    </property>
   </action>
  </widget>

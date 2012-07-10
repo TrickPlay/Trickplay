@@ -28,6 +28,44 @@ function util.is_this_widget(v)
 end 
 ]]
 
+
+local uiElementCreate_map = 
+{
+    ['Clone'] = function(p)  return Widget_Clone(p) end, 
+    ['Group'] = function(p)  return Widget_Group(p) end, 
+    ['Rectangle'] = function(p)  return Widget_Rectangle(p) end, 
+
+    ['Text'] = function(p)  return Widget_Text(p) end, 
+    ['Image'] = function(p)  return Widget_Image(p) end, 
+    ['Button'] = function(p)  return Button(p) end, 
+    ['DialogBox'] = function(p) return DialogBox(p) end,
+    ['ToastAlert'] = function(p) return ToastAlert(p) end,
+    ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
+    ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
+    ['TextInput'] = function(p) return TextInput(p) end,
+    ['LayoutManager'] = function(p)  return LayoutManager(p) end, 
+    ['Slider'] = function(p)  return Slider(p) end, 
+    ['ArrowPane'] = function(p)  return ArrowPane(p) end, 
+    ['ScrollPane'] = function(p)  return ScrollPane(p) end, 
+    ['TabBar'] = function(p)  return TabBar(p) end, 
+    ['ButtonPicker'] = function(p)  return ButtonPicker(p) end, 
+    ['MenuButton'] = function(p)  return MenuButton(p) end, 
+}
+
+
+function util.copy_obj (v)
+
+      local new_object 
+
+      uiTypeStr = getTypeStr(v) 
+
+      if uiElementCreate_map[uiTypeStr] then
+        new_object = uiElementCreate_map[uiTypeStr](v.attributes)
+      end 
+
+      return new_object
+end	
+
 function util.is_this_selected(v)
 	local b_name = v.name.."border"
 

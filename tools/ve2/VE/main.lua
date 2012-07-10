@@ -184,6 +184,31 @@ local rect_init_y = 0
 
 
 
+local function getObjName (border_n) 
+     local i, j = string.find(border_n, "border")
+     return string.sub(border_n, 1, i-1)
+end 
+
+local function org_cord() 
+    for i, v in pairs(curLayer.children) do
+		if(v.extra.selected == true) then
+		     v.x = v.x - v.anchor_point[1] 
+		     v.y = v.y - v.anchor_point[2] 
+		end 
+    end 
+end  
+
+local function ang_cord() 
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true) then
+		    screen_ui.n_selected(v)
+		    v.x = v.x + v.anchor_point[1] 
+		    v.y = v.y + v.anchor_point[2] 
+	  	end 
+    end 
+end  
+
+
 local function getTypeStr(m) 
     if m.widget_type == "Widget" then 
         return m.type
@@ -198,6 +223,17 @@ local function getCurLayer(gid)
     curLayer = devtools:gid(gid)
 
 end 
+
+local function copy_obj (v)
+
+      local new_object 
+      uiTypeStr = getTypeStr(v) 
+      if uiElementCreate_map[uiTypeStr] then
+        new_object = uiElementCreate_map[uiTypeStr](v.attributes)
+      end 
+
+      return new_object
+end	
 
 local function create_mouse_event_handler(uiInstance, uiTypeStr)
 
@@ -478,7 +514,6 @@ end
 
 local function editor_group()
 
-	--if table.getn(selected_objs) == 0 then 
 	if #(selected_objs) == 0 then 
 		print ("there is no selected object !!")
         screen:grab_key_focus()
@@ -558,6 +593,237 @@ _VE_.getUIInfo = function()
     end
     
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
+end 
+
+local arrange_prep = function(gid) 
+
+    getCurLayer(gid)
+    blockReport = true
+
+	if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    org_cord()
+
+    local basis_obj_name = getObjName(selected_objs[1])
+    local basis_obj = curLayer:find_child(basis_obj_name)
+
+    return basis_obj_name, basis_obj
+
+end
+
+local arrange_end = function() 
+
+    ang_cord()
+    screen.grab_key_focus(screen)
+    input_mode = hdr.S_SELECT
+    blockReport = false
+
+end 
+
+_VE_.alignLeft = function(gid)
+
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+   
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+		    if(v.x ~= basis_obj.x) then
+			  	v.x = basis_obj.x
+		    end
+    	end
+    end
+
+    arrange_end()
+
+end 
+
+_VE_.alignRight = function(gid)
+
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
+			v.x = basis_obj.x + basis_obj.w - v.w
+		   end
+		end 
+    end
+
+    arrange_end()
+
+end 
+
+_VE_.alignTop = function(gid)
+
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+    
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and v.name ~= basis_obj_name ) then
+		  --   screen_ui.n_selected(v)
+		  if(v.y ~= basis_obj.y) then
+			v.y = basis_obj.y 
+		  end 
+		end 
+   end
+
+    arrange_end()
+    
+end 
+
+_VE_.alignBottom = function(gid)
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+    
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and  v.name ~= basis_obj_name) then
+		    --screen_ui.n_selected(v)
+		    if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
+			    v.y = basis_obj.y + basis_obj.h - v.h 
+		    end 
+		end 
+    end
+
+    arrange_end()
+
+end 
+ 
+_VE_.alignHorizontalCenter = function(gid)
+
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+    
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+		    -- screen_ui.n_selected(v)
+		    if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
+			    v.x = basis_obj.x + basis_obj.w/2 - v.w/2
+		    end
+		end 
+    end
+
+    arrange_end()
+
+end 
+ 
+_VE_.alignVerticalCenter = function(gid)
+
+    local basis_obj_name, basis_obj = arrange_prep(gid)
+
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+		-- screen_ui.n_selected(v)
+		    if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
+			    v.y = basis_obj.y + basis_obj.h/2 - v.h/2
+		    end
+		end 
+    end
+  
+    arrange_end()
+end 
+ 
+
+local function get_x_sort_t()
+     
+     local x_sort_t = {}
+     
+     for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true) then
+		    local n = #x_sort_t
+			if(n ==0) then
+				table.insert(x_sort_t, v) 
+			elseif (v.x >= x_sort_t[n].x) then
+				table.insert(x_sort_t, v) 
+			elseif (v.x < x_sort_t[n].x) then  
+				local tmp_cord = {}
+				while (v.x < x_sort_t[n].x) do
+					table.insert(tmp_cord, table.remove(x_sort_t))
+					n = #x_sort_t
+					if n == 0 then 
+						break
+					end 
+				end 
+				table.insert(x_sort_t, v) 
+				while (#tmp_cord ~= 0 ) do 
+					table.insert(x_sort_t, table.remove(tmp_cord))
+				end 
+			end
+		end 
+     end
+     
+     return x_sort_t 
+end
+
+local function get_reverse_t(sort_t)
+     local reverse_t = {}
+
+	while(#sort_t ~= 0) do
+		table.insert(reverse_t, table.remove(sort_t))
+	end 
+	return reverse_t 
+end
+
+local function get_x_space(x_sort_t)
+     local f, b 
+     local space = 0
+     b = table.remove(x_sort_t) 
+     while (#x_sort_t ~= 0) do 
+          f = table.remove(x_sort_t) 
+          space = space + b.x - f.x - f.w
+          b = f
+     end 
+     
+     local n = #selected_objs
+     if (n > 2) then 
+     	space = space / (n - 1)
+     end 
+
+     return space
+end 
+
+_VE_.distributeHorizontal = function(gid)
+    getCurLayer(gid)
+    blockReport = true
+
+    if #selected_objs == 0 then 
+	    print("there are  no selected objects") 
+	    input_mode = hdr.S_SELECT
+	    return 
+    end 
+
+    local x_sort_t, space, reverse_t, f, b
+
+    org_cord() 
+
+    x_sort_t = get_x_sort_t()
+
+    space = get_x_space(x_sort_t)
+    space = math.floor(space)
+
+    x_sort_t = get_x_sort_t()
+    reverse_t = get_reverse_t(x_sort_t)
+
+    f = table.remove(reverse_t)
+
+    while(#reverse_t ~= 0) do  
+        b = table.remove(reverse_t)
+	    if(b.x ~= f.x + f.w + space) then 
+	        b.x = f.x + f.w + space 
+	        if(b.x > 1920) then 
+		        print("ERROR b.x is bigger than screen size") 
+		        b.x = 1920 - b.w 
+	        end 
+	    end 
+         f = b 
+    end 
+
+    ang_cord()
+    screen.grab_key_focus(screen)
+    input_mode = hdr.S_SELECT
+
+end 
+
+_VE_.distributeVertical = function(gid)
 end 
 
 _VE_.refresh = function()
