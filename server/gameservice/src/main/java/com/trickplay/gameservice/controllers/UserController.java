@@ -136,11 +136,8 @@ public class UserController extends BaseController {
 	}
 
 	@RequestMapping(value = { "/user", "/rest/user" }, method = RequestMethod.GET)
-	public String getAllUsers(Model model) {
-		List<User> allUsers = userService.findAll();
-		model.addAttribute("users", toUserTO(allUsers));
-		model.addAttribute("numberOfUsers", allUsers.size());
-		return LIST_USER_VIEW;
+	public @ResponseBody UserTO getUserInfo(@RequestParam(value="username") String username) {
+		return new UserTO(userService.findByName(username));
 	}
 
 	private static List<UserTO> toUserTO(List<? extends User> lu) {

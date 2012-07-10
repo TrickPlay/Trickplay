@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Plugin configuration for the game support plugin.
+-->
+<plugin>
+	<!-- Main plugin class -->
+	<class>org.frogx.service.openfire.MUGPlugin</class>
+	
+	<!-- Plugin meta-data -->
+	<name>mug support</name>
+	<description>${pom.description}</description>
+	<author>${author}</author>    
+	<version>${pom.version}</version>
+	<date>${openfire-plugin.build.date}</date>
+	<url>http://frogx.org/</url>
+	<minServerVersion>3.6.4</minServerVersion>
+	
+	<!-- Database data -->
+	<databaseKey>mug-openfire</databaseKey>
+	<databaseVersion>0</databaseVersion>
+	
+	<!-- License -->
+	<licenseType>gpl</licenseType>
+	
+	<!-- Webadministration data -->
+	<adminconsole>
+		<tab id="tab-mug" name="${mug.tab.name}" description="${mug.tab.description}">
+			<sidebar id="sidebar-gaming" name="${mug.sidebar.settings.name}" description="${mug.sidebar.settings.description}">
+				<item id="mug-service-summary" name="${mug.service.summary.name}"
+						url="mug-service-summary.jsp"
+						description="${mug.service.summary.description}"> 
+					<!-- Service Options -->
+					<sidebar id="sidebar-mug-service-options" name="${mug.service.sidebar.options}">
+						
+						<!-- Service Properties -->
+						<item id="mug-service-edit-form" name="${mug.service.edit.name}"
+								url="mug-service-edit-form.jsp"
+								description="${mug.service.edit.description}"/>
+						
+						<!-- Delete Service -->
+						<item id="mug-service-delete" name="${mug.service.delete.name}"
+								url="mug-service-delete.jsp"
+								description="${mug.service.delete.description}"/>
+					</sidebar>
+				</item>
+				<item id="mug-service-create" name="${mug.service.create.name}"
+						url="mug-service-create.jsp"
+						description="${mug.service.create.description}" />
+			</sidebar>
+			<sidebar id="sidebar-gaming" name="${mug.sidebar.room.name}" description="${mug.sidebar.room.description}">
+				<item id="mug-room-summary" name="${mug.sidebar.room.summary.name}"
+						url="mug-room-summary.jsp"
+						description="${mug.sidebar.room.summary.description}">
+					
+					<!-- Room Options -->
+					<sidebar id="sidebar-mug-room-options" name="${mug.room.sidebar.options}"> 
+						<!-- Room Properties -->
+						<item id="mug-room-settings" name="${mug.room.settings.name}"
+								url="mug-room-settings.jsp"
+								description="${mug.room.settings.description}"/>
+					</sidebar>
+				</item>
+			</sidebar>
+		</tab>
+	</adminconsole>
+</plugin>

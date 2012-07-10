@@ -9,6 +9,7 @@
 #define TP_DB_FIRST_PROFILE_NAME    "TrickPlay User"
 
 #define TP_DB_CURRENT_PROFILE_ID    "profile.current"
+#define TP_DB_FIRST_PROFILE_ID    	"profile.first"
 
 #define TP_DB_UUID                  "uuid"
 
