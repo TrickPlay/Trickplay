@@ -671,6 +671,11 @@ local my_animation = Animator {
                     }
 
 local t = my_animation.timeline
+
+function t:on_new_frame(ms, p)
+    pb.progress = p
+end
+
 function t:on_marker_reached(marker, ms)
     -- pb.progress should be updated in on_new_frame, but progressbar is leaking badly, so can't
     pb.progress = ms/ANIMATION_DURATION
@@ -678,14 +683,8 @@ function t:on_marker_reached(marker, ms)
     pb_text.markup = "<span weight='600'>"..marker.."</span>"
 end
 t:add_marker("Updating Guide Data...", ANIMATION_DURATION * 1/10)
-t:add_marker("Updating Guide Data... ", ANIMATION_DURATION * 2/10)
-t:add_marker("Updating Guide Data...  ", ANIMATION_DURATION * 3/10)
-t:add_marker("Updating Guide Data...   ", ANIMATION_DURATION * 4/10)
 t:add_marker("Calibrating Capacitors...", ANIMATION_DURATION * 5/10)
-t:add_marker("Calibrating Capacitors... ", ANIMATION_DURATION * 6/10)
-t:add_marker("Calibrating Capacitors...  ", ANIMATION_DURATION * 7/10)
 t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
-t:add_marker("Going to Warp Speed... ", ANIMATION_DURATION * 9/10)
 t:add_marker("Done", ANIMATION_DURATION)
 my_animation:start()
 
