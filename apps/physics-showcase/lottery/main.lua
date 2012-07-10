@@ -444,7 +444,7 @@ local function make_ball( i )
         Text
         {
             text = tostring( i ),
-            position = { 10 , 10 },
+            position = { 14 , 10 },
             color = "000000D0",
             font = "DejaVu Mono bold 70px",
         }
@@ -494,7 +494,7 @@ for i = 1 , BALL_COUNT do
 
         make_ball( i ):set
         {
-            position = BALL_POSITION,
+            position = { BALL_POSITION[1]+i, BALL_POSITION[2]+i },
 
         }
         ,
@@ -843,7 +843,7 @@ function idle:on_idle( seconds )
 
     -- Step physics multiple times per redraw frame to keep the physics at ~60 steps per second
     for iteration = 1, iterations do
-        physics:step(step)
+        physics:step(step, 30, 30)
 
         for i = 1 , # step_functions do
 

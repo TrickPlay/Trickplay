@@ -245,7 +245,7 @@ do
     
     local rain_h = imgs.rain.falling.h
     local launch_i = 1
-    
+    local duration
     local rain_launcher = Timer{
         interval = 100,
         on_timer = function(self)
@@ -255,8 +255,9 @@ do
                 curr_condition:add(rain[launch_i])
                 rain[launch_i]:lower_to_bottom()
                 rain[launch_i].y = rain_y
+                duration = self.interval*#rain
                 rain[launch_i]:animate{
-                    duration = self.interval*#rain,
+                    duration = duration > 0 and duration or 1,
                     loop = true,
                     y = screen_h,
                 }
@@ -334,16 +335,18 @@ do
         curr_condition:add(unpack(lightning))
         curr_condition:add(base_cloud,glow_cloud)
     end
-    
+
+    local duration
+
     function tstorm_g:stop_rain()
         for i = 1, #rain do
             
             
             if rain[i].parent then
-                
+                duration = rain_launcher.interval*#rain * ((1+screen_h-rain[i].y)/(screen_h-rain_y))
                 rain[i]:stop_animation()
                 rain[i]:animate{
-                    duration = rain_launcher.interval*#rain * ((1+screen_h-rain[i].y)/(screen_h-rain_y)),
+                    duration = duration > 0 and duration or 1,
                     y = screen_h,
                     on_completed = rain[i].unparent_no_param
                 }
@@ -1103,7 +1106,7 @@ do
             extra={
                 drift = function(self)
                     self:animate{
-						duration   = flake.duration,
+						duration   = flake.duration > 0 and flake.duration or 1,
 						--loop       = true,
 						x          = self.x + flake.speed_x*flake.duration/1000,--math.random(screen_w/5,screen_h/2),
 						y          = screen_h+100,
@@ -1151,6 +1154,8 @@ do
         flake.speed_x = speed_x
         
         flake.duration = (screen_h+150 - flake.y)/speed_y * 1000
+
+	flake.duration = flake.duration > 0 and flake.duration or 1
         
         curr_condition:add(flake)
         
@@ -1368,6 +1373,8 @@ do
         snow.speed_x = speed_x
         
         snow.fall.duration = (screen_h - 830) /speed_y * 1000
+
+	snow.fall.duration = snow.fall.duration > 0 and snow.fall.duration or 1
         
         snow.fall.seesaw_duration = math.random(900,1100)
         

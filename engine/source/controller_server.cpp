@@ -417,6 +417,26 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 			break;
 		}
 
+        case TP_CONTROLLER_COMMAND_VIDEO_START_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVSC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_END_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVEC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS:
+        {
+            server->write_printf( connection, "SVSS\n" );
+            break;
+        }
+
         case TP_CONTROLLER_COMMAND_ADVANCED_UI:
         {
             if ( ! info->aui_connection )
