@@ -70,6 +70,22 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionDuplicate, SIGNAL("triggered()"),  self.duplicate)
         QObject.connect(self.ui.actionDelete, SIGNAL("triggered()"),  self.delete)
 
+		#Arrange Menu
+        QObject.connect(self.ui.action_left, SIGNAL("triggered()"),  self.left)
+        QObject.connect(self.ui.action_right, SIGNAL("triggered()"),  self.right)
+        QObject.connect(self.ui.action_top, SIGNAL("triggered()"),  self.top)
+        QObject.connect(self.ui.action_bottom, SIGNAL("triggered()"),  self.bottom)
+        QObject.connect(self.ui.action_horizontalCenter, SIGNAL("triggered()"),  self.horizontalCenter)
+        QObject.connect(self.ui.action_verticalCenter, SIGNAL("triggered()"),  self.verticalCenter)
+
+        QObject.connect(self.ui.action_distributeHorizontally, SIGNAL("triggered()"),  self.distributeHorizontal)
+        QObject.connect(self.ui.action_distributeVertically, SIGNAL("triggered()"),  self.distributeVertical)
+
+        QObject.connect(self.ui.action_bring_to_front, SIGNAL("triggered()"),  self.bringToFront)
+        QObject.connect(self.ui.action_bring_to_forward, SIGNAL("triggered()"),  self.bringForward)
+        QObject.connect(self.ui.action_send_to_back, SIGNAL("triggered()"),  self.sendToBack)
+        QObject.connect(self.ui.action_send_backward, SIGNAL("triggered()"),  self.sendBackward)
+
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
@@ -257,6 +273,54 @@ class MainWindow(QMainWindow):
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
+        return True
+
+    def left(self):
+        self.sendLuaCommand("alignLeft", "_VE_.alignLeft("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def right(self):
+        self.sendLuaCommand("alignRight", "_VE_.alignRight("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def top(self):
+        self.sendLuaCommand("alignTop", "_VE_.alignTop("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def bottom(self):
+        self.sendLuaCommand("alignButtom", "_VE_.alignButtom("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def horizontalCenter(self):
+        self.sendLuaCommand("horizontalCenter", "_VE_.alignHorizontalCenter("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def verticalCenter(self):
+        self.sendLuaCommand("verticalCenter", "_VE_.alignVerticalCenter("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def distributeHorizontal(self):
+        self.sendLuaCommand("distributeHorizontal", "_VE_.distributeHorizontal("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def distributeVertical(self):
+        self.sendLuaCommand("distributeVertical", "_VE_.distributeVertical("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def bringToFront(self):
+        self.sendLuaCommand("bringToFront", "_VE_.bringToFront("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def bringForward(self):
+        self.sendLuaCommand("bringForward", "_VE_.bringForward("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def sendToBack(self):
+        self.sendLuaCommand("sendToBack", "_VE_.sendToBack("+str(self._inspector.curLayerGid)+")")
+        return True
+        
+    def sendBackward(self):
+        self.sendLuaCommand("sendBackward", "_VE_.sebdBackward("+str(self._inspector.curLayerGid)+")")
         return True
 
     def stop(self, serverStoped=False, exit=False):
