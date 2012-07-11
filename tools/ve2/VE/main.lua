@@ -791,39 +791,133 @@ _VE_.distributeHorizontal = function(gid)
 	    return 
     end 
 
-    local x_sort_t, space, reverse_t, f, b
+    
+    local x_table = {}
+    local temp_w = 0
+    local next_x = 0 
+    local next_pos = 0 
+    local min = screen.w
+    local max = 0
+    local distance = 0
 
-    org_cord() 
-
-    x_sort_t = get_x_sort_t()
-
-    space = get_x_space(x_sort_t)
-    space = math.floor(space)
-
-    x_sort_t = get_x_sort_t()
-    reverse_t = get_reverse_t(x_sort_t)
-
-    f = table.remove(reverse_t)
-
-    while(#reverse_t ~= 0) do  
-        b = table.remove(reverse_t)
-	    if(b.x ~= f.x + f.w + space) then 
-	        b.x = f.x + f.w + space 
-	        if(b.x > 1920) then 
-		        print("ERROR b.x is bigger than screen size") 
-		        b.x = 1920 - b.w 
-	        end 
-	    end 
-         f = b 
+    for i,j in ipairs (curLayer.children) do
+        if j.extra.selected == true then 
+            table.insert(x_table, j.x)
+            if j.x < min then 
+                min = j.x 
+            end 
+            if j.x > max then 
+                max = j.x 
+            end 
+        end 
     end 
 
-    ang_cord()
+
+    for i,j in ipairs (curLayer.children) do
+        if j.extra.selected == true then 
+            if j.x == min then 
+                min = j.x + j.w
+            elseif j.x ~= max then 
+                temp_w = temp_w + j.w
+            end 
+        end 
+    end 
+
+    distance = (max - min - temp_w) / (#x_table - 1)
+    table.sort(x_table)
+
+    next_pos = table.remove(x_table) - distance
+    next_x = table.remove(x_table)
+
+    while #x_table ~= 0 do
+        for i,j in ipairs (curLayer.children) do 
+            if j.extra.selected == true then 
+                if j.x == next_x then 
+                    j.x = next_pos - j.w
+                    screen:find_child(j.name.."border").x = next_pos - j.w
+                    screen:find_child(j.name.."a_m").x = next_pos - j.w
+                    next_pos = j.x - distance
+                    next_x = table.remove(x_table)
+                    break
+                end 
+            end 
+        end 
+    end 
+
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
-
+    _VE_.refresh() 
+    blockReport = false
 end 
 
 _VE_.distributeVertical = function(gid)
+
+    getCurLayer(gid)
+    blockReport = true
+
+    if #selected_objs == 0 then 
+	    print("there are  no selected objects") 
+	    input_mode = hdr.S_SELECT
+	    return 
+    end 
+
+    
+    local y_table = {}
+    local temp_h = 0
+    local next_y = 0 
+    local next_pos = 0 
+    local min = screen.h
+    local max = 0
+    local distance = 0
+
+    for i,j in ipairs (curLayer.children) do
+        if j.extra.selected == true then 
+            table.insert(y_table, j.y)
+            if j.y < min then 
+                min = j.y 
+            end 
+            if j.y > max then 
+                max = j.y 
+            end 
+        end 
+    end 
+
+
+    for i,j in ipairs (curLayer.children) do
+        if j.extra.selected == true then 
+            if j.y == min then 
+                min = j.y + j.h
+            elseif j.y ~= max then 
+                temp_h = temp_h + j.h
+            end 
+        end 
+    end 
+
+    distance = (max - min - temp_h) / (#y_table - 1)
+    table.sort(y_table)
+
+    next_pos = table.remove(y_table) - distance
+    next_y = table.remove(y_table)
+
+    while #y_table ~= 0 do
+        for i,j in ipairs (curLayer.children) do 
+            if j.extra.selected == true then 
+                if j.y == next_y then 
+                    j.y = next_pos - j.h
+                    screen:find_child(j.name.."border").y = next_pos - j.h
+                    screen:find_child(j.name.."a_m").y = next_pos - j.h
+                    next_pos = j.y - distance
+                    next_y = table.remove(y_table)
+                    break
+                end 
+            end 
+        end 
+    end 
+
+    screen.grab_key_focus(screen)
+    input_mode = hdr.S_SELECT
+    _VE_.refresh() 
+    blockReport = false
 end 
 
 _VE_.refresh = function()
@@ -1034,6 +1128,8 @@ _VE_.delete = function(gid)
 	end 
 	
     blockReport = false
+
+    _VE_.refresh()
     --[=[
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
@@ -1105,6 +1201,7 @@ _VE_.setUIInfo = function(gid, property, value)
         if the_obj ~= nil then 
             devtools:gid(gid)[property] = the_obj 
             devtools:gid(gid).extra.source = value
+		    screen_ui.n_selected(devtools:gid(gid))
         end 
     else 
         devtools:gid(gid)[property] = value 
