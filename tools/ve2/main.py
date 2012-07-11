@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
         return True
         
     def sendBackward(self):
-        self.sendLuaCommand("sendBackward", "_VE_.sebdBackward("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("sendBackward", "_VE_.sendBackward("+str(self._inspector.curLayerGid)+")")
         return True
 
     def stop(self, serverStoped=False, exit=False):
