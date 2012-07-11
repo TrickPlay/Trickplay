@@ -621,6 +621,7 @@ local arrange_end = function()
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     blockReport = false
+    _VE_.refresh() 
 
 end 
 
@@ -722,7 +723,6 @@ _VE_.alignVerticalCenter = function(gid)
     arrange_end()
 end 
  
-
 local function get_x_sort_t()
      
      local x_sort_t = {}
@@ -782,6 +782,9 @@ local function get_x_space(x_sort_t)
 end 
 
 _VE_.distributeHorizontal = function(gid)
+
+    arrange_prep(gid)
+    --[[
     getCurLayer(gid)
     blockReport = true
 
@@ -790,7 +793,7 @@ _VE_.distributeHorizontal = function(gid)
 	    input_mode = hdr.S_SELECT
 	    return 
     end 
-
+    ]]
     
     local x_table = {}
     local temp_w = 0
@@ -844,14 +847,19 @@ _VE_.distributeHorizontal = function(gid)
         end 
     end 
 
+    arrange_end(gid)
+    --[[
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     _VE_.refresh() 
     blockReport = false
+    ]]
 end 
 
 _VE_.distributeVertical = function(gid)
 
+    arrange_prep(gid)
+    --[[
     getCurLayer(gid)
     blockReport = true
 
@@ -860,7 +868,7 @@ _VE_.distributeVertical = function(gid)
 	    input_mode = hdr.S_SELECT
 	    return 
     end 
-
+    ]]
     
     local y_table = {}
     local temp_h = 0
@@ -914,11 +922,155 @@ _VE_.distributeVertical = function(gid)
         end 
     end 
 
+    arrange_end(gid)
+    --[[
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     _VE_.refresh() 
     blockReport = false
+    ]]
 end 
+
+_VE_.bringToFront = function(gid)
+
+    arrange_prep(gid)
+    --[[
+    getCurLayer(gid)
+    blockReport = true
+
+    if #selected_objs == 0 then 
+	    print("there are  no selected objects") 
+	    input_mode = hdr.S_SELECT
+	    return 
+    end 
+    --]]
+
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true) then
+			curLayer:remove(v)
+			curLayer:add(v)
+			--screen_ui.n_selected(v)
+        end
+    end
+
+    arrange_end(gid)
+
+    --[[
+    screen.grab_key_focus(screen)
+    input_mode = hdr.S_SELECT
+    _VE_.refresh() 
+    blockReport = false
+    ]]
+end 
+
+
+_VE_.bringForward = function(gid)
+
+    arrange_prep(gid)
+
+    local tmp_g = {}
+    local slt_g = {}
+
+    for i, v in ipairs(curLayer.children) do
+	    curLayer:remove(v) 
+		if #slt_g ~= 0 then 
+		    table.insert(tmp_g, v)
+			table.insert(tmp_g, table.remove(slt_g))
+		end 
+	    if(v.extra.selected == true) then
+		    table.insert(slt_g, v) 
+			screen_ui.n_selected(v)
+		else 
+		    table.insert(tmp_g, v) 
+		end
+    end
+
+    if #slt_g ~= 0 then
+    	table.insert(tmp_g, table.remove(slt_g))
+    end 
+
+    tmp_g = get_reverse_t(tmp_g)
+
+    while(table.getn(tmp_g) ~= 0) do
+    	v = table.remove(tmp_g)
+	    curLayer:add(v)
+    end 
+
+    arrange_end(gid)
+
+end
+
+_VE_.sendToBack = function(gid)
+
+    arrange_prep(gid)
+
+    local tmp_g = {}
+    local slt_g = {}
+
+    for i, v in ipairs(curLayer.children) do
+	    curLayer:remove(v) 
+	    if(v.extra.selected == true) then
+		    table.insert(slt_g, v)
+			screen_ui.n_selected(v)
+		else 
+		     table.insert(tmp_g, v) 
+		end
+    end
+    
+    while #slt_g ~= 0 do
+	    v = table.remove(slt_g)
+	    curLayer:add(v)	
+    end 
+    
+    tmp_g = get_reverse_t(tmp_g) 
+    while #tmp_g ~= 0 do
+	    v = table.remove(tmp_g)
+	    g:add(v)	
+    end 
+	
+    arrange_end(gid)
+
+end
+
+_VE_.sendBackward = function(gid)
+
+    arrange_prep(gid)
+
+    local tmp_g = {}
+    local slt_g = {}
+
+    for i, v in ipairs(curLayer.children) do
+	    curLayer:remove(v)  -- 1,2,(3)
+		if #slt_g ~= 0 then 
+		    local b = table.remove(slt_g)
+			local f = table.remove(tmp_g)
+			table.insert(tmp_g, b)
+			table.insert(tmp_g, f) 
+		end 
+	    if (v.extra.selected == true) then
+		    table.insert(slt_g, v) 
+			screen_ui.n_selected(v)
+		else 
+		    table.insert(tmp_g, v) 
+		end
+    end
+
+    if #slt_g ~= 0 then 
+	    local b = table.remove(slt_g) 
+	    local f = table.remove(tmp_g) 
+	    table.insert(tmp_g, b) 
+	    table.insert(tmp_g, f) 
+    end 
+
+    tmp_g = get_reverse_t(tmp_g)
+    while #tmp_g ~= 0 do
+	    v = table.remove(tmp_g)
+	    curLayer:add(v) 
+    end 
+
+    arrange_end(gid)
+
+end
 
 _VE_.refresh = function()
     _VE_.getUIInfo()
