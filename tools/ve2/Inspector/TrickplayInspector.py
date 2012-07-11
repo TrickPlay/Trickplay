@@ -230,7 +230,9 @@ class TrickplayInspector(QWidget):
                 i.setText (0, p)
                 i.setText (1, str(data[p]))
                 if p == "source":
-                    i.setText (1, summarizeSource(data[p]))
+                    #i.setText (1, summarizeSource(data[p]))
+                    i.setText (1, str(data[p]))
+                    i.setFlags(i.flags() ^Qt.ItemIsEditable)
                 if p == "style":
                         style_n = n
                         self.cbStyle = QComboBox()
