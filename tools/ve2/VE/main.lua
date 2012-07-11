@@ -1355,6 +1355,9 @@ _VE_.setUIInfo = function(gid, property, value)
             devtools:gid(gid).extra.source = value
 		    screen_ui.n_selected(devtools:gid(gid))
         end 
+    elseif property == 'visible' then 
+        screen_ui.n_selected_all()
+        devtools:gid(gid)[property] = value 
     else 
         devtools:gid(gid)[property] = value 
     end 
