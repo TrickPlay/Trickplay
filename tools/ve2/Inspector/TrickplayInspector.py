@@ -310,6 +310,8 @@ class TrickplayInspector(QWidget):
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
+        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
+
     def screen_json(self):
         #[{"Default":["Layer1","Layer2"], "New":["Layer2"]}]
         scrJSON = '[{'
