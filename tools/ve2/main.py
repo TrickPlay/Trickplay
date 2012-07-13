@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_Button, SIGNAL("triggered()"),  self.button)
         QObject.connect(self.ui.actionDialog_Box, SIGNAL("triggered()"),  self.dialogbox)
         QObject.connect(self.ui.actionToastAlert, SIGNAL("triggered()"),  self.toastalert)
+        QObject.connect(self.ui.actionToggleButton, SIGNAL("triggered()"),  self.togglebutton)
         QObject.connect(self.ui.actionProgressSpinner, SIGNAL("triggered()"),  self.progressspinner)
         QObject.connect(self.ui.actionOrbitting_Dots, SIGNAL("triggered()"),  self.orbittingdots)
         QObject.connect(self.ui.actionTextInput, SIGNAL("triggered()"),  self.textinput)
@@ -226,6 +227,10 @@ class MainWindow(QMainWindow):
 
     def toastalert(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
+        return True
+
+    def togglebutton(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToggleButton')")
         return True
 
     def dialogbox(self):

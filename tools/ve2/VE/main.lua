@@ -11,6 +11,7 @@ if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")      
 if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
 if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
 if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
+if not TOGGLEBUTTON      then dofile("LIB/Widget/ToggleButton/ToggleButton.lua")     end
 if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
 
 if not RADIOBUTTONGROUP  then dofile("LIB/Widget/RadioButtonGroup/RadioButtonGroup.lua") end
@@ -94,6 +95,7 @@ local uiElementCreate_map =
     ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
     ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
     ['TextInput'] = function(p) return TextInput(p) end,
+    ['ToggleButton'] = function(p) return ToggleButton(p) end,
     ['LayoutManager'] = function(p)  return LayoutManager(p) end, 
     ['Slider'] = function(p)  return Slider(p) end, 
     ['ArrowPane'] = function(p)  return ArrowPane(p) end, 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon Jul  9 15:57:01 2012
+# Created: Fri Jul 13 15:49:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -298,6 +298,8 @@ class Ui_MainWindow(object):
         self.action_send_to_back.setObjectName(_fromUtf8("action_send_to_back"))
         self.action_send_backward = QtGui.QAction(MainWindow)
         self.action_send_backward.setObjectName(_fromUtf8("action_send_backward"))
+        self.actionToggleButton = QtGui.QAction(MainWindow)
+        self.actionToggleButton.setObjectName(_fromUtf8("actionToggleButton"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -318,6 +320,7 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionTabBar)
         self.menuInsert_UI_Element.addAction(self.actionTextInput)
         self.menuInsert_UI_Element.addAction(self.actionToastAlert)
+        self.menuInsert_UI_Element.addAction(self.actionToggleButton)
         self.menuInsert_UI_Element.addAction(self.actionWidgetText)
         self.menuInsert_UI_Element.addAction(self.actionWidgetImage)
         self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
@@ -468,4 +471,5 @@ class Ui_MainWindow(object):
         self.action_bring_to_forward.setText(QtGui.QApplication.translate("MainWindow", "Bring to Forward", None, QtGui.QApplication.UnicodeUTF8))
         self.action_send_to_back.setText(QtGui.QApplication.translate("MainWindow", "Send to Back", None, QtGui.QApplication.UnicodeUTF8))
         self.action_send_backward.setText(QtGui.QApplication.translate("MainWindow", "Send Backward", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggleButton.setText(QtGui.QApplication.translate("MainWindow", "ToggleButton", None, QtGui.QApplication.UnicodeUTF8))
 
