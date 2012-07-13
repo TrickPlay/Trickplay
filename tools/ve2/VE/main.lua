@@ -182,8 +182,6 @@ end
 local rect_init_x = 0
 local rect_init_y = 0
 
-
-
 local function getObjName (border_n) 
      local i, j = string.find(border_n, "border")
      return string.sub(border_n, 1, i-1)
@@ -207,7 +205,6 @@ local function ang_cord()
 	  	end 
     end 
 end  
-
 
 local function getTypeStr(m) 
     if m.widget_type == "Widget" then 
@@ -420,6 +417,9 @@ local function editor_rectangle_done(x,y)
     if(y-rect_init_y < 0) then
     	uiRectangle.y = y
     end
+
+    _VE_.refresh()
+    blockReport = false
     screen.grab_key_focus(screen)
 end 
 
@@ -478,6 +478,8 @@ end
 
 local function editor_clone()
 
+    blockReport = true
+
 	if #selected_objs == 0 then 
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -507,12 +509,15 @@ local function editor_clone()
 	end
 
     _VE_.refresh()
+    blockReport = false
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
 
 local function editor_group()
+
+    blockReport = true
 
 	if #(selected_objs) == 0 then 
 		print ("there is no selected object !!")
@@ -540,6 +545,9 @@ local function editor_group()
         	uiGroup:add(v)
 		end 
     end
+
+    _VE_.refresh()
+    blockReport = false
 
     screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
@@ -1527,6 +1535,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     getCurLayer(layerGid)
 
+    blockReport = true
+
     if uiTypeStr == "Rectangle" then 
 
         input_mode = hdr.S_RECTANGLE 
@@ -1535,7 +1545,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     elseif uiTypeStr == "Group" then 
         
-        blockReport = true
         uiInstance = editor_group()
         if uiInstance == nil then 
             return
@@ -1543,9 +1552,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     elseif uiTypeStr == "Clone" then 
         
-        blockReport = true
         editor_clone()
-        blockReport = false
         return
 
     elseif uiElementCreate_map[uiTypeStr] then
