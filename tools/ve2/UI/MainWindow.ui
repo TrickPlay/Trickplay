@@ -92,6 +92,7 @@
      <addaction name="actionTabBar"/>
      <addaction name="actionTextInput"/>
      <addaction name="actionToastAlert"/>
+     <addaction name="actionToggleButton"/>
      <addaction name="actionWidgetText"/>
      <addaction name="actionWidgetImage"/>
      <addaction name="actionWidgetRectangle"/>
@@ -757,6 +758,11 @@
   <action name="action_send_backward">
    <property name="text">
     <string>Send Backward</string>
+   </property>
+  </action>
+  <action name="actionToggleButton">
+   <property name="text">
+    <string>ToggleButton</string>
    </property>
   </action>
  </widget>
