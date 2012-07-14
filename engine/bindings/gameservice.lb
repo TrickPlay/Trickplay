@@ -17,58 +17,58 @@ global gameservice [[GameServiceSupport*]]
 	gameservice()
 		[[
 			self=lb_construct( GameServiceSupport , App::get(L)->get_context()->get_gameservice() );
-			
+
 			self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_READY, gameservice_app_ready_handler,L);
             self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
 		]];
-	
-	
+
+
 	/*
-	
-    	Event Handler: on_ready
-    	
-    	The on_ready() event handler is invoked after the Trickplay successfully 
+
+    	EEvent Handler: on_ready
+
+    	The on_ready() event handler is invoked after the Trickplay successfully
     	registers a listener for the game events with the gameservice server.
     	If the registration failed, the <on_error> event handler will be invoked, instead.
-    	
+
     	*Prototype:*
-    	
+
     		(code)
     		on_ready( self, app_id)
     		(end)
-    		
+
     	*Arguments:*
-    	
+
     		self - a reference to gameservice
     		app_id - a table with following attributes: { name = "xxxx", version = "xxx" }
-    		
+
     	*Return Value:* None
-    	
+
 	*/
-	
+
 
 	callback on_ready
 	;
-	
+
 	/*
-	
-    	Event Handler: on_error
-    	
+
+    	EEvent Handler: on_error
+
     	The on_error() event handler is invoked when the Trickplay fails on open_app call with gameservice.
-    	
+
     	*Prototype:*
-    	
+
     		(code)
     		on_error( self, response_status, app_id)
     		(end)
-    		
+
     	*Arguments:*
-    	
+
     		self - a reference to gameservice
     		app_id - a table with following attributes: { name = "xxxx", version = "xxx" }
-    		
+
     	*Return Value:* None
-    	
+
 	*/
 	callback on_error
 	;
@@ -82,7 +82,7 @@ global gameservice [[GameServiceSupport*]]
         	TPGameServiceUtil::push_registered_games(L);
         ]];
 
-/*		
+/*
 * props is a lua table of the following format:
  *  {
  *  	app_id = { name = "com.trickplay.games", version = 1 },
@@ -101,36 +101,36 @@ global gameservice [[GameServiceSupport*]]
  *      }
  *  }
 */
-	register_game(table props) 
+	register_game(table props)
 		[[
 			libgameservice::Game game_obj;
 			TPGameServiceUtil::populate_game(L, props, game_obj);
 			self->RegisterGame(game_obj);
 		]];
-		
+
 	/*
-    	Event Handler: on_register_game_completed
-    	
+    	EEvent Handler: on_register_game_completed
+
     	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
-    	
+
     	*Prototype:*
-    	
+
     		(code)
     		on_loaded( mediaplayer )
     		(end)
-    		
+
     	*Arguments:*
-    	
+
     		mediaplayer - reference to the mediaplayer variable that prepared the media resource
-    		
+
     	*Return Value:* None
-    	
+
     	*See Also:* the <load> function and the <on_error> event handler
 	*/
-	
+
 	callback on_register_game_completed
-	; 
-	
+	;
+
 	/*
 	 * match_request table of the following format:
 	 * {
@@ -142,16 +142,16 @@ global gameservice [[GameServiceSupport*]]
 	 * 	}
 	 *
 	 */
- 
+
 	assign_match(table props)
 		[[
 			libgameservice::MatchRequest match_request;
 			TPGameServiceUtil::populate_match_request(L, props, match_request);
 			self->AssignMatch(match_request, NULL);
 		]];
-		
+
 	callback on_assign_match_completed;
-	
+
 	join_match(string match_id, string nick, bool any_role)
 		[[
 			self->JoinMatch(match_id, nick, any_role, NULL);
@@ -161,44 +161,44 @@ global gameservice [[GameServiceSupport*]]
 		[[
 			self->JoinMatch(match_id, nick, role, NULL);
 		]];
-		
-	
+
+
 	callback on_join_match_completed
 	;
-	
-	
+
+
 	start_match(string match_id)
 		[[
 			self->StartMatch(match_id, NULL);
 		]];
-		
+
 	callback on_start_match_completed;
-	
+
 	send_turn(string match_id, string turn_data, bool terminate)
 		[[
 			self->SendTurn(match_id, turn_data, terminate, NULL);
 		]];
-		
+
 	callback on_send_turn_completed
 	;
-	
-	
+
+
 	callback on_turn_received
 	;
-	
-	
+
+
 	callback on_match_started
 	;
-	
-	
+
+
 	callback on_participant_joined
 	;
-	
-	
+
+
 	callback on_participant_left
 	;
-	
-	
+
+
 	callback on_match_updated
 	;
 
