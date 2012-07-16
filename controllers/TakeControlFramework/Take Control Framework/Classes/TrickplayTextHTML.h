@@ -9,9 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "TrickplayUIElement.h"
 
-@interface TrickplayTextHTML : TrickplayUIElement {
-    UIWebView *webview;
     
+@interface TrickplayTextHTML : TrickplayUIElement <UIWebViewDelegate> {
     NSUInteger maxLength;
     NSString *origText;
     NSString *text;
@@ -54,7 +53,6 @@
     BOOL use_markup;
 }
 
-@property (retain) UIWebView *webview;
 @property (retain) NSString *text;
 @property (retain) NSString *origText;
 // .font
