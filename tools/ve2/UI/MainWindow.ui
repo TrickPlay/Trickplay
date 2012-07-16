@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>346</width>
-    <height>571</height>
+    <width>316</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,7 +40,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>346</width>
+     <width>316</width>
      <height>27</height>
     </rect>
    </property>
@@ -56,7 +56,9 @@
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
+    <addaction name="separator"/>
     <addaction name="actionNew_Layer"/>
+    <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -98,6 +100,7 @@
      <addaction name="actionWidgetRectangle"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
+    <addaction name="separator"/>
     <addaction name="actionDelete"/>
     <addaction name="actionDuplicate"/>
     <addaction name="actionClone"/>
@@ -139,9 +142,33 @@
     <addaction name="menu_distribute"/>
     <addaction name="menu_arrange"/>
    </widget>
+   <widget class="QMenu" name="menuView_2">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuBackground">
+     <property name="title">
+      <string>Background</string>
+     </property>
+     <addaction name="actionImange"/>
+     <addaction name="actionSmall_Grid"/>
+     <addaction name="actionMedium_Grid"/>
+     <addaction name="actionLarge_Grid"/>
+     <addaction name="actionWhite"/>
+     <addaction name="actionBlack"/>
+    </widget>
+    <addaction name="menuBackground"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_Horizontal_Guide"/>
+    <addaction name="actionAdd_Vertical_Guide"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Guides"/>
+    <addaction name="actionSnap_to_Guides"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuArrange"/>
+   <addaction name="menuView_2"/>
    <addaction name="menuRun"/>
    <addaction name="menuView"/>
   </widget>
@@ -763,6 +790,56 @@
   <action name="actionToggleButton">
    <property name="text">
     <string>ToggleButton</string>
+   </property>
+  </action>
+  <action name="actionAdd_Horizontal_Guide">
+   <property name="text">
+    <string>Add Horizontal Guide</string>
+   </property>
+  </action>
+  <action name="actionAdd_Vertical_Guide">
+   <property name="text">
+    <string>Add Vertical Guide</string>
+   </property>
+  </action>
+  <action name="actionShow_Guides">
+   <property name="text">
+    <string>Show Guides</string>
+   </property>
+  </action>
+  <action name="actionSnap_to_Guides">
+   <property name="text">
+    <string>Snap to Guides</string>
+   </property>
+  </action>
+  <action name="actionImange">
+   <property name="text">
+    <string>Imange...</string>
+   </property>
+  </action>
+  <action name="actionSmall_Grid">
+   <property name="text">
+    <string>Small Grid</string>
+   </property>
+  </action>
+  <action name="actionMedium_Grid">
+   <property name="text">
+    <string>Medium Grid</string>
+   </property>
+  </action>
+  <action name="actionLarge_Grid">
+   <property name="text">
+    <string>Large Grid</string>
+   </property>
+  </action>
+  <action name="actionWhite">
+   <property name="text">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionBlack">
+   <property name="text">
+    <string>Black</string>
    </property>
   </action>
  </widget>
