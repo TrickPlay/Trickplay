@@ -7,6 +7,66 @@
 
 using namespace libgameservice;
 
+typedef struct _CallbackDataStruct {
+	UserData* user_data;
+	int lua_callback_ref;
+	_CallbackDataStruct(UserData* ud, int cb_ref) :
+		user_data(ud), lua_callback_ref(cb_ref) { }
+} CallbackDataStruct;
+
+static int invoke_lua_callback( lua_State* L, CallbackDataStruct* cb_data, int nargs , int nresults )
+{
+
+	int lua_callback_ref = cb_data != NULL ? cb_data->lua_callback_ref : LUA_REFNIL;
+	UserData * ud = cb_data->user_data;
+
+    LSG;
+
+    // This will push the callback (or nil) onto the stack
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, lua_callback_ref);
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , nargs + 1 );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    {
+    	// Move function to just before the arguments
+
+    	lua_insert( L , - ( nargs + 1 ) );
+
+    	// Push self
+
+
+		if ( ! ud )
+		{
+			lua_pop( L , nargs + 1);
+
+			LSG_CHECK( -(nargs + 1));
+
+			return 0;
+		}
+
+    	ud->push_proxy();
+
+    	// Move self to just before the arguments (and right after the function)
+
+    	lua_insert( L , - ( nargs + 1 ) );
+
+        lua_call( L , nargs + 1 , nresults );
+    }
+
+	LSG_CHECK( nresults - nargs );
+
+    return 1;
+}
+
+
 static std::string stateToStr(GameServiceSupport::State state) {
 	switch(state) {
 	case GameServiceSupport::LOGIN_SUCCESSFUL:
@@ -80,8 +140,8 @@ private:
 
 class OpenAppAction : public Action {
 public:
-	OpenAppAction(GameServiceSupport * game_service, const AppId& app_id)
-	: game_service_(game_service), app_id_(app_id) {
+	OpenAppAction(GameServiceSupport * game_service, const AppId& app_id, void* cb_data)
+	: game_service_(game_service), app_id_(app_id), cb_data_(cb_data) {
 //		std::cout << "Inside OpenAppAction constructor" << std::endl;
 	}
 	~OpenAppAction() {
@@ -95,10 +155,10 @@ protected:
 		else if (game_service_->state() == GameServiceSupport::LOGIN_SUCCESSFUL) {
 			std::cout << "Inside OpenAppAction. Login was successful. initiating OpenApp" << std::endl;
 			game_service_->state_ = GameServiceSupport::APP_OPENING;
-			game_service_->delegate_->OpenApp(app_id_);
+			game_service_->delegate_->OpenApp(app_id_, cb_data_);
 		} else {
 			ResponseStatus rs(libgameservice::NOT_CONNECTED, "Not connected to gameservice server");
-			game_service_->OnOpenAppResponse(rs, app_id_);
+			game_service_->OnOpenAppResponse(rs, app_id_, cb_data_);
 		}
 		return false;
 	}
@@ -106,6 +166,7 @@ protected:
 private:
 	GameServiceSupport * game_service_;
 	AppId app_id_;
+	void* cb_data_;
 };
 
 GameServiceSupport::GameServiceSupport(TPContext * context)
@@ -147,7 +208,7 @@ void GameServiceSupport::init() {
 
 		password = Util::make_v1_uuid();
 		AccountInfo ainfo(user_id, user_id, password, user_id + "@" + domain);
-		RegisterAccount(ainfo, domain, host, port, NULL);
+		RegisterAccount(ainfo, domain, host, port);
 	}
 	else
 	{
@@ -169,8 +230,8 @@ void GameServiceSupport::init() {
 
 
 
-StatusCode GameServiceSupport::RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data) {
-	delegate_->RegisterAccount(account_info, domain, host, port, cb_data);
+StatusCode GameServiceSupport::RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port) {
+	delegate_->RegisterAccount(account_info, domain, host, port, NULL);
 	return OK;
 }
 
@@ -196,7 +257,7 @@ StatusCode GameServiceSupport::OpenApp(const AppId& app_id) {
 	if (state_ != LOGIN_SUCCESSFUL && state_ != LOGIN_IN_PROGRESS)
 		return libgameservice::FAILED;
 
-	::Action::post(new OpenAppAction(this, app_id));
+	::Action::post(new OpenAppAction(this, app_id, NULL));
 	return OK;
 	//return delegate_->OpenApp(app_id);
 }
@@ -208,65 +269,75 @@ StatusCode GameServiceSupport::CloseApp() {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
 
-	return delegate_->CloseApp();
+	return delegate_->CloseApp(NULL);
 }
 
-StatusCode GameServiceSupport::ListGames() {
-	return delegate_->ListGames();
+StatusCode GameServiceSupport::ListGames(UserData * ud, int lua_callback_ref) {
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
+	return delegate_->ListGames(cb_data);
 }
 
-StatusCode GameServiceSupport::RegisterApp(const AppId & app) {
-	return delegate_->RegisterApp(app);
+StatusCode GameServiceSupport::RegisterApp(UserData * ud, const AppId & app, int lua_callback_ref) {
+	return delegate_->RegisterApp(app, NULL);
 }
 
-StatusCode GameServiceSupport::RegisterGame(const Game & game) {
+StatusCode GameServiceSupport::RegisterGame(UserData * ud, const Game & game, int lua_callback_ref) {
+	if (state_ != APP_OPEN) {
+		return libgameservice::APP_NOT_OPEN;
+	}
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
+	return delegate_->RegisterGame(game, cb_data);
+}
+
+StatusCode GameServiceSupport::StartMatch(UserData * ud, const std::string& match_id, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
-	return delegate_->RegisterGame(game);
-}
-
-StatusCode GameServiceSupport::StartMatch(const std::string& match_id, void* cb_data) {
-	if (state_ != APP_OPEN)
-		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->StartMatch(match_id, cb_data);
 }
 
-StatusCode GameServiceSupport::LeaveMatch(const std::string& match_id, void* cb_data) {
+StatusCode GameServiceSupport::LeaveMatch(UserData * ud, const std::string& match_id, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->LeaveMatch(match_id, cb_data);
 }
 
-StatusCode GameServiceSupport::JoinMatch(const std::string& match_id, const std::string& nick,
-		bool acquire_role, void* cb_data) {
+StatusCode GameServiceSupport::JoinMatch(UserData * ud, const std::string& match_id, const std::string& nick,
+		bool acquire_role, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->JoinMatch(match_id, nick, acquire_role, cb_data);
 }
 
-StatusCode GameServiceSupport::JoinMatch(const std::string& match_id, const std::string& nick,
-		const std::string& role, void* cb_data) {
+StatusCode GameServiceSupport::JoinMatch(UserData * ud, const std::string& match_id, const std::string& nick,
+		const std::string& role, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->JoinMatch(match_id, nick, role, cb_data);
 }
 
-StatusCode GameServiceSupport::AssignMatch(const MatchRequest& match_request, void* cb_data) {
+StatusCode GameServiceSupport::AssignMatch(UserData * ud, const MatchRequest& match_request, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->AssignMatch(match_request, cb_data);
 }
 
-StatusCode GameServiceSupport::GetMatchData(const GameId& game_id) {
+StatusCode GameServiceSupport::GetMatchData(UserData * ud, const GameId& game_id, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
-	return delegate_->GetMatchData(game_id);
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
+	return delegate_->GetMatchData(game_id, cb_data);
 }
 
-StatusCode GameServiceSupport::SendTurn(const std::string& match_id, const std::string& state,
-		bool terminate, void* cb_data) {
+StatusCode GameServiceSupport::SendTurn(UserData * ud, const std::string& match_id, const std::string& state,
+		bool terminate, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
 	return delegate_->SendTurn(match_id, state, terminate, cb_data);
 }
 
@@ -335,12 +406,12 @@ void GameServiceSupport::OnRegisterAccountResponse(const ResponseStatus& rs,
 	}
 }
 
-void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 	std::cout << "OnRegisterAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
 }
 
-void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const Game& game) {
+void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const Game& game, void* cb_data) {
 
 	std::cout << "OnRegisterGameResponse(). status_code:"
 			<< statusToString(rs.status_code()) << ", game_id:"
@@ -349,7 +420,7 @@ void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const 
 }
 
 void GameServiceSupport::OnListGamesResponse(const ResponseStatus& rs,
-		const std::vector<GameId>& game_id_vector) {
+		const std::vector<GameId>& game_id_vector, void* cb_data) {
 	std::cout << "OnListGamesResponse(). status_code:" << statusToString(
 			rs.status_code()) << std::endl;
 	std::vector<GameId>::const_iterator iter;
@@ -357,9 +428,11 @@ void GameServiceSupport::OnListGamesResponse(const ResponseStatus& rs,
 		std::cout << "game_id.Str()=" << (*iter).Str() << std::endl;
 		std::cout << "game_id.AsID()=" << (*iter).AsID() << std::endl;
 	}
+
+	delete (CallbackDataStruct*)cb_data;
 }
 
-void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 	/*
 	std::cout << "OnOpenAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
@@ -369,7 +442,6 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 	if (rs.status_code() == OK) {
 		state_ = APP_OPEN;
 		app_id_ = app_id;
-
 
 		TPGameServiceUtil::push_app_id_arg( L, app_id );
 
@@ -386,7 +458,7 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 	}
 }
 
-void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 	std::cout << "OnCloseAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
 	if (rs.status_code() == OK) {
@@ -418,18 +490,18 @@ void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-
 		if (rs.status_code() == OK) {
 
 			TPGameServiceUtil::push_match_request_arg( L, match_request );
 
 			TPGameServiceUtil::push_string_arg( L, match_id );
 
-			invoke_gameservice_on_assign_match_completed( L, this, 3, 0 );
+			invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 3, 0);
 
 		} else {
-			invoke_gameservice_on_assign_match_completed( L, this, 1, 0 );
+			invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0);
 		}
+		delete (CallbackDataStruct*)cb_data;
 }
 
 void GameServiceSupport::OnStartMatchResponse(const ResponseStatus& rs, void* cb_data) {
@@ -438,11 +510,13 @@ void GameServiceSupport::OnStartMatchResponse(const ResponseStatus& rs, void* cb
 			<< statusToString( rs.status_code() )
 			<< std::endl;
 */
+
 		lua_State* L = get_lua_state();
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-		invoke_gameservice_on_start_match_completed( L, this, 1, 0 );
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0 );
+		delete (CallbackDataStruct*)cb_data;
 }
 
 void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data) {
@@ -454,7 +528,8 @@ void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data)
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-		invoke_gameservice_on_send_turn_completed( L, this, 1, 0 );
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0 );
+		delete (CallbackDataStruct*)cb_data;
 }
 
 /*
@@ -483,7 +558,6 @@ void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-
 		if (rs.status_code() == OK) {
 
 			TPGameServiceUtil::push_string_arg( L, match_id );
@@ -492,11 +566,12 @@ void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 
 			TPGameServiceUtil::push_item_arg( L, item );
 
-			invoke_gameservice_on_join_match_completed( L, this, 4, 0 );
+			invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 4, 0 );
 
 		} else {
-			invoke_gameservice_on_join_match_completed( L, this, 1, 0 );
+			invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0 );
 		}
+		delete (CallbackDataStruct*)cb_data;
 }
 
 void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb_data) {

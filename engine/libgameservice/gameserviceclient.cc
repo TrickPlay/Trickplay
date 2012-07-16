@@ -329,23 +329,39 @@ public:
 			delete msg->pdata;
 			break;
 		case MSG_REGISTER_APP:
-			SendRegisterAppW(static_cast<AppData*> (msg->pdata)->app_id_);
+		{
+			AppData* ad = static_cast<AppData*> (msg->pdata);
+			SendRegisterAppW(ad->app_id_, ad->cb_data_);
 			delete msg->pdata;
+		}
 			break;
 		case MSG_REGISTER_GAME:
-			SendRegisterGameW(static_cast<RegisterGameData*> (msg->pdata)->game_);
+		{
+			RegisterGameData* rgd = static_cast<RegisterGameData*> (msg->pdata);
+			SendRegisterGameW(rgd->game_, rgd->cb_data_);
 			delete msg->pdata;
+		}
 			break;
 		case MSG_LIST_GAMES:
-			SendListGamesW();
+		{
+			CallbackData* cd = static_cast<CallbackData*> (msg->pdata);
+			SendListGamesW(cd);
+			delete msg->pdata;
+		}
 			break;
 		case MSG_OPEN_APP:
-			SendOpenAppW(static_cast<AppData*> (msg->pdata)->app_id_);
+		{
+			AppData* ad = static_cast<AppData*> (msg->pdata);
+			SendOpenAppW(ad->app_id_, ad->cb_data_);
 			delete msg->pdata;
+		}
 			break;
 		case MSG_CLOSE_APP:
-			SendCloseAppW(static_cast<AppData*> (msg->pdata)->app_id_);
+		{
+			AppData* ad = static_cast<AppData*> (msg->pdata);
+			SendCloseAppW(ad->app_id_, ad->cb_data_);
 			delete msg->pdata;
+		}
 			break;
 		case MSG_ASSIGN_MATCH:
 		{
@@ -406,35 +422,35 @@ public:
 		case MSG_REGISTER_APP_RESPONSE: {
 			AppResponseData* objptr =
 					static_cast<AppResponseData*> (msg->pdata);
-			OnRegisterAppResponseW(objptr->rs_, objptr->app_id_);
+			OnRegisterAppResponseW(objptr->rs_, objptr->app_id_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
 		case MSG_REGISTER_GAME_RESPONSE: {
 			RegisterGameResponseData* objptr =
 					static_cast<RegisterGameResponseData*> (msg->pdata);
-			OnRegisterGameResponseW(objptr->rs_, objptr->game_);
+			OnRegisterGameResponseW(objptr->rs_, objptr->game_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
 		case MSG_LIST_GAMES_RESPONSE: {
 			ListOfGamesResponseData* objptr =
 					static_cast<ListOfGamesResponseData*> (msg->pdata);
-			OnListGamesResponseW(objptr->rs_, objptr->game_id_vector_);
+			OnListGamesResponseW(objptr->rs_, objptr->game_id_vector_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
 		case MSG_OPEN_APP_RESPONSE: {
 			AppResponseData* objptr =
 					static_cast<AppResponseData*> (msg->pdata);
-			OnOpenAppResponseW(objptr->rs_, objptr->app_id_);
+			OnOpenAppResponseW(objptr->rs_, objptr->app_id_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
 		case MSG_CLOSE_APP_RESPONSE: {
 			AppResponseData* objptr =
 					static_cast<AppResponseData*> (msg->pdata);
-			OnCloseAppResponseW(objptr->rs_, objptr->app_id_);
+			OnCloseAppResponseW(objptr->rs_, objptr->app_id_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
@@ -549,29 +565,29 @@ public:
 		worker_thread_->Post(this, MSG_SEND_PRESENCE, new SendPresenceData(s));
 	}
 
-	void RegisterApp(const AppId & app_id) {
+	void RegisterApp(const AppId & app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
-		worker_thread_->Post(this, MSG_REGISTER_APP, new AppData(app_id));
+		worker_thread_->Post(this, MSG_REGISTER_APP, new AppData(app_id, cb_data));
 	}
 
-	void RegisterGame(const Game & game) {
+	void RegisterGame(const Game & game, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
-		worker_thread_->Post(this, MSG_REGISTER_GAME, new RegisterGameData(game));
+		worker_thread_->Post(this, MSG_REGISTER_GAME, new RegisterGameData(game, cb_data));
 	}
 
-	void ListGames() {
+	void ListGames(void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
-		worker_thread_->Post(this, MSG_LIST_GAMES, NULL);
+		worker_thread_->Post(this, MSG_LIST_GAMES, new CallbackData(cb_data));
 	}
 
-	void OpenApp(const AppId& app_id) {
+	void OpenApp(const AppId& app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
-		worker_thread_->Post(this, MSG_OPEN_APP, new AppData(app_id));
+		worker_thread_->Post(this, MSG_OPEN_APP, new AppData(app_id, cb_data));
 	}
 
-	void CloseApp(const AppId& app_id) {
+	void CloseApp(const AppId& app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
-		worker_thread_->Post(this, MSG_CLOSE_APP, new AppData(app_id));
+		worker_thread_->Post(this, MSG_CLOSE_APP, new AppData(app_id, cb_data));
 	}
 
 	void AssignMatch(const MatchRequest& match_request, void* cb_data) {
@@ -880,154 +896,165 @@ private:
 	}
 
 	/* REGISTER APP */
-	void SendRegisterAppW(const AppId & app_id) {
+	void SendRegisterAppW(const AppId & app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		RegisterAppTask * rat = new RegisterAppTask(pump_.get()->client(), app_id);
+		RegisterAppTask * rat = new RegisterAppTask(pump_.get()->client(), app_id, cb_data);
 		rat->SignalDone.connect(this,
 				&GameServiceClientWorker::OnRegisterAppResponse);
 		rat->Start();
 	}
 
 	struct AppData: public txmpp::MessageData {
-		AppData(const AppId& app_id) :
-			app_id_(app_id) {
+		AppData(const AppId& app_id, void* cb_data) :
+			app_id_(app_id), cb_data_(cb_data) {
 		}
 		AppId app_id_;
+		void* cb_data_;
 	};
 
+	struct CallbackData: public txmpp::MessageData {
+			CallbackData(void* cb_data) :
+				cb_data_(cb_data) {
+			}
+			void* cb_data_;
+		};
+
 	struct AppResponseData: public txmpp::MessageData {
-		AppResponseData(const ResponseStatus& rs, const AppId& app_id) :
-			rs_(rs), app_id_(app_id) {
+		AppResponseData(const ResponseStatus& rs, const AppId& app_id, void* cb_data) :
+			rs_(rs), app_id_(app_id), cb_data_(cb_data) {
 		}
 		ResponseStatus rs_;
 		AppId app_id_;
+		void* cb_data_;
 	};
 
-	void OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+	void OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		main_thread_->Post(this, MSG_REGISTER_APP_RESPONSE, new AppResponseData(rs, app_id));
+		main_thread_->Post(this, MSG_REGISTER_APP_RESPONSE, new AppResponseData(rs, app_id, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
 
-	void OnRegisterAppResponseW(const ResponseStatus& rs, const AppId& app_id) {
+	void OnRegisterAppResponseW(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnRegisterAppResponse(rs, app_id);
+			notify_->OnRegisterAppResponse(rs, app_id, cb_data);
 	}
 
 	/* REGISTER GAME */
-	void SendRegisterGameW(const Game & game) {
+	void SendRegisterGameW(const Game & game, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		RegisterGameTask *rgt = new RegisterGameTask(pump_.get()->client(),
-				game);
+		RegisterGameTask *rgt = new RegisterGameTask(pump_.get()->client(), game, cb_data);
 		rgt->SignalDone.connect(this,
 				&GameServiceClientWorker::OnRegisterGameResponse);
 		rgt->Start();
 	}
 
 	struct RegisterGameData: public txmpp::MessageData {
-			RegisterGameData(const Game& game) :
-				game_(game) {
+			RegisterGameData(const Game& game, void* cb_data) :
+				game_(game), cb_data_(cb_data) {
 			}
 			Game game_;
+			void* cb_data_;
 		};
 
 	struct RegisterGameResponseData: public txmpp::MessageData {
-		RegisterGameResponseData(const ResponseStatus& rs, const Game& game) :
-			rs_(rs), game_(game) {
+		RegisterGameResponseData(const ResponseStatus& rs, const Game& game, void* cb_data) :
+			rs_(rs), game_(game), cb_data_(cb_data) {
 		}
 		ResponseStatus rs_;
 		Game game_;
+		void* cb_data_;
 	};
 
-	void OnRegisterGameResponse(const ResponseStatus& rs, const Game& game) {
+	void OnRegisterGameResponse(const ResponseStatus& rs, const Game& game, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		main_thread_->Post(this, MSG_REGISTER_GAME_RESPONSE, new RegisterGameResponseData(rs, game));
+		main_thread_->Post(this, MSG_REGISTER_GAME_RESPONSE, new RegisterGameResponseData(rs, game, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
 
-	void OnRegisterGameResponseW(const ResponseStatus& rs, const Game& game) {
+	void OnRegisterGameResponseW(const ResponseStatus& rs, const Game& game, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnRegisterGameResponse(rs, game);
+			notify_->OnRegisterGameResponse(rs, game, cb_data);
 	}
 
 	/* LIST GAMES */
-	void SendListGamesW() {
+	void SendListGamesW(void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		ListGamesTask *task = new ListGamesTask(pump_.get()->client());
+		ListGamesTask *task = new ListGamesTask(pump_.get()->client(), cb_data);
 		task->SignalListOfGames.connect(this,
 				&GameServiceClientWorker::OnListGamesResponse);
 		task->Start();
 	}
 
 	struct ListOfGamesResponseData: public txmpp::MessageData {
-		ListOfGamesResponseData(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector) :
-				rs_(rs), game_id_vector_(game_id_vector) {
+		ListOfGamesResponseData(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector, void* cb_data) :
+				rs_(rs), game_id_vector_(game_id_vector), cb_data_(cb_data) {
 			}
 			ResponseStatus rs_;
 			std::vector<GameId> game_id_vector_;
+			void* cb_data_;
 		};
 
-	void OnListGamesResponse(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector) {
+	void OnListGamesResponse(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
 	//	std::cout << "Inside OnListGamesResponse. called from worker thread. game_id_vector.size()=" << game_id_vector.size() << std::endl;
-		main_thread_->Post(this, MSG_LIST_GAMES_RESPONSE, new ListOfGamesResponseData(rs, game_id_vector));
+		main_thread_->Post(this, MSG_LIST_GAMES_RESPONSE, new ListOfGamesResponseData(rs, game_id_vector, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
 
-	void OnListGamesResponseW(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector) {
+	void OnListGamesResponseW(const ResponseStatus& rs, const std::vector<GameId>& game_id_vector, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnListGamesResponse(rs, game_id_vector);
+			notify_->OnListGamesResponse(rs, game_id_vector, cb_data);
 	}
 
 	/* OPEN APP */
-	void SendOpenAppW(const AppId & app_id) {
+	void SendOpenAppW(const AppId & app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		OpenAppTask * rat = new OpenAppTask(pump_.get()->client(), app_id);
+		OpenAppTask * rat = new OpenAppTask(pump_.get()->client(), app_id, cb_data);
 		rat->SignalDone.connect(this,
 				&GameServiceClientWorker::OnOpenAppResponse);
 		rat->Start();
 	}
 
-	void OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+	void OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		main_thread_->Post(this, MSG_OPEN_APP_RESPONSE, new AppResponseData(rs, app_id));
+		main_thread_->Post(this, MSG_OPEN_APP_RESPONSE, new AppResponseData(rs, app_id, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
 
-	void OnOpenAppResponseW(const ResponseStatus& rs, const AppId& app_id) {
+	void OnOpenAppResponseW(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnOpenAppResponse(rs, app_id);
+			notify_->OnOpenAppResponse(rs, app_id, cb_data);
 	}
 
 	/* CLOSE APP */
-	void SendCloseAppW(const AppId & app_id) {
+	void SendCloseAppW(const AppId & app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
-		CloseAppTask * rat = new CloseAppTask(pump_.get()->client(), app_id);
+		CloseAppTask * rat = new CloseAppTask(pump_.get()->client(), app_id, cb_data);
 		rat->SignalDone.connect(this,
 				&GameServiceClientWorker::OnCloseAppResponse);
 		rat->Start();
 	}
 
-	void OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id) {
+	void OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
 		main_thread_->Post(this, MSG_CLOSE_APP_RESPONSE,
-				new AppResponseData(rs, app_id));
+				new AppResponseData(rs, app_id, cb_data));
 		if (notify_)
 			notify_->WakeupMainThread();
 	}
 
-	void OnCloseAppResponseW(const ResponseStatus& rs, const AppId& app_id) {
+	void OnCloseAppResponseW(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnCloseAppResponse(rs, app_id);
+			notify_->OnCloseAppResponse(rs, app_id, cb_data);
 	}
 
 	/* ASSIGN MATCH */
@@ -1326,15 +1353,15 @@ public:
 		return current_app_.is_valid();
 	}
 
-	StatusCode OpenApp(const AppId& app_id);
+	StatusCode OpenApp(const AppId& app_id, void* cb_data);
 
-	StatusCode CloseApp();
+	StatusCode CloseApp(void* cb_data);
 
-	StatusCode ListGames();
+	StatusCode ListGames(void* cb_data);
 
-	StatusCode RegisterApp(const AppId & app);
+	StatusCode RegisterApp(const AppId & app, void* cb_data);
 
-	StatusCode RegisterGame(const Game & game);
+	StatusCode RegisterGame(const Game & game, void* cb_data);
 
 	StatusCode StartMatch(const std::string& match_id, void* cb_data);
 
@@ -1348,7 +1375,7 @@ public:
 
 	StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data);
 
-	StatusCode GetMatchData(const GameId& game_id);
+	StatusCode GetMatchData(const GameId& game_id, void* cb_data);
 
 	StatusCode SendTurn(const std::string& match_id, const std::string& state,
 			bool terminate, void* cb_data);
@@ -1409,33 +1436,33 @@ StatusCode GameServiceClient::SendPresence(const Status & s) {
 	return OK;
 }
 
-StatusCode GameServiceClient::RegisterApp(const AppId & app_id) {
-	worker_->RegisterApp(app_id);
+StatusCode GameServiceClient::RegisterApp(const AppId & app_id, void* cb_data) {
+	worker_->RegisterApp(app_id, cb_data);
 	return OK;
 }
 
-StatusCode GameServiceClient::RegisterGame(const Game & game) {
-	worker_->RegisterGame(game);
+StatusCode GameServiceClient::RegisterGame(const Game & game, void* cb_data) {
+	worker_->RegisterGame(game, cb_data);
 	return OK;
 }
 
-StatusCode GameServiceClient::ListGames() {
-	worker_->ListGames();
+StatusCode GameServiceClient::ListGames(void* cb_data) {
+	worker_->ListGames(cb_data);
 	return OK;
 }
 
-StatusCode GameServiceClient::OpenApp(const AppId& app_id) {
+StatusCode GameServiceClient::OpenApp(const AppId& app_id, void* cb_data) {
 	if (IsAppOpen())
 		return APP_OPEN;
-	worker_->OpenApp(app_id);
+	worker_->OpenApp(app_id, cb_data);
 	current_app_ = app_id;
 	return OK;
 }
 
-StatusCode GameServiceClient::CloseApp() {
+StatusCode GameServiceClient::CloseApp(void* cb_data) {
 	if (!IsAppOpen())
 		return APP_NOT_OPEN;
-	worker_->CloseApp(current_app_);
+	worker_->CloseApp(current_app_, cb_data);
 	current_app_ = AppId();
 	return OK;
 }
@@ -1496,7 +1523,7 @@ StatusCode GameServiceClient::SendTurn(const std::string& match_id, const std::s
 	return OK;
 }
 
-StatusCode GameServiceClient::GetMatchData(const GameId& game_id) {
+StatusCode GameServiceClient::GetMatchData(const GameId& game_id, void* cb_data) {
 	return OK;
 }
 

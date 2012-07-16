@@ -63,7 +63,7 @@ gameservice.on_error = on_error
 local on_assign_match_completed = 
 	function ( gameservice, response_status, match_request, new_match_id )
 		dumptable ( response_status )
-		if response_status.status_code == "OK" then
+		if response_status.status == 0 then
 			match_id = new_match_id
 			setGameState( GAME_STATE_ASSIGN_MATCH_DONE )
 		else
@@ -72,7 +72,7 @@ local on_assign_match_completed =
 		end
 	end
 
-gameservice.on_assign_match_completed = on_assign_match_completed
+--gameservice.on_assign_match_completed = on_assign_match_completed
 
 local doStart = 
 	function ( )
@@ -85,12 +85,12 @@ local doStart =
 		}
 		
 		setGameState( GAME_STATE_ASSIGN_MATCH_PENDING )
-		gameservice:assign_match( match_request )	
+		gameservice:assign_match( match_request, on_assign_match_completed )	
 	end
 
 local on_join_match_completed =
 	function ( gameservice, response_status, match_id, from, item )
-		if response_status.status_code == "OK" then
+		if response_status.status == 0 then
 			setGameState( GAME_STATE_JOIN_MATCH_DONE )
 			join_role = item.role
 		else
@@ -99,7 +99,7 @@ local on_join_match_completed =
 		end
 	end
 	
-gameservice.on_join_match_completed = on_join_match_completed
+-- gameservice.on_join_match_completed = on_join_match_completed
 
 local doJoinMatch = 
 	function ( )
@@ -109,7 +109,7 @@ local doJoinMatch =
 		else		
 			print( " assigned match_id = " .. match_id )
 			setGameState( GAME_STATE_JOIN_MATCH_PENDING )
-			gameservice:join_match( match_id, "p2", true )
+			gameservice:join_match( match_id, "p2", true, on_join_match_completed )
 		end
 	end
 		

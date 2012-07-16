@@ -13,7 +13,7 @@ extern std::string longToString(long val);
 extern std::string booleanToString(bool val);
 
 enum StatusCode {
-	OK,
+	OK = 0,
 	FAILED,
 	LOGIN_FAILED,
 	NOT_CONNECTED,

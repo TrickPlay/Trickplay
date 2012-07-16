@@ -53,19 +53,19 @@ public:
 			const AccountInfo& account_info, void* cb_data) = 0;
 
 	virtual void OnRegisterAppResponse(const ResponseStatus& rs,
-			const AppId& app_id) = 0;
+			const AppId& app_id, void* cb_data) = 0;
 
 	virtual void OnRegisterGameResponse(const ResponseStatus& rs,
-			const Game& game) = 0;
+			const Game& game, void* cb_data) = 0;
 
 	virtual void OnListGamesResponse(const ResponseStatus& rs,
-			const std::vector<GameId>& game_id_vector) = 0;
+			const std::vector<GameId>& game_id_vector, void* cb_data) = 0;
 
 	virtual void OnOpenAppResponse(const ResponseStatus& rs,
-			const AppId& app_id) = 0;
+			const AppId& app_id, void* cb_data) = 0;
 
 	virtual void OnCloseAppResponse(const ResponseStatus& rs,
-			const AppId& app_id) = 0;
+			const AppId& app_id, void* cb_data) = 0;
 
 	virtual void OnAssignMatchResponse(const ResponseStatus& rs,
 			const MatchRequest& match_request, const std::string& match_id,
@@ -117,15 +117,15 @@ public:
 
 	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) = 0;
 
-	virtual StatusCode OpenApp(const AppId& app_id) = 0;
+	virtual StatusCode OpenApp(const AppId& app_id, void* cb_data) = 0;
 
-	virtual StatusCode CloseApp() = 0;
+	virtual StatusCode CloseApp(void* cb_data) = 0;
 
-	virtual StatusCode ListGames() = 0;
+	virtual StatusCode ListGames(void* cb_data) = 0;
 
-	virtual StatusCode RegisterApp(const AppId & app) = 0;
+	virtual StatusCode RegisterApp(const AppId & app, void* cb_data) = 0;
 
-	virtual StatusCode RegisterGame(const Game & game) = 0;
+	virtual StatusCode RegisterGame(const Game & game, void* cb_data) = 0;
 
 	virtual StatusCode StartMatch(const std::string& match_id, void* cb_data) = 0;
 
@@ -139,7 +139,7 @@ public:
 
 	virtual StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data) = 0;
 
-	virtual StatusCode GetMatchData(const GameId& game_id) = 0;
+	virtual StatusCode GetMatchData(const GameId& game_id, void* cb_data) = 0;
 
 	virtual StatusCode SendTurn(const std::string& match_id, const std::string& state,
 			bool terminate, void* cb_data) = 0;

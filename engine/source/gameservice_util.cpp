@@ -353,17 +353,29 @@ void push_response_status_arg( lua_State * L, const libgameservice::ResponseStat
 	lua_newtable( L );
 	int t = lua_gettop( L );
 
-	lua_pushliteral( L , "status_code" );
-	lua_pushstring( L , libgameservice::statusToString(rs.status_code()) );
+	lua_pushliteral( L, "status" );
+	lua_pushinteger( L, rs.status_code() );
+	lua_rawset( L , t );
+
+	const char* status_as_str = libgameservice::statusToString(rs.status_code());
+	lua_pushliteral( L , "status_as_string" );
+	lua_pushstring( L ,  status_as_str );
 	lua_rawset( L , t );
 
 	if (rs.status_code() != libgameservice::OK)
 	{
 		lua_pushliteral( L , "error_message" );
-		lua_pushstring( L , rs.error_message().c_str() );
+		lua_pushstring( L , !(rs.error_message().empty()) ? rs.error_message().c_str() : status_as_str );
 		lua_rawset( L , t );
 	}
 }
+
+void push_response_status_arg( lua_State * L, const libgameservice::StatusCode sc )
+{
+	libgameservice::ResponseStatus rs( sc, std::string() );
+	push_response_status_arg( L, rs );
+}
+
 
 void push_app_id_arg( lua_State * L, const libgameservice::AppId& app_id )
 {
