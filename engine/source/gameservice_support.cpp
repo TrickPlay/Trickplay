@@ -26,6 +26,10 @@ static int invoke_lua_callback( lua_State* L, CallbackDataStruct* cb_data, int n
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, lua_callback_ref);
 
+    if (lua_callback_ref != LUA_REFNIL && lua_callback_ref != LUA_NOREF)
+    	luaL_unref(L, LUA_REGISTRYINDEX, lua_callback_ref);
+
+
     if ( lua_isnil( L , -1 ) )
     {
         lua_pop( L , nargs + 1 );
