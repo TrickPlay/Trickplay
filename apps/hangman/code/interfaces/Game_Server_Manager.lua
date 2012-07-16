@@ -20,7 +20,16 @@ print("game name:   '"..game_name.."'")
 local vendorId, game_id
 
 function Game_Server:init(t)
+    --[[ TODO
     
+    --call open_app
+    
+    --check if user has hangman registered
+    
+    --if not register hangman game with user
+    --]]
+    
+    ---[[
     if initialized then
         
         error("Game_Server Library has already been initialized",2)
@@ -39,9 +48,20 @@ function Game_Server:init(t)
     --check to see if game exists (to get gameID), else create it
     
     initialized = true
-    
+    --]]
 end
 function Game_Server:login(t)
+    
+    --[[ TODO
+    
+    
+        if on_ready already happened, then call login_callback & session_callback
+        
+        if not, then setup on_ready to call login_callback & session_callback
+        
+    --]]
+    
+    
     
     if type(t) ~= "table" then
         
@@ -191,6 +211,13 @@ end
 
 function Game_Server:launch_wildcard_session(session,callback)
     
+    --[[ TODO
+    this function gets called after the user creates the word for a new game
+    
+    so, create the match & send_turn, allowing any opponent to join
+    --]]
+    
+    
     if session == nil then error("must pass session",2) end
     
     interface:create_gameplay_session(user,pswd,game_id,function(t)
@@ -218,6 +245,11 @@ function Game_Server:launch_wildcard_session(session,callback)
 end
 
 function Game_Server:update_game_history(callback)
+    --[[
+    
+        this function updates the Win Loss Record of the logged in user
+    --]]
+    
     
     interface:set_gameplay_summary(
         user,pswd,game_id, base64_encode(json:stringify{wins = g_user.wins, losses = g_user.losses}), callback
@@ -226,6 +258,11 @@ function Game_Server:update_game_history(callback)
 end
 
 function Game_Server:update(session,callback)
+    --[[
+    
+        this function is used to save game state, does not imply that this users turn is over
+    --]]
+    
     
     if session == nil then error("must pass session",2) end
     
@@ -241,6 +278,10 @@ function Game_Server:update(session,callback)
 end
 
 function Game_Server:end_session(session,callback)
+    --[[
+    
+        this function is used to end a match, (if a user loses the match, or times out)
+    --]]
     
     if session == nil then error("must pass session",2) end
     
@@ -255,6 +296,11 @@ function Game_Server:end_session(session,callback)
 end
 
 function Game_Server:respond(session,callback)
+    --[[
+    
+        this function is send_turn, it also appears to update the gamestate
+    --]]
+    
     
     if session == nil then error("must pass session",2) end
     
@@ -270,6 +316,11 @@ function Game_Server:respond(session,callback)
 end
 
 function Game_Server:get_session_state(id,callback)
+    --[[
+    
+        gets the current state of a particular match
+    --]]
+    
     
     if id == nil then error("must pass id",2) end
     
@@ -283,6 +334,11 @@ function Game_Server:get_session_state(id,callback)
 end
 
 function Game_Server:get_a_wild_card_invite(callback)
+    --[[
+    
+        checks to see if there is are any games ( gs:join_match() )
+    --]]
+    
     
     interface:get_gameplay_invitation(
         user,
@@ -294,6 +350,11 @@ function Game_Server:get_a_wild_card_invite(callback)
     
 end
 function Game_Server:accept_invite(invite_id,callback)
+    --[[
+    
+        this function is used to join a match
+    --]]
+    
     
     if invite_id == nil then error("must pass invite_id",2) end
     
@@ -307,6 +368,11 @@ function Game_Server:accept_invite(invite_id,callback)
 end
 
 function Game_Server:get_list_of_sessions(callback)
+    --[[
+    
+        this function is used to get the list of matches that the player is currently involved in
+    --]]
+    
     
     interface:get_all_gameplay_sessions( user, pswd, function(t)
         
