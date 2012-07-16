@@ -17,6 +17,8 @@ namespace TPGameServiceUtil
 
     void push_response_status_arg( lua_State * L, const libgameservice::ResponseStatus& rs );
 
+    void push_response_status_arg( lua_State * L, const libgameservice::StatusCode sc );
+
     void push_app_id_arg( lua_State * L, const libgameservice::AppId& app_id );
 
     void push_match_request_arg( lua_State * L, const libgameservice::MatchRequest& match_request );

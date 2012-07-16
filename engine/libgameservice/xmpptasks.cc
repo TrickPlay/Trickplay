@@ -226,8 +226,8 @@ bool MUGPresenceListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 
 // ListGames task
-ListGamesTask::ListGamesTask(txmpp::TaskParent *parent) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE) {
+ListGamesTask::ListGamesTask(txmpp::TaskParent *parent, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), cb_data_(cb_data) {
 
 //	std::cout << "Inside ListGamesTask constructor" << std::endl;
 }
@@ -285,7 +285,7 @@ int ListGamesTask::ProcessResponse() {
 	//std::cout << "game_id_vector.size()=" << game_id_vector.size() << std::endl;
 	//std::cout << "emitting SignalListOfGames()" << std::endl;
 	ResponseStatus rs;
-	SignalListOfGames.emit(rs, game_id_vector);
+	SignalListOfGames.emit(rs, game_id_vector, cb_data_);
 //	std::cout << "Discover Info IQ query results follow: " << std::endl;
 //	std::cout << stanza->Str() << std::endl;
 
@@ -305,8 +305,8 @@ bool ListGamesTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // RegisterApp task
-RegisterAppTask::RegisterAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+RegisterAppTask::RegisterAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside RegisterAppTask constructor" << std::endl;
 }
@@ -363,7 +363,7 @@ int RegisterAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs(got_error?FAILED:OK, "");
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
@@ -381,8 +381,8 @@ bool RegisterAppTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // RegisterGame task
-RegisterGameTask::RegisterGameTask(txmpp::TaskParent *parent, const Game & game) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_(game) {
+RegisterGameTask::RegisterGameTask(txmpp::TaskParent *parent, const Game & game, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_(game), cb_data_(cb_data) {
 
 	//std::cout << "Inside RegisterGameTask constructor" << std::endl;
 }
@@ -516,7 +516,7 @@ int RegisterGameTask::ProcessResponse() {
 	ResponseStatus rs(got_error?FAILED:OK, "");
 
 
-	SignalDone(rs, game_);
+	SignalDone(rs, game_, cb_data_);
 
 	return STATE_DONE;
 }
@@ -534,8 +534,8 @@ bool RegisterGameTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // OpenApp task
-OpenAppTask::OpenAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+OpenAppTask::OpenAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside OpenAppTask constructor" << std::endl;
 }
@@ -564,14 +564,14 @@ int OpenAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs;
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
 
 // CloseApp task
-CloseAppTask::CloseAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+CloseAppTask::CloseAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside CloseAppTask constructor" << std::endl;
 }
@@ -600,7 +600,7 @@ int CloseAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs;
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
