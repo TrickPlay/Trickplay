@@ -1200,7 +1200,7 @@ void Images::shutdown()
 
 void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1217,7 +1217,7 @@ void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder,
 
 Images::DecoderList Images::get_decoders( const char * _hint )
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1546,7 +1546,7 @@ void Images::dump()
 
 void Images::dump_cache()
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     if ( ! self->cache )
     {
@@ -1613,7 +1613,7 @@ bool Images::cache_put( TPContext * context , const String & key , CoglHandle te
 		return false;
 	}
 
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	// If the cache has not been created yet, do so now
 
@@ -1636,7 +1636,7 @@ bool Images::cache_put( TPContext * context , const String & key , CoglHandle te
 
 CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
 {
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	if ( ! self->cache )
 	{
@@ -1650,7 +1650,7 @@ CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
 
 bool Images::cache_has( const String & key )
 {
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	if ( ! self->cache )
 	{

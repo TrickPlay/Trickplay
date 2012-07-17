@@ -571,17 +571,17 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 void ControllerServer::connection_closed( gpointer connection )
 {
     ConnectionInfo * info = find_connection( connection );
+    gpointer aui_connection = NULL;
 
     if ( info && info->controller )
     {
         tp_context_remove_controller( context, info->controller );
+        aui_connection = info->aui_connection;
     }
 
     drop_resource_group( connection , String() );
 
     drop_post_endpoint( connection );
-
-    gpointer aui_connection = info->aui_connection;
 
     connections.erase( connection );
 
