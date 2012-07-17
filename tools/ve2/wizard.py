@@ -355,6 +355,7 @@ class Wizard():
                 lib_path = str(os.path.join(str(path), 'lib'))
                 os.mkdir(lib_path)
                 shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/Widget')) ,str(os.path.join(lib_path, 'widget')))
+                shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/assets')) ,str(os.path.join(lib_path, 'assets')))
                 os.mkdir(str(os.path.join(lib_path, 've2')))
                 shutil.copyfile(str(os.path.join(self.mainWindow.apath, 'VE/LIB/VE/ve_runtime.lua')) ,str(os.path.join(lib_path, 've2/ve_runtile.lua')))
 

@@ -106,4 +106,23 @@ selected_objs	  = {}
 -- Screen ui functions 
 --screen_ui = dofile("screen_ui")
 
+
+-- background images 
+--[[
+BG_IMAGE_20 = assets("assets/transparency-grid-20-2.png")
+BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
+BG_IMAGE_40 = assets("assets/transparency-grid-40-2.png")
+BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_80 = assets("assets/transparency-grid-80-2.png")
+BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_white = assets("assets/white.png")
+BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_import = Image{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+BG_IMAGE_20 = nil
+BG_IMAGE_40 = nil
+BG_IMAGE_80 = nil
+BG_IMAGE_white = nil
+BG_IMAGE_import = nil
+]]
+
 return hdr
