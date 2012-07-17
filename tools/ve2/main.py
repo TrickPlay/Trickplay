@@ -87,6 +87,20 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_send_to_back, SIGNAL("triggered()"),  self.sendToBack)
         QObject.connect(self.ui.action_send_backward, SIGNAL("triggered()"),  self.sendBackward)
 
+		#View Menu
+        QObject.connect(self.ui.actionImage, SIGNAL("triggered()"),  self.backgroundImage)
+        QObject.connect(self.ui.actionSmall_Grid, SIGNAL("triggered()"),  self.smallGrid)
+        QObject.connect(self.ui.actionMedium_Grid, SIGNAL("triggered()"),  self.mediumGrid)
+        QObject.connect(self.ui.actionLarge_Grid, SIGNAL("triggered()"),  self.largeGrid)
+        QObject.connect(self.ui.actionWhite, SIGNAL("triggered()"),  self.white)
+        QObject.connect(self.ui.actionBlack, SIGNAL("triggered()"),  self.black)
+
+        QObject.connect(self.ui.actionAdd_Horizontal_Guide, SIGNAL("triggered()"),  self.addHorizonGuide)
+        QObject.connect(self.ui.actionAdd_Vertical_Guide, SIGNAL("triggered()"),  self.addVerticalGuide)
+
+        QObject.connect(self.ui.actionShow_Guides, SIGNAL("triggered()"),  self.showGuides)
+        QObject.connect(self.ui.actionSnap_to_Guides, SIGNAL("triggered()"),  self.snapToGuides)
+
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
@@ -364,3 +378,49 @@ class MainWindow(QMainWindow):
         if path is not -1:
             self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
+
+
+    def backgroundImage(self):
+        path = QFileDialog.getOpenFileName(None, 'Set Background Image Source', str(os.path.join(self.path, 'assets/images')), "*.jpg *.gif *.png")
+        path = os.path.basename(str(path))
+        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
+        self.sendLuaCommand("backgroundImage", "_VE_.backgroundImage("+"'"+str(path)+"')")
+        return True
+
+    def smallGrid(self):
+        self.sendLuaCommand("smallGrid", "_VE_.smallGrid()")
+        return True
+
+    def mediumGrid(self):
+        self.sendLuaCommand("mediumGrid", "_VE_.mediumGrid()")
+        return True
+
+    def largeGrid(self):
+        self.sendLuaCommand("largeGrid", "_VE_.largeGrid()")
+        return True
+
+    def white(self):
+        self.sendLuaCommand("white", "_VE_.white()")
+        return True
+
+    def black(self):
+        self.sendLuaCommand("black", "_VE_.black()")
+        return True
+
+    def addHorizonGuide(self):
+        self.sendLuaCommand("addHorizonGuide", "_VE_.addHorizonGuide()")
+        return True
+
+    def addVerticalGuide(self):
+        self.sendLuaCommand("addVerticalGuide", "_VE_.VerticalGuide()")
+        return True
+
+    def showGuides(self):
+        self.sendLuaCommand("showGuides", "_VE_.showGuides()")
+        return True
+
+    def snapToGuides(self):
+        self.sendLuaCommand("snapToGuides", "_VE_.snapToGuides()")
+        return True
+
+

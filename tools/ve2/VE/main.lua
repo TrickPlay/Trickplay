@@ -335,12 +335,14 @@ end
 local function assign_right_name (uiInstance, uiTypeStr)
 
     for m,n in ipairs (screen.children) do
+        if n.name then 
         if string.find(n.name, "Layer") then  
             for k,l in ipairs (n.children) do 
                 if l.name == uiTypeStr:lower()..uiNum then 
                     uiNum = uiNum + 1
                 end
             end
+        end
         end
     end 
 
@@ -1390,13 +1392,38 @@ _VE_.openInspector = function(gid)
     print("openInspc"..gid)
 end 
 
+_VE_.setBGImages = function(path)
+
+    if path then 
+        editor_lb:change_app_path(path)
+    end
+
+    if BG_IMAGE_20 == nil then 
+        BG_IMAGE_20 = Image{src ="LIB/assets/transparency-grid-20-2.png"}
+        BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
+        BG_IMAGE_40 = Image{src="LIB/assets/transparency-grid-40-2.png"}
+        BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+        
+        BG_IMAGE_80 = Image{src="LIB/assets/transparency-grid-80-2.png"}
+        BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+        BG_IMAGE_white = Image{src="LIB/assets/white.png"}
+        BG_IMAGE_white:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+        BG_IMAGE_import = Image{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+    end 
+
+    screen:add(BG_IMAGE_20,BG_IMAGE_40,BG_IMAGE_80,BG_IMAGE_white,BG_IMAGE_import)
+end 
+
 _VE_.setAppPath = function(path)
     editor_lb:change_app_path(path)
 end 
 
 _VE_.openFile = function(path)
-    editor_lb:change_app_path(path)
     screen:clear()
+    _VE_.setBGImages(path)
+    editor_lb:change_app_path(path)
 
     layers_file = "layers.json"
     styles_file = "styles.json"
@@ -1488,7 +1515,7 @@ _VE_.openLuaFile = function()
             dragging = { j , x - j.x , y - j.y }
             if button == 3 then
                 _VE_.openInspector(4)
-            end
+            enimport
         end
     
         function j.on_button_up( j , x , y , button )
@@ -1531,6 +1558,100 @@ _VE_.saveFile = function(scrJson)
 
 end 
 
+_VE_.black = function()
+    BG_IMAGE_20.opacity = 0
+    BG_IMAGE_40.opacity = 0
+    BG_IMAGE_80.opacity = 0
+    BG_IMAGE_white.opacity = 0
+    BG_IMAGE_import.opacity = 0
+end
+
+_VE_.backgroundImage = function(path)
+    _VE_.black()
+    BG_IMAGE_import.src = path  
+    BG_IMAGE_import.opacity = 255  
+end
+
+_VE_.smallGrid = function()
+    _VE_.black()
+    BG_IMAGE_20.opacity = 255
+end
+
+_VE_.mediumGrid = function()
+    _VE_.black()
+    BG_IMAGE_40.opacity = 255
+end
+
+_VE_.largeGrid = function()
+    _VE_.black()
+    BG_IMAGE_80.opacity = 255
+end
+
+_VE_.white = function()
+    _VE_.black()
+    BG_IMAGE_white.opacity = 255
+end
+
+--[[
+_VE_.addHorizonGuide = function()
+
+end
+_VE_.addVerticalGuide = function()
+
+end
+_VE_.showGuides = function()
+    	if guideline_show == false then 
+		menuButtonView.items[11]["icon"].opacity = 255
+		guideline_show = true
+		for i= 1, h_guideline, 1 do 
+			local h_guide = screen:find_child("h_guideline"..tostring(i))
+			if h_guide then 
+				h_guide:show() 
+			end 
+		end 
+		for i= 1, v_guideline, 1 do 
+			local v_guide = screen:find_child("v_guideline"..tostring(i)) 
+			if v_guide then 
+				v_guide:show() 
+			end
+		end 
+	else 
+		if util.is_there_guideline() then 
+			menuButtonView.items[11]["icon"].opacity = 0
+			guideline_show = false
+			for i= 1, h_guideline, 1 do 
+				local h_guide = screen:find_child("h_guideline"..tostring(i)) 
+				if h_guide then 
+					h_guide:hide() 
+				end
+			end 
+			for i= 1, v_guideline, 1 do 
+				local v_guide = screen:find_child("v_guideline"..tostring(i)) 
+				if v_guide then 
+					v_guide:hide() 
+				end 
+			end 
+		else 
+			editor.error_message("008", nil, nil)
+		end
+	end
+	screen:grab_key_focus()
+
+end
+_VE_.snapToGuides = function()
+    	if util.is_there_guideline() then 
+		if menuButtonView.items[12]["icon"].opacity > 0 then 
+		 	menuButtonView.items[12]["icon"].opacity = 0 
+		else 
+		 	menuButtonView.items[12]["icon"].opacity = 255 
+		end
+    else
+    	editor.error_message("008", nil, nil)
+    end
+	screen:grab_key_focus()
+end
+
+]]
 _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     local uiInstance, dragging = nil 
@@ -1648,6 +1769,8 @@ end
 
 
 screen.reactive = true
+
+_VE_.setBGImages()
 screen:show()
 
 controllers:start_pointer()

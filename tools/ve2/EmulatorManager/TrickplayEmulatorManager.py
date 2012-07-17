@@ -198,7 +198,6 @@ class TrickplayEmulatorManager(QWidget):
 				        if self.main.command == "openFile":
 				            self.main.command = ""
 
-                        
 				elif s is not None:
 				    pass
 				
@@ -231,3 +230,4 @@ class TrickplayEmulatorManager(QWidget):
         self.trickplay.setProcessEnvironment(env)
         
         ret = self.trickplay.start('trickplay', [self.path()])
+

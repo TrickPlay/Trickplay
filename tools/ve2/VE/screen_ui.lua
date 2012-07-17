@@ -609,11 +609,13 @@ function screen_ui.menu_hide()
 end 
 
 function screen_ui.add_bg()
+--[[
 	screen:add(BG_IMAGE_20)
     screen:add(BG_IMAGE_40)
     screen:add(BG_IMAGE_80)
     screen:add(BG_IMAGE_white)
     screen:add(BG_IMAGE_import)
+    ]]
 end 
 
 function screen_ui.auto_save()
