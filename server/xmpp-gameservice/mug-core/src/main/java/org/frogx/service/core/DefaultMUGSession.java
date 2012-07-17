@@ -330,6 +330,7 @@ public class DefaultMUGSession implements MUGSession {
 				throw new ConflictException();
 			}
 
+			// TODO: fix the bug in processing private messages. the current implementation doesnt work
 			// An occupant is trying to send a private message
 			String resource = message.getTo().getResource();
 			if (resource != null && resource.trim().length() > 0) {
@@ -383,6 +384,7 @@ public class DefaultMUGSession implements MUGSession {
 				}
 				return;
 			}
+			
 
 			// Try to start or continue the match
 			childElement = message.getChildElement("start",
@@ -585,6 +587,7 @@ public class DefaultMUGSession implements MUGSession {
 				matchElement.addAttribute("matchId", room.getJID().toBareJID());
 				matchElement.addElement("status").setText(
 						room.getMatch().getStatus().name());
+				matchElement.addElement("nickname").setText(room.getOccupant(jid).getNickname());
 
 				Element matchState = room.getMatch().getState();
 				if (matchState != null)

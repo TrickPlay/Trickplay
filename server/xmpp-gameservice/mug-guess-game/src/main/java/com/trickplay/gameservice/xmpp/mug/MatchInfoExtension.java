@@ -14,6 +14,7 @@ public class MatchInfoExtension implements PacketExtension {
 
 	private String matchId;
 	private String status;
+	private String nickname;
 
 	private MatchStateExtension state;
 
@@ -43,6 +44,14 @@ public class MatchInfoExtension implements PacketExtension {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String name) {
+		this.nickname = name;
 	}
 
 	public String getElementName() {
@@ -85,6 +94,8 @@ public class MatchInfoExtension implements PacketExtension {
 				if (eventType == XmlPullParser.START_TAG) {
 					if (parser.getName().equals("status")) {
 						resp.setStatus(parser.nextText());
+					} else if (parser.getName().equals("nickname")) {
+						resp.setNickname(parser.nextText());
 					} else if (parser.getName().equals("state")) {
 							MatchStateExtension.Provider provider = new MatchStateExtension.Provider();
 							resp.setState((MatchStateExtension) provider
