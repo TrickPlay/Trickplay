@@ -255,6 +255,8 @@ ArrowPane = function(parameters)
             
             t.pane_w = instance.pane_w
             t.pane_h = instance.pane_h
+            t.virtual_x = instance.virtual_x
+            t.virtual_y = instance.virtual_y
             t.virtual_w = instance.virtual_w
             t.virtual_h = instance.virtual_h
             
