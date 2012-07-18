@@ -14,7 +14,7 @@ local create_arrow = function(self,state)
 	
 end
 
-local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000, name="ArrowPane"}
+local default_parameters = {pane_w = 400, pane_w = 400,virtual_w=1000,virtual_h=1000, name="ArrowPane"}
 
 ArrowPane = function(parameters)
     
@@ -225,6 +225,14 @@ ArrowPane = function(parameters)
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
+	override_property(instance,"contents",
+		function(oldf) 
+            return pane.contents    
+        end,
+		function(oldf,self,v) 
+            pane.contents = v
+        end
+	)
     instance_on_style_changed()
     
     ----------------------------------------------------------------------------
@@ -232,6 +240,18 @@ ArrowPane = function(parameters)
 	override_property(instance,"attributes",
         function(oldf,self)
             local t = oldf(self)
+            
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.contents = self.contents
             
             t.pane_w = instance.pane_w
             t.pane_h = instance.pane_h
