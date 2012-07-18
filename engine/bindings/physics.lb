@@ -711,17 +711,9 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Property: contacts
 
-	The contacts property is a table that contains the points on the object where it is touching other Body objects. If the object is not touching any objects, the property's value is nil.
+	The contacts property is a read-only table containing an entry for each contact that currently exists for all the Fixtures attached to the Body. If no contacts exist, the contacts property is nil.
 
-	Each entry in the contacts table includes the following keys.
-
-		enabled - boolean flag indicating whether or not the contact is enabled (true=enabled). A contact can be disabled in the physics global variable's <on_pre_solve_contact> event handler.
-		touching - boolean flag indicating whether or not the two objects are touching (true=touching). Note: Contact may occur between the bounding boxes of two objects, but the actual objects do not touch.
-		point - table containing two keys. Key "1" contains the contact point's X coordinate. Key "2" contains the contact point's Y coordinate.
-		bodies - table containing two keys. Key "1" contains the <handle> for one of the objects. Key "2" contains the handle for the other object.
-		other_body - table containing two keys. One key is the <handle> of the current object; its value is the handle of the other object. The second key is the handle of the other object; its value is the handle of the current object. For example, if the object with handle 2 is touching the object with handle 4, the other_body table for the object with handle 2 would contain { 2=4, 4=2 }. This table enables the program to access the other object by using the current object's handle as an index, as in contactObject = Object2.contacts.other_body[ Object2.handle ].
-		fixtures - table containing two keys. Key "1" contains the fixture handle for one of the fixtures. Key "2" contains the fixture handle for the other fixture. The fixture handle is returned by the <add_fixture> function.
-		other_fixture - table containing two keys. One key is the fixture handle of the current fixture; its value is the fixture handle of the other fixture. The second key is the fixture handle of the other fixture; its value is the fixture handle of the current fixture. For example, if the fixture with handle 3 is touching the fixture with handle 5, the other_fixture table for the fixture with handle 3 would contain { 3=5, 5=3 }. This table enables the program to access the other fixture by using the current fixture's handle as an index, as in contactFixture = ObjectX.contacts.other_fixture[ ObjectXFixtureHandle ].
+	For complete information about the contacts property, refer to the description of the <physics.contacts> property.
 
 	*Default Setting:* nil
 
@@ -734,7 +726,7 @@ interface Body [[ ClutterActor * ]]
 		end
 		(end)
 
-	*See Also:* the <handle> property, the <add_fixture> function, and the <on_pre_solve_contact> event handler
+	*See Also:* the <physics.contacts> and <handle> properties, the <add_fixture> function, and the <on_pre_solve_contact> event handler
 */
 
 	readonly table contacts
@@ -1708,6 +1700,10 @@ interface Body [[ ClutterActor * ]]
 	/*
 		Event Handler: on_begin_contact
 
+		The on_begin_contact() event handler is invoked when the edges of two Fixture objects first touch. Initial contact also causes the on_pre_solve_contact and on_post_solve_contact event handlers to be invoked. The on_pre_solve_contact and on_post_solve_contact handlers will continue to be invoked for each step through the physics simulation as long as the two objects continue touching. When the two objects no longer touch, the on_end_contact event handler is invoked.
+
+		The Body object's properties should not be modified when processing the on_begin_contact() event handler. All Body property changes should be postponed until the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler.
+
 		*Prototype:*
 
 			(code)
@@ -1716,30 +1712,15 @@ interface Body [[ ClutterActor * ]]
 
 		*Arguments:*
 
-			self - .
-			contact - .
+			self - Body object on which contact occurred
+			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property.
 
+		Contact occurs between two Fixture objects, not Body objects. The event handler does, however, receive information that identifies both the Fixture and the associated Body objects that are touching.
 
+		The on_begin_contact event is invoked only when two Fixture edges touch; the other type of contact, i.e., when the AABB (axis-aligned bounding box) of two Fixtures overlaps, the event handler is not called. As a result of this, the touching key in the handler's contact table is always true.
 
-		When a body begins to touch another, this callback is triggered.
-
-		The single argument "contact" is a table with several values
-		describing the contact.
-
-		point - A table of X and Y coordinates for the contact point.
-		fixtures - A table containing the handles of the fixtures that made contact.
-		other_fixture - A table containing the same two handles, but indexed by each other,
-		                so that if my fixture handle is 42, I can get the handle of the other fixture
-		                by using contact.other_fixture[ 42 ].
-        bodies - A table containing the handles of the two bodies that made contact.
-        other_body - Same as "other_fixture" but with body handles.
-        touching - Whether the contact is touching or not.
-        enabled - Whether the contact is enabled. You can actually change this value
-                  only during the <on_pre_solve_contact> event.
-
-        *Note:* You should not change bodies in any of the contact callbacks. Instead
-        make a note of the event and change things after the step is done.
-	*/
+		*See Also:* the <physics.contacts> property and <on_end_contact> event handler
+*/
 
     callback on_begin_contact( table contact )
         [[
@@ -1749,7 +1730,7 @@ interface Body [[ ClutterActor * ]]
         ]];
 
 	/*
-		Event: on_end_contact
+		Event Handler: on_end_contact
 
 		When two fixtures are no longer in contact. The contact details are the same as
 		in <on_begin_contact>.
@@ -1763,7 +1744,7 @@ interface Body [[ ClutterActor * ]]
         ]];
 
 	/*
-		Event: on_pre_solve_contact
+		Event Handler: on_pre_solve_contact
 
 		This callback is called after collision detection but before collision resolution. It
 		lets you change the "enabled" property on the contact to affect behavior.
@@ -1779,7 +1760,7 @@ interface Body [[ ClutterActor * ]]
         ]];
 
 	/*
-		Event: on_post_solve_contact
+		Event Handler: on_post_solve_contact
 
 	    This callback is called after collision resolution and gives you a chance to look at
 	    the impulses generated by a collision.
@@ -1796,11 +1777,12 @@ interface Body [[ ClutterActor * ]]
 }
 
 /*===========================================================================*/
+/* Note: The physics global variable is not .CSS-formatted correctly in Natural Docs when specified as a global, so it's marked as an interface instead. */
 
 	/*
-		Global: physics
+		Interface: physics
 
-		The physics global lets you create bodies and run a physics simulation.
+		The physics global variable lets you create Body "objects," attach them to UIElement-based objects, and run a physics simulation.
 	*/
 
 global physics [[ Physics::World * ]]
@@ -1872,11 +1854,41 @@ global physics [[ Physics::World * ]]
             self->get_world()->SetAutoClearForces( auto_clear_forces );
         ]];
 
-	/*
-		Property: contacts
+/***************************************
+	Property: contacts
 
-		A list of all current contacts in the whole physics world.
-	*/
+	The contacts property is a read-only table containing an entry for each contact that currently exists in the physics simulation. If no contacts exist, the contacts property is nil. Note: Contact occurs between Fixture objects, not Body objects.
+
+	The contacts for a particular Body object can be accessed using the object's <contacts> property. The code segment below illustrates the difference between the contacts in the physics simulation vs. the contacts for a particular Body object. The discussion in this section pertains to both contacts properties.
+
+	(code)
+	-- Are there any contacts in the entire physics simulation, which includes all Body objects?
+	if( physics.contacts ~= nil )then
+		print( "Contacts exist in the physics simulation" )
+	end
+
+	-- Does the gBodyObj have any contacts?
+	if( gBodyObj.contacts ~= nil )then
+		print( "Contacts exist for gBodyObj" )
+	end
+	(end)
+
+	Two types of contact are stored in the contacts property: (1) contact between two Fixture's edge boundaries and (2) contact between two Fixture's minimum bounding rectangles, also referred to as the axis-aligned bounding box or AABB. For a square or rectangular Fixture, its AABB may be the same as its edge boundary, depending upon the Fixture's orientation. For all non-rectangular Fixtures, including circles and triangles, the AABB will be the minimum rectangle that can entirely enclose the Fixture. Some examples of Fixture shapes and their AABB bounding boxes are shown below.
+
+(see physics2dAABB.png)
+
+	Each table entry is a key/value pair. The supported keys are described below.
+
+		enabled - boolean flag specifying whether or not the contact is enabled. Default: true, i.e., contact is enabled. The enabled flag can be set only when processing an <on_pre_solve_contact> event.
+		touching - boolean flag specifying whether or not the Fixture object's edges touch. If the touching key is true, the edges touch; if false, the axis-aligned bounding boxes of the objects touch. Note: When edges first touch, the <on_begin_contact> event handler is invoked.
+		point - when the touching key is true, the point key contains a table of { X, Y } screen coordinates that reference where the contact occurs. When the touching key is false, the value of the point key is undefined.
+		fixtures - table containing the handles of the two Fixture objects. For example, if Fixture handles 12 and 24 are in contact, the fixtures table would contain {12,24}.
+		other_fixture - additional table containing the handles of the two Fixture objects, indexed by handle value. For example, if Fixture handles 12 and 24 are in contact, referencing contacts.other_fixtures[ 12 ] returns 24, and contacts.other_fixtures[ 24 ] returns 12; all other indices are nil.
+		bodies - table containing the handles of the two Body objects on which the contacting Fixtures are attached. For example, if Body handles 36 and 48 are in contact, the bodies table would contain {36,48}.
+		other_body - additional table containing the handles of the two Body objects, indexed by handle value. For example, if Body handles 36 and 48 are in contact, referencing contacts.other_body[ 36 ] returns 48, and contacts.other_body[ 48 ] returns 36; all other indices are nil.
+
+	*See Also:* the <on_begin_contact> event handler
+*/
 
     readonly table contacts
         [[
@@ -2209,7 +2221,7 @@ global physics [[ Physics::World * ]]
     #..........................................................................
 
 	/*
-		Event: on_step
+		Event Handler: on_step
 
 		This callback occurs every time the physics simulation completes a step. This
 		will be at most every 1/60 of a second.
@@ -2220,7 +2232,7 @@ global physics [[ Physics::World * ]]
     callback on_step( double seconds );
 
 	/*
-		Event: on_begin_contact
+		Event Handler: on_begin_contact
 
 		Same as the the callback for each Body, but for the entire world.
 	*/
@@ -2231,7 +2243,7 @@ global physics [[ Physics::World * ]]
         ]];
 
 	/*
-		Event: on_end_contact
+		Event Handler: on_end_contact
 
         Same as the the callback for each Body, but for the entire world.
 	*/
@@ -2242,7 +2254,7 @@ global physics [[ Physics::World * ]]
         ]];
 
 	/*
-		Event: on_pre_solve_contact
+		Event Handler: on_pre_solve_contact
 
         Same as the the callback for each Body, but for the entire world.
 	*/
@@ -2253,7 +2265,7 @@ global physics [[ Physics::World * ]]
         ]];
 
 	/*
-		Event: on_post_solve_contact
+		Event Handler: on_post_solve_contact
 
         Same as the the callback for each Body, but for the entire world.
 	*/
@@ -2263,11 +2275,13 @@ global physics [[ Physics::World * ]]
             self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
 
-    /*
+/***************************************
         Property: z_for_y
 
-        When set to true, the physics simulation treats the UIElement's z as its y.
-    */
+        The z_for_y property is a boolean flag specifying whether the physics simulation should use the X-Y plane or the X-Z plane (true=X-Z plane). When using the X-Y plane, gravity pulls objects toward the bottom of the display. When using the X-Z plane, gravity pulls objects away from the screen, into depth.
+
+        *Default Setting:* false, i.e., use X-Y plane
+*/
 
     bool z_for_y
         [[
