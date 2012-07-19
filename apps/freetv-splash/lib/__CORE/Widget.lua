@@ -412,7 +412,7 @@ Widget_Clone = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
-            t.source = self.source.name
+            t.source = self.source and self.source.name or nil
             
             t.type = "Widget_Clone"
             
