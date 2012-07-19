@@ -90,7 +90,7 @@ ToggleButton = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
-            t.group    = instance.group.name
+            t.group    = instance.group and instance.group.name or nil
             t.selected = instance.selected
             
             t.type = "ToggleButton"

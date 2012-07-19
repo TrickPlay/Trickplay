@@ -421,6 +421,7 @@ public:
             // are in "foo/bar" and unzip them to our real destination.
 
             gchar * app_file_zip_dirname = g_path_get_dirname( app_file_zip_path.c_str() );
+            g_assert(app_file_zip_dirname);
 
             free_later( app_file_zip_dirname );
 
