@@ -66,6 +66,26 @@ ClippingRegion = function(parameters)
 		function(oldf,self,v) y_offset = v end
 	)
     
+	override_property(instance,"contents",
+		function(oldf) 
+            local t = {}
+            
+            for i,child in pairs(contents.children) do
+                a = child.attributes
+                if a then
+                    table.insert(t,a)
+                end
+                
+            end
+            
+            return t     
+        end,
+		function(oldf,self,v) 
+            contents:clear()
+            contents:add(unpack(v)) 
+        end
+	)
+    
 	override_property(instance,"widget_type",
 		function() return "ClippingRegion" end, nil
 	)
@@ -85,6 +105,8 @@ ClippingRegion = function(parameters)
             t.virtual_h = self.virtual_h
             t.sets_x_to = self.sets_x_to
             t.sets_y_to = self.sets_y_to
+            
+            t.contents = self.contents
             
             t.type = "ClippingRegion"
             
