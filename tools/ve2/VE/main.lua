@@ -1678,12 +1678,41 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         editor_clone()
         return
 
+    elseif uiTypeStr == "TabBar" then 
+        uiInstance = TabBar{ }
     elseif uiElementCreate_map[uiTypeStr] then
 
         uiInstance = uiElementCreate_map[uiTypeStr]()
 
     end 
+    
+    -- Default Settings
+    if uiTypeStr == "ButtonPicker" then 
+        uiInstance.items = {"item1","item2","item3"}
+    elseif uiTypeStr == "LayoutManager" then 
+        uiInstance:set{ number_of_rows = 2, number_of_cols = 3}
+        uiInstance.placeholder:set{border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+    elseif uiTypeStr == "TabBar" then 
+        uiInstance:set{ 
+             position = {100,100},
+    tabs = {
+        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
+        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
+        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
+        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
+        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
+        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+    }
 
+            --tabs = {
+            --{label="Tab1", contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
+            --{label="Tab2", contents = {Rectangle{w=400,h=400,color="00ff00"}}},
+            --{label="Tab3", contents = {Rectangle{w=400,h=400,color="0000ff"}}}} 
+        }
+    elseif uiTypeStr == "ToastAlert" then 
+    elseif uiTypeStr == "ProgressBar" then 
+    end 
+        
     assign_right_name(uiInstance, uiTypeStr)
 
     if uiTypeStr == "Image" then 
