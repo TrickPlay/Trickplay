@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>348</width>
-    <height>564</height>
+    <width>347</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>348</width>
+     <width>347</width>
      <height>27</height>
     </rect>
    </property>
@@ -90,6 +90,7 @@
      <addaction name="actionDialog_Box"/>
      <addaction name="actionLayoutManager"/>
      <addaction name="actionMenuButton"/>
+     <addaction name="actionProgressBar"/>
      <addaction name="actionProgressSpinner"/>
      <addaction name="actionOrbitting_Dots"/>
      <addaction name="actionScrollPane"/>
@@ -843,6 +844,11 @@
   <action name="actionBlack">
    <property name="text">
     <string>Black</string>
+   </property>
+  </action>
+  <action name="actionProgressBar">
+   <property name="text">
+    <string>ProgressBar</string>
    </property>
   </action>
  </widget>

@@ -10,6 +10,7 @@ if not BUTTON            then dofile("LIB/Widget/Button/Button.lua")            
 if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")           end
 if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
 if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
+if not PROGRESSBAR       then dofile("LIB/Widget/ProgressBar/ProgressBar.lua") end
 if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
 if not TOGGLEBUTTON      then dofile("LIB/Widget/ToggleButton/ToggleButton.lua")     end
 if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
@@ -93,6 +94,7 @@ local uiElementCreate_map =
     ['DialogBox'] = function(p) return DialogBox(p) end,
     ['ToastAlert'] = function(p) return ToastAlert(p) end,
     ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
+    ['ProgressBar'] = function(p) return ProgressBar(p) end,
     ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
     ['TextInput'] = function(p) return TextInput(p) end,
     ['ToggleButton'] = function(p) return ToggleButton(p) end,
@@ -1678,12 +1680,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         editor_clone()
         return
 
-    elseif uiTypeStr == "TabBar" then 
-        uiInstance = TabBar{ }
     elseif uiElementCreate_map[uiTypeStr] then
-
         uiInstance = uiElementCreate_map[uiTypeStr]()
-
     end 
     
     -- Default Settings
@@ -1695,22 +1693,15 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
              position = {100,100},
-    tabs = {
-        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
-        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
-        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
-        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
-        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
-        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
-    }
-
-            --tabs = {
-            --{label="Tab1", contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
-            --{label="Tab2", contents = {Rectangle{w=400,h=400,color="00ff00"}}},
-            --{label="Tab3", contents = {Rectangle{w=400,h=400,color="0000ff"}}}} 
+             tabs = {
+                {label="Tab1",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
+                {label="Tab2",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
+                {label="Tab3", contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
+            }
         }
-    elseif uiTypeStr == "ToastAlert" then 
     elseif uiTypeStr == "ProgressBar" then 
+        uiInstance.progress = 0.25
+    elseif uiTypeStr == "ToastAlert" then 
     end 
         
     assign_right_name(uiInstance, uiTypeStr)
