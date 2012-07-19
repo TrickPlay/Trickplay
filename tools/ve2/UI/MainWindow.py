@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Jul 13 16:08:45 2012
+# Created: Thu Jul 19 11:08:16 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        MainWindow.resize(316, 573)
+        MainWindow.resize(347, 568)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 316, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 347, 27))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.menubar.setFont(font)
@@ -324,6 +324,8 @@ class Ui_MainWindow(object):
         self.actionWhite.setObjectName(_fromUtf8("actionWhite"))
         self.actionBlack = QtGui.QAction(MainWindow)
         self.actionBlack.setObjectName(_fromUtf8("actionBlack"))
+        self.actionProgressBar = QtGui.QAction(MainWindow)
+        self.actionProgressBar.setObjectName(_fromUtf8("actionProgressBar"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -339,6 +341,7 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionDialog_Box)
         self.menuInsert_UI_Element.addAction(self.actionLayoutManager)
         self.menuInsert_UI_Element.addAction(self.actionMenuButton)
+        self.menuInsert_UI_Element.addAction(self.actionProgressBar)
         self.menuInsert_UI_Element.addAction(self.actionProgressSpinner)
         self.menuInsert_UI_Element.addAction(self.actionOrbitting_Dots)
         self.menuInsert_UI_Element.addAction(self.actionScrollPane)
@@ -397,6 +400,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay Visual Editor ", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setProperty(_fromUtf8("aaa"), QtGui.QApplication.translate("MainWindow", "sdfsf", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
@@ -519,10 +523,11 @@ class Ui_MainWindow(object):
         self.actionAdd_Vertical_Guide.setText(QtGui.QApplication.translate("MainWindow", "Add Vertical Guide", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Guides.setText(QtGui.QApplication.translate("MainWindow", "Show Guides", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSnap_to_Guides.setText(QtGui.QApplication.translate("MainWindow", "Snap to Guides", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionImage.setText(QtGui.QApplication.translate("MainWindow", "Imange...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionImage.setText(QtGui.QApplication.translate("MainWindow", "Image...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSmall_Grid.setText(QtGui.QApplication.translate("MainWindow", "Small Grid", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMedium_Grid.setText(QtGui.QApplication.translate("MainWindow", "Medium Grid", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLarge_Grid.setText(QtGui.QApplication.translate("MainWindow", "Large Grid", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWhite.setText(QtGui.QApplication.translate("MainWindow", "White", None, QtGui.QApplication.UnicodeUTF8))
         self.actionBlack.setText(QtGui.QApplication.translate("MainWindow", "Black", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionProgressBar.setText(QtGui.QApplication.translate("MainWindow", "ProgressBar", None, QtGui.QApplication.UnicodeUTF8))
 

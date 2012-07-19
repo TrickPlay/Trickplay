@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionToastAlert, SIGNAL("triggered()"),  self.toastalert)
         QObject.connect(self.ui.actionToggleButton, SIGNAL("triggered()"),  self.togglebutton)
         QObject.connect(self.ui.actionProgressSpinner, SIGNAL("triggered()"),  self.progressspinner)
+        QObject.connect(self.ui.actionProgressBar, SIGNAL("triggered()"),  self.progressbar)
         QObject.connect(self.ui.actionOrbitting_Dots, SIGNAL("triggered()"),  self.orbittingdots)
         QObject.connect(self.ui.actionTextInput, SIGNAL("triggered()"),  self.textinput)
 
@@ -233,6 +234,10 @@ class MainWindow(QMainWindow):
 
     def orbittingdots(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
+        return True
+
+    def progressbar(self):
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressBar')")
         return True
 
     def progressspinner(self):
@@ -422,5 +427,4 @@ class MainWindow(QMainWindow):
     def snapToGuides(self):
         self.sendLuaCommand("snapToGuides", "_VE_.snapToGuides()")
         return True
-
 
