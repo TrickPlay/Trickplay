@@ -96,7 +96,9 @@ Slider = function(parameters)
         reactive = true,
         on_button_down = function(self,...)
             
-            position_grabbed_from =
+            pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
+            
+            prev_pos =
                 --the transformed position of the grip
                 grip.transformed_position[direction_num]*
                 --transformed position value has to be converted to the 1920x1080 scale
@@ -104,7 +106,7 @@ Slider = function(parameters)
                 -- transformed position doesn't take anchor point into account
                 grip[direction_dim]/2 
             
-            drag(...)
+            drag[direction](...)
         end,
     }
 	override_property(instance,"track",

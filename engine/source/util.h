@@ -40,6 +40,17 @@ inline void g_info( const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 // If the expression is true, this throws a string exception
+#ifndef CLANG_ANALYZER_NORETURN
+#ifndef __has_feature         // Optional of course.
+  #define __has_feature(x) 0  // Compatibility with non-clang compilers.
+#endif
+#if __has_feature(attribute_analyzer_noreturn)
+#define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))
+#else
+#define CLANG_ANALYZER_NORETURN
+#endif
+#endif
+void failif( bool expression, const gchar * format, ... ) CLANG_ANALYZER_NORETURN;
 
 inline void failif( bool expression, const gchar * format, ... )
 {
