@@ -21,8 +21,11 @@ local background = Image { src = "assets/background/bg-1.jpg" }
 screen:add(background)
 
 dofile("unlock_code.lua")
---dofile("configure.lua")
 
 screen:show()
 
-do_unlock_code()
+local function on_unlock_completed()
+    dofile("configure.lua")
+end
+
+do_unlock_code(on_unlock_completed)
