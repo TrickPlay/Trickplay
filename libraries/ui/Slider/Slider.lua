@@ -122,7 +122,6 @@ Slider = function(parameters)
 		function()
             grip.enabled  = instance.enabled
             track.enabled = instance.enabled
-            print(instance.enabled)
         end
 	)
     ----------------------------------------------------------------------------
