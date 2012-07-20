@@ -1,3 +1,5 @@
+local on_completed = nil
+
 local unlock_group = Group {}
 screen:add(unlock_group)
 
@@ -140,6 +142,9 @@ local function done_button_handler()
         number = number..digits[i].text
     end
     print("CODE NUMBER:",number)
+    if(on_completed) then
+        dolater(150, unlock_group.unparent, unlock_group)
+        dolater(150,on_completed)
 end
 
 local function skip_button_handler()
@@ -167,7 +172,8 @@ local function unlock_key_handler(screen, key)
     end
 end
 
-function do_unlock_code()
+function do_unlock_code(callback)
+    on_completed = callback
     show_enter_code_screen()
 
     screen.on_key_down = unlock_key_handler
