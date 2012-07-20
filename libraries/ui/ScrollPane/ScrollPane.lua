@@ -28,7 +28,7 @@ ScrollPane = function(parameters)
 	----------------------------------------------------------------------------
 	--The ScrollPane Object inherits from Widget
 	
-    local pane = ClippingRegion(parameters)
+    local pane = ClippingRegion()
     
     local horizontal = Slider()
     local vertical   = Slider{direction="vertical"}
@@ -94,6 +94,7 @@ ScrollPane = function(parameters)
 	instance:subscribe_to(
 		{"virtual_w","pane_w"},
 		function()
+            
             if instance.virtual_w <= instance.pane_w then
                 horizontal:hide()
             else
