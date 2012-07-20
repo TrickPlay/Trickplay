@@ -15,47 +15,36 @@
 
 ]]--
 
-dofile("widget_helper.lua")
-
 local background = Image { src = "assets/background/bg-1.jpg" }
 screen:add(background)
-print("bg")
 
 local movie_posters = assert(loadfile("posters.lua"))("assets/movie_posters/")
 for i = #movie_posters, 1, -1 do screen:add( movie_posters[i] ) end
-print("movies")
 
 local welcome_to, free_tv, welcome_to_free_tv = assert(loadfile("small_text_big_text.lua"))("Welcome to", "FREE TV!")
 screen:add(welcome_to_free_tv)
-print("freetv")
 
 local hundreds_of, movies, hundreds_of_movies = assert(loadfile("small_text_big_text.lua"))("Hundreds of", "MOVIES")
 screen:add(hundreds_of_movies)
-print("hundreds")
 
 
 
 local tv_posters = assert(loadfile("posters.lua"))("assets/tv_posters/")
 for i = #tv_posters, 1, -1 do screen:add( tv_posters[i] ) end
-print("tv_poster")
 
 local tv_logos = assert(loadfile("posters.lua"))("assets/tv_logos/")
 for i = #tv_logos, 1, -1 do screen:add( tv_logos[i] ) end
-print("tv_logo")
 
 local enjoy_your_favorite, tv_shows, enjoy_your_favorite_tv_shows = assert(loadfile("small_text_big_text.lua"))("Enjoy your favorite","TV SHOWS")
 screen:add(enjoy_your_favorite_tv_shows)
-print("enjoy")
 
 
 
 local album_covers = assert(loadfile("posters.lua"))("assets/music_posters/")
 for i = #album_covers, 1, -1 do screen:add( album_covers[i] ) end
-print("album")
 
 local the_best, music, the_best_music = assert(loadfile("small_text_big_text.lua"))("The Best","MUSIC")
 screen:add(the_best_music)
-print("best music")
 
 
 
