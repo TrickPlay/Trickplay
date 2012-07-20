@@ -42,6 +42,12 @@ ScrollPane = function(parameters)
     }
     ----------------------------------------------------------------------------
     
+	instance:subscribe_to( "enabled",
+		function()
+            horizontal.enabled = instance.enabled
+            vertical.enabled   = instance.enabled
+        end
+	)
 	override_property(instance,"virtual_x",
 		function(oldf) return   pane.virtual_x     end,
 		function(oldf,self,v)   pane.virtual_x = v end
