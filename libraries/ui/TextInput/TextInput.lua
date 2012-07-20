@@ -48,6 +48,13 @@ TextInput = function(parameters)
 		reactive = true,
 	}
 	
+	instance:subscribe_to( "enabled",
+		function()
+            text.reactive = instance.enabled
+            text.editable = instance.enabled
+            print(instance.enabled)
+        end
+	)
 	instance:add(text)
 	--the default w and h does not count as setting the size
 	if not size_is_set then instance:reset_size_flag() end
