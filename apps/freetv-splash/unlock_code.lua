@@ -3,6 +3,10 @@ screen:add(unlock_group)
 
 local prompt = Text { color = "white", font = "FreeSans bold 92px", text = "Please enter activation code" }
 unlock_group:add( prompt )
+local logo = Image { src = 'assets/tp_logo.png', position = { -100, 100 }, scale = {2, 2}, opacity = 8 }
+logo.z_rotation = { -30, logo.w/2, logo.h/2 }
+unlock_group:add(logo)
+
 
 local skip_button = Button { x = 280, y = 850, label = "Skip" }
 local done_button = Button { x = 1640-skip_button.w, y = 850, label = "Done" }
