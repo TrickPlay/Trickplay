@@ -420,7 +420,6 @@ LayoutManager = function(parameters)
         end
     end
     local find_w = function(cell,r,c)
-        
         if w < cell.x + cell.w - cell.anchor_point[1] then 
             w = cell.x + cell.w - cell.anchor_point[1]
         end
@@ -585,7 +584,11 @@ LayoutManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            --set_size(cells)
+            w = 0
+            h = 0
+            for_each(cells,find_w)
+            for_each(cells,find_h)
+            instance.size = {w,h}
         end
     )
     ----------------------------------------------------------------------------
@@ -684,6 +687,7 @@ LayoutManager = function(parameters)
                         if in_on_entries then return end
                         
                         cells:on_entries_changed()
+                        
                     end
                 )
             end
@@ -727,6 +731,7 @@ LayoutManager = function(parameters)
             for_each(self,assign_neighbors)
             on_entries_changed(self)
             in_on_entries = false
+            
         end
     }
 	override_property(instance,"cells",
