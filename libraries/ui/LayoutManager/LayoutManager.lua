@@ -572,6 +572,17 @@ LayoutManager = function(parameters)
             end
             
             placeholder:unparent()
+            if v.subscribe_to then
+                v:subscribe_to(
+                    {"h","w","width","height","size"},
+                    function(...)
+                        if in_on_entries then return end
+                        
+                        cells:on_entries_changed()
+                        
+                    end
+                )
+            end
             placeholder = v 
         end
 	)
