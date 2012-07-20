@@ -52,7 +52,6 @@ TextInput = function(parameters)
 		function()
             text.reactive = instance.enabled
             text.editable = instance.enabled
-            print(instance.enabled)
         end
 	)
 	instance:add(text)
