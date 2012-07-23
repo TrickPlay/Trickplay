@@ -153,6 +153,9 @@ TabBar = function(parameters)
                     label    = tabs_lm.cells[i].label,
                     contents = tabs_lm.cells[i].pane.children
                 }
+                for j,child in ipairs(tabs_lm.cells[i].pane.children) do
+                    tabs[i].contents[j] = child.attributes
+                end
             end
             
             return   tabs     
