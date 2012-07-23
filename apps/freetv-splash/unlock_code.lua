@@ -3,6 +3,9 @@ local on_completed = nil
 local unlock_group = Group {}
 screen:add(unlock_group)
 
+local background = Image { src = "assets/background/bg-1.jpg" }
+unlock_group:add(background)
+
 local logo = Image { src = 'assets/tp_logo.png', position = { -100, 100 }, scale = {2, 2}, opacity = 8 }
 logo.z_rotation = { -30, logo.w/2, logo.h/2 }
 unlock_group:add(logo)
