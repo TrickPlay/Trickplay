@@ -51,6 +51,7 @@ PROP_LIST = [
     'tile',
     'is_visible', 
     'color',
+    'orientation',
     'border_color',
     'anchor_point',
     'scale',
@@ -93,7 +94,6 @@ PROP_LIST = [
     'group', 
     'images_selection',
     # Radio Button Group
-    'items',
     'selected_item'
     # Layout Manager
     'number_of_rows',
@@ -143,8 +143,8 @@ PROP_LIST = [
     'y_offset',
     'x_alignment',
     'y_alignment',
-    'items',
     # Button Picker
+    'items',
     'selected_item',
     'derection',
     # Tab Bar
