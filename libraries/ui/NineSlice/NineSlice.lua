@@ -4,8 +4,14 @@ NINESLICE = true
 
 local make_corner = function(self,state)
     local r = self.style.border.corner_radius
-    local c = Canvas(r,r)
     local inset = self.style.border.width/2
+    
+    if r == 0 then 
+        return Rectangle{w = inset*2,h = inset*2,color = self.style.border.colors[state]}
+    end
+    
+    
+    local c = Canvas(r,r)
     c.line_width = inset*2
     c:move_to( inset, inset+r)
     --top-left corner
@@ -27,8 +33,11 @@ end
 local make_top = function(self,state)
     
     local r = self.style.border.corner_radius
-    local c = Canvas(1,r)
     local inset = self.style.border.width/2
+    if r == 0 then 
+        return Rectangle{w = 1,h = inset*2,color = self.style.border.colors[state]}
+    end
+    local c = Canvas(1,r)
     c.line_width = inset*2
     c:move_to( -inset*2,  inset)
     c:line_to(  inset*2,  inset)
@@ -47,8 +56,11 @@ end
 local make_side = function(self,state)
     
     local r = self.style.border.corner_radius
-    local c = Canvas(r,1)
     local inset = self.style.border.width/2
+    if r == 0 then 
+        return Rectangle{w = inset*2,h = 1,color = self.style.border.colors[state]}
+    end
+    local c = Canvas(r,1)
     c.line_width = inset*2
     c:move_to(  inset, -inset*2)
     c:line_to(  inset,  inset*2)
