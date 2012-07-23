@@ -118,6 +118,12 @@ Slider = function(parameters)
             track:set(v)
         end
     )
+	instance:subscribe_to( "enabled",
+		function()
+            grip.enabled  = instance.enabled
+            track.enabled = instance.enabled
+        end
+	)
     ----------------------------------------------------------------------------
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
