@@ -163,6 +163,13 @@ ArrowPane = function(parameters)
 		function(oldf,self,...) pane:add(...) end
 	)
     
+	instance:subscribe_to( "enabled",
+		function()
+            for _,arrow in pairs(arrows) do
+                arrow.enabled = instance.enabled
+            end
+        end
+	)
     ----------------------------------------------------------------------------
     
     function up:on_released()
