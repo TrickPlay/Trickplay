@@ -94,7 +94,7 @@ TabBar = function(parameters)
         end
     }
     
-    local panes_obj = Widget_Group{}
+    local panes_obj = Widget_Group{clip_to_size = true}
     local tab_w = 200
     local tab_h = 50
     local tab_images
@@ -165,17 +165,28 @@ TabBar = function(parameters)
                 direction = "horizontal",
                 cells = v,
             }
+            if tab_location == "top" then
+                tab_pane.virtual_w = tabs_lm.w
+            else
+                tab_pane.virtual_h = tabs_lm.h
+            end
             
         end
 	)
     local pane_w,pane_h
 	override_property(instance,"pane_w",
 		function(oldf) return   pane_w     end,
-		function(oldf,self,v)   pane_w = v end
+		function(oldf,self,v)   
+            pane_w = v 
+            panes_obj.w = v
+        end
     )
 	override_property(instance,"pane_h",
 		function(oldf) return   pane_h     end,
-		function(oldf,self,v)   pane_h = v end
+		function(oldf,self,v)   
+            pane_h = v 
+            panes_obj.h = v
+        end
     )
 	override_property(instance,"tab_w",
 		function(oldf) return   tab_w     end,
