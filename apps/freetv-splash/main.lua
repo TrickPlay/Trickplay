@@ -17,9 +17,6 @@
 
 dofile("widget_helper.lua")
 
-local background = Image { src = "assets/background/bg-1.jpg" }
-screen:add(background)
-
 dofile("unlock_code.lua")
 
 screen:show()
