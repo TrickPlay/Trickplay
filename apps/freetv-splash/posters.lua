@@ -1,6 +1,6 @@
 local directory = ...
 
-poster_names = dofile(directory.."list.lua")
+local poster_names = dofile(directory.."list.lua")
 local posters = {}
 
 for i=1,#poster_names do
@@ -32,5 +32,7 @@ for i=1,#poster_names do
     }
     posters[i].anchor_point = { posters[i].w/2, posters[i].h/2 }
 end
+
+poster_names = nil
 
 return posters
