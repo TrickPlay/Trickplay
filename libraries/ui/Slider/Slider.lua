@@ -24,7 +24,7 @@ Slider = function(parameters)
     
     local pixels_to_progress_ratio
     local prev_pos
-    
+    local g_dragging
     
     local p = 0
     local drag = {
