@@ -24,7 +24,7 @@ Slider = function(parameters)
     
     local pixels_to_progress_ratio
     local prev_pos
-    
+    local g_dragging
     
     local p = 0
     local drag = {
@@ -59,7 +59,11 @@ Slider = function(parameters)
             
         end,
         on_motion = function(self,...)
-            return g_dragging and g_dragging(...)
+            if editor_lb then 
+                return true 
+            else 
+                return g_dragging and g_dragging(...)
+            end
         end,
         on_button_up = function(self,...)
             grip:ungrab_pointer()
@@ -118,6 +122,12 @@ Slider = function(parameters)
             track:set(v)
         end
     )
+	instance:subscribe_to( "enabled",
+		function()
+            grip.enabled  = instance.enabled
+            track.enabled = instance.enabled
+        end
+	)
     ----------------------------------------------------------------------------
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
