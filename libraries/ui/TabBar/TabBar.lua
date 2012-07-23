@@ -251,6 +251,14 @@ TabBar = function(parameters)
     )
     --instance.on_entries_changed = function() print("top_level") end
     
+	instance:subscribe_to( "enabled",
+		function()
+            for i = 1,tabs_lm.length do
+                tabs_lm.cells[i].enabled = instance.enabled
+            end
+            tab_pane.enabled = instance.enabled
+        end
+	)
     instance:subscribe_to( {"tab_w","tab_h"},
         function()
             for i = 1,tabs_lm.length do
