@@ -253,18 +253,18 @@ TabBar = function(parameters)
     
     instance:subscribe_to( {"tab_w","tab_h"},
         function()
-            for i,t in pairs(tabs) do
+            for i = 1,tabs_lm.length do
                 
-                t.size = {tab_w,tab_h}
+                tabs_lm.cells[i].size = {tab_w,tab_h}
                 
             end
         end
     )
     
     local function tab_style_changed()
-        for i,t in pairs(tabs) do
-            
-            t.style:set(instance.style.attributes)
+        for i = 1,tabs_lm.length do
+                
+            tabs_lm.cells[i].style:set(instance.style.attributes)
             
         end
     end
