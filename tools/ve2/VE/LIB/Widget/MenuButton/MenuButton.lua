@@ -107,6 +107,38 @@ MenuButton = function(parameters)
             
         end
 	)
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.items = {}
+            
+            for i = 1,popup.number_of_rows do
+                t.items[i] = popup.cells[i][1]
+            end
+            
+            t.direction = instance.direction
+            t.item_spacing = instance.item_spacing
+            t.popup_offset = instance.popup_offset
+            t.horizontal_alignment = instance.horizontal_alignment
+            
+            t.type = "MenuButton"
+            
+            return t
+        end
+    )
+    
     ----------------------------------------------------------------------------
     function button:on_pressed()
         

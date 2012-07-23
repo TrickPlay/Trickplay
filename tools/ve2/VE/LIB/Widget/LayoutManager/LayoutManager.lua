@@ -25,6 +25,8 @@ ListManager = function(parameters)
 	local cells, direction
     local cell_w, cell_h
     local spacing = 0
+    local w = 0
+    local h = 0
     local number_of_rows_set = false
     local number_of_cols_set = false
     
@@ -49,6 +51,19 @@ ListManager = function(parameters)
     end
     local vertical_alignment   = "center"
     local horizontal_alignment = "center"
+    
+    local find_w = function(cell,i)
+        
+        if w < cell.x + cell.w - cell.anchor_point[1] then 
+            w = cell.x + cell.w - cell.anchor_point[1]
+        end
+    end
+    local find_h = function(cell,i)
+        
+        if h < cell.y + cell.h - cell.anchor_point[2] then 
+            h = cell.y + cell.h - cell.anchor_point[2]
+        end
+    end
     
     local assign_neighbors = function(cell,i,cells)
         
@@ -187,7 +202,13 @@ ListManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            set_size(cells)
+            --set_size(cells)
+            w = 0
+            for_each(cells,find_w)
+            h = 0
+            for_each(cells,find_h)
+            --set_size(self)
+            instance.size = {w,h}
         end
     )
     
@@ -288,7 +309,13 @@ ListManager = function(parameters)
             max_h = 0
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
-            set_size(self)
+            --set_size(self)
+            w = 0
+            for_each(self,find_w)
+            h = 0
+            for_each(self,find_h)
+            --set_size(self)
+            instance.size = {w,h}
             for_each(self,assign_neighbors)
             on_entries_changed()
         end
@@ -393,7 +420,6 @@ LayoutManager = function(parameters)
         end
     end
     local find_w = function(cell,r,c)
-        
         if w < cell.x + cell.w - cell.anchor_point[1] then 
             w = cell.x + cell.w - cell.anchor_point[1]
         end
@@ -546,7 +572,22 @@ LayoutManager = function(parameters)
             end
             
             placeholder:unparent()
+            if v.subscribe_to then
+                v:subscribe_to(
+                    {"h","w","width","height","size"},
+                    function(...)
+                        if in_on_entries then return end
+                        
+                        cells:on_entries_changed()
+                        
+                    end
+                )
+            end
+            
             placeholder = v 
+            
+            cells:on_entries_changed()
+            
         end
 	)
     
@@ -558,7 +599,11 @@ LayoutManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            --set_size(cells)
+            w = 0
+            h = 0
+            for_each(cells,find_w)
+            for_each(cells,find_h)
+            instance.size = {w,h}
         end
     )
     ----------------------------------------------------------------------------
@@ -657,6 +702,7 @@ LayoutManager = function(parameters)
                         if in_on_entries then return end
                         
                         cells:on_entries_changed()
+                        
                     end
                 )
             end
@@ -700,6 +746,7 @@ LayoutManager = function(parameters)
             for_each(self,assign_neighbors)
             on_entries_changed(self)
             in_on_entries = false
+            
         end
     }
 	override_property(instance,"cells",
