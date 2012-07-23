@@ -21,6 +21,8 @@ dofile("unlock_code.lua")
 
 screen:show()
 
+dolater(dofile,"preload_configure.lua")
+
 local function on_unlock_completed()
     dofile("configure.lua")
 end
