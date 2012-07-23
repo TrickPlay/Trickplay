@@ -1388,6 +1388,7 @@ _VE_.repUIInfo = function(uiInstance)
         table.insert(t, json:parse(uiInstance:to_json()))
     end 
     print("repUIInfo"..json:stringify(t))
+    _VE_.repStInfo()
 end
 
 _VE_.openInspector = function(gid)
@@ -1688,20 +1689,55 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     if uiTypeStr == "ButtonPicker" then 
         uiInstance.items = {"item1","item2","item3"}
     elseif uiTypeStr == "LayoutManager" then 
-        uiInstance:set{ number_of_rows = 2, number_of_cols = 3}
-        uiInstance.placeholder:set{border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+        uiInstance:set{
+        number_of_rows = 2,
+        number_of_cols = 3,
+        placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color =
+        {255,255,255,0}},
+        cells = {
+            {Widget_Rectangle{name = "star", w=100,h=100}},
+            {Widget_Rectangle{name = "moon", w=100,h=100}},
+            {Widget_Rectangle{name = "moon", w=100,h=100}},
+            --{Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
+        }
+        }
+
+    --[[
+        uiInstance:set{ number_of_rows = 2, number_of_cols = 2}
+        uiInstance.set{
+                cells = {
+                {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
+                {Widget_Rectangle{w=100,h=100}},
+                {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
+                }
+
+                --{Widget_Rectangle{w=100,h=100, color = {255,0,0,255}},Widget_Rectangle{w=100,h=100, color = {255,100,0,255}}},
+                --{Widget_Rectangle{w=100,h=100, color = {255,0,100,255}}},
+                --{Widget_Rectangle{w=100,h=100, color = {255,100,100,255}},Widget_Rectangle{w=100,h=100, color = {20,220,0,255}}},
+        }
+        ]]
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="Tab1",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
-                {label="Tab2",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
-                {label="Tab3", contents = {Rectangle{w=400,h=400,color={255,255,255,255}}}},
+                {label="Tab1",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}} },
+                {label="Tab2",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}} },
             }
         }
     elseif uiTypeStr == "ProgressBar" then 
         uiInstance.progress = 0.25
     elseif uiTypeStr == "ToastAlert" then 
+        b = Button{name="pretty_button"}
+        uiInstance:add(b)
+    elseif uiTypeStr == "ScrollPane" then 
+        b = Button{name="pretty_button"}
+        uiInstance:add(b)
+    elseif uiTypeStr == "DialogBox" then 
+        b = Button{name="pretty_button"}
+        uiInstance:add(b)
+    elseif uiTypeStr == "ToastAlert" then 
+        b = Button{name="pretty_button"}
+        uiInstance:add(b)
     end 
         
     assign_right_name(uiInstance, uiTypeStr)

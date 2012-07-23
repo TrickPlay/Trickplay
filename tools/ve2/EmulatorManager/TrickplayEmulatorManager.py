@@ -176,7 +176,8 @@ class TrickplayEmulatorManager(QWidget):
 				            return 
 				        self.inspector.inspectorModel.styleData = sdata
 				        self.inspector.preventChanges = True
-				        self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+				        if self.inspector.cbStyle is not None:
+				            self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
 				        self.inspector.preventChanges = False
 				        return
 

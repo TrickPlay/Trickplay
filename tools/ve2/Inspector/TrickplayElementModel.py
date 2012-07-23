@@ -150,6 +150,29 @@ class TrickplayElementModel(QStandardItemModel):
         
         # Recurse through children
         try:
+            cells = data['cells']
+            print ("Rows:", len(cells))
+            print ("Cols:", len(cells[0]))
+            self.insertElement(node, cells[0][0], data, False)
+            self.insertElement(node, cells[1][0], data, False)
+            """
+            for i in range(len(cells)-1, -1, -1):
+                print ("****************** iiii", i)
+                self.insertElement(node, cells[1][1], data, False)
+                self.insertElement(node, cells[1][0], data, False)
+                self.insertElement(node, cells[0][1], data, False)
+                self.insertElement(node, cells[0][0], data, False)
+                for j in range(len(cells[i])-1, -1, -1):
+                    print ("****************** jjjj", j)
+                    self.insertElement(node, cells[i][j], data, False)
+            """
+        
+        # Element has no children
+        except KeyError:
+            pass
+        
+        # Recurse through children
+        try:
             contents = data['contents']
             for i in range(len(contents)-1, -1, -1):
                 self.insertElement(node, contents[i], data, False)

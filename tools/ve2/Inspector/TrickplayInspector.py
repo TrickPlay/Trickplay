@@ -397,6 +397,7 @@ class TrickplayInspector(QWidget):
         self.cbStyle_textChanged = True
 
     def styleChanged(self, index):
+        print ("styleChanged")
         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
         if self.cbStyle_textChanged == True:
             self.main._emulatorManager.chgStyleName(self.getGid(), self.style_name, self.old_name) 
