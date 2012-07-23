@@ -52,7 +52,7 @@ local ANIMATION_DURATION = 20000
 -- NOTE: I'm wrapping all of these in functions so my text editor will let me fold/unfold and jump to the right section easily
 
 -- Welcome to FREE TV
-function welcome_to_free_tv_setup()
+local function welcome_to_free_tv_setup()
     table.insert(animator_properties,
                     {
                         source = welcome_to,
@@ -111,7 +111,7 @@ function welcome_to_free_tv_setup()
 end
 
 -- Movie posters
-function movie_posters_setup()
+local function movie_posters_setup()
     for n,i in ipairs(movie_posters) do
         table.insert(animator_properties,
                         {
@@ -194,7 +194,7 @@ function movie_posters_setup()
 end
 
 -- Hundreds of MOVIES text
-function hundreds_of_movies_setup()
+local function hundreds_of_movies_setup()
     table.insert(animator_properties,
                     {
                         source = hundreds_of,
@@ -248,7 +248,7 @@ function hundreds_of_movies_setup()
 end
 
 local my_angle = math.random(0,359) - 45
-function get_target_x_y(i)
+local function get_target_x_y(i)
     -- Pick an angle to fly out on
     my_angle = ( my_angle + math.random(90,270) ) % 360 - 45
     local target_x, target_y
@@ -269,7 +269,7 @@ function get_target_x_y(i)
 end
 
 -- TV show posters
-function tv_posters_setup()
+local function tv_posters_setup()
     -- First one appears at 3.86/17
     -- First one is fully appeared at 4.13/17
     -- First one vanishes at 5.36/17
@@ -353,7 +353,7 @@ function tv_posters_setup()
 end
 
 -- TV logos
-function tv_logos_setup()
+local function tv_logos_setup()
     -- First one appears at 8.53/17
     -- First one is fully appeared at 8.56/17
     -- First one vanishes at 9.56/17
@@ -437,7 +437,7 @@ function tv_logos_setup()
 end
 
 -- Enjoy your favorite TV SHOWS
-function enjoy_your_favorite_tv_shows_setup()
+local function enjoy_your_favorite_tv_shows_setup()
     -- Fade in at 6.60/17
     -- In by 7.23/17
     -- "Enjoy your favorite" out at 7.76/17
@@ -495,7 +495,7 @@ function enjoy_your_favorite_tv_shows_setup()
 end
 
 -- Album covers
-function album_covers_setup()
+local function album_covers_setup()
     -- First one starts at 10.16/17
     -- First one visible by 10.63/17
     -- First one vanished by 12.23
@@ -579,7 +579,7 @@ function album_covers_setup()
 end
 
 -- The Best MUSIC
-function the_best_music_setup()
+local function the_best_music_setup()
     -- Fade in at 10.90/17
     -- In by 11.50/17
     -- "The best" out at 12.06/17
@@ -652,6 +652,8 @@ local my_animation = Animator {
                         properties = animator_properties,
                     }
 
+animator_properties = nil
+
 local t = my_animation.timeline
 
 function t:on_new_frame(ms, p)
@@ -668,5 +670,50 @@ t:add_marker("Updating Guide Data...", ANIMATION_DURATION * 1/10)
 t:add_marker("Calibrating Capacitors...", ANIMATION_DURATION * 5/10)
 t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
 t:add_marker("Done", ANIMATION_DURATION)
-my_animation:start()
 
+function t:on_completed()
+    -- After animation is completed, fade everything out in 2 stages
+    local a2  = Animator {
+        duration = 1000,
+        properties = {
+            {
+                source = pb_group,
+                name = "opacity",
+                ease_in = false,
+                keys = {
+                    { 0.0, "LINEAR", 255 },
+                    { 0.7, "EASE_IN_SINE", 0 },
+                }
+            },
+            {
+                source = configuration,
+                name = "opacity",
+                ease_in = false,
+                keys = {
+                    { 0.0, "LINEAR", 255 },
+                    { 0.5, "LINEAR", 255 },
+                    { 1.0, "EASE_IN_SINE", 0 },
+                }
+            },
+        },
+    }
+    local t2 = a2.timeline
+
+    function t2:on_completed()
+        configuration:unparent()
+        configuration = nil
+        background = nil
+        my_animation = nil
+        t = nil
+        a2 = nil
+        t2 = nil
+        pb_group = nil
+        pb = nil
+        pb_text = nil
+        pb_text_bg = nil
+        unload_configuration()
+    end
+    a2:start()
+end
+
+my_animation:start()

@@ -232,11 +232,8 @@ done_button.on_released = function()
         end
         number = number..digits[i].text
     end
-    print("CODE NUMBER:",number)
-    if(on_completed) then
-        dolater(150, unlock_group.unparent, unlock_group)
-        dolater(150,on_completed)
-    end
+    print("CODE NUMBER:", number)
+    dolater(150, on_completed )
 end
 
 local previous_position = 1
@@ -292,7 +289,24 @@ end
 
 
 function do_unlock_code(callback)
-    on_completed = callback
+    on_completed = function()
+                        if callback then callback() end
+                        background = nil
+                        logo = nil
+                        prompt = nil
+                        prompt_shadow = nil
+                        prompt_scrim = nil
+                        done_button = nil
+                        number_highlight = nil
+                        highlight_state = nil
+                        number_holder = nil
+                        digit_x = nil
+                        digits = nil
+                        digits_s = nil
+                        unlock_group:unparent()
+                        do_unlock_code = nil
+                        collectgarbage()
+                    end
     show_enter_code_screen()
 
     screen.on_key_down = unlock_key_handler
