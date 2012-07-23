@@ -105,7 +105,8 @@ TabBar = function(parameters)
         vertical_alignment = "top",
         node_constructor = function(obj)
             
-            if obj == nil then obj = {label = "Tab",content = {}}
+            if obj == nil then 
+                obj = {label = "Tab",content = {}}
             elseif type(obj) ~= "table" then
                 error("Expected tab entry to be a string. Received "..type(obj),2)
             elseif type(obj.label) ~= "string" then
@@ -126,8 +127,10 @@ TabBar = function(parameters)
             else
                 obj.style.border.colors.selection = "ffffff"
             end
-            table.insert(tabs,obj)
-            table.insert(panes,pane)
+            
+            --table.insert(tabs,obj)
+            obj.pane = pane
+            --table.insert(panes,pane)
             panes_obj:add(pane)
             
             return obj
@@ -141,7 +144,19 @@ TabBar = function(parameters)
     
     instance.cells = {tab_pane,panes_obj}
 	override_property(instance,"tabs",
-		function(oldf) return   instance.cells     end,
+		function(oldf) 
+        
+            local tabs = {}
+            
+            for i = 1,tabs_lm.length do
+                tabs[i]    = {
+                    label    = tabs_lm.cells[i].label,
+                    contents = tabs_lm.cells[i].pane.children
+                }
+            end
+            
+            return   tabs     
+        end,
 		function(oldf,self,v)  
             
             if type(v) ~= "table" then error("Expected table. Received: ",2) end
@@ -206,6 +221,23 @@ TabBar = function(parameters)
         end
 	)
     
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            
+            t.tab_w = instance.tab_w
+            t.tab_h = instance.tab_h
+            t.tab_location = instance.tab_location
+            t.pane_w = instance.pane_w
+            t.pane_h = instance.pane_h
+            t.tabs   = instance.tabs
+            
+            t.type = "TabBar"
+            
+            return t
+        end
+    )
     --instance.on_entries_changed = function() print("top_level") end
     
     instance:subscribe_to( {"tab_w","tab_h"},
