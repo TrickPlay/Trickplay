@@ -259,6 +259,7 @@ ArrowPane = function(parameters)
             t.virtual_y = instance.virtual_y
             t.virtual_w = instance.virtual_w
             t.virtual_h = instance.virtual_h
+            t.move_by   = instance.move_by
             
             t.type = "ArrowPane"
             
