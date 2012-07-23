@@ -15,43 +15,35 @@
 
 ]]--
 
+local configuration = Group {}
+screen:add(configuration)
+
 local background = Image { src = "assets/background/bg-1.jpg" }
-screen:add(background)
+configuration:add(background)
 
-local movie_posters = assert(loadfile("posters.lua"))("assets/movie_posters/")
-for i = #movie_posters, 1, -1 do screen:add( movie_posters[i] ) end
+for i = #movie_posters, 1, -1 do configuration:add( movie_posters[i] ) end
 
-local welcome_to, free_tv, welcome_to_free_tv = assert(loadfile("small_text_big_text.lua"))("Welcome to", "FREE TV!")
-screen:add(welcome_to_free_tv)
+configuration:add(welcome_to_free_tv)
 
-local hundreds_of, movies, hundreds_of_movies = assert(loadfile("small_text_big_text.lua"))("Hundreds of", "MOVIES")
-screen:add(hundreds_of_movies)
+configuration:add(hundreds_of_movies)
 
+for i = #tv_posters, 1, -1 do configuration:add( tv_posters[i] ) end
 
+for i = #tv_logos, 1, -1 do configuration:add( tv_logos[i] ) end
 
-local tv_posters = assert(loadfile("posters.lua"))("assets/tv_posters/")
-for i = #tv_posters, 1, -1 do screen:add( tv_posters[i] ) end
+configuration:add(enjoy_your_favorite_tv_shows)
 
-local tv_logos = assert(loadfile("posters.lua"))("assets/tv_logos/")
-for i = #tv_logos, 1, -1 do screen:add( tv_logos[i] ) end
+for i = #album_covers, 1, -1 do configuration:add( album_covers[i] ) end
 
-local enjoy_your_favorite, tv_shows, enjoy_your_favorite_tv_shows = assert(loadfile("small_text_big_text.lua"))("Enjoy your favorite","TV SHOWS")
-screen:add(enjoy_your_favorite_tv_shows)
-
-
-
-local album_covers = assert(loadfile("posters.lua"))("assets/music_posters/")
-for i = #album_covers, 1, -1 do screen:add( album_covers[i] ) end
-
-local the_best, music, the_best_music = assert(loadfile("small_text_big_text.lua"))("The Best","MUSIC")
-screen:add(the_best_music)
-
+configuration:add(the_best_music)
 
 
 local pb,pb_text,pb_text_bg = dofile("progress_bar.lua")
-screen:add(pb)
-screen:add(pb_text_bg)
-screen:add(pb_text)
+local pb_group = Group {}
+pb_group:add(pb)
+pb_group:add(pb_text_bg)
+pb_group:add(pb_text)
+configuration:add(pb_group)
 
 -- Now we'll build up the animation in stages, working one object/property at a time
 local animator_properties = {}
@@ -144,7 +136,7 @@ function movie_posters_setup()
                                 keys = {
                                     { 0.0, "LINEAR", screen.w/2 },
                                     { 0.04 + 0.13 * n / #movie_posters, "LINEAR", screen.w/2 },
-                                    { 0.17 + 0.13 * n / #movie_posters, "EASE_OUT_SINE", -2*i.w },
+                                    { 0.17 + 0.13 * n / #movie_posters, "EASE_OUT_SINE", -2*312 },
                                 },
                             }
                         )
@@ -169,7 +161,7 @@ function movie_posters_setup()
                                 keys = {
                                     { 0.0, "LINEAR", screen.w/2 },
                                     { 0.04 + 0.13 * n / #movie_posters, "LINEAR", screen.w/2 },
-                                    { 0.17 + 0.13 * n / #movie_posters, "EASE_OUT_SINE", screen.w + 2*i.w },
+                                    { 0.17 + 0.13 * n / #movie_posters, "EASE_OUT_SINE", screen.w + 2*312 },
                                 },
                             }
                         )
@@ -261,17 +253,17 @@ function get_target_x_y(i)
     my_angle = ( my_angle + math.random(90,270) ) % 360 - 45
     local target_x, target_y
     if(my_angle < 45) then
-        target_x = (1 + math.tan(math.rad(my_angle))) * (screen.w+2*i.w)/2
-        target_y = -2*i.h
+        target_x = (1 + math.tan(math.rad(my_angle))) * (screen.w+2*312)/2
+        target_y = -2*240
     elseif(my_angle < 135) then
-        target_x = screen.w+2*i.w
-        target_y = (1 + math.tan(math.rad(my_angle-90))) * (screen.h+2*i.h)/2
+        target_x = screen.w+2*312
+        target_y = (1 + math.tan(math.rad(my_angle-90))) * (screen.h+2*240)/2
     elseif(my_angle < 225) then
-        target_x = (1 + math.tan(math.rad(180-my_angle))) * (screen.w+2*i.w)/2
-        target_y = screen.h+2*i.h
+        target_x = (1 + math.tan(math.rad(180-my_angle))) * (screen.w+2*312)/2
+        target_y = screen.h+2*240
     else
-        target_x = -2*i.w
-        target_y = (1 + math.tan(math.rad(270-my_angle))) * (screen.h+2*i.h)/2
+        target_x = -2*312
+        target_y = (1 + math.tan(math.rad(270-my_angle))) * (screen.h+2*240)/2
     end
     return target_x, target_y
 end
@@ -678,4 +670,3 @@ t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
 t:add_marker("Done", ANIMATION_DURATION)
 my_animation:start()
 
-screen:show()
