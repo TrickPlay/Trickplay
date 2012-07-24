@@ -104,8 +104,6 @@ ProgressBar = function(parameters)
     local redraw_shell = false
     local redraw_fill  = false
     
-    dumptable(parameters)
-    
 	local instance = Widget( parameters )
     local fill, shell
     local progress = 0
