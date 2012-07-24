@@ -107,8 +107,6 @@ ProgressBar = function(parameters)
 	local instance = Widget( parameters )
     local fill, shell
     local progress = 0
-	
-    instance:add(bg,contents,border)
     
 	----------------------------------------------------------------------------
     
