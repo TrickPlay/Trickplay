@@ -324,158 +324,126 @@ get_all_styles = function()
     return json:stringify(t)
     
 end
-
-local global_style_subscriptions = {}
-
-Style = setmetatable({},
-    {
-
-        subscribe_to = function(self,f)
+Style = function(parameters)
+	
+    if type(parameters) == "string" then
+        
+        if all_styles[parameters] then
             
-            global_style_subscriptions[f] = true
+            return all_styles[parameters]
             
-            collectgarbage("collect")
+        else
             
-            for _,s in pairs(all_styles) do
+            parameters = { name = parameters }
+            
+        end
+        
+    end
+    
+    parameters = is_table_or_nil("Style",parameters)
+    
+    local instance, name
+    local arrow       = ArrowStyle()
+    local border      = BorderStyle()
+    local text        = TextStyle()
+    local fill_colors = ColorScheme(default_fill_colors)
+    
+    local meta_setters = {
+        arrow       = function(v) arrow:set(      v or {}) end,
+        border      = function(v) border:set(     v or {}) end,
+        text        = function(v) text:set(       v or {}) end,
+        fill_colors = function(v) fill_colors:set(v or {}) end,
+        name        = function(v)
+            
+            if v ~= false then
                 
-                s:subscribe_to(nil,f)
+                if name then all_styles[name] = nil end
                 
-            end
-            
-        end,
-
-        __index = function(t,k)
-            t = getmetatable(t)
-            
-            return t[k]
-        end,
-
-        __call = function(parameters)
-            
-            if type(parameters) == "string" then
-                
-                if all_styles[parameters] then
-                    
-                    return all_styles[parameters]
-                    
-                else
-                    
-                    parameters = { name = parameters }
-                    
-                end
+                v = check_name( all_styles, instance, v, "Style" )
                 
             end
             
-            parameters = is_table_or_nil("Style",parameters)
+            name = v
             
-            local instance, name
-            local arrow       = ArrowStyle()
-            local border      = BorderStyle()
-            local text        = TextStyle()
-            local fill_colors = ColorScheme(default_fill_colors)
-            
-            local meta_setters = {
-                arrow       = function(v) arrow:set(      v or {}) end,
-                border      = function(v) border:set(     v or {}) end,
-                text        = function(v) text:set(       v or {}) end,
-                fill_colors = function(v) fill_colors:set(v or {}) end,
-                name        = function(v)
-                    
-                    if v ~= false then
-                        
-                        if name then all_styles[name] = nil end
-                        
-                        v = check_name( all_styles, instance, v, "Style" )
-                        
-                    end
-                    
-                    name = v
-                    
-                end,
+        end,
+    }
+    local meta_getters = {
+        name        = function() return name        end,
+        arrow       = function() return arrow       end,
+        border      = function() return border      end,
+        text        = function() return text        end,
+        fill_colors = function() return fill_colors end,
+        type        = function() return "STYLE"     end,
+        attributes  = function() 
+            return {
+                name        = instance.name,
+                arrow       = instance.arrow.attributes,
+                border      = instance.border.attributes,
+                text        = instance.text.attributes,
+                fill_colors = instance.fill_colors.attributes,
             }
-            local meta_getters = {
-                name        = function() return name        end,
-                arrow       = function() return arrow       end,
-                border      = function() return border      end,
-                text        = function() return text        end,
-                fill_colors = function() return fill_colors end,
-                type        = function() return "STYLE"     end,
-                attributes  = function() 
-                    return {
-                        name        = instance.name,
-                        arrow       = instance.arrow.attributes,
-                        border      = instance.border.attributes,
-                        text        = instance.text.attributes,
-                        fill_colors = instance.fill_colors.attributes,
-                    }
-                end,
-            }
+        end,
+    }
+    
+    instance = setmetatable(
+        { 
+            to_json = function()
+                
+                return json:stringify(instance.attributes)
+                
+            end,
+        },
+        {
+            __index    = __index(meta_getters)
+        }
+    )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        __newindex(meta_setters),
+        
+        function(self,t)
             
-            instance = setmetatable(
-                { 
-                    to_json = function()
-                        
-                        return json:stringify(instance.attributes)
-                        
-                    end,
-                },
-                {
-                    __index    = __index(meta_getters)
-                }
-            )
-            set_up_subscriptions( instance, getmetatable(instance),
+            if type(t) == "string" then
                 
-                __newindex(meta_setters),
-                
-                function(self,t)
-                    
-                    if type(t) == "string" then
-                        
-                        if not all_styles[t] then
-                            error("No existing style by the name "..t,2)
-                        end
-                        
-                        for k, v in pairs(all_styles[t].attributes) do
-                            if k ~= "name" then self[k] = v end
-                        end
-                        
-                    elseif type(t) == "table" then
-                        
-                        for k, v in pairs(t) do
-                            self[k] = v
-                        end
-                        
-                    else
-                        error("Expects a string or a table. Received "..type(t),2)
-                    end
-                    
-                    return instance
+                if not all_styles[t] then
+                    error("No existing style by the name "..t,2)
                 end
-            )
-            
-            
-            --can't use a table, need to ensure some properties receive a nil in order
-            --to trigger the default condition
-            instance.name        = parameters.name 
-            instance.arrow       = parameters.arrow
-            instance.border      = parameters.border
-            instance.text        = parameters.text
-            instance.fill_colors = parameters.fill_colors
-            
-            arrow:subscribe_to(       nil, function() instance:set{} end )
-            border:subscribe_to(      nil, function() instance:set{} end )
-            text:subscribe_to(        nil, function() instance:set{} end )
-            fill_colors:subscribe_to( nil, function() instance:set{} end )
-            
-            for f,_ in pairs(global_style_subscriptions) do
-                instance:subscribe_to(nil,f)
+                
+                for k, v in pairs(all_styles[t].attributes) do
+                    if k ~= "name" then self[k] = v end
+                end
+                
+            elseif type(t) == "table" then
+                
+                for k, v in pairs(t) do
+                    self[k] = v
+                end
+                
+            else
+                error("Expects a string or a table. Received "..type(t),2)
             end
             
             return instance
-    
         end
-    }
-)
+    )
+    
+    
+    --can't use a table, need to ensure some properties receive a nil in order
+    --to trigger the default condition
+    instance.name        = parameters.name 
+    instance.arrow       = parameters.arrow
+    instance.border      = parameters.border
+    instance.text        = parameters.text
+    instance.fill_colors = parameters.fill_colors
+    
+    arrow:subscribe_to(       nil, function() instance:set{} end )
+    border:subscribe_to(      nil, function() instance:set{} end )
+    text:subscribe_to(        nil, function() instance:set{} end )
+    fill_colors:subscribe_to( nil, function() instance:set{} end )
+    
+    return instance
+    
+end
 --really dumb, but I need to hold a reference for the default style somewhere
 --so that the weak table doesn't throw it away (if i use a local, lua is smart
 --enough to realize its never going to be usedand will throw it away anyway)

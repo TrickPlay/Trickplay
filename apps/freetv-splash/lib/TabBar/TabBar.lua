@@ -94,7 +94,7 @@ TabBar = function(parameters)
         end
     }
     
-    local panes_obj = Widget_Group{clip_to_size = true}
+    local panes_obj = Widget_Group{}
     local tab_w = 200
     local tab_h = 50
     local tab_images
@@ -105,8 +105,7 @@ TabBar = function(parameters)
         vertical_alignment = "top",
         node_constructor = function(obj)
             
-            if obj == nil then 
-                obj = {label = "Tab",content = {}}
+            if obj == nil then obj = {label = "Tab",content = {}}
             elseif type(obj) ~= "table" then
                 error("Expected tab entry to be a string. Received "..type(obj),2)
             elseif type(obj.label) ~= "string" then
@@ -127,10 +126,8 @@ TabBar = function(parameters)
             else
                 obj.style.border.colors.selection = "ffffff"
             end
-            
-            --table.insert(tabs,obj)
-            obj.pane = pane
-            --table.insert(panes,pane)
+            table.insert(tabs,obj)
+            table.insert(panes,pane)
             panes_obj:add(pane)
             
             return obj
@@ -144,22 +141,7 @@ TabBar = function(parameters)
     
     instance.cells = {tab_pane,panes_obj}
 	override_property(instance,"tabs",
-		function(oldf) 
-        
-            local tabs = {}
-            
-            for i = 1,tabs_lm.length do
-                tabs[i]    = {
-                    label    = tabs_lm.cells[i].label,
-                    contents = tabs_lm.cells[i].pane.children
-                }
-                for j,child in ipairs(tabs_lm.cells[i].pane.children) do
-                    tabs[i].contents[j] = child.attributes
-                end
-            end
-            
-            return   tabs     
-        end,
+		function(oldf) return   instance.cells     end,
 		function(oldf,self,v)  
             
             if type(v) ~= "table" then error("Expected table. Received: ",2) end
@@ -168,28 +150,17 @@ TabBar = function(parameters)
                 direction = "horizontal",
                 cells = v,
             }
-            if tab_location == "top" then
-                tab_pane.virtual_w = tabs_lm.w
-            else
-                tab_pane.virtual_h = tabs_lm.h
-            end
             
         end
 	)
     local pane_w,pane_h
 	override_property(instance,"pane_w",
 		function(oldf) return   pane_w     end,
-		function(oldf,self,v)   
-            pane_w = v 
-            panes_obj.w = v
-        end
+		function(oldf,self,v)   pane_w = v end
     )
 	override_property(instance,"pane_h",
 		function(oldf) return   pane_h     end,
-		function(oldf,self,v)   
-            pane_h = v 
-            panes_obj.h = v
-        end
+		function(oldf,self,v)   pane_h = v end
     )
 	override_property(instance,"tab_w",
 		function(oldf) return   tab_w     end,
@@ -235,47 +206,22 @@ TabBar = function(parameters)
         end
 	)
     
-	override_property(instance,"attributes",
-        function(oldf,self)
-            local t = oldf(self)
-            
-            
-            t.tab_w = instance.tab_w
-            t.tab_h = instance.tab_h
-            t.tab_location = instance.tab_location
-            t.pane_w = instance.pane_w
-            t.pane_h = instance.pane_h
-            t.tabs   = instance.tabs
-            
-            t.type = "TabBar"
-            
-            return t
-        end
-    )
     --instance.on_entries_changed = function() print("top_level") end
     
-	instance:subscribe_to( "enabled",
-		function()
-            for i = 1,tabs_lm.length do
-                tabs_lm.cells[i].enabled = instance.enabled
-            end
-            tab_pane.enabled = instance.enabled
-        end
-	)
     instance:subscribe_to( {"tab_w","tab_h"},
         function()
-            for i = 1,tabs_lm.length do
+            for i,t in pairs(tabs) do
                 
-                tabs_lm.cells[i].size = {tab_w,tab_h}
+                t.size = {tab_w,tab_h}
                 
             end
         end
     )
     
     local function tab_style_changed()
-        for i = 1,tabs_lm.length do
-                
-            tabs_lm.cells[i].style:set(instance.style.attributes)
+        for i,t in pairs(tabs) do
+            
+            t.style:set(instance.style.attributes)
             
         end
     end

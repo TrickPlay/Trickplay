@@ -583,11 +583,7 @@ LayoutManager = function(parameters)
                     end
                 )
             end
-            
             placeholder = v 
-            
-            cells:on_entries_changed()
-            
         end
 	)
     

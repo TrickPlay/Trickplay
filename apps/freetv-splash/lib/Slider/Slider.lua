@@ -24,7 +24,7 @@ Slider = function(parameters)
     
     local pixels_to_progress_ratio
     local prev_pos
-    local g_dragging
+    
     
     local p = 0
     local drag = {
@@ -57,7 +57,6 @@ Slider = function(parameters)
             g_dragging = drag[direction]
             grip:grab_pointer()
             
-            return true
         end,
         on_motion = function(self,...)
             return g_dragging and g_dragging(...)
