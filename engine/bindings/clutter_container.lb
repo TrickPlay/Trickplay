@@ -115,6 +115,10 @@ interface container [[ClutterActor*]]
                 {
                     clutter_container_add_actor( CLUTTER_CONTAINER( self ), source );
                 }
+                else
+                {
+                    g_warning("THIS HAPPENED AT: %s", Util::where_am_i_lua(L).c_str());
+                }
                 lua_pop(L,1);
             }
         ]];
@@ -154,12 +158,12 @@ interface container [[ClutterActor*]]
                     }
                     else
                     {
-                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER" );
+                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
                     }
                 }
                 else
                 {
-                    g_warning( "ATTEMPT TO ADD NIL TO CONTAINER" );
+                    g_warning( "ATTEMPT TO ADD NIL TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
                 }
             }
         ]];
