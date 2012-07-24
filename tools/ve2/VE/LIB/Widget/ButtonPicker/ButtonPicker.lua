@@ -323,12 +323,6 @@ ButtonPicker = function(parameters)
     )
     
     
-	instance:subscribe_to( "enabled",
-		function()
-            next_arrow.enabled = instance.enabled
-            prev_arrow.enabled = instance.enabled
-        end
-	)
     ----------------------------------------------------------------------------
     instance.window_w = parameters.window_w
     instance.window_h = parameters.window_h
