@@ -350,7 +350,7 @@ Style = setmetatable({},
             return t[k]
         end,
 
-        __call = function(parameters)
+        __call = function(self,parameters)
             
             if type(parameters) == "string" then
                 
