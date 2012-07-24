@@ -57,6 +57,7 @@ Slider = function(parameters)
             g_dragging = drag[direction]
             grip:grab_pointer()
             
+            return true
         end,
         on_motion = function(self,...)
             return g_dragging and g_dragging(...)
