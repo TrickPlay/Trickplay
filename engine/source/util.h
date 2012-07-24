@@ -333,6 +333,8 @@ namespace Util
 
     gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
 
+    String where_am_i_lua( lua_State *L );
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
