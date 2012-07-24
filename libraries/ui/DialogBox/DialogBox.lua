@@ -53,6 +53,8 @@ DialogBox = function(parameters)
 	
 	local title = Text()
 	
+    local content_group = Widget_Group()
+    
 	local bg
 	
 	----------------------------------------------------------------------------
@@ -187,28 +189,29 @@ DialogBox = function(parameters)
 			
 			if canvas then flag_for_redraw = true end
 			
+            content_group.y = v
 		end
 	)
 	
 	override_property(instance,"content",
-		function(oldf) return content     end,
+		function(oldf)
+            
+            return content_group.children     
+            
+        end,
 		function(oldf,self,v)
 			
-			instance:clear()
-			
-			instance:add(bg)
+			content_group:clear()
 			
 			if type(v) == "table" then
 				
-				instance:add(unpack(content))
+				content_group:add(unpack(v))
 				
 			elseif type(v) == "userdata" then
 				
-				instance:add(content)
+				content_group:add(v)
 				
 			end
-			
-			instance:add(label)
 			
 		end
 	)
@@ -227,6 +230,12 @@ DialogBox = function(parameters)
                 
                 t.image = bg.src
                 
+            end
+            
+            t.content = {}
+            
+            for i, child in ipairs(self.content) do
+                t.content[i] = child.attributes
             end
             
             --[[
@@ -303,7 +312,7 @@ DialogBox = function(parameters)
 	instance_on_style_changed()
 	
 	
-	instance:add(title)
+	instance:add(content_group,title)
 	
 	instance:set(parameters)
 	
