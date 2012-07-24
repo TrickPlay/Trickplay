@@ -295,7 +295,7 @@ NineSlice = function(parameters)
             canvas = false
             --if passed nil, this will trigger canvases
             if v == nil then 
-                print("got nil")
+                
                 canvas = true
                 states.default    = nil
                 states.focus      = nil

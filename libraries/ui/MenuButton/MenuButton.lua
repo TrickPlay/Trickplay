@@ -65,13 +65,12 @@ MenuButton = function(parameters)
                 
                 items[i] = {item}
             end
-            print("pre set popup",popup)
+            
             popup:set{
                 number_of_cols = 1,
                 number_of_rows = #items,
                 cells = items,
             }
-            print("post set popup",popup.w,popup.h)
             
             
         end

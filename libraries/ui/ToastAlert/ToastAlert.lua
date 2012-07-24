@@ -218,7 +218,6 @@ ToastAlert = function(parameters)
 				
 				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
 				
-				dumptable(icon.scale)
 			end
 			
 			
