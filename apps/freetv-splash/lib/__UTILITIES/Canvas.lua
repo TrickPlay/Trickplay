@@ -3,15 +3,8 @@ CANVAS = true
 --draws a rounded rectangle canvas path
 round_rectangle = function(c,r)
     
+    
     local inset = c.line_width/2
-    if r == 0 then
-        --using canvas arc with a radius of 0, 
-        --results in a weird effect in the top-left corner
-        
-        c:rectangle(inset,inset,c.w-inset*2,c.h-inset*2)
-        
-        return
-    end
     
     c:move_to( inset, inset+r)
     --top-left corner
