@@ -163,7 +163,7 @@ TabBar = function(parameters)
 		function(oldf,self,v)  
             
             if type(v) ~= "table" then error("Expected table. Received: ",2) end
-            print(1)
+            
             tabs_lm:set{
                 direction = "horizontal",
                 cells = v,
