@@ -388,3 +388,23 @@ gpointer Util::g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout 
 	return g_async_queue_timed_pop( queue , & tv );
 #endif
 }
+
+#include <sstream>
+
+String Util::where_am_i_lua( lua_State * L )
+{
+    std::ostringstream result;
+
+    lua_Debug my_debug;
+
+    if( lua_getstack( L, 1, &my_debug ) )
+    {
+        if( lua_getinfo( L, "Sln", &my_debug ) )
+        {
+            result << my_debug.source << ":" << my_debug.currentline;
+            return result.str();
+        }
+    }
+
+    return String("(unknown)");
+}
