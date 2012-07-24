@@ -163,6 +163,13 @@ ArrowPane = function(parameters)
 		function(oldf,self,...) pane:add(...) end
 	)
     
+	instance:subscribe_to( "enabled",
+		function()
+            for _,arrow in pairs(arrows) do
+                arrow.enabled = instance.enabled
+            end
+        end
+	)
     ----------------------------------------------------------------------------
     
     function up:on_released()
@@ -259,6 +266,7 @@ ArrowPane = function(parameters)
             t.virtual_y = instance.virtual_y
             t.virtual_w = instance.virtual_w
             t.virtual_h = instance.virtual_h
+            t.move_by   = instance.move_by
             
             t.type = "ArrowPane"
             
