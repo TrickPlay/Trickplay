@@ -1577,7 +1577,7 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
         return false;
     }
 
-    load_texture( texture, image );
+    load_texture( texture, image, 0, 0, image->width, image->height );
 
     destroy_image( image );
 
@@ -1595,7 +1595,7 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
         return false;
     }
 
-    load_texture( texture, image );
+    load_texture( texture, image, 0, 0, image->width, image->height );
 
     destroy_image( image );
 
