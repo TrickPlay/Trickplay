@@ -80,13 +80,16 @@ ScrollPane = function(parameters)
             pane.h     = v 
         end
     )
+    local slider_thickness = 30
 	override_property(instance,"slider_thickness",
-		function(oldf) return   pane.h     end,
+		function(oldf) return   slider_thickness     end,
 		function(oldf,self,v)   
+            print("shit",v)
             horizontal.track.h = v
             horizontal.grip.h  = v
             vertical.track.w   = v
             vertical.grip.w    = v
+            slider_thickness   = v
         end
     )
     
