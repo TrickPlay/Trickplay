@@ -411,7 +411,7 @@ local tot_flak_shot_created = 0
 local old_bullets = {}
 local tot_bullets_created = 0
 scrap_caches = function()
-    print("scrapping",#big_explos,#sm_explos,#old_bullets,#old_flak,#old_flak_shot)
+    --print("scrapping",#big_explos,#sm_explos,#old_bullets,#old_flak,#old_flak_shot)
     big_explos = {}
     num_big_explos = 0
     sm_explos = {}
