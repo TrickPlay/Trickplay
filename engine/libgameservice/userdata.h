@@ -1,5 +1,5 @@
-#ifndef _USERDATA_H_
-#define _USERDATA_H_
+#ifndef _GAMESERVICE_USERDATA_H_
+#define _GAMESERVICE_USERDATA_H_
 
 #include <string>
 
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif /* _USERDATA_H_ */
+#endif /* _GAMESERVICE_USERDATA_H_ */
