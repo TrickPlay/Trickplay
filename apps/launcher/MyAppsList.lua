@@ -389,7 +389,7 @@ move_dn = function()
         
         --list[hl_index]:focus()
         hl:focus(list[hl_index].text.text,list[hl_index].icon,list[hl_index].app_id)
-        print(hl_index,top_vis_i)
+        --print(hl_index,top_vis_i)
         update:start()
 end
 
