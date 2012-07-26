@@ -141,11 +141,8 @@ ToastAlert = function(parameters)
             t.animate_in_duration        = self.animate_in_duration
             t.animate_out_duration       = self.animate_out_duration
             
-            if (not canvas) and image.src and image.src ~= "[canvas]" then 
-                
-                t.image = image.src
-                
-            end
+            
+            t.icon = icon.src
             t.type = "ToastAlert"
             
             return t
@@ -218,7 +215,6 @@ ToastAlert = function(parameters)
 				
 				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
 				
-				dumptable(icon.scale)
 			end
 			
 			
