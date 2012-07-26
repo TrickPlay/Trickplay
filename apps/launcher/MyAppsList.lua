@@ -353,7 +353,7 @@ move_dn = function()
             else
                 --print("yea",wrap_i( top_vis_i + vis_len - 1 ),list[ wrap_i( top_vis_i + vis_len - 1 ) ] )
                 gl = list[ wrap_i( top_vis_i + vis_len - 1 ) ]
-                dumptable(list)
+                --dumptable(list)
                 AppList:add(list[ wrap_i( top_vis_i + vis_len - 1 ) ])
                 --print(top_vis_i,list[ wrap_i(top_vis_i) ].name)
                 exiting_item = list[
