@@ -480,7 +480,7 @@ public class DefaultMUGSession implements MUGSession {
 			}
 			boolean freerole = childElement.element("freerole") != null;
 			boolean newmatch = childElement.element("newmatch") != null;
-			String nick= childElement.elementText("nick");
+			String nick= childElement.elementText("nickname");
 			String role = childElement.elementText("role");
 			
 			boolean acquire_role = freerole || (role!=null && !role.isEmpty());
