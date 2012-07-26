@@ -39,6 +39,7 @@ extern const txmpp::QName QN_NICK_ATTR;
 extern const txmpp::QName QN_AFFILIATION_ATTR;
 extern const txmpp::QName QN_JID_ATTR;
 extern const txmpp::QName QN_CODE_ATTR;
+extern const txmpp::QName QN_MATCHID_ATTR;
 
 extern const txmpp::QName QN_MUG_OWNER_DESCRIPTION_TAG;
 extern const txmpp::QName QN_MUG_OWNER_CATEGORY_TAG;
@@ -58,7 +59,7 @@ extern const txmpp::QName QN_MUG_ASSIGNMATCH_TAG;
 extern const txmpp::QName QN_MUG_NEWMATCH_TAG;
 extern const txmpp::QName QN_MUG_FREEROLE_TAG;
 extern const txmpp::QName QN_MUG_ROLE_TAG;
-extern const txmpp::QName QN_MUG_NICK_TAG;
+extern const txmpp::QName QN_MUG_NICKNAME_TAG;
 extern const txmpp::QName QN_MUG_ITEM_TAG;
 extern const txmpp::QName QN_MUG_JOINMATCH_TAG;
 extern const txmpp::QName QN_MUG_STATUS_TAG;
@@ -80,6 +81,11 @@ extern const txmpp::QName QN_MUG_USER_TURN_TAG;
 extern const txmpp::QName QN_MUG_USER_NEWSTATE_TAG;
 extern const txmpp::QName QN_MUG_USER_TERMINATE_TAG;
 extern const txmpp::QName QN_MUG_USER_NEXT_TAG;
+extern const txmpp::QName QN_MUG_USER_ONLY_UPDATE_TAG;
+extern const txmpp::QName QN_MUG_MATCHDATA_TAG;
+extern const txmpp::QName QN_MUG_USERDATA_TAG;
+extern const txmpp::QName QN_MUG_MATCH_TAG;
+extern const txmpp::QName QN_MUG_OPAQUE_TAG;
 
 extern const std::string NS_XDATA;
 extern const txmpp::QName QN_XDATA_X;

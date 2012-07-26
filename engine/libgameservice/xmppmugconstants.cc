@@ -54,13 +54,15 @@ const txmpp::QName QN_NICK_ATTR(true, txmpp::XmlConstants::str_empty(), "nick");
 const txmpp::QName QN_AFFILIATION_ATTR(true, txmpp::XmlConstants::str_empty(), "affiliation");
 const txmpp::QName QN_JID_ATTR(true, txmpp::XmlConstants::str_empty(), "jid");
 const txmpp::QName QN_CODE_ATTR(true, txmpp::XmlConstants::str_empty(), "code");
+const txmpp::QName QN_MATCHID_ATTR(true, txmpp::XmlConstants::str_empty(), "matchId");
+
 
 const txmpp::QName QN_MUG_APP_TAG(true, NS_MUG, "app");
 const txmpp::QName QN_MUG_ASSIGNMATCH_TAG(true, NS_MUG, "matchrequest");
 const txmpp::QName QN_MUG_NEWMATCH_TAG(true, NS_MUG, "newmatch");
 const txmpp::QName QN_MUG_FREEROLE_TAG(true, NS_MUG, "freerole");
 const txmpp::QName QN_MUG_ROLE_TAG(true, NS_MUG, "role");
-const txmpp::QName QN_MUG_NICK_TAG(true, NS_MUG, "nick");
+const txmpp::QName QN_MUG_NICKNAME_TAG(true, NS_MUG, "nickname");
 const txmpp::QName QN_MUG_ITEM_TAG(true, NS_MUG, "item");
 const txmpp::QName QN_MUG_GAMEPRESENCE_TAG(true, NS_MUG, "game");
 const txmpp::QName QN_MUG_STATUS_TAG(true, NS_MUG, "status");
@@ -81,7 +83,11 @@ const txmpp::QName QN_MUG_USER_TURN_TAG(true, NS_MUG_USER, "turn");
 const txmpp::QName QN_MUG_USER_NEWSTATE_TAG(true, NS_MUG_USER, "newstate");
 const txmpp::QName QN_MUG_USER_TERMINATE_TAG(true, NS_MUG_USER, "terminate");
 const txmpp::QName QN_MUG_USER_NEXT_TAG(true, NS_MUG_USER, "next");
-
+const txmpp::QName QN_MUG_USER_ONLY_UPDATE_TAG(true, NS_MUG_USER, "only-update");
+const txmpp::QName QN_MUG_MATCHDATA_TAG(true, NS_MUG_USER, "matchdata");
+const txmpp::QName QN_MUG_USERDATA_TAG(true, NS_MUG_USER, "userdata");
+const txmpp::QName QN_MUG_MATCH_TAG(true, NS_MUG_USER, "match");
+const txmpp::QName QN_MUG_OPAQUE_TAG(true, NS_MUG_USER, "opaque");
 
 const std::string NS_XDATA("jabber:x:data");
 const txmpp::QName QN_XDATA_X(true, NS_XDATA, "x");

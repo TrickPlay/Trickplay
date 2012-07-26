@@ -17,10 +17,14 @@ public:
 	const std::string& next_turn() const { return next_turn_; }
 	void set_next_turn(const std::string& next) { next_turn_ = next; }
 
+	bool only_update() const { return only_update_; }
+	void set_only_update(bool newval) { only_update_ = newval; }
+
 private:
 	std::string new_state_;
 	bool terminate_;
 	std::string next_turn_;
+	bool only_update_;
 };
 }
 

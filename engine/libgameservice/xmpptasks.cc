@@ -13,6 +13,55 @@ extern const txmpp::Jid getMugServiceJid();
 
 
 //const txmpp::Jid JID_MUG_SERVICE("mug.internal.trickplay.com");
+static MatchStatus extractMatchStatus(const txmpp::XmlElement* statusElement)
+{
+	MatchStatus status = unknown;
+	if ( statusElement != NULL ) {
+		std::string status_str( statusElement->BodyText() );
+		status = stringToMatchStatus( status_str );
+	}
+	return status;
+}
+
+
+static MatchState extractMatchState(const txmpp::XmlElement* stateElement)
+{
+	MatchState match_state;
+
+	if (stateElement == NULL) {
+		return match_state;
+	}
+
+
+	const txmpp::XmlElement* tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_FIRST_TAG);
+	if (tmpElement != NULL)
+		match_state.set_first(tmpElement->BodyText());
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_OPAQUE_TAG);
+	if (tmpElement != NULL)
+		match_state.set_opaque(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_NEXT_TAG);
+	if (tmpElement != NULL)
+		match_state.set_next(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_LAST_TAG);
+	if (tmpElement != NULL)
+		match_state.set_last(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(
+			QN_MUG_TURNBASED_TERMINATED_TAG);
+	match_state.set_terminate(tmpElement != NULL);
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_ROLES_TAG);
+	if (tmpElement != NULL) {
+		tmpElement = tmpElement->FirstNamed(QN_MUG_TURNBASED_ROLE_TAG);
+		while (tmpElement != NULL) {
+			match_state.players().push_back(tmpElement->BodyText());
+			tmpElement = tmpElement->NextNamed(QN_MUG_TURNBASED_ROLE_TAG);
+		}
+	}
+	return match_state;
+}
 
 
 // MUG message listener
@@ -154,11 +203,8 @@ int MUGPresenceListenerTask::ProcessResponse() {
 		} else { // match state update
 
 			const txmpp::XmlElement* tmpElement = gameElement->FirstNamed(QN_MUG_STATUS_TAG);
-			MatchStatus status = unknown;
-			if (tmpElement != NULL) {
-				std::string status_str(tmpElement->BodyText());
-				status = stringToMatchStatus(status_str);
-			}
+			MatchStatus status = extractMatchStatus( tmpElement );
+
 			const txmpp::XmlElement* stateElement = gameElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
 
 			if (!isValidMatchStatus(status) || stateElement == NULL) {
@@ -167,34 +213,8 @@ int MUGPresenceListenerTask::ProcessResponse() {
 			}
 
 
-			MatchState match_state;
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_FIRST_TAG);
-			if (tmpElement != NULL)
-				match_state.set_first(tmpElement->BodyText());
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_OPAQUE_TAG);
-			if (tmpElement != NULL)
-				match_state.set_opaque(tmpElement->BodyText());
+			MatchState match_state = extractMatchState( stateElement );
 
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_NEXT_TAG);
-			if (tmpElement != NULL)
-				match_state.set_next(tmpElement->BodyText());
-
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_LAST_TAG);
-			if (tmpElement != NULL)
-				match_state.set_last(tmpElement->BodyText());
-
-			tmpElement = stateElement->FirstNamed(
-					QN_MUG_TURNBASED_TERMINATED_TAG);
-			match_state.set_terminate(tmpElement != NULL);
-
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_ROLES_TAG);
-			if (tmpElement != NULL) {
-				tmpElement = tmpElement->FirstNamed(QN_MUG_TURNBASED_ROLE_TAG);
-				while (tmpElement != NULL) {
-					match_state.players().push_back(tmpElement->BodyText());
-					tmpElement = tmpElement->NextNamed(QN_MUG_TURNBASED_ROLE_TAG);
-				}
-			}
 
 			SignalMatchState(match_id, status, match_state);
 
@@ -638,7 +658,7 @@ int AssignMatchTask::ProcessStart() {
 		matchRequestElement->AddElement(roleElement);
 	}
 	if (!match_request_.nick().empty()) {
-		txmpp::XmlElement *nickElement = new txmpp::XmlElement(QN_MUG_NICK_TAG);
+		txmpp::XmlElement *nickElement = new txmpp::XmlElement(QN_MUG_NICKNAME_TAG);
 		nickElement->AddText(match_request_.nick());
 		matchRequestElement->AddElement(nickElement);
 	}
@@ -914,9 +934,12 @@ int TurnTask::ProcessStart() {
 		turnElement->AddElement(terminateElement);
 	} else {
 		if (!turn_.next_turn().empty()) {
-			txmpp::XmlElement *nextElement = new txmpp::XmlElement(QN_MUG_USER_TERMINATE_TAG);
+			txmpp::XmlElement *nextElement = new txmpp::XmlElement(QN_MUG_USER_NEXT_TAG);
 			nextElement->AddText(turn_.next_turn());
 			turnElement->AddElement(nextElement);
+		} else if (turn_.only_update()) {
+			txmpp::XmlElement *onlyUpdateElement = new txmpp::XmlElement(QN_MUG_USER_ONLY_UPDATE_TAG);
+			turnElement->AddElement(onlyUpdateElement);
 		}
 	}
 	message->AddElement(turnElement);
@@ -928,5 +951,169 @@ int TurnTask::ProcessStart() {
 	return STATE_DONE;
 }
 
+// GetMatchData task
+GetMatchDataTask::GetMatchDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), cb_data_(cb_data) {
+
+//	std::cout << "Inside GetMatchDataTask constructor" << std::endl;
+}
+
+GetMatchDataTask::~GetMatchDataTask() {
+}
+
+int GetMatchDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("get", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *matchDataElement = new txmpp::XmlElement(
+			QN_MUG_MATCHDATA_TAG);
+	matchDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	iqStanza->AddElement(matchDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int GetMatchDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside GetMatchDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	MatchData matchdata;
+	matchdata.set_game_id(game_id_);
+	const txmpp::XmlElement* matchDataElement = stanza->FirstNamed(QN_MUG_MATCHDATA_TAG);
+	if (matchDataElement != NULL) {
+		const txmpp::XmlElement* matchElement = matchDataElement->FirstNamed(QN_MUG_MATCH_TAG);
+		while( NULL != matchElement )
+		{
+			// extract match info from match element
+			MatchInfo mi;
+
+			mi.set_id(matchElement->Attr(QN_MATCHID_ATTR));
+			const txmpp::XmlElement* statusElement = matchElement->FirstNamed(QN_MUG_STATUS_TAG);
+			MatchStatus status = extractMatchStatus( statusElement );
+
+			const txmpp::XmlElement* stateElement = matchElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
+
+			if (!isValidMatchStatus(status) || stateElement == NULL) {
+				continue;
+			}
+
+
+			mi.set_state( extractMatchState( stateElement ) );
+
+			matchdata.match_infos().push_back(mi);
+
+			// move to the next match element
+			matchElement = matchElement->NextNamed(QN_MUG_MATCH_TAG);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalGetMatchDataCompleted.emit(rs, matchdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool GetMatchDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "GetMatchDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
+
+// GetUserData task
+GetUserDataTask::GetUserDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), cb_data_(cb_data) {
+
+//	std::cout << "Inside GetUserDataTask constructor" << std::endl;
+}
+
+GetUserDataTask::~GetUserDataTask() {
+}
+
+int GetUserDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("get", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *userDataElement = new txmpp::XmlElement(
+			QN_MUG_USERDATA_TAG);
+	userDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	iqStanza->AddElement(userDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int GetUserDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside GetUserDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	UserData userdata;
+	userdata.set_game_id(game_id_);
+	const txmpp::XmlElement* userDataElement = stanza->FirstNamed(QN_MUG_USERDATA_TAG);
+	if (userDataElement != NULL) {
+		const txmpp::XmlElement* opaqueElement = userDataElement->FirstNamed(QN_MUG_OPAQUE_TAG);
+
+		if (opaqueElement != NULL) {
+			userdata.set_opaque(opaqueElement->BodyText());
+
+			if (opaqueElement->HasAttr(QN_VERSION_ATTR)) {
+				userdata.set_version(atoi(opaqueElement->Attr(QN_VERSION_ATTR).c_str()));
+			}
+			else
+				userdata.set_version(-1);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalGetUserDataCompleted.emit(rs, userdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool GetUserDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "GetUserDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
 
 } // namespace libgameservice

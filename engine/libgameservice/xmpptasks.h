@@ -14,6 +14,8 @@
 #include "participant.h"
 #include "turn.h"
 #include "item.h"
+#include "matchdata.h"
+#include "userdata.h"
 
 namespace libgameservice {
 
@@ -183,7 +185,42 @@ private:
 	void* cb_data_;
 };
 
+/*
+ * returns a list of all matches in which the requestor is currently participating.
+ */
+class GetMatchDataTask : public txmpp::XmppTask {
+public:
+	explicit GetMatchDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
+	virtual ~GetMatchDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
 
+	txmpp::signal3<const ResponseStatus&, const MatchData&, void*> SignalGetMatchDataCompleted;
+
+private:
+	std::string game_id_;
+	void* cb_data_;
+};
+
+
+/*
+ * returns game data opaque data for the requesting user
+ */
+class GetUserDataTask : public txmpp::XmppTask {
+public:
+	explicit GetUserDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
+	virtual ~GetUserDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
+
+	txmpp::signal3<const ResponseStatus&, const UserData&, void*> SignalGetUserDataCompleted;
+
+private:
+	std::string game_id_;
+	void* cb_data_;
+};
 
 }  // namespace libgameservice
 

@@ -53,16 +53,25 @@ class MatchInfo {
 
 public:
 	MatchInfo() { }
-	MatchInfo(const std::string& id, const MatchState& state)
-	: id_(id), state_(state) { }
+	MatchInfo(const std::string& id, MatchStatus status, const std::string& nickname, const MatchState& state)
+	: id_(id), status_(status), nickname_(nickname), state_(state) { }
 
 	const std::string& id() const { return id_; }
-	void set_id(std::string& str) { id_ = str; }
+	void set_id(const std::string& str) { id_ = str; }
+
+	MatchStatus status() { return status_; }
+	void set_status(MatchStatus new_status) { status_ = new_status; }
 
 	MatchState& state() { return state_; }
 	void set_state(const MatchState& state) { state_ = state; }
+
+	const std::string& nickname() const { return nickname_; }
+	void set_nickname(const std::string& nick) { nickname_ = nick; }
+
 private:
 	std::string id_;
+	MatchStatus status_;
+	std::string nickname_;
 	MatchState state_;
 };
 }
