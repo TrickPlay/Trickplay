@@ -57,7 +57,12 @@ MenuButton = function(parameters)
             local items = {}
             
             for i, item in ipairs(v) do
-                if type(item) ~= "userdata" and item.__types__.actor then 
+                
+                if type(item) == "table" and item.type then 
+                    
+                    item = _G[item.type](item)
+                    
+                elseif type(item) ~= "userdata" and item.__types__.actor then 
                 
                     error("Must be a UIElement or nil. Received "..obj,2) 
                     
@@ -124,7 +129,7 @@ MenuButton = function(parameters)
             t.items = {}
             
             for i = 1,popup.number_of_rows do
-                t.items[i] = popup.cells[i][1]
+                t.items[i] = popup.cells[i][1].attributes
             end
             
             t.direction = instance.direction
