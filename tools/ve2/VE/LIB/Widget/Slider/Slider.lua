@@ -57,13 +57,10 @@ Slider = function(parameters)
             g_dragging = drag[direction]
             grip:grab_pointer()
             
+            return true
         end,
         on_motion = function(self,...)
-            if editor_lb then 
-                return true 
-            else 
-                return g_dragging and g_dragging(...)
-            end
+            return g_dragging and g_dragging(...)
         end,
         on_button_up = function(self,...)
             grip:ungrab_pointer()
