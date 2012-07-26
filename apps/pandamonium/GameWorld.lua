@@ -376,7 +376,7 @@ local start_game_tl = Timeline{
 		for _,obj in pairs(fade_outs) do
 			if obj.fade_out_complete then obj:fade_out_complete() end
 		end
-		print('ffff')
+		--print('ffff')
 		physics:start()
 	end
 }
@@ -391,7 +391,7 @@ GameState:add_state_change_function(
 GameState:add_state_change_function(
 	function()
 		for obj,func in pairs(to_be_deleted) do
-			print("del2", obj)
+			--print("del2", obj)
 			func(obj)
 			to_be_deleted[obj]  = nil
 			active_objects[obj] = nil
@@ -507,13 +507,13 @@ World.check_hopper = function()
 		
 	elseif panda_y > screen_h+200 and not panda.rocket and not firework.moving then
 		
-		print("rocket",panda.rocket)
+		--print("rocket",panda.rocket)
 		
 		panda.dead = true
 		
 		scroll_speed = -panda:get_vy()*physics.pixels_per_meter/7
 		Animation_Loop:add_animation(scroll_after)
-		print(World.update)
+		--print(World.update)
 		Animation_Loop:delete_animation(World.update)
 		return
 		
