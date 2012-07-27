@@ -16,27 +16,9 @@
 ]]--
 
 local configuration = Group {}
-screen:add(configuration)
 
 local background = Image { src = "assets/background/bg-1.jpg" }
 configuration:add(background)
-
-for i = #movie_posters, 1, -1 do configuration:add( movie_posters[i] ) end
-
-configuration:add(welcome_to_free_tv)
-
-configuration:add(hundreds_of_movies)
-
-for i = #tv_posters, 1, -1 do configuration:add( tv_posters[i] ) end
-
-for i = #tv_logos, 1, -1 do configuration:add( tv_logos[i] ) end
-
-configuration:add(enjoy_your_favorite_tv_shows)
-
-for i = #album_covers, 1, -1 do configuration:add( album_covers[i] ) end
-
-configuration:add(the_best_music)
-
 
 local pb,pb_text,pb_text_bg = dofile("progress_bar.lua")
 local pb_group = Group {}
@@ -44,6 +26,7 @@ pb_group:add(pb)
 pb_group:add(pb_text_bg)
 pb_group:add(pb_text)
 configuration:add(pb_group)
+
 
 -- Now we'll build up the animation in stages, working one object/property at a time
 local animator_properties = {}
@@ -636,84 +619,116 @@ local function the_best_music_setup()
                 )
 end
 
+local my_animation = nil
+local t = nil
+local final_callback = nil
 
--- Call all the animator setup functions
-welcome_to_free_tv_setup()
-movie_posters_setup()
-hundreds_of_movies_setup()
-tv_posters_setup()
-tv_logos_setup()
-enjoy_your_favorite_tv_shows_setup()
-album_covers_setup()
-the_best_music_setup()
+local function show_configuration_screen()
+    for i = #movie_posters, 1, -1 do configuration:add( movie_posters[i] ) end
 
-local my_animation = Animator {
-                duration = ANIMATION_DURATION,
-                        properties = animator_properties,
-                    }
+    configuration:add(welcome_to_free_tv)
 
-animator_properties = nil
+    configuration:add(hundreds_of_movies)
 
-local t = my_animation.timeline
+    for i = #tv_posters, 1, -1 do configuration:add( tv_posters[i] ) end
 
-function t:on_new_frame(ms, p)
-    pb.progress = p
-end
+    for i = #tv_logos, 1, -1 do configuration:add( tv_logos[i] ) end
 
-function t:on_marker_reached(marker, ms)
-    -- pb.progress should be updated in on_new_frame, but progressbar is leaking badly, so can't
-    pb.progress = ms/ANIMATION_DURATION
-    pb_text_bg.markup = "<span weight='600'>"..marker.."</span>"
-    pb_text.markup = "<span weight='600'>"..marker.."</span>"
-end
-t:add_marker("Updating Guide Data...", ANIMATION_DURATION * 1/10)
-t:add_marker("Calibrating Capacitors...", ANIMATION_DURATION * 5/10)
-t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
-t:add_marker("Done", ANIMATION_DURATION)
+    configuration:add(enjoy_your_favorite_tv_shows)
 
-function t:on_completed()
-    -- After animation is completed, fade everything out in 2 stages
-    local a2  = Animator {
-        duration = 1000,
-        properties = {
-            {
-                source = pb_group,
-                name = "opacity",
-                ease_in = false,
-                keys = {
-                    { 0.0, "LINEAR", 255 },
-                    { 0.7, "EASE_IN_SINE", 0 },
-                }
-            },
-            {
-                source = configuration,
-                name = "opacity",
-                ease_in = false,
-                keys = {
-                    { 0.0, "LINEAR", 255 },
-                    { 0.5, "LINEAR", 255 },
-                    { 1.0, "EASE_IN_SINE", 0 },
-                }
-            },
-        },
-    }
-    local t2 = a2.timeline
+    for i = #album_covers, 1, -1 do configuration:add( album_covers[i] ) end
 
-    function t2:on_completed()
-        configuration:unparent()
-        configuration = nil
-        background = nil
-        my_animation = nil
-        t = nil
-        a2 = nil
-        t2 = nil
-        pb_group = nil
-        pb = nil
-        pb_text = nil
-        pb_text_bg = nil
-        unload_configuration()
+    configuration:add(the_best_music)
+
+    -- Call all the animator setup functions
+    welcome_to_free_tv_setup()
+    movie_posters_setup()
+    hundreds_of_movies_setup()
+    tv_posters_setup()
+    tv_logos_setup()
+    enjoy_your_favorite_tv_shows_setup()
+    album_covers_setup()
+    the_best_music_setup()
+
+    screen:add(configuration)
+
+    my_animation = Animator {
+                            duration = ANIMATION_DURATION,
+                            properties = animator_properties,
+                        }
+
+    local t = my_animation.timeline
+
+    function t:on_new_frame(ms, p)
+        pb.progress = p
     end
-    a2:start()
+
+    function t:on_marker_reached(marker, ms)
+        -- pb.progress should be updated in on_new_frame, but progressbar is leaking badly, so can't
+        pb.progress = ms/ANIMATION_DURATION
+        pb_text_bg.markup = "<span weight='600'>"..marker.."</span>"
+        pb_text.markup = "<span weight='600'>"..marker.."</span>"
+    end
+    t:add_marker("Updating Guide Data...", ANIMATION_DURATION * 1/10)
+    t:add_marker("Calibrating Capacitors...", ANIMATION_DURATION * 5/10)
+    t:add_marker("Going to Warp Speed...", ANIMATION_DURATION * 8/10)
+    t:add_marker("Done", ANIMATION_DURATION)
+
+    function t:on_completed()
+        -- After animation is completed, fade everything out in 2 stages
+        local a2  = Animator {
+            duration = 1000,
+            properties = {
+                {
+                    source = pb_group,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 255 },
+                        { 0.7, "EASE_IN_SINE", 0 },
+                    }
+                },
+                {
+                    source = configuration,
+                    name = "opacity",
+                    ease_in = false,
+                    keys = {
+                        { 0.0, "LINEAR", 255 },
+                        { 0.5, "LINEAR", 255 },
+                        { 1.0, "EASE_IN_SINE", 0 },
+                    }
+                },
+            },
+        }
+        local t2 = a2.timeline
+
+        function t2:on_completed()
+            configuration:unparent()
+            configuration = nil
+            background = nil
+            my_animation = nil
+            t = nil
+            a2 = nil
+            t2 = nil
+            pb_group = nil
+            pb = nil
+            pb_text = nil
+            pb_text_bg = nil
+            unload_configuration()
+            do_configuration = nil
+            if final_callback then final_callback() end
+        end
+        a2:start()
+    end
+
+
+    animator_properties = nil
+
+    my_animation:start()
 end
 
-my_animation:start()
+function do_configuration(callback)
+    final_callback = callback
+
+    show_configuration_screen()
+end
