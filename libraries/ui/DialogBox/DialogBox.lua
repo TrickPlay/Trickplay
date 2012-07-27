@@ -110,7 +110,7 @@ DialogBox = function(parameters)
 		
 		if instance.is_size_set() then
 			
-			resize_image()
+			resize_images()
 			
 		else
 			--so that the label centers properly
@@ -205,6 +205,19 @@ DialogBox = function(parameters)
 			
 			if type(v) == "table" then
 				
+                for i,obj in ipairs(v) do
+                    
+                    if type(obj) == "table" and obj.type then 
+                        
+                        v[i] = _G[obj.type](obj)
+                        
+                    elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                    
+                        error("Must be a UIElement or nil. Received "..obj,2) 
+                        
+                    end
+                    
+                end
 				content_group:add(unpack(v))
 				
 			elseif type(v) == "userdata" then
