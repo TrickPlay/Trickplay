@@ -262,6 +262,13 @@ class TrickplayInspector(QWidget):
 
                 elif p in NESTED_PROP_LIST: # is 'z_rotation' :
                     z = data[p]
+                    if p == "items" and data["type"] == "ButtonPicker":
+                        print type(z)
+                        print type(z)
+                        print type(z)
+                        print type(z)
+                        print type(z)
+
                     if type(z) ==  list :
                         idx = 0
                         for sp in PropertyIter(p):

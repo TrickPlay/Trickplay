@@ -51,7 +51,11 @@ PROP_LIST = [
     'tile',
     'is_visible', 
     'color',
+    # ButtonPicker
     'orientation',
+    'window_w', 
+    'window_h', 
+    'animate_duration', 
     'border_color',
     'anchor_point',
     'scale',
@@ -179,26 +183,16 @@ PROP_LIST = [
     'virtual_y',
     'virtual_w',
     'virtual_h',
-
-    """
     # ScroolPane
     'slider_thickness',
     # TabBar
-    'length',
     'tab_h',
     'tab_location',
     'tab_w',
-    # ButtonPicker
-    'orientation',
-    'spacing', # horizontal_spacing, vertical_spacing, 'horizontal_cell_spacing', 'vertical_cell_spacing', 
-    'visible', # is_visible ??
-    'window_w', # is_visible ??
-    'window_h', # is_visible ??
+
     # MenuButton
     'item_spacing', 
     'popup_offset', 
-
-    """
 
     # Scroll Pane
     'horizontal_slider',
@@ -211,7 +205,6 @@ PROP_LIST = [
     # Clippig Region
     'virtual_width',
     'virtual_height',
-    'content',
 
     # Widget Text
     'alignment',
@@ -267,7 +260,8 @@ NESTED_PROP_LIST = {
     'x_rotation' : ['angle', 'y center', 'z center'],
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
-    'tile' : ['x', 'y']
+    'tile' : ['x', 'y'],
+    'items' : []
     #Arrow Pane
     #'cells' : [], 
     #'center' : ['',''], 
@@ -278,5 +272,5 @@ NESTED_PROP_LIST = {
     #Arrow Pane
     #'tabs' : [], 
     #ButtonPicker
-    #'items' : [], 
+    #'items' : []
 }
