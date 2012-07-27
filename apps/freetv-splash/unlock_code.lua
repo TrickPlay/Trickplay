@@ -304,6 +304,7 @@ function do_unlock_code(callback)
                         digits = nil
                         digits_s = nil
                         unlock_group:unparent()
+                        unlock_group = nil
                         do_unlock_code = nil
                         collectgarbage()
                     end
