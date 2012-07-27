@@ -85,6 +85,8 @@ class TrickplayElementModel(QStandardItemModel):
         """
         
         #print("insertElelement")
+        if data is None:
+            return
 
         value = data["name"]
         title = data["type"]
@@ -148,7 +150,7 @@ class TrickplayElementModel(QStandardItemModel):
         
         parent.appendRow([node, partner])
         
-        # Recurse through children
+        # Recurse through cells
         try:
             cells = data['cells']
             print ("Rows:", len(cells))
@@ -167,17 +169,28 @@ class TrickplayElementModel(QStandardItemModel):
                     self.insertElement(node, cells[i][j], data, False)
             """
         
-        # Element has no children
+        # Element has no cells
         except KeyError:
             pass
         
-        # Recurse through children
+        # Recurse through items
+        try:
+            if str(data['type']) == "MenuButton":
+                items = data['items']
+                for i in range(len(items)-1, -1, -1):
+                    self.insertElement(node, items[i], data, False)
+        
+        # Element has no items
+        except KeyError:
+            pass
+        
+        # Recurse through contents
         try:
             contents = data['contents']
             for i in range(len(contents)-1, -1, -1):
                 self.insertElement(node, contents[i], data, False)
         
-        # Element has no children
+        # Element has no contents
         except KeyError:
             pass
         
