@@ -89,6 +89,7 @@ mb4 = MenuButton{
         Button(),Button()
     }
 }
+mb4.items:insert(2,Button())
 --]]
 wg = Widget_Group()
 screen:add(wg)
