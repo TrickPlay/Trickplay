@@ -57,6 +57,7 @@ DialogBox = function(parameters)
     
 	local bg
 	
+	local separator_y = parameters.separator_y
 	----------------------------------------------------------------------------
 	-- private helper functions for common actions
 	
@@ -72,7 +73,7 @@ DialogBox = function(parameters)
 	local center_title = function()
 		
 		title.w = instance.w
-		title.y = instance.style.text.y_offset + title.h/2
+		title.y = separator_y - title.h--instance.style.text.y_offset + title.h/2
 		
 	end
 	
@@ -88,7 +89,7 @@ DialogBox = function(parameters)
 		
 		bg = default_bg(instance)
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -104,7 +105,7 @@ DialogBox = function(parameters)
 		
 		if bg then bg:unparent() end
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -179,7 +180,6 @@ DialogBox = function(parameters)
 		function(oldf,self,v) title.text = v end
 	)
 	
-	local separator_y = parameters.separator_y
 	
 	override_property(instance,"separator_y",
 		function(oldf) return separator_y     end,
@@ -227,6 +227,9 @@ DialogBox = function(parameters)
 			end
 			
 		end
+	)
+	override_function(instance,"add",
+		function(oldf,self,...) content_group:add(...) end
 	)
 	
 	----------------------------------------------------------------------------
@@ -325,7 +328,7 @@ DialogBox = function(parameters)
 	instance_on_style_changed()
 	
 	
-	instance:add(content_group,title)
+	screen.add(instance,content_group,title)
 	
 	instance:set(parameters)
 	
