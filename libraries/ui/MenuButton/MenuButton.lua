@@ -22,7 +22,7 @@ MenuButton = function(parameters)
 	
     local button = Button{style = false,w=300}
     
-    local popup = LayoutManager()
+    local popup = ListManager()
     
 	local instance = LayoutManager()
     
@@ -35,8 +35,8 @@ MenuButton = function(parameters)
     ----------------------------------------------------------------------------
     
 	override_property(instance,"item_spacing",
-		function(oldf) return   popup.vertical_spacing     end,
-		function(oldf,self,v)   popup.vertical_spacing = v end
+		function(oldf) return   popup.spacing     end,
+		function(oldf,self,v)   popup.spacing = v end
 	)
     ----------------------------------------------------------------------------
 	
@@ -57,19 +57,23 @@ MenuButton = function(parameters)
             local items = {}
             
             for i, item in ipairs(v) do
-                if type(item) ~= "userdata" and item.__types__.actor then 
+                
+                if type(item) == "table" and item.type then 
+                    
+                    item = _G[item.type](item)
+                    
+                elseif type(item) ~= "userdata" and item.__types__.actor then 
                 
                     error("Must be a UIElement or nil. Received "..obj,2) 
                     
                 end
                 
-                items[i] = {item}
+                --items[i] = {item}
             end
             
             popup:set{
-                number_of_cols = 1,
-                number_of_rows = #items,
-                cells = items,
+                length = #items,
+                cells = v,
             }
             
             
@@ -123,8 +127,8 @@ MenuButton = function(parameters)
             
             t.items = {}
             
-            for i = 1,popup.number_of_rows do
-                t.items[i] = popup.cells[i][1]
+            for i = 1,popup.length do
+                t.items[i] = popup.cells[i].attributes
             end
             
             t.direction = instance.direction
