@@ -154,7 +154,10 @@ ButtonPicker = function(parameters)
                 window_w,
                 window_h,
             }
-            
+            if next_item then
+                next_item.x = window_w/2
+                next_item.y = window_h/2
+            end
 		end
 	)
     ----------------------------------------------------------------------------
