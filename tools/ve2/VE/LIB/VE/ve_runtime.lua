@@ -117,26 +117,35 @@ local styles
 
 function load_styles(str)
     
+        
     if type(styles) == "table" then
+        
         print("WARNING. Styles table already exists")
+        
     end
     
     if type(str) ~= "string" then
+        
         error("Expected string. Received "..type(str),2)
+        
     end
     
     styles = json:parse(str)
     
     if type(styles) ~= "table" then
+        
         error("String is not valid json",2)
+        
     end
     
     for name,attributes in pairs(styles) do
+        
         styles[name] = Style(name):set(attributes)
+        
     end
     
     return styles
-    
+        
 end
 
 --[[
@@ -238,21 +247,33 @@ end
 
 function load_layer(str)
     
+      --load_styles should be called before load_layer
     if type(styles) ~= "table" then
+        
         print("WARNING. Styles table is empty")
-    end
-    if type(str) ~= "string" then
-        error("Expected string. Received "..type(str),2)
+        
     end
     
+    --load_layer expects to receive a json string
+    if type(str) ~= "string" then
+        
+        error("Expected string. Received "..type(str),2)
+        
+    end
+    
+    --parse the json
     local layer = json:parse(str)
     
+    --load_layer expects valid json
     if type(layer) ~= "table" then
+        
         error("String is not valid json",2)
+        
     end
     
-    return construct(layer)
-    
+    --the setter for Widget_Group.children calls the appropriate 
+    --constructors when it receives an attributes table as an entry
+    return Widget_Group(layer)    
 end
 
 --[[
