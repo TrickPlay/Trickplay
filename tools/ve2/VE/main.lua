@@ -41,16 +41,6 @@ ui = {
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
 
-
---[[ test engine ui element 
-
-g = Group{name="Layer1"}
-loadfile("test1.lua")(g)
-
-]]
-
-
-
 function dump_properties( o )
         local t = {}
         local l = 0
@@ -308,12 +298,12 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 			return 
 		end 
 
+        local actor , dx , dy = unpack( dragging )
+	    local border = screen:find_child(uiInstance.name.."border")
+		local am = screen:find_child(uiInstance.name.."a_m") 
 	    if(input_mode == hdr.S_SELECT) then
-	        local border = screen:find_child(uiInstance.name.."border")
-		    local am = screen:find_child(uiInstance.name.."a_m") 
 		    local group_pos
 	       	if(border ~= nil and dragging ~= nil) then 
-                local actor , dx , dy = unpack( dragging )
 		        if (uiInstance.is_in_group == true) then
 			        --group_pos = util.get_group_position(uiInstance)
 			        group_pos = nil
@@ -335,16 +325,16 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 			    if(screen:find_child("v_guideline"..i) ~= nil) then 
 			            local gx = screen:find_child("v_guideline"..i).x 
 			     	    if(15 >= math.abs(gx - x + dx)) then  
-						    new_object.x = gx
 							uiInstance.x = gx + screen:find_child("v_guideline"..i).w 
 							if (am ~= nil) then 
 			     	     	    am.x = am.x - (x-dx-gx)
+			     	     	    border.x = border.x - (x-dx-gx)
 							end
-			     		elseif(15>= math.abs(gx - x + dx - new_object.w)) then
-						    new_object.x = gx - new_object.w  
-							uiInstance.x = gx - new_object.w 
+			     		elseif(15>= math.abs(gx - x + dx - uiInstance.w)) then
+							uiInstance.x = gx - uiInstance.w 
 							if (am ~= nil) then 
-			     	     	    am.x = am.x - (x-dx+new_object.w - gx)
+			     	     	    am.x = am.x - (x-dx+uiInstance.w - gx)
+			     	     	    border.x = border.x - (x-dx+uiInstance.w - gx)
 							end
 			     		end 
 			   	end 
@@ -353,16 +343,17 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 			    if(screen:find_child("h_guideline"..i) ~= nil) then 
 			        local gy =  screen:find_child("h_guideline"..i).y 
 			      	if(15 >= math.abs(gy - y + dy)) then 
-					    new_object.y = gy
+					    uiInstance.y = gy
 					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h 
 						if (am ~= nil) then 
 			     	        am.y = am.y - (y-dy - gy) 
+			     	        border.y = border.y - (y-dy - gy) 
 						end
-			      	elseif(15>= math.abs(gy - y + dy - new_object.h)) then
-					    new_object.y = gy - new_object.h
-						uiInstance.y =  gy - new_object.h 
+			      	elseif(15>= math.abs(gy - y + dy - uiInstance.h)) then
+						uiInstance.y =  gy - uiInstance.h 
 						if (am ~= nil) then 
-			     	        am.y = am.y - (y-dy + new_object.h - gy)  
+			     	        am.y = am.y - (y-dy + uiInstance.h - gy)  
+			     	        border.y = border.y - (y-dy + uiInstance.h - gy)  
 						end
 			      	end 
 			   	end
@@ -1464,6 +1455,7 @@ _VE_.setAppPath = function(path)
 end 
 
 _VE_.openFile = function(path)
+    blockReport = true
     screen:clear()
     _VE_.setBGImages(path)
     editor_lb:change_app_path(path)
@@ -1539,6 +1531,7 @@ _VE_.openFile = function(path)
         end
     end
     -]]
+    blockReport = false
 end 
 
 
