@@ -112,6 +112,16 @@ TabBar = function(parameters)
             elseif type(obj.label) ~= "string" then
                 error("Received a tab without a label",2)
             end
+            for i,c in ipairs(obj.contents or {}) do
+                if type(c) == "table" and c.type then 
+                    
+                    obj.contents[i] = _G[c.type](c)
+                    
+                elseif type(c) ~= "userdata" and c.__types__.actor then 
+                    
+                    error("Must be a UIElement or nil. Received "..c,2) 
+                end
+            end
             local pane = Group{children = obj.contents}
             obj = ToggleButton{
                 label  = obj.label,
@@ -166,6 +176,7 @@ TabBar = function(parameters)
             
             tabs_lm:set{
                 direction = "horizontal",
+                --length = #v,
                 cells = v,
             }
             if tab_location == "top" then
@@ -176,12 +187,16 @@ TabBar = function(parameters)
             
         end
 	)
-    local pane_w,pane_h
+    local pane_w = panes_obj.w
+    local pane_h = panes_obj.h
 	override_property(instance,"pane_w",
 		function(oldf) return   pane_w     end,
 		function(oldf,self,v)   
             pane_w = v 
             panes_obj.w = v
+            if tab_location == "top" then
+                tab_pane.pane_w    = pane_w
+            end
         end
     )
 	override_property(instance,"pane_h",
@@ -189,6 +204,9 @@ TabBar = function(parameters)
 		function(oldf,self,v)   
             pane_h = v 
             panes_obj.h = v
+            if tab_location == "left" then
+                tab_pane.pane_h    = pane_h
+            end
         end
     )
 	override_property(instance,"tab_w",
@@ -239,6 +257,16 @@ TabBar = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.length               = nil
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h = nil
+            t.cell_w = nil
+            t.cells = nil
             
             t.tab_w = instance.tab_w
             t.tab_h = instance.tab_h
@@ -303,10 +331,6 @@ TabBar = function(parameters)
 	)
     instance_on_style_changed()
     --]]
-    
-    
-    
-    
     
     instance:set(parameters)
     
