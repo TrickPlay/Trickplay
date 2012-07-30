@@ -257,10 +257,39 @@ Widget = function(parameters)
 end
 Widget_Group = function(parameters)
     
-    local instance =  Widgetize(  Group()  ):set( 
-        
-        is_table_or_nil( "Widget_Group", parameters ) 
-        
+    local instance =  Widgetize(  Group()  )
+    
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"children",
+        function(oldf,self)  return oldf(self)  end,
+        function(oldf,self,v)
+            
+            if type(v) ~= "table" then 
+                
+                error("Expected table. Received "..type(v),2)
+                
+            end
+            
+            for i,obj in ipairs(v) do
+                
+                if type(obj) == "table" and obj.type then 
+                    
+                    v[i] = _G[obj.type](obj)
+                    
+                elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                
+                    error("Must be a UIElement or nil. Received "..obj,2) 
+                    
+                end
+                
+            end
+            
+            self:clear()
+            
+            self:add(unpack(v))
+            
+        end
     )
     
     ----------------------------------------------------------------------------
@@ -288,7 +317,7 @@ Widget_Group = function(parameters)
         end
     )
     
-    return instance
+    return parameters and instance:set(parameters) or instance
     
 end
 
@@ -298,11 +327,7 @@ local rectangle_properties = {
 }
 Widget_Rectangle = function(parameters)
     
-    local instance = Widgetize(  Rectangle()  ):set( 
-        
-        is_table_or_nil( "Widget_Rectangle", parameters ) 
-        
-    )
+    local instance = Widgetize(  Rectangle()  )
     
     ----------------------------------------------------------------------------
     
@@ -322,7 +347,7 @@ Widget_Rectangle = function(parameters)
         end
     )
     
-    return instance
+    return parameters and instance:set(parameters) or instance
     
 end
 local text_properties = {
@@ -334,11 +359,7 @@ local text_properties = {
 }
 Widget_Text = function(parameters)
     
-    local instance = Widgetize(  Text()  ):set( 
-        
-        is_table_or_nil( "Widget_Text", parameters ) 
-        
-    )
+    local instance = Widgetize(  Text()  )
     
     ----------------------------------------------------------------------------
     
@@ -358,7 +379,7 @@ Widget_Text = function(parameters)
         end
     )
     
-    return instance
+    return parameters and instance:set(parameters) or instance
     
 end
 
@@ -367,11 +388,7 @@ local image_properties = {
 }
 Widget_Image = function(parameters)
     
-    local instance = Widgetize(  Image()  ):set( 
-        
-        is_table_or_nil( "Widget_Image", parameters ) 
-        
-    )
+    local instance = Widgetize(  Image()  )
     
     ----------------------------------------------------------------------------
     
@@ -391,7 +408,7 @@ Widget_Image = function(parameters)
         end
     )
     
-    return instance
+    return parameters and instance:set(parameters) or instance
     
 end
 
@@ -400,11 +417,7 @@ local clone_properties = {
 }
 Widget_Clone = function(parameters)
     
-    local instance = Widgetize(  Clone()  ):set( 
-        
-        is_table_or_nil( "Widget_Clone", parameters ) 
-        
-    )
+    local instance = Widgetize(  Clone()  )
     
     ----------------------------------------------------------------------------
     
@@ -420,7 +433,7 @@ Widget_Clone = function(parameters)
         end
     )
     
-    return instance
+    return parameters and instance:set(parameters) or instance
     
 end
 

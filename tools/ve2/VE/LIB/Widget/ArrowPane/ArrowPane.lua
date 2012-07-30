@@ -154,7 +154,7 @@ ArrowPane = function(parameters)
     
     local move_by = 10
     
-	override_property(instance,"move_by",
+	override_property(instance,"arrow_move_by",
 		function(oldf) return   move_by     end,
 		function(oldf,self,v)   move_by = v end
     )
@@ -266,7 +266,7 @@ ArrowPane = function(parameters)
             t.virtual_y = instance.virtual_y
             t.virtual_w = instance.virtual_w
             t.virtual_h = instance.virtual_h
-            t.move_by   = instance.move_by
+            t.arrow_move_by   = instance.arrow_move_by
             
             t.type = "ArrowPane"
             
