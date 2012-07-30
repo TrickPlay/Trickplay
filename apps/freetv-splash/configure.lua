@@ -715,7 +715,7 @@ local function show_configuration_screen()
             pb_text = nil
             pb_text_bg = nil
             unload_configuration()
-            do_configuration = nil
+            start_configuration = nil
             if final_callback then final_callback() end
         end
         a2:start()
@@ -727,7 +727,7 @@ local function show_configuration_screen()
     my_animation:start()
 end
 
-function do_configuration(callback)
+function start_configuration(callback)
     final_callback = callback
 
     show_configuration_screen()
