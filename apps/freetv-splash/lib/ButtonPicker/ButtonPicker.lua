@@ -57,7 +57,8 @@ ButtonPicker = function(parameters)
 	--The ButtonPicker Object inherits from LayoutManager
 	
     local text = Group()
-    local window = Widget_Group{children={bg,text,fg}}
+    local window = Widget_Group()
+    
     local prev_arrow = Button{
         style = false,
         label = "",
@@ -305,6 +306,14 @@ ButtonPicker = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.length       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.direction = nil
+            t.spacing   = nil
+            t.cell_h = nil
+            t.cell_w = nil
+            t.cells = nil
             
             t.window_w = instance.window_w
             t.window_h = instance.window_h
@@ -387,7 +396,7 @@ ButtonPicker = function(parameters)
     instance_on_style_changed()
 	--]]
     
-    
+    window:add(bg,text,fg)
 	instance:set(parameters)
 	
 	return instance

@@ -20,7 +20,7 @@ ListManager = function(parameters)
     local placeholder = Widget_Rectangle{w=200,h=200,color="ff0000"}
     instance:add(placeholder)
     placeholder:hide()
-    
+    local placeholders = {}
     local node_constructor
 	local cells, direction
     local cell_w, cell_h
@@ -91,6 +91,35 @@ ListManager = function(parameters)
             end
         end
     end
+	override_property(instance,"placeholder",
+		function(oldf)   return placeholder     end,
+		function(oldf,self,v)   
+            instance:add(v)
+            v:hide()
+            
+            for obj, _ in pairs(placeholders) do
+                obj.source = v
+            end
+            
+            placeholder:unparent()
+            if v.subscribe_to then
+                v:subscribe_to(
+                    {"h","w","width","height","size"},
+                    function(...)
+                        if in_on_entries then return end
+                        
+                        cells:on_entries_changed()
+                        
+                    end
+                )
+            end
+            
+            placeholder = v 
+            
+            cells:on_entries_changed()
+            
+        end
+	)
     local position_cell = function(cell,i)
         
         cell.x = 0
@@ -155,7 +184,7 @@ ListManager = function(parameters)
     ----------------------------------------------------------------------------
     
 	override_property(instance,"widget_type",
-		function() return "LayoutManager" end, nil
+		function() return "ListManager" end, nil
 	)
     
 	override_property(instance,    "length",
@@ -247,8 +276,15 @@ ListManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
-                if obj == nil then  obj = Widget_Clone{source=placeholder}
+                if obj == nil then  
+                    
+                    obj = Widget_Clone{source=placeholder}
+                    placeholders[obj] = true
                 
+                elseif type(obj) == "table" and obj.type then 
+                    
+                    obj = _G[obj.type](obj)
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -300,6 +336,7 @@ ListManager = function(parameters)
             for _,f in pairs(items[obj].key_functions) do f() end
             items[obj] = nil
             obj:unparent() 
+            placeholders[obj] = nil
         end,
         
         on_entries_changed = function(self)
@@ -331,6 +368,33 @@ ListManager = function(parameters)
         end
 	)
     
+    
+	----------------------------------------------------------------------------
+	
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.length       = instance.length
+            t.vertical_alignment   = instance.vertical_alignment
+            t.horizontal_alignment = instance.horizontal_alignment
+            t.direction = instance.direction
+            t.spacing   = instance.spacing
+            t.cell_h = instance.cell_h
+            t.cell_w = instance.cell_w
+            t.cells = {}
+            for_each(cells,function(obj,i)
+                
+                if not placeholders[obj] then
+                    t.cells[i] = obj.attributes
+                end
+            end)
+            
+            t.type = "ListManager"
+            
+            return t
+        end
+    )
     
     local function set_and_nil(t,k)
         
@@ -655,6 +719,10 @@ LayoutManager = function(parameters)
                     obj = Widget_Clone{source=placeholder}
                     placeholders[obj] = true
                     
+                elseif type(obj) == "table" and obj.type then 
+                    
+                    obj = _G[obj.type](obj)
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -754,8 +822,12 @@ LayoutManager = function(parameters)
 		function(oldf,self,v)   
             cells:set(v) 
             
-            focused_child = cells[1][1] 
-            focused_child:grab_key_focus()
+            if cells.number_of_rows >= 1 and cells.number_of_rows >= 1  then
+                focused_child = cells[1][1] 
+                focused_child:grab_key_focus()
+            else
+                focused_child = nil
+            end
         end
 	)
     
@@ -797,7 +869,9 @@ LayoutManager = function(parameters)
                 if not t.cells[r] then
                     t.cells[r] = {}
                 end
-                t.cells[r][c] = obj.attributes
+                if not placeholders[obj] then
+                    t.cells[r][c] = obj.attributes
+                end
             end)
             
             t.type = "LayoutManager"

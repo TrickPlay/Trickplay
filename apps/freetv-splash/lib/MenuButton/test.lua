@@ -60,6 +60,7 @@ local style = {
 screen:show()
 
 mb0 = MenuButton()
+---[[
 mb1 = MenuButton{
     x = 300,
     items = {
@@ -88,10 +89,17 @@ mb4 = MenuButton{
         Button(),Button()
     }
 }
-
-screen:add(
-    Rectangle{x=300,size = {20,1000}},
-    Rectangle{x=600,size = {20,1000}},
+mb4.items:insert(2,Button())
+--]]
+wg = Widget_Group()
+screen:add(wg)
+wg:add(
+    Widget_Rectangle{x=300,size = {20,1000}},
+    Widget_Rectangle{x=600,size = {20,1000}},
     mb0,mb1,mb2,mb3,mb4
 )
+
+print(get_all_styles())
+print("\n\n\n")
+print(wg:to_json())
 

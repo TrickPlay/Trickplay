@@ -208,7 +208,7 @@ OrbittingDots = function(parameters)
 	
 	override_property(instance,"num_dots",
 		
-		function(oldf)    return image   end,
+		function(oldf)    return num   end,
 		
 		function(oldf,self,v)
 			
