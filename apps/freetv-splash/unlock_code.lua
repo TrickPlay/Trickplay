@@ -288,9 +288,9 @@ function highlight_state:on_completed()
 end
 
 
-function do_unlock_code(callback)
     on_completed = function()
                         if callback then callback() end
+function start_unlock_code(callback)
                         background = nil
                         logo = nil
                         prompt = nil
@@ -305,7 +305,7 @@ function do_unlock_code(callback)
                         digits_s = nil
                         unlock_group:unparent()
                         unlock_group = nil
-                        do_unlock_code = nil
+                        start_unlock_code = nil
                         collectgarbage()
                     end
     show_enter_code_screen()
