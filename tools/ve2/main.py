@@ -417,14 +417,20 @@ class MainWindow(QMainWindow):
         return True
 
     def addVerticalGuide(self):
-        self.sendLuaCommand("addVerticalGuide", "_VE_.VerticalGuide()")
+        self.sendLuaCommand("addVerticalGuide", "_VE_.addVerticalGuide()")
         return True
 
     def showGuides(self):
-        self.sendLuaCommand("showGuides", "_VE_.showGuides()")
+        if self.ui.actionShow_Guides.isChecked() == True :
+            self.sendLuaCommand("showGuides", "_VE_.showGuides(false)")
+        else :
+            self.sendLuaCommand("showGuides", "_VE_.showGuides(true)")
         return True
 
     def snapToGuides(self):
-        self.sendLuaCommand("snapToGuides", "_VE_.snapToGuides()")
+        if self.ui.actionSnap_to_Guides.isChecked() == True :
+            self.sendLuaCommand("snapToGuides", "_VE_.snapToGuides(false)")
+        else:
+            self.sendLuaCommand("snapToGuides", "_VE_.snapToGuides(true)")
         return True
 

@@ -807,11 +807,26 @@
    </property>
   </action>
   <action name="actionShow_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Guides</string>
    </property>
   </action>
   <action name="actionSnap_to_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Snap to Guides</string>
    </property>

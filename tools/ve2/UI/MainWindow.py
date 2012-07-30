@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Jul 19 11:08:16 2012
+# Created: Fri Jul 27 15:11:27 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -309,8 +309,13 @@ class Ui_MainWindow(object):
         self.actionAdd_Vertical_Guide = QtGui.QAction(MainWindow)
         self.actionAdd_Vertical_Guide.setObjectName(_fromUtf8("actionAdd_Vertical_Guide"))
         self.actionShow_Guides = QtGui.QAction(MainWindow)
+        self.actionShow_Guides.setCheckable(True)
+        self.actionShow_Guides.setChecked(True)
+        self.actionShow_Guides.setEnabled(True)
         self.actionShow_Guides.setObjectName(_fromUtf8("actionShow_Guides"))
         self.actionSnap_to_Guides = QtGui.QAction(MainWindow)
+        self.actionSnap_to_Guides.setCheckable(True)
+        self.actionSnap_to_Guides.setChecked(True)
         self.actionSnap_to_Guides.setObjectName(_fromUtf8("actionSnap_to_Guides"))
         self.actionImage = QtGui.QAction(MainWindow)
         self.actionImage.setObjectName(_fromUtf8("actionImage"))

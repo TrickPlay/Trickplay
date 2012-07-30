@@ -72,10 +72,11 @@ mouse_state       = hdr.BUTTON_UP
 --item_num 	      = 0
 
 --guideline_show	  = true
+snapToGuide	      = true
 
 -- index for new guideline
---h_guideline       = 0
---v_guideline       = 0
+h_guideline       = 0
+v_guideline       = 0
 
 -- key focuses 
 --focus_type        = ""
