@@ -1915,18 +1915,13 @@ _VE_.showGuides = function(guidelineShow)
 
 end
 _VE_.snapToGuides = function(snapGuide)
-    if util.is_there_guideline() then 
-		if sanpGuide == true then 
+	if snapGuide == true then 
 		 	--menuButtonView.items[12]["icon"].opacity = 0 
             snapToGuide = false
-		else 
+	else 
 		 	--menuButtonView.items[12]["icon"].opacity = 255 
             snapToGuide = true
-		end
-    else
-    	--editor.error_message("008", nil, nil)
-        print ("error")
-    end
+	end
 	screen:grab_key_focus()
 end
 
