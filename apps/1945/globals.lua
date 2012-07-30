@@ -391,7 +391,7 @@ base_imgs.water1:set{
 curr_lvl_imgs = {}
 load_imgs={}
 load_imgs[1] = function()
-    print("aassa")
+    --print("aassa")
     for k , v in pairs( curr_lvl_imgs ) do
         if type(v) == "table" then
             for _ , vv in pairs( v ) do
