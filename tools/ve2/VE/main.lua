@@ -1973,18 +1973,18 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     elseif uiTypeStr == "LayoutManager" then 
         uiInstance:set{
         number_of_rows = 2,
-        number_of_cols = 3
-        --placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color =
-        --{255,255,255,0}},
-        --cells = {
-        --    {Widget_Rectangle{name = "star", w=100,h=100}},
-        --    {Widget_Rectangle{name = "moon", w=100,h=100}},
-        --    {Widget_Rectangle{name = "moon", w=100,h=100}},
-            --{Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        --}
+        number_of_cols = 3,
+        placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
+        cells = {
+            {Widget_Rectangle{name = "star", w=100,h=100}},
+            {Widget_Rectangle{name = "moon", w=100,h=100}},
+            {Widget_Rectangle{name = "moon", w=100,h=100}},
+            {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
+        }
         }
 
     
+    --[[
         uiInstance:set{ number_of_rows = 2, number_of_cols = 2}
         uiInstance.set{
                 cells = {
@@ -1997,7 +1997,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
                 --{Widget_Rectangle{w=100,h=100, color = {255,0,100,255}}},
                 --{Widget_Rectangle{w=100,h=100, color = {255,100,100,255}},Widget_Rectangle{w=100,h=100, color = {20,220,0,255}}},
         }
-    
+    ]]
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
              position = {100,100},
@@ -2007,7 +2007,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
             }
         }
 
-        uiInstance.tabs[1]:add()
+        --uiInstance.tabs[1]:add()
     elseif uiTypeStr == "ProgressBar" then 
         uiInstance.progress = 0.25
     elseif uiTypeStr == "ScrollPane" then 
