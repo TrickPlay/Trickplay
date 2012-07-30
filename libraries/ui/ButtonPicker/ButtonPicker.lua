@@ -298,8 +298,8 @@ ButtonPicker = function(parameters)
         end
 	)
     
-    prev_arrow.on_released = prev_i
-    next_arrow.on_released = next_i
+    prev_arrow:add_mouse_handler("on_button_up",prev_i)
+    next_arrow:add_mouse_handler("on_button_up",next_i)
     
     
 	override_property(instance,"attributes",
