@@ -49,6 +49,8 @@ loadfile("test1.lua")(g)
 
 ]]
 
+
+
 function dump_properties( o )
         local t = {}
         local l = 0
@@ -327,6 +329,45 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 		        end 
 	        end 
 	    end 
+
+        if snapToGuide == true then 
+		    for i=1, v_guideline,1 do 
+			    if(screen:find_child("v_guideline"..i) ~= nil) then 
+			            local gx = screen:find_child("v_guideline"..i).x 
+			     	    if(15 >= math.abs(gx - x + dx)) then  
+						    new_object.x = gx
+							uiInstance.x = gx + screen:find_child("v_guideline"..i).w 
+							if (am ~= nil) then 
+			     	     	    am.x = am.x - (x-dx-gx)
+							end
+			     		elseif(15>= math.abs(gx - x + dx - new_object.w)) then
+						    new_object.x = gx - new_object.w  
+							uiInstance.x = gx - new_object.w 
+							if (am ~= nil) then 
+			     	     	    am.x = am.x - (x-dx+new_object.w - gx)
+							end
+			     		end 
+			   	end 
+		    end 
+			for i=1, h_guideline,1 do 
+			    if(screen:find_child("h_guideline"..i) ~= nil) then 
+			        local gy =  screen:find_child("h_guideline"..i).y 
+			      	if(15 >= math.abs(gy - y + dy)) then 
+					    new_object.y = gy
+					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h 
+						if (am ~= nil) then 
+			     	        am.y = am.y - (y-dy - gy) 
+						end
+			      	elseif(15>= math.abs(gy - y + dy - new_object.h)) then
+					    new_object.y = gy - new_object.h
+						uiInstance.y =  gy - new_object.h 
+						if (am ~= nil) then 
+			     	        am.y = am.y - (y-dy + new_object.h - gy)  
+						end
+			      	end 
+			   	end
+			end
+		end 
 
         dragging = nil
         uiInstance:ungrab_pointer()
@@ -1388,7 +1429,6 @@ _VE_.repUIInfo = function(uiInstance)
         table.insert(t, json:parse(uiInstance:to_json()))
     end 
     print("repUIInfo"..json:stringify(t))
-    _VE_.repStInfo()
 end
 
 _VE_.openInspector = function(gid)
@@ -1595,17 +1635,258 @@ _VE_.white = function()
     BG_IMAGE_white.opacity = 255
 end
 
+
+local function guideline_inspector(v)
 --[[
+  	local WIDTH = 300
+  	local HEIGHT = 150
+    local PADDING = 13
+	local TOP_BAR = 30
+    local MSG_BAR = 80
+    local BOTTOM_BAR = 40
+
+    local TSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local MSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
+    local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
+    local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
+
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
+	local title = Text {name = "title", text = "Guideline" }:set(TSTYLE)
+	local title_shadow = Text {name = "title", text = "Guideline"}:set(TSSTYLE)
+	local message = Text {}:set(MSTYLE)
+	local message_shadow = Text {}:set(MSSTYLE)
+
+	-- Text Input Field 	
+	local org_position 
+
+	if(util.guideline_type(v.name) == "v_guideline") then
+		org_position = tostring(math.floor(v.x))
+		title.text = "Vertical Guideline"
+		title_shadow.text = "Vertical Guideline"
+		message.text = "X Position:"
+		message_shadow.text = "X Position:"
+	else
+		org_position = tostring(math.floor(v.y))
+		title.text =  "Horizontal Guideline"
+		title_shadow.text = "Horizontal Guideline"
+		message.text = "Y Position:"
+		message_shadow.text = "Y Position:"
+	end 
+
+	local text_input = TextInput{width = WIDTH - 2 * PADDING , height = 22 , text = org_position}
+
+	--Buttons 
+   	local button_cancel = Button{width = 80, height = 27, label = "Cancel"}
+		  button_cancel.name = "button_cancel"
+   	local button_delete = Button{ width = 80, height = 27, label = "Delete"}
+		  button_delete.name = "button_delete"
+	local button_ok = Button{ width = 80, height = 27, label = "OK"}
+		  button_ok.name = "button_ok"
+
+	-- Button Event Handlers
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_delete.on_press = function() screen:remove(screen:find_child(v.name))
+ 									   xbox:on_button_down() 
+							end 
+
+	button_ok.on_press = function() 
+		if text_input.text == "" then 
+			editor.error_message("006", nil, nil) 
+			xbox:on_button_down() 
+			return 
+   		end    
+		if(util.guideline_type(v.name) == "v_guideline") then
+				v.x = tonumber(text_input.text)
+		else 
+				v.y = tonumber(text_input.text)
+		end 
+		xbox:on_button_down() 
+	end
+
+	local ti_func = function()
+		if current_focus then 
+			current_focus.clear_focus()
+		end 
+		--button_ok.active.opacity = 255
+		--button_ok.dim.opacity = 0
+        button_ok.focused = true
+		--text_input.set_focus()
+        text_input.focused = true
+	end
+
+	local tab_func = function()
+		text_input.clear_focus()
+		--button_ok.active.opacity = 0
+		--button_ok.dim.opacity = 255
+		button_ok.focused = false
+		--button_cancel.set_focus()
+		--button_cancel:grab_key_focus()
+		button_cancel.focused = true
+	end
+
+	-- Focus Destination 
+	button_cancel.extra.focus = {[keys.Right] = "button_delete", [keys.Tab] = "button_delete", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+	button_delete.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Left] = "button_cancel", [keys.Return] = "button_delete", [keys.Up] = ti_func}
+	button_ok.extra.focus = {[keys.Left] = "button_delete", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+
+	text_input.extra.focus = {[keys.Tab] = tab_func, [keys.Return] = "button_ok",}
+
+	-- Button Position Set
+ 		button_cancel:set{position ={WIDTH-button_delete.w-button_ok.w-button_cancel.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+ 		button_delete:set{position ={WIDTH-button_delete.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
+ 		button_ok:set{position ={WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+
+	local msgw = Group {
+		name = "msgw",  --ui_element_insert
+		position ={650, 250},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	msgw_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {PADDING,PADDING/3}, }, 
+			title:set{position = {PADDING+1, PADDING/3+1}}, 
+			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
+			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
+			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
+			button_cancel,
+			button_delete,
+			button_ok
+		}
+		,scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+	}
+
+	function xbox:on_button_down()
+		screen:remove(msgw)
+		msgw:clear() 
+		current_inspector = nil
+		current_focus = nil
+        screen.grab_key_focus(screen) 
+	    input_mode = hdr.S_SELECT
+		return true
+	end 
+
+	function text_input:on_key_down(key)
+
+		local key_focus_obj 
+
+		if text_input.focus[key] == nil then return end 
+
+		if text_input.focus[key] then
+			if type(text_input.focus[key]) == "function" then
+				text_input.focus[key]()
+				return true
+			else
+				local key_focus_obj = screen:find_child(text_input.focus[key]) 
+
+				if key_focus_obj == nil then return end 
+
+				if text_input.clear_focus then
+					text_input.clear_focus()
+				end
+				key_focus_obj:grab_key_focus()
+				if key_focus_obj.set_focus then
+					key_focus_obj.set_focus(key)
+				end
+			end
+		end
+
+	end
+
+	if(util.guideline_type(v.name) == "v_guideline") then
+		msgw.x= v.x - msgw.w/2
+		msgw.y= screen.h/2 - msgw.h/2
+	else
+		msgw.y= v.y - msgw.h/2
+		msgw.x= screen.w/2 - msgw.w/2
+	end 
+
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	util.create_on_button_down_f(msgw)	
+	-- Set focus 
+	ti_func()
+
+    ]]
+end 
+
+
+local function create_on_line_down_f(v)
+
+        function v:on_button_down(x,y,button,num_clicks)
+            dragging = {v, x - v.x, y - v.y }
+	     	if(button == 3) then
+		  		guideline_inspector(v)
+                return true
+            end 
+            return true
+        end
+
+        function v:on_button_up(x,y,button,num_clicks)
+	     	if(dragging ~= nil) then 
+
+	        	local actor , dx , dy = unpack( dragging )
+		  		if(util.guideline_type(v.name) == "v_guideline") then 
+					v.x = x - dx
+		  		elseif(util.guideline_type(v.name) == "h_guideline") then  
+					v.y = y - dy
+		  		end 
+	          	dragging = nil
+            end
+            return true
+        end
+
+end 
+
+
 _VE_.addHorizonGuide = function()
+    h_guideline = h_guideline + 1
 
+     local h_gl = Rectangle {
+		name="h_guideline"..tostring(h_guideline),
+		border_color= hdr.DEFAULT_COLOR, 
+		color={255,25,25,100},
+		size = {screen.w, 4},
+		position = {0, screen.h/2, 0}, 
+		opacity = 255,
+		reactive = true
+     }
+     create_on_line_down_f(h_gl)
+     screen:add(h_gl)
+     screen:grab_key_focus()
+
+--[[
+	 if menuButtonView.items[11]["icon"].opacity < 255 then 
+		h_gl:hide()
+	 end 
+]]
 end
+
 _VE_.addVerticalGuide = function()
+    v_guideline = v_guideline + 1 
 
+     local v_gl = Rectangle {
+		name="v_guideline"..tostring(v_guideline),
+		border_color= hdr.DEFAULT_COLOR, 
+		color={255,25,25,100},
+		size = {4, screen.h},
+		position = {screen.w/2, 0, 0}, 
+		opacity = 255,
+		reactive = true, 
+     }
+     create_on_line_down_f(v_gl)
+     screen:add(v_gl)
+     screen:grab_key_focus()
+
+	 if menuButtonView.items[11]["icon"].opacity < 255 then 
+		v_gl:hide()
+	 end 
 end
-_VE_.showGuides = function()
-    	if guideline_show == false then 
-		menuButtonView.items[11]["icon"].opacity = 255
-		guideline_show = true
+
+_VE_.showGuides = function(guidelineShow)
+    if guidelineShow == false then 
+		--menuButtonView.items[11]["icon"].opacity = 255
 		for i= 1, h_guideline, 1 do 
 			local h_guide = screen:find_child("h_guideline"..tostring(i))
 			if h_guide then 
@@ -1620,8 +1901,7 @@ _VE_.showGuides = function()
 		end 
 	else 
 		if util.is_there_guideline() then 
-			menuButtonView.items[11]["icon"].opacity = 0
-			guideline_show = false
+			--menuButtonView.items[11]["icon"].opacity = 0
 			for i= 1, h_guideline, 1 do 
 				local h_guide = screen:find_child("h_guideline"..tostring(i)) 
 				if h_guide then 
@@ -1641,20 +1921,22 @@ _VE_.showGuides = function()
 	screen:grab_key_focus()
 
 end
-_VE_.snapToGuides = function()
-    	if util.is_there_guideline() then 
-		if menuButtonView.items[12]["icon"].opacity > 0 then 
-		 	menuButtonView.items[12]["icon"].opacity = 0 
+_VE_.snapToGuides = function(snapGuide)
+    if util.is_there_guideline() then 
+		if sanpGuide == true then 
+		 	--menuButtonView.items[12]["icon"].opacity = 0 
+            snapToGuide = false
 		else 
-		 	menuButtonView.items[12]["icon"].opacity = 255 
+		 	--menuButtonView.items[12]["icon"].opacity = 255 
+            snapToGuide = true
 		end
     else
-    	editor.error_message("008", nil, nil)
+    	--editor.error_message("008", nil, nil)
+        print ("error")
     end
 	screen:grab_key_focus()
 end
 
-]]
 _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     local uiInstance, dragging = nil 
@@ -1691,18 +1973,18 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     elseif uiTypeStr == "LayoutManager" then 
         uiInstance:set{
         number_of_rows = 2,
-        number_of_cols = 3,
-        placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color =
-        {255,255,255,0}},
-        cells = {
-            {Widget_Rectangle{name = "star", w=100,h=100}},
-            {Widget_Rectangle{name = "moon", w=100,h=100}},
-            {Widget_Rectangle{name = "moon", w=100,h=100}},
+        number_of_cols = 3
+        --placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color =
+        --{255,255,255,0}},
+        --cells = {
+        --    {Widget_Rectangle{name = "star", w=100,h=100}},
+        --    {Widget_Rectangle{name = "moon", w=100,h=100}},
+        --    {Widget_Rectangle{name = "moon", w=100,h=100}},
             --{Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        }
+        --}
         }
 
-    --[[
+    
         uiInstance:set{ number_of_rows = 2, number_of_cols = 2}
         uiInstance.set{
                 cells = {
@@ -1715,7 +1997,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
                 --{Widget_Rectangle{w=100,h=100, color = {255,0,100,255}}},
                 --{Widget_Rectangle{w=100,h=100, color = {255,100,100,255}},Widget_Rectangle{w=100,h=100, color = {20,220,0,255}}},
         }
-        ]]
+    
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
              position = {100,100},
@@ -1724,20 +2006,27 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
                 {label="Tab2",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}} },
             }
         }
+
+        uiInstance.tabs[1]:add()
     elseif uiTypeStr == "ProgressBar" then 
         uiInstance.progress = 0.25
-    elseif uiTypeStr == "ToastAlert" then 
-        b = Button{name="pretty_button"}
-        uiInstance:add(b)
     elseif uiTypeStr == "ScrollPane" then 
         b = Button{name="pretty_button"}
         uiInstance:add(b)
     elseif uiTypeStr == "DialogBox" then 
         b = Button{name="pretty_button"}
-        uiInstance:add(b)
-    elseif uiTypeStr == "ToastAlert" then 
-        b = Button{name="pretty_button"}
-        uiInstance:add(b)
+        uiInstance.content = {b}
+    elseif uiTypeStr == "MenuButton" then 
+        --b = Button{name="pretty_button"}
+        uiInstance.items = {Button{name="pretty_button"}}
+
+        --uiInstance:add(b)
+        --table.insert(uiInstance.items, b)
+        --uiInstance.items.length = 3
+        --uiInstance.items[1] = b
+        --uiInstance.items[2] = b
+        --uiInstance.items[3] = b
+
     end 
         
     assign_right_name(uiInstance, uiTypeStr)
@@ -1823,6 +2112,13 @@ end
         end
 	end
 
+local function styleUpdate()
+    if blockReport ~= true then
+        _VE_.refresh()
+    end 
+end 
+
+Style:subscribe_to(styleUpdate)
 
 screen.reactive = true
 

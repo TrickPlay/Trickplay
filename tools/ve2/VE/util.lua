@@ -53,6 +53,384 @@ local uiElementCreate_map =
 }
 
 
+function util.create_on_button_down_f(v)
+
+	v.extra.selected = false
+	local org_object, new_object 
+
+	function v:on_button_down(x,y,button,num_clicks, m)
+
+		if m and m.control then 
+			control = true 
+		else 
+			control = false 
+		end 
+
+	   	if (input_mode ~= hdr.S_RECTANGLE) then 
+	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
+	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
+					if (v.extra.is_in_group == true and control == false ) then 
+
+		    			local p_obj = v.parent 
+
+						while p_obj.extra.is_in_group == true do
+								p_obj = p_obj.parent
+					    end 
+
+                		if(button == 3) then 
+                			editor.inspector(p_obj, x, y)
+                    		return true
+                		end 
+
+	            		if(input_mode == hdr.S_SELECT and p_obj.extra.selected == false) then 
+		     				screen_ui.selected(p_obj)
+	            		elseif (p_obj.extra.selected == true) then 
+		     				screen_ui.n_select(p_obj)
+		    			end
+
+	            		org_object = util.copy_obj(p_obj)
+
+		    			if v.extra.lock == false then 
+           	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+		    			end 
+
+           	    		return true
+	      			else 
+
+                		if(button == 3) then	
+                 			editor.inspector(v, x, y)
+                    		return true
+                		end 
+
+	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 
+		     				screen_ui.selected(v) 
+							if(v.type == "Text") then 
+			      				v:set{cursor_visible = true}
+			      				v:set{editable= true}
+     			    			v:grab_key_focus(v)
+							end 
+		    			elseif (v.extra.selected == true) then 
+								if(v.type == "Text") then 
+			      					v:set{cursor_visible = true}
+			      					v:set{editable= true}
+     			    				v:grab_key_focus(v)
+								end 
+								screen_ui.n_select(v) 
+	       				end
+
+				-----[[	SHOW POSSIBLE CONTAINERS
+		    			if control == true then 
+							if v.type == "Text" then 
+								v.editable = false 
+								v.cursor_visible = false
+								screen:grab_key_focus()
+							end
+
+							for i,j in pairs (g.children) do 
+								if util.is_this_container(j) == true then 
+									j:lower_to_bottom()
+								end 
+							end 
+
+							editor_lb:set_cursor(52)
+							cursor_type = 52
+
+							selected_content = v 
+			
+							local odr 
+							for i,j in pairs (g.children) do 
+								if j.name == v.name then 
+									odr = i
+								end 
+							end 
+
+							if odr then 
+								for i,j in pairs (g.children) do 
+									if util.is_this_container(j) == true then 
+										if i > odr then 
+											j.extra.org_opacity = j.opacity
+                       						j:set{opacity = 50}
+										end 	
+									elseif i ~= odr then  
+										j.extra.org_opacity = j.opacity
+                       					j:set{opacity = 50}
+									end 
+								end 
+							end
+						end 
+				-----]]]] 
+
+						if v.type ~= "Text" then 
+							for i, j in pairs (g.children) do  
+	           					if j.type == "Text" then 
+	            					if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+										ui.text = j	
+			  							if ui.text.on_key_down then 
+	                  						ui.text:on_key_down(keys.Return)
+			  							end 
+		    						end
+	           					end 
+	        				end 
+	    				end 
+	    				org_object = util.copy_obj(v)
+						if v.extra.lock == false then 
+        					dragging = {v, x - v.x, y - v.y }
+						end
+        				return true
+					end
+	    		elseif (input_mode == hdr.S_FOCUS) then 
+					if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
+		     			screen_ui.selected(v)
+						local tabs_focus = screen:find_child("tabs_focus")
+						local focus = screen:find_child("focusChanger")
+						if tabs_focus then 
+							for i,j in pairs (tabs_focus.children) do 
+								if j.color[2] == 25 then --활성화 되어 있는 탭 
+									if focus_type == "U" then 
+										focus.extra.tabs[i].up_focus = v.name
+									elseif focus_type == "D" then 
+										focus.extra.tabs[i].down_focus = v.name
+									elseif focus_type == "R" then 
+										focus.extra.tabs[i].right_focus = v.name
+									elseif focus_type == "L" then 
+										focus.extra.tabs[i].left_focus = v.name
+									end 
+								end
+							end 
+						end 
+		     			screen:find_child("text"..focus_type).text = v.name 
+					end 
+					input_mode = hdr.S_FOCUS
+           			return true
+            	end
+	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
+				if v.extra.lock == false then 
+					dragging = {v, x - v.x, y - v.y }
+           			return true
+				end 
+    		end
+		end
+	end
+	
+	function v:on_button_up(x,y,button,num_clicks, m)
+
+		if m  and m.control then 
+			control = true 
+		else 
+			control = false 
+		end 
+
+		if screen:find_child("multi_select_border") then
+			return 
+		end 
+
+		if (input_mode ~= hdr.S_RECTANGLE) then 
+	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
+	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
+	    			if (v.extra.is_in_group == true) then 
+						local p_obj = v.parent 
+						new_object = util.copy_obj(p_obj)
+					    if(dragging ~= nil) then 
+	            			local actor , dx , dy = unpack( dragging )
+							if type(dx) == "number" then 
+	            				new_object.position = {x-dx, y-dy}
+							else 
+								print("dx is function") 
+							end 
+							if new_object == nil or org_object == nil then 
+									return 
+							end 
+							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+								screen_ui.n_select(v, dragging) 
+								screen_ui.n_select(new_object, dragging) 
+								screen_ui.n_select(org_object, dragging) 
+                    			table.insert(undo_list, {p_obj.name, hdr.CHG, org_object, new_object})
+							end 
+	            			dragging = nil
+	            		end 
+		    		return true 
+				elseif( input_mode ~= hdr.S_RECTANGLE) then  
+	      	    	if(dragging ~= nil) then 
+	       	       		local actor = unpack(dragging) 
+		       			if (actor.name == "grip") then  
+							dragging = nil 
+							return true 
+		       			end 
+	               		local actor , dx , dy = unpack( dragging )
+		       			new_object = util.copy_obj(v)
+	               		new_object.position = {x-dx, y-dy}
+					---[[ Content Setting 
+		       			if util.is_in_container_group(x,y) and selected_content then 
+			     			local c, t = util.find_container(x,y) 
+			     			if control == true then 
+			       				if not util.is_this_container(v) or c.name ~= v.name then
+			     					if c and t then 
+				    					if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
+			        						v:unparent()
+											if t ~= "TabBar" then
+			        							v.position = {v.x - c.x, v.y - c.y,0}
+											end 
+			        						v.extra.is_in_group = true
+											if screen:find_child(v.name.."border") then 
+			             						screen:find_child(v.name.."border").position = v.position
+											end
+											if screen:find_child(v.name.."a_m") then 
+			             						screen:find_child(v.name.."a_m").position = v.position 
+			        						end 
+			        						if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
+			            						c.content:add(v) 
+												v.x = v.x - c.content.x
+												v.y = v.y - c.content.y
+			        						elseif t == "LayoutManager" then 
+				     							local col , row=  c:r_c_from_abs_position(x,y)
+				     							c:replace(row,col,v) 
+			        						elseif t == "TabBar" then 
+												local x_off, y_off = c:get_offset()
+
+												local t_index = c:get_index()
+												
+												if t_index then 
+													v.x = v.x - x_off	
+													v.y = v.y - y_off	
+			            							c.tabs[t_index]:add(v) 
+												end
+											elseif t == "Group" then 
+												c:add(v)
+			        						end 
+			     	       				end 
+				    				end 
+			       				end 
+								editor_lb:set_cursor(68)
+								cursor_type = 68
+			     			end 
+			     			if screen:find_child(c.name.."border") and selected_container then 
+								screen:remove(screen:find_child(c.name.."border"))
+								screen:remove(screen:find_child(c.name.."a_m"))
+								screen:remove(screen:find_child(v.name.."border"))
+								screen:remove(screen:find_child(v.name.."a_m"))
+								selected_content = nil
+								selected_container = nil
+			    			end 
+		       			end 
+					---]] Content Setting 
+		       			for i,j in pairs (g.children) do 
+			     			if j.extra then 
+				   				if j.extra.org_opacity then 
+									j.opacity = j.extra.org_opacity
+				   				end 
+			     			end 
+		       			end 
+	
+		       			local border = screen:find_child(v.name.."border")
+		       			local am = screen:find_child(v.name.."a_m") 
+		       			local group_pos
+	       	       		if(border ~= nil) then 
+		             		if (v.extra.is_in_group == true) then
+			     				group_pos = util.get_group_position(v)
+			     				if group_pos then 
+									if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
+	                     				if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
+								end
+		             		else 
+	                     		border.position = {x -dx, y -dy}
+			     				if am then 
+	                     			am.position = {x -dx, y -dy}
+			     				end
+		             		end 
+	                	end 
+			
+						if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
+						    for i=1, v_guideline,1 do 
+			   					if(screen:find_child("v_guideline"..i) ~= nil) then 
+			     					local gx = screen:find_child("v_guideline"..i).x 
+			     					if(15 >= math.abs(gx - x + dx)) then  
+									    new_object.x = gx
+										v.x = gx + screen:find_child("v_guideline"..i).w 
+										if (am ~= nil) then 
+			     	     						am.x = am.x - (x-dx-gx)
+										end
+			     					elseif(15>= math.abs(gx - x + dx - new_object.w)) then
+										new_object.x = gx - new_object.w  
+										v.x = gx - new_object.w 
+										if (am ~= nil) then 
+			     	     						am.x = am.x - (x-dx+new_object.w - gx)
+										end
+			     					end 
+			   					end 
+		        			end 
+							for i=1, h_guideline,1 do 
+			   					if(screen:find_child("h_guideline"..i) ~= nil) then 
+			      					local gy =  screen:find_child("h_guideline"..i).y 
+			      					if(15 >= math.abs(gy - y + dy)) then 
+									    new_object.y = gy
+										v.y =gy + screen:find_child("h_guideline"..i).h 
+										if (am ~= nil) then 
+			     	     						am.y = am.y - (y-dy - gy) 
+										end
+			      						elseif(15>= math.abs(gy - y + dy - new_object.h)) then
+											new_object.y = gy - new_object.h
+											v.y =  gy - new_object.h 
+											if (am ~= nil) then 
+			     	     						am.y = am.y - (y-dy + new_object.h - gy)  
+											end
+			      						end 
+			   						end
+								end
+							end 
+		        			if(border ~= nil )then 
+			     				border.position = v.position
+							end 
+							if(org_object ~= nil) then  
+		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			     					screen_ui.n_select(v, dragging) 
+			     					screen_ui.n_select(new_object, dragging) 
+			     					screen_ui.n_select(org_object, dragging) 
+			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
+			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
+                    	     		table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
+			   					end
+							end 
+	            			dragging = nil
+              	  		end
+              	  		return true
+	      			end 
+             	end
+	   		else 
+	      		dragging = nil
+          		return true
+       		end
+		end
+	end
+end
+
+
+function util.is_there_guideline () 
+
+	for i, j in pairs (screen.children) do 
+		if j.name then 
+			if string.find(j.name, "_guideline") then 
+				return true 
+			end 
+		end 
+    end 
+	return false
+
+end 
+
+
+function util.guideline_type(name) 
+    local i, j = string.find(name,"v_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "v_guideline"
+    end 
+    local i, j = string.find(name,"h_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "h_guideline"
+    end 
+    return ""
+end 
+
+
 function util.copy_obj (v)
 
       local new_object 
@@ -422,19 +800,6 @@ function util.getObjnames()
     return obj_names
 
 end
-
-function util.is_there_guideline () 
-
-	for i, j in pairs (screen.children) do 
-		if j.name then 
-			if string.find(j.name, "_guideline") then 
-				return true 
-			end 
-		end 
-    end 
-	return false
-
-end 
 
 
 function util.is_in_container_group(x_pos, y_pos) 
