@@ -232,8 +232,7 @@ done_button.on_released = function()
         end
         number = number..digits[i].text
     end
-    print("CODE NUMBER:", number)
-    dolater(150, on_completed )
+    dolater(150, on_completed, number )
 end
 
 local previous_position = 1
@@ -288,9 +287,9 @@ function highlight_state:on_completed()
 end
 
 
-    on_completed = function()
-                        if callback then callback() end
 function start_unlock_code(callback)
+    on_completed = function(code)
+                        if callback then callback(code) end
                         background = nil
                         logo = nil
                         prompt = nil

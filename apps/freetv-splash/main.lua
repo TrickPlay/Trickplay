@@ -25,8 +25,13 @@ dolater(dofile,"preload_configure.lua")
 
 dofile("configure.lua")
 
-local function on_unlock_completed()
-    start_configuration()
+local function on_configuration_completed()
+    print("Configuration completed")
+end
+
+local function on_unlock_completed(code)
+    print("Code entered:",code)
+    start_configuration(on_configuration_completed)
 end
 
 start_unlock_code(on_unlock_completed)
