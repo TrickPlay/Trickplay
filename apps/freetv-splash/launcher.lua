@@ -1,19 +1,16 @@
--- Some assets
+-- The launcher has a service logo and highlight scrim when it's visible, and then it has its menubar
+-- The menubar is delegated
 
 local service
-
 local service_logo
 local highlight_scrim
-local bar_highlight, blue_overlay
-local bar_slice
+local menubar
 
 local launcher_group = Group {}
 
 local function load_assets()
     service_logo = Image { src = "assets/paytv_logos/"..service..".png" }
     service_logo.anchor_point = { service_logo.w/2, 0 }
-    bar_highlight = Image { src = "assets/menubar/bar-highlight.png" }
-    blue_overlay = Image { src = "assets/menubar/blue-overlay.png" }
 
     highlight_scrim = Canvas( 1920, 1 )
     highlight_scrim:rectangle( 0,0, 1920,1 )
@@ -29,19 +26,26 @@ local function load_assets()
     highlight_scrim:fill()
     highlight_scrim = highlight_scrim:Image( { height = 1080, tile = { false, true } } )
 
-    bar_slice = Canvas( 1, 45 )
-    -- 1 pixel of #0E1924, gradient for 43 pixels from (75,75,75) to (0,0,0), then one pixel of #0E1924
-    bar_slice:rectangle(-1,1, 3,43)
-    bar_slice:set_source_color( "#0E1924" )
-    bar_slice.line_width = 1
-    bar_slice:stroke(true)
+    menubar = dofile("launcher/mainmenu.lua")
+end
 
-    bar_slice:set_source_linear_pattern(1,2, 1,42)
-    bar_slice:add_source_pattern_color_stop( 0, "#4B4B4B" )
-    bar_slice:add_source_pattern_color_stop( 1, "#000000" )
-    bar_slice:fill()
+local launcher_hidden_key_handler
 
-    bar_slice = bar_slice:Image( { width = 1920, tile = { true, false } } )
+local function launcher_onscreen_key_handler(screen, key)
+    if(keys.BACK == key) then
+        launcher_group:animate({ duration = 500, opacity = 0 })
+        menubar:goaway()
+        screen.on_key_down = launcher_hidden_key_handler
+    else
+        -- Send all other keypresses to the menubar
+        menubar:on_key_down(key)
+    end
+end
+
+launcher_hidden_key_handler = function(screen, key)
+    launcher_group:animate({ duration = 500, opacity = 255 })
+    menubar:appear()
+    screen.on_key_down = launcher_onscreen_key_handler
 end
 
 local function show_launcher()
@@ -50,22 +54,18 @@ local function show_launcher()
     screen:add(launcher_group)
 
     service_logo.position = { 1920*0.2, 100 }
-    bar_slice.position = { 0, 925 }
-    bar_highlight.position = { 100, 925-bar_highlight.h/2 }
-    blue_overlay.position = { 100, 925 }
 
     launcher_group:add(highlight_scrim)
     launcher_group:add(service_logo)
-    launcher_group:add(bar_slice)
-    launcher_group:add(bar_highlight)
-    launcher_group:add(blue_overlay)
+    launcher_group:add(menubar)
 
     mediaplayer.on_loaded = function()
         mediaplayer:play()
-        dolater(4000, launcher_group.animate, launcher_group, { duration = 750, opacity = 255 })
     end
     mediaplayer:load("glee.mp4")
 
+    screen:grab_key_focus()
+    screen.on_key_down = launcher_hidden_key_handler
 end
 
 function start_launcher(the_service)
