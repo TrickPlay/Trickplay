@@ -217,11 +217,25 @@ ListManager = function(parameters)
 	)
 	override_property(instance,"horizontal_alignment",
 		function(oldf)   return horizontal_alignment     end,
-		function(oldf,self,v)   horizontal_alignment = v end
+		function(oldf,self,v)   
+            if v == "left" or v == "right" or v == "center" then
+                horizontal_alignment = v 
+            else
+                error("expected 'left' 'right' or 'center'. Received "..v,2)
+            end
+            
+        end
 	)
 	override_property(instance,"vertical_alignment",
 		function(oldf)   return vertical_alignment     end,
-		function(oldf,self,v)   vertical_alignment = v end
+		function(oldf,self,v)   
+            
+            if v == "top" or v == "bottom" or v == "center" then
+                vertical_alignment = v 
+            else
+                error("expected 'top' 'bottom' or 'center'. Received "..v,2)
+            end
+        end
 	)
     
     instance:subscribe_to( 
@@ -618,11 +632,26 @@ LayoutManager = function(parameters)
 	)
 	override_property(instance,"horizontal_alignment",
 		function(oldf)   return horizontal_alignment     end,
-		function(oldf,self,v)   horizontal_alignment = v end
+		function(oldf,self,v)   
+            print(v,v == "left" or v == "right" or v == "center")
+            if v == "left" or v == "right" or v == "center" then
+                horizontal_alignment = v 
+            else
+                error("expected 'left' 'right' or 'center'. Received "..v,2)
+            end
+            
+        end
 	)
 	override_property(instance,"vertical_alignment",
 		function(oldf)   return vertical_alignment     end,
-		function(oldf,self,v)   vertical_alignment = v end
+		function(oldf,self,v)   
+            
+            if v == "top" or v == "bottom" or v == "center" then
+                vertical_alignment = v 
+            else
+                error("expected 'top' 'bottom' or 'center'. Received "..v,2)
+            end
+        end
 	)
     local placeholders = {}
 	override_property(instance,"placeholder",
