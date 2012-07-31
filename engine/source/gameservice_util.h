@@ -13,6 +13,8 @@ namespace TPGameServiceUtil
 
     int populate_game( lua_State * L, int index, libgameservice::Game& game );
 
+    int populate_game_id( lua_State * L, int index, libgameservice::GameId& game_id );
+
     void push_registered_games( lua_State * L );
 
     void push_response_status_arg( lua_State * L, const libgameservice::ResponseStatus& rs );
