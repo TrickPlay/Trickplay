@@ -19,13 +19,15 @@ dofile("widget_helper.lua")
 
 dofile("unlock_code.lua")
 
-screen:show()
-
-
 dofile("configure.lua")
+
+dofile("launcher.lua")
+
+screen:show()
 
 local function on_configuration_completed(service)
     print("Configuration completed")
+    start_launcher(service)
 end
 
 local function on_unlock_completed(code)
