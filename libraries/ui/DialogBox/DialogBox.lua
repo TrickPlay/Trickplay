@@ -73,7 +73,7 @@ DialogBox = function(parameters)
 	local center_title = function()
 		
 		title.w = instance.w
-		title.y = separator_y - title.h--instance.style.text.y_offset + title.h/2
+		title.y = instance.style.text.y_offset +separator_y/2
 		
 	end
 	
@@ -238,7 +238,6 @@ DialogBox = function(parameters)
         function(oldf,self)
             local t = oldf(self)
                 
-            t.title = self.title
             t.separator_y = self.separator_y
             t.title = self.title
             
@@ -271,7 +270,7 @@ DialogBox = function(parameters)
     ----------------------------------------------------------------------------
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size"},
+		{"h","w","width","height","size","separator_y"},
 		function()
 			
 			flag_for_redraw = true
@@ -304,9 +303,9 @@ DialogBox = function(parameters)
 		
 		title.anchor_point = {0,title.h/2}
 		title.x            = text_style.x_offset
-		title.y            = text_style.y_offset + title.h/2
-		title.w            = instance.w
 		title.color        = text_style.colors.default
+        
+		center_title()
 		
 	end
 	
