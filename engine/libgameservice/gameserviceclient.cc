@@ -64,6 +64,9 @@ enum {
 	MSG_TURN,
 	MSG_SEND_APP_PRESENCE,
 	MSG_LIST_GAMES,
+	MSG_GET_MATCHDATA,
+	MSG_GET_USERDATA,
+	MSG_UPDATE_USERDATA,
 
 	// worker thread to main thread
 	MSG_STATE_CHANGE,
@@ -80,6 +83,9 @@ enum {
 	MSG_START_MATCH_RESPONSE,
 	MSG_LEAVE_MATCH_RESPONSE,
 	MSG_TURN_RESPONSE,
+	MSG_GET_MATCHDATA_RESPONSE,
+	MSG_GET_USERDATA_RESPONSE,
+	MSG_UPDATE_USERDATA_RESPONSE,
 	MSG_HANDLE_START,
 	MSG_HANDLE_LEAVE,
 	MSG_HANDLE_TURN,
@@ -398,6 +404,27 @@ public:
 			delete msg->pdata;
 		}
 			break;
+		case MSG_GET_MATCHDATA:
+		{
+			GameData* gd = static_cast<GameData*> (msg->pdata);
+			GetMatchDataW(gd->game_id_, gd->cb_data_);
+			delete msg->pdata;
+		}
+			break;
+		case MSG_GET_USERDATA:
+		{
+			GameData* gd = static_cast<GameData*> (msg->pdata);
+			GetUserDataW(gd->game_id_, gd->cb_data_);
+			delete msg->pdata;
+		}
+			break;
+		case MSG_UPDATE_USERDATA:
+		{
+			GameData* gd = static_cast<GameData*> (msg->pdata);
+			UpdateUserDataW(gd->game_id_, gd->opaque_, gd->cb_data_);
+			delete msg->pdata;
+		}
+			break;
 
 		case MSG_STATUS_UPDATE:
 			OnStatusUpdateW(static_cast<SendPresenceData*> (msg->pdata)->s_);
@@ -486,6 +513,27 @@ public:
 			TurnResponseData* objptr =
 					static_cast<TurnResponseData*> (msg->pdata);
 			OnTurnResponseW(objptr->rs_, objptr->cb_data_);
+			delete msg->pdata;
+		}
+			break;
+		case MSG_GET_MATCHDATA_RESPONSE: {
+			GetMatchDataResponseData* objptr =
+					static_cast<GetMatchDataResponseData*> (msg->pdata);
+			OnGetMatchDataResponseW(objptr->rs_, objptr->match_data_, objptr->cb_data_);
+			delete msg->pdata;
+		}
+			break;
+		case MSG_GET_USERDATA_RESPONSE: {
+			GetUserDataResponseData* objptr =
+					static_cast<GetUserDataResponseData*> (msg->pdata);
+			OnGetUserDataResponseW(objptr->rs_, objptr->user_data_, objptr->cb_data_);
+			delete msg->pdata;
+		}
+			break;
+		case MSG_UPDATE_USERDATA_RESPONSE: {
+			GetUserDataResponseData* objptr =
+					static_cast<GetUserDataResponseData*> (msg->pdata);
+			OnUpdateUserDataResponseW(objptr->rs_, objptr->user_data_, objptr->cb_data_);
 			delete msg->pdata;
 		}
 			break;
@@ -613,6 +661,21 @@ public:
 	void PostTurn(const std::string& match_id, const Turn& turn, void* cb_data) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		worker_thread_->Post(this, MSG_TURN, new TurnData(match_id, turn, cb_data));
+	}
+
+	void GetMatchData(const std::string& game_id, void* cb_data) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		worker_thread_->Post(this, MSG_GET_MATCHDATA, new GameData(game_id, cb_data));
+	}
+
+	void GetUserGameData(const std::string& game_id, void* cb_data) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		worker_thread_->Post(this, MSG_GET_USERDATA, new GameData(game_id, cb_data));
+	}
+
+	void UpdateUserGameData(const std::string& game_id, const std::string& opaque, void* cb_data) {
+		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		worker_thread_->Post(this, MSG_UPDATE_USERDATA, new GameData(game_id, opaque, cb_data));
 	}
 
 	bool DoCallbacks(uint wait_millis) {
@@ -1263,6 +1326,102 @@ private:
 			notify_->OnTurnResponse(rs, cb_data);
 	}
 
+	/* Get Match Data and Get User Data */
+	struct GameData: public txmpp::MessageData {
+		GameData(const std::string& game_id, void* cb_data) :
+			game_id_(game_id), opaque_(), cb_data_(cb_data) {
+		}
+		GameData(const std::string& game_id, const std::string& opaque, void* cb_data) :
+			game_id_(game_id), opaque_(opaque), cb_data_(cb_data) {
+		}
+		std::string game_id_;
+		std::string opaque_;
+		void* cb_data_;
+	};
+
+	struct GetMatchDataResponseData: public txmpp::MessageData {
+		GetMatchDataResponseData(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) :
+			rs_(rs), match_data_(match_data), cb_data_(cb_data) {
+		}
+		ResponseStatus rs_;
+		MatchData match_data_;
+		void* cb_data_;
+	};
+
+	struct GetUserDataResponseData: public txmpp::MessageData {
+		GetUserDataResponseData(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) :
+			rs_(rs), user_data_(user_data), cb_data_(cb_data) {
+		}
+		ResponseStatus rs_;
+		UserGameData user_data_;
+		void* cb_data_;
+	};
+
+	void GetMatchDataW(const std::string& game_id, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		GetMatchDataTask *task = new GetMatchDataTask(pump_.get()->client(), game_id, cb_data);
+		task->SignalDone.connect(this, &GameServiceClientWorker::OnGetMatchDataResponse);
+		task->Start();
+	}
+
+
+	void OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+	//	std::cout << "Inside OnTurnResponse. called from worker thread. " << std::endl;
+		main_thread_->Post(this, MSG_GET_MATCHDATA_RESPONSE, new GetMatchDataResponseData(rs, match_data, cb_data));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void OnGetMatchDataResponseW(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		if (notify_)
+			notify_->OnGetMatchDataResponse(rs, match_data, cb_data);
+	}
+
+	void GetUserDataW(const std::string& game_id, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		GetUserGameDataTask *task = new GetUserGameDataTask(pump_.get()->client(), game_id, cb_data);
+		task->SignalDone.connect(this, &GameServiceClientWorker::OnGetUserDataResponse);
+		task->Start();
+	}
+
+
+	void OnGetUserDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+	//	std::cout << "Inside OnTurnResponse. called from worker thread. " << std::endl;
+		main_thread_->Post(this, MSG_GET_USERDATA_RESPONSE, new GetUserDataResponseData(rs, user_data, cb_data));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void OnGetUserDataResponseW(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		if (notify_)
+			notify_->OnGetUserGameDataResponse(rs, user_data, cb_data);
+	}
+
+	void UpdateUserDataW(const std::string& game_id, const std::string& opaque, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		UpdateUserGameDataTask *task = new UpdateUserGameDataTask(pump_.get()->client(), game_id, opaque, cb_data);
+		task->SignalDone.connect(this, &GameServiceClientWorker::OnUpdateUserDataResponse);
+		task->Start();
+	}
+
+	void OnUpdateUserDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
+	//	std::cout << "Inside OnTurnResponse. called from worker thread. " << std::endl;
+		main_thread_->Post(this, MSG_UPDATE_USERDATA_RESPONSE, new GetUserDataResponseData(rs, user_data, cb_data));
+		if (notify_)
+			notify_->WakeupMainThread();
+	}
+
+	void OnUpdateUserDataResponseW(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+		assert (txmpp::ThreadManager::CurrentThread() != worker_thread_);
+		if (notify_)
+			notify_->OnUpdateUserGameDataResponse(rs, user_data, cb_data);
+	}
+
 	struct StatusErrorData: txmpp::MessageData {
 		StatusErrorData(const txmpp::XmlElement &stanza) :
 			stanza_(stanza) {
@@ -1376,6 +1535,10 @@ public:
 	StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data);
 
 	StatusCode GetMatchData(const GameId& game_id, void* cb_data);
+
+	StatusCode GetUserGameData(const GameId& game_id, void* cb_data);
+
+	StatusCode UpdateUserGameData(const GameId& game_id, const std::string& opaque, void* cb_data);
 
 	StatusCode SendTurn(const std::string& match_id, const std::string& state,
 			bool terminate, void* cb_data);
@@ -1524,8 +1687,30 @@ StatusCode GameServiceClient::SendTurn(const std::string& match_id, const std::s
 }
 
 StatusCode GameServiceClient::GetMatchData(const GameId& game_id, void* cb_data) {
+	if (!IsAppOpen())
+		return APP_NOT_OPEN;
+
+	worker_->GetMatchData(game_id.AsID(), cb_data);
 	return OK;
 }
+
+//virtual StatusCode GetUserData(const GameId& game_id, void* cb_data) = 0;
+StatusCode GameServiceClient::GetUserGameData(const GameId& game_id, void* cb_data) {
+	if (!IsAppOpen())
+		return APP_NOT_OPEN;
+
+	worker_->GetUserGameData(game_id.AsID(), cb_data);
+	return OK;
+}
+
+StatusCode GameServiceClient::UpdateUserGameData(const GameId& game_id, const std::string& opaque, void* cb_data) {
+	if (!IsAppOpen())
+		return APP_NOT_OPEN;
+
+	worker_->UpdateUserGameData(game_id.AsID(), opaque, cb_data);
+	return OK;
+}
+
 
 bool GameServiceClient::DoCallbacks(uint wait_millis) {
 	return worker_->DoCallbacks(wait_millis);

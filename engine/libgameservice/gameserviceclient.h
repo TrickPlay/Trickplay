@@ -13,6 +13,8 @@
 #include "participant.h"
 #include "item.h"
 #include "accountinfo.h"
+#include "matchdata.h"
+#include "usergamedata.h"
 
 namespace libgameservice {
 
@@ -92,6 +94,12 @@ public:
 
 	virtual void OnTurnResponse(const ResponseStatus& rs, void* cb_data) = 0;
 
+	virtual void OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) = 0;
+
+	virtual void OnGetUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) = 0;
+
+	virtual void OnUpdateUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) = 0;
+
 	virtual void OnTurn(const std::string& match_id, const Participant& from,
 			const Turn& turn_message) = 0;
 
@@ -140,6 +148,10 @@ public:
 	virtual StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data) = 0;
 
 	virtual StatusCode GetMatchData(const GameId& game_id, void* cb_data) = 0;
+
+	virtual StatusCode GetUserGameData(const GameId& game_id, void* cb_data) = 0;
+
+	virtual StatusCode UpdateUserGameData(const GameId& game_id, const std::string& opaque, void* cb_data) = 0;
 
 	virtual StatusCode SendTurn(const std::string& match_id, const std::string& state,
 			bool terminate, void* cb_data) = 0;

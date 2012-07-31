@@ -926,7 +926,8 @@ int TurnTask::ProcessStart() {
 	txmpp::XmlElement *turnElement = new txmpp::XmlElement(QN_MUG_USER_TURN_TAG);
 
 	txmpp::XmlElement *stateElement = new txmpp::XmlElement(QN_MUG_USER_NEWSTATE_TAG);
-	stateElement->AddText(turn_.new_state());
+	stateElement->AddCDATAText(turn_.new_state().c_str(), turn_.new_state().size());
+//	stateElement->AddText(turn_.new_state());
 	turnElement->AddElement(stateElement);
 
 	if (turn_.terminate()) {
@@ -1023,7 +1024,7 @@ int GetMatchDataTask::ProcessResponse() {
 
 
 	ResponseStatus rs;
-	SignalGetMatchDataCompleted.emit(rs, matchdata, cb_data_);
+	SignalDone.emit(rs, matchdata, cb_data_);
 
 	return STATE_DONE;
 }
@@ -1040,34 +1041,34 @@ bool GetMatchDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
 	return false;
 }
 
-// GetUserData task
-GetUserDataTask::GetUserDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
+// GetUserGameData task
+GetUserGameDataTask::GetUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
 	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), cb_data_(cb_data) {
 
-//	std::cout << "Inside GetUserDataTask constructor" << std::endl;
+//	std::cout << "Inside GetUserGameDataTask constructor" << std::endl;
 }
 
-GetUserDataTask::~GetUserDataTask() {
+GetUserGameDataTask::~GetUserGameDataTask() {
 }
 
-int GetUserDataTask::ProcessStart() {
+int GetUserGameDataTask::ProcessStart() {
 
 	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
 			MakeIq("get", getMugServiceJid(), task_id()));
-	txmpp::XmlElement *userDataElement = new txmpp::XmlElement(
+	txmpp::XmlElement *userGameDataElement = new txmpp::XmlElement(
 			QN_MUG_USERDATA_TAG);
-	userDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+	userGameDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
 
-	iqStanza->AddElement(userDataElement);
+	iqStanza->AddElement(userGameDataElement);
 
 	SendStanza(iqStanza.get());
 
 	return STATE_RESPONSE;
 }
 
-int GetUserDataTask::ProcessResponse() {
+int GetUserGameDataTask::ProcessResponse() {
 
-	//	std::cout << "Inside GetUserDataTask::ProcessResponse()" << std::endl;
+	//	std::cout << "Inside GetUserGameDataTask::ProcessResponse()" << std::endl;
 
 	const txmpp::XmlElement* stanza = NextStanza();
 
@@ -1080,7 +1081,7 @@ int GetUserDataTask::ProcessResponse() {
 	if (stanza->HasAttr(txmpp::QN_FROM))
 		from = stanza->Attr(txmpp::QN_FROM);
 
-	UserData userdata;
+	UserGameData userdata;
 	userdata.set_game_id(game_id_);
 	const txmpp::XmlElement* userDataElement = stanza->FirstNamed(QN_MUG_USERDATA_TAG);
 	if (userDataElement != NULL) {
@@ -1099,14 +1100,97 @@ int GetUserDataTask::ProcessResponse() {
 
 
 	ResponseStatus rs;
-	SignalGetUserDataCompleted.emit(rs, userdata, cb_data_);
+	SignalDone.emit(rs, userdata, cb_data_);
 
 	return STATE_DONE;
 }
 
-bool GetUserDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+bool GetUserGameDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
-	//std::cout << "GetUserDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+	//std::cout << "GetUserGameDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
+
+
+// UpdateUserGameData task
+UpdateUserGameDataTask::UpdateUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, const std::string& opaque, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), opaque_(opaque), cb_data_(cb_data) {
+
+//	std::cout << "Inside UpdateUserGameDataTask constructor" << std::endl;
+}
+
+UpdateUserGameDataTask::~UpdateUserGameDataTask() {
+}
+
+int UpdateUserGameDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("set", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *userGameDataElement = new txmpp::XmlElement(
+			QN_MUG_USERDATA_TAG);
+	userGameDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	txmpp::XmlElement *opaqueElement = new txmpp::XmlElement(
+				QN_MUG_OPAQUE_TAG);
+	opaqueElement->AddCDATAText(opaque_.c_str(), opaque_.size());
+
+	userGameDataElement->AddElement(opaqueElement);
+
+	iqStanza->AddElement(userGameDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int UpdateUserGameDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside UpdateUserGameDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	UserGameData userdata;
+	userdata.set_game_id(game_id_);
+	const txmpp::XmlElement* userDataElement = stanza->FirstNamed(QN_MUG_USERDATA_TAG);
+	if (userDataElement != NULL) {
+		const txmpp::XmlElement* opaqueElement = userDataElement->FirstNamed(QN_MUG_OPAQUE_TAG);
+
+		if (opaqueElement != NULL) {
+			userdata.set_opaque(opaqueElement->BodyText());
+
+			if (opaqueElement->HasAttr(QN_VERSION_ATTR)) {
+				userdata.set_version(atoi(opaqueElement->Attr(QN_VERSION_ATTR).c_str()));
+			}
+			else
+				userdata.set_version(-1);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalDone.emit(rs, userdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool UpdateUserGameDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "UpdateUserGameDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
 
 	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
 		QueueStanza(stanza);

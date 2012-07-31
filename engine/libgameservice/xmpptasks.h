@@ -15,7 +15,7 @@
 #include "turn.h"
 #include "item.h"
 #include "matchdata.h"
-#include "userdata.h"
+#include "usergamedata.h"
 
 namespace libgameservice {
 
@@ -196,7 +196,7 @@ public:
 	virtual int ProcessResponse();
 	bool HandleStanza(const txmpp::XmlElement *stanza);
 
-	txmpp::signal3<const ResponseStatus&, const MatchData&, void*> SignalGetMatchDataCompleted;
+	txmpp::signal3<const ResponseStatus&, const MatchData&, void*> SignalDone;
 
 private:
 	std::string game_id_;
@@ -207,18 +207,37 @@ private:
 /*
  * returns game data opaque data for the requesting user
  */
-class GetUserDataTask : public txmpp::XmppTask {
+class GetUserGameDataTask : public txmpp::XmppTask {
 public:
-	explicit GetUserDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
-	virtual ~GetUserDataTask();
+	explicit GetUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
+	virtual ~GetUserGameDataTask();
 	virtual int ProcessStart();
 	virtual int ProcessResponse();
 	bool HandleStanza(const txmpp::XmlElement *stanza);
 
-	txmpp::signal3<const ResponseStatus&, const UserData&, void*> SignalGetUserDataCompleted;
+	txmpp::signal3<const ResponseStatus&, const UserGameData&, void*> SignalDone;
 
 private:
 	std::string game_id_;
+	void* cb_data_;
+};
+
+/*
+ * update user game data
+ */
+class UpdateUserGameDataTask : public txmpp::XmppTask {
+public:
+	explicit UpdateUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, const std::string& opaque, void* cb_data);
+	virtual ~UpdateUserGameDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
+
+	txmpp::signal3<const ResponseStatus&, const UserGameData&, void*> SignalDone;
+
+private:
+	std::string game_id_;
+	std::string opaque_;
 	void* cb_data_;
 };
 

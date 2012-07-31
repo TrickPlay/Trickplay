@@ -337,6 +337,21 @@ StatusCode GameServiceSupport::GetMatchData(UserData * ud, const GameId& game_id
 	return delegate_->GetMatchData(game_id, cb_data);
 }
 
+StatusCode GameServiceSupport::GetUserGameData(UserData * ud, const GameId& game_id, int lua_callback_ref) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
+	return delegate_->GetUserGameData(game_id, cb_data);
+}
+
+StatusCode GameServiceSupport::UpdateUserGameData(UserData * ud, const GameId& game_id, const std::string& opaque, int lua_callback_ref) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
+	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
+	return delegate_->UpdateUserGameData(game_id, opaque, cb_data);
+}
+
+
 StatusCode GameServiceSupport::SendTurn(UserData * ud, const std::string& match_id, const std::string& state,
 		bool terminate, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
@@ -591,6 +606,60 @@ void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb
 //		TPGameServiceUtil::push_response_status_arg( L, rs );
 
 	//	invoke_gameservice_on_( L, this, 1, 0 );
+
+}
+
+void GameServiceSupport::OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
+	lua_State* L = get_lua_state();
+
+	TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	if (rs.status_code() == OK) {
+
+		TPGameServiceUtil::push_match_data_arg( L, match_data );
+
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 2, 0);
+
+	} else {
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0);
+	}
+	delete (CallbackDataStruct*)cb_data;
+
+}
+
+void GameServiceSupport::OnGetUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+	lua_State* L = get_lua_state();
+
+	TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	if (rs.status_code() == OK) {
+
+		TPGameServiceUtil::push_user_game_data_arg( L, user_data );
+
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 2, 0);
+
+	} else {
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0);
+	}
+	delete (CallbackDataStruct*)cb_data;
+
+}
+
+void GameServiceSupport::OnUpdateUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data) {
+	lua_State* L = get_lua_state();
+
+	TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	if (rs.status_code() == OK) {
+
+		TPGameServiceUtil::push_user_game_data_arg( L, user_data );
+
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 2, 0);
+
+	} else {
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0);
+	}
+	delete (CallbackDataStruct*)cb_data;
 
 }
 

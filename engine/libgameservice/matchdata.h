@@ -11,6 +11,7 @@ class MatchData {
 
 public:
 
+	const std::vector<MatchInfo>& const_match_infos() const { return match_infos_; }
 	std::vector<MatchInfo>& match_infos() { return match_infos_; }
 	void set_match_infos(std::vector<MatchInfo>& other) { match_infos_ = other; }
 

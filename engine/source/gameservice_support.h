@@ -73,6 +73,10 @@ public:
 
 	virtual StatusCode GetMatchData(UserData* ud, const GameId& game_id, int lua_callback_ref);
 
+	virtual StatusCode GetUserGameData(UserData* ud, const GameId& game_id, int lua_callback_ref);
+
+	virtual StatusCode UpdateUserGameData(UserData* ud, const GameId& game_id, const std::string& opaque, int lua_callback_ref);
+
 	virtual StatusCode SendTurn(UserData* ud, const std::string& match_id, const std::string& state,
 			bool terminate, int lua_callback_ref);
 
@@ -143,6 +147,12 @@ public:
 			const Participant& participant);
 
 	virtual void OnTurnResponse(const ResponseStatus& rs, void* cb_data);
+
+	virtual void OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data);
+
+	virtual void OnGetUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data);
+
+	virtual void OnUpdateUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data);
 
 	virtual void OnTurn(const std::string& match_id, const Participant& from,
 			const Turn& turn_message);

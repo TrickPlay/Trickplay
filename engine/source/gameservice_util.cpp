@@ -564,5 +564,64 @@ void push_turn_arg( lua_State * L, const libgameservice::Turn& turn_message )
 	lua_rawset( L , t );
 }
 
+void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_data )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "game_id" );
+	lua_pushstring( L , match_data.game_id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "match_infos" );
+	lua_newtable( L );
+
+	int match_infos_t = lua_gettop( L );
+
+	int i = 1;
+	std::vector<libgameservice::MatchInfo>::const_iterator it;
+	for( it=match_data.const_match_infos().begin(); it < match_data.const_match_infos().end(); i++ ) {
+		lua_newtable( L );
+		int match_info_t = lua_gettop( L );
+
+		lua_pushliteral( L, "match_id" );
+		lua_pushstring( L , (*it).id().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "match_status" );
+		push_match_status_arg( L , (*it).status() );
+		lua_rawset( L ,  match_info_t);
+
+		lua_pushliteral( L, "nickname" );
+		lua_pushstring( L , (*it).nickname().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "match_state" );
+		push_match_state_arg( L, (*it).const_state() );
+		lua_rawset( L, match_info_t );
+
+		lua_rawseti( L, match_infos_t, i++ );
+	}
+
+	lua_rawset( L, t );
+}
+
+void push_user_game_data_arg( lua_State * L, const libgameservice::UserGameData& user_game_data )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "game_id" );
+	lua_pushstring( L , user_game_data.game_id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "version" );
+	lua_pushinteger( L , user_game_data.version() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "opaque" );
+	lua_pushstring( L , user_game_data.opaque().c_str() );
+	lua_rawset( L , t );
+}
 
 }
