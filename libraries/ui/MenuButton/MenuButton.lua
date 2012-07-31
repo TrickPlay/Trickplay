@@ -153,8 +153,9 @@ MenuButton = function(parameters)
 	
 	local instance_on_style_changed
     local function instance_on_style_changed()
-        
-        button.style:set(instance.style.attributes)
+        local t = instance.style.attributes
+        t.name = nil
+        button.style:set(t)
 	end
 	
     
