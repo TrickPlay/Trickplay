@@ -138,6 +138,72 @@ global gameservice [[GameServiceSupport*]]
 	/*callback on_register_game_completed
 	; */
 	
+	
+	/*		
+	 * game_id is a lua table of the following format:
+	 *  {
+	 *  	app_id = { name = "com.trickplay.games", version = 1 },
+	 *  	name = "indy_car_race",
+	 *  }
+	 */
+	table get_match_data(table game_id, function on_get_match_data_completed = 0) 
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_get_match_data_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			libgameservice::GameId game_id_obj;
+			TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+			libgameservice::StatusCode sc = self->GetMatchData(ud, game_id_obj, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
+		
+	
+	/*		
+	 * game_id is a lua table of the following format:
+	 *  {
+	 *  	app_id = { name = "com.trickplay.games", version = 1 },
+	 *  	name = "indy_car_race",
+	 *  }
+	 */
+	table get_user_game_data(table game_id, function on_get_user_game_data_completed = 0) 
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_get_user_game_data_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			libgameservice::GameId game_id_obj;
+			TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+			libgameservice::StatusCode sc = self->GetUserGameData(ud, game_id_obj, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
+	
+	
+	/*		
+	 * game_id is a lua table of the following format:
+	 *  {
+	 *  	app_id = { name = "com.trickplay.games", version = 1 },
+	 *  	name = "indy_car_race",
+	 *  }
+	 */
+	table update_user_game_data(table game_id, string opaque, function on_update_user_game_data_completed = 0) 
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_update_user_game_data_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			libgameservice::GameId game_id_obj;
+			TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+			libgameservice::StatusCode sc = self->UpdateUserGameData(ud, game_id_obj, opaque, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
+
 	/*
 	 * match_request table of the following format:
 	 * {

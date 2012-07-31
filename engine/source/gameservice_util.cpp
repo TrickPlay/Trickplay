@@ -336,6 +336,67 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	return 0;
 }
 
+int populate_game_id( lua_State * L, int index, libgameservice::GameId& game_id )
+{
+    if (lua_type(L, index) != LUA_TTABLE)
+    {
+		return luaL_error(L, "Incorrect argument, table expected");
+	}
+
+    // app_id
+	lua_getfield(L, index, "app_id");
+
+	if (!lua_istable(L, -1))
+	{
+		return luaL_error(L, "Incorrect argument, fail to set \'app_id\' : table expected");
+	}
+
+	int pt = lua_gettop(L);
+
+	// app_name
+	lua_getfield(L, pt, "name");
+	const char * cname = lua_tostring(L,-1);
+	if (!cname)
+	{
+		return luaL_error(L, "Incorrect argument, failed to set \'app_id.name\' : string expected");
+	}
+	String app_name = cname;
+	lua_pop(L,1);
+
+	// app_version
+	int app_version = 1;
+	lua_getfield(L, pt, "version");
+	if (!lua_isnil(L, -1)) {
+		if(!lua_isnumber(L, -1))
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'app_id.version\' : number expected");
+			}
+			if ( lua_tointeger(L, -1) <= 0 )
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'app_id.version\' : positive non-zero number expected");
+			}
+			app_version =  lua_tointeger(L, -1);
+	}
+	lua_pop(L,1);
+
+	// pop app_id table
+	lua_pop(L, 1);
+
+	// game name
+	lua_getfield(L, index, "name");
+	cname = lua_tostring(L,-1);
+	if (!cname)
+	{
+		return luaL_error(L, "Incorrect argument, failed to set \'name\' : string expected");
+	}
+	lua_pop(L,1);
+
+	game_id = libgameservice::GameId(libgameservice::AppId(app_name, app_version), cname);
+
+	return 0;
+}
+
+
 void push_registered_games( lua_State * L )
 {
 
