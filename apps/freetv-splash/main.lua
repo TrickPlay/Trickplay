@@ -35,8 +35,8 @@ local function on_unlock_completed(code)
     if(code == "") then
         on_configuration_completed("xfinity")
     else
-    start_configuration(on_configuration_completed, code)
-end
+        start_configuration(on_configuration_completed, code)
+    end
 end
 
 start_unlock_code(on_unlock_completed)
