@@ -225,13 +225,16 @@ end
 
 done_button.on_released = function()
     local number = ""
-    for i=1,9 do
-        if(digits[i].text == "") then
-            print("ENTER PRESSED BUT NUMBER NOT COMPLETE")
-            return
+    if(done_button.label == "Register") then
+        for i=1,9 do
+            if(digits[i].text == "") then
+                print("ENTER PRESSED BUT NUMBER NOT COMPLETE")
+                return
+            end
+            number = number..digits[i].text
         end
-        number = number..digits[i].text
     end
+    screen.on_key_down = nil
     dolater(150, on_completed, number )
 end
 
