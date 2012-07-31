@@ -14,10 +14,14 @@ end
 local function on_sleep(label)
 end
 
+local function on_key_down(label, key)
+end
+
 return {
             label = "Store",
             activate = on_activate,
             deactivate = on_deactivate,
             wake = on_wake,
             sleep = on_sleep,
+            on_key_down = on_key_down,
         }

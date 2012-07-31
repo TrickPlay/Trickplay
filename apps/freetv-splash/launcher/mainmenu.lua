@@ -39,6 +39,9 @@ for _,i in pairs(functional_areas) do
     label.x = inner_labels.w + 100
     label.extra.activate = sub_menu.activate
     label.extra.deactivate = sub_menu.deactivate
+    label.extra.sleep = sub_menu.sleep
+    label.extra.wake = sub_menu.wake
+    label.on_key_down = sub_menu.on_key_down
     inner_labels:add(label)
 end
 local active_label = 1
@@ -99,10 +102,10 @@ function menubar:on_key_down(key)
             inner_labels:animate({ duration = 250, x = 100-inner_labels.children[active_label].x })
 
             inner_labels.children[orig_active]:deactivate(inner_labels.children[active_label])
-        elseif(keys.Up == key)
+        elseif(keys.Up == key) then
             -- We handle "Up" by waking the submenu so that it will know to navigate internally
             inner_labels.children[active_label]:wake()
-        elseif(keys.Down == key)
+        elseif(keys.Down == key) then
             -- We handle "Down" by telling the submenu to sleep, which means it'll tend to refuse on_key_downs till it wakes
             inner_labels.children[active_label]:sleep()
         end
