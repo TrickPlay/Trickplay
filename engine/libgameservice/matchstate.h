@@ -59,9 +59,10 @@ public:
 	const std::string& id() const { return id_; }
 	void set_id(const std::string& str) { id_ = str; }
 
-	MatchStatus status() { return status_; }
+	MatchStatus status() const { return status_; }
 	void set_status(MatchStatus new_status) { status_ = new_status; }
 
+	const MatchState& const_state() const { return state_; }
 	MatchState& state() { return state_; }
 	void set_state(const MatchState& state) { state_ = state; }
 

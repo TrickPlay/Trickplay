@@ -35,6 +35,10 @@ namespace TPGameServiceUtil
 
     void push_turn_arg( lua_State * L, const libgameservice::Turn& turn_message );
 
+    void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_data );
+
+    void push_user_game_data_arg( lua_State * L, const libgameservice::UserGameData& user_game_data );
+
 };
 
 

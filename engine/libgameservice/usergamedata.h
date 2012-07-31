@@ -1,16 +1,16 @@
-#ifndef _GAMESERVICE_USERDATA_H_
-#define _GAMESERVICE_USERDATA_H_
+#ifndef _USERGAMEDATA_H_
+#define _USERGAMEDATA_H_
 
 #include <string>
 
 namespace libgameservice {
 
-class UserData {
+class UserGameData {
 
 public:
 
-	UserData() { };
-	UserData(const std::string& game_id, const std::string& opaque, int version)
+	UserGameData() { };
+	UserGameData(const std::string& game_id, const std::string& opaque, int version)
 	: game_id_(game_id), opaque_(opaque), version_(version) { }
 
 	const std::string& opaque() const { return opaque_; }
@@ -22,11 +22,11 @@ public:
 	const std::string& game_id() const { return game_id_; }
 	void set_game_id(const std::string& newval) { game_id_ = newval; }
 private:
+	std::string game_id_;
 	std::string opaque_;
 	int version_;
-	std::string game_id_;
 };
 
 }
 
-#endif /* _GAMESERVICE_USERDATA_H_ */
+#endif /* _USERGAMEDATA_H_ */
