@@ -15,6 +15,23 @@
 
 ]]--
 
+dolater(dofile,"preload_configure.lua")
+
+local service = ""
+local services = {
+	"bbox",
+	"bouygues",
+	"bt",
+	"cablevision",
+	"charter",
+	"cox",
+	"directv",
+	"kt",
+	"uverse",
+	"xfinity",
+}
+local service_logo
+
 local configuration = Group {}
 
 local background = Image { src = "assets/background/bg-1.jpg" }
@@ -624,6 +641,9 @@ local t = nil
 local final_callback = nil
 
 local function show_configuration_screen()
+    service_logo = Image { src = "assets/paytv_logos/"..service..".png", x = 100, y = 100 }
+    configuration:add(service_logo)
+
     for i = #movie_posters, 1, -1 do configuration:add( movie_posters[i] ) end
 
     configuration:add(welcome_to_free_tv)
@@ -714,9 +734,10 @@ local function show_configuration_screen()
             pb = nil
             pb_text = nil
             pb_text_bg = nil
+            service_logo = nil
             unload_configuration()
             start_configuration = nil
-            if final_callback then final_callback() end
+            if final_callback then final_callback(service) end
         end
         a2:start()
     end
@@ -727,8 +748,10 @@ local function show_configuration_screen()
     my_animation:start()
 end
 
-function start_configuration(callback)
+function start_configuration(callback, code)
     final_callback = callback
+    service = services[code % #services + 1]
+    print("Identified service:",service)
 
     show_configuration_screen()
 end
