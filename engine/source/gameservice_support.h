@@ -77,8 +77,7 @@ public:
 
 	virtual StatusCode UpdateUserGameData(UserData* ud, const GameId& game_id, const std::string& opaque, int lua_callback_ref);
 
-	virtual StatusCode SendTurn(UserData* ud, const std::string& match_id, const std::string& state,
-			bool terminate, int lua_callback_ref);
+	virtual StatusCode SendTurn(UserData* ud, const std::string& match_id, const Turn& turn_data, int lua_callback_ref);
 
 	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
 	 * after your WakeupMainThread() notify function is called.

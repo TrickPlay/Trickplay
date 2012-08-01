@@ -66,6 +66,7 @@ const txmpp::QName QN_MUG_NICKNAME_TAG(true, NS_MUG, "nickname");
 const txmpp::QName QN_MUG_ITEM_TAG(true, NS_MUG, "item");
 const txmpp::QName QN_MUG_GAMEPRESENCE_TAG(true, NS_MUG, "game");
 const txmpp::QName QN_MUG_STATUS_TAG(true, NS_MUG, "status");
+const txmpp::QName QN_MUG_INROOMID_TAG(true, NS_MUG, "inRoomId");
 
 const txmpp::QName QN_MUG_TURNBASED_STATE_TAG(true, NS_MUG_TURNBASED, "state");
 const txmpp::QName QN_MUG_TURNBASED_FIRST_TAG(true, NS_MUG_TURNBASED, "first");

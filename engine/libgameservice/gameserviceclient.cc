@@ -1540,8 +1540,7 @@ public:
 
 	StatusCode UpdateUserGameData(const GameId& game_id, const std::string& opaque, void* cb_data);
 
-	StatusCode SendTurn(const std::string& match_id, const std::string& state,
-			bool terminate, void* cb_data);
+	StatusCode SendTurn(const std::string& match_id, const Turn& turn, void* cb_data);
 
 	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
 	 * after your WakeupMainThread() notify function is called.
@@ -1675,14 +1674,16 @@ StatusCode GameServiceClient::LeaveMatch(const std::string& match_id, void* cb_d
 	return OK;
 }
 
-StatusCode GameServiceClient::SendTurn(const std::string& match_id, const std::string& state, bool terminate, void* cb_data) {
+StatusCode GameServiceClient::SendTurn(const std::string& match_id, const Turn& turn_data, void* cb_data) {
 	if (!IsAppOpen())
 		return APP_NOT_OPEN;
 
-	Turn turn;
+/*
+    Turn turn;
 	turn.set_new_state(state);
 	turn.set_terminate(terminate);
-	worker_->PostTurn(match_id, turn, cb_data);
+*/
+	worker_->PostTurn(match_id, turn_data, cb_data);
 	return OK;
 }
 

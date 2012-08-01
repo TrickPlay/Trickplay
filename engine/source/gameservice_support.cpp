@@ -352,12 +352,11 @@ StatusCode GameServiceSupport::UpdateUserGameData(UserData * ud, const GameId& g
 }
 
 
-StatusCode GameServiceSupport::SendTurn(UserData * ud, const std::string& match_id, const std::string& state,
-		bool terminate, int lua_callback_ref) {
+StatusCode GameServiceSupport::SendTurn(UserData * ud, const std::string& match_id, const Turn& turn_data, int lua_callback_ref) {
 	if (state_ != APP_OPEN)
 		return libgameservice::APP_NOT_OPEN;
 	CallbackDataStruct * cb_data = new CallbackDataStruct(ud, lua_callback_ref);
-	return delegate_->SendTurn(match_id, state, terminate, cb_data);
+	return delegate_->SendTurn(match_id, turn_data, cb_data);
 }
 
 /* Call this from the thread you want to receive callbacks on. Typically, this will be called

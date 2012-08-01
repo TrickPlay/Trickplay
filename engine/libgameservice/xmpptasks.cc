@@ -1006,6 +1006,14 @@ int GetMatchDataTask::ProcessResponse() {
 			const txmpp::XmlElement* statusElement = matchElement->FirstNamed(QN_MUG_STATUS_TAG);
 			MatchStatus status = extractMatchStatus( statusElement );
 
+			const txmpp::XmlElement* nicknameElement = matchElement->FirstNamed(QN_MUG_NICKNAME_TAG);
+			if (nicknameElement != NULL)
+				mi.set_nickname(nicknameElement->BodyText());
+
+			const txmpp::XmlElement* inRoomIdElement = matchElement->FirstNamed(QN_MUG_INROOMID_TAG);
+			if (inRoomIdElement != NULL)
+				mi.set_in_room_id(inRoomIdElement->BodyText());
+
 			const txmpp::XmlElement* stateElement = matchElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
 
 			if (!isValidMatchStatus(status) || stateElement == NULL) {

@@ -64,6 +64,7 @@ extern const txmpp::QName QN_MUG_ITEM_TAG;
 extern const txmpp::QName QN_MUG_JOINMATCH_TAG;
 extern const txmpp::QName QN_MUG_STATUS_TAG;
 extern const txmpp::QName QN_MUG_GAMEPRESENCE_TAG;
+extern const txmpp::QName QN_MUG_INROOMID_TAG;
 
 extern const txmpp::QName QN_MUG_TURNBASED_STATE_TAG;
 extern const txmpp::QName QN_MUG_TURNBASED_FIRST_TAG;

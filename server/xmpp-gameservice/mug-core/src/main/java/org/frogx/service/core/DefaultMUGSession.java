@@ -587,7 +587,9 @@ public class DefaultMUGSession implements MUGSession {
 				matchElement.addAttribute("matchId", room.getJID().toBareJID());
 				matchElement.addElement("status").setText(
 						room.getMatch().getStatus().name());
-				matchElement.addElement("nickname").setText(room.getOccupant(jid).getNickname());
+				MUGOccupant occupant = room.getOccupant(jid);
+				matchElement.addElement("nickname").setText(occupant.getNickname());
+				matchElement.addElement("inRoomId").setText(Integer.toString(occupant.getInRoomId()));
 
 				Element matchState = room.getMatch().getState();
 				if (matchState != null)

@@ -625,6 +625,16 @@ void push_turn_arg( lua_State * L, const libgameservice::Turn& turn_message )
 	lua_rawset( L , t );
 }
 
+/*
+{
+  game_id = "xx",
+  match_infos = {
+  	  { match_id = "xx", match_status = "xx", nickname = "xx", in_room_id = "xx", match_state = { } }
+  	  ...
+  }
+}
+*/
+
 void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_data )
 {
 	lua_newtable( L );
@@ -655,6 +665,10 @@ void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_
 
 		lua_pushliteral( L, "nickname" );
 		lua_pushstring( L , (*it).nickname().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "in_room_id" );
+		lua_pushstring( L , (*it).in_room_id().c_str() );
 		lua_rawset( L ,  match_info_t );
 
 		lua_pushliteral( L, "match_state" );
