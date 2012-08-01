@@ -85,11 +85,18 @@ TabBar = function(parameters)
     local panes = {}
     local tabs = {}
 	local rbg 
+    local tabs_lm
     rbg= RadioButtonGroup{name = "TabBar",
         on_selection_change = function()
-            for i,p in ipairs(panes) do
-                p[i == rbg.selected and "show" or "hide"](p)
-                tabs[rbg.selected]:grab_key_focus()
+            print("shieet")
+            for i = 1,tabs_lm.length do
+                local t = tabs_lm.cells[i]
+                if t.selected then
+                    t.pane:show()
+                    t:grab_key_focus()
+                else
+                    t.pane:hide()
+                end
             end
         end
     }
@@ -100,7 +107,7 @@ TabBar = function(parameters)
     local tab_images
     local tab_style 
     local tab_location
-    local tabs_lm = ListManager{
+    tabs_lm = ListManager{
         spacing = 0,
         vertical_alignment = "top",
         node_constructor = function(obj)
@@ -146,7 +153,7 @@ TabBar = function(parameters)
             return obj
         end
     }
-    local tab_pane = ArrowPane{style = false,move_by = "210"}
+    local tab_pane = ArrowPane{style = false,arrow_move_by = tab_w}
     tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
     tab_pane.style.border.colors.default = "00000000"
     tab_pane.style.fill_colors.default = "00000000"
@@ -229,7 +236,7 @@ TabBar = function(parameters)
                 tab_pane.pane_h    = tab_h
                 tab_pane.virtual_w = tabs_lm.w
                 tab_pane.virtual_h = tab_h
-                tab_pane.move_by   = tab_w + tabs_lm.spacing
+                tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
                 for _,tab in tabs_lm.cells.pairs() do
                     tab.create_canvas = top_tabs
                     tab.w = 200
@@ -241,7 +248,7 @@ TabBar = function(parameters)
                 tab_pane.pane_h    = pane_h
                 tab_pane.virtual_w = tab_w
                 tab_pane.virtual_h = tabs_lm.h
-                tab_pane.move_by   = tab_h + tabs_lm.spacing
+                tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
                 for _,tab in tabs_lm.cells.pairs() do
                     tab.create_canvas = side_tabs
                 end
@@ -300,9 +307,11 @@ TabBar = function(parameters)
             if tab_location == "top" then
                 tab_pane.pane_h = tab_h
                 tab_pane.virtual_h = tab_h
+                tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
             elseif tab_location == "left" then
                 tab_pane.pane_w = tab_w
                 tab_pane.virtual_w = tab_w
+                tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
             end
         end
     )
