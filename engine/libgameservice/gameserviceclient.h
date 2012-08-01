@@ -153,8 +153,7 @@ public:
 
 	virtual StatusCode UpdateUserGameData(const GameId& game_id, const std::string& opaque, void* cb_data) = 0;
 
-	virtual StatusCode SendTurn(const std::string& match_id, const std::string& state,
-			bool terminate, void* cb_data) = 0;
+	virtual StatusCode SendTurn(const std::string& match_id, const Turn& turn_data, void* cb_data) = 0;
 
 	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
 	 * after your WakeupMainThread() notify function is called.

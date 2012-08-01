@@ -53,8 +53,8 @@ class MatchInfo {
 
 public:
 	MatchInfo() { }
-	MatchInfo(const std::string& id, MatchStatus status, const std::string& nickname, const MatchState& state)
-	: id_(id), status_(status), nickname_(nickname), state_(state) { }
+	MatchInfo(const std::string& id, MatchStatus status, const std::string& nickname, const std::string& in_room_id, const MatchState& state)
+	: id_(id), status_(status), nickname_(nickname), in_room_id_(in_room_id), state_(state) { }
 
 	const std::string& id() const { return id_; }
 	void set_id(const std::string& str) { id_ = str; }
@@ -69,10 +69,15 @@ public:
 	const std::string& nickname() const { return nickname_; }
 	void set_nickname(const std::string& nick) { nickname_ = nick; }
 
+	const std::string& in_room_id() const { return in_room_id_; }
+	void set_in_room_id(const std::string& in_room_id) { in_room_id_ = in_room_id; }
+
+
 private:
 	std::string id_;
 	MatchStatus status_;
 	std::string nickname_;
+	std::string in_room_id_;
 	MatchState state_;
 };
 }

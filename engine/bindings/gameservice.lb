@@ -205,7 +205,7 @@ global gameservice [[GameServiceSupport*]]
 		]];
 
 	/*
-	 * match_request table of the following format:
+	 * The input parameter 'match_request' shoubld be a table of the following structure:
 	 * {
 	 * 		game_id = "xyz",
 	 * 		free_role = true,
@@ -214,9 +214,20 @@ global gameservice [[GameServiceSupport*]]
 	 * 		nick = "best_gamer"
 	 * 	}
 	 *
+	 * the callback should have the following declaration
+	 * function on_assign_match_completed( gameservice, response_status, match_request, new_match_id )
+	 * where:
+	 *		parameter 'gameservice' is the global object which is a proxy to the xmpp gameservice component.
+	 *		parameter 'response_status' is a table with the following attributes:
+	 *			{ status = <int>, status_as_string = "xxx", error_message = "xxx" }
+	 *			if status is 0 then the request is successful and parameters 3 and 4 will be valid
+	 *			if status is not equals to 0 then parameters 3 and 4 to the function will be nil
+	 *			the reason for failure will be provided in 'error_message' attribute.
+	 *		parameter 'match_request' is the input argument passed into assign_match request
+	 *		parameter 'new_match_id' is the id of the match assigned
 	 */
  
-	table assign_match(table props, function on_assign_match_completed=0)
+	table assign_match(table match_request, function on_assign_match_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;
 			if ( on_assign_match_completed )
@@ -224,15 +235,32 @@ global gameservice [[GameServiceSupport*]]
 				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
 			}
 			UserData * ud = UserData::get(L);
-			libgameservice::MatchRequest match_request;
-			TPGameServiceUtil::populate_match_request(L, props, match_request);
-			libgameservice::StatusCode sc = self->AssignMatch(ud, match_request, function_idx);
+			libgameservice::MatchRequest match_request_obj;
+			TPGameServiceUtil::populate_match_request(L, match_request, match_request_obj);
+			libgameservice::StatusCode sc = self->AssignMatch(ud, match_request_obj, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
 		
 	/*callback on_assign_match_completed
 	;*/
 	
+	/*
+	 * the callback should have the following declaration
+	 * function on_join_match_completed( gameservice, response_status, match_id, from, item )
+	 * where:
+	 *		parameter 'gameservice' is the global object which is a proxy to the xmpp gameservice component.
+	 *		parameter 'response_status' is a table with the following attributes:
+	 *			{ status = <int>, status_as_string = "xxx", error_message = "xxx" }
+	 *			if status is 0 then the request is successful and parameters 3 and 4 will be valid
+	 *			if status is not equals to 0 then parameters 3 and 4 to the function will be nil
+	 *			the reason for failure will be provided in 'error_message' attribute.
+	 *		parameter 'match_id' is the id of the match. same as the input parameter with the same name passed to join_match
+	 * 		parameter 'from' is a table with the following structure:
+	 *			{ id = <int>, nick = "xyz" } where id is the unique id within the context of a match assigned by the gameservice component
+	 *      parameter 'item' is a table with the following structure:
+	 *			{ <role> = "xxx", <affiliation> = "xxx", [jid] = "xxx", <nick> = "xxx"  }
+	 *
+	 */
 	table join_match(string match_id, string nick, bool any_role, function on_join_match_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;
@@ -245,6 +273,23 @@ global gameservice [[GameServiceSupport*]]
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
 
+	/*
+	 * the callback should have the following declaration
+	 * function on_join_match_completed( gameservice, response_status, match_id, from, item )
+	 * where:
+	 *		parameter 'gameservice' is the global object which is a proxy to the xmpp gameservice component.
+	 *		parameter 'response_status' is a table with the following attributes:
+	 *			{ status = <int>, status_as_string = "xxx", error_message = "xxx" }
+	 *			if status is 0 then the request is successful and parameters 3 and 4 will be valid
+	 *			if status is not equals to 0 then parameters 3 and 4 to the function will be nil
+	 *			the reason for failure will be provided in 'error_message' attribute.
+	 *		parameter 'match_id' is the id of the match. same as the input parameter with the same name passed to join_match
+	 * 		parameter 'from' is a table with the following structure:
+	 *			{ id = <int>, nick = "xyz" } where id is the unique id within the context of a match assigned by the gameservice component
+	 *      parameter 'item' is a table with the following structure:
+	 *			{ <role> = "xxx", <affiliation> = "xxx", [jid] = "xxx", <nick> = "xxx"  }
+	 *
+	 */
 	table join_match_with_role(string match_id, string nick, string role, function on_join_match_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;
@@ -262,6 +307,21 @@ global gameservice [[GameServiceSupport*]]
 	;*/
 	
 	
+	/*
+	 * the callback should have the following declaration
+	 * function on_start_match_completed( gameservice, response_status, match_id, from )
+	 * where:
+	 *		parameter 'gameservice' is the global object which is a proxy to the xmpp gameservice component.
+	 *		parameter 'response_status' is a table with the following attributes:
+	 *			{ status = <int>, status_as_string = "xxx", error_message = "xxx" }
+	 *			if status is 0 then the request is successful and parameters 3 and 4 will be valid
+	 *			if status is not equals to 0 then parameters 3 and 4 to the function will be nil
+	 *			the reason for failure will be provided in 'error_message' attribute.
+	 *		parameter 'match_id' is the id of the match. same as the input parameter with the same name passed to join_match
+	 * 		parameter 'from' is a table with the following structure:
+	 *			{ id = <int>, nick = "xyz" } where id is the unique id within the context of a match assigned by the gameservice component
+	 *
+	 */
 	table start_match(string match_id, function on_start_match_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;
@@ -277,7 +337,7 @@ global gameservice [[GameServiceSupport*]]
 	/*callback on_start_match_completed
 	;*/
 	
-	table send_turn(string match_id, string turn_data, bool terminate, function on_send_turn_completed=0)
+	table send_turn(string match_id, string state, bool terminate, function on_send_turn_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;
 			if ( on_send_turn_completed )
@@ -285,7 +345,26 @@ global gameservice [[GameServiceSupport*]]
 				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
 			}
 			UserData * ud = UserData::get(L);
-			libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn_data, terminate, function_idx);
+			Turn turn;
+			turn.set_new_state(state);
+			turn.set_terminate(terminate);
+			libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
+
+	table update_state(string match_id, string new_state, bool terminate, function on_send_turn_completed=0)
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_send_turn_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			Turn turn;
+			turn.set_new_state(new_state);
+			turn.set_terminate(terminate);
+			turn.set_only_update(true);
+			libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
 		
