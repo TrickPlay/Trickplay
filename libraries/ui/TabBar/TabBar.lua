@@ -297,6 +297,13 @@ TabBar = function(parameters)
                 tabs_lm.cells[i].size = {tab_w,tab_h}
                 
             end
+            if tab_location == "top" then
+                tab_pane.pane_h = tab_h
+                tab_pane.virtual_h = tab_h
+            elseif tab_location == "left" then
+                tab_pane.pane_w = tab_w
+                tab_pane.virtual_w = tab_w
+            end
         end
     )
     
