@@ -166,13 +166,13 @@ function controller:init(t)
                         
                         main_menu:add_entry(session,"MAKE_A_WORD")
                         
-                        game_server:launch_wildcard_session(session,function(id)
+                        game_server:launch_wildcard_session(session,function(match)
                             
                             print("got id back")
                             
                             app_state.state = "MAIN_PAGE"
                             bg:slide_in_hangman()
-                            session.id = id
+                            session.match_id = match.match_id
                             session = nil
                             
                         end)
@@ -299,7 +299,9 @@ function controller:change_message(t)
     
     mesg.anchor_point = {
         mesg.w/2, 0
-    }
+    }make_word:set_session(game_state:make())
+                                
+                                app_state.state = "MAKE_WORD"
     
 end
 function controller:new_letters()

@@ -50,7 +50,7 @@ function main()
         }
         g_user = {
             name   = "",
-            id     = 0,
+            id     = false,
         }
         
         g_user = setmetatable(
@@ -521,19 +521,35 @@ function main()
         g_user.name = settings.username
         
         gsm:init{
+            
             username = g_user.name,
-            game_config = hangman_game_config,
-            session_callback = function(t)
-                print("SUCCESS")
-                Main_Menu:setup_lists()
-            end,
-            login_callback = function(t)
+            
+            on_connection = function(t)
                 if t then
-                    app_state.state = APP_STATE_MAIN_PAGE
+                    
+                    g_user.id = gsm:get_user_id()
+                    
+                    gsm:register_game(
+                        
+                        hangman_game_config(),
+                        
+                        function(success)
+                            
+                            app_state.state = APP_STATE_MAIN_PAGE
+                            
+                            Main_Menu:setup_lists()
+                            
+                        end
+                    
+                    )
+                    
                 else
                     app_state.state = APP_STATE_LOADING
+                    
+                    --TODO: need to try again
                 end
-            end
+            end,
+            
         }
         
         app_state.state = APP_STATE_LOADING_NO_SPLASH
