@@ -95,6 +95,11 @@ void Socket::write( const guint8 * data, gsize count )
 {
     if ( ! is_connected() )
     {
+        tpwarn( "ATTEMPT TO WRITE ON A SOCKET THAT IS NOT OPEN" );
+        if ( client )
+        {
+            tpwarn( "YOU MUST WAIT FOR Socket:on_connected() BEFORE YOU WRITE" );
+        }
         return;
     }
 
@@ -225,6 +230,8 @@ void Socket::start_async_write()
         // be written in the meantime.
 
         g_object_set_data_full( G_OBJECT( output ), OUTPUT_BUFFER_KEY, output_buffer, ( GDestroyNotify) g_byte_array_unref );
+
+        tplog( "SCHEDULING WRITE OF %d BYTES", output_buffer->len );
 
         g_output_stream_write_async( output, output_buffer->data, output_buffer->len, TRICKPLAY_PRIORITY, NULL, write_async, this );
 
