@@ -22,7 +22,10 @@ global gameservice [[GameServiceSupport*]]
             self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
 		]];
 	
-	
+	readonly string user_id
+		[[
+			user_id=self->GetUserId().c_str();
+		]];
 	/*
 	
     	Event Handler: on_ready

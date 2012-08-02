@@ -174,7 +174,7 @@ private:
 };
 
 GameServiceSupport::GameServiceSupport(TPContext * context)
-: tpcontext_(context), state_(NO_CONNECTION), login_after_register_flag_(false) {
+: tpcontext_(context), state_(NO_CONNECTION), login_after_register_flag_(false), user_id_() {
 
 	init();
 }
@@ -192,7 +192,7 @@ void GameServiceSupport::init() {
 
 	delegate_ = newGameServiceAsyncImpl(this);
 
-	String user_id = db->get_string(GAMESERVICE_USER_ID_KEY, "");
+	user_id_ = db->get_string(GAMESERVICE_USER_ID_KEY, "");
 	String password = db->get_string(GAMESERVICE_PASSWORD_KEY, "");
 
 	// retrieve domain, host and port information from the configuration
@@ -200,23 +200,23 @@ void GameServiceSupport::init() {
 	String host = tpcontext_->get(TP_GAMESERVICE_HOST);
 	int port = tpcontext_->get_int(TP_GAMESERVICE_PORT, 5222);
 
-	if (user_id.empty()) {
+	if (user_id_.empty()) {
 		login_after_register_flag_ = true;
 		// create a new account
-		user_id = Util::make_v1_uuid();
-		if (user_id.empty()) {
+		user_id_ = Util::make_v1_uuid();
+		if (user_id_.empty()) {
 			std::cout << "Failed to create default gameservice user account. "
 					<< "Trickplay system uuid is NULL." << std::endl;
 			return;
 		}
 
 		password = Util::make_v1_uuid();
-		AccountInfo ainfo(user_id, user_id, password, user_id + "@" + domain);
+		AccountInfo ainfo(user_id_, user_id_, password, user_id_ + "@" + domain);
 		RegisterAccount(ainfo, domain, host, port);
 	}
 	else
 	{
-		Login(user_id, password, domain, host, port);
+		Login(user_id_, password, domain, host, port);
 	}
 	/*
 	std::string user_id("p2");

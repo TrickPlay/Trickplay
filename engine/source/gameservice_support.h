@@ -45,6 +45,8 @@ public:
 
 	State state() const { return state_; }
 
+	const std::string& GetUserId() const { return user_id_; }
+
 	virtual StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port);
 
 	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port);
@@ -183,6 +185,7 @@ private:
 	State state_;
 	AppId app_id_;
 	bool login_after_register_flag_;
+	std::string user_id_;
 };
 
 #endif /* _GAMESERVICE_SUPPORT_H_ */
