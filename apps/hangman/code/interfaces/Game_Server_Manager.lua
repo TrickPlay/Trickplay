@@ -10,7 +10,7 @@ local gameservice_available = false
 local gameservice_error_response = nil
 
 local props = {
-		username = nil,
+		screen_name = nil,
 		on_connection = nil
 }
 
@@ -117,13 +117,32 @@ gameservice.on_participant_joined = on_participant_joined
 gameservice.on_participant_left = on_participant_left
 gameservice.on_match_updated = on_match_updated
 	
+function Game_Server:get_screen_name()    
+    
+    return props.screen_name
+    
+end
+function Game_Server:set_screen_name(screen_name) 
+    
+    if type(screen_name) ~= "string" then 
+        error("Expects string. Received "..type(screen_name),2) 
+    end
+    
+    props.screen_name = screen_name
+    
+end
+function Game_Server:get_user_id()    
+    
+    return gameservice:user_id()
+    
+end
 function Game_Server:init(t)    
     if type(t) ~= "table" then        
         error("Invalid parameter. must pass a table", 2)        
     end
     
-    username = t.username or error("Must pass in a username",2)
-    on_connection = t.on_connection or error("Must pass in a on_connection", 2)
+    props.screen_name      = t.screen_name      or error("Must pass in a screen_name",2)
+    props.on_connection = t.on_connection or error("Must pass in a on_connection", 2)
 
 	do_callbacks()
 end
@@ -137,7 +156,12 @@ local check_gameservice_is_available =
 
 function Game_Server:register_game(game_config, on_register_game_completed)
 	check_gameservice_is_available( )
-	gameservice:register_game(game_config, on_register_game_completed)
+	gameservice:register_game(
+        game_config, 
+        function ( gameservice, response_status )        
+            on_register_game_completed ( true )
+        end
+    )
 end
 
 function Game_Server:launch_wildcard_session(session, callback)
@@ -174,7 +198,7 @@ function Game_Server:launch_wildcard_session(session, callback)
 			-- start and play turn too
 			gameservice:start_match( match_id )
 			matches[match_id].callback = callback
-			matches[match_id].state = session.state
+			matches[match_id].state = session.opaque_state
 		end
 	
 	local on_assign_match_completed =
@@ -186,7 +210,7 @@ function Game_Server:launch_wildcard_session(session, callback)
 			end
 			
 			gameservice:join_match(
-					new_match_id, props.username, "p1", on_join_match_completed
+					new_match_id, props.screen_name, "p1", on_join_match_completed
 			)	
 		end
 	
@@ -195,7 +219,7 @@ function Game_Server:launch_wildcard_session(session, callback)
 			free_role = false,
 			role = "p1",
 			new_match = true,
-			nick = props.username
+			nick = props.screen_name
 		}
 	gameservice:assign_match( match_request, on_assign_match_completed )
 	    
@@ -223,7 +247,7 @@ function Game_Server:update(session,callback)
     check_gameservice_is_available( )
     if session == nil then error("must pass session",2) end
     
-    gameservice:update_state( session.id, session.state, false, callback )
+    gameservice:update_state( session.match_id, session.opaque_state, false, callback )
     
 end
 
@@ -235,7 +259,7 @@ function Game_Server:end_session(session,callback)
     check_gameservice_is_available( )
     if session == nil then error("must pass session",2) end
     
-    gameservice:send_turn( session.id, session.state, true, callback )
+    gameservice:send_turn( session.match_id, session.opaque_state, true, callback )
     
 end
 
@@ -248,20 +272,20 @@ function Game_Server:respond(session,callback)
     check_gameservice_is_available( )
     if session == nil then error("must pass session",2) end
     
-    gameservice:send_turn( session.id, session.state, false, callback )
+    gameservice:send_turn( session.match_id, session.opaque_state, false, callback )
     
 end
 
-function Game_Server:get_session_state(id,callback)
+function Game_Server:get_session_state(match_id,callback)
     --[[
         gets the current state of a particular match
     --]]
     
     
     check_gameservice_is_available( )
-    if id == nil then error("must pass id",2) end
+    if match_id == nil then error("must pass id",2) end
     
-    callback( matches[id] )
+    callback( matches[match_id] )
 end
 
 function Game_Server:get_a_wild_card_invite(callback)
@@ -271,6 +295,7 @@ function Game_Server:get_a_wild_card_invite(callback)
     
     
     check_gameservice_is_available( )
+
 
     local on_assign_match_completed =
 		function ( gameservice, response_status, match_request, new_match_id )
@@ -285,9 +310,9 @@ function Game_Server:get_a_wild_card_invite(callback)
 	
 	match_request = {
 			game_id = game_id_urn,
-			role = "guessor",
+			role = "p2",
 			new_match = false,
-			nick = props.username
+			nick = props.screen_name
 		}
 	gameservice:assign_match( match_request, on_assign_match_completed )
     interface:get_gameplay_invitation(
@@ -329,7 +354,7 @@ function Game_Server:accept_invite(invite_id, callback)
 		end
 	
 	gameservice:join_match(
-			invite_id, props.username, "guessor", on_join_match_completed
+			invite_id, props.screen_name, "p2", on_join_match_completed
 			)	
     
 end
@@ -352,6 +377,7 @@ function Game_Server:get_list_of_sessions(callback)
         				matches[match.match_id].nick = match.nickname
         				matches[match.match_id].match_state = match.match_state
         				matches[match.match_id].match_status = match.match_status
+                        matches[match.match_id].match_id = match.match_id
         			end
         			
         		end
