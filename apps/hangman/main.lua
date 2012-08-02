@@ -522,7 +522,7 @@ function main()
         
         gsm:init{
             
-            username = g_user.name,
+            screen_name = g_user.name,
             
             on_connection = function(t)
                 if t then
