@@ -68,6 +68,11 @@ const txmpp::QName QN_MUG_GAMEPRESENCE_TAG(true, NS_MUG, "game");
 const txmpp::QName QN_MUG_STATUS_TAG(true, NS_MUG, "status");
 const txmpp::QName QN_MUG_INROOMID_TAG(true, NS_MUG, "inRoomId");
 
+const txmpp::QName QN_MUG_MATCHDATA_TAG(true, NS_MUG, "matchdata");
+const txmpp::QName QN_MUG_USERDATA_TAG(true, NS_MUG, "userdata");
+const txmpp::QName QN_MUG_MATCH_TAG(true, NS_MUG, "match");
+const txmpp::QName QN_MUG_OPAQUE_TAG(true, NS_MUG, "opaque");
+
 const txmpp::QName QN_MUG_TURNBASED_STATE_TAG(true, NS_MUG_TURNBASED, "state");
 const txmpp::QName QN_MUG_TURNBASED_FIRST_TAG(true, NS_MUG_TURNBASED, "first");
 const txmpp::QName QN_MUG_TURNBASED_OPAQUE_TAG(true, NS_MUG_TURNBASED, "opaque");
@@ -85,10 +90,6 @@ const txmpp::QName QN_MUG_USER_NEWSTATE_TAG(true, NS_MUG_USER, "newstate");
 const txmpp::QName QN_MUG_USER_TERMINATE_TAG(true, NS_MUG_USER, "terminate");
 const txmpp::QName QN_MUG_USER_NEXT_TAG(true, NS_MUG_USER, "next");
 const txmpp::QName QN_MUG_USER_ONLY_UPDATE_TAG(true, NS_MUG_USER, "only-update");
-const txmpp::QName QN_MUG_MATCHDATA_TAG(true, NS_MUG_USER, "matchdata");
-const txmpp::QName QN_MUG_USERDATA_TAG(true, NS_MUG_USER, "userdata");
-const txmpp::QName QN_MUG_MATCH_TAG(true, NS_MUG_USER, "match");
-const txmpp::QName QN_MUG_OPAQUE_TAG(true, NS_MUG_USER, "opaque");
 
 const std::string NS_XDATA("jabber:x:data");
 const txmpp::QName QN_XDATA_X(true, NS_XDATA, "x");

@@ -281,7 +281,7 @@ StatusCode GameServiceSupport::ListGames(UserData * ud, int lua_callback_ref) {
 	return delegate_->ListGames(cb_data);
 }
 
-StatusCode GameServiceSupport::RegisterApp(UserData * ud, const AppId & app, int lua_callback_ref) {
+StatusCode GameServiceSupport::RegisterApp(const AppId & app) {
 	return delegate_->RegisterApp(app, NULL);
 }
 
@@ -431,9 +431,21 @@ void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const A
 
 void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const Game& game, void* cb_data) {
 
-	std::cout << "OnRegisterGameResponse(). status_code:"
+	/*
+	 *
+	 std::cout << "OnRegisterGameResponse(). status_code:"
 			<< statusToString(rs.status_code()) << ", game_id:"
 			<< game.game_id().AsID() << std::endl;
+	*/
+
+
+	lua_State* L = get_lua_state();
+
+	TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0);
+
+	delete (CallbackDataStruct*)cb_data;
 
 }
 
@@ -611,11 +623,16 @@ void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb
 void GameServiceSupport::OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
 	lua_State* L = get_lua_state();
 
+	std::cout << "Inside OnGetMatchDataResponse. number of match_infos = " << match_data.const_match_infos().size() << std::endl;
 	TPGameServiceUtil::push_response_status_arg( L, rs );
 
 	if (rs.status_code() == OK) {
 
+		std::cout << "Inside OnGetMatchDataResponse. pushing match_data into lua stack" << std::endl;
+
 		TPGameServiceUtil::push_match_data_arg( L, match_data );
+
+		std::cout << "Inside OnGetMatchDataResponse. finished pushing match_data into lua stack" << std::endl;
 
 		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 2, 0);
 

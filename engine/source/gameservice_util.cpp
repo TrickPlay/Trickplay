@@ -138,7 +138,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 		return luaL_error(L, "Incorrect argument, failed to set \'app_id.name\' : string expected");
 	}
 	String app_name = cname;
-	lua_pop(L,1);
+	lua_pop(L, 1);
 
 	// app_version
 	int app_version = 1;
@@ -215,7 +215,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if (!lua_isboolean(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'join_after_start\' : boolean expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'join_after_start\' : boolean expected");
 		}
 		game.set_join_after_start(lua_toboolean(L, -1));
 	}
@@ -227,7 +227,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if (!lua_isboolean(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'abort_when_player_leaves\' : boolean expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'abort_when_player_leaves\' : boolean expected");
 		}
 		game.set_abort_when_player_leaves(lua_toboolean(L, -1));
 	}
@@ -239,11 +239,11 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if(!lua_isnumber(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'min_players_to_start\' : number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'min_players_to_start\' : number expected");
 		}
 		if ( lua_tointeger(L, -1) <= 0 )
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'min_players_to_start\' : positive non-zero number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'min_players_to_start\' : positive non-zero number expected");
 		}
 		game.set_min_players_for_start(lua_tointeger(L, -1));
 	}
@@ -255,11 +255,11 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if(!lua_isnumber(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'max_duration_per_turn\' : number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'max_duration_per_turn\' : number expected");
 		}
-		if ( lua_tointeger(L, -1) <= 0 )
+		if ( lua_tointeger(L, -1) < 0 )
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'max_duration_per_turn\' : positive non-zero number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'max_duration_per_turn\' : non negative number expected");
 		}
 		game.set_max_duration_per_turn(lua_tointeger(L, -1));
 	}
@@ -269,17 +269,18 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	lua_getfield(L, index, "roles");
 	if (!lua_istable(L, -1))
 	{
-		return luaL_error(L, "Incorrect argument, fail to set \'roles\' : table expected");
+		return luaL_error(L, "Incorrect argument, failed to find \'roles\' : table expected");
 	}
 
 	pt = lua_gettop(L);
 
-	lua_pushnil(L);
+	lua_pushnil( L );
 	while(lua_next(L, pt) != 0)
 	{
+		std::cout << "extracting role info" << std::endl;
 		if (!lua_istable(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, fail to set \'properties\' elements : table expected");
+			return luaL_error(L, "Incorrect argument, failed to access properties table for a role");
 		}
 
 		String role_name;
@@ -326,8 +327,10 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 		}
 		lua_pop(L,1);
 
+		std::cout << "finished extracting role" << std::endl;
 		game.roles().push_back(libgameservice::Role(role_name, cannot_start, first_role));
 
+		lua_pop( L, 1 ); // pop the role table
 	}
 
 	// pop the roles table
@@ -651,7 +654,9 @@ void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_
 
 	int i = 1;
 	std::vector<libgameservice::MatchInfo>::const_iterator it;
-	for( it=match_data.const_match_infos().begin(); it < match_data.const_match_infos().end(); i++ ) {
+	for( it=match_data.const_match_infos().begin(); it < match_data.const_match_infos().end(); it++ ) {
+
+		std::cout << "populating lua table for match_id= " << (*it).id() <<  std::endl;
 		lua_newtable( L );
 		int match_info_t = lua_gettop( L );
 
@@ -675,9 +680,12 @@ void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_
 		push_match_state_arg( L, (*it).const_state() );
 		lua_rawset( L, match_info_t );
 
+		std::cout << "the top of the stack is " << lua_gettop( L ) << ". match_info table is at index " << match_info_t << std::endl;
 		lua_rawseti( L, match_infos_t, i++ );
 	}
 
+	std::cout << "finished populating match_info into match_infos. the top of the stack is " << lua_gettop( L )
+			<< ". match_data table is at index " << t << std::endl;
 	lua_rawset( L, t );
 }
 
