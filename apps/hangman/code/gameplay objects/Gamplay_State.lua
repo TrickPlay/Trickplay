@@ -58,6 +58,8 @@ end
 
 local make_from_existing = function(p_data)
     
+	print("make from existing")
+    
     assert(g_user.name ~= nil)
     
     if type(p_data) == "string" then
@@ -80,12 +82,15 @@ local make_from_existing = function(p_data)
         error("got a sesssion with no data",2)
     end
     
-    if type(p_data.state) == "string" then
+    if type(p_data.match_state.opaque) == "string" then
         
         p_data.state = json:parse(base64_decode(p_data.match_state.opaque))
         
     end
-    
+    if type(p_data.state) == "table" then dumptable(p_data.state) 
+    else
+    		print("no state")
+	end
     if p_data.state.state then error("got a state.state",2) end
     
     

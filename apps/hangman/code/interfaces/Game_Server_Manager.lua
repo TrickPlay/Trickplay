@@ -14,7 +14,7 @@ local props = {
 		on_connection = nil
 }
 
-local do_callbacks() = 
+local do_callbacks = 
 	function ()
 		if props.on_connection == nil then
 			return
@@ -55,7 +55,7 @@ local app_id = { name = app.id, version = app.version }
 
 local game_name = app.id
 
-local game_id = { "app_id" = app_id, "name" = game_name }
+local game_id = { app_id = app_id, name = game_name }
 
 print("game name:   '"..game_name.."'")
 
@@ -79,7 +79,7 @@ local on_match_started =
 			return
 		end
 		
-		if matches[match_id].id = from.id then
+		if matches[match_id].id == from.id then
 			if matches[match_id].state ~= nil then
 				-- set the state of the match
 				gameservice:update_state( match_id, matches[match_id].state, false )
@@ -133,7 +133,7 @@ function Game_Server:set_screen_name(screen_name)
 end
 function Game_Server:get_user_id()    
     
-    return gameservice:user_id()
+    return gameservice.user_id
     
 end
 function Game_Server:init(t)    
@@ -155,10 +155,12 @@ local check_gameservice_is_available =
 	end
 
 function Game_Server:register_game(game_config, on_register_game_completed)
+	print("register game called")
 	check_gameservice_is_available( )
 	gameservice:register_game(
         game_config, 
         function ( gameservice, response_status )        
+        	print("register game completed")
             on_register_game_completed ( true )
         end
     )
@@ -179,9 +181,9 @@ function Game_Server:launch_wildcard_session(session, callback)
 		
 	local on_join_match_completed =
 		function ( gameservice, response_status, match_id, from, item )
-			if ( response_status.status != 0 )
+			if ( response_status.status ~= 0 ) then
 				--let the client know that we failed to join match that was previously assigned to us
-				--callback( ??? )
+				callback( false )
 				return
 			end
 			
@@ -203,9 +205,9 @@ function Game_Server:launch_wildcard_session(session, callback)
 	
 	local on_assign_match_completed =
 		function ( gameservice, response_status, match_request, new_match_id )
-			if ( response_status.status != 0 )
+			if ( response_status.status ~= 0 ) then
 				--let the client know that a new match cannot be created
-				--callback( ??? )
+				callback( false )
 				return
 			end
 			
@@ -299,9 +301,9 @@ function Game_Server:get_a_wild_card_invite(callback)
 
     local on_assign_match_completed =
 		function ( gameservice, response_status, match_request, new_match_id )
-			if ( response_status.status != 0 )
+			if ( response_status.status ~= 0 ) then
 				--let the client know that a new match cannot be created
-				--callback( ??? )
+				callback( nil )
 				return
 			end
 			
@@ -315,13 +317,6 @@ function Game_Server:get_a_wild_card_invite(callback)
 			nick = props.screen_name
 		}
 	gameservice:assign_match( match_request, on_assign_match_completed )
-    interface:get_gameplay_invitation(
-        user,
-        pswd,
-        game_id,
-        1,
-        callback
-    )
     
 end
 function Game_Server:accept_invite(invite_id, callback)
@@ -335,7 +330,7 @@ function Game_Server:accept_invite(invite_id, callback)
     
 	local on_join_match_completed =
 		function ( gameservice, response_status, match_id, from, item )
-			if ( response_status.status != 0 )
+			if ( response_status.status ~= 0 ) then
 				--let the client know that we failed to join match that was previously assigned to us
 				--callback( ??? )
 				return
@@ -367,10 +362,14 @@ function Game_Server:get_list_of_sessions(callback)
     
     check_gameservice_is_available( )
     local on_get_match_data_completed = 
-    	function ( gameservice, match_data )
+    	function ( gameservice, response_status, match_data )
+    		print("received match data")
     		if match_data ~= nil and match_data.match_infos ~= nil then
+    			print("match info is present")
+				dumptable(match_data)
     			-- load the matches table with list of returned matches
-    			for index, match in ipairs( match_data.match_infos )
+    			for index, match in ipairs( match_data.match_infos ) do
+    				print("match",index,match)
         			if matches[match.match_id] == nil then
         				matches[match.match_id] = { }
         				matches[match.match_id].id = match.in_room_id
@@ -383,6 +382,8 @@ function Game_Server:get_list_of_sessions(callback)
         		end
     		end
     		callback( matches )
+    			dumptable(matches)
+    		print("done parsing match data")
     	end
     	
     gameservice:get_match_data( game_id, on_get_match_data_completed )    
