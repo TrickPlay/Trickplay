@@ -57,7 +57,7 @@ public:
 
 	virtual StatusCode ListGames(UserData* ud, int lua_callback_ref);
 
-	virtual StatusCode RegisterApp(UserData* ud, const AppId & app, int lua_callback_ref);
+	virtual StatusCode RegisterApp(const AppId & app);
 
 	virtual StatusCode RegisterGame(UserData* ud, const Game & game, int lua_callback_ref);
 

@@ -1172,8 +1172,12 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 			g_info("Performing luaopen_gameservice()");
 			luaopen_gameservice( L );
 
-			g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
-			context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
+			AppId appId(metadata.id, 1);
+			g_info("calling gameservice->RegisterApp(%s, %d) ", metadata.id.c_str(), 1);
+			context->get_gameservice()->RegisterApp(appId);
+
+			g_info("calling gameservice->OpenApp(%s, %d) ", metadata.id.c_str(), 1);
+			context->get_gameservice()->OpenApp(appId);
 		}
     }
 #endif
