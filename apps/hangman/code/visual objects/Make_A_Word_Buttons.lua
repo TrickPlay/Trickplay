@@ -168,7 +168,14 @@ function controller:init(t)
                         
                         game_server:launch_wildcard_session(session,function(match)
                             
-                            print("got id back")
+                            print("got id back",match)
+                            
+                            if not match then 
+                            	
+                            	list:set_state("FOCUSED")
+
+                            	return 
+                            end
                             
                             app_state.state = "MAIN_PAGE"
                             bg:slide_in_hangman()
@@ -299,9 +306,7 @@ function controller:change_message(t)
     
     mesg.anchor_point = {
         mesg.w/2, 0
-    }make_word:set_session(game_state:make())
-                                
-                                app_state.state = "MAKE_WORD"
+    }
     
 end
 function controller:new_letters()

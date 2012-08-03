@@ -132,7 +132,53 @@ local launch_key_board = function()
             
             
             screen:grab_key_focus()
+                        
             
+            game_server:set_screen_name(g_user.name)
+            
+                    
+        game_server:init{
+            
+            screen_name = g_user.name,
+            
+            on_connection = function(t)
+            	print("init called back")
+                if t then
+                    
+                    g_user.id = gsm:get_user_id()
+                    
+                    gsm:register_game(
+                        
+                        hangman_game_config(),
+                        
+                        function(success)
+                            print("register called back")
+                            app_state.state = APP_STATE_MAIN_PAGE
+                            
+                            front_page:setup_lists()
+                            
+                        end
+                    
+                    )
+                    
+                else
+                    app_state.state = APP_STATE_LOADING
+                    print("init failed")
+                    --TODO: need to try again
+                end
+            end,
+            
+        }
+        
+
+            print("init called")
+            
+
+            
+            --front_page:setup_lists()
+            
+            --app_state.state = "MAIN_PAGE"
+            --[[
             game_server:login{
                 user        = g_user.name,
                 --pswd        = results.password,
@@ -181,6 +227,7 @@ local launch_key_board = function()
                     
                 end
             }
+            --]]
             
             
         end

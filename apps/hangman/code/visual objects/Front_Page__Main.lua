@@ -493,13 +493,13 @@ function self:setup_lists()
         loaded = true
         
         self:gain_focus()
-        
+        --[[
         if # sessions == 0 then
-            
+            print("no sessions")
             
             
         else
-            
+            --]]
             for i,sesh in pairs(sessions) do
                 
                 --make a session object
@@ -536,7 +536,7 @@ function self:setup_lists()
                 
             end
             
-        end
+        --end
         
         game_history:set_wins(   g_user.wins   )
         game_history:set_losses( g_user.losses )

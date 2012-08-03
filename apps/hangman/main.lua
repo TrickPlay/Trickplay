@@ -14,7 +14,7 @@ APP_STATE_GUESS_WORD = "GUESS_WORD"
 APP_STATE_MAKE_WORD = "MAKE_WORD"
 APP_STATE_MAKE_PAGE = "MAKE_PAGE"
 
-local hangman_game_config = function()
+hangman_game_config = function()
     return {
 		app_id = {name = app.id, version = 1 },
         name = app.id,
@@ -24,7 +24,7 @@ local hangman_game_config = function()
         game_type = "correspondence",
         join_after_start = true,
         min_players_for_start = 1,
-        max_duration_per_turn = 0,  -- only applicable for online  game_type
+        max_duration_per_turn = 100000000,  -- only applicable for online  game_type
         abort_when_player_leaves = false, -- only applicable for online game_type
         roles = {
         		{ name = "p1" },
@@ -36,9 +36,9 @@ end
 
 function main()
     
-    local font = "Free Sans"
+    local font = "FreeSans"
     
-    g_font     = "IM FELL English SC"
+    g_font     = "FreeSans"--"IM FELL English SC"
     app_state  = nil
     
     do
