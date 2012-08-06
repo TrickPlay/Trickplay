@@ -76,6 +76,8 @@ local convert_to_participant_id =
 
 local on_match_started =
 	function ( gameservice, match_id, from )
+    
+        print("on_match_started",gameservice, match_id, from)
 		
 		if matches[match_id] == nil then
 			return
@@ -84,7 +86,8 @@ local on_match_started =
 		if matches[match_id].id == from.id then
 			if matches[match_id].state ~= nil then
 				-- set the state of the match
-				gameservice:update_state( match_id, matches[match_id].state, false )
+				--gameservice:update_state( match_id, matches[match_id].state, false )
+                gameservice:send_turn( match_id, matches[match_id].state, false, nil )
 			end
 			callback = matches[match_id].callback
 			matches[match_id].callback = nil
@@ -171,6 +174,7 @@ end
 function Game_Server:init(t)    
     if type(t) ~= "table" then        
         error("Invalid parameter. must pass a table", 2)        
+    gameservice:send_turn( session.match_id, session.opaque_state, false, callback )
     end
     
     props.screen_name      = t.screen_name      or error("Must pass in a screen_name",2)
