@@ -370,14 +370,15 @@ function Game_Server:get_list_of_sessions(callback)
     			-- load the matches table with list of returned matches
     			for index, match in ipairs( match_data.match_infos ) do
     				print("match",index,match)
-        			if matches[match.match_id] == nil then
+        			if  matches[match.match_id] == nil then
         				matches[match.match_id] = { }
-        				matches[match.match_id].id = match.in_room_id
-        				matches[match.match_id].nick = match.nickname
-        				matches[match.match_id].match_state = match.match_state
-        				matches[match.match_id].match_status = match.match_status
+                        matches[match.match_id].id = match.in_room_id
+                        matches[match.match_id].nick = match.nickname
                         matches[match.match_id].match_id = match.match_id
-        			end
+                    end
+                    
+        			matches[match.match_id].match_state  = match.match_state
+        			matches[match.match_id].match_status = match.match_status
         			
         		end
     		end
