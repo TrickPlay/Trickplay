@@ -55,6 +55,20 @@ function self:init(t)
     
 end
 
+local default_state = function()
+    return {
+                players = {
+                    {name = g_user.name, score = 0, id = g_user.id, counted_score = false},
+                    {name = false,       score = 0, id = false,     counted_score = false}
+                },
+                turn    = g_user.name, --waiting for wildcard opponent
+                word    = false,
+                viewing = false,
+                phase   = "MAKING",
+                letters = {},
+                expires = reset_expiration(),
+            }
+end
 
 local make_from_existing = function(p_data)
     
@@ -89,8 +103,7 @@ local make_from_existing = function(p_data)
     end
     if type(p_data.state) == "table" then dumptable(p_data.state) 
     else
-    		print("no state")
-    		p_data.state = {}
+    		error("No state. This should never happen",2)
 	end
     if p_data.state.state then error("got a state.state",2) end
     
@@ -490,18 +503,7 @@ function self:make(t)
     return make_from_existing(
         t or {
             match_id = false,
-            state = {
-                players = {
-                    {name = g_user.name, score = 0, id = g_user.id, counted_score = false},
-                    {name = false,       score = 0, id = false,     counted_score = false}
-                },
-                turn    = g_user.name, --waiting for wildcard opponent
-                word    = false,
-                viewing = false,
-                phase   = "MAKING",
-                letters = {},
-                expires = reset_expiration(),
-            }
+            state = default_state(),
         }
     )
     
