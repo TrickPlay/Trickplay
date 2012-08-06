@@ -90,6 +90,7 @@ local make_from_existing = function(p_data)
     if type(p_data.state) == "table" then dumptable(p_data.state) 
     else
     		print("no state")
+    		p_data.state = {}
 	end
     if p_data.state.state then error("got a state.state",2) end
     
