@@ -891,7 +891,13 @@ public class DefaultMUGSession implements MUGSession {
 				if (openApps.contains(appID)) {
 					return;
 				}
-					
+
+				// check if the app is registered otherwise silently register the app
+				// TODO: address the consequences of registering an app silently
+				if (null == component.getApp(appID)) {
+					component.registerApp(appID.getName(), appID.getVersion(), request.getFrom());
+				}
+				
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doOpen(rooms);
 				openApps.add(appID);

@@ -467,7 +467,7 @@ public class DefaultMUGService implements MUGService {
 	}
 
 	public MUGApp getApp(AppID appID) {
-		return null;
+		return apps.get(appID);
 	}
 
 	/**
