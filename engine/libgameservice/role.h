@@ -7,8 +7,8 @@ namespace libgameservice {
 
 class Role {
 public:
-	Role(const std::string& name) {
-		Role(name, false, false);
+	Role(const std::string& name) : name_(name), cannot_start_(false), first_role_(false) {
+		//Role(name, false, false);
 	}
 	Role(const std::string& name, bool cannot_start, bool first_role) :
 		name_(name), cannot_start_(cannot_start), first_role_(first_role) {

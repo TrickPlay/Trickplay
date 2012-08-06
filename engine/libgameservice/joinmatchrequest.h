@@ -8,7 +8,7 @@ namespace libgameservice {
 class JoinMatchRequest {
 public:
 
-	JoinMatchRequest() { }
+	JoinMatchRequest() : free_role_(false) { }
 
 	JoinMatchRequest(const std::string& match_id, bool freerole, const std::string& role, const std::string& nick) :
 		match_id_(match_id), free_role_(freerole), role_(role), nick_(nick) {
