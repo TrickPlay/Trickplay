@@ -82,7 +82,7 @@ local make_from_existing = function(p_data)
         error("got a sesssion with no data",2)
     end
     
-    if type(p_data.match_state.opaque) == "string" then
+    if type(p_data.match_state) == "table" and type(p_data.match_state.opaque) == "string" then
         
         p_data.state = json:parse(base64_decode(p_data.match_state.opaque))
         
