@@ -109,7 +109,7 @@ protected:
 		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS) {
 			game_service_->DoCallbacks();
 			if (game_service_->state() != GameServiceSupport::LOGIN_IN_PROGRESS) {
-		//		std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
+				std::cout << "Login completed. current state:" << stateToStr(game_service_->state()) << std::endl;
 				return false;
 			}
 		} else {
