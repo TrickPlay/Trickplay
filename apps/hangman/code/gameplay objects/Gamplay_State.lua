@@ -8,7 +8,7 @@ local game_server
 local reset_expiration = function() return os.time() + 24*60*60 end
 
 
-local all_seshs = {}
+all_seshs = {}
 setmetatable(all_seshs,{__mode = "v"})
 
 self.check_server = Timer{
@@ -236,6 +236,7 @@ local make_from_existing = function(p_data)
     
    
     function session:sync_callback(t)
+        t = session
         --print("syncing", session)
         --if something changed
         if data.key ~= t.key then
