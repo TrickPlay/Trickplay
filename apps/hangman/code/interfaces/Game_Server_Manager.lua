@@ -301,7 +301,7 @@ function Game_Server:respond(session,callback)
     --[[
         this function is send_turn, it also appears to update the gamestate
     --]]
-    
+    print("Game_Server:respond()")
     
     check_gameservice_is_available( )
     if session == nil then error("must pass session",2) end
