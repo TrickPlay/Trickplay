@@ -137,7 +137,7 @@ local on_match_updated =
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
         
-        all_seshs[match_id].sync_callback()
+        if all_seshs[match_id] then all_seshs[match_id].sync_callback() end
         
 	end
 	
