@@ -19,13 +19,14 @@ local do_callbacks =
 		if props.on_connection == nil then
 			return
 		end
-		
+		print("do_callbacks")
 		if gameservice_available then
 			props.on_connection( true )
 		elseif gameservice_error_response then
 			props.on_connection( false )
 		else
-			return
+			print("gameservice_available == false/nil and gameservice_error_response == false/nil")
+            return
 		end
 		props.on_connection = nil
 		
@@ -34,13 +35,14 @@ local do_callbacks =
 local on_ready = 
 	function ( gameservice, app_id ) 
 		gameservice_available = true
+        print ("gameservice is available") 
 		do_callbacks()
 	end
 
 local on_error = 
 	function ( gameservice, response_status )
 		print( "failed to connect with gameservice. status_code = " 
-				.. response_status.status_code
+				.. response_status.status_as_string
 				.. ", error_message = '" 
 				.. response_status.error_message 
 				.. "'"
