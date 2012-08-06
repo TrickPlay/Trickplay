@@ -97,18 +97,31 @@ local on_match_started =
 
 local on_turn_received = 
 	function ( gameservice, match_id, from, turn_message )
+    
+        print("on_turn_received",gameservice, match_id, from, turn_message)
+        dumptable(turn_message)
+    
 	end
 
 local on_participant_joined =
 	function ( gameservice, match_id, from, item )	
+    
+        print("on_participant_joined",gameservice, match_id, from, item)
+        dumptable(item)
+    
 	end
 	
 local on_participant_left =
 	function ( gameservice, match_id, participant )	
+    
+        print("on_participant_left",gameservice, match_id, participant)
+        dumptable(participant)
 	end
 	
 local on_match_updated =
 	function ( gameservice, match_id, match_status, match_state )
+        print("on_match_updated",gameservice, match_id, match_status, match_state)
+        dumptable(match_state)
         
         if  matches[match_id] == nil then
         	
@@ -123,6 +136,8 @@ local on_match_updated =
         
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
+        
+        all_seshs[match_id].sync_callback()
         
 	end
 	
