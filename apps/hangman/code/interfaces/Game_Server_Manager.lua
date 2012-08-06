@@ -109,6 +109,21 @@ local on_participant_left =
 	
 local on_match_updated =
 	function ( gameservice, match_id, match_status, match_state )
+        
+        if  matches[match_id] == nil then
+        	
+            print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
+            
+            matches[match_id] = {}
+            --matches[match_id].id = in_room_id
+            --matches[match_id].nick = g_user.name
+            matches[match_id].match_id = match_id
+            
+        end
+        
+        matches[match_id].match_state  = match_state
+        matches[match_id].match_status = match_status
+        
 	end
 	
 gameservice.on_ready =  on_ready 
@@ -311,7 +326,8 @@ function Game_Server:get_a_wild_card_invite(callback)
 			
 			callback( new_match_id )
 		end
-	
+				callback( matches[match_id] )
+
 	match_request = {
 			game_id = game_id_urn,
 			role = "p2",
@@ -347,6 +363,7 @@ function Game_Server:accept_invite(invite_id, callback)
 			matches[match_id].match_id = match_id
 			matches[match_id].role = item.role
 			
+            
 			callback( matches[match_id] )
 		end
 	
