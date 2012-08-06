@@ -486,7 +486,8 @@ function self:setup_lists()
     
     game_server:get_list_of_sessions(function(sessions)
         
-        game_state.check_server:start()
+        --game_state.check_server:start()
+        
         
         status.stop = true
         
@@ -540,7 +541,7 @@ function self:setup_lists()
         
         game_history:set_wins(   g_user.wins   )
         game_history:set_losses( g_user.losses )
-        
+        game_state.check_server:on_timer()
     end)
     
 end
