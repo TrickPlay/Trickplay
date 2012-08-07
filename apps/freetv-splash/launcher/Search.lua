@@ -15,6 +15,12 @@ local function on_sleep(label)
 end
 
 local function on_key_down(label, key)
+    if( keys.OK == key ) then
+        -- Since search is not implemented, use this as a cheat shortcut to resetting the service
+        settings.back_to_start = nil
+        settings.service = nil
+        exit()
+    end
 end
 
 return {
