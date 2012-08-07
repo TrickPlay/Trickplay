@@ -132,7 +132,6 @@ local on_participant_left =
 	
 local on_match_updated =
 	function ( gameservice, match_id, match_status, match_state )
-    
         print("on_match_updated",gameservice, match_id, match_status, match_state)
         dumptable(match_state)
         
@@ -154,18 +153,7 @@ local on_match_updated =
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
         
-        if all_seshs[match_id] then 
-            all_seshs[match_id]:sync_callback(match_state.opaque) 
-        elseif 
-            type(match_state)  == "table" and 
-            match_state.opaque ~= nil and 
-            match_state.opaque ~= "" then
-            
-            print("calling make")
-            Game_State:make(matches[match_id])
-        else
-            print("on_match_updated call with blank match state")
-        end
+        if all_seshs[match_id] then all_seshs[match_id]:sync_callback(match_state.opaque) end
         
 	end
 	
@@ -428,6 +416,9 @@ function Game_Server:accept_invite(invite_id, callback)
 			)	
     
 end
+
+function Game_Server:get_match(id) return matches[id] end 
+
 
 function Game_Server:get_list_of_sessions(callback)
     --[[    
