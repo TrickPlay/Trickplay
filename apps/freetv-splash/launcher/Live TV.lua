@@ -197,6 +197,10 @@ local function make_show_tile(channel_num, data)
     return show_group
 end
 
+local function unfocus_show(number)
+    menubar:find_child("tv_shows").children[number]:unfocus()
+end
+
 local function focus_show(number)
     local the_show = menubar:find_child("tv_shows").children[number]
     the_show:focus()
@@ -260,6 +264,18 @@ local function on_sleep(label)
 end
 
 local function on_key_down(label, key)
+    if( keys.Left == key or keys.Right == key ) then
+        unfocus_show(active_show)
+
+        if(keys.Left == key) then
+            active_show = ((active_show - 2) % menubar:find_child("tv_shows").count) + 1
+        else
+            active_show = (active_show % menubar:find_child("tv_shows").count) + 1
+        end
+
+        focus_show(active_show)
+        return true
+    end
 end
 
 return {
