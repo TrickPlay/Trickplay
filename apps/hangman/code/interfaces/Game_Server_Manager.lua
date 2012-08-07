@@ -314,6 +314,18 @@ function Game_Server:end_session(session,callback)
     
 end
 
+function Game_Server:leave_match(session,callback)
+    --[[
+        this function is used to end a match, (if a user loses the match, or times out)
+    --]]
+    
+    check_gameservice_is_available( )
+    if session == nil then error("must pass session",2) end
+    
+    gameservice:leave_match( session.match_id, callback )
+    
+end
+
 function Game_Server:respond(session,callback)
     --[[
         this function is send_turn, it also appears to update the gamestate
