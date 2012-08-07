@@ -15,6 +15,10 @@ local function on_sleep(label)
 end
 
 local function on_key_down(label, key)
+    if( keys.OK == key ) then
+        settings.back_to_start = "Store"
+        apps:launch("com.trickplay.app-shop")
+    end
 end
 
 return {
