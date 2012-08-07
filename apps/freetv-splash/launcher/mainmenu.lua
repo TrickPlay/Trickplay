@@ -84,6 +84,7 @@ end
 
 menubar.goaway = function(self)
     menubar_animationstate.state = "hidden"
+    inner_labels.children[active_label]:sleep()
 end
 
 function menubar:start_item(item)
@@ -114,7 +115,7 @@ function menubar:on_key_down(key)
             inner_labels:animate({ duration = 250, x = 100-inner_labels.children[active_label].x })
 
             inner_labels.children[orig_active]:deactivate(inner_labels.children[active_label])
-        elseif(keys.Up == key) then
+        elseif(keys.Up == key or keys.OK == key) then
             -- We handle "Up" by waking the submenu so that it will know to navigate internally
             inner_labels.children[active_label]:wake()
             submenu_active = true
