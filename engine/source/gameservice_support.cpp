@@ -612,12 +612,12 @@ void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb
 			<< std::endl;
 			*/
 
-	//	lua_State* L = get_lua_state();
+		lua_State* L = get_lua_state();
 
-//		TPGameServiceUtil::push_response_status_arg( L, rs );
+		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-	//	invoke_gameservice_on_( L, this, 1, 0 );
-
+		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 1, 0 );
+		delete (CallbackDataStruct*)cb_data;
 }
 
 void GameServiceSupport::OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
