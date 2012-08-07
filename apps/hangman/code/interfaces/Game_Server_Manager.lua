@@ -106,7 +106,13 @@ local on_turn_received =
     
         print("on_turn_received",gameservice, match_id, from, turn_message)
         dumptable(turn_message)
-    
+        
+        
+        if all_seshs[match_id] then 
+            
+            all_seshs[match_id]:sync_callback(turn_message.new_state) 
+            
+        end
 	end
 
 local on_participant_joined =
@@ -143,7 +149,7 @@ local on_match_updated =
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
         
-        if all_seshs[match_id] then all_seshs[match_id].sync_callback() end
+        if all_seshs[match_id] then all_seshs[match_id]:sync_callback(match_state.opaque) end
         
 	end
 	
