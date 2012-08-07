@@ -132,7 +132,9 @@ function self:init(t)
                                     function(t)
                                         
                                         print("accepting the following invite")
-                                        
+                                        dumptable(t)
+                                        print("whats in GSM.matches")
+                                        dumptable(game_server:get_match(match_id))
                                         t = game_state:make(t)
                                         
                                         game_server:update(t,function()
