@@ -337,8 +337,17 @@ global gameservice [[GameServiceSupport*]]
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
 		
-	/*callback on_start_match_completed
-	;*/
+	table leave_match(string match_id, function on_leave_match_completed=0)
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_leave_match_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			libgameservice::StatusCode sc = self->LeaveMatch(ud, match_id, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
 	
 	table send_turn(string match_id, string state, bool terminate, function on_send_turn_completed=0)
 		[[
