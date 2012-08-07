@@ -235,25 +235,25 @@ local make_from_existing = function(p_data)
     end
     
    
-    function session:sync_callback(t)
-        t = session
+    function session:sync_callback(new_state)--t)
+        
         --print("syncing", session)
         --if something changed
         if data.key ~= t.key then
             print("mismatch")
-            data = t
+            --data = t
             
             --sanity check on its state
-            if data.match_state.opaque == json.null then 
+            if new_state == json.null then 
                 
                 dumptable(data)
                 
                 error("got a sesssion with no data",2)
             end
             
-            if type(data.state) == "string" then
+            if type(new_state) == "string" then
                 
-                data.state = json:parse(base64_decode(data.match_state.opaque))
+                data.state = json:parse(base64_decode(new_state))
                 
             end
             
