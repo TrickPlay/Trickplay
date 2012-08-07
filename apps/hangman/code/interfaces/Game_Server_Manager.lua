@@ -139,6 +139,10 @@ local on_match_updated =
         	
             print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
             
+            if match_status ~= "completed" then 
+                print("Received update for a completed match that I was not tracking. Ignoring")
+                return
+            end
             matches[match_id] = {}
             --matches[match_id].id = in_room_id
             --matches[match_id].nick = g_user.name
@@ -416,17 +420,18 @@ function Game_Server:get_list_of_sessions(callback)
 				dumptable(match_data)
     			-- load the matches table with list of returned matches
     			for index, match in ipairs( match_data.match_infos ) do
-    				print("match",index,match)
-        			if  matches[match.match_id] == nil then
-        				matches[match.match_id] = { }
-                        matches[match.match_id].id = match.in_room_id
-                        matches[match.match_id].nick = match.nickname
-                        matches[match.match_id].match_id = match.match_id
-                    end
-                    
-        			matches[match.match_id].match_state  = match.match_state
-        			matches[match.match_id].match_status = match.match_status
-        			
+                    if not( match.match_status == "completed" and matches[match.match_id] == nil) then
+                        print("match",index,match)
+                        if  matches[match.match_id] == nil then
+                            matches[match.match_id] = { }
+                            matches[match.match_id].id = match.in_room_id
+                            matches[match.match_id].nick = match.nickname
+                            matches[match.match_id].match_id = match.match_id
+                        end
+                        
+                        matches[match.match_id].match_state  = match.match_state
+                        matches[match.match_id].match_status = match.match_status
+        			end
         		end
     		end
     		callback( matches )
