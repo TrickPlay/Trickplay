@@ -133,13 +133,13 @@ local on_participant_left =
 local on_match_updated =
 	function ( gameservice, match_id, match_status, match_state )
         print("on_match_updated",gameservice, match_id, match_status, match_state)
-        dumptable(match_state)
+        
         
         if  matches[match_id] == nil then
         	
             print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
             
-            if match_status ~= "completed" then 
+            if match_status == "completed" then 
                 print("Received update for a completed match that I was not tracking. Ignoring")
                 return
             end
@@ -152,7 +152,7 @@ local on_match_updated =
         
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
-        
+        dumptable(matches[match_id])
         if all_seshs[match_id] then all_seshs[match_id]:sync_callback(match_state.opaque) end
         
 	end
@@ -392,6 +392,7 @@ function Game_Server:accept_invite(invite_id, callback)
     
 	local on_join_match_completed =
 		function ( gameservice, response_status, match_id, from, item )
+        
 			if ( response_status.status ~= 0 ) then
 				--let the client know that we failed to join match that was previously assigned to us
 				--callback( ??? )
