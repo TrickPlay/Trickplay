@@ -237,6 +237,11 @@ local make_from_existing = function(p_data)
    
     function session:sync_callback(new_state)--t)
         
+        if new_state == nil or new_state == "" then
+            print("WARNING. Sync_Callback called with no state")
+            return
+        end
+        
         --sanity check on its state
         if new_state == json.null then 
             
