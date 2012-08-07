@@ -239,7 +239,7 @@ local make_from_existing = function(p_data)
         
         --print("syncing", session)
         --if something changed
-        if data.key ~= t.key then
+        if true then --data.key ~= t.key then
             print("mismatch")
             --data = t
             
