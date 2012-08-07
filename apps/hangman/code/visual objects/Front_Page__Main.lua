@@ -423,9 +423,7 @@ function self:won_against(entry)
         
         game_history:set_wins( g_user.wins )
         
-    end)<<<<<<<<
-presence type="unavailable" from="room1@mug.internal.trickplay.com/1_q" to="ca5cd5d0-e00a-11e1-8fce-109add46f936@internal.trickplay.com/smarttv"><game xmlns="http://jabber.org/protocol/mug"><item affiliation="none" role="p2" jid="d63c53fe-dce9-11e1-bd68-6b00b2f10aa2@internal.trickplay.com"/></game></presence>
-<<<<<<<<
+    end)
 
     
 end
