@@ -264,14 +264,10 @@ local make_from_existing = function(p_data)
             
             if session.i_counted_score and session.opponent_counted_score then
                 
-                game_server:end_session(session,function()
-                    print("Session "..session.match_id.." terminated")
-                    session:delete()
-                end)
+                session:delete()
                 
             end
             
-            print("donzo")
             return false
             
         else

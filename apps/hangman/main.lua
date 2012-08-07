@@ -356,8 +356,9 @@ function main()
     }
     
     Game_History:init{
-        make_frame   = make_frame,
-        img_srcs       = img_srcs,
+        make_frame  = make_frame,
+        img_srcs    = img_srcs,
+        game_server = gsm,
     }
     
     Clipped_List:init{
