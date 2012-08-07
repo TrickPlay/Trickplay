@@ -87,7 +87,10 @@ local on_match_started =
 			if matches[match_id].state ~= nil then
 				-- set the state of the match
 				--gameservice:update_state( match_id, matches[match_id].state, false )
+                print("Send Turn")
                 gameservice:send_turn( match_id, matches[match_id].state, false, nil )
+            else
+                print("NOT SENDING TURN")
 			end
 			callback = matches[match_id].callback
 			matches[match_id].callback = nil
