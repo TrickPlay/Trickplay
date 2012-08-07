@@ -97,10 +97,11 @@ function menubar:start_item(item)
     end
 end
 
+local submenu_active = false
 function menubar:on_key_down(key)
     -- By default, dispatch the keypress to the submenu
     -- If the submenu doesn't handle the keypress, it's because it wants us to do so
-    if(not inner_labels.children[active_label]:on_key_down(key)) then
+    if( not submenu_active or not inner_labels.children[active_label]:on_key_down(key)) then
         -- We can move left or right, which changes the active menu
         if(keys.Left == key or keys.Right == key) then
             local orig_active = active_label
@@ -116,9 +117,11 @@ function menubar:on_key_down(key)
         elseif(keys.Up == key) then
             -- We handle "Up" by waking the submenu so that it will know to navigate internally
             inner_labels.children[active_label]:wake()
+            submenu_active = true
         elseif(keys.Down == key) then
             -- We handle "Down" by telling the submenu to sleep, which means it'll tend to refuse on_key_downs till it wakes
             inner_labels.children[active_label]:sleep()
+            submenu_active = false
         end
     end
 end
