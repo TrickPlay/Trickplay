@@ -48,7 +48,7 @@ launcher_hidden_key_handler = function(screen, key)
     screen.on_key_down = launcher_onscreen_key_handler
 end
 
-local function show_launcher()
+local function show_launcher(start_item)
     launcher_group.opacity = 0
 
     screen:add(launcher_group)
@@ -66,10 +66,13 @@ local function show_launcher()
 
     screen:grab_key_focus()
     screen.on_key_down = launcher_hidden_key_handler
+    menubar:start_item(start_item)
+    settings.back_to_start = "Live TV"
 end
 
-function start_launcher(the_service)
+function start_launcher(the_service, start_item)
+    if( not start_item ) then start_item = "Live TV" end
     service = the_service
     load_assets()
-    show_launcher()
+    show_launcher(start_item)
 end
