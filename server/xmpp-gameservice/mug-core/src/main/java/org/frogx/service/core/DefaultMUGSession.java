@@ -399,7 +399,7 @@ public class DefaultMUGSession implements MUGSession {
 					MUGService.mugUserNS);
 			if (childElement != null) {
 				room.leave(occupant);
-				occupants.remove(occupant);
+				occupants.remove(roomName);
 				return;
 			}
 
