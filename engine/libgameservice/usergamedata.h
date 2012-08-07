@@ -9,7 +9,7 @@ class UserGameData {
 
 public:
 
-	UserGameData() { };
+	UserGameData() : version_(-1) { };
 	UserGameData(const std::string& game_id, const std::string& opaque, int version)
 	: game_id_(game_id), opaque_(opaque), version_(version) { }
 

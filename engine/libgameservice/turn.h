@@ -8,6 +8,9 @@ namespace libgameservice {
 class Turn {
 public:
 
+	Turn() :
+		new_state_(), terminate_(false), next_turn_(), only_update_(false) { }
+
 	const std::string& new_state() const { return new_state_; }
 	void set_new_state(const std::string& str) { new_state_ = str; }
 

@@ -355,6 +355,22 @@ global gameservice [[GameServiceSupport*]]
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
 
+	table send_turn_to_role(string match_id, string state, string next_role, bool terminate, function on_send_turn_completed=0)
+		[[
+			int function_idx = LUA_REFNIL;
+			if ( on_send_turn_completed )
+			{
+				function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			UserData * ud = UserData::get(L);
+			Turn turn;
+			turn.set_new_state(state);
+			turn.set_next_turn(next_role);
+			turn.set_terminate(terminate);
+			libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
+			TPGameServiceUtil::push_response_status_arg(L, sc);
+		]];
+
 	table update_state(string match_id, string new_state, bool terminate, function on_send_turn_completed=0)
 		[[
 			int function_idx = LUA_REFNIL;

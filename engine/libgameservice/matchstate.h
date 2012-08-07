@@ -9,6 +9,8 @@ namespace libgameservice {
 class MatchState {
 public:
 
+	MatchState() : terminate_(false) { }
+
 	const std::string& opaque() const { return opaque_; }
 	void set_opaque(const std::string& str) { opaque_ = str; }
 
