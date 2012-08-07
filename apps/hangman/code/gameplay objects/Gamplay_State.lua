@@ -237,44 +237,36 @@ local make_from_existing = function(p_data)
    
     function session:sync_callback(new_state)--t)
         
-        --print("syncing", session)
-        --if something changed
-        if true then --data.key ~= t.key then
-            print("mismatch")
-            --data = t
+        --sanity check on its state
+        if new_state == json.null then 
             
-            --sanity check on its state
-            if new_state == json.null then 
-                
-                dumptable(data)
-                
-                error("got a sesssion with no data",2)
-            end
+            dumptable(data)
             
-            if type(new_state) == "string" then
-                
-                data.state = json:parse(base64_decode(new_state))
-                
-            end
+            error("got a sesssion with no data",2)
+        end
+        
+        if type(new_state) == "string" then
             
-            if data.state.state then error("got a state.state",2) end
+            data.state = json:parse(base64_decode(new_state))
             
+        end
+        
+        if data.state.state then error("got a state.state",2) end
+        
+        
+        session:update_views()
+        
+        if session.i_counted_score and session.opponent_counted_score then
             
-            session:update_views()
-            
-            if session.i_counted_score and session.opponent_counted_score then
+            game_server:leave_match(session,function()
                 
                 session:delete()
                 
-            end
-            
-            return false
-            
-        else
-            
-            return true
+            end)
             
         end
+        
+        return false
         
     end
     function session:delete()
