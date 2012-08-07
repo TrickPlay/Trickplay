@@ -177,9 +177,9 @@ local function make_show_tile(channel_num, data)
                                                             keys = {
                                                                 { bg_focus, "opacity", 0 },
                                                                 { bg_unfocus, "opacity", 255 },
-                                                                { logo, "opacity", 128 },
-                                                                { channel_num, "opacity", 128 },
-                                                                { show_text, "opacity", 128 },
+                                                                { logo, "opacity", 64 },
+                                                                { channel_num, "opacity", 64 },
+                                                                { show_text, "opacity", 64 },
                                                             },
                                                         },
                                                     },
