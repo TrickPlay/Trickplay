@@ -133,6 +133,7 @@ local channel_bar
 local channel_bar_focus
 local bar_height
 local show_offset = 0
+local active_show = 2
 
 local function make_show_tile(channel_num, data)
     local show_group = Group { name = data.show }
@@ -225,7 +226,7 @@ local function build_bar()
 
     menubar.y = 925 - channel_bar.h
 
-    focus_show(2)
+    focus_show(active_show)
 end
 
 local function show_bar()
