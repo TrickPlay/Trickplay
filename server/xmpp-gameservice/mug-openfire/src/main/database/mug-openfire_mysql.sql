@@ -28,3 +28,11 @@ CREATE TABLE frogxMugGame (
 	CONSTRAINT game_uk_name UNIQUE(name),
 	CONSTRAINT game_uk_gid UNIQUE(gameID)
 );
+
+CREATE TABLE frogxUserData (
+  username           VARCHAR(255)   NOT NULL,
+  propName           VARCHAR(255)   NOT NULL,
+  propValue          TEXT           NOT NULL,
+  version			 INT            NOT NULL,
+  PRIMARY KEY (username, propName)
+);
