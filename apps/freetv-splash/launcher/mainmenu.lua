@@ -86,6 +86,17 @@ menubar.goaway = function(self)
     menubar_animationstate.state = "hidden"
 end
 
+function menubar:start_item(item)
+    for i,v in pairs(functional_areas) do
+        if( v == item ) then
+            local orig_active = active_label
+            active_label = i
+            inner_labels.x = 100-inner_labels.children[active_label].x
+            inner_labels.children[orig_active]:deactivate(inner_labels.children[active_label])
+        end
+    end
+end
+
 function menubar:on_key_down(key)
     -- By default, dispatch the keypress to the submenu
     -- If the submenu doesn't handle the keypress, it's because it wants us to do so

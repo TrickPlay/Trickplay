@@ -17,26 +17,35 @@
 
 dofile("widget_helper.lua")
 
-dofile("unlock_code.lua")
-
-dofile("configure.lua")
-
 dofile("launcher.lua")
 
-screen:show()
+local back_to_start = settings.back_to_start
 
-local function on_configuration_completed(service)
-    print("Configuration completed")
-    start_launcher(service)
-end
+if( not back_to_start) then
 
-local function on_unlock_completed(code)
-    print("Code entered:",code)
-    if(code == "") then
-        on_configuration_completed("xfinity")
-    else
-        start_configuration(on_configuration_completed, code)
+    dofile("unlock_code.lua")
+
+    dofile("configure.lua")
+
+    screen:show()
+
+    local function on_configuration_completed(service)
+        print("Configuration completed")
+        settings.service = service
+        start_launcher(service)
     end
-end
 
-start_unlock_code(on_unlock_completed)
+    local function on_unlock_completed(code)
+        print("Code entered:",code)
+        if(code == "") then
+            on_configuration_completed("xfinity")
+        else
+            start_configuration(on_configuration_completed, code)
+        end
+    end
+
+    start_unlock_code(on_unlock_completed)
+else
+    screen:show()
+    start_launcher(settings.service, settings.back_to_start)
+end
