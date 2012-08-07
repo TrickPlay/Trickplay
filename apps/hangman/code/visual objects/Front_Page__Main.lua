@@ -132,9 +132,9 @@ function self:init(t)
                                     function(t)
                                         
                                         print("accepting the following invite")
-                                        dumptable(t)
+                                        --dumptable(t)
                                         
-                                        t = game_state:make(t)
+                                        t = all_seshs[match_id]--game_state:make(t)
                                         
                                         game_server:update(t,function()
                                             --dumptable(t:get_data())

@@ -153,7 +153,11 @@ local on_match_updated =
         matches[match_id].match_state  = match_state
         matches[match_id].match_status = match_status
         
-        if all_seshs[match_id] then all_seshs[match_id]:sync_callback(match_state.opaque) end
+        if all_seshs[match_id] then 
+            all_seshs[match_id]:sync_callback(match_state.opaque) 
+        else
+            Game_State:make(matches[match_id])
+        end
         
 	end
 	
