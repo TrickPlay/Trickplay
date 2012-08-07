@@ -554,10 +554,11 @@ void push_match_state_arg( lua_State * L, const libgameservice::MatchState& matc
 	lua_newtable( L );
 
 	//std::vector<String> players = match_state.const_players();
+	int i=1;
 	std::vector<String>::const_iterator it;
 	for ( it=match_state.const_players().begin() ; it < match_state.const_players().end(); it++ ) {
 		lua_pushstring( L, (*it).c_str() );
-		lua_rawseti( L, -2, 1 );
+		lua_rawseti( L, -2, i++ );
 	}
 
 	lua_rawset( L, t );
