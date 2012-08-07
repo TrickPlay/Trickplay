@@ -253,7 +253,7 @@ function controller:init(t)
                     
                     screen:grab_key_focus()
                     controller:change_message("Saving...")
-                    game_server:update(
+                    game_server:end_session(
                         session,
                         function(t)
                             session = nil
