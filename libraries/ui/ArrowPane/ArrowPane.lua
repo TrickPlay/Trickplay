@@ -14,7 +14,7 @@ local create_arrow = function(self,state)
 	
 end
 
-local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000, name="ArrowPane"}
+local default_parameters = {pane_w = 400, pane_w = 400,virtual_w=1000,virtual_h=1000, name="ArrowPane"}
 
 ArrowPane = function(parameters)
     
@@ -154,7 +154,7 @@ ArrowPane = function(parameters)
     
     local move_by = 10
     
-	override_property(instance,"move_by",
+	override_property(instance,"arrow_move_by",
 		function(oldf) return   move_by     end,
 		function(oldf,self,v)   move_by = v end
     )
@@ -163,23 +163,30 @@ ArrowPane = function(parameters)
 		function(oldf,self,...) pane:add(...) end
 	)
     
+	instance:subscribe_to( "enabled",
+		function()
+            for _,arrow in pairs(arrows) do
+                arrow.enabled = instance.enabled
+            end
+        end
+	)
     ----------------------------------------------------------------------------
-    
-    function up:on_released()
+
+    up:add_mouse_handler("on_button_up", function()
         pane.virtual_y = pane.virtual_y - move_by
-    end
+    end)
     
-    function down:on_released()
+    down:add_mouse_handler("on_button_up", function()
         pane.virtual_y = pane.virtual_y + move_by
-    end
-    
-    function left:on_released()
+    end)
+
+    left:add_mouse_handler("on_button_up", function()
         pane.virtual_x = pane.virtual_x - move_by
-    end
-    
-    function right:on_released()
+    end)
+
+    right:add_mouse_handler("on_button_up", function()
         pane.virtual_x = pane.virtual_x + move_by
-    end
+    end)
     
     instance:add_key_handler(keys.Up,       up.click)
     instance:add_key_handler(keys.Down,   down.click)
@@ -225,6 +232,14 @@ ArrowPane = function(parameters)
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
+	override_property(instance,"contents",
+		function(oldf) 
+            return pane.contents    
+        end,
+		function(oldf,self,v) 
+            pane.contents = v
+        end
+	)
     instance_on_style_changed()
     
     ----------------------------------------------------------------------------
@@ -233,10 +248,25 @@ ArrowPane = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.contents = self.contents
+            
             t.pane_w = instance.pane_w
             t.pane_h = instance.pane_h
+            t.virtual_x = instance.virtual_x
+            t.virtual_y = instance.virtual_y
             t.virtual_w = instance.virtual_w
             t.virtual_h = instance.virtual_h
+            t.arrow_move_by   = instance.arrow_move_by
             
             t.type = "ArrowPane"
             

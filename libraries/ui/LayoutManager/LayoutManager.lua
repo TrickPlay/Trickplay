@@ -20,11 +20,13 @@ ListManager = function(parameters)
     local placeholder = Widget_Rectangle{w=200,h=200,color="ff0000"}
     instance:add(placeholder)
     placeholder:hide()
-    
+    local placeholders = {}
     local node_constructor
 	local cells, direction
     local cell_w, cell_h
     local spacing = 0
+    local w = 0
+    local h = 0
     local number_of_rows_set = false
     local number_of_cols_set = false
     
@@ -49,6 +51,19 @@ ListManager = function(parameters)
     end
     local vertical_alignment   = "center"
     local horizontal_alignment = "center"
+    
+    local find_w = function(cell,i)
+        
+        if w < cell.x + cell.w - cell.anchor_point[1] then 
+            w = cell.x + cell.w - cell.anchor_point[1]
+        end
+    end
+    local find_h = function(cell,i)
+        
+        if h < cell.y + cell.h - cell.anchor_point[2] then 
+            h = cell.y + cell.h - cell.anchor_point[2]
+        end
+    end
     
     local assign_neighbors = function(cell,i,cells)
         
@@ -76,6 +91,35 @@ ListManager = function(parameters)
             end
         end
     end
+	override_property(instance,"placeholder",
+		function(oldf)   return placeholder     end,
+		function(oldf,self,v)   
+            instance:add(v)
+            v:hide()
+            
+            for obj, _ in pairs(placeholders) do
+                obj.source = v
+            end
+            
+            placeholder:unparent()
+            if v.subscribe_to then
+                v:subscribe_to(
+                    {"h","w","width","height","size"},
+                    function(...)
+                        if in_on_entries then return end
+                        
+                        cells:on_entries_changed()
+                        
+                    end
+                )
+            end
+            
+            placeholder = v 
+            
+            cells:on_entries_changed()
+            
+        end
+	)
     local position_cell = function(cell,i)
         
         cell.x = 0
@@ -140,7 +184,7 @@ ListManager = function(parameters)
     ----------------------------------------------------------------------------
     
 	override_property(instance,"widget_type",
-		function() return "LayoutManager" end, nil
+		function() return "ListManager" end, nil
 	)
     
 	override_property(instance,    "length",
@@ -173,11 +217,25 @@ ListManager = function(parameters)
 	)
 	override_property(instance,"horizontal_alignment",
 		function(oldf)   return horizontal_alignment     end,
-		function(oldf,self,v)   horizontal_alignment = v end
+		function(oldf,self,v)   
+            if v == "left" or v == "right" or v == "center" then
+                horizontal_alignment = v 
+            else
+                error("expected 'left' 'right' or 'center'. Received "..v,2)
+            end
+            
+        end
 	)
 	override_property(instance,"vertical_alignment",
 		function(oldf)   return vertical_alignment     end,
-		function(oldf,self,v)   vertical_alignment = v end
+		function(oldf,self,v)   
+            
+            if v == "top" or v == "bottom" or v == "center" then
+                vertical_alignment = v 
+            else
+                error("expected 'top' 'bottom' or 'center'. Received "..v,2)
+            end
+        end
 	)
     
     instance:subscribe_to( 
@@ -187,7 +245,13 @@ ListManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            set_size(cells)
+            --set_size(cells)
+            w = 0
+            for_each(cells,find_w)
+            h = 0
+            for_each(cells,find_h)
+            --set_size(self)
+            instance.size = {w,h}
         end
     )
     
@@ -226,8 +290,15 @@ ListManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
-                if obj == nil then  obj = Widget_Clone{source=placeholder}
+                if obj == nil then  
+                    
+                    obj = Widget_Clone{source=placeholder}
+                    placeholders[obj] = true
                 
+                elseif type(obj) == "table" and obj.type then 
+                    
+                    obj = _G[obj.type](obj)
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -279,6 +350,7 @@ ListManager = function(parameters)
             for _,f in pairs(items[obj].key_functions) do f() end
             items[obj] = nil
             obj:unparent() 
+            placeholders[obj] = nil
         end,
         
         on_entries_changed = function(self)
@@ -288,7 +360,13 @@ ListManager = function(parameters)
             max_h = 0
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
-            set_size(self)
+            --set_size(self)
+            w = 0
+            for_each(self,find_w)
+            h = 0
+            for_each(self,find_h)
+            --set_size(self)
+            instance.size = {w,h}
             for_each(self,assign_neighbors)
             on_entries_changed()
         end
@@ -304,6 +382,33 @@ ListManager = function(parameters)
         end
 	)
     
+    
+	----------------------------------------------------------------------------
+	
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.length       = instance.length
+            t.vertical_alignment   = instance.vertical_alignment
+            t.horizontal_alignment = instance.horizontal_alignment
+            t.direction = instance.direction
+            t.spacing   = instance.spacing
+            t.cell_h = instance.cell_h
+            t.cell_w = instance.cell_w
+            t.cells = {}
+            for_each(cells,function(obj,i)
+                
+                if not placeholders[obj] then
+                    t.cells[i] = obj.attributes
+                end
+            end)
+            
+            t.type = "ListManager"
+            
+            return t
+        end
+    )
     
     local function set_and_nil(t,k)
         
@@ -393,7 +498,6 @@ LayoutManager = function(parameters)
         end
     end
     local find_w = function(cell,r,c)
-        
         if w < cell.x + cell.w - cell.anchor_point[1] then 
             w = cell.x + cell.w - cell.anchor_point[1]
         end
@@ -528,11 +632,26 @@ LayoutManager = function(parameters)
 	)
 	override_property(instance,"horizontal_alignment",
 		function(oldf)   return horizontal_alignment     end,
-		function(oldf,self,v)   horizontal_alignment = v end
+		function(oldf,self,v)   
+            print(v,v == "left" or v == "right" or v == "center")
+            if v == "left" or v == "right" or v == "center" then
+                horizontal_alignment = v 
+            else
+                error("expected 'left' 'right' or 'center'. Received "..v,2)
+            end
+            
+        end
 	)
 	override_property(instance,"vertical_alignment",
 		function(oldf)   return vertical_alignment     end,
-		function(oldf,self,v)   vertical_alignment = v end
+		function(oldf,self,v)   
+            
+            if v == "top" or v == "bottom" or v == "center" then
+                vertical_alignment = v 
+            else
+                error("expected 'top' 'bottom' or 'center'. Received "..v,2)
+            end
+        end
 	)
     local placeholders = {}
 	override_property(instance,"placeholder",
@@ -546,7 +665,22 @@ LayoutManager = function(parameters)
             end
             
             placeholder:unparent()
+            if v.subscribe_to then
+                v:subscribe_to(
+                    {"h","w","width","height","size"},
+                    function(...)
+                        if in_on_entries then return end
+                        
+                        cells:on_entries_changed()
+                        
+                    end
+                )
+            end
+            
             placeholder = v 
+            
+            cells:on_entries_changed()
+            
         end
 	)
     
@@ -558,7 +692,11 @@ LayoutManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            --set_size(cells)
+            w = 0
+            h = 0
+            for_each(cells,find_w)
+            for_each(cells,find_h)
+            instance.size = {w,h}
         end
     )
     ----------------------------------------------------------------------------
@@ -610,6 +748,10 @@ LayoutManager = function(parameters)
                     obj = Widget_Clone{source=placeholder}
                     placeholders[obj] = true
                     
+                elseif type(obj) == "table" and obj.type then 
+                    
+                    obj = _G[obj.type](obj)
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -657,6 +799,7 @@ LayoutManager = function(parameters)
                         if in_on_entries then return end
                         
                         cells:on_entries_changed()
+                        
                     end
                 )
             end
@@ -700,6 +843,7 @@ LayoutManager = function(parameters)
             for_each(self,assign_neighbors)
             on_entries_changed(self)
             in_on_entries = false
+            
         end
     }
 	override_property(instance,"cells",
@@ -707,8 +851,12 @@ LayoutManager = function(parameters)
 		function(oldf,self,v)   
             cells:set(v) 
             
-            focused_child = cells[1][1] 
-            focused_child:grab_key_focus()
+            if cells.number_of_rows >= 1 and cells.number_of_rows >= 1  then
+                focused_child = cells[1][1] 
+                focused_child:grab_key_focus()
+            else
+                focused_child = nil
+            end
         end
 	)
     
@@ -750,7 +898,9 @@ LayoutManager = function(parameters)
                 if not t.cells[r] then
                     t.cells[r] = {}
                 end
-                t.cells[r][c] = obj.attributes
+                if not placeholders[obj] then
+                    t.cells[r][c] = obj.attributes
+                end
             end)
             
             t.type = "LayoutManager"

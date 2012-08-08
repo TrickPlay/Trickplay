@@ -24,7 +24,7 @@ Slider = function(parameters)
     
     local pixels_to_progress_ratio
     local prev_pos
-    
+    local g_dragging
     
     local p = 0
     local drag = {
@@ -57,6 +57,7 @@ Slider = function(parameters)
             g_dragging = drag[direction]
             grip:grab_pointer()
             
+            return true
         end,
         on_motion = function(self,...)
             return g_dragging and g_dragging(...)
@@ -75,6 +76,14 @@ Slider = function(parameters)
             end
             grip:set(v)
         end
+    )
+	override_property(instance,"grip_w",
+		function(oldf) return   grip.w     end,
+		function(oldf,self,v)   grip.w = v end
+    )
+	override_property(instance,"grip_h",
+		function(oldf) return   grip.h     end,
+		function(oldf,self,v)   grip.h = v end
     )
     local progress = 0
 	override_property(instance,"progress",
@@ -96,7 +105,9 @@ Slider = function(parameters)
         reactive = true,
         on_button_down = function(self,...)
             
-            position_grabbed_from =
+            pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
+            
+            prev_pos =
                 --the transformed position of the grip
                 grip.transformed_position[direction_num]*
                 --transformed position value has to be converted to the 1920x1080 scale
@@ -104,7 +115,7 @@ Slider = function(parameters)
                 -- transformed position doesn't take anchor point into account
                 grip[direction_dim]/2 
             
-            drag(...)
+            drag[direction](...)
         end,
     }
 	override_property(instance,"track",
@@ -116,6 +127,20 @@ Slider = function(parameters)
             track:set(v)
         end
     )
+	override_property(instance,"track_w",
+		function(oldf) return   track.w     end,
+		function(oldf,self,v)   track.w = v end
+    )
+	override_property(instance,"track_h",
+		function(oldf) return   track.h     end,
+		function(oldf,self,v)   track.h = v end
+    )
+	instance:subscribe_to( "enabled",
+		function()
+            grip.enabled  = instance.enabled
+            track.enabled = instance.enabled
+        end
+	)
     ----------------------------------------------------------------------------
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
@@ -151,8 +176,10 @@ Slider = function(parameters)
             
             t.direction = self.direction
             t.progress  = self.progress
-            t.grip  = {w = grip.w, h = grip.h, }
-            t.track = {w = track.w,h = track.h,}
+            t.grip_w    = self.grip_w
+            t.grip_h    = self.grip_h
+            t.track_w   = self.track_w
+            t.track_h   = self.track_h
             
             t.type = "Slider"
             
