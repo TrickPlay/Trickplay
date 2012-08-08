@@ -5,7 +5,7 @@ local game_server
 
 
 
-local reset_expiration = function() return os.time() + 60*10 end --24*60*60 end
+local reset_expiration = function() return os.time() + 60*2 end --24*60*60 end
 
 
 all_seshs = {}
