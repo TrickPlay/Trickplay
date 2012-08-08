@@ -247,16 +247,21 @@ function controller:init(t)
                 print("continue")
                 ls:light_down()
                 make_word:set_session(session)
+                
                 if session.my_score == 3 then
                     
                     session.viewing = false
                     
                     screen:grab_key_focus()
+                    
                     controller:change_message("Ending Session...")
+                    
                     game_server:end_session(
                         session,
                         function(t)
+                            
                             print("Session Ended. Leaving....")
+                            
                             game_server:leave_match(
                                 session,
                                 function(t)
@@ -273,10 +278,10 @@ function controller:init(t)
                     
                 else
                     app_state.state = "MAKE_WORD"
+                    session = nil
                 end
                 bg:fade_out_vic()
                 bg:slide_out_hangman()
-                session = nil
             end},
             {name = "Give Up", select = function()
                 

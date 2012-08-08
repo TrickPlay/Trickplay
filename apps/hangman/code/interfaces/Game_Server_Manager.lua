@@ -139,14 +139,20 @@ local on_match_updated =
         	
             print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
             
-            if match_status == "completed" then 
-                print("Received update for a completed match that I was not tracking. Ignoring")
+            if match_status == "completed" or match_status == "aborted" then 
+                print("Received update for a aborted/completed match that I was not tracking. Ignoring")
                 return
             end
             matches[match_id] = {}
             --matches[match_id].id = in_room_id
             --matches[match_id].nick = g_user.name
             matches[match_id].match_id = match_id
+            
+        elseif match_status == "aborted" then
+            
+            all_seshs[match_id]:abort(match_state.opaque)
+            
+            return
             
         end
         
