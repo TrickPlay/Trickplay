@@ -244,6 +244,7 @@ function mme:make(sesh)
     
     function entry:delete()
         
+        print("deleted")
         self:unparent()
         
         if sesh_ref ~= nil then   sesh_ref:remove_view(self)   end
