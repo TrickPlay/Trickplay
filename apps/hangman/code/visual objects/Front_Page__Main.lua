@@ -32,6 +32,7 @@ function self:init(t)
         color = {0,0,0},
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 319-2,
         y     = 720-2,
     }, Text{
@@ -40,6 +41,7 @@ function self:init(t)
         color = "b7b7b7",
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 319,
         y     = 720,
     })
@@ -49,6 +51,7 @@ function self:init(t)
         color = {0,0,0},
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 729-2,
         y     = 720-2,
     }, Text{
@@ -57,6 +60,7 @@ function self:init(t)
         color = "b7b7b7",
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 729,
         y     = 720,
     })
