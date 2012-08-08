@@ -122,7 +122,7 @@ function self:init(t)
                     
                     game_server:get_a_wild_card_invite(
                         function(match_id)
-                            print(match_id)
+                            print("Called back from game_server:get_a_wild_card_invite(), result is:",match_id)
                             status.stop = true
                             if match_id == nil then -- TODO, find what would be passed
                                 

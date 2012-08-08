@@ -258,8 +258,6 @@ local make_from_existing = function(p_data)
         if data.state.state then error("got a state.state",2) end
         
         
-        session:update_views()
-        
         if self.my_turn then
             print("I Expired. Leaving Match.")
             
@@ -268,16 +266,19 @@ local make_from_existing = function(p_data)
                 --list:set_state("UNFOCUSED")
                 screen:grab_key_focus()
                 
-                views = {}
                 session.viewing = false
                 
                 bg:fade_out_vic()
                 bg:slide_out_hangman()
                 app_state.state = "MAIN_PAGE"
             end
+            
+            session.my_score = 3
         elseif not self.opponent_counted_score and not synching then
             print("They Expired. Leaving Match.")
+            session.opponent_score = 3
         end
+        session:update_views()
         
         game_server:leave_match(session,function()
             
