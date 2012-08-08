@@ -298,7 +298,10 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 			return 
 		end 
 
-        local actor , dx , dy = unpack( dragging )
+        local actor , dx , dy 
+        if dragging ~= nil then 
+            actor , dx , dy = unpack( dragging )
+        end 
 	    local border = screen:find_child(uiInstance.name.."border")
 		local am = screen:find_child(uiInstance.name.."a_m") 
 	    if(input_mode == hdr.S_SELECT) then
@@ -1990,8 +1993,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="Tab1",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}} },
-                {label="Tab2",   contents = {Rectangle{w=400,h=400,color={255,255,255,255}}} },
+                {label="Tab1",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
+                {label="Tab2",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
             }
         }
 

@@ -31,6 +31,234 @@ class PropertyIter:
             self.current = 0
             raise StopIteration
 
+
+ 
+NO_STYLE_WIDGET = ["Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group", "LayoutManager", "ProgressBar", "ProgressSpinner", "OrbitingDots"] 
+
+READ_ONLY= ["gid", "baseline", "selected_text", "base_size", "loaded", "tags"]
+
+BOOL_PROP = [
+    'is_visible', 
+    'focused',
+    'enabled',
+    # Progress Spinner
+    'animating', 
+    # Toggle Button
+    'selected', 
+    # Widget Image
+    'async',
+    #'loaded',
+    #'read_tags',
+    # Widget Text
+    'single_line',
+    'use_markup',
+    'wants_enter',
+    'editable',
+    'justify',
+    # Widget Group
+    'clip_to_size',
+    # Widget Image
+    'tile_x',
+    'tile_y',
+]
+
+COLOR_PROP = [
+    'color',
+    'border_color',
+    'message_color', 
+    # Color Scheme 
+    'default', 
+    'focus', 
+    'activation',
+    'default_color', 
+    'focus_color', 
+    'activate_color', 
+    'select_color', 
+]
+
+FONT_PROP = [
+    'font', 
+    'message_font', 
+]
+
+COMBOBOX_PROP = [
+    # ButtonPicker
+    'orientation', # horizontal, vertical
+    # WidgetText
+    'wrap_mode', # WORD(default), CHAR, WORD_CHAR
+    'alignment', # LEFT(default), CENTER, RIGHT
+    # TabBar, Slider, MenuButton
+    'direction', # TabBar, Slider direction : horizontal, vertical
+                 # MenuButton direction : up, down, left, right
+    # ArrowPane
+    'horizontal_alignment',
+    'vertical_alignment', 
+    # TabBar
+    'tab_location',
+]
+FILE_PROP = [
+    'source', 
+]
+
+TEXT_PROP = [
+    'name', 
+    'src', 
+    'text',
+    'position', 
+    'x',
+    'y',
+    'z',
+    'w',
+    'h',
+    'size',
+    'separator_y',
+    'opacity', 
+    'tile',
+    # ButtonPicker
+    'window_w', 
+    'window_h', 
+    'animate_duration', 
+    'anchor_point',
+    'scale',
+    'clip',
+    'x_rotation',
+    'y_rotation',
+    'z_rotation',
+    # Widget Style
+    'style', 
+    'x_offset',
+    'y_offset',
+    'width',
+    'corner_radius',
+    # Color
+    'hex_string', 
+    'rgb_table',
+    'color_table',
+    # Button
+    'label', 
+    # Toggle Button
+    'group', 
+    'images_selection',
+    # Radio Button Group
+    'selected_item'
+    # Layout Manager
+    'number_of_rows',
+    'number_of_columns',
+    'cell_width', 
+    'cell_height', 
+    'horizontal_cell_spacing', 
+    'vertical_cell_spacing', 
+    'cell_timing', 
+    'cell_timing_offset', 
+    'cells_focusable', 
+    # Text Input
+    # Progress Bar
+    'progress',
+    'fill_style',
+    'empty_style', 
+    # Progress Spinner
+    'duration',
+    'image', 
+    # Obitting Dots
+    'image', 
+    'num_dots', 
+    'dot_size', 
+    # Dialog Box
+    'title', 
+    'content', 
+    'seterator_y', 
+    'image', 
+    # Toast Alert 
+    'icon', 
+    'message', 
+    'horizontal_message_padding', 
+    'vertical_message_padding', 
+    'horizontal_icon_padding', 
+    'vertical_icon_padding', 
+    'animate_in_duration',
+    'animate_out_duration',
+    'on_screen_duration',
+    # Menu Button
+    'button',
+    'x_offset',
+    'y_offset',
+    'x_alignment',
+    'y_alignment',
+    # Button Picker
+    'items',
+    'selected_item',
+    'derection',
+    # Tab Bar
+    'dist_from_pane',
+    'focus_opens_tab',
+    # ArrowPane
+    'cell_w', 
+    'cell_h', 
+    'children_want_focus', 
+    'clip',
+    'count',
+    'depth',
+    'has_clip',
+    'horizontal_spacing',
+    'is_animating',
+    'is_rotated',
+    'is_scaled',
+    'move_by',
+    'note_constructor',
+    'number_of_cols',
+    'number_of_rows',
+    'pane_h', 
+    'pane_w', 
+    'placeholder', 
+    'request_mode', # "HEIGHT_FOR_WIDTH"
+    'vertical_spacing', 
+    'virtual_x',
+    'virtual_y',
+    'virtual_w',
+    'virtual_h',
+    # ScroolPane
+    'slider_thickness',
+    # TabBar
+    'tab_h',
+    'tab_w',
+
+    # MenuButton
+    'item_spacing', 
+    'popup_offset', 
+
+    # Scroll Pane
+    'horizontal_slider',
+    'vertical_slider',
+    # Slider 
+    'value', 
+    'ratio',
+    'grip', 
+    'grip_w', 
+    'grip_h', 
+    'track', 
+    'track_w', 
+    'track_h', 
+    # Clippig Region
+    'virtual_width',
+    'virtual_height',
+
+    # Widget Text
+    'cursor_position',
+    'cursor_size',
+    'line_spacing',
+    'markup',
+    'max_length',
+    'password_char',
+    'selected_text',
+    'selected_end',
+    
+    # Widget Image
+    #'tags',        # Readonly
+
+    # Widget Rectangle
+    'border_width',
+]
+
      
 PROP_LIST = [
     'gid',
@@ -119,9 +347,7 @@ PROP_LIST = [
     'image', 
     'animating', 
     # Obitting Dots
-    'duration', 
     'image', 
-    'animating', 
     'num_dots', 
     'dot_size', 
     # Dialog Box
@@ -222,13 +448,13 @@ PROP_LIST = [
     'single_line',
     'use_markup',
     'wants_enter',
-    'wrap_mote',
+    'wrap_mode',
     
     # Widget Image
     'async',
     'loaded',
-    'read_tags',
-    'tags',
+    #'read_tags',
+    #'tags',
 
     # Widget Rectangle
     'border_width',
@@ -247,12 +473,12 @@ NESTED_PROP_LIST = {
     'text' : ['alignment', 'colors', 'font', 'justify', 'wrap', 'x_offset', 'y_offset'], 
     'position' : ['x', 'y', 'z'], 
     'size' : ['w', 'h'],
-    'base_size' : ['w', 'h'],
+    'base_size' : ['w', 'h'], #read only
     'new_attr' : ['a', 'b','c'],
-    'color' : ['r', 'g', 'b', 'a'],
+    #'color' : ['r', 'g', 'b', 'a'],
     'cursor_color' : ['r', 'g', 'b', 'a'],
     'selection_color' : ['r', 'g', 'b', 'a'],
-    'message_color' : ['r', 'g', 'b', 'a'],
+    #'message_color' : ['r', 'g', 'b', 'a'],
     'border_color' : ['r', 'g', 'b', 'a'],
     'anchor_point' : ['x', 'y'],
     'scale' : ['x', 'y'],
