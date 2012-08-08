@@ -22,7 +22,7 @@ MenuButton = function(parameters)
 	
     local button = Button{style = false,w=300}
     
-    local popup = LayoutManager()
+    local popup = ListManager()
     
 	local instance = LayoutManager()
     
@@ -35,8 +35,8 @@ MenuButton = function(parameters)
     ----------------------------------------------------------------------------
     
 	override_property(instance,"item_spacing",
-		function(oldf) return   popup.vertical_spacing     end,
-		function(oldf,self,v)   popup.vertical_spacing = v end
+		function(oldf) return   popup.spacing     end,
+		function(oldf,self,v)   popup.spacing = v end
 	)
     ----------------------------------------------------------------------------
 	
@@ -57,21 +57,24 @@ MenuButton = function(parameters)
             local items = {}
             
             for i, item in ipairs(v) do
-                if type(item) ~= "userdata" and item.__types__.actor then 
+                
+                if type(item) == "table" and item.type then 
+                    
+                    item = _G[item.type](item)
+                    
+                elseif type(item) ~= "userdata" and item.__types__.actor then 
                 
                     error("Must be a UIElement or nil. Received "..obj,2) 
                     
                 end
                 
-                items[i] = {item}
+                --items[i] = {item}
             end
-            print("pre set popup",popup)
+            
             popup:set{
-                number_of_cols = 1,
-                number_of_rows = #items,
-                cells = items,
+                length = #items,
+                cells = v,
             }
-            print("post set popup",popup.w,popup.h)
             
             
         end
@@ -107,6 +110,38 @@ MenuButton = function(parameters)
             
         end
 	)
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.items = {}
+            
+            for i = 1,popup.length do
+                t.items[i] = popup.cells[i].attributes
+            end
+            
+            t.direction = instance.direction
+            t.item_spacing = instance.item_spacing
+            t.popup_offset = instance.popup_offset
+            t.horizontal_alignment = instance.horizontal_alignment
+            
+            t.type = "MenuButton"
+            
+            return t
+        end
+    )
+    
     ----------------------------------------------------------------------------
     function button:on_pressed()
         
@@ -118,8 +153,9 @@ MenuButton = function(parameters)
 	
 	local instance_on_style_changed
     local function instance_on_style_changed()
-        
-        button.style:set(instance.style.attributes)
+        local t = instance.style.attributes
+        t.name = nil
+        button.style:set(t)
 	end
 	
     

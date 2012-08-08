@@ -130,6 +130,8 @@ ToastAlert = function(parameters)
         function(oldf,self)
             local t = oldf(self)
                 
+            t.content = nil
+            
             t.message                    = self.message
             t.message_font               = self.message_font
             t.message_color              = self.message_color
@@ -141,11 +143,8 @@ ToastAlert = function(parameters)
             t.animate_in_duration        = self.animate_in_duration
             t.animate_out_duration       = self.animate_out_duration
             
-            if (not canvas) and image.src and image.src ~= "[canvas]" then 
-                
-                t.image = image.src
-                
-            end
+            
+            t.icon = icon.src
             t.type = "ToastAlert"
             
             return t
@@ -209,26 +208,24 @@ ToastAlert = function(parameters)
 			
 			--reposition icon
 			icon.x = horizontal_icon_padding 
-			icon.y = instance.separator_y + vertical_icon_padding
+			icon.y = vertical_icon_padding
 			
 			--resize icon
 			--icon.w = instance.w - message.x - message_padding
 			--icon.h = instance.h - instance.separator_y - message_padding
-			if (icon.y + icon.h + vertical_icon_padding) > instance.h then
+			if (icon.y + icon.h + vertical_icon_padding) > (instance.h  - instance.separator_y)  then
 				
-				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
+				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - (instance.h  - instance.separator_y) )) / icon.h
 				
-				dumptable(icon.scale)
 			end
-			
-			
+            
 			--reposition message
 			message.x = icon.x + icon.w + horizontal_icon_padding + horizontal_message_padding
-			message.y = instance.separator_y + vertical_message_padding
+			message.y = vertical_message_padding
 			
 			--resize message
 			message.w = instance.w - message.x - horizontal_message_padding
-			message.h = instance.h - instance.separator_y - vertical_message_padding
+			message.h = instance.h - instance.separator_y - vertical_message_padding*2
 			
 		end
 	)

@@ -374,7 +374,7 @@ function Make_Bar(loc,wu_data,index, master)
     zip_backing[1].color = {140,140,140}
     
     --Hierarchy of groups
-    zip_entry:add(zip_code_prompt,us_only,ok_backing)
+    zip_entry:add(zip_code_prompt,us_only)
     zip_entry:hide()
     
     full_bar:add(blurb_txt,five_day,green_button_full,blue_button_5_day,yellow_button,blue_button_today,zip_entry)
@@ -383,7 +383,7 @@ function Make_Bar(loc,wu_data,index, master)
     five_day:hide()
     mini_bar:add(green_button_mini)
     
-    bar:add(arrow_l,arrow_r,mesg,--[[curr_temp,hi_temp,lo_temp,location,]]full_bar,err_msg,mini_bar,loading_sun,loading_error)
+    bar:add(arrow_l,arrow_r,mesg,--[[curr_temp,hi_temp,lo_temp,location,]]full_bar,mini_bar,loading_sun,loading_error)
     local pws_tbl
     local f_tbl
     

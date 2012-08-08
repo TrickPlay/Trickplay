@@ -53,8 +53,11 @@ DialogBox = function(parameters)
 	
 	local title = Text()
 	
+    local content_group = Widget_Group()
+    
 	local bg
 	
+	local separator_y = parameters.separator_y
 	----------------------------------------------------------------------------
 	-- private helper functions for common actions
 	
@@ -70,7 +73,7 @@ DialogBox = function(parameters)
 	local center_title = function()
 		
 		title.w = instance.w
-		title.y = instance.style.text.y_offset + title.h/2
+		title.y = instance.style.text.y_offset +separator_y/2
 		
 	end
 	
@@ -86,7 +89,7 @@ DialogBox = function(parameters)
 		
 		bg = default_bg(instance)
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -102,13 +105,13 @@ DialogBox = function(parameters)
 		
 		if bg then bg:unparent() end
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
 		if instance.is_size_set() then
 			
-			resize_image()
+			resize_images()
 			
 		else
 			--so that the label centers properly
@@ -177,7 +180,6 @@ DialogBox = function(parameters)
 		function(oldf,self,v) title.text = v end
 	)
 	
-	local separator_y = parameters.separator_y
 	
 	override_property(instance,"separator_y",
 		function(oldf) return separator_y     end,
@@ -187,30 +189,47 @@ DialogBox = function(parameters)
 			
 			if canvas then flag_for_redraw = true end
 			
+            content_group.y = v
 		end
 	)
 	
 	override_property(instance,"content",
-		function(oldf) return content     end,
+		function(oldf)
+            
+            return content_group.children     
+            
+        end,
 		function(oldf,self,v)
 			
-			instance:clear()
-			
-			instance:add(bg)
+			content_group:clear()
 			
 			if type(v) == "table" then
 				
-				instance:add(unpack(content))
+                for i,obj in ipairs(v) do
+                    
+                    if type(obj) == "table" and obj.type then 
+                        
+                        v[i] = _G[obj.type](obj)
+                        
+                    elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                    
+                        error("Must be a UIElement or nil. Received "..obj,2) 
+                        
+                    end
+                    
+                end
+				content_group:add(unpack(v))
 				
 			elseif type(v) == "userdata" then
 				
-				instance:add(content)
+				content_group:add(v)
 				
 			end
 			
-			instance:add(label)
-			
 		end
+	)
+	override_function(instance,"add",
+		function(oldf,self,...) content_group:add(...) end
 	)
 	
 	----------------------------------------------------------------------------
@@ -219,7 +238,6 @@ DialogBox = function(parameters)
         function(oldf,self)
             local t = oldf(self)
                 
-            t.title = self.title
             t.separator_y = self.separator_y
             t.title = self.title
             
@@ -227,6 +245,12 @@ DialogBox = function(parameters)
                 
                 t.image = bg.src
                 
+            end
+            
+            t.content = {}
+            
+            for i, child in ipairs(self.content) do
+                t.content[i] = child.attributes
             end
             
             --[[
@@ -246,7 +270,7 @@ DialogBox = function(parameters)
     ----------------------------------------------------------------------------
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size"},
+		{"h","w","width","height","size","separator_y"},
 		function()
 			
 			flag_for_redraw = true
@@ -279,9 +303,9 @@ DialogBox = function(parameters)
 		
 		title.anchor_point = {0,title.h/2}
 		title.x            = text_style.x_offset
-		title.y            = text_style.y_offset + title.h/2
-		title.w            = instance.w
 		title.color        = text_style.colors.default
+        
+		center_title()
 		
 	end
 	
@@ -303,7 +327,7 @@ DialogBox = function(parameters)
 	instance_on_style_changed()
 	
 	
-	instance:add(title)
+	screen.add(instance,content_group,title)
 	
 	instance:set(parameters)
 	
