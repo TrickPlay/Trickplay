@@ -40,7 +40,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     for i,initial in pairs(menu.initials) do
 	
 	initial.on_text_change = function()
-	    print(initial)
+	    --print(initial)
 	    initial.anchor_point = {initial.w/2,initial.h/2}
 	end
 	
@@ -644,7 +644,7 @@ Menu_Level_Complete = Class(function(menu, ...)
     local g_over = nil
     function menu:animate_in(score,from_splash)
 	if my_plane.dead then return end
-        print("end of level")
+        --print("end of level")
         local m
         for i = 1, state.curr_level do
             m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
@@ -663,7 +663,7 @@ Menu_Level_Complete = Class(function(menu, ...)
         local timer = Timer{interval=3000}
         timer.on_timer = function()
             if my_plane.dead then return end
-	    print("progressing to level "..state.counters[state.curr_level].lvl_points)
+	    --print("progressing to level "..state.counters[state.curr_level].lvl_points)
             h_score_val.text = string.format("%06d",state.counters[state.curr_level].lvl_points).." pts"
             --remove_all_from_render_list()
             menu.group:show()

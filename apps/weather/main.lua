@@ -79,7 +79,7 @@ function post_main()
 		
 	--load saved settings, or default to Palo Alto,CA
 	locations = settings.locations or {"94306","89109"}
-	dumptable(locations)
+	--dumptable(locations)
 	bar_i = 1
 	view_5_day=false
 	curr_condition=Group{name="Bottom Corner Weather conditions"}
