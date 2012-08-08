@@ -21,8 +21,6 @@ void CallbackHolder::clean(lua_State *L) {
 		callback_refs = g_slist_remove(callback_refs, iter->data);
 	}
 	
-	g_slist_free(invalid);
-	
 }
 
 CallbackHolder::CallbackHolder() {
