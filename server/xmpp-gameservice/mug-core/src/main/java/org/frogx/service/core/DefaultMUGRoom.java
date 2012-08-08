@@ -1040,5 +1040,13 @@ public class DefaultMUGRoom implements MUGRoom {
 		}
 	}
 
+	public void abortMatch() {
+		MUGMatch.Status beforeStatus = getMatch().getStatus();
+		getMatch().abort();
+		MUGMatch.Status afterStatus = getMatch().getStatus();
+		if (!afterStatus.equals(beforeStatus)) {
+			broadcastRoomPresence();
+		}
+	}
 
 }

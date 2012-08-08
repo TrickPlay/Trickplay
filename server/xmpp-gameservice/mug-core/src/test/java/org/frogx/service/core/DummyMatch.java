@@ -178,4 +178,9 @@ public class DummyMatch implements MUGMatch {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public void abort() {
+		// TODO Auto-generated method stub
+		
+	}
 }
