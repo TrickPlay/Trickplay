@@ -125,6 +125,8 @@ MenuButton = function(parameters)
             t.cell_w               = nil
             t.cells                = nil
             
+            t.style = instance.style
+            
             t.items = {}
             
             for i = 1,popup.length do
