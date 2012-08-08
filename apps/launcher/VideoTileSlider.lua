@@ -59,7 +59,7 @@ local function make_sub_menu(p)
     }
     contents:add( unpack( sub_menu_items ) )
     
-    sub_menu:add( sub_menu_edge, contents, arrow )
+    sub_menu:add( sub_menu_edge, contents )
     
     
     local dur = 200

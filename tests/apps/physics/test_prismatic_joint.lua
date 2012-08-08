@@ -80,24 +80,22 @@ local paddle = physics:Body(
     Rectangle
     {
         color = "FFFFFF",
-        size = { 30 , PADDLE_HEIGHT }
+        size = { PADDLE_HEIGHT, 30 }
     },
     {
         density = 0.8,
     } )
 
 paddle.position = { pole.x , pole.y - POLE_HEIGHT / 2 }
-paddle.angle = 90
 
-paddle:PrismaticJoint( pole , { 1 , 1 } ,
-
+pole:PrismaticJoint( paddle, { 0, -1 },
     {
         enable_limit = true,
-        lower_translation = 0,
-        upper_translation = POLE_HEIGHT / 2,
+        upper_translation = 0,
+        lower_translation = -(POLE_HEIGHT / 2),
         enable_motor = true,
-        motor_speed = -5,
-        max_motor_force = 40
+        motor_speed = 5,
+        max_motor_force = 70
     }
 )
 

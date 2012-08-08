@@ -28,7 +28,7 @@ ScrollPane = function(parameters)
 	----------------------------------------------------------------------------
 	--The ScrollPane Object inherits from Widget
 	
-    local pane = ClippingRegion(parameters)
+    local pane = ClippingRegion()
     
     local horizontal = Slider()
     local vertical   = Slider{direction="vertical"}
@@ -42,6 +42,20 @@ ScrollPane = function(parameters)
     }
     ----------------------------------------------------------------------------
     
+	instance:subscribe_to( "enabled",
+		function()
+            horizontal.enabled = instance.enabled
+            vertical.enabled   = instance.enabled
+        end
+	)
+	override_property(instance,"virtual_x",
+		function(oldf) return   pane.virtual_x     end,
+		function(oldf,self,v)   pane.virtual_x = v end
+    )
+	override_property(instance,"virtual_y",
+		function(oldf) return   pane.virtual_y     end,
+		function(oldf,self,v)   pane.virtual_y = v end
+    )
 	override_property(instance,"virtual_w",
 		function(oldf) return   pane.virtual_w     end,
 		function(oldf,self,v)   pane.virtual_w = v end
@@ -66,13 +80,16 @@ ScrollPane = function(parameters)
             pane.h     = v 
         end
     )
+    local slider_thickness = 30
 	override_property(instance,"slider_thickness",
-		function(oldf) return   pane.h     end,
+		function(oldf) return   slider_thickness     end,
 		function(oldf,self,v)   
+            
             horizontal.track.h = v
             horizontal.grip.h  = v
             vertical.track.w   = v
             vertical.grip.w    = v
+            slider_thickness   = v
         end
     )
     
@@ -86,6 +103,7 @@ ScrollPane = function(parameters)
 	instance:subscribe_to(
 		{"virtual_w","pane_w"},
 		function()
+            
             if instance.virtual_w <= instance.pane_w then
                 horizontal:hide()
             else
@@ -102,6 +120,44 @@ ScrollPane = function(parameters)
             else
                 vertical:show()
             end
+        end
+    )
+	override_property(instance,"contents",
+		function(oldf) 
+            return pane.contents    
+        end,
+		function(oldf,self,v) 
+            pane.contents = v
+        end
+	)
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.contents = self.contents
+            
+            t.pane_w = instance.pane_w
+            t.pane_h = instance.pane_h
+            t.virtual_x = instance.virtual_x
+            t.virtual_y = instance.virtual_y
+            t.virtual_w = instance.virtual_w
+            t.virtual_h = instance.virtual_h
+            
+            t.slider_thickness = instance.slider_thickness
+            
+            t.type = "ScrollPane"
+            
+            return t
         end
     )
     ----------------------------------------------------------------------------

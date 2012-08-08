@@ -57,7 +57,8 @@ ButtonPicker = function(parameters)
 	--The ButtonPicker Object inherits from LayoutManager
 	
     local text = Group()
-    local window = Widget_Group{children={bg,text,fg}}
+    local window = Widget_Group()
+    
     local prev_arrow = Button{
         style = false,
         label = "",
@@ -153,7 +154,10 @@ ButtonPicker = function(parameters)
                 window_w,
                 window_h,
             }
-            
+            if next_item then
+                next_item.x = window_w/2
+                next_item.y = window_h/2
+            end
 		end
 	)
     ----------------------------------------------------------------------------
@@ -236,8 +240,8 @@ ButtonPicker = function(parameters)
     }
     
 	override_property(instance,"animate_duration",
-		function(oldf) return Timeline.duration     end,
-		function(oldf,self,v) Timeline.duration = v end
+		function(oldf) return update.duration     end,
+		function(oldf,self,v) update.duration = v end
 	)
     ----------------------------------------------------------------------------
     
@@ -297,9 +301,46 @@ ButtonPicker = function(parameters)
         end
 	)
     
-    prev_arrow.on_released = prev_i
-    next_arrow.on_released = next_i
+    prev_arrow:add_mouse_handler("on_button_up",prev_i)
+    next_arrow:add_mouse_handler("on_button_up",next_i)
     
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.length       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.direction = nil
+            t.spacing   = nil
+            t.cell_h = nil
+            t.cell_w = nil
+            t.cells = nil
+            
+            t.window_w = instance.window_w
+            t.window_h = instance.window_h
+            t.animate_duration = instance.animate_duration
+            t.orientation = instance.orientation
+            t.items = {}
+            
+            for i = 1,items.length do
+                t.items[i] = items[i].text
+            end
+            
+            t.type = "ButtonPicker"
+            
+            return t
+        end
+    )
+    
+    
+	instance:subscribe_to( "enabled",
+		function()
+            next_arrow.enabled = instance.enabled
+            prev_arrow.enabled = instance.enabled
+        end
+	)
     ----------------------------------------------------------------------------
     instance.window_w = parameters.window_w
     instance.window_h = parameters.window_h
@@ -333,7 +374,6 @@ ButtonPicker = function(parameters)
         
         prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
         next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
-        
     end 
 	local instance_on_style_changed
     function instance_on_style_changed()
@@ -359,7 +399,7 @@ ButtonPicker = function(parameters)
     instance_on_style_changed()
 	--]]
     
-    
+    window:add(bg,text,fg)
 	instance:set(parameters)
 	
 	return instance

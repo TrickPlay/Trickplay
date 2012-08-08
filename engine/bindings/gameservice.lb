@@ -17,7 +17,7 @@ global gameservice [[GameServiceSupport*]]
 	gameservice()
 		[[
 			self=lb_construct( GameServiceSupport , App::get(L)->get_context()->get_gameservice() );
-			
+
 			self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_READY, gameservice_app_ready_handler,L);
             self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
 		]];
@@ -27,51 +27,51 @@ global gameservice [[GameServiceSupport*]]
 			user_id=self->GetUserId().c_str();
 		]];
 	/*
-	
-    	Event Handler: on_ready
-    	
-    	The on_ready() event handler is invoked after the Trickplay successfully 
+
+    	EEvent Handler: on_ready
+
+    	The on_ready() event handler is invoked after the Trickplay successfully
     	registers a listener for the game events with the gameservice server.
     	If the registration failed, the <on_error> event handler will be invoked, instead.
-    	
+
     	*Prototype:*
-    	
+
     		(code)
     		on_ready( self, app_id)
     		(end)
-    		
+
     	*Arguments:*
-    	
+
     		self - a reference to gameservice
     		app_id - a table with following attributes: { name = "xxxx", version = "xxx" }
-    		
+
     	*Return Value:* None
-    	
+
 	*/
-	
+
 
 	callback on_ready
 	;
-	
+
 	/*
-	
-    	Event Handler: on_error
-    	
+
+    	EEvent Handler: on_error
+
     	The on_error() event handler is invoked when the Trickplay fails on open_app call with gameservice.
-    	
+
     	*Prototype:*
-    	
+
     		(code)
     		on_error( self, response_status)
     		(end)
-    		
+
     	*Arguments:*
-    	
+
     		self - a reference to gameservice
     		response_status - a table with following attributes: { status = <int>, status_as_string = "xxx", error_message = "xxx" }
-    		
+
     	*Return Value:* None
-    	
+
 	*/
 	callback on_error
 	;
@@ -85,7 +85,7 @@ global gameservice [[GameServiceSupport*]]
         	TPGameServiceUtil::push_registered_games(L);
         ]];
 
-/*		
+/*
 * props is a lua table of the following format:
  *  {
  *  	app_id = { name = "com.trickplay.games", version = 1 },
@@ -103,6 +103,24 @@ global gameservice [[GameServiceSupport*]]
  *      	{   name = "p2", cannot_start = true, first_role = false }
  *      }
  *  }
+
+    	EEvent Handler: on_register_game_completed
+
+    	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
+
+    	*Prototype:*
+
+    		(code)
+    		on_loaded( mediaplayer )
+    		(end)
+
+    	*Arguments:*
+
+    		mediaplayer - reference to the mediaplayer variable that prepared the media resource
+
+    	*Return Value:* None
+
+    	*See Also:* the <load> function and the <on_error> event handler
 */
 	table register_game(table props, function on_register_game_completed = 0) 
 		[[
@@ -117,29 +135,7 @@ global gameservice [[GameServiceSupport*]]
 			libgameservice::StatusCode sc = self->RegisterGame(ud, game_obj, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
-		
-	/*
-    	Event Handler: on_register_game_completed
-    	
-    	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
-    	
-    	*Prototype:*
-    	
-    		(code)
-    		on_loaded( mediaplayer )
-    		(end)
-    		
-    	*Arguments:*
-    	
-    		mediaplayer - reference to the mediaplayer variable that prepared the media resource
-    		
-    	*Return Value:* None
-    	
-    	*See Also:* the <load> function and the <on_error> event handler
-	*/
-	
-	/*callback on_register_game_completed
-	; */
+
 	
 	
 	/*		
@@ -243,9 +239,6 @@ global gameservice [[GameServiceSupport*]]
 			libgameservice::StatusCode sc = self->AssignMatch(ud, match_request_obj, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
-		
-	/*callback on_assign_match_completed
-	;*/
 	
 	/*
 	 * the callback should have the following declaration
@@ -304,10 +297,6 @@ global gameservice [[GameServiceSupport*]]
 			libgameservice::StatusCode sc = self->JoinMatch(ud, match_id, nick, role, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
-		
-	
-	/*callback on_join_match_completed
-	;*/
 	
 	
 	/*
@@ -395,27 +384,24 @@ global gameservice [[GameServiceSupport*]]
 			libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
 			TPGameServiceUtil::push_response_status_arg(L, sc);
 		]];
-		
-	/*callback on_send_turn_completed
-	;*/
-	
-	
+
+
 	callback on_turn_received
 	;
-	
-	
+
+
 	callback on_match_started
 	;
-	
-	
+
+
 	callback on_participant_joined
 	;
-	
-	
+
+
 	callback on_participant_left
 	;
-	
-	
+
+
 	callback on_match_updated
 	;
 
