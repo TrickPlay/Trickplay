@@ -615,6 +615,10 @@ public class GenericTurnBasedMatch implements MUGMatch {
 		removeSpectator(occupant);
 	}
 
+	public void abort() {
+		if (status != Status.completed)
+			status = Status.aborted;
+	}
 
 	/**
 	 * Initialize the configuration form of the match.
