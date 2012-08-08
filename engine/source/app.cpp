@@ -1151,6 +1151,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_ease( L );
     luaopen_matrix( L );
 
+
 #ifdef TP_WITH_WEBGL
     luaopen_typed_array( L );
     luaopen_webgl( L );

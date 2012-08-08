@@ -469,6 +469,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
     ${BINDINGS_SRC}/physics_bullet.lb
+
 )
 
 if (TP_WITH_GAMESERVICE)
@@ -576,6 +577,8 @@ list( APPEND
     ${ENGINE_SRC}/source/plugin.cpp
     ${ENGINE_SRC}/source/desktop_controller.cpp
     ${ENGINE_SRC}/source/physics_bullet.cpp
+    
+    ${ENGINE_SRC}/source/callback_holder.cpp
 )
 
 if (TP_WITH_GAMESERVICE)

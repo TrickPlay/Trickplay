@@ -78,6 +78,8 @@
 #ifndef _TXMPP_SIGSLOT_H_
 #define _TXMPP_SIGSLOT_H_
 
+#include <stdio.h>
+
 #ifndef NO_CONFIG_H
 #include "config.h"
 #endif

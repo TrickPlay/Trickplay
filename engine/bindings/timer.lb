@@ -3,6 +3,7 @@ module timer;
 [[
 #include "glib.h"
 #include "common.h"
+#include "callback_holder.h"
 
 /*
     You can create a timer in two ways:
@@ -36,11 +37,18 @@ public:
     void set_interval(UserData * ud,unsigned int new_interval);
     unsigned int get_interval() const;
     void cancel();
+    
+    // NEW
+    CallbackHolder* ontimer_holder;
+    int add_ontimer_listener(lua_State *L);
+    void remove_ontimer_listener(lua_State *L);
+    ////
 
 private:
-    
+
     GSource *   source;
     lua_Number  interval;
+
 };
 
 ]]
@@ -119,6 +127,7 @@ class Timer [[timer*]]
 
     Timer( int interval = 0 , function on_timer = 0 )
         [[
+	    
             self = lb_construct( timer , new timer );
 
             if (lua_gettop(L)==2 && lua_istable(L,-2))
@@ -199,8 +208,21 @@ class Timer [[timer*]]
 		*See Also:* the <start> function
 	*/
 
+    
     stop()
 	[[self->stop();]];
+    
+    
+    int add_ontimer_listener(function f)
+	[[
+	    return self->add_ontimer_listener(L);
+	]];
+    
+    remove_ontimer_listener(int ref)
+	[[
+	    self->remove_ontimer_listener(L);
+	]];
+    
 
 	/*
 		Event Handler: on_timer
@@ -225,28 +247,38 @@ class Timer [[timer*]]
 		
 		*See Also:* the <interval> property and the <start> function
 	*/
-	
+    
+    
     callback on_timer
 	[[
 	    if(!on_timer)
 	    {
-			self->stop();
-		}
-	]];        
+		self->stop();
+	    }
+	]];
+    
 }
 
 [[
 
 timer::timer()
 :
+    // NEW
+    ontimer_holder(NULL),
+    ////
     source( NULL ),
-    interval( 0 ) 
+    interval( 0 )
+    
 {
 }
 
 timer::~timer()
 {
     cancel();
+    
+    // NEW
+    g_free(ontimer_holder);
+    ////
 }
 
 void timer::start( UserData * ud )
@@ -300,14 +332,16 @@ void timer::cancel()
       
 gboolean timer::timer_fired(gpointer _handle)
 {
-	UserData::Handle * handle = UserData::Handle::get( _handle );
+    UserData::Handle * handle = UserData::Handle::get( _handle );
 	
     lua_State * L = handle->get_lua_state();
-
+    
     g_assert( L );
 
     timer * self = ( timer* ) handle->get_user();
-
+    
+    if (self->ontimer_holder) self->ontimer_holder->invoke_callbacks(L, 0);
+    
     if ( ! handle->invoke_callback( "on_timer" , 1 ) )
     {
         self->cancel();
@@ -321,7 +355,22 @@ gboolean timer::timer_fired(gpointer _handle)
         return FALSE;
     }
     lua_pop(L,1);
+    
     return TRUE;
 }
+
+//NEW
+int timer::add_ontimer_listener(lua_State *L) {
+    if (ontimer_holder == NULL) {
+	ontimer_holder = new CallbackHolder();
+    }
+    ontimer_holder->add_callback(L);
+}
+
+void timer::remove_ontimer_listener(lua_State *L) {
+    if (ontimer_holder == NULL) return;
+    ontimer_holder->remove_callback(L);
+}
+////
 
 ]]
