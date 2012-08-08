@@ -988,9 +988,6 @@ public class DefaultMUGRoom implements MUGRoom {
 		boolean hasRole = occupant.hasRole();
 		MUGMatch.Status matchStateBefore = match.getStatus();
 		
-		if (occupant.getPresence().getType() != Type.unavailable)
-			occupant.setPresence(new Presence(Type.unavailable));
-		
 		// leave the match and inform the occupants about changes
 		match.leave(occupant);
 		// reflect the occupant left message to all other occupants
@@ -1011,6 +1008,13 @@ public class DefaultMUGRoom implements MUGRoom {
 			}
 		}
 		
+		// inform occupants about the changing match status
+		if (!matchStateBefore.equals(match.getStatus()))
+			broadcastRoomPresence();
+
+		if (occupant.getPresence().getType() != Type.unavailable)
+			occupant.setPresence(new Presence(Type.unavailable));
+		
 		try {
 			occupant.send(occupant.getPresence());
 		}
@@ -1021,12 +1025,10 @@ public class DefaultMUGRoom implements MUGRoom {
 		// remove the occupant
 		if (occupants.containsKey(occupant.getUserAddress().toBareJID()))
 			occupants.remove(occupant.getUserAddress().toBareJID());
+		
 		occupant.destroy();
 		occupant = null;
 		
-		// inform occupants about the changing match status
-		if (!matchStateBefore.equals(match.getStatus()))
-			broadcastRoomPresence();
 		
 		// reset start counter
 	//	if (hasRole)

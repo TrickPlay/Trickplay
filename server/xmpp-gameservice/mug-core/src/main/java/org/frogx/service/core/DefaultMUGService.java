@@ -16,6 +16,7 @@ import org.dom4j.Element;
 import org.frogx.service.api.AppID;
 import org.frogx.service.api.MUGApp;
 import org.frogx.service.api.MUGManager;
+import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGMatch.TurnInfo;
 import org.frogx.service.api.MUGPersistenceProvider;
 import org.frogx.service.api.MUGRoom;
@@ -792,12 +793,23 @@ public class DefaultMUGService implements MUGService {
 		// go through all the rooms and make sure the matches are progressing
 		if (rooms != null) {
 			for (MUGRoom room: rooms.values()) {
+				log.info("checking for inactivity in room = " + room.getName());
 				synchronized(room) {
+					if (room.getMatch().getStatus() != MUGMatch.Status.active)
+						return;
 					TurnInfo tinfo = room.getMatch() != null ? room.getMatch().getTurnInfo() : null;
 					if (tinfo != null && tinfo.getTarget() != null) {
-						long expireUntil = System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
-						if (tinfo.getTarget().getLastPacketTime() < expireUntil)
+						log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
+						long expireTime = tinfo.getExpirationTime();//System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
+						log.info("room = " + room.getName() 
+								+ ", target = " + tinfo.getTarget().getNickname()
+								+ ", turn expirationTime = " + expireTime
+								+ ", currentTime = " + System.currentTimeMillis());
+						
+						if (expireTime < System.currentTimeMillis()) {
+							log.info("turn expired. forcing the user = " +  tinfo.getTarget().getNickname() + " to leave the room");
 							room.leave(tinfo.getTarget());
+						}
 					}
 				}
 			}
