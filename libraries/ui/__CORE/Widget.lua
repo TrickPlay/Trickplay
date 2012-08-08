@@ -301,6 +301,8 @@ Widget_Group = function(parameters)
             
             t.clip_to_size = self.clip_to_size
             
+            t.style = nil
+            
             t.children = {}
             
             for i,child in pairs(instance.children) do
@@ -335,6 +337,8 @@ Widget_Rectangle = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.style = nil
+            
             for _,k in pairs(rectangle_properties) do
                 
                 t[k] = self[k]
@@ -367,6 +371,8 @@ Widget_Text = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.style = nil
+            
             for _,k in pairs(text_properties) do
                 
                 t[k] = self[k]
@@ -396,6 +402,8 @@ Widget_Image = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.style = nil
+            
             for _,k in pairs(image_properties) do
                 
                 t[k] = self[k]
@@ -424,6 +432,8 @@ Widget_Clone = function(parameters)
 	override_property(instance,"attributes",
         function(oldf,self)
             local t = oldf(self)
+            
+            t.style = nil
             
             t.source = self.source and self.source.name or nil
             
