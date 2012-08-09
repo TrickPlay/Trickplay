@@ -120,6 +120,7 @@ function menubar:on_key_down(key)
             inner_labels.children[active_label]:wake()
             submenu_active = true
         elseif(keys.Down == key) then
+            if( not submenu_active ) then screen:on_key_down(keys.BACK) end
             -- We handle "Down" by telling the submenu to sleep, which means it'll tend to refuse on_key_downs till it wakes
             inner_labels.children[active_label]:sleep()
             submenu_active = false
