@@ -61,7 +61,7 @@ local default_state = function()
                     {name = g_user.name, score = 0, id = g_user.id, counted_score = false},
                     {name = false,       score = 0, id = false,     counted_score = false}
                 },
-                turn    = g_user.name, --waiting for wildcard opponent
+                turn    = g_user.id, --waiting for wildcard opponent
                 word    = false,
                 viewing = false,
                 phase   = "MAKING",
@@ -146,7 +146,7 @@ local make_from_existing = function(p_data)
             data.state.players[2].name = g_user.name
             data.state.players[2].id   = g_user.id
             data.state.expires = reset_expiration()
-            data.state.turn = g_user.name
+            data.state.turn = g_user.id
         end
         
     end
@@ -216,7 +216,7 @@ local make_from_existing = function(p_data)
     
     function session:opponents_turn()
         
-        data.state.turn = self.opponent_name
+        data.state.turn = self.opponent_id
         
     end
     
@@ -529,7 +529,7 @@ local make_from_existing = function(p_data)
         match_id        = function() return data.match_id      end,
         viewing         = function() return data.state.viewing end,
         
-        my_turn                 = function() return data.state.turn == g_user.name end,
+        my_turn                 = function() return data.state.turn == g_user.id end,
         opaque_state            = function() return base64_encode(json:stringify(data.state)) end,
         opponent_counted_score  = function() return opponent().counted_score    end,
     }
