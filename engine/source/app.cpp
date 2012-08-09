@@ -91,9 +91,6 @@ extern int luaopen_http_module( lua_State * L );
 extern int luaopen_ease( lua_State * L );
 extern int luaopen_matrix( lua_State * L );
 
-//leland
-extern int luaopen_test_module( lua_State * L );
-
 #ifdef TP_WITH_GAMESERVICE
 extern int luaopen_gameservice( lua_State * L );
 #endif
@@ -158,171 +155,171 @@ bool LuaStateProxy::is_valid()
 
 bool App::Metadata::set_root( const String & uri_or_native_path )
 {
-	GFile * file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
+    GFile * file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
 
-	char * uri = g_file_get_uri( file );
+    char * uri = g_file_get_uri( file );
 
-	char * path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
+    char * path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
 
-	g_object_unref( file );
+    g_object_unref( file );
 
-	bool result = uri != 0;
+    bool result = uri != 0;
 
-	if ( result )
-	{
-		root_uri = uri;
-		root_native_path = path ? path : "";
-	}
+    if ( result )
+    {
+        root_uri = uri;
+        root_native_path = path ? path : "";
+    }
 
-	g_free( uri );
-	g_free( path );
+    g_free( uri );
+    g_free( path );
 
-	return result;
+    return result;
 }
 
 class LuaAPIPlugin
 {
 public:
 
-	static void call_open( lua_State * L )
-	{
-		App * app = App::get( L );
+    static void call_open( lua_State * L )
+    {
+        App * app = App::get( L );
 
-		String app_id = app->get_id();
+        String app_id = app->get_id();
 
-		List * list = get_list( app->get_context() );
+        List * list = get_list( app->get_context() );
 
-		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
-		{
-			tplog2( "CALLING OPEN ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+        for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+        {
+            tplog2( "CALLING OPEN ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
 
-			int top_before = lua_gettop( L );
+            int top_before = lua_gettop( L );
 
-			int result = (*it)->open( L , app_id.c_str() , (*it)->plugin->user_data() );
+            int result = (*it)->open( L , app_id.c_str() , (*it)->plugin->user_data() );
 
-			if ( 0 != result )
-			{
-				tpwarn( "  PLUGIN OPEN RETURNED %d" , result );
-			}
-			else
-			{
-				tplog2( "  PLUGIN OPENED" );
-			}
+            if ( 0 != result )
+            {
+                tpwarn( "  PLUGIN OPEN RETURNED %d" , result );
+            }
+            else
+            {
+                tplog2( "  PLUGIN OPENED" );
+            }
 
-			int top_after = lua_gettop( L );
+            int top_after = lua_gettop( L );
 
-			if ( top_after > top_before )
-			{
-				tpwarn( "  PLUGIN OPEN LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
+            if ( top_after > top_before )
+            {
+                tpwarn( "  PLUGIN OPEN LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
 
-				lua_pop( L , top_after - top_before + 1 );
-			}
-			else if ( top_after < top_before )
-			{
-				tpwarn( "  PLUGIN OPEN POPPED TOO MANY VALUES OFF THE STACK" );
-			}
-		}
-	}
+                lua_pop( L , top_after - top_before + 1 );
+            }
+            else if ( top_after < top_before )
+            {
+                tpwarn( "  PLUGIN OPEN POPPED TOO MANY VALUES OFF THE STACK" );
+            }
+        }
+    }
 
-	static void call_close( lua_State * L )
-	{
-		App * app = App::get( L );
+    static void call_close( lua_State * L )
+    {
+        App * app = App::get( L );
 
-		String app_id = app->get_id();
+        String app_id = app->get_id();
 
-		List * list = get_list( app->get_context() );
+        List * list = get_list( app->get_context() );
 
-		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
-		{
-			tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+        for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+        {
+            tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
 
-			int top_before = lua_gettop( L );
+            int top_before = lua_gettop( L );
 
-			(*it)->close( L , app_id.c_str() , (*it)->plugin->user_data() );
+            (*it)->close( L , app_id.c_str() , (*it)->plugin->user_data() );
 
-			tplog2( "  PLUGIN CLOSED" );
+            tplog2( "  PLUGIN CLOSED" );
 
-			int top_after = lua_gettop( L );
+            int top_after = lua_gettop( L );
 
-			if ( top_after > top_before )
-			{
-				tpwarn( "  PLUGIN CLOSE LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
+            if ( top_after > top_before )
+            {
+                tpwarn( "  PLUGIN CLOSE LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
 
-				lua_pop( L , top_after - top_before + 1 );
-			}
-			else if ( top_after < top_before )
-			{
-				tpwarn( "  PLUGIN CLOSE POPPED TOO MANY VALUES OFF THE STACK" );
-			}
-		}
-	}
+                lua_pop( L , top_after - top_before + 1 );
+            }
+            else if ( top_after < top_before )
+            {
+                tpwarn( "  PLUGIN CLOSE POPPED TOO MANY VALUES OFF THE STACK" );
+            }
+        }
+    }
 
 private:
 
-	LuaAPIPlugin( TrickPlay::Plugin * _plugin )
-	:
-		plugin( _plugin )
-	{
-		g_assert( plugin );
+    LuaAPIPlugin( TrickPlay::Plugin * _plugin )
+    :
+        plugin( _plugin )
+    {
+        g_assert( plugin );
 
-		open = ( TPLuaAPIOpen ) plugin->get_symbol( TP_LUA_API_OPEN );
-		close = ( TPLuaAPIClose ) plugin->get_symbol( TP_LUA_API_CLOSE );
+        open = ( TPLuaAPIOpen ) plugin->get_symbol( TP_LUA_API_OPEN );
+        close = ( TPLuaAPIClose ) plugin->get_symbol( TP_LUA_API_CLOSE );
 
-		g_assert( open );
-		g_assert( close );
-	}
+        g_assert( open );
+        g_assert( close );
+    }
 
-	~LuaAPIPlugin()
-	{
-		delete plugin;
-	}
+    ~LuaAPIPlugin()
+    {
+        delete plugin;
+    }
 
-	typedef std::list< LuaAPIPlugin * > List;
+    typedef std::list< LuaAPIPlugin * > List;
 
-	static List * get_list( TPContext * context )
-	{
-		static char key = 0;
+    static List * get_list( TPContext * context )
+    {
+        static char key = 0;
 
-		List * result = ( List * ) context->get_internal( & key );
+        List * result = ( List * ) context->get_internal( & key );
 
-		if ( ! result )
-		{
-			result = new List;
+        if ( ! result )
+        {
+            result = new List;
 
-			StringList symbols;
-			symbols.push_back( TP_LUA_API_OPEN );
-			symbols.push_back( TP_LUA_API_CLOSE );
+            StringList symbols;
+            symbols.push_back( TP_LUA_API_OPEN );
+            symbols.push_back( TP_LUA_API_CLOSE );
 
-			TrickPlay::Plugin::List plugins = TrickPlay::Plugin::scan( context , "tp_lua_api-" , symbols );
+            TrickPlay::Plugin::List plugins = TrickPlay::Plugin::scan( context , "tp_lua_api-" , symbols );
 
-			for ( TrickPlay::Plugin::List::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
-			{
-				result->push_back( new LuaAPIPlugin( * it ) );
-			}
+            for ( TrickPlay::Plugin::List::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+            {
+                result->push_back( new LuaAPIPlugin( * it ) );
+            }
 
-			context->add_internal( & key , result , destroy_list );
-		}
+            context->add_internal( & key , result , destroy_list );
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	static void destroy_list( gpointer _list )
-	{
-		g_assert( _list );
+    static void destroy_list( gpointer _list )
+    {
+        g_assert( _list );
 
-		List * list = ( List * ) _list;
+        List * list = ( List * ) _list;
 
-		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
-		{
-			delete * it;
-		}
+        for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+        {
+            delete * it;
+        }
 
-		delete list;
-	}
+        delete list;
+    }
 
-	TrickPlay::Plugin *	plugin;
-	TPLuaAPIOpen		open;
-	TPLuaAPIClose		close;
+    TrickPlay::Plugin *    plugin;
+    TPLuaAPIOpen        open;
+    TPLuaAPIClose        close;
 };
 
 //=============================================================================
@@ -621,8 +618,8 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
     if ( ! contents )
     {
-		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
-		return false;
+        g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
+        return false;
     }
 
     bool result = App::load_metadata_from_data( contents.data() , md );
@@ -991,42 +988,42 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     ClutterActor * splash = 0;
 
-	Image * splash_image = 0;
+    Image * splash_image = 0;
 
-	if ( AppResource( this , "default.jpg" ).exists( this ) )
-	{
-		splash_image = load_image( "default.jpg" , false );
-	}
-	else if ( AppResource( this , "default.png" ).exists( this ) )
-	{
-		splash_image = load_image( "default.png" , false );
-	}
+    if ( AppResource( this , "default.jpg" ).exists( this ) )
+    {
+        splash_image = load_image( "default.jpg" , false );
+    }
+    else if ( AppResource( this , "default.png" ).exists( this ) )
+    {
+        splash_image = load_image( "default.png" , false );
+    }
 
-	if ( splash_image )
-	{
-		splash = clutter_texture_new();
+    if ( splash_image )
+    {
+        splash = clutter_texture_new();
 
-		clutter_actor_set_name( splash , "splash" );
+        clutter_actor_set_name( splash , "splash" );
 
-		Images::load_texture( CLUTTER_TEXTURE( splash ) , splash_image );
+        Images::load_texture( CLUTTER_TEXTURE( splash ) , splash_image );
 
-		gfloat width;
-		gfloat height;
+        gfloat width;
+        gfloat height;
 
-		clutter_actor_get_size( stage , & width , & height );
+        clutter_actor_get_size( stage , & width , & height );
 
-		clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
+        clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
 
-		clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
 
-		clutter_actor_show( stage );
+        clutter_actor_show( stage );
 
-		clutter_actor_queue_redraw( stage );
+        clutter_actor_queue_redraw( stage );
 
-		delete splash_image;
+        delete splash_image;
 
-		g_info( "APP SPLASH %s : %1.3f s", metadata.id.c_str() , t.elapsed() );
-	}
+        g_info( "APP SPLASH %s : %1.3f s", metadata.id.c_str() , t.elapsed() );
+    }
 
     //.........................................................................
 
@@ -1037,34 +1034,34 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
 int App::global_tracker( lua_State * L )
 {
-	lua_pushvalue( L , 2 );
-	lua_pushvalue( L , 3 );
-	lua_rawset( L , 1 );
+    lua_pushvalue( L , 2 );
+    lua_pushvalue( L , 3 );
+    lua_rawset( L , 1 );
 
-	if ( lua_type( L , 2 ) == LUA_TSTRING )
-	{
-		if ( App * app = App::get( L ) )
-		{
-			String where;
+    if ( lua_type( L , 2 ) == LUA_TSTRING )
+    {
+        if ( App * app = App::get( L ) )
+        {
+            String where;
 
-			lua_Debug ar;
+            lua_Debug ar;
 
-			if ( lua_getstack( L , 1 , & ar ) )
-			{
-				if ( lua_getinfo( L , "Sl" , & ar ) )
-				{
-					if ( ar.source )
-					{
-						where = Util::format( "%s:%d" , ar.source , ar.currentline );
-					}
-				}
-			}
+            if ( lua_getstack( L , 1 , & ar ) )
+            {
+                if ( lua_getinfo( L , "Sl" , & ar ) )
+                {
+                    if ( ar.source )
+                    {
+                        where = Util::format( "%s:%d" , ar.source , ar.currentline );
+                    }
+                }
+            }
 
-			app->globals[ String( lua_tostring( L , 2 ) ) ] = where;
-		}
-	}
+            app->globals[ String( lua_tostring( L , 2 ) ) ] = where;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1153,11 +1150,6 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_keyboard( L );
     luaopen_ease( L );
     luaopen_matrix( L );
-    
-    //leland
-    luaopen_test_module( L );
-    
-
 
 #ifdef TP_WITH_WEBGL
     luaopen_typed_array( L );
@@ -1175,14 +1167,14 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 #ifdef TP_WITH_GAMESERVICE
     if ( context->get_bool( TP_GAMESERVICE_ENABLED ) )
     {
-		if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end())
-		{
-			g_info("Performing luaopen_gameservice()");
-			luaopen_gameservice( L );
+        if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end())
+        {
+            g_info("Performing luaopen_gameservice()");
+            luaopen_gameservice( L );
 
-			g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
-			context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
-		}
+            g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
+            context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
+        }
     }
 #endif
 
@@ -1199,7 +1191,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     if ( context->get_bool( TP_START_DEBUGGER , false ) || launch.debug )
     {
-    	debugger.break_next_line();
+        debugger.break_next_line();
     }
 
     //.........................................................................
@@ -1210,13 +1202,13 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     if ( ! lua_isnil( L , -1 ) )
     {
-		if ( lua_getmetatable( L , -1 ) )
-		{
-			lua_pushliteral( L , "__newindex" );
-			lua_pushcfunction( L , global_tracker );
-			lua_rawset( L , -3 );
-			lua_pop( L , 1 );
-		}
+        if ( lua_getmetatable( L , -1 ) )
+        {
+            lua_pushliteral( L , "__newindex" );
+            lua_pushcfunction( L , global_tracker );
+            lua_rawset( L , -3 );
+            lua_pop( L , 1 );
+        }
     }
 
     lua_pop( L , 1 );
@@ -1236,35 +1228,35 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     int result = TP_RUN_OK;
 
-	int top = lua_gettop( L );
+    int top = lua_gettop( L );
 
-	if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
-	{
-		g_critical( "%s", String( 60, '=' ).c_str() );
-		g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
-		g_critical( "%s", String( 60, '=' ).c_str() );
+    if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
+    {
+        g_critical( "%s", String( 60, '=' ).c_str() );
+        g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
+        g_critical( "%s", String( 60, '=' ).c_str() );
 
-		lua_pop( L , lua_gettop( L ) - top );
+        lua_pop( L , lua_gettop( L ) - top );
 
-		result = TP_RUN_APP_ERROR;
-	}
-	else
-	{
-		lua_pop( L , lua_gettop( L ) - top );
+        result = TP_RUN_APP_ERROR;
+    }
+    else
+    {
+        lua_pop( L , lua_gettop( L ) - top );
 
-		// Make it small
+        // Make it small
 
-		//clutter_actor_set_scale( screen, 0, 0 );
+        //clutter_actor_set_scale( screen, 0, 0 );
 
-		// By adding it to the stage, the ref is sunk, so we don't need
-		// to unref it here.
+        // By adding it to the stage, the ref is sunk, so we don't need
+        // to unref it here.
 
-		clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
 
-		g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
+        g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
-		notify( context , TP_NOTIFICATION_APP_LOADED );
-	}
+        notify( context , TP_NOTIFICATION_APP_LOADED );
+    }
 
     run_callback( this , result );
 }
@@ -1634,7 +1626,7 @@ bool App::change_app_path( const char * path )
 
     if ( ! metadata.set_root( path ) )
     {
-    	return false;
+        return false;
     }
 
     g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.get_root_uri().c_str() );
@@ -1742,18 +1734,18 @@ void App::animate_out()
         return;
     }
 
-	if ( ! context->get_bool( TP_APP_ANIMATIONS_ENABLED , true ) )
-	{
-		animate_out_completed( 0 , screen );
-	}
-	else
-	{
-		// So we can hold on to it until we are done
+    if ( ! context->get_bool( TP_APP_ANIMATIONS_ENABLED , true ) )
+    {
+        animate_out_completed( 0 , screen );
+    }
+    else
+    {
+        // So we can hold on to it until we are done
 
-		g_object_ref( G_OBJECT( screen ) );
+        g_object_ref( G_OBJECT( screen ) );
 
-		g_idle_add_full( G_PRIORITY_HIGH, animate_out_callback, screen, NULL );
-	}
+        g_idle_add_full( G_PRIORITY_HIGH, animate_out_callback, screen, NULL );
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -1773,33 +1765,33 @@ gboolean App::animate_out_callback( gpointer s )
 
         //clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), screen );
 
-		gfloat width;
-		gfloat height;
+        gfloat width;
+        gfloat height;
 
-		clutter_actor_get_size( parent, &width, &height );
+        clutter_actor_get_size( parent, &width, &height );
 
-		clutter_actor_set_anchor_point( screen, 960, 540 );
+        clutter_actor_set_anchor_point( screen, 960, 540 );
 
-		clutter_actor_set_position( screen, width / 2, height / 2 );
+        clutter_actor_set_position( screen, width / 2, height / 2 );
 
-		clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
+        clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
 
-		ClutterAnimator *animator = clutter_animator_new();
-		clutter_animator_set_duration(animator, 750);
-		clutter_animator_set(animator,
-								screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
-								screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
-								screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
-								screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
-								screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
-								screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
-								screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-								screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-								NULL
-							);
-		ClutterTimeline *timeline = clutter_animator_start(animator);
+        ClutterAnimator *animator = clutter_animator_new();
+        clutter_animator_set_duration(animator, 750);
+        clutter_animator_set(animator,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                NULL
+                            );
+        ClutterTimeline *timeline = clutter_animator_start(animator);
 
-		g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
+        g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
     }
 
     g_object_unref( G_OBJECT( screen ) );
@@ -1822,7 +1814,7 @@ Image * App::load_image( const gchar * source , bool read_tags )
 
     if ( ! resource.good() )
     {
-    	return 0;
+        return 0;
     }
 
     Image * image = 0;
@@ -1848,7 +1840,7 @@ Image * App::load_image( const gchar * source , bool read_tags )
     }
     else if ( resource.is_native() )
     {
-    	String path( resource.get_native_path().c_str() );
+        String path( resource.get_native_path().c_str() );
 
         tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  DECODING" );
@@ -1869,7 +1861,7 @@ public:
 
     ImageResponseClosure( bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
-    	read_tags( _read_tags ),
+        read_tags( _read_tags ),
         callback( _callback ),
         user( _user ),
         destroy_notify( _destroy_notify )
@@ -1891,7 +1883,7 @@ public:
             tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
-            		self->read_tags ,
+                    self->read_tags ,
                     response.get_header( "Content-Type" ),
                     self->callback,
                     self->user,
@@ -1915,7 +1907,7 @@ public:
 
 private:
 
-    bool						read_tags;
+    bool                        read_tags;
     Image::DecodeAsyncCallback  callback;
     gpointer                    user;
     GDestroyNotify              destroy_notify;
@@ -1929,10 +1921,10 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
 
     if ( ! source )
     {
-    	if ( destroy_notify )
-    	{
-    		destroy_notify( user );
-    	}
+        if ( destroy_notify )
+        {
+            destroy_notify( user );
+        }
 
         return false;
     }
@@ -1944,9 +1936,9 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         tplog( "  INVALID PATH" );
 
         if ( destroy_notify )
-    	{
-    		destroy_notify( user );
-    	}
+        {
+            destroy_notify( user );
+        }
 
         return false;
     }
@@ -1966,7 +1958,7 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
     }
     else if ( resource.is_native() )
     {
-    	String path( resource.get_native_path() );
+        String path( resource.get_native_path() );
 
         tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  STARTING DECODE FROM FILE" );
@@ -2009,4 +2001,3 @@ void App::audio_match( const String & json )
 }
 
 //.........................................................................
-
