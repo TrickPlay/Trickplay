@@ -793,15 +793,21 @@ public class DefaultMUGSession implements MUGSession {
 
 		for (MUGRoom room : component.getGameRoomsByGame(gamens)) {
 			synchronized (room) {
+				MUGMatch.Status matchStatus = room.getMatch().getStatus();
 				if (!room.isMembersOnly()
 						&& !room.isPasswordProtected()
 						&& !room.isLocked()
-						&& !MUGMatch.Status.completed.equals(room.getMatch()
-								.getStatus()) && !room.isOccupant(jid)
-						&& room.getMatch().getFreeRoles().size() > 0) {
+						&& !room.isOccupant(jid)
+						&& room.getMatch().getFreeRoles().size() > 0
+						&& 
+						( MUGMatch.Status.created.equals(matchStatus)
+								||
+								MUGMatch.Status.active.equals(matchStatus)
+						)
+						) {
 					if (reserveRole(room, nick, jid, requestedRole)) {
 						return room;
-					}						
+					}
 				}
 			}
 		}
@@ -844,12 +850,14 @@ public class DefaultMUGSession implements MUGSession {
 			String appns = childElement != null ? childElement.attributeValue("appId") : null;
 			if (appns == null || appns.isEmpty()) {
 				// close all open apps
+				log.info("user=" + request.getFrom() + ", room=" + request.getTo() + ". closing all apps. apps="+openApps);
 				List<MUGRoom> rooms = component.getGameRooms(request.getFrom());
 				doClose(rooms);
 				openApps.clear();
 				occupants.clear();
 			} else {
 				AppID appID = CommonUtils.extractAppID(appns);
+				log.info("user=" + request.getFrom() + ", room=" + request.getTo() + ". closing apps="+appID);
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doClose(rooms);
 				openApps.remove(appID);
@@ -940,6 +948,7 @@ public class DefaultMUGSession implements MUGSession {
 		if (roomName == null) {
 			boolean appClosingPresence = Presence.Type.unavailable.equals(presence.getType());
 			if (appClosingPresence) {
+				log.info("user=" + presence.getFrom() + ", room=" + recipient + ". received unavailable presence. closing app(s)");
 				CloseAppHandler handler = new CloseAppHandler(presence);
 				handler.execute();
 			} else {
