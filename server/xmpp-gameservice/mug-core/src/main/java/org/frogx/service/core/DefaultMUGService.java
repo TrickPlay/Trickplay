@@ -783,6 +783,7 @@ public class DefaultMUGService implements MUGService {
 	}
 	
 	private void checkForTimedOutSessions() {
+		log.info("checking for timedout sessions at " + System.currentTimeMillis());
 		final long deadline = System.currentTimeMillis() - sessiontimeout;
 		for (DefaultMUGSession session : sessions.values()) {
 			try {
@@ -809,19 +810,19 @@ public class DefaultMUGService implements MUGService {
 		// go through all the rooms and make sure the matches are progressing
 		if (rooms != null) {
 			for (MUGRoom room: rooms.values()) {
-			//	log.info("checking for inactivity in room = " + room.getName());
+				log.info("checking for inactivity in room = " + room.getName());
 				synchronized(room) {
 					if (room.getMatch().getStatus() != MUGMatch.Status.active)
-						return;
+						continue;
 					TurnInfo tinfo = room.getMatch() != null ? room.getMatch().getTurnInfo() : null;
 					if (tinfo != null && tinfo.getTarget() != null) {
-				//		log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
+					//	log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
 						long expireTime = tinfo.getExpirationTime();//System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
-				/*		log.info("room = " + room.getName() 
+						/*log.info("room = " + room.getName() 
 								+ ", target = " + tinfo.getTarget().getNickname()
 								+ ", turn expirationTime = " + expireTime
-								+ ", currentTime = " + System.currentTimeMillis());
-								*/
+								+ ", currentTime = " + System.currentTimeMillis());*/
+								
 						
 						if (expireTime < System.currentTimeMillis()) {
 							log.info("turn expired. aborting match = " +  room.getJID());
