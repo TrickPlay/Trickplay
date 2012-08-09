@@ -387,7 +387,7 @@ class TrickplayInspector(QWidget):
         comboNumber = {}
         comboHandlers = {}
 
-        def comboPropertyFill(propName, propOrder, data,gid=None) :
+        def comboPropertyFill(propName, propOrder, data, gid=None) :
             def makeComboHandler(gid, prop_name):
                 def handler():
                     if not self.preventChanges:
@@ -399,6 +399,39 @@ class TrickplayInspector(QWidget):
             #propValue = str(data[propName])
             # QComboBox 
             comboProp = QComboBox()
+
+            idx = 0 
+            current_idx = 0
+            if type(propName) == list:
+                comboValue = str(data[propName[0]])
+                pname = propName[0]
+            else:
+                comboValue = str(data[propName])
+                pname = propName
+
+            for i in COMBOBOX_PROP_VALS[pname]:
+                comboProp.addItem(i)
+                if i == comboValue:
+                    current_idx = idx
+                idx = idx + 1
+
+            comboProp.setCurrentIndex(current_idx)
+
+            #QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
+            #QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
+            #QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+
+            if type(propName) == list:
+                strPropName = ' '.join(propName)
+                comboBox[strPropName] = comboProp
+                comboNumber[strPropName] = propOrder
+                comboHandlers[strPropName] = makeComboHandler(gid, propName)
+                #QObject.connect(bool_checkbox, SIGNAL('stateChanged(int)'), boolHandlers[strPropName])
+            else :
+                comboBox[propName] = comboProp
+                comboNumber[propName] = propOrder
+                comboHandlers[propName] = makeComboHandler(str(data["gid"]), propName)
+                #QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[propName])
 
         for p in PropertyIter(None):
 
@@ -417,6 +450,7 @@ class TrickplayInspector(QWidget):
                 i.setText (0, p)  # first col : property name
                 #i.setText (0, p[:1].upper()+p[1:])
 
+                #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
                 if p in TEXT_PROP or p in READ_ONLY :
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
                     if not  p in READ_ONLY :
@@ -449,7 +483,6 @@ class TrickplayInspector(QWidget):
                     boolPropertyFill(p, n, data) 
                 elif p in COLOR_PROP: 
                     colorPropertyFill(p, n, data) 
-
                 elif p in FONT_PROP:
                     fontPropertyFill(p, n, data) 
                 elif p in COMBOBOX_PROP: 
@@ -514,8 +547,8 @@ class TrickplayInspector(QWidget):
                                         colorPropertyFill(colNames, colNums, q, int(data['gid'])) 
                                     elif ssp == "font":
                                         fontPropertyFill(colNames, colNums, q, int(data['gid'])) 
-                                    #elif ssp == "alignment":
-                                        #comboPropertyFill(colNames, colNums, r, int(data['gid'])) 
+                                    elif ssp == "alignment":
+                                        comboPropertyFill(colNames, colNums, q, int(data['gid'])) 
                                     elif ssp in ['justify', 'wrap']:
                                         boolPropertyFill(colNames, colNums, q, int(data['gid'])) 
                                     else:
@@ -554,14 +587,24 @@ class TrickplayInspector(QWidget):
                         self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                 
         if boolCheckBox :
-            for n, cb in boolCheckBox.iteritems() :
+            for n, b in boolCheckBox.iteritems() :
                 if type(boolNumber[n]) is not list :
-                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(boolNumber[n])), 1, cb)
+                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(boolNumber[n])), 1, b)
                     self.ui.property.itemWidget(self.ui.property.topLevelItem(int(boolNumber[n])),1).setStyleSheet("QCheckBox{padding-top:-20;padding-bottom:-20px}")
                 else:
                     if len(boolNumber[n]) < 4:
-                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]), 1, b)
+                        self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QCheckBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+
+        if comboBox :
+            for n, cb in comboBox.iteritems() :
+                if type(comboNumber[n]) is not list :
+                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(comboNumber[n])), 1, cb)
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px}")
+                else:
+                    if len(comboNumber[n]) < 4:
+                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]), 1, cb)
+                        self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
         # substitude style property text input to style combo
 
