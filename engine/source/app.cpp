@@ -91,6 +91,9 @@ extern int luaopen_http_module( lua_State * L );
 extern int luaopen_ease( lua_State * L );
 extern int luaopen_matrix( lua_State * L );
 
+//leland
+extern int luaopen_test_module( lua_State * L );
+
 #ifdef TP_WITH_GAMESERVICE
 extern int luaopen_gameservice( lua_State * L );
 #endif
@@ -1150,6 +1153,10 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_keyboard( L );
     luaopen_ease( L );
     luaopen_matrix( L );
+    
+    //leland
+    luaopen_test_module( L );
+    
 
 
 #ifdef TP_WITH_WEBGL
