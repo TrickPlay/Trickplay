@@ -3,7 +3,6 @@ module timer;
 [[
 #include "glib.h"
 #include "common.h"
-#include "callback_holder.h"
 
 /*
     You can create a timer in two ways:
@@ -251,17 +250,20 @@ class Timer [[timer*]]
         if ( lua_isnil( L , -1 ) )
         {
             ud->remove_last_callback( name , L );
+            if ( ! callback_attached( name ) )
+            {
+               self->stop();
+            }
         }
         else
         {
-        ud->get_last_callback( name , L );
 
         // callback already exists ==> replace
-        if ( !lua_isnil( L , -1 ) )
+        if ( ud->callback_attached( name ) )
         {
             lua_pop( L , 1 );
             ud->remove_last_callback( name , L );
-            ud->add_callback( name , L );
+            ud->add_last_callback( name , L );
         }
 
         // no current callback ==> add
@@ -281,7 +283,6 @@ timer::timer()
 :
     source( NULL ),
     interval( 0 )
-
 {
 }
 

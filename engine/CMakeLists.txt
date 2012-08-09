@@ -22,9 +22,9 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
 
 if ( TP_WITH_GAMESERVICE )
-	add_subdirectory( libgameservice )
-	include_directories( ${ENGINE_SRC}/libgameservice )
-	add_definitions( -DTP_WITH_GAMESERVICE=1 )
+    add_subdirectory( libgameservice )
+    include_directories( ${ENGINE_SRC}/libgameservice )
+    add_definitions( -DTP_WITH_GAMESERVICE=1 )
 endif( TP_WITH_GAMESERVICE )
 
 
@@ -437,7 +437,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
-	${BINDINGS_SRC}/regex.lb
+    ${BINDINGS_SRC}/regex.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
@@ -473,9 +473,9 @@ list( APPEND LB_FILES
 )
 
 if (TP_WITH_GAMESERVICE)
-	list ( APPEND LB_FILES
-		${BINDINGS_SRC}/gameservice.lb
-	)
+    list ( APPEND LB_FILES
+        ${BINDINGS_SRC}/gameservice.lb
+    )
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -577,23 +577,21 @@ list( APPEND
     ${ENGINE_SRC}/source/plugin.cpp
     ${ENGINE_SRC}/source/desktop_controller.cpp
     ${ENGINE_SRC}/source/physics_bullet.cpp
-
-    ${ENGINE_SRC}/source/callback_holder.cpp
 )
 
 if (TP_WITH_GAMESERVICE)
-	list ( APPEND ENGINE_SOURCE_FILES
-		${ENGINE_SRC}/source/gameservice_support.cpp
-		${ENGINE_SRC}/source/gameservice_util.cpp
-	)
+    list ( APPEND ENGINE_SOURCE_FILES
+        ${ENGINE_SRC}/source/gameservice_support.cpp
+        ${ENGINE_SRC}/source/gameservice_util.cpp
+    )
 
-	list( APPEND
+    list( APPEND
 
-	    ENGINE_LIBRARIES
+        ENGINE_LIBRARIES
 
-	    gameservice
-	    tptxmpp
-	)
+        gameservice
+        tptxmpp
+    )
 
 endif(TP_WITH_GAMESERVICE)
 
