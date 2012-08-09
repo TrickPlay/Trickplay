@@ -812,16 +812,19 @@ public class DefaultMUGService implements MUGService {
 			for (MUGRoom room: rooms.values()) {
 				log.info("checking for inactivity in room = " + room.getName());
 				synchronized(room) {
-					if (room.getMatch().getStatus() != MUGMatch.Status.active)
+					log.info(room.getName()+".status=" + room.getMatch().getStatus());
+					if (!MUGMatch.Status.active.equals(room.getMatch().getStatus())) {
+						log.info(room.getName() + ".status is not active. skipping it.");
 						continue;
+					}
 					TurnInfo tinfo = room.getMatch() != null ? room.getMatch().getTurnInfo() : null;
 					if (tinfo != null && tinfo.getTarget() != null) {
-					//	log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
+						log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
 						long expireTime = tinfo.getExpirationTime();//System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
-						/*log.info("room = " + room.getName() 
+						log.info("room = " + room.getName() 
 								+ ", target = " + tinfo.getTarget().getNickname()
 								+ ", turn expirationTime = " + expireTime
-								+ ", currentTime = " + System.currentTimeMillis());*/
+								+ ", currentTime = " + System.currentTimeMillis());
 								
 						
 						if (expireTime < System.currentTimeMillis()) {
