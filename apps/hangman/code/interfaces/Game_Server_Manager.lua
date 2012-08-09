@@ -289,8 +289,29 @@ function Game_Server:update_game_history(callback)
     
     
 	check_gameservice_is_available( )
+    
+    print("wins = ".. g_user.wins, "losses = "..g_user.losses)
     gameservice:update_user_game_data( 
     		game_id, base64_encode(json:stringify{wins = g_user.wins, losses = g_user.losses}), callback
+    )
+    
+end
+
+function Game_Server:get_game_history(callback)
+    --[[    
+        this function gets the Win Loss Record of the logged in user
+    --]]
+    
+    
+	check_gameservice_is_available( )
+    
+    gameservice:get_user_game_data( 
+    		game_id, 
+            function(gameservice, response_status, game_data )
+                
+                callback( json:parse( base64_decode(  game_data.opaque  ) ) )
+                
+            end
     )
     
 end
