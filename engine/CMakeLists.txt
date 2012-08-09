@@ -469,6 +469,9 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
     ${BINDINGS_SRC}/physics_bullet.lb
+    
+    #leland
+    ${BINDINGS_SRC}/test_module.lb
 
 )
 
