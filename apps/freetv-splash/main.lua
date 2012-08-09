@@ -19,6 +19,12 @@ dofile("widget_helper.lua")
 
 dofile("launcher.lua")
 
+--[[
+    Globals -- very limited set of these
+]]--
+
+FONT_NAME = "Lato Regular"
+
 local back_to_start = settings.back_to_start
 
 if( not back_to_start) then

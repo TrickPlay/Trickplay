@@ -140,10 +140,10 @@ local function make_show_tile(channel_num, data)
     local logo = Image { src = "assets/channel_logos/logo-"..data.channel..".png" }
     logo.anchor_point = { 0, logo.h/2 }
     logo.position = { 30, bar_height/2 }
-    local channel_num = Text { color = "grey85", text = ""..channel_num, font = "FreeFont Sans 40px" }
+    local channel_num = Text { color = "grey75", text = ""..channel_num, font = FONT_NAME.." 30px" }
     channel_num.anchor_point = { 0, channel_num.baseline }
     channel_num.x = logo.x + logo.w + 5
-    local show_text = Text { color = "white", text = data.show, font = "FreeFont Sans 50px" }
+    local show_text = Text { color = "white", text = data.show, font = FONT_NAME.." 40px" }
     show_text.anchor_point = { 0, show_text.h/2 }
     show_text.position = { channel_num.x + channel_num.w + 15, bar_height/2 }
     channel_num.y = show_text.y - show_text.h/2 + show_text.baseline
