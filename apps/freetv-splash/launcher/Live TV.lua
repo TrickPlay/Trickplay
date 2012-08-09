@@ -235,7 +235,7 @@ local function build_bar()
 
     local clip_group_outter = Group { name = "clip_outter" }
     menubar:add(clip_group_outter)
-    clip_group = Group { name = "clip_inner" }
+    local clip_group = Group { name = "clip_inner" }
     clip_group_outter:add(clip_group)
 
     local shows_group = Group { name = "tv_shows" }
