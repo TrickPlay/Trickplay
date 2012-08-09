@@ -1,4 +1,5 @@
 
+#include "stdlib.h"
 #include "user_data.h"
 #include "lb.h"
 #include "util.h"
@@ -222,6 +223,10 @@ gpointer UserData::initialize_with_client( gpointer _client )
     g_assert( ! initialized );
 
     initialized = true;
+    
+    //initialize callback list mapping
+    
+    callback_lists = g_hash_table_new(g_str_hash, g_str_equal);
 
     // If there is no master object, create one now
 
@@ -403,6 +408,12 @@ void UserData::finalize( lua_State * L , int index )
 }
 
 //.............................................................................
+bool UserData::callback_attached( const char * name )
+{
+    return g_hash_table_lookup( callback_lists, name );
+}
+
+//.............................................................................
 
 int UserData::set_callback( const char * name , lua_State * L , int index , int function_index )
 {
@@ -432,6 +443,169 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 	LSG_CHECK( 0 );
 	
     return lua_isnil( L , fn );
+}
+
+//.............................................................................
+// debug print functions
+
+void list_print_iterator( gpointer item , gpointer prefix )
+{
+    int * itemc = (int*) item;
+    printf( "%p: %d ", itemc , *itemc );
+}
+
+void print_g_slist( GSList *l )
+{
+    g_slist_foreach( l , list_print_iterator , 0 );
+}
+
+void hashmap_print_iterator( gpointer key , gpointer value , gpointer user_data )
+{
+    printf("%s: " , (char*) key );
+    print_g_slist( (GSList*) value );
+    printf("\n");
+}
+
+void print_g_hash( GHashTable * h )
+{
+    g_hash_table_foreach( h , (GHFunc) hashmap_print_iterator , 0 );
+}
+
+//...............................................................................
+
+int UserData::add_callback( char * name , lua_State * L )
+{
+    assert( !lua_isnil( L , -1 ) );
+    
+    int * ref = (int*) malloc( sizeof( int ) );
+    *ref = lb_weak_ref( L );
+    
+    GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
+    callback_list = g_slist_prepend( callback_list , ref );
+    g_hash_table_insert( callback_lists , name ,  callback_list );
+    
+    print_g_hash( callback_lists );
+    
+    return *ref;
+}
+
+//.............................................................................
+
+gint remove_helper( gconstpointer a , gconstpointer b ) {
+    if ( *(int*) a == *(int*) b )
+    {
+	return 0;
+    }
+    return 1;
+}
+
+void UserData::remove_callback( char * name, lua_State * L )
+{
+    int ref = lua_tonumber( L , -1 );
+    lua_pop( L , 1 );
+    
+    GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists, name );
+    GSList * found = NULL;
+    
+    if ( ( found = g_slist_find_custom( callback_list , &ref , remove_helper ) ) )
+    {
+	g_free ( (int*) found->data );
+	callback_list = g_slist_delete_link( callback_list , found );
+	g_hash_table_insert( callback_lists , name , callback_list );
+    }
+}
+
+//.............................................................................
+
+int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
+{
+    // does not make sense to aggregate callback results of more than 1 return value
+    g_assert( nresults < 2 );
+    g_assert( name );
+    
+    GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists, name );
+    GSList * iter = NULL;
+    
+    int aggregate_result = 1;
+    
+    for ( iter = callback_list ; iter ; )
+    {
+	// save next element in case callback destroys itself
+	GSList * next = iter->next;
+	
+	int ref = *(int*) iter->data;
+	
+	// push callback on top of stack (above arguments)
+	lb_weak_deref( L , ref );
+	
+	// clear stack and return 0 if callback is null
+	if ( lua_isnil( L , -1 ) )
+	{
+	    lua_pop( L , nargs + 1 );
+	    return 0;
+	}
+
+	// push self
+	push_proxy();
+	
+	// push a copy of arguments on top of self
+	for ( int i=0 ; i<nargs ; ++i )
+	{
+	    lua_pushvalue( L , - ( nargs + 2 ) );
+	}
+	
+	if ( 0 != lua_pcall( L , nargs + 1 , nresults , 0) )
+	{
+	    lua_error( L );
+	    // function does not return
+	}
+	
+	if ( nresults > 0 )
+	{
+	    // multiple callbacks do not allow for return types other than boolean
+	    // lua_toboolean returns 1 for any Lua value different from false and nil; otherwise it returns 0
+	    aggregate_result &= !lua_isboolean( L , -1 ) || lua_toboolean( L , -1 );
+	    lua_pop( L , nresults );
+	}
+	
+	iter = next;
+    }
+    
+    lua_pushboolean( L , aggregate_result );
+    
+    // success
+    return 1;
+}
+
+//.............................................................................
+
+int UserData::get_last_callback( char* name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists, name );
+    if (callback_list)
+    {
+	int ref = *(int*) g_slist_last( callback_list )->data;
+	lb_weak_deref( L , ref );
+    } else
+    {
+	lua_pushnil( L );
+    }
+    return 1;
+    
+}
+
+//.............................................................................
+
+void UserData::remove_last_callback( char* name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists , name );
+    GSList * last = g_slist_last( callback_list );
+    if ( last )
+    {
+	g_free( last->data );
+	callback_list = g_slist_delete_link( callback_list , last );
+	g_hash_table_insert( callback_lists , name , callback_list );
+    }
 }
 
 //.............................................................................
