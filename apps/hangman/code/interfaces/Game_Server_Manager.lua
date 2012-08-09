@@ -397,7 +397,7 @@ function Game_Server:get_a_wild_card_invite(callback)
 			
 			callback( new_match_id )
 		end
-				callback( matches[match_id] )
+				--callback( matches[match_id] )
 
 	match_request = {
 			game_id = game_id_urn,
