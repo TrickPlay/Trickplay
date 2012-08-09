@@ -17,7 +17,7 @@ bar_slice:add_source_pattern_color_stop( 0, "#4B4B4B" )
 bar_slice:add_source_pattern_color_stop( 1, "#000000" )
 bar_slice:fill()
 
-bar_slice = bar_slice:Image( { width = 1920, tile = { true, false } } )
+bar_slice = bar_slice:Image( { width = screen.w, tile = { true, false } } )
 
 bar_highlight = Image { src = "assets/menubar/bar-highlight.png", x = 100 }
 bar_highlight.y = -bar_highlight.h/2
