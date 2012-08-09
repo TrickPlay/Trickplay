@@ -243,6 +243,11 @@ struct UserData
     int add_callback( char * name , lua_State * L );
 
     //.........................................................................
+    // Add callback with given name on this user data to end of list
+
+    int add_last_callback( char * name , lua_State * L )
+
+    //.........................................................................
     // Remove callback with given name and reference on this user data
 
     void remove_callback( char * name, lua_State * L );

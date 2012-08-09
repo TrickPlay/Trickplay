@@ -408,6 +408,7 @@ void UserData::finalize( lua_State * L , int index )
 }
 
 //.............................................................................
+
 bool UserData::callback_attached( const char * name )
 {
     return g_hash_table_lookup( callback_lists, name );
@@ -445,32 +446,6 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
     return lua_isnil( L , fn );
 }
 
-//.............................................................................
-// debug print functions
-
-void list_print_iterator( gpointer item , gpointer prefix )
-{
-    int * itemc = (int*) item;
-    printf( "%p: %d ", itemc , *itemc );
-}
-
-void print_g_slist( GSList *l )
-{
-    g_slist_foreach( l , list_print_iterator , 0 );
-}
-
-void hashmap_print_iterator( gpointer key , gpointer value , gpointer user_data )
-{
-    printf("%s: " , (char*) key );
-    print_g_slist( (GSList*) value );
-    printf("\n");
-}
-
-void print_g_hash( GHashTable * h )
-{
-    g_hash_table_foreach( h , (GHFunc) hashmap_print_iterator , 0 );
-}
-
 //...............................................................................
 
 int UserData::add_callback( char * name , lua_State * L )
@@ -484,7 +459,21 @@ int UserData::add_callback( char * name , lua_State * L )
     callback_list = g_slist_prepend( callback_list , ref );
     g_hash_table_insert( callback_lists , name ,  callback_list );
 
-    print_g_hash( callback_lists );
+    return *ref;
+}
+
+//...............................................................................
+
+int UserData::add_last_callback( char * name , lua_State * L )
+{
+    assert( !lua_isnil( L , -1 ) );
+
+    int * ref = (int*) malloc( sizeof( int ) );
+    *ref = lb_weak_ref( L );
+
+    GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
+    callback_list = g_slist_append( callback_list , ref );
+    g_hash_table_insert( callback_lists , name ,  callback_list );
 
     return *ref;
 }
