@@ -431,7 +431,7 @@ end
 
 function self:lost_against(entry)
     
-    my_turn_list:remove_entry(entry,function()
+    my_turn_list:remove_entry( entry, function()
         
         g_user.losses = g_user.losses + 1
         
@@ -485,12 +485,12 @@ function self:reset()
 end
 
 function self:setup_lists()
-    print(333)
+    print("FrontPage:setup_lists(). Getting list of sessions...")
     status.text = "Logging in"
     status.wobble:start()
     
     game_server:get_list_of_sessions(function(sessions)
-        
+        print("got list of sessions")
         --game_state.check_server:start()
         
         
@@ -512,29 +512,34 @@ function self:setup_lists()
                 sesh = game_state:make(sesh)
                 
                 print("make sesh",sesh.i_counted_score,sesh.opponent_counted_score)
+                
+                if sesh.i_counted_score then
+                    
+                    print("I already marked a win/loss for this session, deleting")
+                    
+                    sesh:delete()
+                    
                 if sesh.opponent_counted_score then
-                    print("weeeeeeeee")
+                    print("My opponent marked a win/loss for this session, I should do the same")
+                    --[[
                     game_server:end_session(sesh,function()
                         print("sesh "..sesh.match_id.." terminated")
                         sesh:delete()
                     end)
+                    --]]
+                    sesh.i_counted_score = true
                     
-                    if not sesh.i_counted_score then
-                        
-                        sesh.i_counted_score = true
-                        
-                        if sesh.opponent_score == 3 then
-                            self:add_win(sesh.opponent_name)
-                            g_user.wins = g_user.wins + 1
-                            game_history:set_wins( g_user.wins )
-                        else
-                            self:add_loss(sesh.opponent_name)
-                            g_user.losses = g_user.losses + 1
-                            game_history:set_wins( g_user.losses )
-                        end
+                    if sesh.opponent_score == 3 then
+                        self:add_win(sesh.opponent_name)
+                        g_user.wins = g_user.wins + 1
+                        game_history:set_wins( g_user.wins )
+                    else
+                        self:add_loss(sesh.opponent_name)
+                        g_user.losses = g_user.losses + 1
+                        game_history:set_losses( g_user.losses )
                     end
                     
-                elseif not sesh.i_counted_score then
+                else
                     
                     sesh = list_entry:make(sesh)
                     
