@@ -12,9 +12,9 @@ local function load_assets()
     service_logo = Image { src = "assets/paytv_logos/"..service..".png" }
     service_logo.anchor_point = { service_logo.w/2, 0 }
 
-    highlight_scrim = Canvas( 1920, 1 )
-    highlight_scrim:rectangle( 0,0, 1920,1 )
-    highlight_scrim:set_source_linear_pattern( 0,0, 1920,0 )
+    highlight_scrim = Canvas( screen.w, 1 )
+    highlight_scrim:rectangle( 0,0, screen.w,1 )
+    highlight_scrim:set_source_linear_pattern( 0,0, screen.w,0 )
     highlight_scrim:add_source_pattern_color_stop( 0,    "#000000C0" )
     highlight_scrim:add_source_pattern_color_stop( 0.07, "#000000C0" )
     highlight_scrim:add_source_pattern_color_stop( 0.15, "#00000080" )
@@ -24,7 +24,7 @@ local function load_assets()
     highlight_scrim:add_source_pattern_color_stop( 0.33, "#000000C0" )
     highlight_scrim:add_source_pattern_color_stop( 0,    "#000000C0" )
     highlight_scrim:fill()
-    highlight_scrim = highlight_scrim:Image( { height = 1080, tile = { false, true } } )
+    highlight_scrim = highlight_scrim:Image( { height = screen.h, tile = { false, true } } )
 
     menubar = dofile("launcher/mainmenu.lua")
 end
@@ -56,7 +56,7 @@ local function show_launcher(start_item)
 
     screen:add(launcher_group)
 
-    service_logo.position = { 1920*0.2, 100 }
+    service_logo.position = { screen.w*0.2, 100 }
 
     screen:add(highlight_scrim)
     launcher_group:add(service_logo)
