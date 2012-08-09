@@ -135,6 +135,7 @@ function self:init(t)
                                 
                                     function(t)
                                         
+                                        print("Making GameState from accepted invite: ", match_id)
                                         t = game_state:make(t)
                                         
                                         game_server:update(t,function()
@@ -416,9 +417,9 @@ function self:won_against(entry)
     
     their_turn_list:remove_entry(entry,function()
         
-        if not sesh_ref.i_counted_score then
+        if not entry:get_session().i_counted_score then
         
-            sesh_ref.i_counted_score = true
+            entry:get_session().i_counted_score = true
                 
             g_user.wins = g_user.wins + 1
             
@@ -439,9 +440,9 @@ function self:lost_against(entry)
     
     my_turn_list:remove_entry( entry, function()
         
-        if not sesh_ref.i_counted_score then
+        if not entry:get_session().i_counted_score then
         
-            sesh_ref.i_counted_score = true
+            entry:get_session().i_counted_score = true
             
             g_user.losses = g_user.losses + 1
             
@@ -531,7 +532,7 @@ function self:setup_lists()
                     
                     sesh:delete()
                     
-                if sesh.opponent_counted_score then
+                elseif sesh.opponent_counted_score then
                     print("My opponent marked a win/loss for this session, I should do the same")
                     --[[
                     game_server:end_session(sesh,function()
