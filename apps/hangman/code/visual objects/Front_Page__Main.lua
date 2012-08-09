@@ -416,13 +416,19 @@ function self:won_against(entry)
     
     their_turn_list:remove_entry(entry,function()
         
-        g_user.wins = g_user.wins + 1
+        if not sesh_ref.i_counted_score then
         
-        if g_user.wins > 9999 then g_user.wins = 9999 end
+            sesh_ref.i_counted_score = true
+                
+            g_user.wins = g_user.wins + 1
+            
+            if g_user.wins > 9999 then g_user.wins = 9999 end
+            
+            game_history:set_wins( g_user.wins )
+            
+        end
         
         self:add_win(entry:get_session().opponent_name)
-        
-        game_history:set_wins( g_user.wins )
         
     end)
 
@@ -433,13 +439,19 @@ function self:lost_against(entry)
     
     my_turn_list:remove_entry( entry, function()
         
-        g_user.losses = g_user.losses + 1
+        if not sesh_ref.i_counted_score then
         
-        if g_user.losses > 9999 then g_user.losses = 9999 end
+            sesh_ref.i_counted_score = true
+            
+            g_user.losses = g_user.losses + 1
+            
+            if g_user.losses > 9999 then g_user.losses = 9999 end
+            
+            game_history:set_losses( g_user.losses )
+            
+        end
         
         self:add_loss(entry:get_session().opponent_name)
-        
-        game_history:set_losses( g_user.losses )
         
     end)
     
@@ -527,7 +539,6 @@ function self:setup_lists()
                         sesh:delete()
                     end)
                     --]]
-                    sesh.i_counted_score = true
                     
                     if sesh.opponent_score == 3 then
                         self:add_win(sesh.opponent_name)
