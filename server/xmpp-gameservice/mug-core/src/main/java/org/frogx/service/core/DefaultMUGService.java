@@ -727,18 +727,34 @@ public class DefaultMUGService implements MUGService {
 	}
 	
 	public void removeGameRoom(String roomName) {
+		
+		
 		MUGRoom room = rooms.get(roomName);
 		
 		if (room == null) {
 			// No room found
 			return;
 		}
-		
-		String category = room.getGame().getCategory().toLowerCase();
-		room.destroy();
 		rooms.remove(roomName);
+		
+		String category = "";
+		if (room != null && room.getGame() != null && room.getGame().getCategory() != null) {
+			category = room.getGame().getCategory().toLowerCase();
+		}
 		if (roomsByCategory.containsKey(category))
-			roomsByCategory.get(category).remove(room);
+			if (roomsByCategory.get(category) != null)
+				roomsByCategory.get(category).remove(room);
+		
+		String gamens = null;
+		if (room != null && room.getGame() != null && room.getGame().getGameID() != null)
+			gamens = room.getGame().getGameID().getNamespace();
+			
+		if (roomsByGame.containsKey(gamens)) {
+			if (roomsByGame.get(gamens) != null)
+				roomsByGame.get(gamens).remove(room);
+		}
+		
+		room.destroy();
 	}
 	
 	public Collection<MUGRoom> getGameRoomsByCategory(String category) {

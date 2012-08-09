@@ -393,8 +393,13 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			}
 			
 			status = Status.active;
-			if (firstTurnIndex<0)
-				firstTurnIndex = 0;
+			if (firstTurnIndex<0) {
+				for(int i=0; i<players.length; i++)
+					if (players[i] != null) {
+						firstTurnIndex = i;
+						break;
+					}
+			}
 			nextTurnIndex = firstTurnIndex;
 			setTurnInfo();
 	//	}
