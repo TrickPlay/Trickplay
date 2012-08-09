@@ -201,10 +201,23 @@ local function unfocus_show(number)
     menubar:find_child("tv_shows").children[number]:unfocus()
 end
 
-local function focus_show(number)
+local function focus_show(number, t)
     local the_show = menubar:find_child("tv_shows").children[number]
     the_show:focus()
-    menubar:animate({ duration = 250, x = 200 - the_show.x })
+    local mode = "EASE_IN_OUT_SINE"
+    if ( t > 300 ) then mode = "EASE_OUT_BOUNCE" end
+    menubar:animate({ duration = t, mode = mode, x = 200 - the_show.x })
+end
+
+local function make_stub(w)
+    local stub = Group { name = "stub" }
+
+    stub:add( Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height } },
+                Clone { source = channel_bar, name = "bg-unfocus", x = 1, w = w - 2 },
+                Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height }, x = w - 1 }
+            )
+
+    return stub
 end
 
 local function build_bar()
@@ -228,9 +241,20 @@ local function build_bar()
         shows_group:add(new_show)
     end
 
+    local stubs_group = Group { name = "stubs" }
+    menubar:add(stubs_group)
+
+    local stub = make_stub( 205 )
+    stub.x = -205
+    stubs_group:add(stub)
+
+    stub = make_stub( screen.w - ( shows_group.children[shows_group.count].w + 200 ) )
+    stub.x = shows_group.children[shows_group.count].w + shows_group.children[shows_group.count].x
+    stubs_group:add(stub)
+
     menubar.y = 925 - channel_bar.h
 
-    focus_show(active_show)
+    focus_show(active_show,10)
 end
 
 local function show_bar()
@@ -265,13 +289,16 @@ local function on_key_down(label, key)
     if( keys.Left == key or keys.Right == key ) then
         unfocus_show(active_show)
 
+        local transition_time = 250
         if(keys.Left == key) then
             active_show = ((active_show - 2) % menubar:find_child("tv_shows").count) + 1
+            if( active_show == menubar:find_child("tv_shows").count ) then transition_time = menubar:find_child("tv_shows").count*100 end
         else
             active_show = (active_show % menubar:find_child("tv_shows").count) + 1
+            if( active_show == 1 ) then transition_time = menubar:find_child("tv_shows").count*100 end
         end
 
-        focus_show(active_show)
+        focus_show(active_show, transition_time)
         return true
     end
 end
