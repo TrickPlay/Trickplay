@@ -157,11 +157,13 @@ local launch_key_board = function()
                             
                             gsm:get_game_history( function(scores)
                                 
-                                g_user.wins   = scores.wins
-                                g_user.losses = scores.losses
-                                
-                                Game_History:set_wins(  scores.wins)
-                                Game_History:set_losses(scores.losses)
+                                if scores then
+                                    g_user.wins   = scores.wins
+                                    g_user.losses = scores.losses
+                                    
+                                    Game_History:set_wins(  scores.wins)
+                                    Game_History:set_losses(scores.losses)
+                                end
                                 
                                 app_state.state = APP_STATE_MAIN_PAGE
                             
