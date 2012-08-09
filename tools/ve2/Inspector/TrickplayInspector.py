@@ -233,9 +233,9 @@ class TrickplayInspector(QWidget):
                         self.preventChanges = True
 
                         if state == 2 :
-                            boolVal = True
+                            boolVal = 'true'
                         else:
-                            boolVal = False
+                            boolVal = 'false'
 
                         if type(prop_name) == list:
                             self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], boolVal)
