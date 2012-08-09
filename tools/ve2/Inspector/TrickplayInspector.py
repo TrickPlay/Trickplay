@@ -226,60 +226,144 @@ class TrickplayInspector(QWidget):
         boolNumber = {}
         boolHandlers = {}
 
-        def makeBoolHandler(gid, prop_name):
-            def handler(state):
-                if not self.preventChanges:
-                    self.preventChanges = True
-                    if state == 2 :
-                        self.sendData(gid, prop_name, True)
-                    else:
-                        self.sendData(gid, prop_name, False)
-                self.preventChanges = False
-            return handler
-
+        def boolPropertyFill(propName, propOrder, data) :
+            def makeBoolHandler(gid, prop_name):
+                def handler(state):
+                    if not self.preventChanges:
+                        self.preventChanges = True
+                        if state == 2 :
+                            self.sendData(gid, prop_name, True)
+                        else:
+                            self.sendData(gid, prop_name, False)
+                    self.preventChanges = False
+                return handler
+    
+            bool_checkbox = QCheckBox()
+            if str(data[propName]) == "True" :
+                bool_checkbox.setCheckState(Qt.Checked)
+            else:
+                bool_checkbox.setCheckState(Qt.Unchecked)
+    
+            boolCheckBox[propName] = bool_checkbox
+            boolNumber[propName] = propOrder
+            boolHandlers[propName] = makeBoolHandler(str(data["gid"]), propName)
+            QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[p])
+                
         fontPushButton = {}
         fontNumber = {}
         fontHandlers = {}
+    
+        def fontPropertyFill(propName, propOrder, data) :
+            def makeFontHandler(gid, defaultFont, prop_name):
+                def handler():
+                    if not self.preventChanges:
+                        fontDialog = QFontDialog()
+                        fontDialog.setCurrentFont(defaultFont)
+                        font, ok = fontDialog.getFont(defaultFont)
+                        if ok:
+                            family = font.family()
+                            size = font.pointSize()
+                            fontString = "%s"%family+" %i"%size+"px"
+                            self.sendData(gid, prop_name, fontString)
+    
+                    self.preventChanges = False
+                return handler
 
-        def makeFontHandler(gid, defaultFont, prop_name):
-            def handler():
-                if not self.preventChanges:
-                    fontDialog = QFontDialog()
-                    fontDialog.setCurrentFont(defaultFont)
-                    font, ok = fontDialog.getFont(defaultFont)
-                    if ok:
-                        family = font.family()
-                        size = font.pointSize()
-                        fontString = "%s"%family+" %i"%size+"px"
-                        self.sendData(gid, prop_name, fontString)
+            fontStr = str(data[propName])
+            fontSize = int(re.search('[0-9]+', fontStr).group(0))
+            fontFamily =str(fontStr[:int(fontStr.find(str(fontSize))) - 1])
 
-                self.preventChanges = False
-            return handler
+            # QPushButton for font setting
+            font_pushbutton = QPushButton()
+            # Default Font
+            defaultFont = QFont()
+            defaultFont.setPointSize(fontSize) 
+            defaultFont.setFamily(fontFamily) 
 
+            # Font Button
+            buttonFont = QFont()
+            buttonFont.setPointSize(9) 
+            buttonFont.setFamily(fontFamily)
+            
+            font_pushbutton.setText(fontStr)
+            #font_pushbutton.setFont(buttonFont)
+
+            fontHandlers[propName] = makeFontHandler(str(data["gid"]), defaultFont, propName)
+            QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[propName])
+
+            fontPushButton[propName] = font_pushbutton
+            fontNumber[propName] = propOrder
+    
         colorPushButton = {}
         colorNumber = {}
         colorHandlers = {}
 
-        def makeColorHandler(gid, currentColor, prop_name):
-            def handler():
-                if not self.preventChanges:
-                    colorDialog = QColorDialog()
-                    colorDialog.setCurrentColor(currentColor)
-                    color = colorDialog.getColor()
-                    if color.isValid():
-                        #color to color string needed 
-                        colorStr = '{'+str(color.red())+','+str(color.green())+','+str(color.blue())+','+str(color.alpha())+'}'
-                        self.sendData(gid, prop_name, colorStr)
+        def colorPropertyFill(propName, propOrder, data, c1, c2, c3) :
+            def makeColorHandler(gid, currentColor, prop_name):
+                def handler():
+                    if not self.preventChanges:
+                        colorDialog = QColorDialog()
+                        colorDialog.setCurrentColor(currentColor)
+                        color = colorDialog.getColor()
+                        if color.isValid():
+                            #color to color string needed 
+                            colorStr = '{'+str(color.red())+','+str(color.green())+','+str(color.blue())+','+str(color.alpha())+'}'
+                            self.sendData(gid, prop_name, colorStr)
+    
+                    self.preventChanges = False
+                return handler
 
-                self.preventChanges = False
-            return handler
+            colorStr = str(data[propName])
+                    
+            # QPushButton for font setting
+            color_pushbutton = QPushButton()
+            color_pushbutton.setText(colorStr)
 
-        def makeComboHandler(gid, prop_name):
-            def handler():
-                if not self.preventChanges:
-                    pass
-                self.preventChanges = False
-            return handler
+            # Current Color 
+            colorStr = colorStr[:len(colorStr)-1]
+            colorStr = colorStr[1:]
+
+            currentColor = QColor()
+            idx = colorStr.find(',')
+            currentColor.setRed(int(colorStr[:idx]))
+            colorStr = colorStr[idx+1:]
+            idx = colorStr.find(',')
+            currentColor.setGreen(int(colorStr[:idx]))
+            colorStr = colorStr[idx+1:]
+            idx = colorStr.find(',')
+            if idx > 0 : 
+                currentColor.setBlue(int(colorStr[:idx]))
+                colorStr = colorStr[idx+1:]
+                idx = colorStr.find(',')
+                currentColor.setAlpha(int(colorStr[:idx]))
+
+            if c1 :
+                # TODO: propName ??!?!?!?!?
+                #colorHandlers[propName] = makeColorHandler(str(data["gid"]), currentColor, propName)
+                #QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[propName])
+                colorPushButton[propName] = color_pushbutton
+                colorNumber[propName] = [propOrder, c1, c2, c3]
+            else :
+                #colorHandlers[propName] = makeColorHandler(str(data["gid"]), currentColor, propName)
+                #QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[propName])
+                colorPushButton[propName] = color_pushbutton
+                colorNumber[propName] = propOrder
+
+        comboBox = {}
+        comboNumber = {}
+        comboHandlers = {}
+
+        def comboPropertyFill(propName, propOrder, data) :
+            def makeComboHandler(gid, prop_name):
+                def handler():
+                    if not self.preventChanges:
+                        pass
+                    self.preventChanges = False
+                return handler
+
+            propValue = str(data[propName])
+            # QComboBox 
+            comboProp = QComboBox()
 
         for p in PropertyIter(None):
 
@@ -291,11 +375,13 @@ class TrickplayInspector(QWidget):
 
             elif data.has_key(p) == True:
 
+                # Text Inputs
+
                 i = QTreeWidgetItem() 
-                
-                #i.setText (0, p[:1].upper()+p[1:])
 
                 i.setText (0, p)  # first col : property name
+                #i.setText (0, p[:1].upper()+p[1:])
+
                 if p in TEXT_PROP or p in READ_ONLY :
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
                     if not  p in READ_ONLY :
@@ -306,9 +392,9 @@ class TrickplayInspector(QWidget):
 
                 elif p == "style": 
                         style_n = n
-                        self.cbStyle = QComboBox()
                         idx = 0
                         cbStyle_idx = 0
+                        self.cbStyle = QComboBox()
                         for x in self.inspectorModel.styleData[0]:
                             self.cbStyle.addItem(x)
                             if x == str(data[p]):
@@ -325,92 +411,23 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
 
                 elif p in BOOL_PROP:
-                    bool_checkbox = QCheckBox()
-                    if str(data[p]) == "True" :
-                        bool_checkbox.setCheckState(Qt.Checked)
-                    else:
-                        bool_checkbox.setCheckState(Qt.Unchecked)
+                    boolPropertyFill(p, n, data) 
+                elif p in COLOR_PROP: 
+                    colorPropertyFill(p, n, data) 
+                elif p in FONT_PROP:
+                    fontPropertyFill(p, n, data) 
+                elif p in COMBOBOX_PROP: 
+                    comboPropertyFill(p, n, data) 
 
-                    boolCheckBox[p] = bool_checkbox
-                    boolNumber[p] = n
-                    boolHandlers[p] = makeBoolHandler(str(data["gid"]), p)
-                    QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[p])
-                
-                
-                elif p in COLOR_PROP: # is 'z_rotation' :
-                    colorStr = str(data[p])
-                    
-                    # QPushButton for font setting
-                    color_pushbutton = QPushButton()
-                    color_pushbutton.setText(colorStr)
-                    #font_pushbutton.setBaseSize(200, 80)
-
-                    # Current Color 
-                    colorStr = colorStr[:len(colorStr)-1]
-                    colorStr = colorStr[1:]
-
-                    currentColor = QColor()
-                    idx = colorStr.find(',')
-                    currentColor.setRed(int(colorStr[:idx]))
-                    colorStr = colorStr[idx+1:]
-                    idx = colorStr.find(',')
-                    currentColor.setGreen(int(colorStr[:idx]))
-                    colorStr = colorStr[idx+1:]
-                    idx = colorStr.find(',')
-                    currentColor.setBlue(int(colorStr[:idx]))
-                    colorStr = colorStr[idx+1:]
-                    idx = colorStr.find(',')
-                    currentColor.setAlpha(int(colorStr[:idx]))
-
-                    colorHandlers[p] = makeColorHandler(str(data["gid"]), currentColor, p)
-                    QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[p])
-
-                    colorPushButton[p] = color_pushbutton
-                    colorNumber[p] = n
-                    
-                elif p in FONT_PROP: # is 'z_rotation' :
-
-                    fontStr = str(data[p])
-                    fontSize = int(re.search('[0-9]+', fontStr).group(0))
-                    fontFamily =str(fontStr[:int(fontStr.find(str(fontSize))) - 1])
-
-                    # QPushButton for font setting
-                    font_pushbutton = QPushButton()
-
-                    # Default Font
-                    defaultFont = QFont()
-                    defaultFont.setPointSize(fontSize) 
-                    defaultFont.setFamily(fontFamily) 
-
-                    # Font Button
-                    buttonFont = QFont()
-                    buttonFont.setPointSize(9) 
-                    buttonFont.setFamily(fontFamily)
-                    
-                    font_pushbutton.setText(fontStr)
-                    #font_pushbutton.setFont(buttonFont)
-                    #font_pushbutton.setBaseSize(200, 80)
-
-                    fontHandlers[p] = makeFontHandler(str(data["gid"]), defaultFont, p)
-                    QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[p])
-
-                    fontPushButton[p] = font_pushbutton
-                    fontNumber[p] = n
-
-                elif p in COMBOBOX_PROP: # is 'z_rotation' :
-                    propValue = str(data[p])
-                    # QComboBox 
-                    comboProp = QComboBox()
-
-                    pass
-
-                if p in NESTED_PROP_LIST: # is 'z_rotation' :
+                if p in NESTED_PROP_LIST: 
                     z = data[p]
+                    """
                     if p == "items" and data["type"] == "ButtonPicker":
                         print type(z)
                         print type(z)
                         print type(z)
-                    if type(z) ==  list :
+                    """
+                    if type(z) ==  list : #size, x_rotation, ... 
                         idx = 0
                         for sp in PropertyIter(p):
                             j = QTreeWidgetItem(i) 
@@ -426,27 +443,36 @@ class TrickplayInspector(QWidget):
                         #find Style name from combo box  
                         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
                         z = self.inspectorModel.styleData[0][self.style_name]
-                        for sp in PropertyIter(p):
+                        
+                        c1 = 0 
+                        for sp in PropertyIter(p): #'arrow', 'border', 'fill_colors', 'text
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
                             j.setText (0, sp)
                             q = z[sp]
-                            for ssp in PropertyIter(sp):
+                            c2 = 0 
+                            for ssp in PropertyIter(sp): #colors, corner_radius, width, alignment, font, justify, wrap, x-yoffset
                                 if ssp in NESTED_PROP_LIST and  ssp is not 'size':
                                     k = QTreeWidgetItem(j) 
                                     k.setText (0, ssp)
                                     r = q[ssp]
-                                    for sssp in PropertyIter(ssp):
+                                    c3 = 0
+                                    for sssp in PropertyIter(ssp): #activation, default, focus 
                                         m = QTreeWidgetItem(k)
                                         sssp = str(sssp)
                                         m.setText(0,sssp)
-                                        m.setText(1,str(r[sssp]))
-                                        m.setFlags(k.flags() ^Qt.ItemIsEditable)
+                                        #m.setText(1,str(r[sssp]))
+                                        #m.setFlags(k.flags() ^Qt.ItemIsEditable)
+                                        #print c1,c2,c3, "@@@@@@@@@@@@@@"
+                                        colorPropertyFill(sssp, n, r, c1, c2, c3) 
+                                        c3 = c3 + 1
                                 else :
                                     l = QTreeWidgetItem(j)
                                     l.setText(0,ssp)
                                     l.setText(1,str(q[ssp]))
                                     l.setFlags(l.flags() ^Qt.ItemIsEditable)
+                                c2 = c2 + 1 
+                            c1 = c1 + 1 
 
 
                 items.append(i)
@@ -456,8 +482,29 @@ class TrickplayInspector(QWidget):
 
         if colorPushButton :
             for n, cb in colorPushButton.iteritems() :
-                self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(colorNumber[n])), 1, cb)
-                self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                if type(colorNumber[n]) is not list :
+                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(colorNumber[n])), 1, cb)
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                else:
+                    """
+                    for nn in colorNumber[n]:
+                        if topN < 0 :
+                            topN = nn 
+                        elif c1N < 0 :
+                            c1N = nn 
+                        elif c2N < 0 :
+                            c2N = nn 
+                        elif c3N < 0 :
+                            c3N = nn 
+                    """
+
+                    #print topN, c1N, c2N, c3N, "#############"
+                    #print self.ui.property.topLevelItem(topN).child(c1N).child(c2N).child(c3N), "oooooooo"
+                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
+
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                    
+
         if fontPushButton :
             for n, pb in fontPushButton.iteritems() :
                 self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(fontNumber[n])), 1, pb)
@@ -684,8 +731,9 @@ class TrickplayInspector(QWidget):
         else:
             return False
 
-    def is_this_style(self, item):
-        if self.is_this_subItem(item) is True:
+    def handle_style(self, item):
+        if self.is_this_subItem(item) is True: #if it is Style 
+            print ("handle_style")
             pitem = item.parent()
             style_property = []
             while pitem is not None:
@@ -707,8 +755,9 @@ class TrickplayInspector(QWidget):
 
         
     def propertyItemChanged(self, item, col):
+        print "propertyItemChanged"
         
-        if self.is_this_style(item) is True:
+        if self.handle_style(item) is True:
             return
 
         if str(item.text(0)) in NESTED_PROP_LIST and str(item.text(0)) != "text" :

@@ -487,7 +487,7 @@ NESTED_PROP_LIST = {
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
     'tile' : ['x', 'y'],
-    'items' : []
+    #'items' : []
     #Arrow Pane
     #'cells' : [], 
     #'center' : ['',''], 
