@@ -202,9 +202,10 @@ local function unfocus_show(number)
 end
 
 local function focus_show(number, t)
+    menubar:stop_animation()
     local the_show = menubar:find_child("tv_shows").children[number]
     the_show:focus()
-    local mode = "EASE_IN_OUT_SINE"
+    local mode = "EASE_OUT_SINE"
     if ( t > 300 ) then mode = "EASE_OUT_BOUNCE" end
     menubar:animate({ duration = t, mode = mode, x = 200 - the_show.x })
 end
@@ -222,6 +223,7 @@ end
 
 local function build_bar()
     screen:add(menubar)
+    menubar:hide()
     local clone_src = Group { name = "Clone sources" }
     menubar:add(clone_src)
     clone_src:hide()
@@ -231,8 +233,13 @@ local function build_bar()
     bar_height = channel_bar.h
     clone_src:add(channel_bar, channel_bar_focus)
 
+    local clip_group_outter = Group { name = "clip_outter" }
+    menubar:add(clip_group_outter)
+    clip_group = Group { name = "clip_inner" }
+    clip_group_outter:add(clip_group)
+
     local shows_group = Group { name = "tv_shows" }
-    menubar:add(shows_group)
+    clip_group:add(shows_group)
 
     for k,v in orderedPairs(channel_data) do
         local new_show = make_show_tile(k,v)
@@ -242,7 +249,7 @@ local function build_bar()
     end
 
     local stubs_group = Group { name = "stubs" }
-    menubar:add(stubs_group)
+    clip_group:add(stubs_group)
 
     local stub = make_stub( 205 )
     stub.x = -205
@@ -252,18 +259,23 @@ local function build_bar()
     stub.x = shows_group.children[shows_group.count].w + shows_group.children[shows_group.count].x
     stubs_group:add(stub)
 
+    clip_group_outter.clip = { -205, 0, 205+stub.x+stub.w, bar_height }
+
     menubar.y = 925 - channel_bar.h
 
     focus_show(active_show,10)
 end
 
 local function show_bar()
+    menubar:find_child("clip_inner"):stop_animation()
     menubar:show()
-    menubar:raise_to_top()
+    menubar:find_child("clip_inner"):animate({ duration = 250, y = 0, mode = "EASE_OUT_SINE" })
+--    menubar:raise_to_top()
 end
 
 local function hide_bar()
-    menubar:hide()
+    menubar:find_child("clip_inner"):stop_animation()
+    menubar:find_child("clip_inner"):animate({ duration = 250, y = bar_height, mode = "EASE_OUT_SINE", on_completed = function() menubar:hide() end })
 end
 
 local function on_activate(label)
