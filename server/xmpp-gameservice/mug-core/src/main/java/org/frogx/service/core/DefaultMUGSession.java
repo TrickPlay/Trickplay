@@ -793,15 +793,21 @@ public class DefaultMUGSession implements MUGSession {
 
 		for (MUGRoom room : component.getGameRoomsByGame(gamens)) {
 			synchronized (room) {
+				MUGMatch.Status matchStatus = room.getMatch().getStatus();
 				if (!room.isMembersOnly()
 						&& !room.isPasswordProtected()
 						&& !room.isLocked()
-						&& !MUGMatch.Status.completed.equals(room.getMatch()
-								.getStatus()) && !room.isOccupant(jid)
-						&& room.getMatch().getFreeRoles().size() > 0) {
+						&& !room.isOccupant(jid)
+						&& room.getMatch().getFreeRoles().size() > 0
+						&& 
+						( MUGMatch.Status.created.equals(matchStatus)
+								||
+								MUGMatch.Status.active.equals(matchStatus)
+						)
+						) {
 					if (reserveRole(room, nick, jid, requestedRole)) {
 						return room;
-					}						
+					}
 				}
 			}
 		}
