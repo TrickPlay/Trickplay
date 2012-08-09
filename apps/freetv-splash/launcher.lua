@@ -34,6 +34,7 @@ local launcher_hidden_key_handler
 local function launcher_onscreen_key_handler(screen, key)
     if(keys.BACK == key) then
         launcher_group:animate({ duration = 500, opacity = 0 })
+        highlight_scrim:animate({ duration = 500, opacity = 0 })
         menubar:goaway()
         screen.on_key_down = launcher_hidden_key_handler
     else
@@ -44,20 +45,23 @@ end
 
 launcher_hidden_key_handler = function(screen, key)
     launcher_group:animate({ duration = 500, opacity = 255 })
+    highlight_scrim:animate({ duration = 500, opacity = 255 })
     menubar:appear()
     screen.on_key_down = launcher_onscreen_key_handler
 end
 
 local function show_launcher(start_item)
     launcher_group.opacity = 0
+    highlight_scrim.opacity = 0
 
     screen:add(launcher_group)
 
     service_logo.position = { 1920*0.2, 100 }
 
-    launcher_group:add(highlight_scrim)
+    screen:add(highlight_scrim)
     launcher_group:add(service_logo)
     launcher_group:add(menubar)
+    highlight_scrim:lower_to_bottom()
 
     mediaplayer.on_loaded = function()
         mediaplayer:play()
