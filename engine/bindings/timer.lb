@@ -253,7 +253,7 @@ class Timer [[timer*]]
 	[[
 	    char * name = (char*) "on_timer";
 	    UserData * ud = UserData::get( L );
-	    
+
 	    // timer.on_timer=nil ==> remove
 	    if ( lua_isnil( L , -1 ) )
 	    {
