@@ -612,7 +612,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			if (mug.abortWhenPlayerLeaves()) {
 				status = Status.aborted;
 			} else {
-				nextTurnIndex = -1;
+				nextTurnIndex = -1; // TODO: this part is flaky ??
 			}
 			//
 		}

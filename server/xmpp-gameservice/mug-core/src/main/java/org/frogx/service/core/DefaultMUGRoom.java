@@ -587,6 +587,7 @@ public class DefaultMUGRoom implements MUGRoom {
 		Packet roomPresence = getPresence();
 		for (MUGOccupant recipient : occupants.values()) {
 			try {
+				log.info("sending room presence. room="+getJID()+",recipient="+recipient.getNickname());
 				recipient.send(roomPresence);
 			} catch (ComponentException e) {
 				log.error(locale.getLocalizedString("mug.room.error.presence")
@@ -1041,10 +1042,13 @@ public class DefaultMUGRoom implements MUGRoom {
 	}
 
 	public void abortMatch() {
+		log.info("aborting match associated with room="+getJID());
 		MUGMatch.Status beforeStatus = getMatch().getStatus();
 		getMatch().abort();
+		log.info("match aborted. room="+getJID());
 		MUGMatch.Status afterStatus = getMatch().getStatus();
 		if (!afterStatus.equals(beforeStatus)) {
+			log.info("room status changed to "+afterStatus+". broadcasting new room presence to all occupants. room="+getJID());
 			broadcastRoomPresence();
 		}
 	}
