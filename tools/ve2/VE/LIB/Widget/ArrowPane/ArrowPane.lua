@@ -171,22 +171,22 @@ ArrowPane = function(parameters)
         end
 	)
     ----------------------------------------------------------------------------
-    
-    function up:on_released()
+
+    up:add_mouse_handler("on_button_up", function()
         pane.virtual_y = pane.virtual_y - move_by
-    end
+    end)
     
-    function down:on_released()
+    down:add_mouse_handler("on_button_up", function()
         pane.virtual_y = pane.virtual_y + move_by
-    end
-    
-    function left:on_released()
+    end)
+
+    left:add_mouse_handler("on_button_up", function()
         pane.virtual_x = pane.virtual_x - move_by
-    end
-    
-    function right:on_released()
+    end)
+
+    right:add_mouse_handler("on_button_up", function()
         pane.virtual_x = pane.virtual_x + move_by
-    end
+    end)
     
     instance:add_key_handler(keys.Up,       up.click)
     instance:add_key_handler(keys.Down,   down.click)

@@ -144,6 +144,8 @@ ScrollPane = function(parameters)
             t.cell_w               = nil
             t.cells                = nil
             
+            t.style = instance.style
+            
             t.contents = self.contents
             
             t.pane_w = instance.pane_w

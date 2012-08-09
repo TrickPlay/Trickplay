@@ -492,7 +492,7 @@ GridManager = function(p)
                 end
                 if number_of_cols > v then
                     
-                    for i = number_of_rows,v+1,-1 do
+                    for i = number_of_cols,v+1,-1 do
                         
                         self:remove_col(i)
                     end
