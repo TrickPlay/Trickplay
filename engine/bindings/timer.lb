@@ -39,9 +39,8 @@ public:
     void cancel();
     
     // NEW
-    CallbackHolder* ontimer_holder;
-    int add_ontimer_listener(lua_State *L);
-    void remove_ontimer_listener(lua_State *L);
+    int add_ontimer_listener( UserData * ud , lua_State *L );
+    void remove_ontimer_listener( UserData * ud , lua_State *L );
     ////
 
 private:
@@ -127,7 +126,6 @@ class Timer [[timer*]]
 
     Timer( int interval = 0 , function on_timer = 0 )
         [[
-	    
             self = lb_construct( timer , new timer );
 
             if (lua_gettop(L)==2 && lua_istable(L,-2))
@@ -146,12 +144,14 @@ class Timer [[timer*]]
 				if (on_timer)
 				{
 				    lua_pushvalue(L,on_timer);
-				    lb_set_callback(L,"on_timer");
-				    lua_pop(L,1);
+				    __ud__->add_callback( (char*) "on_timer" , L );
+				    //lb_set_callback(L,"on_timer");
+				    //lua_pop(L,1);
 				}
 		    }
 	    
-	    if (lb_callback_attached(L,self,"on_timer",-1))
+	    //if (lb_callback_attached(L,self,"on_timer",-1))
+	    if ( __ud__->callback_attached( (char*) "on_timer" ) )
 		self->start(__ud__);
         ]];
         
@@ -190,10 +190,11 @@ class Timer [[timer*]]
 
     start()
         [[
-	    if (lb_callback_attached(L,self,"on_timer",1))
+	    //if (lb_callback_attached(L,self,"on_timer",1))
+	    if ( UserData::get( L )->callback_attached( (char*) "on_timer" ) )
 	    {
-			self->start(UserData::get(L));
-		}
+		self->start(UserData::get(L));
+	    }
 	]];
 	
 	/*
@@ -215,15 +216,14 @@ class Timer [[timer*]]
     
     int add_ontimer_listener(function f)
 	[[
-	    return self->add_ontimer_listener(L);
+	    result = self->add_ontimer_listener( UserData::get( L ) , L );
 	]];
     
     remove_ontimer_listener(int ref)
 	[[
-	    self->remove_ontimer_listener(L);
+	    self->remove_ontimer_listener( UserData::get( L ) , L );
 	]];
-    
-
+	
 	/*
 		Event Handler: on_timer
 		
@@ -248,14 +248,39 @@ class Timer [[timer*]]
 		*See Also:* the <interval> property and the <start> function
 	*/
     
-    
-    callback on_timer
+    function on_timer
+	[[ return UserData::get( L )->get_last_callback( (char*) "on_timer" , L ); ]]
 	[[
-	    if(!on_timer)
+	    char * name = (char*) "on_timer";
+	    UserData * ud = UserData::get( L );
+	    
+	    // timer.on_timer=nil ==> remove
+	    if ( lua_isnil( L , -1 ) )
 	    {
-		self->stop();
+		ud->remove_last_callback( name , L );
+	    }
+	    else
+	    {
+		ud->get_last_callback( name , L );
+		
+		// callback already exists ==> replace
+		if ( !lua_isnil( L , -1 ) )
+		{
+		    lua_pop( L , 1 );
+		    ud->remove_last_callback( name , L );
+		    ud->add_callback( name , L );
+		}
+		
+		// no current callback ==> add
+		else
+		{
+		    lua_pop( L , 1 );
+		    ud->add_callback( name , L );
+		}
 	    }
 	]];
+
+	
     
 }
 
@@ -263,9 +288,6 @@ class Timer [[timer*]]
 
 timer::timer()
 :
-    // NEW
-    ontimer_holder(NULL),
-    ////
     source( NULL ),
     interval( 0 )
     
@@ -275,10 +297,6 @@ timer::timer()
 timer::~timer()
 {
     cancel();
-    
-    // NEW
-    g_free(ontimer_holder);
-    ////
 }
 
 void timer::start( UserData * ud )
@@ -340,9 +358,8 @@ gboolean timer::timer_fired(gpointer _handle)
 
     timer * self = ( timer* ) handle->get_user();
     
-    if (self->ontimer_holder) self->ontimer_holder->invoke_callbacks(L, 0);
-    
-    if ( ! handle->invoke_callback( "on_timer" , 1 ) )
+    //if ( ! handle->invoke_callback( "on_timer" , 1 ) )
+    if ( ! handle->get_user_data()->invoke_callbacks( "on_timer" , 0 , 1 ) )
     {
         self->cancel();
         return FALSE;
@@ -350,6 +367,7 @@ gboolean timer::timer_fired(gpointer _handle)
 
     if ( lua_isboolean(L,-1) && !lua_toboolean( L, -1 ) )
     {
+	printf( "cancel\n" );
         self->cancel();
         lua_pop(L,1);
         return FALSE;
@@ -360,16 +378,12 @@ gboolean timer::timer_fired(gpointer _handle)
 }
 
 //NEW
-int timer::add_ontimer_listener(lua_State *L) {
-    if (ontimer_holder == NULL) {
-	ontimer_holder = new CallbackHolder();
-    }
-    ontimer_holder->add_callback(L);
+int timer::add_ontimer_listener( UserData * ud , lua_State * L ) {
+    return ud->add_callback( (char*) "on_timer" , L );
 }
 
-void timer::remove_ontimer_listener(lua_State *L) {
-    if (ontimer_holder == NULL) return;
-    ontimer_holder->remove_callback(L);
+void timer::remove_ontimer_listener(UserData * ud , lua_State * L ) {
+    ud->remove_callback( (char*) "on_timer" , L );
 }
 ////
 
