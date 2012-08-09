@@ -159,7 +159,7 @@ local function make_show_tile(channel_num, data)
 
     show_group.extra.anim = AnimationState {
                                                     duration = 250,
-                                                    mode = EASE_IN_OUT_SINE,
+                                                    mode = "EASE_OUT_SINE",
                                                     transitions = {
                                                         {
                                                             source = "*",
