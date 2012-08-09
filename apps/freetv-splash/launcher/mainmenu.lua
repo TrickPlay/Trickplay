@@ -35,7 +35,7 @@ local inner_labels = Group { }
 labels:add(inner_labels)
 for _,i in pairs(functional_areas) do
     local sub_menu = dofile("launcher/"..i..".lua")
-    local label = Text { font = "FreeSans bold 34px", text = sub_menu.label, color = "AliceBlue", opacity = 128 }
+    local label = Text { font = FONT_NAME.." 34px", text = sub_menu.label, color = "AliceBlue", opacity = 128 }
     label.x = inner_labels.w + 100
     label.extra.activate = sub_menu.activate
     label.extra.deactivate = sub_menu.deactivate
