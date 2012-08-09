@@ -162,7 +162,7 @@ ELSE ( PKG_CONFIG_FOUND )
         json-glib-1.0
 
         sndfile
-        
+
         exif
     )
 
@@ -239,8 +239,8 @@ endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 if ( TP_FONT_DEBUG )
 
     add_definitions( -DTP_FONT_DEBUG=1 )
-    
-endif( TP_FONT_DEBUG )    
+
+endif( TP_FONT_DEBUG )
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
@@ -314,9 +314,9 @@ if ( TP_FORCE_VERIFICATION )
 
     add_definitions( -DTP_FORCE_VERIFICATION=1 )
     add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
-    
+
     string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
-    
+
     if ( NOT CODE_LENGTH EQUAL 3 )
         message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
     endif( NOT CODE_LENGTH EQUAL 3 )
@@ -382,9 +382,9 @@ endif (TP_PRODUCTION)
 if (TP_JPEG_FORCE_ALPHA)
 
     add_definitions( -DTP_JPEG_FORCE_ALPHA=1 )
-    
+
 endif (TP_JPEG_FORCE_ALPHA)
-    
+
 #------------------------------------------------------------------------------
 # Profiling
 #------------------------------------------------------------------------------
@@ -469,16 +469,13 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
     ${BINDINGS_SRC}/physics_bullet.lb
-    
-    #leland
-    ${BINDINGS_SRC}/test_module.lb
 
 )
 
 if (TP_WITH_GAMESERVICE)
 	list ( APPEND LB_FILES
 		${BINDINGS_SRC}/gameservice.lb
-	)	
+	)
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -580,7 +577,7 @@ list( APPEND
     ${ENGINE_SRC}/source/plugin.cpp
     ${ENGINE_SRC}/source/desktop_controller.cpp
     ${ENGINE_SRC}/source/physics_bullet.cpp
-    
+
     ${ENGINE_SRC}/source/callback_holder.cpp
 )
 
@@ -588,16 +585,16 @@ if (TP_WITH_GAMESERVICE)
 	list ( APPEND ENGINE_SOURCE_FILES
 		${ENGINE_SRC}/source/gameservice_support.cpp
 		${ENGINE_SRC}/source/gameservice_util.cpp
-	)	
-	
+	)
+
 	list( APPEND
 
 	    ENGINE_LIBRARIES
-	
+
 	    gameservice
 	    tptxmpp
 	)
-	
+
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -664,11 +661,9 @@ target_link_libraries(
     dl
     tplua
     clutteralphamode
-    
+
     LinearMath
     BulletDynamics
     BulletCollision
     BulletSoftBody
 )
-
-

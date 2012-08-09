@@ -140,7 +140,7 @@ struct UserData
 
     inline gpointer get_client( ) const
     {
-    	return client;
+        return client;
     }
 
     //.........................................................................
@@ -174,12 +174,12 @@ struct UserData
 
         if ( ! lua_isuserdata( L , index ) )
         {
-        	return 0;
+            return 0;
         }
 
         if ( sizeof( UserData ) != lua_rawlen( L , index ) )
         {
-        	return 0;
+            return 0;
         }
 
         UserData * result = ( UserData * ) lua_touserdata( L , index );
@@ -191,9 +191,9 @@ struct UserData
 
     inline static gpointer get_client_check( lua_State * L , int index = 1 )
     {
-    	UserData * ud = get_check( L , index );
+        UserData * ud = get_check( L , index );
 
-    	return ud ? ud->client : 0;
+        return ud ? ud->client : 0;
     }
 
     //.........................................................................
@@ -226,50 +226,41 @@ struct UserData
     // This is called when the Lua object is destroyed.
 
     static void finalize( lua_State * L , int index = 1 );
-    
+
     //.........................................................................
     // Install a callback on this user data
 
     static int set_callback( const char * name , lua_State * L , int index = -2 , int function_index = -1 );
-    
-    
-    
-    //.........................................................................
-    // NEW STUFF
-    
+
     //.........................................................................
     // Check if there is at least one callback of type 'name' on this user data
-    
+
     bool callback_attached( const char * name );
-    
+
     //.........................................................................
     // Add callback with given name on this user data
-    
+
     int add_callback( char * name , lua_State * L );
-    
+
     //.........................................................................
     // Remove callback with given name and reference on this user data
-    
+
     void remove_callback( char * name, lua_State * L );
-    
+
     //.........................................................................
     // Invoke all callbacks with given name on this user data
-    
+
     int invoke_callbacks( const char * name , int nargs , int nresults );
-    
+
     //.........................................................................
     // Get last callback in list
-    
+
     int get_last_callback( char* name , lua_State * L );
-    
+
     //.........................................................................
     // Remove last callback in list
-    
+
     void remove_last_callback( char* name , lua_State * L );
-    
-    //.........................................................................
-    
-    
 
     //.........................................................................
     // Retrieve a callback - will always push a value, nil or otherwise.
@@ -430,17 +421,17 @@ private:
     SignalMap *     signals;
 
     //.........................................................................
-    
+
     //.........................................................................
     // maps callback names to list of registered callbacks
-    
+
     GHashTable*     callback_lists;
 
 #ifdef TP_PROFILING
 
     class GCTag;
 
-    GCTag *			gctag;
+    GCTag *            gctag;
 
 #endif
 };
