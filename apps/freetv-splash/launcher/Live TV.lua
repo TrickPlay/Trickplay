@@ -244,7 +244,6 @@ end
 
 local function on_activate(label)
     label:animate({ duration = 250, opacity = 255 })
-    print("Live TV on")
     if(menubar.count == 0) then build_bar() end
     hide_bar()
 end
@@ -252,7 +251,6 @@ end
 local function on_deactivate(label, new_active)
     label:animate({ duration = 250, opacity = 128, on_completed = function() if(new_active) then new_active:activate() end end } )
     hide_bar()
-    print("Live TV off")
 end
 
 local function on_wake(label)
