@@ -96,6 +96,27 @@ COMBOBOX_PROP = [
     # TabBar
     'tab_location',
 ]
+
+COMBOBOX_PROP_VALS = {
+    # ButtonPicker
+    'orientation' : ['horizontal', 'vertical'],
+    # WidgetText
+    'wrap_mode' : ['WORD', 'CHAR', 'WORD_CHAR'],
+    'alignment' : ['LEFT', 'CENTER', 'RIGHT'],
+    # TabBar, Slider, MenuButton
+    'direction' : { 
+                    'TabBar':['horizontal', 'vertical'],
+                    'Slider':['horizontal', 'vertical'],
+                    'MenuButton':[ 'up', 'down', 'left', 'right']
+                  }, # TabBar, Slider direction : horizontal, vertical
+                    # MenuButton direction : up, down, left, right
+    # MenuButton
+    'horizontal_alignment' : ['left','center','right'],
+    'vertical_alignment' : ['top', 'center', 'bottom'],
+    # TabBar
+    'tab_location':['top', 'left']
+}
+
 FILE_PROP = [
     'source', 
 ]
