@@ -117,19 +117,38 @@ function self:init(t)
                     status.text = "Searching for Games"
                     
                     game_server:get_a_wild_card_invite(
-                        function(t)
-                            dumptable(t)
+                        function(match_id)
+                            print(match_id)
                             status.stop = true
-                            if # t.invitations == 0 then
+                            if match_id == nil then -- TODO, find what would be passed
                                 
                                 make_word:set_session(game_state:make())
                                 
                                 app_state.state = "MAKE_WORD"
                                 
                             else
+                                game_server:accept_invite(match_id, 
                                 
-                                t = t.invitations[1]
-                                
+                                    function(t)
+                                        
+                                        t = game_state:make(t)
+                                        
+                                        game_server:update(t,function()
+                                            --dumptable(t:get_data())
+                                            
+                                            guess_word:reset()
+                                            guess_word:guess_word(t)
+                                            ls:reset()
+                                            
+                                            t = list_entry:make(t)
+                                            --my_turn_list:add_entry(t, false)
+                                            
+                                            app_state.state = "GUESS_WORD"
+                                        end)
+                                        
+                                    end
+                                )
+                                --[[
                                 game_server:accept_invite(t.id,function() end)
                                 
                                 local f = function(t)
@@ -160,7 +179,7 @@ function self:init(t)
                                     f(t)
                                     
                                 end
-                                
+                                --]]
                             end
                             
                         end
@@ -402,6 +421,7 @@ function self:won_against(entry)
         game_history:set_wins( g_user.wins )
         
     end)
+
     
 end
 
@@ -467,29 +487,31 @@ function self:setup_lists()
     
     game_server:get_list_of_sessions(function(sessions)
         
-        game_state.check_server:start()
+        --game_state.check_server:start()
+        
         
         status.stop = true
         
         loaded = true
         
         self:gain_focus()
-        
+        --[[
         if # sessions == 0 then
-            
+            print("no sessions")
             
             
         else
-            
+            --]]
             for i,sesh in pairs(sessions) do
                 
                 --make a session object
-                sesh = game_state:make(sesh.gameState)
+                sesh = game_state:make(sesh)
+                
                 print("make sesh",sesh.i_counted_score,sesh.opponent_counted_score)
                 if sesh.opponent_counted_score then
                     print("weeeeeeeee")
                     game_server:end_session(sesh,function()
-                        print("sesh "..sesh.id.." terminated")
+                        print("sesh "..sesh.match_id.." terminated")
                         sesh:delete()
                     end)
                     
@@ -516,11 +538,11 @@ function self:setup_lists()
                 
             end
             
-        end
+        --end
         
         game_history:set_wins(   g_user.wins   )
         game_history:set_losses( g_user.losses )
-        
+        game_state.check_server:on_timer()
     end)
     
 end

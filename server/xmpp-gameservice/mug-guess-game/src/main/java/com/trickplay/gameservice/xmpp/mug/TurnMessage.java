@@ -14,6 +14,7 @@ public class TurnMessage implements PacketExtension {
 	private String newState;
 	private boolean terminate;	
 	private String nextTurn;
+	private boolean onlyUpdate;
 	
 	public String getNewState() {
 		return newState;
@@ -37,6 +38,14 @@ public class TurnMessage implements PacketExtension {
 
 	public void setTerminate(boolean terminate) {
 		this.terminate = terminate;
+	}
+	
+	public boolean isOnlyUpdate() {
+		return onlyUpdate;
+	}
+	
+	public void setOnlyUpdate(boolean updateFlag) {
+		onlyUpdate = updateFlag;
 	}
 	
 	public TurnMessage() {
@@ -70,6 +79,9 @@ public class TurnMessage implements PacketExtension {
 		} else {
 			if (nextTurn != null)
 				startElement.addElement("next").setText(nextTurn);
+			else if (onlyUpdate) {
+				startElement.addElement("only-update");
+			}
 		}
 		
 		return startElement;

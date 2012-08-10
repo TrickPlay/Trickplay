@@ -4,17 +4,14 @@
 #include "gameserviceclient.h"
 #include "context.h"
 #include "lua.h"
+#include "lb.h"
+#include "user_data.h"
 
 using namespace libgameservice;
 class OpenAppAction;
 
 extern int invoke_gameservice_on_ready(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
 extern int invoke_gameservice_on_error(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
-extern int invoke_gameservice_on_register_game_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
-extern int invoke_gameservice_on_assign_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
-extern int invoke_gameservice_on_join_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
-extern int invoke_gameservice_on_start_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
-extern int invoke_gameservice_on_send_turn_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
 extern int invoke_gameservice_on_turn_received(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
 extern int invoke_gameservice_on_match_started(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
 extern int invoke_gameservice_on_participant_joined(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
@@ -30,8 +27,7 @@ extern int invoke_gameservice_on_match_updated(lua_State*L,GameServiceSupport* s
 #define GAMESERVICE_USER_ID_KEY							"com.trickplay.gameservice.user_id"
 #define GAMESERVICE_PASSWORD_KEY						"com.trickplay.gameservice.password"
 
-
-class GameServiceSupport : public GameServiceClientNotify, public GameServiceAsyncInterface, public Notify {
+class GameServiceSupport : public GameServiceClientNotify, public Notify {
 
 public:
 
@@ -49,7 +45,9 @@ public:
 
 	State state() const { return state_; }
 
-	virtual StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port, void* cb_data);
+	const std::string& GetUserId() const { return user_id_; }
+
+	virtual StatusCode RegisterAccount(const AccountInfo& account_info, const std::string& domain, const std::string& host, int port);
 
 	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port);
 
@@ -57,28 +55,31 @@ public:
 
 	virtual StatusCode CloseApp();
 
-	virtual StatusCode ListGames();
+	virtual StatusCode ListGames(UserData* ud, int lua_callback_ref);
 
 	virtual StatusCode RegisterApp(const AppId & app);
 
-	virtual StatusCode RegisterGame(const Game & game);
+	virtual StatusCode RegisterGame(UserData* ud, const Game & game, int lua_callback_ref);
 
-	virtual StatusCode StartMatch(const std::string& match_id, void* cb_data);
+	virtual StatusCode StartMatch(UserData* ud, const std::string& match_id, int lua_callback_ref);
 
-	virtual StatusCode LeaveMatch(const std::string& match_id, void* cb_data);
+	virtual StatusCode LeaveMatch(UserData* ud, const std::string& match_id, int lua_callback_ref);
 
-	virtual StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
-			bool acquire_role, void* cb_data);
+	virtual StatusCode JoinMatch(UserData* ud, const std::string& match_id, const std::string& nick,
+			bool acquire_role, int lua_callback_ref);
 
-	virtual StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
-			const std::string& role, void* cb_data);
+	virtual StatusCode JoinMatch(UserData* ud, const std::string& match_id, const std::string& nick,
+			const std::string& role, int lua_callback_ref);
 
-	virtual StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data);
+	virtual StatusCode AssignMatch(UserData* ud, const MatchRequest& match_request, int lua_callback_ref);
 
-	virtual StatusCode GetMatchData(const GameId& game_id);
+	virtual StatusCode GetMatchData(UserData* ud, const GameId& game_id, int lua_callback_ref);
 
-	virtual StatusCode SendTurn(const std::string& match_id, const std::string& state,
-			bool terminate, void* cb_data);
+	virtual StatusCode GetUserGameData(UserData* ud, const GameId& game_id, int lua_callback_ref);
+
+	virtual StatusCode UpdateUserGameData(UserData* ud, const GameId& game_id, const std::string& opaque, int lua_callback_ref);
+
+	virtual StatusCode SendTurn(UserData* ud, const std::string& match_id, const Turn& turn_data, int lua_callback_ref);
 
 	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
 	 * after your WakeupMainThread() notify function is called.
@@ -109,19 +110,19 @@ public:
 			const AccountInfo& account_info, void* cb_data);
 
 	virtual void OnRegisterAppResponse(const ResponseStatus& rs,
-			const AppId& app_id);
+			const AppId& app_id, void* cb_data);
 
 	virtual void OnRegisterGameResponse(const ResponseStatus& rs,
-			const Game& game);
+			const Game& game, void* cb_data);
 
 	virtual void OnListGamesResponse(const ResponseStatus& rs,
-			const std::vector<GameId>& game_id_vector);
+			const std::vector<GameId>& game_id_vector, void* cb_data);
 
 	virtual void OnOpenAppResponse(const ResponseStatus& rs,
-			const AppId& app_id);
+			const AppId& app_id, void* cb_data);
 
 	virtual void OnCloseAppResponse(const ResponseStatus& rs,
-			const AppId& app_id);
+			const AppId& app_id, void* cb_data);
 
 	virtual void OnAssignMatchResponse(const ResponseStatus& rs,
 			const MatchRequest& match_request, const std::string& match_id,
@@ -147,6 +148,12 @@ public:
 			const Participant& participant);
 
 	virtual void OnTurnResponse(const ResponseStatus& rs, void* cb_data);
+
+	virtual void OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data);
+
+	virtual void OnGetUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data);
+
+	virtual void OnUpdateUserGameDataResponse(const ResponseStatus& rs, const UserGameData& user_data, void* cb_data);
 
 	virtual void OnTurn(const std::string& match_id, const Participant& from,
 			const Turn& turn_message);
@@ -178,6 +185,7 @@ private:
 	State state_;
 	AppId app_id_;
 	bool login_after_register_flag_;
+	std::string user_id_;
 };
 
 #endif /* _GAMESERVICE_SUPPORT_H_ */

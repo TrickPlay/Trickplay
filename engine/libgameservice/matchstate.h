@@ -9,6 +9,8 @@ namespace libgameservice {
 class MatchState {
 public:
 
+	MatchState() : terminate_(false) { }
+
 	const std::string& opaque() const { return opaque_; }
 	void set_opaque(const std::string& str) { opaque_ = str; }
 
@@ -53,16 +55,31 @@ class MatchInfo {
 
 public:
 	MatchInfo() { }
-	MatchInfo(const std::string& id, const MatchState& state)
-	: id_(id), state_(state) { }
+	MatchInfo(const std::string& id, MatchStatus status, const std::string& nickname, const std::string& in_room_id, const MatchState& state)
+	: id_(id), status_(status), nickname_(nickname), in_room_id_(in_room_id), state_(state) { }
 
 	const std::string& id() const { return id_; }
-	void set_id(std::string& str) { id_ = str; }
+	void set_id(const std::string& str) { id_ = str; }
 
+	MatchStatus status() const { return status_; }
+	void set_status(MatchStatus new_status) { status_ = new_status; }
+
+	const MatchState& const_state() const { return state_; }
 	MatchState& state() { return state_; }
 	void set_state(const MatchState& state) { state_ = state; }
+
+	const std::string& nickname() const { return nickname_; }
+	void set_nickname(const std::string& nick) { nickname_ = nick; }
+
+	const std::string& in_room_id() const { return in_room_id_; }
+	void set_in_room_id(const std::string& in_room_id) { in_room_id_ = in_room_id; }
+
+
 private:
 	std::string id_;
+	MatchStatus status_;
+	std::string nickname_;
+	std::string in_room_id_;
 	MatchState state_;
 };
 }

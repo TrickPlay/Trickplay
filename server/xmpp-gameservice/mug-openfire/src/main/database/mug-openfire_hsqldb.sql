@@ -17,3 +17,10 @@ CREATE TABLE frogxMugServiceProp (
   CONSTRAINT frogxMugServiceProp_pk PRIMARY KEY (serviceID, name)
 );
 
+CREATE TABLE frogxUserData (
+  username           VARCHAR(255)   NOT NULL,
+  propName           VARCHAR(255)   NOT NULL,
+  propValue          TEXT           NOT NULL,
+  version			 INT            NOT NULL,
+  CONSTRAINT frogxUserData_pk PRIMARY KEY (username, propName)
+);

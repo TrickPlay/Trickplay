@@ -330,6 +330,7 @@ public class DefaultMUGSession implements MUGSession {
 				throw new ConflictException();
 			}
 
+			// TODO: fix the bug in processing private messages. the current implementation doesnt work
 			// An occupant is trying to send a private message
 			String resource = message.getTo().getResource();
 			if (resource != null && resource.trim().length() > 0) {
@@ -383,6 +384,7 @@ public class DefaultMUGSession implements MUGSession {
 				}
 				return;
 			}
+			
 
 			// Try to start or continue the match
 			childElement = message.getChildElement("start",
@@ -397,7 +399,7 @@ public class DefaultMUGSession implements MUGSession {
 					MUGService.mugUserNS);
 			if (childElement != null) {
 				room.leave(occupant);
-				occupants.remove(occupant);
+				occupants.remove(roomName);
 				return;
 			}
 
@@ -478,7 +480,7 @@ public class DefaultMUGSession implements MUGSession {
 			}
 			boolean freerole = childElement.element("freerole") != null;
 			boolean newmatch = childElement.element("newmatch") != null;
-			String nick= childElement.elementText("nick");
+			String nick= childElement.elementText("nickname");
 			String role = childElement.elementText("role");
 			
 			boolean acquire_role = freerole || (role!=null && !role.isEmpty());
@@ -585,6 +587,9 @@ public class DefaultMUGSession implements MUGSession {
 				matchElement.addAttribute("matchId", room.getJID().toBareJID());
 				matchElement.addElement("status").setText(
 						room.getMatch().getStatus().name());
+				MUGOccupant occupant = room.getOccupant(jid);
+				matchElement.addElement("nickname").setText(occupant.getNickname());
+				matchElement.addElement("inRoomId").setText(Integer.toString(occupant.getInRoomId()));
 
 				Element matchState = room.getMatch().getState();
 				if (matchState != null)
@@ -886,7 +891,13 @@ public class DefaultMUGSession implements MUGSession {
 				if (openApps.contains(appID)) {
 					return;
 				}
-					
+
+				// check if the app is registered otherwise silently register the app
+				// TODO: address the consequences of registering an app silently
+				if (null == component.getApp(appID)) {
+					component.registerApp(appID.getName(), appID.getVersion(), request.getFrom());
+				}
+				
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doOpen(rooms);
 				openApps.add(appID);

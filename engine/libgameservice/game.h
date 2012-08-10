@@ -148,7 +148,7 @@ public:
 	bool abort_when_player_leaves() const { return abort_when_player_leaves_; }
 	void set_abort_when_player_leaves(bool abort_flag) { abort_when_player_leaves_ = abort_flag; }
 
-	RoleVector roles() { return roles_; }
+	RoleVector& roles() { return roles_; }
 	void set_roles(RoleVector& nroles) {
 		roles_ = nroles;
 	}

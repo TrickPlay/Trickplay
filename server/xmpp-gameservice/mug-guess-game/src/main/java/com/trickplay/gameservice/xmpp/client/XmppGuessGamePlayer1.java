@@ -133,8 +133,15 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 
 		XmppGuessGamePlayer1 p1 = null;
 		try {
-
-			p1 = new XmppGuessGamePlayer1("gameservice.trickplay.com", "gameservice1.gameservice.trickplay.com", 5222);
+			String domain = "gameservice.trickplay.com";
+			String host = "gameservice.gameservice.trickplay.com";
+			int port = 5222;
+			if (args.length >= 1 && "use_localhost".equals(args[0])) {
+				domain = "internal.trickplay.com";
+				host = "localhost";
+				port = 5222;
+			}
+			p1 = new XmppGuessGamePlayer1(domain, host, port);
 			
 			String appId = p1.registerApp("tpapps", 1);
 			

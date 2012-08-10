@@ -2,6 +2,7 @@
 local game_hist = Group{name = "Game History", x = 49, y = 756}
 
 local make_frame
+local game_server
 local loaded = false
 
 local function make_flash_text_animation(object,shadow)
@@ -124,9 +125,10 @@ function game_hist:init(t)
     
     if type(t) ~= "table" then error("must pass a table as the parameter",2) end
     
-    make_frame        = t.make_frame        or error( "must pass make_frame",        2 )
-    box_w             = t.box_w             or 208
-    box_h             = t.box_h             or 324
+    make_frame  = t.make_frame  or error( "must pass make_frame",  2 )
+    game_server = t.game_server or error( "must pass game_server", 2 )
+    box_w       = t.box_w       or 208
+    box_h       = t.box_h       or 324
     
     local f = Clone{source = t.img_srcs.game_hist_bg }
     
@@ -236,6 +238,8 @@ function game_hist:set_wins(score)
     
     wins.anim:start(score)
     
+    game_server:update_game_history(function() print("history updated") end)
+    
 end
 
 function game_hist:set_losses(score)
@@ -244,6 +248,8 @@ function game_hist:set_losses(score)
     if type(score) ~= "number" then error("must pass a number",2) end
     
     losses.anim:start(score)
+    
+    game_server:update_game_history(function() print("history updated") end)
     
 end
 

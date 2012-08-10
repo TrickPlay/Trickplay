@@ -454,13 +454,21 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			
 			boolean matchFinished = false;
 			int nextRoleIdx = -1;
+			boolean only_update_match_state = false;
+			boolean invalid_move = false;
 			Element nextElement = moveIter.hasNext() ? moveIter.next() : null;
-			if (nextElement != null && nextElement.getName().equals("terminate")) {
-				matchFinished = true;
+			if (nextElement != null) {
+				if (nextElement.getName().equals("terminate")) {
+					matchFinished = true;
+				} else if (nextElement.getName().equals("only-update")) {
+					only_update_match_state = true;
+				} 				
 			} else if (mug.isAutonext()) {
 				nextRoleIdx = computeNextTurnIndex(playerIdx);
 				nextElement = DocumentHelper.createElement(QName.get("next", MUGService.mugUserNS));
-			} else {
+			} 
+			
+			if (!mug.isAutonext() && !only_update_match_state && !matchFinished) {
 				if (nextElement == null || !nextElement.getName().equals("next")) {
 					log.debug("Not valid move in match " + room.getJID() + ": " + nextElement.asXML());
 					throw new InvalidTurnException();
@@ -471,27 +479,30 @@ public class GenericTurnBasedMatch implements MUGMatch {
 					log.debug("Not valid move in match " + room.getJID() + ": " + nextElement.asXML());
 					throw new InvalidTurnException();
 				}
-			}
+			} 
 			
 			opaqueMatchState = stateElement.getText();
-			nextTurnIndex = nextRoleIdx;
-			lastTurnIndex = playerIdx;
-			setTurnInfo();
-			if (!matchFinished) {
-				List<Element> movesCopy = new ArrayList<Element>();
-				movesCopy.add(stateElement);
-				if (nextRoleIdx >= 0) {
-					movesCopy.add(nextElement.addText(mug.getRoleForIndex(nextRoleIdx)));
-				}
-				moves = movesCopy;
-			}
-			room.broadcastTurn(moves, player);
 			
-			if (matchFinished) {
-			//	reset();
-				status = Status.completed;
-				room.broadcastRoomPresence();
-			};
+			if (!only_update_match_state) {
+				nextTurnIndex = nextRoleIdx;
+				lastTurnIndex = playerIdx;
+				setTurnInfo();
+				if (!matchFinished) {
+					List<Element> movesCopy = new ArrayList<Element>();
+					movesCopy.add(stateElement);
+					if (nextRoleIdx >= 0) {
+						movesCopy.add(nextElement.addText(mug.getRoleForIndex(nextRoleIdx)));
+					}
+					moves = movesCopy;
+				}
+				room.broadcastTurn(moves, player);
+				
+				if (matchFinished) {
+				//	reset();
+					status = Status.completed;
+					room.broadcastRoomPresence();
+				}
+			}
 		
 	//	}
 	}
