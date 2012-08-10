@@ -387,9 +387,10 @@ class MainWindow(QMainWindow):
 
     def backgroundImage(self):
         path = QFileDialog.getOpenFileName(None, 'Set Background Image Source', str(os.path.join(self.path, 'assets/images')), "*.jpg *.gif *.png")
-        path = os.path.basename(str(path))
-        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
-        self.sendLuaCommand("backgroundImage", "_VE_.backgroundImage("+"'"+str(path)+"')")
+        if len(path) > 0 :
+            path = os.path.basename(str(path))
+            self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
+            self.sendLuaCommand("backgroundImage", "_VE_.backgroundImage("+"'"+str(path)+"')")
         return True
 
     def smallGrid(self):

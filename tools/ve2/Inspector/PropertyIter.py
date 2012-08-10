@@ -115,6 +115,8 @@ COMBOBOX_PROP_VALS = {
     'vertical_alignment' : ['top', 'center', 'bottom'],
     # TabBar
     'tab_location':['top', 'left']
+    # Clone
+    # 'source': [], 
 }
 
 FILE_PROP = [
