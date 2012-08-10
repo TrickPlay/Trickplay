@@ -1,4 +1,4 @@
-import re
+import re, os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -221,10 +221,14 @@ class TrickplayInspector(QWidget):
         items = []
         n = 0 
         style_n = 0 
+        source_n = 0 
         
+        source_button = None
+
         boolCheckBox = {}
         boolNumber = {}
         boolHandlers = {}
+
 
         def boolPropertyFill(propName, propOrder, data, gid=None) :
             def makeBoolHandler(gid, prop_name):
@@ -490,7 +494,20 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+                elif p == "src":
+                    source_n = n
+                    def openFileChooser():
+                        if not self.preventChanges:
+                            self.preventChanges = True
+                            path = QFileDialog.getOpenFileName(None, 'Set Image Source', str(os.path.join(self.main.path, 'assets/images')), "*.jpg *.gif *.png")
+                            if len(path) > 0 :
+                                path = os.path.basename(str(path))
+                                self.sendData(int(data['gid']), 'src', path)
+                            self.preventChanges = False
 
+                    source_button = QPushButton()
+                    source_button.setText(str(data[p]))
+                    QObject.connect(source_button, SIGNAL('clicked()'), openFileChooser)
                 elif p in BOOL_PROP:
                     boolPropertyFill(p, n, data) 
                 elif p in COLOR_PROP: 
@@ -499,6 +516,7 @@ class TrickplayInspector(QWidget):
                     fontPropertyFill(p, n, data) 
                 elif p in COMBOBOX_PROP: 
                     comboPropertyFill(p, n, data) 
+                    
 
                 if p in NESTED_PROP_LIST: 
                     z = data[p]
@@ -619,6 +637,10 @@ class TrickplayInspector(QWidget):
                         self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
         # substitude style property text input to style combo
+
+        if source_n is not 0 : 
+            self.ui.property.setItemWidget(self.ui.property.topLevelItem(source_n), 1, source_button)
+            self.ui.property.itemWidget(self.ui.property.topLevelItem(source_n),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
         if style_n is not 0 : 
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
