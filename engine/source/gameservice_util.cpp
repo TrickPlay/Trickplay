@@ -138,7 +138,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 		return luaL_error(L, "Incorrect argument, failed to set \'app_id.name\' : string expected");
 	}
 	String app_name = cname;
-	lua_pop(L,1);
+	lua_pop(L, 1);
 
 	// app_version
 	int app_version = 1;
@@ -215,7 +215,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if (!lua_isboolean(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'join_after_start\' : boolean expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'join_after_start\' : boolean expected");
 		}
 		game.set_join_after_start(lua_toboolean(L, -1));
 	}
@@ -227,7 +227,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if (!lua_isboolean(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'abort_when_player_leaves\' : boolean expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'abort_when_player_leaves\' : boolean expected");
 		}
 		game.set_abort_when_player_leaves(lua_toboolean(L, -1));
 	}
@@ -239,11 +239,11 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if(!lua_isnumber(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'min_players_to_start\' : number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'min_players_to_start\' : number expected");
 		}
 		if ( lua_tointeger(L, -1) <= 0 )
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'min_players_to_start\' : positive non-zero number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'min_players_to_start\' : positive non-zero number expected");
 		}
 		game.set_min_players_for_start(lua_tointeger(L, -1));
 	}
@@ -255,11 +255,11 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	{
 		if(!lua_isnumber(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'max_duration_per_turn\' : number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'max_duration_per_turn\' : number expected");
 		}
-		if ( lua_tointeger(L, -1) <= 0 )
+		if ( lua_tointeger(L, -1) < 0 )
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'max_duration_per_turn\' : positive non-zero number expected");
+			return luaL_error(L, "Incorrect argument, failed to extract \'max_duration_per_turn\' : non negative number expected");
 		}
 		game.set_max_duration_per_turn(lua_tointeger(L, -1));
 	}
@@ -269,17 +269,18 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	lua_getfield(L, index, "roles");
 	if (!lua_istable(L, -1))
 	{
-		return luaL_error(L, "Incorrect argument, fail to set \'roles\' : table expected");
+		return luaL_error(L, "Incorrect argument, failed to find \'roles\' : table expected");
 	}
 
 	pt = lua_gettop(L);
 
-	lua_pushnil(L);
+	lua_pushnil( L );
 	while(lua_next(L, pt) != 0)
 	{
+		std::cout << "extracting role info" << std::endl;
 		if (!lua_istable(L, -1))
 		{
-			return luaL_error(L, "Incorrect argument, fail to set \'properties\' elements : table expected");
+			return luaL_error(L, "Incorrect argument, failed to access properties table for a role");
 		}
 
 		String role_name;
@@ -326,8 +327,10 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 		}
 		lua_pop(L,1);
 
+		std::cout << "finished extracting role" << std::endl;
 		game.roles().push_back(libgameservice::Role(role_name, cannot_start, first_role));
 
+		lua_pop( L, 1 ); // pop the role table
 	}
 
 	// pop the roles table
@@ -335,6 +338,67 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 
 	return 0;
 }
+
+int populate_game_id( lua_State * L, int index, libgameservice::GameId& game_id )
+{
+    if (lua_type(L, index) != LUA_TTABLE)
+    {
+		return luaL_error(L, "Incorrect argument, table expected");
+	}
+
+    // app_id
+	lua_getfield(L, index, "app_id");
+
+	if (!lua_istable(L, -1))
+	{
+		return luaL_error(L, "Incorrect argument, fail to set \'app_id\' : table expected");
+	}
+
+	int pt = lua_gettop(L);
+
+	// app_name
+	lua_getfield(L, pt, "name");
+	const char * cname = lua_tostring(L,-1);
+	if (!cname)
+	{
+		return luaL_error(L, "Incorrect argument, failed to set \'app_id.name\' : string expected");
+	}
+	String app_name = cname;
+	lua_pop(L,1);
+
+	// app_version
+	int app_version = 1;
+	lua_getfield(L, pt, "version");
+	if (!lua_isnil(L, -1)) {
+		if(!lua_isnumber(L, -1))
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'app_id.version\' : number expected");
+			}
+			if ( lua_tointeger(L, -1) <= 0 )
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'app_id.version\' : positive non-zero number expected");
+			}
+			app_version =  lua_tointeger(L, -1);
+	}
+	lua_pop(L,1);
+
+	// pop app_id table
+	lua_pop(L, 1);
+
+	// game name
+	lua_getfield(L, index, "name");
+	cname = lua_tostring(L,-1);
+	if (!cname)
+	{
+		return luaL_error(L, "Incorrect argument, failed to set \'name\' : string expected");
+	}
+	lua_pop(L,1);
+
+	game_id = libgameservice::GameId(libgameservice::AppId(app_name, app_version), cname);
+
+	return 0;
+}
+
 
 void push_registered_games( lua_State * L )
 {
@@ -353,17 +417,29 @@ void push_response_status_arg( lua_State * L, const libgameservice::ResponseStat
 	lua_newtable( L );
 	int t = lua_gettop( L );
 
-	lua_pushliteral( L , "status_code" );
-	lua_pushstring( L , libgameservice::statusToString(rs.status_code()) );
+	lua_pushliteral( L, "status" );
+	lua_pushinteger( L, rs.status_code() );
+	lua_rawset( L , t );
+
+	const char* status_as_str = libgameservice::statusToString(rs.status_code());
+	lua_pushliteral( L , "status_as_string" );
+	lua_pushstring( L ,  status_as_str );
 	lua_rawset( L , t );
 
 	if (rs.status_code() != libgameservice::OK)
 	{
 		lua_pushliteral( L , "error_message" );
-		lua_pushstring( L , rs.error_message().c_str() );
+		lua_pushstring( L , !(rs.error_message().empty()) ? rs.error_message().c_str() : status_as_str );
 		lua_rawset( L , t );
 	}
 }
+
+void push_response_status_arg( lua_State * L, const libgameservice::StatusCode sc )
+{
+	libgameservice::ResponseStatus rs( sc, std::string() );
+	push_response_status_arg( L, rs );
+}
+
 
 void push_app_id_arg( lua_State * L, const libgameservice::AppId& app_id )
 {
@@ -478,10 +554,11 @@ void push_match_state_arg( lua_State * L, const libgameservice::MatchState& matc
 	lua_newtable( L );
 
 	//std::vector<String> players = match_state.const_players();
+	int i=1;
 	std::vector<String>::const_iterator it;
 	for ( it=match_state.const_players().begin() ; it < match_state.const_players().end(); it++ ) {
 		lua_pushstring( L, (*it).c_str() );
-		lua_rawseti( L, -2, 1 );
+		lua_rawseti( L, -2, i++ );
 	}
 
 	lua_rawset( L, t );
@@ -552,5 +629,83 @@ void push_turn_arg( lua_State * L, const libgameservice::Turn& turn_message )
 	lua_rawset( L , t );
 }
 
+/*
+{
+  game_id = "xx",
+  match_infos = {
+  	  { match_id = "xx", match_status = "xx", nickname = "xx", in_room_id = "xx", match_state = { } }
+  	  ...
+  }
+}
+*/
+
+void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_data )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "game_id" );
+	lua_pushstring( L , match_data.game_id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "match_infos" );
+	lua_newtable( L );
+
+	int match_infos_t = lua_gettop( L );
+
+	int i = 1;
+	std::vector<libgameservice::MatchInfo>::const_iterator it;
+	for( it=match_data.const_match_infos().begin(); it < match_data.const_match_infos().end(); it++ ) {
+
+		std::cout << "populating lua table for match_id= " << (*it).id() <<  std::endl;
+		lua_newtable( L );
+		int match_info_t = lua_gettop( L );
+
+		lua_pushliteral( L, "match_id" );
+		lua_pushstring( L , (*it).id().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "match_status" );
+		push_match_status_arg( L , (*it).status() );
+		lua_rawset( L ,  match_info_t);
+
+		lua_pushliteral( L, "nickname" );
+		lua_pushstring( L , (*it).nickname().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "in_room_id" );
+		lua_pushstring( L , (*it).in_room_id().c_str() );
+		lua_rawset( L ,  match_info_t );
+
+		lua_pushliteral( L, "match_state" );
+		push_match_state_arg( L, (*it).const_state() );
+		lua_rawset( L, match_info_t );
+
+		std::cout << "the top of the stack is " << lua_gettop( L ) << ". match_info table is at index " << match_info_t << std::endl;
+		lua_rawseti( L, match_infos_t, i++ );
+	}
+
+	std::cout << "finished populating match_info into match_infos. the top of the stack is " << lua_gettop( L )
+			<< ". match_data table is at index " << t << std::endl;
+	lua_rawset( L, t );
+}
+
+void push_user_game_data_arg( lua_State * L, const libgameservice::UserGameData& user_game_data )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "game_id" );
+	lua_pushstring( L , user_game_data.game_id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "version" );
+	lua_pushinteger( L , user_game_data.version() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "opaque" );
+	lua_pushstring( L , user_game_data.opaque().c_str() );
+	lua_rawset( L , t );
+}
 
 }

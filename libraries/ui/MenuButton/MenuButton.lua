@@ -110,6 +110,15 @@ MenuButton = function(parameters)
             
         end
 	)
+	instance:subscribe_to( "focused",
+		function()
+            if not instance.enabled then return end
+            
+            button.focused = instance.focused
+            
+        end
+	)
+	instance:add_key_handler(   keys.OK, function() button:click()   end)
     
 	override_property(instance,"attributes",
         function(oldf,self)
@@ -124,6 +133,8 @@ MenuButton = function(parameters)
             t.cell_h               = nil
             t.cell_w               = nil
             t.cells                = nil
+            
+            t.style = instance.style
             
             t.items = {}
             

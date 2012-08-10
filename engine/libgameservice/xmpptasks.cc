@@ -13,6 +13,55 @@ extern const txmpp::Jid getMugServiceJid();
 
 
 //const txmpp::Jid JID_MUG_SERVICE("mug.internal.trickplay.com");
+static MatchStatus extractMatchStatus(const txmpp::XmlElement* statusElement)
+{
+	MatchStatus status = unknown;
+	if ( statusElement != NULL ) {
+		std::string status_str( statusElement->BodyText() );
+		status = stringToMatchStatus( status_str );
+	}
+	return status;
+}
+
+
+static MatchState extractMatchState(const txmpp::XmlElement* stateElement)
+{
+	MatchState match_state;
+
+	if (stateElement == NULL) {
+		return match_state;
+	}
+
+
+	const txmpp::XmlElement* tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_FIRST_TAG);
+	if (tmpElement != NULL)
+		match_state.set_first(tmpElement->BodyText());
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_OPAQUE_TAG);
+	if (tmpElement != NULL)
+		match_state.set_opaque(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_NEXT_TAG);
+	if (tmpElement != NULL)
+		match_state.set_next(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_LAST_TAG);
+	if (tmpElement != NULL)
+		match_state.set_last(tmpElement->BodyText());
+
+	tmpElement = stateElement->FirstNamed(
+			QN_MUG_TURNBASED_TERMINATED_TAG);
+	match_state.set_terminate(tmpElement != NULL);
+
+	tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_ROLES_TAG);
+	if (tmpElement != NULL) {
+		tmpElement = tmpElement->FirstNamed(QN_MUG_TURNBASED_ROLE_TAG);
+		while (tmpElement != NULL) {
+			match_state.players().push_back(tmpElement->BodyText());
+			tmpElement = tmpElement->NextNamed(QN_MUG_TURNBASED_ROLE_TAG);
+		}
+	}
+	return match_state;
+}
 
 
 // MUG message listener
@@ -154,11 +203,8 @@ int MUGPresenceListenerTask::ProcessResponse() {
 		} else { // match state update
 
 			const txmpp::XmlElement* tmpElement = gameElement->FirstNamed(QN_MUG_STATUS_TAG);
-			MatchStatus status = unknown;
-			if (tmpElement != NULL) {
-				std::string status_str(tmpElement->BodyText());
-				status = stringToMatchStatus(status_str);
-			}
+			MatchStatus status = extractMatchStatus( tmpElement );
+
 			const txmpp::XmlElement* stateElement = gameElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
 
 			if (!isValidMatchStatus(status) || stateElement == NULL) {
@@ -167,34 +213,8 @@ int MUGPresenceListenerTask::ProcessResponse() {
 			}
 
 
-			MatchState match_state;
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_FIRST_TAG);
-			if (tmpElement != NULL)
-				match_state.set_first(tmpElement->BodyText());
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_OPAQUE_TAG);
-			if (tmpElement != NULL)
-				match_state.set_opaque(tmpElement->BodyText());
+			MatchState match_state = extractMatchState( stateElement );
 
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_NEXT_TAG);
-			if (tmpElement != NULL)
-				match_state.set_next(tmpElement->BodyText());
-
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_LAST_TAG);
-			if (tmpElement != NULL)
-				match_state.set_last(tmpElement->BodyText());
-
-			tmpElement = stateElement->FirstNamed(
-					QN_MUG_TURNBASED_TERMINATED_TAG);
-			match_state.set_terminate(tmpElement != NULL);
-
-			tmpElement = stateElement->FirstNamed(QN_MUG_TURNBASED_ROLES_TAG);
-			if (tmpElement != NULL) {
-				tmpElement = tmpElement->FirstNamed(QN_MUG_TURNBASED_ROLE_TAG);
-				while (tmpElement != NULL) {
-					match_state.players().push_back(tmpElement->BodyText());
-					tmpElement = tmpElement->NextNamed(QN_MUG_TURNBASED_ROLE_TAG);
-				}
-			}
 
 			SignalMatchState(match_id, status, match_state);
 
@@ -226,8 +246,8 @@ bool MUGPresenceListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 
 
 // ListGames task
-ListGamesTask::ListGamesTask(txmpp::TaskParent *parent) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE) {
+ListGamesTask::ListGamesTask(txmpp::TaskParent *parent, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), cb_data_(cb_data) {
 
 //	std::cout << "Inside ListGamesTask constructor" << std::endl;
 }
@@ -285,7 +305,7 @@ int ListGamesTask::ProcessResponse() {
 	//std::cout << "game_id_vector.size()=" << game_id_vector.size() << std::endl;
 	//std::cout << "emitting SignalListOfGames()" << std::endl;
 	ResponseStatus rs;
-	SignalListOfGames.emit(rs, game_id_vector);
+	SignalListOfGames.emit(rs, game_id_vector, cb_data_);
 //	std::cout << "Discover Info IQ query results follow: " << std::endl;
 //	std::cout << stanza->Str() << std::endl;
 
@@ -305,8 +325,8 @@ bool ListGamesTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // RegisterApp task
-RegisterAppTask::RegisterAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+RegisterAppTask::RegisterAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside RegisterAppTask constructor" << std::endl;
 }
@@ -363,7 +383,7 @@ int RegisterAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs(got_error?FAILED:OK, "");
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
@@ -381,8 +401,8 @@ bool RegisterAppTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // RegisterGame task
-RegisterGameTask::RegisterGameTask(txmpp::TaskParent *parent, const Game & game) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_(game) {
+RegisterGameTask::RegisterGameTask(txmpp::TaskParent *parent, const Game & game, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_(game), cb_data_(cb_data) {
 
 	//std::cout << "Inside RegisterGameTask constructor" << std::endl;
 }
@@ -516,7 +536,7 @@ int RegisterGameTask::ProcessResponse() {
 	ResponseStatus rs(got_error?FAILED:OK, "");
 
 
-	SignalDone(rs, game_);
+	SignalDone(rs, game_, cb_data_);
 
 	return STATE_DONE;
 }
@@ -534,8 +554,8 @@ bool RegisterGameTask::HandleStanza(const txmpp::XmlElement *stanza) {
 }
 
 // OpenApp task
-OpenAppTask::OpenAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+OpenAppTask::OpenAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside OpenAppTask constructor" << std::endl;
 }
@@ -564,14 +584,14 @@ int OpenAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs;
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
 
 // CloseApp task
-CloseAppTask::CloseAppTask(txmpp::TaskParent *parent, const AppId & app_id) :
-	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id) {
+CloseAppTask::CloseAppTask(txmpp::TaskParent *parent, const AppId & app_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), app_id_(app_id), cb_data_(cb_data) {
 
 	//std::cout << "Inside CloseAppTask constructor" << std::endl;
 }
@@ -600,7 +620,7 @@ int CloseAppTask::ProcessResponse() {
 	//const txmpp::XmlElement* discoInfoResponse = stanza->FirstNamed(txmpp::QN_DISCO_INFO_QUERY);
 	ResponseStatus rs;
 
-	SignalDone(rs, app_id_);
+	SignalDone(rs, app_id_, cb_data_);
 
 	return STATE_DONE;
 }
@@ -638,7 +658,7 @@ int AssignMatchTask::ProcessStart() {
 		matchRequestElement->AddElement(roleElement);
 	}
 	if (!match_request_.nick().empty()) {
-		txmpp::XmlElement *nickElement = new txmpp::XmlElement(QN_MUG_NICK_TAG);
+		txmpp::XmlElement *nickElement = new txmpp::XmlElement(QN_MUG_NICKNAME_TAG);
 		nickElement->AddText(match_request_.nick());
 		matchRequestElement->AddElement(nickElement);
 	}
@@ -906,7 +926,8 @@ int TurnTask::ProcessStart() {
 	txmpp::XmlElement *turnElement = new txmpp::XmlElement(QN_MUG_USER_TURN_TAG);
 
 	txmpp::XmlElement *stateElement = new txmpp::XmlElement(QN_MUG_USER_NEWSTATE_TAG);
-	stateElement->AddText(turn_.new_state());
+	stateElement->AddCDATAText(turn_.new_state().c_str(), turn_.new_state().size());
+//	stateElement->AddText(turn_.new_state());
 	turnElement->AddElement(stateElement);
 
 	if (turn_.terminate()) {
@@ -914,9 +935,12 @@ int TurnTask::ProcessStart() {
 		turnElement->AddElement(terminateElement);
 	} else {
 		if (!turn_.next_turn().empty()) {
-			txmpp::XmlElement *nextElement = new txmpp::XmlElement(QN_MUG_USER_TERMINATE_TAG);
+			txmpp::XmlElement *nextElement = new txmpp::XmlElement(QN_MUG_USER_NEXT_TAG);
 			nextElement->AddText(turn_.next_turn());
 			turnElement->AddElement(nextElement);
+		} else if (turn_.only_update()) {
+			txmpp::XmlElement *onlyUpdateElement = new txmpp::XmlElement(QN_MUG_USER_ONLY_UPDATE_TAG);
+			turnElement->AddElement(onlyUpdateElement);
 		}
 	}
 	message->AddElement(turnElement);
@@ -928,5 +952,260 @@ int TurnTask::ProcessStart() {
 	return STATE_DONE;
 }
 
+// GetMatchData task
+GetMatchDataTask::GetMatchDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), cb_data_(cb_data) {
+
+//	std::cout << "Inside GetMatchDataTask constructor" << std::endl;
+}
+
+GetMatchDataTask::~GetMatchDataTask() {
+}
+
+int GetMatchDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("get", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *matchDataElement = new txmpp::XmlElement(
+			QN_MUG_MATCHDATA_TAG);
+	matchDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	iqStanza->AddElement(matchDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int GetMatchDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside GetMatchDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	MatchData matchdata;
+	matchdata.set_game_id(game_id_);
+	const txmpp::XmlElement* matchDataElement = stanza->FirstNamed(QN_MUG_MATCHDATA_TAG);
+	if (matchDataElement != NULL) {
+		const txmpp::XmlElement* matchElement = matchDataElement->FirstNamed(QN_MUG_MATCH_TAG);
+		while( NULL != matchElement )
+		{
+			// extract match info from match element
+			MatchInfo mi;
+
+			mi.set_id(matchElement->Attr(QN_MATCHID_ATTR));
+			const txmpp::XmlElement* statusElement = matchElement->FirstNamed(QN_MUG_STATUS_TAG);
+			MatchStatus status = extractMatchStatus( statusElement );
+
+			const txmpp::XmlElement* nicknameElement = matchElement->FirstNamed(QN_MUG_NICKNAME_TAG);
+			if (nicknameElement != NULL)
+				mi.set_nickname(nicknameElement->BodyText());
+
+			const txmpp::XmlElement* inRoomIdElement = matchElement->FirstNamed(QN_MUG_INROOMID_TAG);
+			if (inRoomIdElement != NULL)
+				mi.set_in_room_id(inRoomIdElement->BodyText());
+
+			const txmpp::XmlElement* stateElement = matchElement->FirstNamed(QN_MUG_TURNBASED_STATE_TAG);
+
+			if (!isValidMatchStatus(status) || stateElement == NULL) {
+				continue;
+			}
+
+
+			mi.set_state( extractMatchState( stateElement ) );
+
+			matchdata.match_infos().push_back(mi);
+
+			// move to the next match element
+			matchElement = matchElement->NextNamed(QN_MUG_MATCH_TAG);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalDone.emit(rs, matchdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool GetMatchDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "GetMatchDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
+
+// GetUserGameData task
+GetUserGameDataTask::GetUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), cb_data_(cb_data) {
+
+//	std::cout << "Inside GetUserGameDataTask constructor" << std::endl;
+}
+
+GetUserGameDataTask::~GetUserGameDataTask() {
+}
+
+int GetUserGameDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("get", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *userGameDataElement = new txmpp::XmlElement(
+			QN_MUG_USERDATA_TAG);
+	userGameDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	iqStanza->AddElement(userGameDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int GetUserGameDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside GetUserGameDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	UserGameData userdata;
+	userdata.set_game_id(game_id_);
+	const txmpp::XmlElement* userDataElement = stanza->FirstNamed(QN_MUG_USERDATA_TAG);
+	if (userDataElement != NULL) {
+		const txmpp::XmlElement* opaqueElement = userDataElement->FirstNamed(QN_MUG_OPAQUE_TAG);
+
+		if (opaqueElement != NULL) {
+			userdata.set_opaque(opaqueElement->BodyText());
+
+			if (opaqueElement->HasAttr(QN_VERSION_ATTR)) {
+				userdata.set_version(atoi(opaqueElement->Attr(QN_VERSION_ATTR).c_str()));
+			}
+			else
+				userdata.set_version(-1);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalDone.emit(rs, userdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool GetUserGameDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "GetUserGameDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
+
+
+// UpdateUserGameData task
+UpdateUserGameDataTask::UpdateUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, const std::string& opaque, void* cb_data) :
+	txmpp::XmppTask(parent, txmpp::XmppEngine::HL_SINGLE), game_id_(game_id), opaque_(opaque), cb_data_(cb_data) {
+
+//	std::cout << "Inside UpdateUserGameDataTask constructor" << std::endl;
+}
+
+UpdateUserGameDataTask::~UpdateUserGameDataTask() {
+}
+
+int UpdateUserGameDataTask::ProcessStart() {
+
+	txmpp::scoped_ptr<txmpp::XmlElement> iqStanza(
+			MakeIq("set", getMugServiceJid(), task_id()));
+	txmpp::XmlElement *userGameDataElement = new txmpp::XmlElement(
+			QN_MUG_USERDATA_TAG);
+	userGameDataElement->AddAttr(QN_GAMEID_ATTR, game_id_);
+
+	txmpp::XmlElement *opaqueElement = new txmpp::XmlElement(
+				QN_MUG_OPAQUE_TAG);
+	opaqueElement->AddCDATAText(opaque_.c_str(), opaque_.size());
+
+	userGameDataElement->AddElement(opaqueElement);
+
+	iqStanza->AddElement(userGameDataElement);
+
+	SendStanza(iqStanza.get());
+
+	return STATE_RESPONSE;
+}
+
+int UpdateUserGameDataTask::ProcessResponse() {
+
+	//	std::cout << "Inside UpdateUserGameDataTask::ProcessResponse()" << std::endl;
+
+	const txmpp::XmlElement* stanza = NextStanza();
+
+	if (stanza == NULL) {
+		return STATE_BLOCKED;
+	}
+
+	std::string from = "Someone";
+
+	if (stanza->HasAttr(txmpp::QN_FROM))
+		from = stanza->Attr(txmpp::QN_FROM);
+
+	UserGameData userdata;
+	userdata.set_game_id(game_id_);
+	const txmpp::XmlElement* userDataElement = stanza->FirstNamed(QN_MUG_USERDATA_TAG);
+	if (userDataElement != NULL) {
+		const txmpp::XmlElement* opaqueElement = userDataElement->FirstNamed(QN_MUG_OPAQUE_TAG);
+
+		if (opaqueElement != NULL) {
+			userdata.set_opaque(opaqueElement->BodyText());
+
+			if (opaqueElement->HasAttr(QN_VERSION_ATTR)) {
+				userdata.set_version(atoi(opaqueElement->Attr(QN_VERSION_ATTR).c_str()));
+			}
+			else
+				userdata.set_version(-1);
+		}
+	}
+
+
+	ResponseStatus rs;
+	SignalDone.emit(rs, userdata, cb_data_);
+
+	return STATE_DONE;
+}
+
+bool UpdateUserGameDataTask::HandleStanza(const txmpp::XmlElement *stanza) {
+
+	//std::cout << "UpdateUserGameDataTask::HandleStanza. processing stanza:" << stanza->Str() << std::endl;
+
+	if (MatchResponseIq(stanza, getMugServiceJid(), task_id())) {
+		QueueStanza(stanza);
+		return true;
+	}
+
+	return false;
+}
 
 } // namespace libgameservice

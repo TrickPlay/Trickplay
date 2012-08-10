@@ -61,7 +61,13 @@ void Socket::disconnect()
 {
     if ( connection )
     {
-        g_io_stream_close( G_IO_STREAM( connection ) , NULL, NULL );
+        tplog("SCHEDULING CLOSING STREAM");
+
+        // Unreffing the connection and the socket will auto-close things when all the pending writes are done
+        // TODO: Writes from an on_exit handler will fail, because the event loop will not get a chance to
+        //       execute the writes before the socket is torn down when the process exits.  This will likely
+        //       need to be fixed explicitly in the on_exit handler by giving gio a chance to complete.
+        //       It's odd that I can't find anything in google about async gio not completing before a process exits
         g_object_unref( G_OBJECT( connection ) );
         connection = NULL;
     }
@@ -174,7 +180,7 @@ void Socket::start_async_read()
 
     g_assert( input_buffer );
 
-    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, TRICKPLAY_PRIORITY, NULL, read_async, this );
+    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, G_PRIORITY_DEFAULT, NULL, read_async, this );
 }
 
 //.............................................................................
@@ -233,7 +239,7 @@ void Socket::start_async_write()
 
         tplog( "SCHEDULING WRITE OF %d BYTES", output_buffer->len );
 
-        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, TRICKPLAY_PRIORITY, NULL, write_async, this );
+        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, G_PRIORITY_DEFAULT, NULL, write_async, this );
 
         output_buffer = g_byte_array_new();
     }

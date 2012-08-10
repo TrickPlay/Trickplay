@@ -252,15 +252,22 @@ function controller:init(t)
                     session.viewing = false
                     
                     screen:grab_key_focus()
-                    controller:change_message("Saving...")
-                    game_server:update(
+                    controller:change_message("Ending Session...")
+                    game_server:end_session(
                         session,
                         function(t)
-                            session = nil
-                            controller:change_message("")
-                            print("successfully updated")
-                            
-                            app_state.state = "MAIN_PAGE"
+                            print("Session Ended. Leaving....")
+                            game_server:leave_match(
+                                session,
+                                function(t)
+                                    print("left")
+                                    session = nil
+                                    controller:change_message("")
+                                    print("successfully updated")
+                                    
+                                    app_state.state = "MAIN_PAGE"
+                                end
+                            )
                         end
                     )
                     
