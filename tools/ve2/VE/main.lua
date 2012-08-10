@@ -644,6 +644,33 @@ _VE_.getUIInfo = function()
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 
+_VE_.printInstanceName = function(layernames)
+
+    theNames =""
+
+    for m,n in ipairs (screen.children) do
+        if n.name then
+        if string.find(n.name, "Layer") then  
+            print(n.name)
+            for q,w in ipairs (layernames) do 
+                if n.name == w then
+                    for k,l in ipairs (n.children) do 
+                        if theNames ~= "" then 
+                            theNames = theNames.." "..l.name
+                        else
+                            theNames = theNames..l.name
+                        end
+                    end
+                end
+            end
+        end
+        end
+    end 
+
+    print("prtObjNme"..theNames)
+
+end 
+
 local arrange_prep = function(gid) 
 
     getCurLayer(gid)

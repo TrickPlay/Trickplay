@@ -114,13 +114,13 @@ COMBOBOX_PROP_VALS = {
     'horizontal_alignment' : ['left','center','right'],
     'vertical_alignment' : ['top', 'center', 'bottom'],
     # TabBar
-    'tab_location':['top', 'left']
+    'tab_location':['top', 'left'],
     # Clone
-    # 'source': [], 
+    'source': [], 
 }
 
 FILE_PROP = [
-    'source', 
+    'src', 
 ]
 
 TEXT_PROP = [
@@ -171,7 +171,8 @@ TEXT_PROP = [
     'cell_height', 
     'horizontal_cell_spacing', 
     'vertical_cell_spacing', 
-    'cell_timing', 
+    'cell_timing', #
+
     'cell_timing_offset', 
     'cells_focusable', 
     # Text Input

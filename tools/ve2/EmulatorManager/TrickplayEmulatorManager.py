@@ -21,6 +21,7 @@ class TrickplayEmulatorManager(QWidget):
 
         self.manager = QNetworkAccessManager()
         self.pdata = None
+        self.clonelist = []
         
         self.run()
 
@@ -118,6 +119,8 @@ class TrickplayEmulatorManager(QWidget):
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "prtObjNme":
+				        self.clonelist = s[9:].split()
 				    elif luaCmd == "repUIInfo":
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repStInfo" :

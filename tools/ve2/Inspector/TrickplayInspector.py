@@ -392,6 +392,9 @@ class TrickplayInspector(QWidget):
         comboHandlers = {}
 
         def comboPropertyFill(propName, propOrder, data, gid=None) :
+            # QComboBox 
+            comboProp = QComboBox()
+
             def makeComboHandler(gid, combo, prop_name):
                 def handler(index):
                     currentPropVal = str(combo.itemText(combo.currentIndex()))                    
@@ -402,10 +405,11 @@ class TrickplayInspector(QWidget):
                         else:
                             self.sendData(gid, prop_name, currentPropVal)
                     self.preventChanges = False
+                    comboProp.setEditable(False)
                 return handler
 
-            # QComboBox 
-            comboProp = QComboBox()
+            def comboActivated(index):
+                comboProp.setEditable (True)
 
             idx = 0 
             current_idx = 0
@@ -416,6 +420,19 @@ class TrickplayInspector(QWidget):
                 comboValue = str(data[propName])
                 pname = propName
 
+            if pname == "source":
+                #comboProp.setEditable(True)
+                if len(self.main._emulatorManager.clonelist) > 0 :
+                    clone_idx = 0
+                    for i in self.main._emulatorManager.clonelist:
+                        if i == str(data['name']):
+                            del self.main._emulatorManager.clonelist[clone_idx]
+                        clone_idx = clone_idx + 1
+                                
+                    COMBOBOX_PROP_VALS[pname] = self.main._emulatorManager.clonelist
+                else:
+                    pass
+            
             for i in COMBOBOX_PROP_VALS[pname]:
                 if pname == 'direction':
                     idx = 0
@@ -448,6 +465,8 @@ class TrickplayInspector(QWidget):
                 comboNumber[propName] = propOrder
                 comboHandlers[propName] = makeComboHandler(str(data["gid"]), comboProp, propName)
                 QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[propName])
+
+            QObject.connect(comboProp, SIGNAL('activated(int)'), comboActivated)
 
         for p in PropertyIter(None):
 
@@ -494,6 +513,15 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+
+                elif p == "source":
+                    layers =  "','".join (self.screens[self.currentScreenName])
+                    layers = "{'"+layers+"'}"
+                    inputCmd = str("_VE_.printInstanceName("+layers+")")
+                    self.main._emulatorManager.trickplay.write(inputCmd+"\n")
+                    self.main._emulatorManager.trickplay.waitForBytesWritten()
+                    comboPropertyFill(p, n, data)
+
                 elif p == "src":
                     source_n = n
                     def openFileChooser():
@@ -691,10 +719,12 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
+
         if index < 0 or self.addItemToScreens is True:
             return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
+
         if self.screens.has_key(self.currentScreenName) == False :
             if self.old_screen_name == "":
                 return
@@ -723,6 +753,7 @@ class TrickplayInspector(QWidget):
 
             self.curLayerGid = theItem['gid'] 
             self.ui.inspector.setCurrentIndex(theItem.index())
+
                     
     def styleActivated(self, index):
         self.cbStyle.setEditable (True)
