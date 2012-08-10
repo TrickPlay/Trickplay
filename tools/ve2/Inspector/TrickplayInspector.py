@@ -388,15 +388,18 @@ class TrickplayInspector(QWidget):
         comboHandlers = {}
 
         def comboPropertyFill(propName, propOrder, data, gid=None) :
-            def makeComboHandler(gid, prop_name):
-                def handler():
+            def makeComboHandler(gid, combo, prop_name):
+                def handler(index):
+                    currentPropVal = str(combo.itemText(combo.currentIndex()))                    
                     if not self.preventChanges:
                         self.preventChanges = True
-                        pass
+                        if type(prop_name) == list:
+                            self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], '"'+currentPropVal+'"')
+                        else:
+                            self.sendData(gid, prop_name, currentPropVal)
                     self.preventChanges = False
                 return handler
 
-            #propValue = str(data[propName])
             # QComboBox 
             comboProp = QComboBox()
 
@@ -410,9 +413,18 @@ class TrickplayInspector(QWidget):
                 pname = propName
 
             for i in COMBOBOX_PROP_VALS[pname]:
-                comboProp.addItem(i)
-                if i == comboValue:
-                    current_idx = idx
+                if pname == 'direction':
+                    idx = 0
+                    for j in COMBOBOX_PROP_VALS[pname][str(data['type'])]:
+                        comboProp.addItem(j)
+                        if j == comboValue:
+                            current_idx = idx
+                        idx = idx + 1
+                    break
+                else:
+                    comboProp.addItem(i)
+                    if i == comboValue:
+                        current_idx = idx
                 idx = idx + 1
 
             comboProp.setCurrentIndex(current_idx)
@@ -425,13 +437,13 @@ class TrickplayInspector(QWidget):
                 strPropName = ' '.join(propName)
                 comboBox[strPropName] = comboProp
                 comboNumber[strPropName] = propOrder
-                comboHandlers[strPropName] = makeComboHandler(gid, propName)
-                #QObject.connect(bool_checkbox, SIGNAL('stateChanged(int)'), boolHandlers[strPropName])
+                comboHandlers[strPropName] = makeComboHandler(gid, comboProp, propName)
+                QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[strPropName])
             else :
                 comboBox[propName] = comboProp
                 comboNumber[propName] = propOrder
-                comboHandlers[propName] = makeComboHandler(str(data["gid"]), propName)
-                #QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[propName])
+                comboHandlers[propName] = makeComboHandler(str(data["gid"]), comboProp, propName)
+                QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[propName])
 
         for p in PropertyIter(None):
 
