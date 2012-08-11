@@ -275,6 +275,8 @@ TabBar = function(parameters)
             t.cell_w = nil
             t.cells = nil
             
+            t.style = instance.style
+            
             t.tab_w = instance.tab_w
             t.tab_h = instance.tab_h
             t.tab_location = instance.tab_location
