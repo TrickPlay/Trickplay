@@ -389,6 +389,8 @@ ListManager = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
+            t.style = nil
+            
             t.length       = instance.length
             t.vertical_alignment   = instance.vertical_alignment
             t.horizontal_alignment = instance.horizontal_alignment
@@ -884,6 +886,8 @@ LayoutManager = function(parameters)
 	override_property(instance,"attributes",
         function(oldf,self)
             local t = oldf(self)
+            
+            t.style = nil
             
             t.number_of_cols       = instance.number_of_cols
             t.number_of_rows       = instance.number_of_rows
