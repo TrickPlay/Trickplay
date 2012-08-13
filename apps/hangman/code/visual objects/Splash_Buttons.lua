@@ -163,6 +163,12 @@ local launch_key_board = function()
                                     
                                     Game_History:set_wins(  scores.wins)
                                     Game_History:set_losses(scores.losses)
+                                else
+                                    g_user.wins   = 0
+                                    g_user.losses = 0
+                                    
+                                    Game_History:set_wins(   0 )
+                                    Game_History:set_losses( 0 )
                                 end
                                 
                                 app_state.state = APP_STATE_MAIN_PAGE
