@@ -466,7 +466,7 @@ void Network::Response::replace_body( gpointer data , gsize size )
 Network::Settings::Settings( TPContext * context )
 :
     debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
-    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFYPEER, true ) ),
     ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
 {
 }
