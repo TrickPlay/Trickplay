@@ -8,7 +8,7 @@ if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
 if not BUTTON            then dofile("Button/Button.lua")                 end
 
-
+--[=[
 local button_test_group = Group{}
 
 screen:add( button_test_group )
@@ -237,7 +237,7 @@ end
 
 
 button_test_group:unparent()
-
+--]=]
 
 
 
@@ -285,8 +285,8 @@ local style = {
 screen:show()
 
 
+---[[
 b1 = Button()
-
 --------------------------------------------------------------------------------
 b2 = Button{x = 100,y = 200, label = "LABEL"}--,style = style}
 print("b2")
@@ -300,6 +300,8 @@ b3 = Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
 
 b3.w = 400
 --------------------------------------------------------------------------------
+--]]
+print("b4")
 b4 = Button{
     x = 200,y = 600,
     images = {
@@ -309,7 +311,8 @@ b4 = Button{
     h = 150
 }
 b4.w = 300
-
+print("derrrp")
+---[[
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
 
@@ -320,6 +323,7 @@ print(b3:to_json())
 print(b5:to_json())
 print(b5.style:to_json())
 b5.y = 700
+--]]
 screen:add(Rectangle{size = screen.size, color = "000033"},b1,b2,b3,b4,b5)
 
 controllers:start_pointer()

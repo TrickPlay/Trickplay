@@ -1,11 +1,38 @@
 WIDGET = true
 
+--List of Properties copied from docs
 local uielement_properties = {
-	"position","size","anchor_point","name","gid",
-	"x_rotation","y_rotation","z_rotation","scale",
-	"opacity","clip","is_visible"
+    "name",
+    "gid",
+    --"x",   redundant to position
+    --"y",
+    --"z",
+    --"depth",
+    "position",
+    --"w",   redundant to size
+    --"h",
+    --"width",
+    --"height",
+    "size",
+    "center",
+    "anchor_point",
+    "scale",
+    "x_rotation",
+    "y_rotation",
+    "z_rotation",
+    "is_scaled",
+    "is_rotated",
+    "opacity",
+    "clip",
+    "has_clip",
+    --"clip_to_size",    only applies to Groups
+    --"parent",          handled separately in Widget.attributes
+    "reactive",
+    "transformed_size",
+    "transformed_position",
+    "is_animating",
+    "is_visible",
 }
-
 --------------------------------------------------------------------------------
 -- This function receives a UIElement as its parameter sets up the attributes
 -- and methods of Widget. Namely:
@@ -23,17 +50,55 @@ local uielement_properties = {
 --------------------------------------------------------------------------------
 local function Widgetize(instance)
     
+    local env = {}
+    env.update = function() end
+    ----------------------------------------------------------------------------
+    
     --Pablo's function to duplicate the metatable of UIElements
     dupmetatable(instance)
     
     local mt = getmetatable(instance)
     ----------------------------------------------------------------------------
     -- subscribe_to() / unsubscribe()
-    set_up_subscriptions(mt,mt,mt.__newindex,mt.set)
+    
+    local old__newindex = mt.__newindex
+    local old_set       = mt.set
+    
+    local updating = false
+    
+    set_up_subscriptions(mt,mt,
+        function(...)
+            
+            old__newindex(...)
+            if not updating then
+                
+                updating = true
+                
+                env.update(instance,env)
+                
+                updating = false
+                
+            end
+        end,
+        function(...)
+            
+            old_set(...)
+            
+            if not updating then
+                
+                updating = true
+                
+                env.update(instance,env)
+                
+                updating = false
+                
+            end
+        end
+    )
     ----------------------------------------------------------------------------
     local key_functions = {}
     
-    function instance:add_key_handler(key,func)
+    override_function(instance,"add_key_handler",function(oldf,self,key,func)
         
         if not key_functions[key] then
             
@@ -49,7 +114,7 @@ local function Widgetize(instance)
             
         end
         
-    end
+    end)
     
     function instance:on_key_down(key)
         if not instance.enabled then return end
@@ -110,7 +175,7 @@ local function Widgetize(instance)
         )
     end
     
-    function instance:add_mouse_handler(event,func,ignore_enabled)
+    override_function(instance,"add_mouse_handler",function(oldf,self,event,func,ignore_enabled)
         
         if not event or not mouse_functions[event] then
             
@@ -129,7 +194,7 @@ local function Widgetize(instance)
         mouse_functions[event][func] = ignore_enabled
         
         return function()  mouse_functions[event][func] = nil  end
-    end
+    end)
     
     ----------------------------------------------------------------------------
     
@@ -159,6 +224,7 @@ local function Widgetize(instance)
                 
             end
             
+            t.parent  = self.parent and self.parent.gid
             t.style   = self.style.name
             t.focused = self.focused
             t.enabled = self.enabled
@@ -240,7 +306,7 @@ local function Widgetize(instance)
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-    return instance
+    return instance, env
 end
 
 --------------------------------------------------------------------------------
@@ -248,12 +314,40 @@ end
 
 Widget = function(parameters)
     
-    return  Widgetize(  Group()  ):set( 
+    local instance, env = Widgetize(  Group()  )
+    
+    instance:set( 
         
         is_table_or_nil( "Widget_Group", parameters ) 
         
     )
     
+    env.add           = instance.add
+    env.remove        = instance.remove
+    env.clear         = instance.clear
+    env.foreach_child = instance.foreach_child
+    env.find_child    = instance.find_child
+    env.raise_child   = instance.raise_child
+    env.lower_child   = instance.lower_child
+    env.set_children  = getmetatable(instance).__setters__.children
+    env.get_children  = getmetatable(instance).__getters__.children
+    
+    override_function( instance, "add",           function() print(          "'add' method is removed") end )
+    override_function( instance, "remove",        function() print(       "'remove' method is removed") end )
+    override_function( instance, "clear",         function() print(        "'clear' method is removed") end )
+    override_function( instance, "foreach_child", function() print("'foreach_child' method is removed") end )
+    override_function( instance, "find_child",    function() print(   "'find_child' method is removed") end )
+    override_function( instance, "raise_child",   function() print(  "'raise_child' method is removed") end )
+    override_function( instance, "lower_child",   function() print(  "'lower_child' method is removed") end )
+    
+	override_property(
+        instance,"children", 
+        function() print("'children' property is removed") end, 
+        function() print("'children' property is removed") end
+    )
+    
+    
+    return instance, env
 end
 Widget_Group = function(parameters)
     

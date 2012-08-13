@@ -61,29 +61,49 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         end
         
     end
-    
-    obj.set = function(self,t)
-        
-        old_set(self, t)
-        
-        if type(t) == "table" then
-        local p = {}
-        
-        for key,_ in pairs(t) do
-            if subscriptions[key] then
-                
-                for f,_ in pairs(subscriptions[key]) do f(key) end
-                
+    do
+        local setting = false
+        obj.set = function(self,t)
+            if setting then
+                old_set(self, t)
+            else
+                setting = true
+                old_set(self, t)
+                self:notify(t)
+                setting = false
             end
-            table.insert(p,key)
+            
+            return self
+            
         end
-        --functionality of widgets relies on the callbacks in 
-        -- 'subscriptions_all' happening after the callbacks
-        -- in 'subscriptions'
-        for f,_ in pairs(subscriptions_all ) do f(p) end
+    end
+    do
+        local notifying = false
+        local p = {}
+        obj.notify = function(self,t,force)
+            if notifying and not force then 
+                print("WARNING. Object is already notifying subscribers")
+                return 
+            end
+            notifying = true
+            p = nil
+            if type(t) == "table" then
+                p = {}
+                for key,_ in pairs(t) do
+                    if subscriptions[key] then
+                        
+                        for f,_ in pairs(subscriptions[key]) do f(key) end
+                        
+                    end
+                    table.insert(p,key)
+                end
+            end
+            --functionality of widgets relies on the callbacks in 
+            -- 'subscriptions_all' happening after the callbacks
+            -- in 'subscriptions'
+            for f,_ in pairs(subscriptions_all ) do f(p) end
+            notifying = false
         end
-        return self
-        
     end
     mt.__newindex = function(self,key,value)
         
