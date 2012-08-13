@@ -417,19 +417,28 @@ function self:won_against(entry)
     
     their_turn_list:remove_entry(entry,function()
         
-        if not entry:get_session().i_counted_score then
+        local session = entry:get_session()
         
-            entry:get_session().i_counted_score = true
+        if not session.i_counted_score then
+        
+            session.i_counted_score = true
+            
+            game_server:update(
                 
-            g_user.wins = g_user.wins + 1
-            
-            if g_user.wins > 9999 then g_user.wins = 9999 end
-            
-            game_history:set_wins( g_user.wins )
+                session,  function(t)
+                    
+                    g_user.wins = g_user.wins + 1
+                    
+                    if g_user.wins > 9999 then g_user.wins = 9999 end
+                    
+                    game_history:set_wins( g_user.wins )
+                    
+                end
+            )
             
         end
         
-        self:add_win(entry:get_session().opponent_name)
+        self:add_win(session.opponent_name)
         
     end)
 
@@ -440,19 +449,28 @@ function self:lost_against(entry)
     
     my_turn_list:remove_entry( entry, function()
         
-        if not entry:get_session().i_counted_score then
+        local session = entry:get_session()
         
-            entry:get_session().i_counted_score = true
+        if not session.i_counted_score then
+        
+            session.i_counted_score = true
             
-            g_user.losses = g_user.losses + 1
-            
-            if g_user.losses > 9999 then g_user.losses = 9999 end
-            
-            game_history:set_losses( g_user.losses )
+            game_server:update(
+                
+                session,  function(t)
+                    
+                    g_user.losses = g_user.losses + 1
+                    
+                    if g_user.losses > 9999 then g_user.losses = 9999 end
+                    
+                    game_history:set_losses( g_user.losses )
+                    
+                end
+            )
             
         end
         
-        self:add_loss(entry:get_session().opponent_name)
+        self:add_loss(session.opponent_name)
         
     end)
     
@@ -543,9 +561,42 @@ function self:setup_lists()
                     
                     if sesh.opponent_score == 3 then
                         self:add_win(sesh.opponent_name)
-                        g_user.wins = g_user.wins + 1
-                        game_history:set_wins( g_user.wins )
+                        
+                        sesh.i_counted_score = true
+                        
+                        game_server:update(
+                            
+                            sesh,  function(t)
+                                
+                                g_user.wins = g_user.wins + 1
+                                
+                                if g_user.wins > 9999 then g_user.wins = 9999 end
+                                
+                                game_history:set_wins( g_user.wins )
+                                
+                            end
+                        )
+                        
+                        
                     else
+                    
+                        sesh.i_counted_score = true
+                        
+                        game_server:update(
+                            
+                            sesh,  function(t)
+                                
+                                g_user.losses = g_user.losses + 1
+                                
+                                if g_user.losses > 9999 then g_user.losses = 9999 end
+                                
+                                game_history:set_losses( g_user.losses )
+                                
+                            end
+                        )
+                    
+                    
+                    
                         self:add_loss(sesh.opponent_name)
                         g_user.losses = g_user.losses + 1
                         game_history:set_losses( g_user.losses )
@@ -561,8 +612,8 @@ function self:setup_lists()
             
         --end
         
-        game_history:set_wins(   g_user.wins   )
-        game_history:set_losses( g_user.losses )
+        --game_history:set_wins(   g_user.wins   )
+        --game_history:set_losses( g_user.losses )
         game_state.check_server:on_timer()
     end)
     

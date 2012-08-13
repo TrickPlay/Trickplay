@@ -186,7 +186,7 @@ typedef struct TPContext TPContext;
                             that this is always disabled on production builds.
                             Defaults to "0".
 
-    TP_SSL_VERIFY_PEER -    Whether server certificates are verified for SSL connections.
+    TP_SSL_VERIFYPEER -     Whether server certificates are verified for SSL connections.
                             Defaults to "1".
 
     TP_SSL_CA_CERT_FILE -   Path to a file that contains top level certificates for
@@ -316,7 +316,7 @@ typedef struct TPContext TPContext;
 #define TP_FONTS_PATH                   "fonts_path"
 #define TP_DOWNLOADS_PATH               "downloads_path"
 #define TP_NETWORK_DEBUG                "network_debug"
-#define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
+#define TP_SSL_VERIFYPEER               "ssl_verifypeer"
 #define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
 #define TP_LIRC_ENABLED                 "lirc_enabled"
 #define TP_LIRC_UDS                     "lirc_uds"
