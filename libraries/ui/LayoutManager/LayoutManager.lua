@@ -577,7 +577,7 @@ LayoutManager = setmetatable(
                     end
                 end,
                 attributes = function(instance,env)
-                    return function(oldf)
+                    return function(oldf,self)
                         local t = oldf(self)
                         
                         t.number_of_cols       = instance.number_of_cols
@@ -589,7 +589,7 @@ LayoutManager = setmetatable(
                         t.cell_h = instance.cell_h
                         t.cell_w = instance.cell_w
                         t.cells = {}
-                        for_each(cells,function(obj,r,c)
+                        env.for_each(cells,function(obj,r,c)
                             if not t.cells[r] then
                                 t.cells[r] = {}
                             end
