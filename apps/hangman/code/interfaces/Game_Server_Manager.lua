@@ -139,14 +139,20 @@ local on_match_updated =
         	
             print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
             
-            if match_status == "completed" then 
-                print("Received update for a completed match that I was not tracking. Ignoring")
+            if match_status == "completed" or match_status == "aborted" then 
+                print("Received update for a aborted/completed match that I was not tracking. Ignoring")
                 return
             end
             matches[match_id] = {}
             --matches[match_id].id = in_room_id
             --matches[match_id].nick = g_user.name
             matches[match_id].match_id = match_id
+            
+        elseif match_status == "aborted" then
+            
+            all_seshs[match_id]:abort(match_state.opaque)
+            
+            return
             
         end
         
@@ -283,8 +289,29 @@ function Game_Server:update_game_history(callback)
     
     
 	check_gameservice_is_available( )
+    
+    print("wins = ".. g_user.wins, "losses = "..g_user.losses)
     gameservice:update_user_game_data( 
     		game_id, base64_encode(json:stringify{wins = g_user.wins, losses = g_user.losses}), callback
+    )
+    
+end
+
+function Game_Server:get_game_history(callback)
+    --[[    
+        this function gets the Win Loss Record of the logged in user
+    --]]
+    
+    
+	check_gameservice_is_available( )
+    
+    gameservice:get_user_game_data( 
+    		game_id, 
+            function(gameservice, response_status, game_data )
+                
+                callback( json:parse( base64_decode(  game_data.opaque  ) ) )
+                
+            end
     )
     
 end
@@ -370,7 +397,7 @@ function Game_Server:get_a_wild_card_invite(callback)
 			
 			callback( new_match_id )
 		end
-				callback( matches[match_id] )
+				--callback( matches[match_id] )
 
 	match_request = {
 			game_id = game_id_urn,

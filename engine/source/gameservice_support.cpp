@@ -133,7 +133,7 @@ public:
 	}
 protected:
 	bool run() {
-		std::cout << "Inside DoCallbacksAction" << std::endl;
+	//	std::cout << "Inside DoCallbacksAction" << std::endl;
 		game_service_->DoCallbacks();
 		return false;
 	}
@@ -154,10 +154,12 @@ public:
 protected:
 	bool run() {
 	//	std::cout << "Inside OpenAppAction" << std::endl;
-		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS)
+		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS
+				|| game_service_->state() == GameServiceSupport::INITIALIZING
+				|| game_service_->state() == GameServiceSupport::INIT_COMPLETED)
 			return true;
 		else if (game_service_->state() == GameServiceSupport::LOGIN_SUCCESSFUL) {
-			std::cout << "Inside OpenAppAction. Login was successful. initiating OpenApp" << std::endl;
+		//	std::cout << "Inside OpenAppAction. Login was successful. initiating OpenApp" << std::endl;
 			game_service_->state_ = GameServiceSupport::APP_OPENING;
 			game_service_->delegate_->OpenApp(app_id_, cb_data_);
 		} else {
@@ -181,6 +183,7 @@ GameServiceSupport::GameServiceSupport(TPContext * context)
 
 void GameServiceSupport::init() {
 
+	state_ = INITIALIZING;
 	SystemDatabase * db = tpcontext_->get_db();
 
 	int current_profile_id = db->get_current_profile().id;
@@ -216,6 +219,7 @@ void GameServiceSupport::init() {
 	}
 	else
 	{
+		state_ = INIT_COMPLETED;
 		Login(user_id_, password, domain, host, port);
 	}
 	/*
@@ -242,7 +246,8 @@ StatusCode GameServiceSupport::RegisterAccount(const AccountInfo& account_info, 
 StatusCode GameServiceSupport::Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) {
 	// set up a idle handler to monitor Login state
 
-	if (state_ > NO_CONNECTION) {
+	// Don't allow login if user is already logged in or if a login action is in progress
+	if (state_ > INIT_COMPLETED) {
 		return INVALID_STATE;
 	}
 	state_ = LOGIN_IN_PROGRESS;
@@ -258,8 +263,8 @@ StatusCode GameServiceSupport::OpenApp(const AppId& app_id) {
 	if (state_ <= NO_CONNECTION)
 		return libgameservice::NOT_CONNECTED;
 
-	if (state_ != LOGIN_SUCCESSFUL && state_ != LOGIN_IN_PROGRESS)
-		return libgameservice::FAILED;
+	//if (state_ > LOGIN_SUCCESSFUL)
+		//return libgameservice::FAILED;
 
 	::Action::post(new OpenAppAction(this, app_id, NULL));
 	return OK;
@@ -401,18 +406,20 @@ void GameServiceSupport::OnRegisterAccountResponse(const ResponseStatus& rs,
 				*/
 
 	if (rs.status_code() == OK) {
-
+		if (state_ == INITIALIZING)
+			state_ = INIT_COMPLETED;
 		if (login_after_register_flag_) {
 			login_after_register_flag_ = false;
 
 			SystemDatabase * db = tpcontext_->get_db();
 			String user_id = db->get_string(GAMESERVICE_USER_ID_KEY, "");
 			if (user_id.empty()) {
+				user_id = account_info.user_id();
 				db->set(GAMESERVICE_USER_ID_KEY, account_info.user_id());
 				db->set(GAMESERVICE_PASSWORD_KEY, account_info.password());
 			}
 
-			if (state_ <= NO_CONNECTION) {
+			if (state_ <= INIT_COMPLETED) {
 				// retrieve domain, host and port information from the configuration
 				String domain = tpcontext_->get(TP_GAMESERVICE_DOMAIN);
 				String host = tpcontext_->get(TP_GAMESERVICE_HOST);
@@ -421,12 +428,16 @@ void GameServiceSupport::OnRegisterAccountResponse(const ResponseStatus& rs,
 				Login(account_info.user_id(), account_info.password(), domain, host, port);
 			}
 		}
+	} else {
+		if (state_ == INITIALIZING)
+			state_ = INIT_FAILED;
 	}
 }
 
 void GameServiceSupport::OnRegisterAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
-	std::cout << "OnRegisterAppResponse(). status_code:" << statusToString(
+/*	std::cout << "OnRegisterAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
+			*/
 }
 
 void GameServiceSupport::OnRegisterGameResponse(const ResponseStatus& rs, const Game& game, void* cb_data) {
@@ -489,8 +500,9 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 }
 
 void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id, void* cb_data) {
-	std::cout << "OnCloseAppResponse(). status_code:" << statusToString(
+	/*std::cout << "OnCloseAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
+			*/
 	if (rs.status_code() == OK) {
 		state_ = LOGIN_SUCCESSFUL;
 	} else {
@@ -550,9 +562,9 @@ void GameServiceSupport::OnStartMatchResponse(const ResponseStatus& rs, void* cb
 }
 
 void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data) {
-	std::cout << "OnTurnResponse(). status_code:"
+	/*std::cout << "OnTurnResponse(). status_code:"
 			<< statusToString( rs.status_code() )
-			<< std::endl;
+			<< std::endl;*/
 
 		lua_State* L = get_lua_state();
 
@@ -623,16 +635,16 @@ void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb
 void GameServiceSupport::OnGetMatchDataResponse(const ResponseStatus& rs, const MatchData& match_data, void* cb_data) {
 	lua_State* L = get_lua_state();
 
-	std::cout << "Inside OnGetMatchDataResponse. number of match_infos = " << match_data.const_match_infos().size() << std::endl;
+	//std::cout << "Inside OnGetMatchDataResponse. number of match_infos = " << match_data.const_match_infos().size() << std::endl;
 	TPGameServiceUtil::push_response_status_arg( L, rs );
 
 	if (rs.status_code() == OK) {
 
-		std::cout << "Inside OnGetMatchDataResponse. pushing match_data into lua stack" << std::endl;
+	//	std::cout << "Inside OnGetMatchDataResponse. pushing match_data into lua stack" << std::endl;
 
 		TPGameServiceUtil::push_match_data_arg( L, match_data );
 
-		std::cout << "Inside OnGetMatchDataResponse. finished pushing match_data into lua stack" << std::endl;
+	//	std::cout << "Inside OnGetMatchDataResponse. finished pushing match_data into lua stack" << std::endl;
 
 		invoke_lua_callback( L, (CallbackDataStruct *)cb_data, 2, 0);
 
