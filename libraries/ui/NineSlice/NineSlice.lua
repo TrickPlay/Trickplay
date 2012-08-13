@@ -105,6 +105,100 @@ local make_canvas = function(self,state)
     }
 end
 local default_parameters = {}
+
+local SingleNineSlice = setmetatable(
+    {},
+    {
+        __index = function(self,k)
+            
+            return getmetatable(self)[k]
+            
+        end,
+        __call = function(self,p)
+            
+            return self:declare():set(p or {})
+            
+        end,
+        subscriptions = {
+            ["style"] = function(instance,env)
+                return function()
+                end
+            end,
+        },
+        public = {
+            properties = {
+            },
+            functions = {
+            },
+        },
+        private = {
+            make_single_nine_slice = function(instance,env)
+                return function(cell,r,c)
+                    if cell.w  >= (env.col_widths[c] or 0) then 
+                        env.col_widths[c] = cell.w
+                    end
+                    print(r,c,env.col_widths[r])
+                end
+            end,
+        },
+        
+        
+        declare = function(self,parameters)
+        end,
+    }
+)
+
+NineSlice = setmetatable(
+    {},
+    {
+        __index = function(self,k)
+            
+            return getmetatable(self)[k]
+            
+        end,
+        __call = function(self,p)
+            
+            return self:declare():set(p or {})
+            
+        end,
+        subscriptions = {
+            ["style"] = function(instance,env)
+                return function()
+                end
+            end,
+        },
+        public = {
+            properties = {
+            },
+            functions = {
+            },
+        },
+        private = {
+            make_single_nine_slice = function(instance,env)
+                return function(cell,r,c)
+                    if cell.w  >= (env.col_widths[c] or 0) then 
+                        env.col_widths[c] = cell.w
+                    end
+                    print(r,c,env.col_widths[r])
+                end
+            end,
+        },
+        
+        
+        declare = function(self,parameters)
+            local instance,env = LayoutManager:declare()
+        
+            env.left_col_w  = 0
+            env.right_col_w = 0
+            env.top_row_h   = 0
+            env.btm_row_h   = 0
+        end,
+    }
+)
+
+
+
+
 NineSlice = function(parameters)
     
 	--input is either nil or a table

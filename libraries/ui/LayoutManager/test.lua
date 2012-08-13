@@ -30,7 +30,7 @@ test_group:unparent()
 
 
 screen:show()
----[[
+--[[
 lm1 = LayoutManager{
     number_of_rows = 2,
     number_of_cols = 2,
@@ -40,6 +40,7 @@ lm1 = LayoutManager{
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
     }
 }
+--]]
 
 lm2 = LayoutManager{
     y = 400,
@@ -51,7 +52,7 @@ lm2 = LayoutManager{
         {Button(),Button()},
     }
 }
-
+--[[
 lm3 = ListManager{
     x=500,
     length = 2,
@@ -59,6 +60,7 @@ lm3 = ListManager{
         Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}
     }
 }
+--]]
 dolater(function()
     lm2:grab_key_focus()
 end)

@@ -150,24 +150,28 @@ local style = {
 
 
 screen:show()
-
+print("ssssssssssssssssssssssssssssssssss")
+---[[
 b0 = ToggleButton()
-
 b0.x = 400
-b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text"}
-b2 = ToggleButton{x=400,y=200,style = style,selected = true}
 
+b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text"}
+
+b2 = ToggleButton{x=400,y=200,style = style,selected = true,enabled = false}
+
+--]]
 b3 = ToggleButton{
     name = "B2",
     x = 600,y = 0,
     images = {
         default = Group{ children={Image{src="Button/button3.png"},Image{src="Button/strike-off.png"}}},
         focus   = Group{children={Image{src="Button/button-focus.png"},Image{src="Button/strike-off.png"}}},
-        selection = Image{src="Button/strike-on.png",x=-8,y=-8},
+        selection = Group{children={Image{src="Button/strike-on.png",x=-8,y=-8}}},
     },
 }
 
-
+--]]
+print("tttttttttttttttttttttttttttttttttt")
 
 
 
