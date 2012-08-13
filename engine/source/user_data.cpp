@@ -531,13 +531,14 @@ gint find_ref( gconstpointer a , gconstpointer b ) {
 
 //.............................................................................
 
-void UserData::remove_callback( GSList *link , GSList *list , char * name , lua_State *L )
+GSList * UserData::remove_callback( GSList *link , GSList *list , char * name , lua_State *L )
 {
     int *refptr = (int*) link->data;
     lb_strong_unref( L , *refptr );
     g_free ( refptr );
     list = g_slist_delete_link( list , link );
     g_hash_table_insert( callback_lists , name , list );
+    return list;
 }
 
 //.............................................................................
@@ -565,7 +566,7 @@ GSList * UserData::remove_last_callback( char *name , lua_State * L )
 
     if ( last )
     {
-        remove_callback( last , callback_list , name , L );
+        callback_list = remove_callback( last , callback_list , name , L );
     }
 
     return callback_list;
