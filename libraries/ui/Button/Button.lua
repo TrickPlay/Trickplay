@@ -304,12 +304,15 @@ Button = setmetatable(
                     local label_colors = instance.style.text.colors
                     local prev_state
                     local label = env.label
-                    if label_state then
-                        prev_state = label_state.state
-                        label_state.timeline:stop()
+                    if env.label_state then
+                        
+                        prev_state = env.label_state.state
+                        if  env.label_state.timeline then
+                            env.label_state.timeline:stop()
+                        end
                     end
                     
-                    label_state = AnimationState{
+                    env.label_state = AnimationState{
                         duration    = 100,
                         transitions = {
                             {
@@ -327,7 +330,8 @@ Button = setmetatable(
                         }
                     }
                     
-                    label_state:warp(prev_state or "DEFAULT")
+                    env.label_state:warp(prev_state or "DEFAULT")
+                    
                 end
             end,
             center_label = function(instance,env)
@@ -485,7 +489,7 @@ Button = setmetatable(
         env.on_released   = false
         env.images        = false
         env.label         = Text{text = "Button"}
-        env.label_state   = {state = "OFF"}
+        env.label_state   = {state = "DEFAULT"}
         env.create_canvas = create_canvas
         
         env.image_states = {}
