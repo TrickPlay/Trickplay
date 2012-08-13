@@ -4,6 +4,7 @@
 #include "lb.h"
 #include "util.h"
 #include "profiler.h"
+#include <string.h>
 
 //=============================================================================
 
@@ -453,7 +454,7 @@ int UserData::add_callback( char * name , lua_State * L )
     assert( !lua_isnil( L , -1 ) );
 
     int * ref = (int*) malloc( sizeof( int ) );
-    *ref = lb_weak_ref( L );
+    *ref = lb_strong_ref( L );
 
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
     callback_list = g_slist_prepend( callback_list , ref );
@@ -469,7 +470,7 @@ int UserData::add_last_callback( char * name , lua_State * L )
     assert( !lua_isnil( L , -1 ) );
 
     int * ref = (int*) malloc( sizeof( int ) );
-    *ref = lb_weak_ref( L );
+    *ref = lb_strong_ref( L );
 
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
     callback_list = g_slist_append( callback_list , ref );
@@ -525,7 +526,7 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 	int ref = *(int*) iter->data;
 
 	// push callback on top of stack (above arguments)
-	lb_weak_deref( L , ref );
+	lb_strong_deref( L , ref );
 
 	// clear stack and return 0 if callback is null
 	if ( lua_isnil( L , -1 ) )
@@ -574,7 +575,7 @@ int UserData::get_last_callback( char * name , lua_State * L )
     if (callback_list)
     {
 	int ref = *(int*) g_slist_last( callback_list )->data;
-	lb_weak_deref( L , ref );
+	lb_strong_deref( L , ref );
     } else
     {
 	lua_pushnil( L );
