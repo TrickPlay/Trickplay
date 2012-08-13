@@ -133,10 +133,6 @@ Button = setmetatable(
                 return function(oldf) return env.label.text     end,
                 function(oldf,self,v) env.label.text = v end
             end,
-            states = function(instance,env)
-                return function(oldf) return env.states     end,
-                function(oldf,self,v) env.states = v end
-            end,
             on_pressed =  function(instance,env)
                 return function(oldf) return env.on_pressed     end,
                 function(oldf,self,v) env.on_pressed = v end
