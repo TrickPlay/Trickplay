@@ -944,18 +944,7 @@ class Text [[ClutterActor*]] actor
         }
         else
         {
-            // callback already exists ==> replace
-            if ( ud->callback_attached( name ) )
-            {
-                ud->remove_last_callback( name , L );
-                ud->add_last_callback( name , L );
-            }
-
-            // no current callback ==> add
-            else
-            {
-                ud->add_callback( name , L );
-            }
+            ud->set_last_callback( name , L );
         }
     ]];
 
