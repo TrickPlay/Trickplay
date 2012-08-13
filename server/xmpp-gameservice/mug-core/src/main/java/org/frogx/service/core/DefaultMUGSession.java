@@ -121,6 +121,7 @@ public class DefaultMUGSession implements MUGSession {
 	 */
 	public DefaultMUGSession(DefaultMUGService component,
 			MUGManager mugManager, JID address) {
+		log.info("creating new MUG session for " + address);
 		this.component = component;
 		this.mugManager = mugManager;
 		this.jid = address;
@@ -152,7 +153,11 @@ public class DefaultMUGSession implements MUGSession {
 	 * @return True if the user is an occupant of any game room.
 	 */
 	public boolean isParticipant() {
-		return !((occupants == null) || occupants.isEmpty());
+		boolean hasParticipants = !((occupants == null) || occupants.isEmpty());
+		if (openApps != null && !openApps.isEmpty())
+			return true;
+		else
+			return hasParticipants;
 	}
 
 	/**

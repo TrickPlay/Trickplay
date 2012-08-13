@@ -790,6 +790,7 @@ public class DefaultMUGService implements MUGService {
 				synchronized (session) {
 				// If user is not present in any room then remove the session
 					if (!session.isParticipant()) {
+						log.info("expiring session " + session.getAddress() + ". session no participants");
 						removeSession(session.getAddress());
 						continue;
 					}
@@ -798,6 +799,7 @@ public class DefaultMUGService implements MUGService {
 						continue;
 					}
 					if (session.getLastPacketTime() < deadline) {
+						log.info("expiring session " + session.getAddress());
 						removeSession(session.getAddress());
 					}
 				}
