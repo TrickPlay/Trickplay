@@ -1020,6 +1020,7 @@ int GetMatchDataTask::ProcessResponse() {
 				continue;
 			}
 
+			mi.set_status(status);
 
 			mi.set_state( extractMatchState( stateElement ) );
 

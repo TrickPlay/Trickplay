@@ -24,8 +24,8 @@ hangman_game_config = function()
         game_type = "correspondence",
         join_after_start = true,
         min_players_for_start = 1,
-        max_duration_per_turn = 100000000,  -- only applicable for online  game_type
-        abort_when_player_leaves = false, -- only applicable for online game_type
+        max_duration_per_turn = 2*60*1000,  -- only applicable for online  game_type
+        abort_when_player_leaves = true, -- only applicable for online game_type
         roles = {
         		{ name = "p1" },
         		{ name = "p2", cannot_start = true }
@@ -38,7 +38,7 @@ function main()
     
     local font = "FreeSans"
     
-    g_font     = "FreeSans"--"IM FELL English SC"
+    g_font     = "IM FELL English SC"
     app_state  = nil
     
     do

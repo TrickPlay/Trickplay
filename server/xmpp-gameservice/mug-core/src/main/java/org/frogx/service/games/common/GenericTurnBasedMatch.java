@@ -393,8 +393,13 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			}
 			
 			status = Status.active;
-			if (firstTurnIndex<0)
-				firstTurnIndex = 0;
+			if (firstTurnIndex<0) {
+				for(int i=0; i<players.length; i++)
+					if (players[i] != null) {
+						firstTurnIndex = i;
+						break;
+					}
+			}
 			nextTurnIndex = firstTurnIndex;
 			setTurnInfo();
 	//	}
@@ -607,7 +612,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			if (mug.abortWhenPlayerLeaves()) {
 				status = Status.aborted;
 			} else {
-				nextTurnIndex = -1;
+				nextTurnIndex = -1; // TODO: this part is flaky ??
 			}
 			//
 		}
@@ -615,6 +620,10 @@ public class GenericTurnBasedMatch implements MUGMatch {
 		removeSpectator(occupant);
 	}
 
+	public void abort() {
+		if (status != Status.completed)
+			status = Status.aborted;
+	}
 
 	/**
 	 * Initialize the configuration form of the match.

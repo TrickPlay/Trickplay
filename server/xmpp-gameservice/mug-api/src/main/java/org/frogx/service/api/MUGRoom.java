@@ -401,4 +401,6 @@ public interface MUGRoom extends Result {
 	public void rejoin(MUGOccupant occupant, Presence presence) throws ForbiddenException, ComponentException;
 	
 	public void markOffline(MUGOccupant occupant);
+	
+	public void abortMatch();
 }
