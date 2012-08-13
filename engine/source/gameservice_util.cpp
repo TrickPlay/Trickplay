@@ -277,7 +277,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 	lua_pushnil( L );
 	while(lua_next(L, pt) != 0)
 	{
-		std::cout << "extracting role info" << std::endl;
+	//	std::cout << "extracting role info" << std::endl;
 		if (!lua_istable(L, -1))
 		{
 			return luaL_error(L, "Incorrect argument, failed to access properties table for a role");
@@ -327,7 +327,7 @@ int populate_game( lua_State * L, int index, libgameservice::Game& game )
 		}
 		lua_pop(L,1);
 
-		std::cout << "finished extracting role" << std::endl;
+	//	std::cout << "finished extracting role" << std::endl;
 		game.roles().push_back(libgameservice::Role(role_name, cannot_start, first_role));
 
 		lua_pop( L, 1 ); // pop the role table
@@ -657,7 +657,7 @@ void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_
 	std::vector<libgameservice::MatchInfo>::const_iterator it;
 	for( it=match_data.const_match_infos().begin(); it < match_data.const_match_infos().end(); it++ ) {
 
-		std::cout << "populating lua table for match_id= " << (*it).id() <<  std::endl;
+	//	std::cout << "populating lua table for match_id= " << (*it).id() <<  std::endl;
 		lua_newtable( L );
 		int match_info_t = lua_gettop( L );
 
@@ -681,12 +681,12 @@ void push_match_data_arg( lua_State * L, const libgameservice::MatchData& match_
 		push_match_state_arg( L, (*it).const_state() );
 		lua_rawset( L, match_info_t );
 
-		std::cout << "the top of the stack is " << lua_gettop( L ) << ". match_info table is at index " << match_info_t << std::endl;
+		//std::cout << "the top of the stack is " << lua_gettop( L ) << ". match_info table is at index " << match_info_t << std::endl;
 		lua_rawseti( L, match_infos_t, i++ );
 	}
 
-	std::cout << "finished populating match_info into match_infos. the top of the stack is " << lua_gettop( L )
-			<< ". match_data table is at index " << t << std::endl;
+	/*std::cout << "finished populating match_info into match_infos. the top of the stack is " << lua_gettop( L )
+			<< ". match_data table is at index " << t << std::endl;*/
 	lua_rawset( L, t );
 }
 
