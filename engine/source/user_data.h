@@ -332,7 +332,7 @@ private:
 
     friend struct Handle;
 
-    void remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
+    GSList * remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
 
     //.........................................................................
 
