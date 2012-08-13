@@ -141,6 +141,8 @@ ArrowPane = setmetatable(
                 end,
                 attributes = function(instance,env)
                     return function(oldf,self)
+                        if self == nil then error("no",3) end
+                        print(self)
                         local t = oldf(self)
 						
 						t.number_of_cols       = nil
@@ -222,6 +224,7 @@ ArrowPane = setmetatable(
                             instance.style.arrow.size/2,
                             instance.style.arrow.size/2
                         },
+                        reactive = true,
                         label = "", 
                         style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
@@ -235,6 +238,7 @@ ArrowPane = setmetatable(
                             instance.style.arrow.size/2,
                             instance.style.arrow.size/2
                         },
+                        reactive = true,
                         label = "", 
                         style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
@@ -248,6 +252,7 @@ ArrowPane = setmetatable(
                             instance.style.arrow.size/2,
                             instance.style.arrow.size/2
                         },
+                        reactive = true,
                         label = "", 
                         style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow,
@@ -261,6 +266,7 @@ ArrowPane = setmetatable(
                             instance.style.arrow.size/2,
                             instance.style.arrow.size/2
                         },
+                        reactive = true,
                         label = "", 
                         style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
@@ -442,7 +448,7 @@ ArrowPane = setmetatable(
             env.lm_update = env.update
             env.new_w = true
             env.new_h = true
-            
+            env.move_by = 10
             
             for name,f in pairs(self.private) do
                 env[name] = f(instance,env)
