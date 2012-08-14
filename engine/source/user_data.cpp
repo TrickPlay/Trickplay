@@ -346,11 +346,30 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
 //.............................................................................
 
+void unref_and_free_callback( gpointer value , gpointer data )
+{
+    int *refptr = (int*) value;
+    lb_strong_unref( (lua_State*) data , *refptr );
+    g_free( refptr );
+}
+
+void unref_and_free_callbacks( gpointer key , gpointer value , gpointer data )
+{
+    GSList * callback_list = (GSList*) value;
+    g_slist_foreach( callback_list , unref_and_free_callback , data );
+    g_slist_free( callback_list );
+}
+
 void UserData::finalize( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
 
     tplog( "FINALIZING '%s' UD %p : MASTER %p : CLIENT %p" , self->type , self , self->master , self->client );
+
+    // unreference callbacks and free callback_lists
+
+    g_hash_table_foreach( self->callback_lists , unref_and_free_callbacks , L );
+    g_hash_table_destroy( self->callback_lists );
 
     if ( self->master )
     {
@@ -465,7 +484,7 @@ int UserData::add_callback( char * name , lua_State * L )
 
 //...............................................................................
 
-int UserData::add_last_callback( char * name , lua_State * L )
+int UserData::set_last_callback( char * name , lua_State * L )
 {
     assert( !lua_isnil( L , -1 ) );
 
@@ -473,6 +492,10 @@ int UserData::add_last_callback( char * name , lua_State * L )
     *ref = lb_strong_ref( L );
 
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
+    if ( callback_list )
+    {
+        callback_list = remove_last_callback( name , L );
+    }
     callback_list = g_slist_append( callback_list , ref );
     g_hash_table_insert( callback_lists , name ,  callback_list );
 
@@ -481,13 +504,44 @@ int UserData::add_last_callback( char * name , lua_State * L )
 
 //.............................................................................
 
-gint remove_helper( gconstpointer a , gconstpointer b ) {
+int UserData::get_last_callback( char * name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists, name );
+    if (callback_list)
+    {
+	int ref = *(int*) g_slist_last( callback_list )->data;
+	lb_strong_deref( L , ref );
+    } else
+    {
+	lua_pushnil( L );
+    }
+    return 1;
+
+}
+
+//.............................................................................
+
+gint find_ref( gconstpointer a , gconstpointer b ) {
     if ( *(int*) a == *(int*) b )
     {
 	return 0;
     }
     return 1;
 }
+
+//.............................................................................
+
+GSList * UserData::remove_callback( GSList *link , GSList *list , char * name , lua_State *L )
+{
+    int *refptr = (int*) link->data;
+    lb_strong_unref( L , *refptr );
+    g_free ( refptr );
+    list = g_slist_delete_link( list , link );
+    g_hash_table_insert( callback_lists , name , list );
+    return list;
+}
+
+//.............................................................................
 
 void UserData::remove_callback( char * name, lua_State * L )
 {
@@ -497,12 +551,25 @@ void UserData::remove_callback( char * name, lua_State * L )
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists, name );
     GSList * found = NULL;
 
-    if ( ( found = g_slist_find_custom( callback_list , &ref , remove_helper ) ) )
+    if ( ( found = g_slist_find_custom( callback_list , &ref , find_ref ) ) )
     {
-	g_free ( (int*) found->data );
-	callback_list = g_slist_delete_link( callback_list , found );
-	g_hash_table_insert( callback_lists , name , callback_list );
+        remove_callback( found , callback_list , name , L );
     }
+}
+
+//.............................................................................
+
+GSList * UserData::remove_last_callback( char *name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists , name );
+    GSList * last = g_slist_last( callback_list );
+
+    if ( last )
+    {
+        callback_list = remove_callback( last , callback_list , name , L );
+    }
+
+    return callback_list;
 }
 
 //.............................................................................
@@ -565,37 +632,6 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 
     // success
     return 1;
-}
-
-//.............................................................................
-
-int UserData::get_last_callback( char * name , lua_State * L )
-{
-    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists, name );
-    if (callback_list)
-    {
-	int ref = *(int*) g_slist_last( callback_list )->data;
-	lb_strong_deref( L , ref );
-    } else
-    {
-	lua_pushnil( L );
-    }
-    return 1;
-
-}
-
-//.............................................................................
-
-void UserData::remove_last_callback( char* name , lua_State * L )
-{
-    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists , name );
-    GSList * last = g_slist_last( callback_list );
-    if ( last )
-    {
-	g_free( last->data );
-	callback_list = g_slist_delete_link( callback_list , last );
-	g_hash_table_insert( callback_lists , name , callback_list );
-    }
 }
 
 //.............................................................................

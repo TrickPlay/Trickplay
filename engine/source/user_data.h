@@ -243,9 +243,9 @@ struct UserData
     int add_callback( char * name , lua_State * L );
 
     //.........................................................................
-    // Add callback with given name on this user data to end of list
+    // Sets last callback with given name on this user data
 
-    int add_last_callback( char * name , lua_State * L );
+    int set_last_callback( char * name , lua_State * L );
 
     //.........................................................................
     // Remove callback with given name and reference on this user data
@@ -265,7 +265,7 @@ struct UserData
     //.........................................................................
     // Remove last callback in list
 
-    void remove_last_callback( char* name , lua_State * L );
+    GSList * remove_last_callback( char* name , lua_State * L );
 
     //.........................................................................
     // Retrieve a callback - will always push a value, nil or otherwise.
@@ -333,6 +333,8 @@ struct UserData
 private:
 
     friend struct Handle;
+
+    GSList * remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
 
     //.........................................................................
 
@@ -430,7 +432,7 @@ private:
     //.........................................................................
 
     //.........................................................................
-    // maps callback names to list of registered callbacks
+    // maps callback names to lists of registered callbacks
 
     GHashTable*     callback_lists;
 

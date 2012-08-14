@@ -350,12 +350,13 @@ local make_from_existing = function(p_data)
             self:update_views()
             return
         end
+        --[[
         if session.viewing then
             time_rem = "Viewing"
             self:update_views()
             return
         end
-        
+        --]]
         delta = os.difftime(
             data.state.expires,
             os.time()
@@ -365,7 +366,15 @@ local make_from_existing = function(p_data)
             
             time_rem = "Checking..."
             if self.my_turn then
+                
                 print("I Expired. Waiting for Server to call Abort")
+                
+                game_server:end_session(
+                    session,
+                    function()
+                        session:abort()
+                    end
+                )
                 
             elseif not self.opponent_counted_score and not synching then
                 print("They Expired. Waiting for Server to call Abort")
@@ -504,6 +513,7 @@ local make_from_existing = function(p_data)
         word            = function(v) data.state.word    = v end,
         match_id        = function(v) all_seshs[v] = session; data.match_id = v end,
         opponent_score  = function(v) opponent().score = v  end,
+        opponent_name   = function(v) opponent().name  = v  end,
         viewing         = function(v)
             
             data.state.viewing = v
