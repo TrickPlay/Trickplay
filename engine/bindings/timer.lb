@@ -250,19 +250,10 @@ class Timer [[timer*]]
     [[
         char * name = (char*) "on_timer";
         UserData * ud = UserData::get( L );
-
-        // timer.on_timer=nil ==> remove
-        if ( lua_isnil( L , -1 ) )
+        ud->set_last_callback( name , L );
+        if ( ! ud->callback_attached( name ) )
         {
-            ud->remove_last_callback( name , L );
-            if ( ! ud->callback_attached( name ) )
-            {
-               self->stop();
-            }
-        }
-        else
-        {
-            ud->set_last_callback( name , L );
+           self->stop();
         }
     ]];
 
@@ -341,7 +332,7 @@ gboolean timer::timer_fired(gpointer _handle)
 
     timer * self = ( timer* ) handle->get_user();
 
-    if ( ! handle->get_user_data()->invoke_callbacks( "on_timer" , 0 , 1 ) )
+    if ( ! handle->invoke_callbacks( "on_timer" , 1 ) )
     {
         self->cancel();
         return FALSE;

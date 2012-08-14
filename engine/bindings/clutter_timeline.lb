@@ -96,11 +96,12 @@ class Timeline [[ClutterTimeline*]]
 
             g_object_unref(self);
 
-            UserData::get(L)->connect_signal(
+            __ud__->connect_signal(
                 "on_new_frame",
                 "new-frame",
                 G_CALLBACK(Timeline_on_new_frame),
                 L);
+
 	]];
 
     ~Timeline()
@@ -618,19 +619,22 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     function on_new_frame
-	[[
+    [[
+        return UserData::get( L )->get_last_callback( (char*) "on_new_frame" , L );
+    ]]
+    [[
+        UserData::get( L )->set_last_callback( (char*) "on_new_frame" , L );
+    ]];
 
-	]];
+    int add_onnewframe_listener( function f )
+    [[
+        result = UserData::get( L )->add_callback( (char*) "on_new_frame" , L );
+    ]];
 
-    int add_onnewframe_listener(function f)
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_new_frame" , L );
-        ]];
-
-    remove_onnewframe_listener(int ref )
-        [[
-            UserData::get( L )->remove_callback( "on_new_frame" , L );
-        ]];
+    remove_onnewframe_listener( int ref )
+    [[
+        UserData::get( L )->remove_callback( (char*) "on_new_frame" , L );
+    ]];
 
 	/*
 		Event Handler: on_started

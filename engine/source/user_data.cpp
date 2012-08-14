@@ -77,6 +77,13 @@ int UserData::Handle::invoke_callback( const char * name , int nresults )
     return ud ? ud->invoke_callback( name , 0 , nresults ) : 0;
 }
 
+int UserData::Handle::invoke_callbacks( const char * name , int nresults )
+{
+    UserData * ud = UserData::get( master );
+
+    return ud ? ud->invoke_callbacks( name , 0 , nresults ) : 0;
+}
+
 //=============================================================================
 
 #ifdef TP_PROFILING
@@ -484,22 +491,21 @@ int UserData::add_callback( char * name , lua_State * L )
 
 //...............................................................................
 
-int UserData::set_last_callback( char * name , lua_State * L )
+void UserData::set_last_callback( char * name , lua_State * L )
 {
-    assert( !lua_isnil( L , -1 ) );
-
-    int * ref = (int*) malloc( sizeof( int ) );
-    *ref = lb_strong_ref( L );
-
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
     if ( callback_list )
     {
         callback_list = remove_last_callback( name , L );
     }
-    callback_list = g_slist_append( callback_list , ref );
-    g_hash_table_insert( callback_lists , name ,  callback_list );
+    if ( !lua_isnil( L , -1 ) )
+    {
+        int * ref = (int*) malloc( sizeof( int ) );
+        *ref = lb_strong_ref( L );
 
-    return *ref;
+        callback_list = g_slist_append( callback_list , ref );
+        g_hash_table_insert( callback_lists , name ,  callback_list );
+    }
 }
 
 //.............................................................................
@@ -595,7 +601,7 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 	// push callback on top of stack (above arguments)
 	lb_strong_deref( L , ref );
 
-	// clear stack and return 0 if callback is null
+	// if callback is null, clear stack and return 0
 	if ( lua_isnil( L , -1 ) )
 	{
 	    lua_pop( L , nargs + 1 );
@@ -627,6 +633,8 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 
 	iter = next;
     }
+
+    lua_pop( L , nargs );
 
     lua_pushboolean( L , aggregate_result );
 
