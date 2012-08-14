@@ -78,6 +78,7 @@ struct UserData
         // the Lua state - and therefore cannot push arguments.
 
         int invoke_callback( const char * name , int nresults = 0 );
+        int invoke_callbacks( const char * name , int nresults = 0 );
 
     private:
 
@@ -245,7 +246,7 @@ struct UserData
     //.........................................................................
     // Sets last callback with given name on this user data
 
-    int set_last_callback( char * name , lua_State * L );
+    void set_last_callback( char * name , lua_State * L );
 
     //.........................................................................
     // Remove callback with given name and reference on this user data
