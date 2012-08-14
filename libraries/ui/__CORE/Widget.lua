@@ -64,6 +64,8 @@ local function Widgetize(instance)
     local old__newindex = mt.__newindex
     local old_set       = mt.set
     
+    env.is_setting = false
+    
     local updating = false
     
     set_up_subscriptions(mt,mt,
@@ -82,6 +84,10 @@ local function Widgetize(instance)
         end,
         function(...)
             
+            if env.is_setting then error("already setting",2) end
+            
+            env.is_setting = true
+            
             old_set(...)
             
             if not updating then
@@ -93,6 +99,10 @@ local function Widgetize(instance)
                 updating = false
                 
             end
+            
+            if not env.is_setting then error("no",2) end
+            
+            env.is_setting = false
         end
     )
     ----------------------------------------------------------------------------
