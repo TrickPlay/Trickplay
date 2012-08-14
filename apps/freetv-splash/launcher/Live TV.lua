@@ -205,8 +205,7 @@ local function focus_show(number, t)
     menubar:stop_animation()
     local the_show = menubar:find_child("tv_shows").children[number]
     the_show:focus()
-    local mode = "EASE_OUT_SINE"
-    if ( t > 300 ) then mode = "EASE_OUT_BOUNCE" end
+    local mode = "EASE_IN_OUT_SINE"
     menubar:animate({ duration = t, mode = mode, x = 200 - the_show.x })
 end
 
@@ -304,10 +303,10 @@ local function on_key_down(label, key)
         local transition_time = 250
         if(keys.Left == key) then
             active_show = ((active_show - 2) % menubar:find_child("tv_shows").count) + 1
-            if( active_show == menubar:find_child("tv_shows").count ) then transition_time = menubar:find_child("tv_shows").count*100 end
+            if( active_show == menubar:find_child("tv_shows").count ) then transition_time = menubar:find_child("tv_shows").count*50 end
         else
             active_show = (active_show % menubar:find_child("tv_shows").count) + 1
-            if( active_show == 1 ) then transition_time = menubar:find_child("tv_shows").count*100 end
+            if( active_show == 1 ) then transition_time = menubar:find_child("tv_shows").count*50 end
         end
 
         focus_show(active_show, transition_time)
