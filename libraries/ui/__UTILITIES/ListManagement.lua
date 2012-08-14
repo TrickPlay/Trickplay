@@ -565,7 +565,7 @@ GridManager = function(p)
             
             elseif type(k) == "number" then
                 if k < 1 or k > number_of_rows then
-                    --error("Invalid index. 0 < '"..k.."' < "..number_of_rows,2)
+                    print("Invalid row index. 0 < '"..k.."' < "..number_of_rows)
                     return
                 end
                 
