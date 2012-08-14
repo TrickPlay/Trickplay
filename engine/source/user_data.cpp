@@ -730,6 +730,32 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
 //.............................................................................
 
+int UserData::invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( master );
+    g_assert( L );
+
+    LSG;
+
+    // Now, we get the user data from the master object. If Lua has gone away,
+    // it won't be there. (But neither will the master in the client map).
+
+    UserData * self = UserData::get( master );
+
+    if ( ! self )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    g_assert( L == self->L );
+
+    return self->invoke_callbacks( name , nargs , nresults );
+}
+
 int UserData::invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
 {
     g_assert( master );
@@ -780,6 +806,30 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     }
 
     return UserData::invoke_callback( G_OBJECT( master ) , name , nargs , nresults , L );
+}
+
+int UserData::invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( client );
+
+    LSG;
+
+    // Using the client pointer, we get the master from the client map
+    // If it is not there, we bail. Because of that, this cannot be called
+    // before initialize.
+
+    gpointer master = g_hash_table_lookup( get_client_map() , client );
+
+    if ( ! master )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    return UserData::invoke_callbacks( G_OBJECT( master ) , name , nargs , nresults , L );
 }
 
 //.............................................................................
