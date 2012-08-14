@@ -5,10 +5,11 @@ dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
 -- Unit Tests
 
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
-dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/xmlParser1.lua" ) 
+dofile( "packages/engine_unit_tests/tests/Alpha1.lua" )
+dofile( "packages/engine_unit_tests/tests/xmlParser1.lua" )
 dofile( "packages/engine_unit_tests/tests/xmlParser2.lua" )
 dofile( "packages/engine_unit_tests/tests/timer1.lua")
+dofile( "packages/engine_unit_tests/tests/timer2.lua")
 dofile( "packages/engine_unit_tests/tests/urlRequest1.lua" )
 dofile( "packages/engine_unit_tests/tests/UIElement1.lua" )
 dofile( "packages/engine_unit_tests/tests/UIElement2.lua" )
@@ -52,16 +53,16 @@ dofile( "packages/engine_unit_tests/tests/choose1.lua" )
 dofile( "packages/engine_unit_tests/tests/serialize1.lua" )
 dofile( "packages/engine_unit_tests/tests/encoding_encrypting1.lua" )
 dofile( "packages/engine_unit_tests/tests/global_misc1.lua" )
-dofile( "packages/engine_unit_tests/tests/json1.lua" ) 
+dofile( "packages/engine_unit_tests/tests/json1.lua" )
 dofile( "packages/engine_unit_tests/tests/trickplay1.lua" )
 dofile( "packages/engine_unit_tests/tests/bug_814.lua" )
 dofile( "packages/engine_unit_tests/tests/settings1.lua" )
 dofile( "packages/engine_unit_tests/tests/system1.lua" )
 dofile( "packages/engine_unit_tests/tests/uri1.lua" )
-dofile( "packages/engine_unit_tests/tests/stopwatch1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/bitmap1.lua") 
-dofile( "packages/engine_unit_tests/tests/canvas1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/profile1.lua" )  
+dofile( "packages/engine_unit_tests/tests/stopwatch1.lua" )
+dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
+dofile( "packages/engine_unit_tests/tests/canvas1.lua" )
+dofile( "packages/engine_unit_tests/tests/profile1.lua" )
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
@@ -89,7 +90,7 @@ dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 screen:add (test_group)
 
 -- setup steps
-if logo_image ~= nil then	
+if logo_image ~= nil then
    logo_image:grab_key_focus()
    globe_image:grab_key_focus()
 end
@@ -106,25 +107,25 @@ idle.limit = 1.0
 
 function idle.on_idle( idle , seconds )
        total = total + seconds
-		
+
 	if 	( animator_timeline_completed_called == true  and
 		appOnLoadedCalled == true and
 		bitmap1_async_loaded_called == true and
 		image1Loaded == true  and
-		image2_callback_called == true and 
+		image2_callback_called == true and
 		--on_alpha_called == true  and
 		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
 		alpha1_completed == true and
 		timeline_4_test_completed == true and
 		timeline5_on_completed_called == true and
-		timeline6_on_completed_called == true and 
+		timeline6_on_completed_called == true and
 		timeline_8_test_completed == true and
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
 		animation_state2_completed == true and
-		score_on_completed_called == true and 
-		total > 5 ) 
+		score_on_completed_called == true and
+		total > 5 )
  		or total > 30 then
 
 			if  total < 10 then
@@ -132,8 +133,8 @@ function idle.on_idle( idle , seconds )
 			end
 
 			-- run unit tests
-			local engine_results = engine_unit_test() 
-		
+			local engine_results = engine_unit_test()
+
 			idle.on_idle = nil
 
 			-- clean up
@@ -142,4 +143,3 @@ function idle.on_idle( idle , seconds )
 
       end
 end
-

@@ -17,6 +17,10 @@ end
 timer2:add_ontimer_listener(on_timer2_1)
 timer2:add_ontimer_listener(on_timer2_2)
 
+collectgarbage()
+collectgarbage()
+collectgarbage()
+
 timer2:start()
 
 
