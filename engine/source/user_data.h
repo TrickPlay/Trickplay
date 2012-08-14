@@ -289,12 +289,14 @@ struct UserData
     // already. In any case, it pops nargs.
 
     static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
 
     //.........................................................................
     // Same as above, but can be used when you already know the master object,
     // so it skips the client lookup.
 
     static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
 
     //.........................................................................
     // If you already have the user data pointer, you can call this one.
