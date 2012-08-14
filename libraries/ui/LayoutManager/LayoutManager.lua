@@ -920,7 +920,10 @@ LayoutManager = setmetatable(
                 end,
                 
                 on_entries_changed = function(self)
-                    env.update()
+                    
+                    if not env.is_setting then
+                        env.update()
+                    end
                     --[=[
                     if env.in_on_entries then return end
                     env.in_on_entries = true
