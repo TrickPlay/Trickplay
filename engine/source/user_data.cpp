@@ -627,7 +627,14 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults , i
 	{
 	    // multiple callbacks do not allow for return types other than boolean
 	    // lua_toboolean returns 1 for any Lua value different from false and nil; otherwise it returns 0
-	    aggregate_result &= !lua_isboolean( L , -1 ) || lua_toboolean( L , -1 );
+            if ( default_ret == 1 )
+            {
+                aggregate_result &= !lua_isboolean( L , -1 ) || lua_toboolean( L , -1 );
+            }
+            else
+            {
+                aggregate_result |= lua_isboolean( L , -1 ) && lua_toboolean( L , -1 );
+            }
 	    lua_pop( L , nresults );
 	}
 

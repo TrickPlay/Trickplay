@@ -78,7 +78,6 @@ struct UserData
         // the Lua state - and therefore cannot push arguments.
 
         int invoke_callback( const char * name , int nresults = 0 );
-
         int invoke_callbacks( const char * name , int nresults = 0 , int default_ret = 0 );
 
     private:
