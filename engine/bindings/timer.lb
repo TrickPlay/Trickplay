@@ -331,7 +331,7 @@ gboolean timer::timer_fired(gpointer _handle)
 
     timer * self = ( timer* ) handle->get_user();
 
-    if ( ! handle->invoke_callbacks( "on_timer" , 1 ) )
+    if ( ! handle->invoke_callbacks( "on_timer" , 1 , 1 ) )
     {
         self->cancel();
         return FALSE;
