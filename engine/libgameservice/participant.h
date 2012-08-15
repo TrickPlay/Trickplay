@@ -30,11 +30,9 @@ public:
 		if (resource.empty())
 			return p;
 		size_t underscoreLoc = resource.find("_");
-		if (underscoreLoc >= 0) {
-			std::string id = resource.substr(0, underscoreLoc);
-			p.set_id(id);
-			p.set_nick(resource.substr(underscoreLoc+1));
-		}
+        std::string id = resource.substr(0, underscoreLoc);
+        p.set_id(id);
+        p.set_nick(resource.substr(underscoreLoc+1));
 		return p;
 	}
 
