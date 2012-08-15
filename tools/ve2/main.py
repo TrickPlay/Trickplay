@@ -4,9 +4,10 @@ from PyQt4.QtCore import *
 
 from wizard import Wizard
 from UI.MainWindow import Ui_MainWindow
-from UI.NewProjectDialog import Ui_newProjectDialog
+#from UI.NewProjectDialog import Ui_newProjectDialog
 from Inspector.TrickplayInspector import TrickplayInspector
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
+
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
