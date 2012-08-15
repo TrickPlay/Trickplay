@@ -161,11 +161,12 @@ local function make_poster(item)
     local img_scrim = Rectangle { color = "black", opacity = 96, w = img.w + 4, h = img.h + 4 }
     poster:add(img_scrim, img)
 
-    local title_grp = Group { w = img.w, x = 2, y = -16 }
-    local title  = Text { font = FONT_NAME.." 32px", color = "white", text = item.name, y = 1, scale = { 1/2.5, 1/2.5 } }
-    local title_scrim = Rectangle { color = "black", opacity = 96, w = img.w, h = title.h + 2 }
+    local title_grp = Group { w = img.w, x = -2 }
+    local title  = Text { font = FONT_NAME.." 36px", color = "white", text = item.name, x = 3, y = 1, scale = { 1/2.5, 1/2.5 } }
+    local title_scrim = Rectangle { color = "black", opacity = 96, w = math.max(img.w, title.w/2.5) + 4, h = (title.h/2.5) + 2 }
     title_grp:add(title_scrim, title)
     title_grp.w = img.w
+    title_grp.y = -title_scrim.h
     title_grp.clip_to_size = true
 
     poster:add(title_grp)
