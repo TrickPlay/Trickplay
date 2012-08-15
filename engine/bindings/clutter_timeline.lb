@@ -96,12 +96,6 @@ class Timeline [[ClutterTimeline*]]
 
             g_object_unref(self);
 
-            __ud__->connect_signal(
-                "on_new_frame",
-                "new-frame",
-                G_CALLBACK(Timeline_on_new_frame),
-                L);
-
 	]];
 
     ~Timeline()
@@ -619,22 +613,32 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     function on_new_frame
-    [[
-        return UserData::get( L )->get_last_callback( (char*) "on_new_frame" , L );
-    ]]
-    [[
-        UserData::get( L )->set_last_callback( (char*) "on_new_frame" , L );
-    ]];
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_new_frame" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_new_frame" , L );
+            UserData::get( L )->connect_signal(
+                "on_new_frame",
+                "new-frame",
+                G_CALLBACK(Timeline_on_new_frame),
+                L);
+        ]];
 
     int add_onnewframe_listener( function f )
-    [[
-        result = UserData::get( L )->add_callback( (char*) "on_new_frame" , L );
-    ]];
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_new_frame" , L );
+            UserData::get( L )->connect_signal(
+                "on_new_frame",
+                "new-frame",
+                G_CALLBACK(Timeline_on_new_frame),
+                L);
+        ]];
 
     remove_onnewframe_listener( int ref )
-    [[
-        UserData::get( L )->remove_callback( (char*) "on_new_frame" , L );
-    ]];
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_new_frame" , L );
+        ]];
 
 	/*
 		Event Handler: on_started
@@ -650,15 +654,33 @@ class Timeline [[ClutterTimeline*]]
 		*See Also:* the <start> function
 	*/
 
-    callback on_started
-	[[
-	    UserData::get(L)->connect_signal_if(
-			on_started,
-			"on_started",
-			"started",
-			G_CALLBACK(Timeline_on_started),
-			L);
-	]];
+    function on_started
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_started" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_started" , L );
+            UserData::get( L )->connect_signal(
+                "on_started",
+                "started",
+                G_CALLBACK(Timeline_on_started),
+                L);
+        ]];
+
+    int add_onstarted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_started" , L );
+            UserData::get( L )->connect_signal(
+                "on_started",
+                "started",
+                G_CALLBACK(Timeline_on_started),
+                L);
+        ]];
+
+    remove_onstarted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_started" , L );
+        ]];
 
     /*
     	Event Handler: on_completed
@@ -674,15 +696,33 @@ class Timeline [[ClutterTimeline*]]
 		*See Also:* the <duration> and <loop> properties and the <start> and <stop> functions
     */
 
-    callback on_completed
-	[[
-	    UserData::get(L)->connect_signal_if(
-			on_completed,
-			"on_completed",
-			"completed",
-			G_CALLBACK(Timeline_on_completed),
-			L);
-	]];
+    function on_completed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_completed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_completed" , L );
+            UserData::get( L )->connect_signal(
+                "on_completed",
+                "completed",
+                G_CALLBACK(Timeline_on_completed),
+                L);
+        ]];
+
+    int add_oncompleted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_completed" , L );
+            UserData::get( L )->connect_signal(
+                "on_completed",
+                "completed",
+                G_CALLBACK(Timeline_on_completed),
+                L);
+        ]];
+
+    remove_oncompleted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_completed" , L );
+        ]];
 
 	/*
 		Event Handler: on_paused
@@ -693,22 +733,40 @@ class Timeline [[ClutterTimeline*]]
 
 		*Argument:*
 
-			timeline - Timeline object the event applies to
+		timeline - Timeline object the event applies to
 
 		*Return Value:* None
 
 		*See Also:* the <pause> and <start> functions
 	*/
 
-    callback on_paused
-	[[
-	    UserData::get(L)->connect_signal_if(
-			on_paused,
-			"on_paused",
-			"paused",
-			G_CALLBACK(Timeline_on_paused),
-			L);
-	]];
+    function on_paused
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_paused" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_paused" , L );
+            UserData::get(L)->connect_signal(
+                "on_paused",
+                "paused",
+                G_CALLBACK(Timeline_on_paused),
+                L);
+        ]];
+
+    int add_onpaused_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_paused" , L );
+            UserData::get( L )->connect_signal(
+                "on_paused",
+                "paused",
+                G_CALLBACK(Timeline_on_paused),
+                L);
+        ]];
+
+    remove_onpaused_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_paused" , L );
+        ]];
 
 	/*
 		Event Handler: on_marker_reached
@@ -728,15 +786,33 @@ class Timeline [[ClutterTimeline*]]
 		*See Also:* the <add_marker> function
 	*/
 
-    callback on_marker_reached
-	[[
-	    UserData::get(L)->connect_signal_if(
-			on_marker_reached,
-			"on_marker_reached",
-			"marker-reached",
-			G_CALLBACK(Timeline_on_marker_reached),
-			L);
-	]];
+    function on_marker_reached
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_marker_reached" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_marker_reached" , L );
+            UserData::get(L)->connect_signal(
+                "on_marker_reached",
+                "marker-reached",
+                G_CALLBACK(Timeline_on_marker_reached),
+                L);
+        ]];
+
+    int add_onmarkerreached_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_marker_reached" , L );
+            UserData::get( L )->connect_signal(
+                "on_marker_reached",
+                "marker-reached",
+                G_CALLBACK(Timeline_on_marker_reached),
+                L);
+        ]];
+
+    remove_onmarkerreached_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_marker_reached" , L );
+        ]];
 }
 
 [[
@@ -749,24 +825,24 @@ void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
 
 void Timeline_on_started(ClutterTimeline*timeline,lua_State*L)
 {
-    UserData::invoke_callback(G_OBJECT(timeline),"on_started",0,0,L);
+    UserData::invoke_callbacks(G_OBJECT(timeline),"on_started",0,0,L);
 }
 
 void Timeline_on_completed(ClutterTimeline*timeline,lua_State*L)
 {
-    UserData::invoke_callback(G_OBJECT(timeline),"on_completed",0,0,L);
+    UserData::invoke_callbacks(G_OBJECT(timeline),"on_completed",0,0,L);
 }
 
 void Timeline_on_paused(ClutterTimeline*timeline,lua_State*L)
 {
-    UserData::invoke_callback(G_OBJECT(timeline),"on_paused",0,0,L);
+    UserData::invoke_callbacks(G_OBJECT(timeline),"on_paused",0,0,L);
 }
 
 void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint msecs,lua_State*L)
 {
     lua_pushstring(L,marker_name);
     lua_pushinteger(L,msecs);
-    UserData::invoke_callback(G_OBJECT(timeline),"on_marker_reached",2,0,L);
+    UserData::invoke_callbacks(G_OBJECT(timeline),"on_marker_reached",2,0,L);
 }
 
 ]]
