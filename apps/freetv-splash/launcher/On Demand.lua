@@ -183,6 +183,7 @@ local function make_poster(item)
                                                             keys = {
                                                                 { poster, "opacity", 255 },
                                                                 { poster, "y_rotation", 0 },
+                                                                { title_grp, "opacity", 255 },
                                                                 { poster, "scale", { 2.5, 2.5 } },
                                                             },
                                                         },
@@ -192,6 +193,7 @@ local function make_poster(item)
                                                             keys = {
                                                                 { poster, "opacity", 64 },
                                                                 { poster, "y_rotation", -15 },
+                                                                { title_grp, "opacity", 0 },
                                                                 { poster, "scale", { 1, 1 } },
                                                             },
                                                         },
