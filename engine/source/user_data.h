@@ -78,7 +78,8 @@ struct UserData
         // the Lua state - and therefore cannot push arguments.
 
         int invoke_callback( const char * name , int nresults = 0 );
-        int invoke_callbacks( const char * name , int nresults = 0 , int default_ret );
+
+        int invoke_callbacks( const char * name , int nresults = 0 , int default_ret = 0 );
 
     private:
 
@@ -256,7 +257,7 @@ struct UserData
     //.........................................................................
     // Invoke all callbacks with given name on this user data
 
-    int invoke_callbacks( const char * name , int nargs , int nresults , int default_ret );
+    int invoke_callbacks( const char * name , int nargs , int nresults , int default_ret=0 );
 
     //.........................................................................
     // Get last callback in list
@@ -290,14 +291,14 @@ struct UserData
     // already. In any case, it pops nargs.
 
     static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
-    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, int default_ret , lua_State * L );
+    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
 
     //.........................................................................
     // Same as above, but can be used when you already know the master object,
     // so it skips the client lookup.
 
     static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
-    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, int default_ret , lua_State * L );
+    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
 
     //.........................................................................
     // If you already have the user data pointer, you can call this one.
