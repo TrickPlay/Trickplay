@@ -77,11 +77,11 @@ int UserData::Handle::invoke_callback( const char * name , int nresults )
     return ud ? ud->invoke_callback( name , 0 , nresults ) : 0;
 }
 
-int UserData::Handle::invoke_callbacks( const char * name , int nresults )
+int UserData::Handle::invoke_callbacks( const char * name , int nresults , int default_ret )
 {
     UserData * ud = UserData::get( master );
 
-    return ud ? ud->invoke_callbacks( name , 0 , nresults ) : 0;
+    return ud ? ud->invoke_callbacks( name , 0 , nresults , default_ret ) : 0;
 }
 
 //=============================================================================
@@ -580,7 +580,7 @@ GSList * UserData::remove_last_callback( char *name , lua_State * L )
 
 //.............................................................................
 
-int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
+int UserData::invoke_callbacks( const char * name , int nargs , int nresults , int default_ret )
 {
     // does not make sense to aggregate callback results of more than 1 return value
     g_assert( nresults < 2 );
@@ -774,7 +774,7 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
 //.............................................................................
 
-int UserData::invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
+int UserData::invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, int default_ret , lua_State * L )
 {
     g_assert( master );
     g_assert( L );
@@ -797,7 +797,7 @@ int UserData::invoke_callbacks( GObject * master , const char * name , int nargs
 
     g_assert( L == self->L );
 
-    return self->invoke_callbacks( name , nargs , nresults );
+    return self->invoke_callbacks( name , nargs , nresults , default_ret );
 }
 
 int UserData::invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
@@ -852,7 +852,7 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     return UserData::invoke_callback( G_OBJECT( master ) , name , nargs , nresults , L );
 }
 
-int UserData::invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L )
+int UserData::invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, int default_ret , lua_State * L )
 {
     g_assert( client );
 
@@ -873,7 +873,7 @@ int UserData::invoke_callbacks( gpointer client , const char * name , int nargs 
         return 0;
     }
 
-    return UserData::invoke_callbacks( G_OBJECT( master ) , name , nargs , nresults , L );
+    return UserData::invoke_callbacks( G_OBJECT( master ) , name , nargs , nresults , default_ret , L );
 }
 
 //.............................................................................
