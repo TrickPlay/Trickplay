@@ -580,7 +580,7 @@ GSList * UserData::remove_last_callback( char *name , lua_State * L )
 
 //.............................................................................
 
-int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
+int UserData::invoke_callbacks( const char * name , int nargs , int nresults , int default_ret )
 {
     // does not make sense to aggregate callback results of more than 1 return value
     g_assert( nresults < 2 );
