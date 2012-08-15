@@ -15,10 +15,10 @@ ListManager = function(parameters)
     ----------------------------------------------------------------------------
 	--The ListManager Object inherits from Widget
 	
-	local instance = Widget( parameters )
+	local instance, env = Widget( parameters )
     
     local placeholder = Widget_Rectangle{w=200,h=200,color="ff0000"}
-    instance:add(placeholder)
+    env.add(instance,placeholder)
     placeholder:hide()
     local placeholders = {}
     local node_constructor
@@ -94,7 +94,7 @@ ListManager = function(parameters)
 	override_property(instance,"placeholder",
 		function(oldf)   return placeholder     end,
 		function(oldf,self,v)   
-            instance:add(v)
+            env.add(instance,v)
             v:hide()
             
             for obj, _ in pairs(placeholders) do
@@ -305,7 +305,7 @@ ListManager = function(parameters)
                 
                 elseif obj.parent then  obj:unparent()  end
             end
-            instance:add(obj)
+            env.add(instance,obj)
             
             items[obj] = {
                 neighbors = { },
