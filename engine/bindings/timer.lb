@@ -205,22 +205,6 @@ class Timer [[timer*]]
     stop()
     [[self->stop();]];
 
-
-    int add_ontimer_listener(function f)
-    [[
-        result = self->add_ontimer_listener( UserData::get( L ) , L );
-    ]];
-
-    remove_ontimer_listener(int ref )
-    [[
-        UserData * ud = UserData::get( L );
-        self->remove_ontimer_listener( ud , L );
-        if ( ! ud->callback_attached( (char*) "on_timer" ) )
-        {
-            self->stop();
-        }
-    ]];
-
     /*
         Event Handler: on_timer
 
@@ -254,6 +238,21 @@ class Timer [[timer*]]
         if ( ! ud->callback_attached( name ) )
         {
            self->stop();
+        }
+    ]];
+
+    int add_ontimer_listener(function f)
+    [[
+        result = self->add_ontimer_listener( UserData::get( L ) , L );
+    ]];
+
+    remove_ontimer_listener(int ref )
+    [[
+        UserData * ud = UserData::get( L );
+        self->remove_ontimer_listener( ud , L );
+        if ( ! ud->callback_attached( (char*) "on_timer" ) )
+        {
+            self->stop();
         }
     ]];
 

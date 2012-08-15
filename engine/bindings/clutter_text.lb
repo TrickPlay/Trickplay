@@ -25,18 +25,9 @@ class Text [[ClutterActor*]] actor
     Text(table props =0)
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
-
-            __ud__->connect_signal(
-                    "on_text_changed",
-                    "text-changed",
-                    G_CALLBACK(Text_on_text_changed),
-                    L);
-
-            ClutterUtil::initialize_actor(L,self,TEXT_METATABLE);
-            ClutterUtil::set_props_from_table(L,props);
-	    g_object_unref( self );
-
-
+		    ClutterUtil::initialize_actor(L,self,TEXT_METATABLE);
+		    ClutterUtil::set_props_from_table(L,props);
+		    g_object_unref( self );
         ]];
 
     ~Text()
@@ -921,33 +912,6 @@ class Text [[ClutterActor*]] actor
             }
         ]];
 
-    int add_ontextchanged_listener( function f )
-    [[
-        result = UserData::get( L )->add_callback( (char*) "on_text_changed" , L );
-    ]];
-
-    remove_ontextchanged_listener( int ref )
-    [[
-        UserData::get( L )->remove_callback( (char*) "on_text_changed" , L );
-    ]];
-
-    function on_textchanged
-    [[ return UserData::get( L )->get_last_callback( (char*) "on_text_changed" , L ); ]]
-    [[
-        char * name = (char*) "on_text_changed";
-        UserData * ud = UserData::get( L );
-
-        // nil ==> remove
-        if ( lua_isnil( L , -1 ) )
-        {
-            ud->remove_last_callback( name , L );
-        }
-        else
-        {
-            ud->set_last_callback( name , L );
-        }
-    ]];
-
 	/*
 		Event Handler: on_text_changed
 
@@ -971,11 +935,21 @@ class Text [[ClutterActor*]] actor
 
 	*/
 
+    callback on_text_changed
+		[[
+		    UserData::get(L)->connect_signal_if(
+				on_text_changed,
+				"on_text_changed",
+				"text-changed",
+				G_CALLBACK(Text_on_text_changed),
+				L);
+		]];
+
 }
 
 [[
 void Text_on_text_changed(ClutterText*text,lua_State*L)
 {
-    UserData::get( L )->invoke_callbacks( "on_text_changed" , 0 , 1 );
+	UserData::invoke_callback( G_OBJECT( text ) , "on_text_changed" , 0 , 0 , L );
 }
 ]]
