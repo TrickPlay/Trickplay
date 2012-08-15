@@ -140,13 +140,12 @@ local function make_show_tile(channel_num, data)
     local logo = Image { src = "assets/channel_logos/logo-"..data.channel..".png" }
     logo.anchor_point = { 0, logo.h/2 }
     logo.position = { 30, bar_height/2 }
-    local channel_num = Text { color = "grey75", text = ""..channel_num, font = FONT_NAME.." 24px" }
-    channel_num.anchor_point = { 0, channel_num.baseline }
+    local channel_num = Text { color = "grey35", text = ""..channel_num, font = FONT_NAME.." 192px" }
     local show_text = Text { color = "white", text = data.show, font = FONT_NAME.." 40px" }
     show_text.anchor_point = { 0, show_text.h/2 }
     show_text.position = { logo.x + logo.w + 15, bar_height/2 }
-    channel_num.x = 14
-    channel_num.y = channel_num.h + 6
+    channel_num.x = 15
+    channel_num.y = -48
 
     local bg_focus = Clone { source = channel_bar_focus, name = "bg-focus", x = 1, w = show_text.x + show_text.w + 30 }
     local bg_unfocus = Clone { source = channel_bar, name = "bg-unfocus", x = 1, w = show_text.x + show_text.w + 30 }
@@ -155,7 +154,7 @@ local function make_show_tile(channel_num, data)
                     bg_focus,
                     bg_unfocus,
                     Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height }, x = 1 + show_text.x + show_text.w + 30 },
-                    logo, channel_num, show_text )
+                    channel_num, logo, show_text )
 
     show_group.extra.anim = AnimationState {
                                                     duration = 250,
