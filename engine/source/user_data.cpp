@@ -589,7 +589,7 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults , i
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists, name );
     GSList * iter = NULL;
 
-    int aggregate_result = 1;
+    int aggregate_result = default_ret;
 
     for ( iter = callback_list ; iter ; )
     {
