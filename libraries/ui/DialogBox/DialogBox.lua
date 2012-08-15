@@ -46,7 +46,7 @@ DialogBox = function(parameters)
 	----------------------------------------------------------------------------
 	--The DialogBox Object inherits from Widget
 	
-	local instance = Widget( parameters )
+	local instance, env = Widget( parameters )
 	
 	--the default w and h does not count as setting the size
 	if not size_is_set then instance:reset_size_flag() end
@@ -89,7 +89,7 @@ DialogBox = function(parameters)
 		
 		bg = default_bg(instance)
 		
-		screen.add(instance, bg )
+		env.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -105,7 +105,7 @@ DialogBox = function(parameters)
 		
 		if bg then bg:unparent() end
 		
-		screen.add(instance, bg )
+		env.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -327,7 +327,7 @@ DialogBox = function(parameters)
 	instance_on_style_changed()
 	
 	
-	screen.add(instance,content_group,title)
+	env.add(instance,content_group,title)
 	
 	instance:set(parameters)
 	
