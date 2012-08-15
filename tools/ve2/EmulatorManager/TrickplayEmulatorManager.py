@@ -3,6 +3,8 @@ import os, telnetlib, base64, sys, random, json, time
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
+from UI.HorizontalGuideline import Ui_horizGuideDialog
+from UI.VerticalGuideline import Ui_vertGuideDialog
 
 class TrickplayEmulatorManager(QWidget):
     
@@ -72,6 +74,13 @@ class TrickplayEmulatorManager(QWidget):
     def app_started(self):
 		print "[VE] APP Started"
 
+    def deleteClicked(self) :
+        inputCmd = str("_VE_.deleteGuideLine()")
+        print inputCmd
+        self.trickplay.write(inputCmd+"\n")
+        self.trickplay.waitForBytesWritten()
+        self.GLI_dialog.done(1)
+        
     def app_ready_read(self):
 
 		# Read all available output from the process
@@ -88,6 +97,7 @@ class TrickplayEmulatorManager(QWidget):
 				break
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
+
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
 				try:
@@ -119,6 +129,29 @@ class TrickplayEmulatorManager(QWidget):
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
+				        org_position = int(s[9:])
+				        self.GLI_dialog = QDialog()
+				        if luaCmd =="openV_GLI":
+				            self.GLInspector_ui = Ui_vertGuideDialog()
+				        else:
+				            self.GLInspector_ui = Ui_horizGuideDialog()
+
+				        self.GLInspector_ui.setupUi(self.GLI_dialog) 
+				        self.GLI_dialog.setGeometry(400,400, 286, 86)
+				        self.GLI_dialog.focusWidget()
+				        self.GLInspector_ui.spinBox.setValue(org_position) 
+				        QObject.connect(self.GLInspector_ui.deleteButton, SIGNAL("clicked()"), self.deleteClicked)
+
+				        if self.GLI_dialog.exec_():
+				            new_positon = self.GLInspector_ui.spinBox.value()
+				            if luaCmd =="openV_GLI":
+				                inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
+				            else:
+				                inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
+				            print inputCmd
+				            self.trickplay.write(inputCmd+"\n")
+				            self.trickplay.waitForBytesWritten()
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
 				    elif luaCmd == "repUIInfo":
@@ -234,4 +267,3 @@ class TrickplayEmulatorManager(QWidget):
         self.trickplay.setProcessEnvironment(env)
         
         ret = self.trickplay.start('trickplay', [self.path()])
-

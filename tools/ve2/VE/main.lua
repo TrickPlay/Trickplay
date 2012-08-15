@@ -1658,28 +1658,46 @@ _VE_.white = function()
     BG_IMAGE_white.opacity = 255
 end
 
+local guideline_inspector_on = false
+local selected_guideline = nil
+
+
+_VE_.close_guideInspector = function() 
+    selected_guideline:find_child("line").color = {0,255,255,255}
+    selected_guideline = nil
+    guideline_inspector_on = false
+end 
+
+_VE_.setHGuideY = function(y)
+    selected_guideline.y = y - 10 
+    _VE_.close_guideInspector()
+end 
+
+_VE_.setVGuideX = function(x)
+    selected_guideline.x = x - 10 
+    _VE_.close_guideInspector()
+end 
+
+_VE_.deleteGuideLine = function()
+    screen:remove(selected_guideline) 
+    _VE_.close_guideInspector()
+end 
 
 local function guideline_inspector(v)
+
+	local org_position 
+    guideline_inspector_on = true
+    selected_guideline = v
+
+    if(util.guideline_type(v.name) == "v_guideline") then
+		org_position = tostring(math.floor(v.x))
+        print("openV_GLI"..org_position)
+	else
+		org_position = tostring(math.floor(v.y))
+        print("openH_GLI"..org_position)
+    end 
+
 --[[
-  	local WIDTH = 300
-  	local HEIGHT = 150
-    local PADDING = 13
-	local TOP_BAR = 30
-    local MSG_BAR = 80
-    local BOTTOM_BAR = 40
-
-    local TSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local MSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
-    local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
-    local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
-
-    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
-    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
-	local title = Text {name = "title", text = "Guideline" }:set(TSTYLE)
-	local title_shadow = Text {name = "title", text = "Guideline"}:set(TSSTYLE)
-	local message = Text {}:set(MSTYLE)
-	local message_shadow = Text {}:set(MSSTYLE)
-
 	-- Text Input Field 	
 	local org_position 
 
@@ -1736,7 +1754,7 @@ local function guideline_inspector(v)
         button_ok.focused = true
 		--text_input.set_focus()
         text_input.focused = true
-	end
+	endUi_horizGuideDialog
 
 	local tab_func = function()
 		text_input.clear_focus()
@@ -1773,7 +1791,7 @@ local function guideline_inspector(v)
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
 			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
-			button_cancel,
+			button_cancel,Ui_horizGuideDialog
 			button_delete,
 			button_ok
 		}
@@ -1804,7 +1822,7 @@ local function guideline_inspector(v)
 				local key_focus_obj = screen:find_child(text_input.focus[key]) 
 
 				if key_focus_obj == nil then return end 
-
+Ui_horizGuideDialog
 				if text_input.clear_focus then
 					text_input.clear_focus()
 				end
@@ -1827,17 +1845,17 @@ local function guideline_inspector(v)
 
 	msgw.extra.lock = false
  	screen:add(msgw)
-	util.create_on_button_down_f(msgw)	
+	util.create_on_button_down_f(msgw)	Ui_horizGuideDialog
 	-- Set focus 
 	ti_func()
 
     ]]
 end 
 
-
 local function create_on_line_down_f(v)
 
         function v:on_button_down(x,y,button,num_clicks)
+            v:find_child("line").color = {255,0,0,255}
             dragging = {v, x - v.x, y - v.y }
 	     	if(button == 3) then
 		  		guideline_inspector(v)
@@ -1855,6 +1873,9 @@ local function create_on_line_down_f(v)
 		  		elseif(util.guideline_type(v.name) == "h_guideline") then  
 					v.y = y - dy
 		  		end 
+                if guideline_inspector_on ~= true then 
+                    v:find_child("line").color = {0,255,255,255}
+                end 
 	          	dragging = nil
             end
             return true
@@ -1866,15 +1887,21 @@ end
 _VE_.addHorizonGuide = function()
     h_guideline = h_guideline + 1
 
-     local h_gl = Rectangle {
+     local h_gl =Group{
 		name="h_guideline"..tostring(h_guideline),
+		position = {0, screen.h/2-10, 0}, 
+		size = {screen.w, 20},
+		reactive = true,
+        children = { Rectangle {
+        name = "line",
 		border_color= hdr.DEFAULT_COLOR, 
-		color={255,25,25,100},
-		size = {screen.w, 4},
-		position = {0, screen.h/2, 0}, 
+		color={0,255,255,255},
+		position = {0, 9, 0},
+		size = {screen.w, 2},
 		opacity = 255,
-		reactive = true
-     }
+        }
+        }
+        }
      create_on_line_down_f(h_gl)
      screen:add(h_gl)
      screen:grab_key_focus()
@@ -1889,14 +1916,20 @@ end
 _VE_.addVerticalGuide = function()
     v_guideline = v_guideline + 1 
 
-     local v_gl = Rectangle {
+     local v_gl = Group{ 
 		name="v_guideline"..tostring(v_guideline),
-		border_color= hdr.DEFAULT_COLOR, 
-		color={255,25,25,100},
-		size = {4, screen.h},
-		position = {screen.w/2, 0, 0}, 
-		opacity = 255,
 		reactive = true, 
+		position = {screen.w/2-10, 0, 0}, 
+		size = {20, screen.h},
+        children = { Rectangle {
+        name = "line",
+		border_color= hdr.DEFAULT_COLOR, 
+		color={0,255,255,255},
+		size = {2, screen.h},
+		position = {9, 0, 0}, 
+		opacity = 255,
+        }
+     }
      }
      create_on_line_down_f(v_gl)
      screen:add(v_gl)

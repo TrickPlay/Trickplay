@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'VerticalGuideline.ui'
 #
-# Created: Thu Aug  9 17:10:39 2012
+# Created: Wed Aug 15 15:38:50 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_vertGuideDialog(object):
     def setupUi(self, vertGuideDialog):
         vertGuideDialog.setObjectName(_fromUtf8("vertGuideDialog"))
-        vertGuideDialog.resize(290, 86)
+        vertGuideDialog.resize(286, 86)
         font = QtGui.QFont()
         font.setPointSize(10)
         vertGuideDialog.setFont(font)
@@ -34,16 +34,16 @@ class Ui_vertGuideDialog(object):
         self.gridLayout.setSpacing(0)
         self.gridLayout.setMargin(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.spinBox = QtGui.QSpinBox(self.layoutWidget)
+        self.spinBox.setMaximum(9999)
+        self.spinBox.setObjectName(_fromUtf8("spinBox"))
+        self.gridLayout.addWidget(self.spinBox, 1, 0, 1, 1)
         self.labelName = QtGui.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.labelName.setFont(font)
         self.labelName.setObjectName(_fromUtf8("labelName"))
         self.gridLayout.addWidget(self.labelName, 0, 0, 1, 1)
-        self.spinBox = QtGui.QSpinBox(self.layoutWidget)
-        self.spinBox.setMaximum(9999)
-        self.spinBox.setObjectName(_fromUtf8("spinBox"))
-        self.gridLayout.addWidget(self.spinBox, 1, 0, 1, 1)
         self.deleteButton = QtGui.QPushButton(vertGuideDialog)
         self.deleteButton.setGeometry(QtCore.QRect(10, 56, 89, 27))
         self.deleteButton.setObjectName(_fromUtf8("deleteButton"))
