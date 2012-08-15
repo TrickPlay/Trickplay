@@ -256,7 +256,7 @@ struct UserData
     //.........................................................................
     // Invoke all callbacks with given name on this user data
 
-    int invoke_callbacks( const char * name , int nargs , int nresults );
+    int invoke_callbacks( const char * name , int nargs , int nresults , int default_ret );
 
     //.........................................................................
     // Get last callback in list
