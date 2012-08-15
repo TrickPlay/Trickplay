@@ -643,8 +643,10 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults , i
 
     lua_pop( L , nargs );
 
-    lua_pushboolean( L , aggregate_result );
-
+    if ( nresults > 0 )
+    {
+        lua_pushboolean( L , aggregate_result );
+    }
     // success
     return 1;
 }
