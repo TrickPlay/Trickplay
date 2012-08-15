@@ -77,6 +77,13 @@ int UserData::Handle::invoke_callback( const char * name , int nresults )
     return ud ? ud->invoke_callback( name , 0 , nresults ) : 0;
 }
 
+int UserData::Handle::invoke_callbacks( const char * name , int nresults )
+{
+    UserData * ud = UserData::get( master );
+
+    return ud ? ud->invoke_callbacks( name , 0 , nresults ) : 0;
+}
+
 //=============================================================================
 
 #ifdef TP_PROFILING
@@ -346,11 +353,30 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
 //.............................................................................
 
+void unref_and_free_callback( gpointer value , gpointer data )
+{
+    int *refptr = (int*) value;
+    lb_strong_unref( (lua_State*) data , *refptr );
+    g_free( refptr );
+}
+
+void unref_and_free_callbacks( gpointer key , gpointer value , gpointer data )
+{
+    GSList * callback_list = (GSList*) value;
+    g_slist_foreach( callback_list , unref_and_free_callback , data );
+    g_slist_free( callback_list );
+}
+
 void UserData::finalize( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
 
     tplog( "FINALIZING '%s' UD %p : MASTER %p : CLIENT %p" , self->type , self , self->master , self->client );
+
+    // unreference callbacks and free callback_lists
+
+    g_hash_table_foreach( self->callback_lists , unref_and_free_callbacks , L );
+    g_hash_table_destroy( self->callback_lists );
 
     if ( self->master )
     {
@@ -465,29 +491,63 @@ int UserData::add_callback( char * name , lua_State * L )
 
 //...............................................................................
 
-int UserData::add_last_callback( char * name , lua_State * L )
+void UserData::set_last_callback( char * name , lua_State * L )
 {
-    assert( !lua_isnil( L , -1 ) );
-
-    int * ref = (int*) malloc( sizeof( int ) );
-    *ref = lb_strong_ref( L );
-
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists , name );
-    callback_list = g_slist_append( callback_list , ref );
-    g_hash_table_insert( callback_lists , name ,  callback_list );
+    if ( callback_list )
+    {
+        callback_list = remove_last_callback( name , L );
+    }
+    if ( !lua_isnil( L , -1 ) )
+    {
+        int * ref = (int*) malloc( sizeof( int ) );
+        *ref = lb_strong_ref( L );
 
-    return *ref;
+        callback_list = g_slist_append( callback_list , ref );
+        g_hash_table_insert( callback_lists , name ,  callback_list );
+    }
 }
 
 //.............................................................................
 
-gint remove_helper( gconstpointer a , gconstpointer b ) {
+int UserData::get_last_callback( char * name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists, name );
+    if (callback_list)
+    {
+	int ref = *(int*) g_slist_last( callback_list )->data;
+	lb_strong_deref( L , ref );
+    } else
+    {
+	lua_pushnil( L );
+    }
+    return 1;
+
+}
+
+//.............................................................................
+
+gint find_ref( gconstpointer a , gconstpointer b ) {
     if ( *(int*) a == *(int*) b )
     {
 	return 0;
     }
     return 1;
 }
+
+//.............................................................................
+
+GSList * UserData::remove_callback( GSList *link , GSList *list , char * name , lua_State *L )
+{
+    int *refptr = (int*) link->data;
+    lb_strong_unref( L , *refptr );
+    g_free ( refptr );
+    list = g_slist_delete_link( list , link );
+    g_hash_table_insert( callback_lists , name , list );
+    return list;
+}
+
+//.............................................................................
 
 void UserData::remove_callback( char * name, lua_State * L )
 {
@@ -497,12 +557,25 @@ void UserData::remove_callback( char * name, lua_State * L )
     GSList * callback_list = ( GSList* ) g_hash_table_lookup( callback_lists, name );
     GSList * found = NULL;
 
-    if ( ( found = g_slist_find_custom( callback_list , &ref , remove_helper ) ) )
+    if ( ( found = g_slist_find_custom( callback_list , &ref , find_ref ) ) )
     {
-	g_free ( (int*) found->data );
-	callback_list = g_slist_delete_link( callback_list , found );
-	g_hash_table_insert( callback_lists , name , callback_list );
+        remove_callback( found , callback_list , name , L );
     }
+}
+
+//.............................................................................
+
+GSList * UserData::remove_last_callback( char *name , lua_State * L )
+{
+    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists , name );
+    GSList * last = g_slist_last( callback_list );
+
+    if ( last )
+    {
+        callback_list = remove_callback( last , callback_list , name , L );
+    }
+
+    return callback_list;
 }
 
 //.............................................................................
@@ -528,7 +601,7 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 	// push callback on top of stack (above arguments)
 	lb_strong_deref( L , ref );
 
-	// clear stack and return 0 if callback is null
+	// if callback is null, clear stack and return 0
 	if ( lua_isnil( L , -1 ) )
 	{
 	    lua_pop( L , nargs + 1 );
@@ -561,41 +634,12 @@ int UserData::invoke_callbacks( const char * name , int nargs , int nresults )
 	iter = next;
     }
 
+    lua_pop( L , nargs );
+
     lua_pushboolean( L , aggregate_result );
 
     // success
     return 1;
-}
-
-//.............................................................................
-
-int UserData::get_last_callback( char * name , lua_State * L )
-{
-    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists, name );
-    if (callback_list)
-    {
-	int ref = *(int*) g_slist_last( callback_list )->data;
-	lb_strong_deref( L , ref );
-    } else
-    {
-	lua_pushnil( L );
-    }
-    return 1;
-
-}
-
-//.............................................................................
-
-void UserData::remove_last_callback( char* name , lua_State * L )
-{
-    GSList * callback_list = (GSList*) g_hash_table_lookup( callback_lists , name );
-    GSList * last = g_slist_last( callback_list );
-    if ( last )
-    {
-	g_free( last->data );
-	callback_list = g_slist_delete_link( callback_list , last );
-	g_hash_table_insert( callback_lists , name , callback_list );
-    }
 }
 
 //.............................................................................
@@ -730,6 +774,32 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
 //.............................................................................
 
+int UserData::invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( master );
+    g_assert( L );
+
+    LSG;
+
+    // Now, we get the user data from the master object. If Lua has gone away,
+    // it won't be there. (But neither will the master in the client map).
+
+    UserData * self = UserData::get( master );
+
+    if ( ! self )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    g_assert( L == self->L );
+
+    return self->invoke_callbacks( name , nargs , nresults );
+}
+
 int UserData::invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L )
 {
     g_assert( master );
@@ -780,6 +850,30 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     }
 
     return UserData::invoke_callback( G_OBJECT( master ) , name , nargs , nresults , L );
+}
+
+int UserData::invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L )
+{
+    g_assert( client );
+
+    LSG;
+
+    // Using the client pointer, we get the master from the client map
+    // If it is not there, we bail. Because of that, this cannot be called
+    // before initialize.
+
+    gpointer master = g_hash_table_lookup( get_client_map() , client );
+
+    if ( ! master )
+    {
+        lua_pop( L , nargs );
+
+        LSG_CHECK( -nargs );
+
+        return 0;
+    }
+
+    return UserData::invoke_callbacks( G_OBJECT( master ) , name , nargs , nresults , L );
 }
 
 //.............................................................................

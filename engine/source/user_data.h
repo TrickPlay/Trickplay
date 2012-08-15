@@ -78,6 +78,7 @@ struct UserData
         // the Lua state - and therefore cannot push arguments.
 
         int invoke_callback( const char * name , int nresults = 0 );
+        int invoke_callbacks( const char * name , int nresults = 0 );
 
     private:
 
@@ -243,9 +244,9 @@ struct UserData
     int add_callback( char * name , lua_State * L );
 
     //.........................................................................
-    // Add callback with given name on this user data to end of list
+    // Sets last callback with given name on this user data
 
-    int add_last_callback( char * name , lua_State * L );
+    void set_last_callback( char * name , lua_State * L );
 
     //.........................................................................
     // Remove callback with given name and reference on this user data
@@ -265,7 +266,7 @@ struct UserData
     //.........................................................................
     // Remove last callback in list
 
-    void remove_last_callback( char* name , lua_State * L );
+    GSList * remove_last_callback( char* name , lua_State * L );
 
     //.........................................................................
     // Retrieve a callback - will always push a value, nil or otherwise.
@@ -289,12 +290,14 @@ struct UserData
     // already. In any case, it pops nargs.
 
     static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
 
     //.........................................................................
     // Same as above, but can be used when you already know the master object,
     // so it skips the client lookup.
 
     static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
 
     //.........................................................................
     // If you already have the user data pointer, you can call this one.
@@ -331,6 +334,8 @@ struct UserData
 private:
 
     friend struct Handle;
+
+    GSList * remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
 
     //.........................................................................
 
@@ -428,7 +433,7 @@ private:
     //.........................................................................
 
     //.........................................................................
-    // maps callback names to list of registered callbacks
+    // maps callback names to lists of registered callbacks
 
     GHashTable*     callback_lists;
 
