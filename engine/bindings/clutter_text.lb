@@ -934,18 +934,7 @@ class Text [[ClutterActor*]] actor
     function on_textchanged
     [[ return UserData::get( L )->get_last_callback( (char*) "on_text_changed" , L ); ]]
     [[
-        char * name = (char*) "on_text_changed";
-        UserData * ud = UserData::get( L );
-
-        // nil ==> remove
-        if ( lua_isnil( L , -1 ) )
-        {
-            ud->remove_last_callback( name , L );
-        }
-        else
-        {
-            ud->set_last_callback( name , L );
-        }
+        UserData::get( L )->set_last_callback( (char*) "on_text_changed" , L );
     ]];
 
 	/*
