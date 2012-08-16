@@ -329,10 +329,20 @@ class TrickplayInspector(QWidget):
                 fontNumber[propName] = propOrder
     
         colorPushButton = {}
+        colorValue = {}
         colorNumber = {}
         colorHandlers = {}
 
         def colorPropertyFill(propName, propOrder, data, gid=None) :
+
+            if type(propName) == list:
+                colorStr = str(data[propName[0]])
+            else:
+                colorStr = str(data[propName])
+                    
+            # QPushButton for font setting
+            color_pushbutton = QPushButton()
+            color_pushbutton.setText(colorStr)
 
             def makeColorHandler(gid, currentColor, prop_name):
                 def handler():
@@ -345,20 +355,13 @@ class TrickplayInspector(QWidget):
                             #color to color string needed 
                             colorStr = '{'+str(color.red())+','+str(color.green())+','+str(color.blue())+','+str(color.alpha())+'}'
                             if type(prop_name) == list:
-                                self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2],colorStr)
+                                self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], colorStr)
                             else:
                                 self.sendData(gid, prop_name, colorStr)
-                    self.preventChanges = False
+                            color_pushbutton.setIcon(QIcon(QPixmap.fill(color)))
+                        self.preventChanges = False
                 return handler
 
-            if type(propName) == list:
-                colorStr = str(data[propName[0]])
-            else:
-                colorStr = str(data[propName])
-                    
-            # QPushButton for font setting
-            color_pushbutton = QPushButton()
-            color_pushbutton.setText(colorStr)
 
             # Current Color 
             colorStr = colorStr[:len(colorStr)-1]
@@ -375,6 +378,12 @@ class TrickplayInspector(QWidget):
             if len(colorList) == 4:
                 currentColor.setAlpha(int(colorList[3]))
             
+            pix = QPixmap(10,10)
+            pix.fill(currentColor)
+            icon = QIcon(pix)
+            color_pushbutton.setIcon(icon)
+            #color_pushbutton.setIcon(QIcon(QPixmap(50,50).fill(currentColor)))
+
             if type(propName) == list:
                 strPropName = ' '.join(propName)
                 colorHandlers[strPropName] = makeColorHandler(gid, currentColor, propName)
@@ -562,7 +571,7 @@ class TrickplayInspector(QWidget):
                             j.setText (0, sp)
                             #j.setText (0, sp[:1].upper()+sp[1:])
                             j.setText (1, str(z[idx]))
-                            #if p ~= "base_size": #read_only 
+                            #if p ~= "base_size": #read_only r: 'color
                             if not p in READ_ONLY :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
@@ -614,6 +623,7 @@ class TrickplayInspector(QWidget):
                                         l.setFlags(l.flags() ^Qt.ItemIsEditable)
                                 c2 = c2 + 1 
                             c1 = c1 + 1 
+ 
 
                 items.append(i)
                 n = n + 1
@@ -624,14 +634,15 @@ class TrickplayInspector(QWidget):
             for n, cb in colorPushButton.iteritems() :
                 if type(colorNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(colorNumber[n])), 1, cb)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{alignment:left;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+
                 else:
                     if len(colorNumber[n]) < 4:
                         self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{alignment:left;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                     else:
                         self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{alignment:left;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                     
 
         if fontPushButton :
@@ -693,7 +704,8 @@ class TrickplayInspector(QWidget):
         return scrJSON
 
     def itemSelectionChanged(self):
-        if self.cbStyle :
+        #if self.cbStyle :
+        if self.has_key("cbStyle") :
             self.cbStyle.setEditable (False)
 
     def removeScreen(self):
