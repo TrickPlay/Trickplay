@@ -10,7 +10,7 @@ void app_closing_handler(TPContext *,const char *,void * l);
 
 /*
 	Global: app
-	
+
 	The app global variable stores information associated with the current TrickPlay application. Many of the properties contain settings defined in the application's app file (see <The app Metadata File> for details). Also provided are event handlers that inform the application when it has been loaded (<on_loaded>) and when it is about to terminate (<on_closing>).
 */
 
@@ -19,106 +19,106 @@ global app [[App*]]
     app()
         [[
             self=lb_construct( App , App::get(L) );
-	
+
             self->add_notification_handler(TP_NOTIFICATION_APP_LOADED,app_loaded_handler,L);
             self->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
         ]];
-    
+
     /*
     	Property: id
-    	
+
     	The id property is a string that contains the application's unique identifier. It is set in the app metadata file's id property.
-    	
+
     	Every TrickPlay application must define its id property.
     */
-    
+
     readonly string id
         [[id=self->get_metadata().id.c_str();]];
-        
-        
+
+
     /*
     	Property: name
-    	
+
     	The name property is a string that contains the application's name. It is set in the app metadata file's name property.
-    	
+
     	Every TrickPlay application must define its name property.
     */
-    
+
     readonly string name
         [[name=self->get_metadata().name.c_str();]];
 
 
     /*
     	Property: version
-    	
+
     	The version property is a string containing the application's version number. The version number is typically shown to the user (unlike the <release> number). It is set in the app metadata file's version property.
-    	
+
     	Every TrickPlay application must define its version property.
 
 		*See Also:* the <release> property
 	*/
-    
+
     readonly string version
         [[version=self->get_metadata().version.c_str();]];
 
 
     /*
     	Property: release
-    	
+
     	The release property is an integer value specifying the application's release number. This value is used for internal purposes only, and is never shown to the user. It is set in the app metadata file's release property.
-    	
+
     	Every TrickPlay application must define its release property.
-    	
+
     	*See Also:* the <version> property
     */
-    
+
     readonly int release
         [[release=self->get_metadata().release;]];
-    
-    
+
+
 	/*
 		Property: author
-		
+
 		The author property is a string that identifies the application's author. It is set in the app metadata file's author property.
-		
+
 		Defining the author property is optional.
 	*/
-    
+
     readonly string author
         [[author=self->get_metadata().author.c_str();]];
-    
-    
+
+
     /*
     	Property: description
-    	
+
     	The description property contains additional descriptive information about the application. It is set in the app metadata file's description property.
-    	
+
     	Defining the description property is optional.
     */
-    
+
     readonly string description
         [[description=self->get_metadata().description.c_str();]];
 
 
 	/*
 		Property: copyright
-		
+
 		The copyright property is a string containing the application's copyright information. It is set in the app metadata file's copyright property.
-		
+
 		Defining the copyright property is optional.
-	*/    
-    
+	*/
+
     readonly string copyright
         [[copyright=self->get_metadata().copyright.c_str();]];
-    
+
 
 	/*
 		UndocumentedProperty: attributes
-		
+
 		The attributes property is reserved for future expansion.
-		
+
 		The attributes property is a table of key/value pairs, where the key is a particular attribute of the application and whose value is always true. The attributes table is set in the app metadata file's attributes property.
-		
+
 		Defining the attributes table is optional.
 	*/
 
@@ -138,34 +138,34 @@ global app [[App*]]
 
 	/*
 		Property: args
-		
+
 		The args property is a string containing the arguments specified in the app_args configuration key. Refer to <TrickPlay Configuration Keys> for further details.
-		
+
 		Defining the args property is optional.
 	*/
 
     readonly string args
         [[
             TPContext * context = App::get( L )->get_context();
-            
+
             args = context->is_first_app() ? context->get( TP_APP_ARGS , "" ) : "";
-        ]];        
+        ]];
 
 
 	/*
 		Property: contents
-		
+
 		The contents property is a table that contains the list of all files contained in the application's app bundle directory structure. A file located in a subdirectory will include the subdirectory specification as part of its filename. Files of type subdirectory are not included in the contents table.
-		
+
 		Note: If the application was launched from a remote URI, the contents property will be nil.
 	*/
 
     readonly table contents
         [[
             // TODO: THIS WON'T WORK FOR APPS LAUNCHED FROM A REMOTE URI.
-            
+
             StringList list = AppResource::get_pi_children( self->get_metadata().get_root_uri() );
-            
+
             if ( list.empty() )
             {
                 g_warning( "CANNOT GET APP CONTENTS" );
@@ -176,7 +176,7 @@ global app [[App*]]
                 lua_newtable( L );
                 int t = lua_gettop( L );
                 int index = 1;
-                
+
                 for ( StringList::const_iterator it = list.begin(); it != list.end(); ++it , ++index )
                 {
                     lua_pushstring( L , it->c_str() );
@@ -188,50 +188,50 @@ global app [[App*]]
 
 	/*
 		Property: launch
-		
+
 		The launch property is a table containing information about the manner in which the application was launched. Each table entry is a key/value pair, where key is one of the strings shown below. All keys will be present in the table, but individual keys may have a nil value.
-		
+
 		caller - the <id> property of the application that launched the current application
 		action - the string name of the action that was invoked, if any
 		uri - the URI attached to the action. If the action key is nil, the uri key will also be nil.
 		type - the mime type specified for the URI
 		parameters - string of parameters passed to the application
 	*/
-    
+
     readonly table launch
     	[[
     		const App::LaunchInfo & info( App::get( L )->get_launch_info() );
-    		
+
     		lua_newtable( L );
-    		
+
     		if ( ! info.caller.empty() )
     		{
     			lua_pushstring( L, info.caller.c_str() );
     			lua_setfield( L, -2, "caller" );
     		}
-    		
+
     		if ( ! info.action.empty() )
     		{
     			lua_pushstring( L, info.action.c_str() );
     			lua_setfield( L, -2, "action" );
     		}
-    		
+
     		if ( ! info.uri.empty() )
     		{
     			lua_pushstring( L, info.uri.c_str() );
     			lua_setfield( L, -2, "uri" );
     		}
-    		
+
     		if ( ! info.type.empty() )
     		{
     			lua_pushstring( L, info.type.c_str() );
     			lua_setfield( L, -2, "type" );
     		}
-    		
+
     		if ( ! info.parameters.empty() )
     		{
 				String statement( "return " + info.parameters );
-	
+
 				if ( luaL_dostring( L, statement.c_str() ) != 0 )
 				{
 					// Pop the error
@@ -241,7 +241,7 @@ global app [[App*]]
 				else
 				{
 				    // The result of dostring should be at the top of the stack
-				    	    
+
     				lua_setfield( L, -2, "parameters" );
 			    }
     		}
@@ -250,15 +250,15 @@ global app [[App*]]
 
 	/*
 		UndocumentedFunction: set_badge
-		
+
 		The set_badge() function is not fully implemented at this time.
-		
+
 		The set_badge() function specifies a badge style and associated text label that are displayed in the App Launcher application.
-		
+
 		*Arguments:*
-		
+
 			style - string specifying the badge style. The following badge styles are supported.
-		
+
 				(code)
 				"BADGE_STYLE_1" - a very cool badge guaranteed to make viewers want to run your app until they pass out
 				"DRAGNET_BADGE" - a monotonous, just-the-facts type of badge that includes an image of Jack Webb as Officer Joe Friday
@@ -266,32 +266,32 @@ global app [[App*]]
 				(end)
 
 			text - string label to display alongside the application's badge
-		
+
 		*Return Value:* None
-		
+
 		*See Also:* the <clear_badge> function
 	*/
-	
+
 	set_badge( string style, string text )
 		[[
 			self->get_context()->get_db()->set_app_badge( self->get_id(), style, text );
-		]];    	
-		
-		
+		]];
+
+
 	/*
 		UndocumentedFunction: clear_badge
-		
+
 		The clear_badge() function is not fully implemented at this time.
-		
+
 		The clear_badge() function removes the application's badge from the App Launcher application's database of badges.
-		
+
 		*Arguments:* None
-		
+
 		*Return Value:* None
-		
+
 		*See Also:* the <set_badge> function
 	*/
-	
+
 	clear_badge()
 		[[
 			self->get_context()->get_db()->set_app_badge( self->get_id(), "", "" );
@@ -300,68 +300,117 @@ global app [[App*]]
 
 	/*
 		Event Handler: on_loaded
-		
+
 		The on_loaded() event handler is invoked after the application has been loaded, but before its code has begun execution. This provides the application an opportunity to perform any desired initialization operations.
-		
+
 		*Prototype:*
-		
+
 			(code)
 			on_loaded( app )
 			(end)
-			
+
 		*Arguments:*
-		
+
 			app - reference to the app global variable
-			
+
 		*Return Value:* None
-		
+
 		*See Also:* the <on_closing> event handler
 	*/
-    
-    callback on_loaded;
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
+        ]];
+
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
+        ]];
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
+        ]];
 
 
 	/*
 		Event Handler: on_closing
-		
+
 		The on_closing() event handler is invoked immediately before the application terminates. This provides the application the opportunity to perform any final clean-up operations.
-		
+
 		*Prototype:*
-		
+
 			(code)
 			on_closing( app )
 			(end)
-		
+
 		*Arguments:*
 
 			app - reference to the app global variable
-		
+
 		*Return Value:* None
-		
+
 		*See Also:* the <on_loaded> event handler
-	*/    
-    
-    callback on_closing;
+	*/
+
+    function on_closing
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_closing" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_closing" , L );
+        ]];
+
+    int add_onclosing_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_closing" , L );
+        ]];
+
+    remove_onclosing_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_closing" , L );
+        ]];
 
 
 	/*
 		UndocumentedEventHandler: on_audio_match
-		
+
 		The on_audio_match() event handler is undocumented, and appears to do nothing.
 	*/
-    callback on_audio_match;
+
+    function on_audio_match
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_audio_match" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_audio_match" , L );
+        ]];
+
+    int add_onaudiomatch_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_audio_match" , L );
+        ]];
+
+    remove_onaudiomatch_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_audio_match" , L );
+        ]];
 }
 
 [[
 void app_loaded_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_app_on_loaded(L,App::get(L),0,0);
+    lb_invoke_callbacks(L,App::get(L),"APP_METATABLE","on_loaded",0,0);
 }
 
 void app_closing_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_app_on_closing(L,App::get(L),0,0);
+    lb_invoke_callbacks(L,App::get(L),"APP_METATABLE","on_closing",0,0);
 }
 ]]
