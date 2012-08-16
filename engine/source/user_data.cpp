@@ -889,6 +889,7 @@ int UserData::invoke_callbacks( gpointer client , const char * name , int nargs 
 
 int UserData::invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults )
 {
+    printf("here\n");
     g_assert( L );
     g_assert( global );
 
