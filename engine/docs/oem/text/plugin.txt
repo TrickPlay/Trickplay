@@ -192,9 +192,11 @@ All plug-in functions must conform to the prototype shown below.
 	typedef int (*lua_CFunction)( lua_State * L );
 	(end)
 	
-This prototype receives a single argument of a pointer to the Lua state structure. The arguments passed to the plug-in function are stored on the top of this structure, as on a stack. To access the arguments, the plug-in function pops them from the Lua stack. The function also returns an integer value that specifies the number of values the plug-in function is returning to the caller. These return values must be pushed onto the Lua stack by the plug-in function.
+This prototype receives a single argument of a pointer to the Lua state structure. The arguments passed to the plug-in function are stored within this structure. To access the arguments, a plug-in function may call any of Lua's auxiliary luaL_checkXXX() functions, such as luaL_checknumber() or luaL_checkstring(). Refer to the <Lua Reference Manual at http://www.lua.org/manual/5.1/index.html> for the complete list of available functions.
 
-The Perlin Noise plug-in contains the pnoise() function that we wish to make available to Lua applications. However, the pnoise() prototype does not conform to the required format; instead, it accepts three arguments of type double. To enable a Lua program to call pnoise(), we create an intermediate function between the Lua application and pnoise(). This intermediate function's prototype will conform to the required prototype. It will also pop the pnoise() arguments from the Lua stack and pass them to pnoise(). Finally, the intermediate function will push the pnoise() function's single return value onto the Lua stack before returning control back to the Lua application. 
+Each plug-in function also returns an integer value that specifies the number of values the plug-in function is returning to the caller. These return values must be pushed onto the Lua stack by the plug-in function.
+
+The Perlin Noise plug-in contains the pnoise() function that we wish to make available to Lua applications. However, the pnoise() prototype does not conform to the required format; instead, it accepts three arguments of type double. To enable a Lua program to call pnoise(), we create an intermediate function between the Lua application and pnoise(). This intermediate function's prototype will conform to the required prototype. It will also access the pnoise() arguments from the Lua stack and pass them to pnoise(). Finally, the intermediate function will push the pnoise() function's single return value onto the Lua stack before returning control back to the Lua application. 
 
 The intermediate function called getPerlinNoise() is shown below. For details about the luaL_checknumber() and lua_pushnumber() functions, refer to the Lua documentation.
 
@@ -202,7 +204,7 @@ The intermediate function called getPerlinNoise() is shown below. For details ab
 	int
 	getPerlinNoise( lua_State *L ){
 
-		/* Pop function's arguments from stack */
+		/* Access function's arguments from Lua state */
 		double x = luaL_checknumber( L, 1 );
 		double y = luaL_checknumber( L, 2 );
 		double z = luaL_checknumber( L, 3 );

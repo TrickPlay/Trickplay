@@ -526,7 +526,7 @@ namespace ImageDecoders
             		tplog2( "ROTATING JPEG WITH ORIENTATION = %d", orientation );
             	}
 
-                guchar * p = pixels;
+                guchar * p;
 
                 unsigned int index;
 
@@ -866,6 +866,7 @@ namespace ImageDecoders
                 failif( ! image->pixels, "FAILED TO ALLOCATE PIXEL MEMORY" );
 
                 guchar * destination = ( guchar * ) image->pixels;
+                g_assert(destination);
 
                 GifPixelType * source = screen;
 
@@ -874,6 +875,7 @@ namespace ImageDecoders
                     if ( * source < color_map->ColorCount )
                     {
                         GifColorType * color = & color_map->Colors[ * source ];
+                        g_assert(color);
 
                         *(destination++) = color->Red;
                         *(destination++) = color->Green;

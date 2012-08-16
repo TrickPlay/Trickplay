@@ -42,6 +42,10 @@ ToastAlert = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "ToastAlert" end, nil
+	)
+    
 	override_property(instance,"icon",
 		
 		function(oldf)    return icon   end,
@@ -119,6 +123,36 @@ ToastAlert = function(parameters)
 		function(oldf) return   animate_out_duration     end,
 		function(oldf,self,v)   animate_out_duration = v end
 	)
+    
+    ----------------------------------------------------------------------------
+	
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.content = nil
+            
+            t.message                    = self.message
+            t.message_font               = self.message_font
+            t.message_color              = self.message_color
+            t.horizontal_message_padding = self.horizontal_message_padding
+            t.vertical_message_padding   = self.vertical_message_padding
+            t.horizontal_icon_padding    = self.horizontal_icon_padding
+            t.vertical_icon_padding      = self.vertical_icon_padding
+            t.on_screen_duration         = self.on_screen_duration
+            t.animate_in_duration        = self.animate_in_duration
+            t.animate_out_duration       = self.animate_out_duration
+            
+            
+            t.icon = icon.src
+            t.type = "ToastAlert"
+            
+            return t
+        end
+    )
+    
+    ----------------------------------------------------------------------------
+	
     local animating = false
 	override_function(instance,"popup",
 		function(oldf,self,v) 
@@ -165,31 +199,33 @@ ToastAlert = function(parameters)
 	)
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size","separator_y","icon"},
+		{
+            "h","w","width","height","size","separator_y","icon",
+            "horizontal_message_padding","vertical_message_padding",
+            "horizontal_icon_padding","vertical_icon_padding"
+        },
 		function()
 			
 			--reposition icon
 			icon.x = horizontal_icon_padding 
-			icon.y = instance.separator_y + vertical_icon_padding
+			icon.y = vertical_icon_padding
 			
 			--resize icon
 			--icon.w = instance.w - message.x - message_padding
 			--icon.h = instance.h - instance.separator_y - message_padding
-			if (icon.y + icon.h + vertical_icon_padding) > instance.h then
+			if (icon.y + icon.h + vertical_icon_padding) > (instance.h  - instance.separator_y)  then
 				
-				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
+				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - (instance.h  - instance.separator_y) )) / icon.h
 				
-				dumptable(icon.scale)
 			end
-			
-			
+            
 			--reposition message
 			message.x = icon.x + icon.w + horizontal_icon_padding + horizontal_message_padding
-			message.y = instance.separator_y + vertical_message_padding
+			message.y = vertical_message_padding
 			
 			--resize message
 			message.w = instance.w - message.x - horizontal_message_padding
-			message.h = instance.h - instance.separator_y - vertical_message_padding
+			message.h = instance.h - instance.separator_y - vertical_message_padding*2
 			
 		end
 	)

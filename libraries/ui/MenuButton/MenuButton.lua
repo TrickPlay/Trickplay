@@ -1,3 +1,189 @@
+
+MENUBUTTON = true
+
+
+local default_parameters = {
+    direction = "down",
+    vertical_alignment = "top",
+    item_spacing = 0,
+    popup_offset = 10,
+}
+MenuButton = function(parameters)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("MenuButton",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+    ----------------------------------------------------------------------------
+	--The ButtonPicker Object inherits from LayoutManager
+	
+    local button = Button{style = false,w=300}
+    
+    local popup = ListManager()
+    
+	local instance = LayoutManager()
+    
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"popup_offset",
+		function(oldf) return   instance.vertical_spacing     end,
+		function(oldf,self,v)   instance.vertical_spacing = v end
+	)
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"item_spacing",
+		function(oldf) return   popup.spacing     end,
+		function(oldf,self,v)   popup.spacing = v end
+	)
+    ----------------------------------------------------------------------------
+	
+    instance:subscribe_to(
+        "horizontal_alignment",
+        function()
+            popup.horizontal_alignment = instance.horizontal_alignment
+        end
+    )
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"items",
+		function(oldf) return   popup.cells     end,
+		function(oldf,self,v)  
+            
+            if type(v) ~= "table" then error("Expected table. Received: ",2) end
+            
+            local items = {}
+            
+            for i, item in ipairs(v) do
+                
+                if type(item) == "table" and item.type then 
+                    
+                    item = _G[item.type](item)
+                    
+                elseif type(item) ~= "userdata" and item.__types__.actor then 
+                
+                    error("Must be a UIElement or nil. Received "..obj,2) 
+                    
+                end
+                
+                --items[i] = {item}
+            end
+            
+            popup:set{
+                length = #items,
+                cells = v,
+            }
+            
+            
+        end
+	)
+    ----------------------------------------------------------------------------
+    local direction
+    
+    local possible_directions = {
+        up    = {{popup},{button}},
+        down  = {{button},{popup}},
+        left  = {{popup,button}},
+        right = {{button,popup}},
+    }
+    
+	override_property(instance,"direction",
+		function(oldf) return   direction     end,
+		function(oldf,self,v)  
+            
+            if not possible_directions[v] then
+                error("MenuButton.direction expects 'up', 'down', 'left', or 'right'. Received: "..v,2)
+            end
+            if direction == v then return end
+            instance:set{
+                number_of_rows = 
+                    ((v == "up"   or v == "down")  and 2) or
+                    ((v == "left" or v == "right") and 1),
+                number_of_cols = 
+                    ((v == "up"   or v == "down")  and 1) or
+                    ((v == "left" or v == "right") and 2),
+                cells = possible_directions[v],
+            }
+            direction = v
+            
+        end
+	)
+	instance:subscribe_to( "focused",
+		function()
+            if not instance.enabled then return end
+            
+            button.focused = instance.focused
+            
+        end
+	)
+	instance:add_key_handler(   keys.OK, function() button:click()   end)
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h               = nil
+            t.cell_w               = nil
+            t.cells                = nil
+            
+            t.style = instance.style
+            
+            t.items = {}
+            
+            for i = 1,popup.length do
+                t.items[i] = popup.cells[i].attributes
+            end
+            
+            t.direction = instance.direction
+            t.item_spacing = instance.item_spacing
+            t.popup_offset = instance.popup_offset
+            t.horizontal_alignment = instance.horizontal_alignment
+            
+            t.type = "MenuButton"
+            
+            return t
+        end
+    )
+    
+    ----------------------------------------------------------------------------
+    function button:on_pressed()
+        
+        popup[ popup.is_visible and "hide" or "show" ](popup)
+        
+    end
+    
+    ----------------------------------------------------------------------------
+	
+	local instance_on_style_changed
+    local function instance_on_style_changed()
+        local t = instance.style.attributes
+        t.name = nil
+        button.style:set(t)
+	end
+	
+    
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
+    ----------------------------------------------------------------------------
+    
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
+--[=[
+
 --[[
 Function: Menu Button
 ]]
@@ -839,3 +1025,4 @@ button
 
     return umbrella
 end
+--]=]

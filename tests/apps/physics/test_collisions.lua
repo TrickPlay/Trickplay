@@ -84,24 +84,21 @@ local balls = {}
 for i = 1 , BALL_COUNT do
     table.insert( balls ,
         make_ball( "FF0000" ,
-            { group = -1 }
-            --{ category = 1 , mask = { 0 , 2 , 3 } }
+            { group = -1, category = 1 , mask = { 0 , 2 , 3 } }
     ) )
 end
 
 for i = 1 , BALL_COUNT do
     table.insert( balls ,
         make_ball( "00FF00" ,
-            { group = -2 }
-            --{ category = 2 , mask = { 0 , 1 , 3 } }
+            { group = -2, category = 2 , mask = { 0 , 1 , 3 } }
     ) )
 end
 
 for i = 1 , BALL_COUNT do
     table.insert( balls ,
         make_ball( "0000FF" ,
-            { group = -3 }
-            --{ category = 3 , mask = { 0 , 1 , 2 } }
+            { group = -3, category = 3 , mask = { 0 , 1 , 2 } }
         ) )
 end
 

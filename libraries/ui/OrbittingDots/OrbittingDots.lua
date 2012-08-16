@@ -3,7 +3,7 @@ ORBITTINGDOTS = true
 
 local canvas_dot = function(self)
 	
-	local c = Canvas(self.w,self.h)
+	local c = Canvas(self.dot_size,self.dot_size)
 	
 	c.line_width = self.style.border.width
 	
@@ -20,7 +20,7 @@ local canvas_dot = function(self)
 	
 end
 
-default_parameters = {w = 100, h = 100, num_dots = 12}
+local default_parameters = {w = 100, h = 100, num_dots = 12}
 
 OrbittingDots = function(parameters)
 	
@@ -188,6 +188,10 @@ OrbittingDots = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "OrbittingDots" end, nil
+	)
+    
 	override_property(instance,"dot_size",
 		
 		function(oldf)    return dot_size   end,
@@ -204,7 +208,7 @@ OrbittingDots = function(parameters)
 	
 	override_property(instance,"num_dots",
 		
-		function(oldf)    return image   end,
+		function(oldf)    return num   end,
 		
 		function(oldf,self,v)
 			
@@ -248,13 +252,14 @@ OrbittingDots = function(parameters)
 		function(oldf) return load_timeline.duration     end,
 		function(oldf,self,v) load_timeline.duration = v end
 	)
+    local animating = false
 	override_property(instance,"animating",
 		function(oldf) return load_timeline.is_playing end,
 		function(oldf,self,v)
 			
 			if type(v) ~= "boolean" then
 				
-				error("OrbittingDots.animating expects type boolean. Received "..type(v),2)
+				error("ProgressSpinner.animating expects type boolean. Received "..type(v),2)
 				
 			elseif animating == v then
 				
@@ -278,15 +283,37 @@ OrbittingDots = function(parameters)
 	)
 	
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.animating = self.animating
+            t.duration = self.duration
+            t.num_dots = instance.num_dots
+            t.dot_size = instance.dot_size
+            
+            if (not canvas) and image.src and image.src ~= "[canvas]" then 
+                
+                t.image = image.src
+                
+            end
+            t.type = "OrbittingDots"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
 	local style_callback = function() if canvas then flag_for_redraw = true end   end
 	
-	function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, style_callback )
-		instance.style.border:on_changed(         instance, style_callback )
-		instance.style.border.colors:on_changed(  instance, style_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, style_callback )
+        instance.style.fill_colors:subscribe_to( nil, style_callback )
+        
 		style_callback()
 	end
 	

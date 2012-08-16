@@ -49,14 +49,14 @@ Profiler::Profiler( const char * _name , int _type )
 
     type = _type;
 
-    timer = g_timer_new();
-
     GQueue * queue = get_queue();
 
     if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
     {
         g_timer_stop( previous->timer );
     }
+
+    timer = g_timer_new();
 
     g_queue_push_tail( queue, this );
 }
@@ -69,13 +69,13 @@ Profiler::Profiler( const Profiler & )
 
 Profiler::~Profiler()
 {
+    g_timer_stop( timer );
+
     GQueue * queue = get_queue();
 
-    g_assert( this == g_queue_peek_tail( queue ) );
+    g_assert( this == g_queue_pop_tail( queue ) );
 
     double elapsed = ( g_timer_elapsed( timer, NULL ) * 1000 );
-
-    g_queue_pop_tail( queue );
 
     if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
     {

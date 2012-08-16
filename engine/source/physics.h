@@ -22,7 +22,7 @@ namespace Physics
 
     //=========================================================================
 
-    class World : private b2ContactListener , private b2DebugDraw
+    class World : private b2ContactListener , private b2Draw
     {
     public:
 
@@ -114,6 +114,8 @@ namespace Physics
         //.........................................................................
 
         void destroy_body_later( b2Body * body );
+        void deactivate_body_later( b2Body * body );
+        void activate_body_later( b2Body * body );
 
         //.........................................................................
 
@@ -141,7 +143,7 @@ namespace Physics
         virtual void PostSolve( b2Contact * contact , const b2ContactImpulse * impulse );
 
         //.........................................................................
-        // b2DebugDraw methods
+        // b2Draw methods
 
         virtual void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
 
@@ -179,8 +181,8 @@ namespace Physics
 
         //.........................................................................
 
-        static gboolean on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world );        
-        
+        static gboolean on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world );
+
         //.........................................................................
 
         lua_State *     L;
@@ -193,6 +195,7 @@ namespace Physics
         int             position_iterations;
 
         guint           idle_source;
+        guint           repaint_source;
         GTimer *        timer;
 
         ClutterActor *  screen;
@@ -203,7 +206,9 @@ namespace Physics
         typedef std::list< b2Body * > b2BodyList;
 
         b2BodyList      to_destroy;
-        
+        b2BodyList      to_deactivate;
+        b2BodyList      to_activate;
+
     };
 
     //=========================================================================

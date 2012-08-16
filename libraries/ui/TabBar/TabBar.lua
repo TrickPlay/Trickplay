@@ -1,3 +1,361 @@
+TABBAR = true
+
+local top_tabs = function(self,state)
+	local c = Canvas(self.w,self.h)
+	
+	c.op = "SOURCE"
+	
+	c.line_width = self.style.border.width
+	
+	local r     = self.style.border.corner_radius
+    local inset = c.line_width/2
+    
+    c:move_to( inset, inset+r)
+    --top-left corner
+    c:arc( inset+r, inset+r, r,180,270)
+    c:line_to(c.w - (inset+r), inset)
+    --top-right corner
+    c:arc( c.w - (inset+r), inset+r, r,270,360)
+    c:line_to(c.w - inset,c.h + inset)
+    --bottom-right corner
+    c:line_to( inset, c.h + inset)
+    --bottom-left corner
+    c:line_to( inset, inset+r)
+    
+	c:set_source_color( self.style.fill_colors[state] or "00000000" )
+	
+	c:fill(true)
+    
+	c:set_source_color( self.style.border.colors[state] or "ffffff" )
+	
+	c:stroke(true)
+	
+	return c:Image()
+	
+end
+
+local side_tabs = function(self,state)
+	local c = Canvas(self.w,self.h)
+	
+	c.op = "SOURCE"
+	
+	c.line_width = self.style.border.width
+	
+	local r     = self.style.border.corner_radius
+    local inset = c.line_width/2
+    
+    c:move_to( inset, inset+r)
+    --top-left corner
+    c:arc( inset+r, inset+r, r,180,270)
+    c:line_to(c.w + inset, inset)
+    --top-right corner
+    c:line_to(c.w + inset, c.h - inset)
+    --bottom-right corner
+    c:line_to( inset+r, c.h - inset)
+    --bottom-left corner
+    c:arc( inset+r, c.h - (inset+r), r,90,180)
+    c:line_to( inset, inset+r)
+    
+    
+	c:set_source_color( self.style.fill_colors[state] or "00000000" )
+	
+	c:fill(true)
+    
+	c:set_source_color( self.style.border.colors[state] or "ffffff" )
+	
+	c:stroke(true)
+	
+	return c:Image()
+	
+end
+
+local default_parameters = {tab_w = 200,tab_h = 50,pane_w = 400,pane_h = 300, tab_location = "top"}
+TabBar = function(parameters)
+    
+	--input is either nil or a table
+	parameters = is_table_or_nil("TabBar",parameters) -- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+	----------------------------------------------------------------------------
+	--The TabBar Object inherits from Widget
+	
+	local instance = ListManager{vertical_alignment = "top",spacing=0}
+    local panes = {}
+    local tabs = {}
+	local rbg 
+    local tabs_lm
+    rbg= RadioButtonGroup{name = "TabBar",
+        on_selection_change = function()
+            print("shieet")
+            for i = 1,tabs_lm.length do
+                local t = tabs_lm.cells[i]
+                if t.selected then
+                    t.pane:show()
+                    t:grab_key_focus()
+                else
+                    t.pane:hide()
+                end
+            end
+        end
+    }
+    
+    local panes_obj = Widget_Group{clip_to_size = true}
+    local tab_w = 200
+    local tab_h = 50
+    local tab_images
+    local tab_style 
+    local tab_location
+    tabs_lm = ListManager{
+        spacing = 0,
+        vertical_alignment = "top",
+        node_constructor = function(obj)
+            
+            if obj == nil then 
+                obj = {label = "Tab",content = {}}
+            elseif type(obj) ~= "table" then
+                error("Expected tab entry to be a string. Received "..type(obj),2)
+            elseif type(obj.label) ~= "string" then
+                error("Received a tab without a label",2)
+            end
+            for i,c in ipairs(obj.contents or {}) do
+                if type(c) == "table" and c.type then 
+                    
+                    obj.contents[i] = _G[c.type](c)
+                    
+                elseif type(c) ~= "userdata" and c.__types__.actor then 
+                    
+                    error("Must be a UIElement or nil. Received "..c,2) 
+                end
+            end
+            local pane = Group{children = obj.contents}
+            obj = ToggleButton{
+                label  = obj.label,
+                w      = tab_w,
+                h      = tab_h,
+                style  = false,
+                group  = rbg,
+                create_canvas = tab_location == "top" and top_tabs or side_tabs,
+                --images = tab_images,
+            }
+            if tab_style then
+                obj.style:set(tab_style.attributes)
+            else
+                obj.style.border.colors.selection = "ffffff"
+            end
+            
+            --table.insert(tabs,obj)
+            obj.pane = pane
+            --table.insert(panes,pane)
+            panes_obj:add(pane)
+            
+            return obj
+        end
+    }
+    local tab_pane = ArrowPane{style = false,arrow_move_by = tab_w}
+    tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
+    tab_pane.style.border.colors.default = "00000000"
+    tab_pane.style.fill_colors.default = "00000000"
+    tab_pane:add(tabs_lm)
+    
+    instance.cells = {tab_pane,panes_obj}
+	override_property(instance,"tabs",
+		function(oldf) 
+        
+            local tabs = {}
+            
+            for i = 1,tabs_lm.length do
+                tabs[i]    = {
+                    label    = tabs_lm.cells[i].label,
+                    contents = tabs_lm.cells[i].pane.children
+                }
+                for j,child in ipairs(tabs_lm.cells[i].pane.children) do
+                    tabs[i].contents[j] = child.attributes
+                end
+            end
+            
+            return   tabs     
+        end,
+		function(oldf,self,v)  
+            
+            if type(v) ~= "table" then error("Expected table. Received: ",2) end
+            
+            tabs_lm:set{
+                direction = "horizontal",
+                --length = #v,
+                cells = v,
+            }
+            if tab_location == "top" then
+                tab_pane.virtual_w = tabs_lm.w
+            else
+                tab_pane.virtual_h = tabs_lm.h
+            end
+            
+        end
+	)
+    local pane_w = panes_obj.w
+    local pane_h = panes_obj.h
+	override_property(instance,"pane_w",
+		function(oldf) return   pane_w     end,
+		function(oldf,self,v)   
+            pane_w = v 
+            panes_obj.w = v
+            if tab_location == "top" then
+                tab_pane.pane_w    = pane_w
+            end
+        end
+    )
+	override_property(instance,"pane_h",
+		function(oldf) return   pane_h     end,
+		function(oldf,self,v)   
+            pane_h = v 
+            panes_obj.h = v
+            if tab_location == "left" then
+                tab_pane.pane_h    = pane_h
+            end
+        end
+    )
+	override_property(instance,"tab_w",
+		function(oldf) return   tab_w     end,
+		function(oldf,self,v)   tab_w = v end
+    )
+	override_property(instance,"tab_h",
+		function(oldf) return   tab_h     end,
+		function(oldf,self,v)   tab_h = v end
+    )
+	override_property(instance,"tab_location",
+		function(oldf) return   tab_location     end,
+		function(oldf,self,v)  
+            if tab_location == v then return end
+            
+            if v == "top" then
+                instance.direction  = "vertical"
+                tabs_lm.direction  = "horizontal"
+                tab_pane.pane_w    = pane_w
+                tab_pane.pane_h    = tab_h
+                tab_pane.virtual_w = tabs_lm.w
+                tab_pane.virtual_h = tab_h
+                tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+                for _,tab in tabs_lm.cells.pairs() do
+                    tab.create_canvas = top_tabs
+                    tab.w = 200
+                end
+            elseif v == "left" then
+                instance.direction  = "horizontal"
+                tabs_lm.direction  = "vertical"
+                tab_pane.pane_w    = tab_w
+                tab_pane.pane_h    = pane_h
+                tab_pane.virtual_w = tab_w
+                tab_pane.virtual_h = tabs_lm.h
+                tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+                for _,tab in tabs_lm.cells.pairs() do
+                    tab.create_canvas = side_tabs
+                end
+            else
+                error("Expected 'top' or 'left'. Received "..v,2)
+            end
+            
+            tab_location = v
+        end
+	)
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.length               = nil
+            t.number_of_cols       = nil
+            t.number_of_rows       = nil
+            t.vertical_alignment   = nil
+            t.horizontal_alignment = nil
+            t.vertical_spacing     = nil
+            t.horizontal_spacing   = nil
+            t.cell_h = nil
+            t.cell_w = nil
+            t.cells = nil
+            
+            t.style = instance.style
+            
+            t.tab_w = instance.tab_w
+            t.tab_h = instance.tab_h
+            t.tab_location = instance.tab_location
+            t.pane_w = instance.pane_w
+            t.pane_h = instance.pane_h
+            t.tabs   = instance.tabs
+            
+            t.type = "TabBar"
+            
+            return t
+        end
+    )
+    --instance.on_entries_changed = function() print("top_level") end
+    
+	instance:subscribe_to( "enabled",
+		function()
+            for i = 1,tabs_lm.length do
+                tabs_lm.cells[i].enabled = instance.enabled
+            end
+            tab_pane.enabled = instance.enabled
+        end
+	)
+    instance:subscribe_to( {"tab_w","tab_h"},
+        function()
+            for i = 1,tabs_lm.length do
+                
+                tabs_lm.cells[i].size = {tab_w,tab_h}
+                
+            end
+            if tab_location == "top" then
+                tab_pane.pane_h = tab_h
+                tab_pane.virtual_h = tab_h
+                tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+            elseif tab_location == "left" then
+                tab_pane.pane_w = tab_w
+                tab_pane.virtual_w = tab_w
+                tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+            end
+        end
+    )
+    
+    local function tab_style_changed()
+        for i = 1,tabs_lm.length do
+                
+            tabs_lm.cells[i].style:set(instance.style.attributes)
+            
+        end
+    end
+    local function arrow_on_changed()
+        
+        tab_pane.style.arrow:set(instance.style.arrow.attributes)
+        
+    end
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.arrow:subscribe_to(        nil, arrow_on_changed  )
+        instance.style.arrow.colors:subscribe_to( nil, arrow_on_changed  )
+        instance.style.border:subscribe_to(       nil, tab_style_changed )
+        instance.style.fill_colors:subscribe_to(  nil, tab_style_changed )
+        instance.style.text:subscribe_to(         nil, tab_style_changed )
+        
+		arrow_on_changed()
+        tab_style_changed()
+	end
+	---[[
+	instance:subscribe_to(
+		"style",
+		instance_on_style_changed
+	)
+    instance_on_style_changed()
+    --]]
+    
+    instance:set(parameters)
+    
+    return instance
+end
+
+--[[
 function ui_element.tabBar(t)
     
     --default parameters
@@ -507,3 +865,4 @@ function ui_element.tabBar(t)
 
     return umbrella
 end
+--]]
