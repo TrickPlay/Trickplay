@@ -889,7 +889,6 @@ int UserData::invoke_callbacks( gpointer client , const char * name , int nargs 
 
 int UserData::invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults )
 {
-    printf("here\n");
     g_assert( L );
     g_assert( global );
 
@@ -914,6 +913,45 @@ int UserData::invoke_global_callback( lua_State * L , const char * global , cons
     lua_insert( L , - ( nargs + 1 ) );
 
     result = ud->invoke_callback( name , nargs , nresults );
+
+    if ( result )
+    {
+        lua_remove( L , - ( nresults + 1 ) );
+    }
+    else
+    {
+        lua_pop( L , 1 );
+    }
+
+    return result;
+}
+
+int UserData::invoke_global_callbacks( lua_State * L , const char * global , const char * name , int nargs , int nresults , int default_ret )
+{
+    g_assert( L );
+    g_assert( global );
+
+    int result = 0;
+
+    lua_getglobal( L , global );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , nargs + 1 );
+        return 0;
+    }
+
+    UserData * ud = UserData::get( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+        lua_pop( L , nargs + 1 );
+        return 0;
+    }
+
+    lua_insert( L , - ( nargs + 1 ) );
+
+    result = ud->invoke_callbacks( name , nargs , nresults , default_ret );
 
     if ( result )
     {

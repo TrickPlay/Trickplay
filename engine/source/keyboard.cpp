@@ -2259,7 +2259,7 @@ void Keyboard::field_value_changed()
             lua_pushstring( L , form.get_field().id.c_str() );
             lua_pushstring( L , form.get_field().value.c_str() );
 
-            UserData::invoke_global_callback( L , "keyboard" , "on_field_changed" , 2 , 0 );
+            UserData::invoke_global_callbacks( L , "keyboard" , "on_field_changed" , 2 , 0 );
         }
     }
 }
@@ -2300,7 +2300,7 @@ void Keyboard::cancel()
     {
         if ( lua_State * L = lsp->get_lua_state() )
         {
-            UserData::invoke_global_callback( L , "keyboard" , "on_cancel" , 0 , 0 );
+            UserData::invoke_global_callbacks( L , "keyboard" , "on_cancel" , 0 , 0 );
         }
     }
 
@@ -2328,7 +2328,7 @@ void Keyboard::submit()
                 lua_rawset( L , -3 );
             }
 
-            if ( UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 1 ) )
+            if ( UserData::invoke_global_callbacks( L , "keyboard" , "on_submit" , 1 , 1 , 1 ) )
             {
             	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
             	{
@@ -2346,4 +2346,3 @@ void Keyboard::submit()
 }
 
 //-----------------------------------------------------------------------------
-
