@@ -526,6 +526,7 @@ class MainWindow(QMainWindow):
             # clean backtrace and debug window
             self.backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
+            self._debug.clearGlobalTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
