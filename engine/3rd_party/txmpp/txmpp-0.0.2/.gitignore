@@ -1,0 +1,10 @@
+*.backup
+*.dylib
+*.log
+*.o
+*.os
+*.so
+.*.swp
+.scon*
+config.h
+hello-example

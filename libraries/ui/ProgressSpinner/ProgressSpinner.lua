@@ -32,7 +32,7 @@ local canvas_dot = function(self)
 	
 end
 
-default_parameters = {w = 100, h = 100, duration = 2000}
+local default_parameters = {w = 100, h = 100, duration = 2000}
 
 ProgressSpinner = function(parameters)
 	
@@ -143,6 +143,10 @@ ProgressSpinner = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
+	override_property(instance,"widget_type",
+		function() return "ProgressSpinner" end, nil
+	)
+    
 	override_property(instance,"duration",
 		function(oldf) return duration     end,
 		function(oldf,self,v) duration = v end
@@ -177,7 +181,27 @@ ProgressSpinner = function(parameters)
 	)
 	
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.animating = self.animating
+            t.duration = self.duration
+            
+            if (not canvas) and image.src and image.src ~= "[canvas]" then 
+                
+                t.image = image.src
+                
+            end
+            t.type = "ProgressSpinner"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
 	instance:subscribe_to(
 		{"h","w","width","height","size"},
 		function()   flag_for_redraw = true   end
@@ -213,12 +237,12 @@ ProgressSpinner = function(parameters)
 		end
 	)
 	
-	function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        
 		canvas_callback()
 	end
 	

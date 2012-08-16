@@ -130,7 +130,7 @@ function bg:create(t)
                 count = count + 1
             else
                 self:stop()
-                print("stop()")
+                --print("stop()")
             end
             
         end

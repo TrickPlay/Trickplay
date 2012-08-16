@@ -44,7 +44,7 @@ DialogBox = function(parameters)
 	parameters = recursive_overwrite(parameters,default_parameters) 
     
 	----------------------------------------------------------------------------
-	--The Button Object inherits from Widget
+	--The DialogBox Object inherits from Widget
 	
 	local instance = Widget( parameters )
 	
@@ -53,8 +53,11 @@ DialogBox = function(parameters)
 	
 	local title = Text()
 	
+    local content_group = Widget_Group()
+    
 	local bg
 	
+	local separator_y = parameters.separator_y
 	----------------------------------------------------------------------------
 	-- private helper functions for common actions
 	
@@ -70,7 +73,7 @@ DialogBox = function(parameters)
 	local center_title = function()
 		
 		title.w = instance.w
-		title.y = instance.style.text.y_offset + title.h/2
+		title.y = instance.style.text.y_offset +separator_y/2
 		
 	end
 	
@@ -86,7 +89,7 @@ DialogBox = function(parameters)
 		
 		bg = default_bg(instance)
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
@@ -102,13 +105,13 @@ DialogBox = function(parameters)
 		
 		if bg then bg:unparent() end
 		
-		instance:add( bg )
+		screen.add(instance, bg )
 		
 		bg:lower_to_bottom()
 		
 		if instance.is_size_set() then
 			
-			resize_image()
+			resize_images()
 			
 		else
 			--so that the label centers properly
@@ -127,6 +130,11 @@ DialogBox = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+    
+	override_property(instance,"widget_type",
+		function() return "DialogBox" end, nil
+	)
+    
 	override_property(instance,"image",
 		
 		function(oldf)    return image   end,
@@ -172,7 +180,6 @@ DialogBox = function(parameters)
 		function(oldf,self,v) title.text = v end
 	)
 	
-	local separator_y = parameters.separator_y
 	
 	override_property(instance,"separator_y",
 		function(oldf) return separator_y     end,
@@ -180,36 +187,90 @@ DialogBox = function(parameters)
 			
 			separator_y = v
 			
-			if canvas then flag_for_redraw = false end
+			if canvas then flag_for_redraw = true end
 			
+            content_group.y = v
 		end
 	)
 	
 	override_property(instance,"content",
-		function(oldf) return content     end,
+		function(oldf)
+            
+            return content_group.children     
+            
+        end,
 		function(oldf,self,v)
 			
-			instance:clear()
-			
-			instance:add(bg)
+			content_group:clear()
 			
 			if type(v) == "table" then
 				
-				instance:add(unpack(content))
+                for i,obj in ipairs(v) do
+                    
+                    if type(obj) == "table" and obj.type then 
+                        
+                        v[i] = _G[obj.type](obj)
+                        
+                    elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                    
+                        error("Must be a UIElement or nil. Received "..obj,2) 
+                        
+                    end
+                    
+                end
+				content_group:add(unpack(v))
 				
 			elseif type(v) == "userdata" then
 				
-				instance:add(content)
+				content_group:add(v)
 				
 			end
 			
-			instance:add(label)
-			
 		end
 	)
+	override_function(instance,"add",
+		function(oldf,self,...) content_group:add(...) end
+	)
+	
+	----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.separator_y = self.separator_y
+            t.title = self.title
+            
+            if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
+                
+                t.image = bg.src
+                
+            end
+            
+            t.content = {}
+            
+            for i, child in ipairs(self.content) do
+                t.content[i] = child.attributes
+            end
+            
+            --[[
+            if content and content.to_json then
+                
+                t.children = 
+                
+            end
+            --]]
+            
+            t.type = "DialogBox"
+            
+            return t
+        end
+    )
+    
+    ----------------------------------------------------------------------------
 	
 	instance:subscribe_to(
-		{"h","w","width","height","size"},
+		{"h","w","width","height","size","separator_y"},
 		function()
 			
 			flag_for_redraw = true
@@ -242,21 +303,21 @@ DialogBox = function(parameters)
 		
 		title.anchor_point = {0,title.h/2}
 		title.x            = text_style.x_offset
-		title.y            = text_style.y_offset + title.h/2
-		title.w            = instance.w
+		title.color        = text_style.colors.default
+        
+		center_title()
 		
 	end
 	
 	local canvas_callback = function() if canvas then make_canvas() end end
 	
-	function instance_on_style_changed()
-		
-		instance.style.text:on_changed(instance,update_title)
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        instance.style.text:subscribe_to( nil, update_title )
+        
 		update_title()
 		flag_for_redraw = true
 	end
@@ -266,7 +327,7 @@ DialogBox = function(parameters)
 	instance_on_style_changed()
 	
 	
-	instance:add(title)
+	screen.add(instance,content_group,title)
 	
 	instance:set(parameters)
 	

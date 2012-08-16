@@ -28,15 +28,15 @@ class MP : private MediaPlayer::Delegate
             if (is_default)
             {
                 player=App::get(L)->get_context()->get_default_media_player();
-                
-                if (player)
-                {
-                    player->add_delegate(this);
-                }
             }
             else
             {
                 player=App::get(L)->get_context()->create_new_media_player(this);                
+            }
+
+            if (player)
+            {
+                player->add_delegate(this);
             }
         }
         

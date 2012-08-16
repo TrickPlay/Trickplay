@@ -18,7 +18,7 @@
 
 
 #import "TouchController.h"
-#import "AccelerometerController.h"
+#import "CoreMotionController.h"
 #import "AudioController.h"
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
@@ -28,11 +28,12 @@
 #import "Protocols.h"
 
 #import <uuid/uuid.h>
+#import <VideoStreamer/VideoStreamer.h>
 
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
-UINavigationControllerDelegate, VirtualRemoteDelegate> {
+UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 
 @private
     BOOL viewDidAppear;
@@ -99,19 +100,25 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // and editing the images to be sent Trickplay.
     CameraViewController *camera;
     
+    // This VideoStreamer object may be used to stream video via SIP from the iOS Device
+    // to an outside SIP server or client. The camera cannot be accessed while a video
+    // streamer exists and the video streamer is automatically destroyed when no longer
+    // needed.
+    VideoStreamer *videoStreamer;
+    
     // The UIViewController for the virtual remote used to control the Television.
     VirtualRemoteViewController *virtualRemote;
     
     // YES if static graphics have been added to Take Control's views, NO otherwise.
     BOOL graphics;
     
+    // The CoreMotionController is used to capture the motion of the device using the
+    // accelerometer, gyroscope, magnetometer, and the calculation of device motion.
+    CoreMotionController *coreMotionController;
+    
     // The TouchController. All touch events sent to this delegate
     // for proper handling.
     id <ViewControllerTouchDelegate> touchDelegate;
-    
-    // The AccelerometerController. All accelerometer events sent to this delegate
-    // for proper handling.
-    id <ViewControllerAccelerometerDelegate> accelDelegate;
     
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
@@ -132,7 +139,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 @property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
@@ -170,7 +176,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @synthesize backgroundView;
 
 @synthesize touchDelegate;
-@synthesize accelDelegate;
 @synthesize advancedUIDelegate;
 
 #pragma mark -
@@ -326,7 +331,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"deviceID: %@", deviceID);
         
         // Tell the service what this device is capable of
-        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.4\t%@\tKY\tAX\tFM\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
         
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
@@ -339,8 +344,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
         // Controls touches
         touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
-        // Controls Acceleration
-        accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
+        // Controls Core Motion (Accelerometer, gyroscope, magnetometer, device motion)
+        coreMotionController = [[CoreMotionController alloc] initWithSocketManager:socketManager];
         
         // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
         // from Trickplay
@@ -503,8 +508,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  */
 - (void)do_WM:(NSArray *)args {
     version = [[args objectAtIndex:0] retain];
-    if ([version floatValue] < 4.3) {
-        NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
+    if ([version floatValue] < 4.4) {
+        NSLog(@"WARNING: Protocol Version is less than 4.4, please update Trickplay.");
     }
     
     //[tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
@@ -833,7 +838,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 #pragma mark -
-#pragma mark Accelerometer Controller Commands
+#pragma mark CoreMotion Controller Commands
 
 /**
  * SA = Start Accelerometer
@@ -846,7 +851,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  *  1. Interval between events (in milliseconds)
  */
 - (void)do_SA:(NSArray *)args {
-    [accelDelegate startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
+    [coreMotionController startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
 }
 
 /**
@@ -856,7 +861,79 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * server.
  */
 - (void)do_PA:(NSArray *)args {
-    [accelDelegate pauseAccelerometer];
+    [coreMotionController pauseAccelerometer];
+}
+
+
+/**
+ * SG = Start Gyroscope
+ *
+ * Informs the GyroscopeController to begin sending gyroscope events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SGY:(NSArray *)args {
+    [coreMotionController startGyroscopeWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PG = Pause Gyroscope
+ *
+ * Tells the GyroscopeController to stop sending gyroscope events to the
+ * server.
+ */
+- (void)do_PGY:(NSArray *)args {
+    [coreMotionController pauseGyroscope];
+}
+
+
+/**
+ * SM = Start Magnetometer
+ *
+ * Informs the MagnetometerController to begin sending magnetometer events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SMM:(NSArray *)args {
+    [coreMotionController startMagnetometerWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PM = Pause Magnetometer
+ *
+ * Tells the MagnetometerController to stop sending magnetometer events to the
+ * server.
+ */
+- (void)do_PMM:(NSArray *)args {
+    [coreMotionController pauseMagnetometer];
+}
+
+
+/**
+ * SD = Start DeviceMotion
+ *
+ * Informs the DeviceMotionController to begin sending DeviceMotion events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SAT:(NSArray *)args {
+    [coreMotionController startDeviceMotionWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PD = Pause DeviceMotion
+ *
+ * Tells the DeviceMotionController to stop sending DeviceMotion events to the
+ * server.
+ */
+- (void)do_PAT:(NSArray *)args {
+    [coreMotionController pauseDeviceMotion];
 }
 
 #pragma mark -
@@ -1028,7 +1105,44 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 #pragma mark -
-#pragma mark - Modal Virtual Remote
+#pragma mark Video Streaming
+
+- (void)do_VS {
+    // TODO: Make sure that the camera is not in use first. Also, camera should destroy itself when not in use.
+    if (camera) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    if (!context) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    videoStreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    if (!videoStreamer) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    [videoStreamer startChat];
+    [delegate tpAppViewController:self wantsToPresentCamera:videoStreamer];
+}
+
+// TODO: If in any way the video streamer is destroyed, pass cancel message back to TrickPlay
+
+- (void)videoStreamerInitiatingChat:(id)_videoStreamer {
+    
+}
+
+- (void)videoStreamerChatStarted:(id)_videoStreamer {
+    
+}
+
+- (void)videoStreamer:(id)_videoStreamer chatEndedWithInfo:(NSString *)reason {
+    
+}
+
+#pragma mark -
+#pragma mark Modal Virtual Remote
 
 /**
  * SV = Show Virtual Remote
@@ -1078,7 +1192,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  */
 - (void)do_RT:(NSArray *)args {
     [audioController destroyAudioStreamer];
-    [accelDelegate pauseAccelerometer];
+    [coreMotionController pauseAccelerometer];
+    [coreMotionController pauseGyroscope];
+    [coreMotionController pauseMagnetometer];
+    [coreMotionController pauseDeviceMotion];
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [styleAlert release];
@@ -1419,8 +1536,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
-    if (accelDelegate) {
-        [(AccelerometerController *)accelDelegate release];
+    if (coreMotionController) {
+        [coreMotionController release];
     }
     if (styleAlert) {
         [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];

@@ -7,24 +7,36 @@ assets_path = "assets/"
 audio_path  = "audio/"
 code_path   = "code/"
 
-local hangman_game_definition = function(vendor_name,vendor_id)
+APP_STATE_MAIN_PAGE = "MAIN_PAGE"
+APP_STATE_LOADING = "LOADING"
+APP_STATE_LOADING_NO_SPLASH = "LOADING_NO_SPLASH"
+APP_STATE_GUESS_WORD = "GUESS_WORD"
+APP_STATE_MAKE_WORD = "MAKE_WORD"
+APP_STATE_MAKE_PAGE = "MAKE_PAGE"
+
+hangman_game_config = function()
     return {
-        game_name               = app.name,
-        appId                   = app.name,
-        leaderboardFlag         = false,
-        achievementsFlag        = false,
-        allowWildCardInvitation = true,
-        turnBasedFlag           = true,
-        vendorName              = vendor_name,
-        vendorId                = vendor_id,
-        minPlayers              = 2,
-        maxPlayers              = 2,
+		app_id = {name = app.id, version = 1 },
+        name = app.id,
+        description = app.name,
+        category = "word games",
+        turn_policy = "roundrobin",
+        game_type = "correspondence",
+        join_after_start = true,
+        min_players_for_start = 1,
+        max_duration_per_turn = 2*60*1000,  -- only applicable for online  game_type
+        abort_when_player_leaves = true, -- only applicable for online game_type
+        roles = {
+        		{ name = "p1" },
+        		{ name = "p2", cannot_start = true }
+        }
+        
     }
 end
 
 function main()
     
-    local font = "Free Sans"
+    local font = "FreeSans"
     
     g_font     = "IM FELL English SC"
     app_state  = nil
@@ -38,7 +50,7 @@ function main()
         }
         g_user = {
             name   = "",
-            id     = 0,
+            id     = false,
         }
         
         g_user = setmetatable(
@@ -165,7 +177,6 @@ function main()
     -- server interface components
     -------------------------------------
     Game_State = dofile( code_path .. "gameplay objects/Gamplay_State.lua"   )
-    gsi        = dofile( code_path .. "interfaces/Game_Server_Interface.lua" )
     gsm        = dofile( code_path .. "interfaces/Game_Server_Manager.lua"   )
     
     -- 'in game' visual components
@@ -222,13 +233,8 @@ function main()
     ----------------------------------------------------------------------------
     -- Link components together                                               --
     ----------------------------------------------------------------------------
-    gsi:init{
-        on_lose_internet   = function() end,--Modal_Menu:animate{duration = 200, opacity = 0} end,
-        on_regain_internet = function() end,--Modal_Menu:animate{duration = 200, opacity = 0} end,
-    }
-    gsm:init{ interface = gsi }
     
-    Game_State:init{game_server   = gsm}
+    Game_State:init{game_server = gsm}
     
     Letter_Slots:init{
         num_slots = 8,
@@ -310,7 +316,7 @@ function main()
         front_page     = Main_Menu,
         side_buttons = Side_Buttons,
         
-        game_definition = hangman_game_definition,
+        game_definition = hangman_game_config,
         
     }
     
@@ -349,42 +355,10 @@ function main()
         img_srcs     = img_srcs,
     }
     
-    --[[
-    Main_Menu:init{
-        
-        font          = font,
-        
-        make_list     = make_list,
-        make_button   = make_button,
-        
-        img_srcs      = img_srcs,
-        
-        game_server    = gsm,
-        guess_word     = Guess_Word_Buttons,
-        make_word      = Make_Word_Buttons,
-        ls             = Letter_Slots,
-        main_menu_list = Main_Menu_List,
-        
-        create_game_state = make_GS_from_existing,
-        new_game_state    = create_new_GS,
-        make_frame        = make_frame,
-    }
-    
-    Main_Menu_List:init{
-        img_srcs    = img_srcs,
-        make_entry  = Main_Menu_Entry,
-        guess_word  = Guess_Word_Buttons,
-        make_word   = Make_Word_Buttons,
-        main_menu   = Main_Menu,
-        game_server = gsm,
-        create_game_state = make_GS_from_existing,
-        make_frame   = make_frame,
-        game_history = Game_History
-    }
-    --]]
     Game_History:init{
-        make_frame   = make_frame,
-        img_srcs       = img_srcs,
+        make_frame  = make_frame,
+        img_srcs    = img_srcs,
+        game_server = gsm,
     }
     
     Clipped_List:init{
@@ -449,7 +423,7 @@ function main()
         duration = 300,
         transitions = {
             {
-                source = "*",          target = "LOADING_NO_SPLASH", duration = 300,
+                source = "*",          target = APP_STATE_LOADING_NO_SPLASH, duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {Splash_Buttons,     "opacity",   0},
@@ -464,7 +438,7 @@ function main()
                 },
             },
             {
-                source = "*",          target = "LOADING", duration = 300,
+                source = "*",          target = APP_STATE_LOADING, duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {Splash_Buttons,     "opacity", 255},
@@ -479,7 +453,7 @@ function main()
                 },
             },
             {
-                source = "*",          target = "MAIN_PAGE", duration = 300,
+                source = "*",          target = APP_STATE_MAIN_PAGE, duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity", 255},
@@ -495,7 +469,7 @@ function main()
                 },
             },
             {
-                source = "*",        target = "MAKE_WORD", duration = 300,
+                source = "*",        target = APP_STATE_MAKE_WORD, duration = 300,
                 keys = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity",   0},
@@ -510,7 +484,7 @@ function main()
                 },
             },
             {
-                source = "*",        target = "GUESS_WORD", duration = 300,
+                source = "*",        target = APP_STATE_GUESS_WORD, duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity",   0},
@@ -547,39 +521,43 @@ function main()
         
         g_user.name = settings.username
         
-        gsm:login{
-            user        = g_user.name,
-            pswd        = settings.password,
-            email       = g_user.name.."@"..g_user.name..".com",
-            game_definition = hangman_game_definition,
-            session_callback = function(t)
-                
-                print("SUCCESS")
-                
-                Main_Menu:setup_lists()
-                
-            end,
-            login_callback = function(t)
-                
+        gsm:init{
+            
+            screen_name = g_user.name,
+            
+            on_connection = function(t)
                 if t then
                     
-                    app_state.state = "MAIN_PAGE"
+                    g_user.id = gsm:get_user_id()
+                    
+                    gsm:register_game(
+                        
+                        hangman_game_config(),
+                        
+                        function(success)
+                            
+                            app_state.state = APP_STATE_MAIN_PAGE
+                            
+                            Main_Menu:setup_lists()
+                            
+                        end
+                    
+                    )
                     
                 else
+                    app_state.state = APP_STATE_LOADING
                     
-                    app_state.state = "LOADING"
-                    
+                    --TODO: need to try again
                 end
-                
-                
-            end
+            end,
+            
         }
         
-        app_state.state = "LOADING_NO_SPLASH"
+        app_state.state = APP_STATE_LOADING_NO_SPLASH
     else
-        app_state.state = "LOADING"
+        app_state.state = APP_STATE_LOADING
     end
-    
+
     --for all of the locals in the 'init' functions
     collectgarbage("collect")
     

@@ -15,11 +15,11 @@ local create_fill = function(self)
         c:add_source_pattern_color_stop( 1 , self.style.fill_colors.focus_lower )
         c:fill()
         
-        return c:Image()
+        return c:Image{name = "fill"} 
         
     else
         
-        return Rectangle{size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.focus or "ff0000"}
         
     end
     
@@ -71,13 +71,13 @@ local create_shell = function(self)
         
     end
     
-    return c:Image() 
+    return c:Image{name = "shell"} 
     
 end
 
 local default_parameters = {
     w = 200, 
-    h = 50,
+    h = 50,--[[
     style = {
         fill_colors = {
             default_upper = {  0,  0,  0,255},
@@ -89,7 +89,7 @@ local default_parameters = {
             corner_radius = 10,
             colors = { default_upper = "ffffff",default_lower = "444444"}
         }
-    }
+    }--]]
 }
 
 ProgressBar = function(parameters)
@@ -104,23 +104,18 @@ ProgressBar = function(parameters)
     local redraw_shell = false
     local redraw_fill  = false
     
-    dumptable(parameters)
-    
 	local instance = Widget( parameters )
     local fill, shell
     local progress = 0
-	
-    instance:add(bg,contents,border)
     
 	----------------------------------------------------------------------------
     
+	override_property(instance,"widget_type",
+		function() return "ProgressBar" end, nil
+	)
+    
     local expand_fill = function() 
-        fill.clip = {
-            0,
-            0,
-            fill.w*progress,
-            fill.h
-        }
+        fill.w = (shell.w-2*instance.style.border.width)*progress
     end
 	override_property(instance,"progress",
 		function(oldf) return progress end,
@@ -147,12 +142,14 @@ ProgressBar = function(parameters)
 		function()
 			if redraw_shell then 
                 if shell then shell:unparent() end
+                redraw_shell = false
                 shell = create_shell(instance)
                 instance:add(shell)
                 shell:lower_to_bottom()
             end
             if redraw_fill then
                 if fill then fill:unparent() end
+                redraw_fill = false
                 fill = create_fill(instance)
                 instance:add(fill)
                 
@@ -165,19 +162,32 @@ ProgressBar = function(parameters)
 	)
     
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.progress = self.progress
+            
+            t.type = "ProgressBar"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
     local set_redraw_shell = function() redraw_shell = true end
     local set_redraw_both  = function() redraw_shell = true redraw_fill  = true end
     
     
-	local function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, set_redraw_both  )
-		instance.style.border:on_changed(         instance, set_redraw_shell )
-		instance.style.border.colors:on_changed(  instance, set_redraw_shell )
-		
-		set_redraw_both()
+	local instance_on_style_changed
+    function instance_on_style_changed()
         
+        instance.style.border:subscribe_to(      nil, set_redraw_shell )
+        instance.style.fill_colors:subscribe_to( nil, set_redraw_both )
+        
+		set_redraw_both()
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
@@ -186,6 +196,8 @@ ProgressBar = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
+	redraw_shell = true 
+    redraw_fill  = true 
 	instance:set(parameters)
 	
 	return instance

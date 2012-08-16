@@ -1,6 +1,6 @@
 CLIPPINGREGION = true
 
-local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000,clip_to_size=true}
+local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000}
 
 ClippingRegion = function(parameters)
     
@@ -65,9 +65,70 @@ ClippingRegion = function(parameters)
 		function(oldf) return y_offset     end,
 		function(oldf,self,v) y_offset = v end
 	)
+    
+	override_property(instance,"contents",
+		function(oldf) 
+            local t = {}
+            
+            for i,child in pairs(contents.children) do
+                a = child.attributes
+                if a then
+                    table.insert(t,a)
+                end
+                
+            end
+            
+            return t     
+        end,
+		function(oldf,self,v) 
+            
+            for i,obj in ipairs(v) do
+                
+                if type(obj) == "table" and obj.type then 
+                    
+                    v[i] = _G[obj.type](obj)
+                    
+                elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                
+                    error("Must be a UIElement or nil. Received "..obj,2) 
+                    
+                end
+                
+            end
+            
+            contents:clear()
+            
+            contents:add(unpack(v)) 
+        end
+	)
+    
+	override_property(instance,"widget_type",
+		function() return "ClippingRegion" end, nil
+	)
 	override_function(instance,"add",
 		function(oldf,self,...) contents:add(...) end
 	)
+    
+	----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.virtual_x = self.virtual_x
+            t.virtual_y = self.virtual_y
+            t.virtual_w = self.virtual_w
+            t.virtual_h = self.virtual_h
+            t.sets_x_to = self.sets_x_to
+            t.sets_y_to = self.sets_y_to
+            
+            t.contents = self.contents
+            
+            t.type = "ClippingRegion"
+            
+            return t
+        end
+    )
     
 	----------------------------------------------------------------------------
 	
@@ -83,10 +144,28 @@ ClippingRegion = function(parameters)
             instance.virtual_x = instance.virtual_x
             instance.virtual_y = instance.virtual_y
             
+            contents.clip = {
+                instance.virtual_x,
+                instance.virtual_y,
+                instance.w,
+                instance.h,
+            }
+            
             
 		end
 	)
     
+	instance:subscribe_to(
+		{"virtual_x","virtual_y"},
+		function()
+            contents.clip = {
+                instance.virtual_x,
+                instance.virtual_y,
+                instance.w,
+                instance.h,
+            }
+        end
+    )
 	----------------------------------------------------------------------------
 	
     local set_border_width = function() border.border_width = instance.style.border.width          end
@@ -94,12 +173,13 @@ ClippingRegion = function(parameters)
     local set_bg_color     = function() bg.color            = instance.style.fill_colors.default   end
     
     
-	local function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, set_bg_color     )
-		instance.style.border:on_changed(         instance, set_border_width )
-		instance.style.border.colors:on_changed(  instance, set_border_color )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, set_border_width )
+        instance.style.border.colors:subscribe_to(      nil, set_border_color )
+        instance.style.fill_colors:subscribe_to( nil, set_bg_color )
+        
 		set_border_width()
 		set_border_color()
 		set_bg_color()
@@ -113,7 +193,13 @@ ClippingRegion = function(parameters)
 	----------------------------------------------------------------------------
 	
 	instance:set(parameters)
-	
+    
+    contents.clip = {
+        instance.virtual_x,
+        instance.virtual_y,
+        instance.w,
+        instance.h,
+    }
 	return instance
 	
 end

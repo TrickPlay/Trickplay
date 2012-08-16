@@ -10,7 +10,7 @@ local press = function(old_function,self)
     
 end
 
-local create_canvas = function(old_function,self,state)
+local create_canvas = function(self,state)
 	
 	local c = Canvas(self.w,self.h)
 	
@@ -23,7 +23,7 @@ local create_canvas = function(old_function,self,state)
 	c:set_source_color( self.style.fill_colors[state] or "00000000" )
 	
 	c:fill(true)
-	
+    
 	c:set_source_color( self.style.border.colors[state] or "ffffff" )
 	
 	c:stroke()
@@ -56,7 +56,6 @@ end
 local default_parameters = {
 	states          = states,
 	create_canvas   = create_canvas,
-	style = {border = { colors = { selection = "ffffff"}}}
 }
 
 --------------------------------------------------------------------------------
@@ -87,38 +86,18 @@ ToggleButton = function(parameters)
     
 	----------------------------------------------------------------------------
 	
-    local button_to_json
-    
-	instance.to_json = function(_,t)
-		
-		t.group    = instance.group.name
-		t.selected = instance.selected
-		
-		t.type = t.type or "ToggleButton"
-		
-		return t
-		
-	end
-	
-	button_to_json = instance.to_json
-	
-	----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("ToggleButton.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t or {}
-        
-        return button_to_json(_,t)
-		
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.group    = instance.group and instance.group.name or nil
+            t.selected = instance.selected
+            
+            t.type = "ToggleButton"
+            
+            return t
+        end
+    )
     
 	----------------------------------------------------------------------------
 	-- the ToggleButton.selected attribute and its callbacks
@@ -126,6 +105,10 @@ ToggleButton = function(parameters)
 	local radio_button_group
     local on_deselection, on_selection
     local selected = false
+    
+	override_property(instance,"widget_type",
+		function() return "ToggleButton" end, nil
+	)
     
 	override_property(instance,"group",
 		function() return radio_button_group end,

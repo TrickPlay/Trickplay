@@ -76,7 +76,7 @@ local make_enum = function(array_of_states)
 		
         if current_state == new_state then
 			
-            print("warning changing state to current state: ", new_state)
+            --print("warning changing state to current state: ", new_state)
             
 	    return
             

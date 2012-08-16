@@ -15,6 +15,29 @@ if not ORBITTINGDOTS     then dofile("OrbittingDots/OrbittingDots.lua")     end
 
 
 
+local style = {
+    border = {
+        width = 10,
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    text = {
+        font = "Sans 50px",
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    fill_colors    = {
+        default    = {80,0,0},
+        focus      = {155,155,155},
+        activation = {155,155,155}
+    }
+}
 
 
 screen:show()
@@ -33,5 +56,10 @@ od4.num_dots = 12
 od4.num_dots = 12
 od4.size = {200,200}
 
-screen:add(od1,od2,od3,od4)
+od5 = OrbittingDots{x = 400,y = 200,num_dots = 10,animating = true,style = style}
+print(od1:to_json())
+print(od2:to_json())
+print(od3:to_json())
+print(od4:to_json())
+screen:add(od1,od2,od3,od4,od5)
 

@@ -186,7 +186,7 @@ typedef struct TPContext TPContext;
                             that this is always disabled on production builds.
                             Defaults to "0".
 
-    TP_SSL_VERIFY_PEER -    Whether server certificates are verified for SSL connections.
+    TP_SSL_VERIFYPEER -     Whether server certificates are verified for SSL connections.
                             Defaults to "1".
 
     TP_SSL_CA_CERT_FILE -   Path to a file that contains top level certificates for
@@ -278,6 +278,15 @@ typedef struct TPContext TPContext;
                                 app; instead it will start the engine and remain idle.
                                 Defaults to "0".
 
+    TP_GAMESERVICE_ENABLED - 	If set to true, gameservice support will be available. Default is false
+
+    TP_GAMESERVICE_DOMAIN - 	This is the default xmpp domain on which a gameservice user account exists.
+    							Defaults to gameservice.trickplay.com
+
+    TP_GAMESERVICE_HOST - 		The host on which the gameservice XMPP server runs on. Defaults to gameservice.gameservice.trickplay.com
+
+    TP_GAMESERVICE_PORT -		The port on which gameservice XMPP server listens on. Defaults to 5222
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -307,7 +316,7 @@ typedef struct TPContext TPContext;
 #define TP_FONTS_PATH                   "fonts_path"
 #define TP_DOWNLOADS_PATH               "downloads_path"
 #define TP_NETWORK_DEBUG                "network_debug"
-#define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
+#define TP_SSL_VERIFYPEER               "ssl_verifypeer"
 #define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
 #define TP_LIRC_ENABLED                 "lirc_enabled"
 #define TP_LIRC_UDS                     "lirc_uds"
@@ -332,6 +341,10 @@ typedef struct TPContext TPContext;
 #define TP_DEBUGGER_PORT				"debugger_port"
 #define TP_START_DEBUGGER				"start_debugger"
 #define TP_DONT_RUN_APP					"dont_run_app"
+#define TP_GAMESERVICE_ENABLED			"gameservice_enabled"
+#define TP_GAMESERVICE_DOMAIN			"gameservice_domain"
+#define TP_GAMESERVICE_HOST				"gameservice_host"
+#define TP_GAMESERVICE_PORT				"gameservice_port"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
