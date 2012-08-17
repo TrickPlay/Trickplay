@@ -963,6 +963,7 @@ class Text [[ClutterActor*]] actor
             UserData::get( L )->remove_callback( (char*) "on_text_changed" , L );
         ]];
 
+
 }
 
 [[
