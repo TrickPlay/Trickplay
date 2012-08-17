@@ -1536,6 +1536,9 @@ _VE_.openFile = function(path)
 
                 local uiTypeStr = getTypeStr(m) 
 
+                if uiTypeStr == "LayoutManager" then 
+                    m.placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+                end 
                 create_mouse_event_handler(m, uiTypeStr)
 
                 m.reactive = true 
@@ -2021,17 +2024,22 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     -- Default Settings
     if uiTypeStr == "ButtonPicker" then 
         uiInstance.items = {"item1","item2","item3"}
+    ---[[ for arrow_move_by test
+        elseif uiTypeStr == "ArrowPane" then 
+        uiInstance:add(Widget_Rectangle{w=1000,h=1000,color="ffff00"},Widget_Rectangle{w=100,h=100,color="ff0000"},Widget_Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
+    --]]--
     elseif uiTypeStr == "LayoutManager" then 
+        
         uiInstance:set{
         number_of_rows = 2,
         number_of_cols = 3,
         placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
-        cells = {
-            {Widget_Rectangle{name = "star", w=100,h=100}},
+        --[[cells = {
+            {Widget_Rectangle{name = "star", w=30,h=30}},
             {Widget_Rectangle{name = "moon", w=100,h=100}},
             {Widget_Rectangle{name = "moon", w=100,h=100}},
             {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        }
+        }]]
         }
 
     
@@ -2053,7 +2061,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="Tab1",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
+                {label="Tab1",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}, Button{}} },
                 {label="Tab2",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
             }
         }

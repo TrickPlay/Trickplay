@@ -189,7 +189,7 @@ TEXT_PROP = [
     'dot_size', 
     # Dialog Box
     'title', 
-    'content', 
+    #'content', 
     'seterator_y', 
     'image', 
     # Toast Alert 
@@ -227,7 +227,7 @@ TEXT_PROP = [
     'is_animating',
     'is_rotated',
     'is_scaled',
-    'move_by',
+    'arrow_move_by',
     'note_constructor',
     'number_of_cols',
     'number_of_rows',
@@ -376,7 +376,7 @@ PROP_LIST = [
     'dot_size', 
     # Dialog Box
     'title', 
-    'content', 
+    #'content', 
     'seterator_y', 
     'image', 
     # Toast Alert 
@@ -419,7 +419,7 @@ PROP_LIST = [
     'is_animating',
     'is_rotated',
     'is_scaled',
-    'move_by',
+    'arrow_move_by',
     'note_constructor',
     'number_of_cols',
     'number_of_rows',
@@ -451,7 +451,11 @@ PROP_LIST = [
     'value', 
     'ratio',
     'grip', # userdata ? 
+    'grip_w', 
+    'grip_h', 
     'track', #userdata ?
+    'track_w', 
+    'track_h', 
     # Clippig Region
     'virtual_width',
     'virtual_height',

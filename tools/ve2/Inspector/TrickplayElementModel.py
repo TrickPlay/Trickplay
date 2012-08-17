@@ -186,7 +186,7 @@ class TrickplayElementModel(QStandardItemModel):
         
         # Recurse through contents
         try:
-            contents = data['contents']
+            contents = data['content']
             for i in range(len(contents)-1, -1, -1):
                 self.insertElement(node, contents[i], data, False)
         
