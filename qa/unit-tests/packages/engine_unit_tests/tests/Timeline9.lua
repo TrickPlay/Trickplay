@@ -1,7 +1,7 @@
 -- Test Set up --
 
 local timeline = Timeline()
-timeline.duration = 500
+timeline.duration = 100
 timeline.loop = false
 
 local cb1_Calls = 0
@@ -49,7 +49,6 @@ timeline:start()
 
 -- Tests --
 function test_Timeline_multi_called ()
-    --on_new_frame
     assert_not_equal (cb1_Calls, 1, "cb1_Calls returned: "..cb1_Calls.." Expected not 0")
     assert_not_equal (cb2_Calls, 0, "cb2_Calls returned: "..cb2_Calls.." Expected 0")
     assert_true ( not started1 , "started returned: "..tostring(started1).." Expected false")
