@@ -823,7 +823,23 @@ global mediaplayer [[MP*]]
     	*See Also:* the <play> function
     */
 
-    callback on_end_of_stream;
+    function on_end_of_stream
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_end_of_stream" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+    int add_onendofstream_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+    remove_onendofstream_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_of_stream" , L );
+        ]];
 }
 
 [[
@@ -842,7 +858,7 @@ void MP::error(MediaPlayer * player,int code,const char * message)
 
 void MP::end_of_stream(MediaPlayer * player)
 {
-    invoke_mediaplayer_on_end_of_stream(L,this,0,0);
+    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
 }
 
 ]]
