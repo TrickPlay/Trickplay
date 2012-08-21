@@ -120,51 +120,51 @@ ListManager = function(parameters)
             
         end
 	)
-    local position_cell = function(cell,i)
+    local position_cells = function(self)
         
-        cell.x = 0
         if direction == "horizontal" then
-            for j = 1, i-1 do
-                cell.x = cell.x + cells[j].w + spacing
+            for i = 1, self.length do
+                self[i].x =  (i-1) > 0 and (self[i-1].x + self[i-1].w + spacing) or 0
             end
         end
         
-        cell.y = 0
         if direction == "vertical" then
-            for j = 1, i-1 do
-                cell.y = cell.y + cells[j].h + spacing
+            for i = 1, self.length do
+                self[i].y =  (i-1) > 0 and (self[i-1].y + self[i-1].h + spacing) or 0
+                print("y",i,self[i].y,(i-1) > 0 and self[i-1].h)
             end
         end
-        local ap = {0,0}
-        if direction == "vertical" then
-            if horizontal_alignment == "left" then
-                ap[1] = 0
-            elseif horizontal_alignment == "center" then
-                ap[1] = cell.w/2
-                cell:move_by(max_w/2,0)
-            elseif horizontal_alignment == "right" then
-                ap[1] = cell.w
-                cell:move_by(max_w,0)
-            end
-        else
-            ap[1] = cell.w/2
-            cell:move_by(cell.w/2,0)
+        
+        local ap = {}
+        for i = 1, self.length do
+            
+            ap[1] = 
+                direction            ~= "vertical" and self[i].w/2 or 
+                horizontal_alignment == "right"    and self[i].w   or
+                horizontal_alignment == "center"   and self[i].w/2 or
+                horizontal_alignment == "left"     and 0
+            
+            ap[2] = 
+                direction            ~= "horizontal" and self[i].h/2 or 
+                horizontal_alignment == "bottom"     and self[i].h   or
+                horizontal_alignment == "center"     and self[i].h/2 or
+                horizontal_alignment == "top"        and 0
+            
+            self[i].anchor_point = ap
+            
+            self[i]:move_by(
+                direction            ~= "vertical" and self[i].w/2  or 
+                horizontal_alignment == "right"    and max_w        or
+                horizontal_alignment == "center"   and max_w/2      or
+                horizontal_alignment == "left"     and 0,
+                
+                direction            ~= "horizontal" and self[i].h/2  or 
+                horizontal_alignment == "bottom"     and max_h        or
+                horizontal_alignment == "center"     and max_h/2      or
+                horizontal_alignment == "top"        and 0
+            )
+            
         end
-        if direction == "horizontal" then
-            if vertical_alignment == "top" then
-                ap[2] = 0
-            elseif vertical_alignment == "center" then
-                ap[2] = cell.h/2
-                cell:move_by(0,max_h/2)
-            elseif vertical_alignment == "bottom" then
-                ap[2] = cell.h
-                cell:move_by(0,max_h)
-            end
-        else
-            ap[2] = cell.h/2
-            cell:move_by(0,cell.h/2)
-        end
-        cell.anchor_point = ap
         
     end
     
@@ -244,7 +244,8 @@ ListManager = function(parameters)
             "spacing","cell_w", "cell_h", "direction",
         },
         function() 
-            for_each(cells,position_cell) 
+            --for_each(cells,position_cell) 
+            position_cells(cells)
             --set_size(cells)
             w = 0
             for_each(cells,find_w)
@@ -336,7 +337,9 @@ ListManager = function(parameters)
                 obj:subscribe_to(
                     {"h","w","width","height","size"},
                     function()
+                        print("sz changed",obj.gid,obj.w,obj.h)
                         if cells.on_entries_changed then
+                            print("o_e_c")
                             cells:on_entries_changed()
                         end
                     end
@@ -359,7 +362,8 @@ ListManager = function(parameters)
             for_each(self,widths_of_cols)
             max_h = 0
             for_each(self,heights_of_rows)
-            for_each(self,position_cell)
+            --for_each(self,position_cell)
+            position_cells(self)
             --set_size(self)
             w = 0
             for_each(self,find_w)
@@ -411,23 +415,6 @@ ListManager = function(parameters)
             return t
         end
     )
-    
-    local function set_and_nil(t,k)
-        
-        if t[k] == nil then return end
-        instance[k] = t[k]
-        t[k]     = nil
-        
-    end
-    
-	override_function(instance,"set", function(old_function, obj, t )
-		--need to force the setting of number_of_cols/rows before cells
-        set_and_nil(t,"length")
-        set_and_nil(t,"cells")
-		old_function(obj, t)
-		
-	end)
-    
     ----------------------------------------------------------------------------
     
     local function set_and_nil(t,k)
@@ -452,6 +439,585 @@ ListManager = function(parameters)
 	return instance
     
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ListManager = setmetatable(
+    {},
+    {
+        __index = function(self,k)
+            
+            return getmetatable(self)[k]
+            
+        end,
+        __call = function(self,p)
+            dumptable(p)
+            return self:declare():set(p or {})
+            
+        end,
+        
+        public = {
+            properties = {
+                widget_type = function(instance,env)
+                    return function() return "ListManager" end
+                end,
+                placeholder = function(instance,env)
+                    return function(oldf) return env.placeholder     end,
+                    function(oldf,self,v) 
+                        env.add(instance,v)
+                        v:hide()
+                        
+                        for obj, _ in pairs(env.placeholders) do
+                            obj.source = v
+                        end
+                        
+                        env.placeholder:unparent()
+                        if v.subscribe_to then
+                            v:subscribe_to(
+                                {"h","w","width","height","size"},
+                                function(...)
+                                    if env.in_on_entries then return end
+                                    
+                                    env.cells:on_entries_changed()
+                                    
+                                end
+                            )
+                        end
+                        
+                        env.placeholder = v 
+                        
+                        env.cells:on_entries_changed()
+                    end
+                end,
+                length = function(instance,env)
+                    return function(oldf) return env.cells.length     end,
+                    function(oldf,self,v)        env.cells.length = v end
+                end,
+                cell_w = function(instance,env)
+                    return function(oldf) return env.cell_w     end,
+                    function(oldf,self,v) 
+                        env.cell_w = v 
+                        env.max_w  = v
+                        env.for_each(env.cells,function(cell) cell.w = cell_w end)
+                        env.reposition = true
+                    end
+                end,
+                cell_h = function(instance,env)
+                    return function(oldf) return env.cell_h     end,
+                    function(oldf,self,v) 
+                        env.cell_h = v 
+                        env.max_h  = v
+                        env.for_each(env.cells,function(cell) cell.h = cell_h end)
+                        env.reposition = true
+                    end
+                end,
+                direction = function(instance,env)
+                    return function(oldf) return env.direction     end,
+                    function(oldf,self,v)        
+                        env.direction = v 
+                        env.reposition = true
+                        env.reassign_neighbors = true
+                    end
+                end,
+                spacing = function(instance,env)
+                    return function(oldf) return env.spacing     end,
+                    function(oldf,self,v)        
+                        env.spacing = v
+                        env.reposition = true
+                     end
+                end,
+                horizontal_alignment = function(instance,env)
+                    return function(oldf) return env.horizontal_alignment     end,
+                    function(oldf,self,v) 
+                        if v == "left" or v == "right" or v == "center" then
+                            env.horizontal_alignment = v 
+                            env.reposition = true
+                        else
+                            error("expected 'left' 'right' or 'center'. Received "..v,2)
+                        end
+                    end
+                end,
+                vertical_alignment = function(instance,env)
+                    return function(oldf) return env.vertical_alignment     end,
+                    function(oldf,self,v) 
+                        if v == "top" or v == "bottom" or v == "center" then
+                            env.vertical_alignment = v 
+                            env.reposition = true
+                        else
+                            error("expected 'top' 'bottom' or 'center'. Received "..v,2)
+                        end
+                    end
+                end,
+                node_constructor = function(instance,env)
+                    return function(oldf) return env.node_constructor     end,
+                    function(oldf,self,v) 
+                        if type(v) ~= "function" then
+                            error("Expected function. Received "..type(v),2)
+                        end
+                        env.node_constructor = v
+                    end
+                end,
+                on_entries_changed = function(instance,env)
+                    return function(oldf) return env.on_entries_changed     end,
+                    function(oldf,self,v) 
+                        if type(v) ~= "function" then
+                            error("Expected function. Received "..type(v),2)
+                        end
+                        env.on_entries_changed = v
+                    end
+                end,
+                
+                
+                
+                
+                cells = function(instance,env)
+                    return function(oldf) return env.cells     end,
+                    function(oldf,self,v)   
+                        env.new_cells = v  
+                        --print("herp")
+                        dumptable(v)
+                    end
+                end,
+
+                attributes = function(instance,env)
+                    return function(oldf,self)
+                    
+                        local t = oldf(self)
+            
+                        t.style = nil
+                        
+                        t.length               = instance.length
+                        t.vertical_alignment   = instance.vertical_alignment
+                        t.horizontal_alignment = instance.horizontal_alignment
+                        t.direction            = instance.direction
+                        t.spacing              = instance.spacing
+                        t.cell_h               = instance.cell_h
+                        t.cell_w               = instance.cell_w
+                        t.cells                = {}
+                        env.for_each(env.cells,function(obj,i)
+                            
+                            if not placeholders[obj] then
+                                t.cells[i] = obj.attributes
+                            end
+                        end)
+                        
+                        t.type = "ListManager"
+                        
+                        return t
+                        
+                    end
+                end,
+               
+            },
+            functions = {
+            },
+        },
+        private = {
+            widths_of_cols = function(instance,env)
+                return function(cell)
+                    if cell.w  > (env.max_w or 0) then 
+                        env.max_w = cell.w 
+                    end
+                end
+            end,
+            heights_of_rows = function(instance,env)
+                return function(cell)
+                    if cell.h  > (env.max_h or 0) then 
+                        env.max_h = cell.h 
+                    end
+                end
+            end,
+            find_w = function(instance,env)
+                return function(cell,i)
+                    
+                    if env.w < cell.x + cell.w - cell.anchor_point[1] then 
+                        env.w = cell.x + cell.w - cell.anchor_point[1]
+                    end
+                end
+            end,
+            find_h = function(instance,env)
+                return function(cell,i)
+                    
+                    if env.h < cell.y + cell.h - cell.anchor_point[2] then 
+                        env.h = cell.y + cell.h - cell.anchor_point[2]
+                    end
+                end
+            end,
+            assign_neighbors = function(instance,env)
+                return function(cell,i,cells)
+        
+                    env.items[cell].neighbors.up = nil
+                    env.items[cell].neighbors.down = nil
+                    env.items[cell].neighbors.left = nil
+                    env.items[cell].neighbors.right = nil
+                    
+                    if i ~= 1 then
+                        if env.direction == "vertical" then
+                            env.items[cell].neighbors.up = cells[i-1]
+                        elseif env.direction == "horizontal" then
+                            env.items[cell].neighbors.left = cells[i-1]
+                        else
+                            error("direction is invalid",2)
+                        end
+                    end
+                    if i ~= cells.length then
+                        if env.direction == "vertical" then
+                            env.items[cell].neighbors.down = cells[i+1]
+                        elseif env.direction == "horizontal" then
+                            env.items[cell].neighbors.right = cells[i+1]
+                        else
+                            error("direction is invalid",2)
+                        end
+                    end
+                end
+            end,
+            position_cells = function(instance,env)
+                return function(self)
+                    if env.direction == "horizontal" then
+                        for i = 1, self.length do
+                            self[i].x =  (i-1) > 0 and (self[i-1].x + self[i-1].w + env.spacing) or 0
+                            self[i].y =  0
+                        end
+                    elseif env.direction == "vertical" then
+                        for i = 1, instance.length do
+                            self[i].x =  0
+                            self[i].y =  (i-1) > 0 and (self[i-1].y + self[i-1].h + env.spacing) or 0
+                        end
+                    else
+                        error("Invalid direction: "..env.direction,2)
+                    end
+                    
+                    local ap = {}
+                    for i = 1, self.length do
+                        
+                        ap[1] = 
+                            env.direction            ~= "vertical" and self[i].w/2 or 
+                            env.horizontal_alignment == "right"    and self[i].w   or
+                            env.horizontal_alignment == "center"   and self[i].w/2 or
+                            env.horizontal_alignment == "left"     and 0
+                        
+                        ap[2] = 
+                            env.direction            ~= "horizontal" and self[i].h/2 or 
+                            env.horizontal_alignment == "bottom"     and self[i].h   or
+                            env.horizontal_alignment == "center"     and self[i].h/2 or
+                            env.horizontal_alignment == "top"        and 0
+                        
+                        self[i].anchor_point = ap
+                        
+                        self[i]:move_by(
+                            env.direction            ~= "vertical" and self[i].w/2  or 
+                            env.horizontal_alignment == "right"    and env.max_w    or
+                            env.horizontal_alignment == "center"   and env.max_w/2  or
+                            env.horizontal_alignment == "left"     and 0,
+                            
+                            env.direction            ~= "horizontal" and self[i].h/2  or 
+                            env.horizontal_alignment == "bottom"     and env.max_h    or
+                            env.horizontal_alignment == "center"     and env.max_h/2  or
+                            env.horizontal_alignment == "top"        and 0
+                        )
+                        
+                    end
+                    
+                end
+            end,
+            for_each = function(instance,env)
+                return function(self,f)
+                     for i = 1, self.length do
+                        if self[i] then f(self[i],i,self) end
+                    end
+                end
+            end,
+
+            update = function(instance,env)
+                return function()
+                    
+                    if env.updating then return end
+                    env.updating = true
+                    if  env.new_placeholder then
+                        local v = env.new_placeholder
+                        env.new_placeholder = false
+                        if v.parent then v:unparent() end
+                        --print("add",v.gid)
+                        env.add(instance,v)
+                        v:hide()
+                        
+                        for obj, _ in pairs(env.placeholders) do
+                            obj.source = v
+                        end
+                        
+                        if env.placeholder then env.placeholder:unparent() end
+                        
+                        env.placeholder = v 
+                    end
+                    if  env.new_cells then
+                        
+                        env.cells.length = #env.new_cells
+                        env.cells:set(env.new_cells) 
+                        
+                        focused_child = env.cells[1]
+                        focused_child:grab_key_focus()
+                        
+                        env.find_col_widths    = true
+                        env.find_col_heights   = true
+                        env.reposition         = true
+                        env.find_width         = true
+                        env.find_height        = true
+                        env.reassign_neighbors = true
+                        
+                        env.new_cells = false
+                    end
+                    if  env.find_col_widths then
+                        env.find_col_widths = false
+                        env.max_w  = 0
+                        env.for_each(env.cells,env.widths_of_cols) 
+                    end
+                    --print(#env.col_widths,instance.number_of_cols)
+                    if  env.find_col_heights then
+                        env.find_col_heights = false
+                        env.max_h  = 0
+                        env.for_each(env.cells,env.heights_of_rows) 
+                    end
+                    --print(#env.row_heights,instance.number_of_rows)
+                    if  env.reposition then
+                        env.reposition = false
+                        env.position_cells(env.cells)
+                        env.find_width  = true
+                        env.find_height = true
+                    end
+                    --print("a")
+                    if  env.find_width then
+                        env.find_width = false
+                        env.w = 0
+                        env.for_each(env.cells,env.find_w) 
+                        
+                        instance.w = env.w
+                    end
+                    if  env.find_height then
+                        env.find_height = false
+                        env.h = 0
+                        env.for_each(env.cells,env.find_h) 
+                        
+                        instance.h = env.h
+                    end
+                    if  env.reassign_neighbors then
+                        env.reassign_neighbors = false
+                        env.for_each(env.cells,env.assign_neighbors) 
+                    end
+                    
+                    if env.children_want_focus and env.focused_child == nil and 
+                        self.length > 0 then 
+                        env.focused_child = self[1]
+                        env.focused_child:grab_key_focus()
+                    end
+                    env.updating = false
+                end
+            end,
+        },
+        declare = function(self,parameters)
+            
+            local instance, env = Widget()
+            
+            function instance:on_key_focus_in()    
+                if env.children_want_focus and env.focused_child then 
+                    dolater(function()
+                        env.focused_child:grab_key_focus() 
+                    end)
+                end
+                
+            end 
+            
+            local getter, setter
+            
+            env.node_constructor = false
+            env.cells = ArrayManager{  
+                
+                node_constructor=function(obj)
+                    if env.node_constructor then
+                        
+                        obj = env.node_constructor(obj)
+                        
+                    else -- default node_constructor
+                        
+                        if obj == nil then  
+                            
+                            obj = Widget_Clone{source=env.placeholder}
+                            env.placeholders[obj] = true
+                            
+                        elseif type(obj) == "table" and obj.type then 
+                            
+                            obj = _G[obj.type](obj)
+                            
+                        elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                            
+                            error("Must be a UIElement or nil. Received "..obj,2) 
+                        
+                        elseif obj.parent then  obj:unparent()  end
+                    end
+                    
+                    --if env.cell_w then obj.w = env.cell_w end    TODO check these
+                    --if env.cell_h then obj.h = env.cell_h end
+                    
+                    
+                    
+                    env.add(instance,obj)
+                    
+                    
+                    env.items[obj] = {
+                        neighbors = { },
+                        key_functions = {
+                            up    = obj:add_key_handler(keys.Up,   function() 
+                                if  env.items[obj].neighbors.up then 
+                                    env.items[obj].neighbors.up:grab_key_focus()
+                                    env.focused_child = env.items[obj].neighbors.up 
+                                end 
+                            end),
+                            down  = obj:add_key_handler(keys.Down, function() 
+                                if  env.items[obj].neighbors.down then 
+                                    env.items[obj].neighbors.down:grab_key_focus() 
+                                    env.focused_child = env.items[obj].neighbors.down
+                                end 
+                            end),
+                            left  = obj:add_key_handler(keys.Left, function() 
+                                if  env.items[obj].neighbors.left then 
+                                    env.items[obj].neighbors.left:grab_key_focus() 
+                                    env.focused_child = env.items[obj].neighbors.left
+                                end 
+                            end),
+                            right = obj:add_key_handler(keys.Right,function() 
+                                if  env.items[obj].neighbors.right then 
+                                    env.items[obj].neighbors.right:grab_key_focus() 
+                                    env.focused_child = env.items[obj].neighbors.right
+                                end 
+                            end),
+                        }
+                    }
+                    
+                    if obj.subscribe_to then
+                        obj:subscribe_to(
+                            {"h","w","width","height","size"},
+                            function(...)
+                                if env.in_on_entries then return end
+                                --print("width_changed",obj.w,obj.h)
+                                --[[
+                                env.find_col_widths = true
+                                env.find_col_heights = true
+                                env.reposition = true
+                                env.find_width = true
+                                env.find_height = true
+                                --]]
+                                if env.cells.on_entries_changed then env.cells:on_entries_changed() end
+                            end
+                        )
+                    end
+                    
+                    return obj
+                end,
+                
+                node_destructor=function(obj) 
+                    if obj == env.focused_child then 
+                        local neighbors = env.items[obj].neighbors
+                        env.focused_child = 
+                            neighbors.up or 
+                            neighbors.left or
+                            neighbors.right or
+                            neighbors.down 
+                    end
+                    for _,f in pairs(env.items[obj].key_functions) do f() end
+                    env.items[obj] = nil
+                    obj:unparent() 
+                    env.placeholders[obj] = nil
+                    
+                end,
+                
+                on_entries_changed = function(self)
+                    
+                    if not env.is_setting then
+                        env.update()
+                    end
+                    --[[
+                    max_w = 0
+                    for_each(self,widths_of_cols)
+                    max_h = 0
+                    for_each(self,heights_of_rows)
+                    --for_each(self,position_cell)
+                    position_cells(self)
+                    --set_size(self)
+                    w = 0
+                    for_each(self,find_w)
+                    h = 0
+                    for_each(self,find_h)
+                    --set_size(self)
+                    instance.size = {w,h}
+                    for_each(self,assign_neighbors)
+                    on_entries_changed()
+                    --]]
+                end
+            }
+            env.new_cells = false
+            env.w = 0
+            env.h = 0
+            env.cell_w = false
+            env.cell_h = false
+            env.spacing = 20
+            env.items = {}
+            --public attributes, set to false if there is no default
+            env.max_w = 0
+            env.max_h = 0
+            env.direction   = "vertical"
+            env.vertical_alignment   = "center"
+            env.horizontal_alignment = "center"
+            env.placeholders   = {}
+            env.children_want_focus   = true
+            env.in_on_entries   = false
+            env.focused_child   = false
+            env.on_entries_changed   = false
+            env.placeholder = nil
+            env.new_placeholder = Rectangle{w=200,h=200,color="ff0000"}
+            
+            for name,f in pairs(self.private) do
+                env[name] = f(instance,env)
+            end
+            
+            instance.reactive = true
+            
+            
+            for name,f in pairs(self.public.properties) do
+                getter, setter = f(instance,env)
+                override_property( instance, name,
+                    getter, setter
+                )
+                
+            end
+            
+            for name,f in pairs(self.public.functions) do
+                
+                override_function( instance, name, f(instance,env) )
+                
+            end
+            --[[
+            for t,f in pairs(self.subscriptions) do
+                instance:subscribe_to(t,f(instance,env))
+            end
+            for _,f in pairs(self.subscriptions_all) do
+                instance:subscribe_to(nil,f(instance,env))
+            end
+            --]]
+            return instance, env
+            
+        end
+    }
+)
 --------------------------------------------------------------------------------
 --============================================================================--
 --============================================================================--
@@ -469,7 +1035,7 @@ LayoutManager = setmetatable(
             
         end,
         __call = function(self,p)
-            dumptable(p)
+            
             return self:declare():set(p or {})
             
         end,
@@ -572,7 +1138,7 @@ LayoutManager = setmetatable(
                     return function(oldf) return env.cells     end,
                     function(oldf,self,v)   
                         env.new_cells = v  
-                        print("herp")
+                        --print("herp")
                         dumptable(v)
                     end
                 end,
@@ -589,7 +1155,7 @@ LayoutManager = setmetatable(
                         t.cell_h = instance.cell_h
                         t.cell_w = instance.cell_w
                         t.cells = {}
-                        env.for_each(cells,function(obj,r,c)
+                        env.for_each(env.cells,function(obj,r,c)
                             if not t.cells[r] then
                                 t.cells[r] = {}
                             end
@@ -612,7 +1178,7 @@ LayoutManager = setmetatable(
                     if cell.w  >= (env.col_widths[c] or 0) then 
                         env.col_widths[c] = cell.w
                     end
-                    print(r,c,env.col_widths[r])
+                    --print(r,c,env.col_widths[r])
                 end
             end,
             heights_of_rows = function(instance,env)
@@ -663,7 +1229,7 @@ LayoutManager = setmetatable(
             end,
             position_cells = function(instance,env)
                 return function()
-                    print("c")
+                    --print("c")
                     if env.cell_w then
                         for i = 1, instance.number_of_rows do
                             for j = 1, instance.number_of_cols do
@@ -673,7 +1239,7 @@ LayoutManager = setmetatable(
                     else
                         for i = 1, instance.number_of_rows do
                             for j = 1, instance.number_of_cols do
-                                print("x",i,j)--,env.cells[i][j-1],env.col_widths[j-1])
+                                --print("x",i,j)--,env.cells[i][j-1],env.col_widths[j-1])
                                 env.cells[i][j].x = (j-1) > 0 and 
                                     (env.cells[i][j-1].x + env.col_widths[j-1] + env.horizontal_spacing) or 0
                                 
@@ -689,13 +1255,13 @@ LayoutManager = setmetatable(
                     else
                         for i = 1, instance.number_of_rows do
                             for j = 1, instance.number_of_cols do
-                                print("y",i,j)
+                                --print("y",i,j)
                                 env.cells[i][j].y = (i-1) > 0 and 
                                     (env.cells[i-1][j].y + env.row_heights[i-1] + env.vertical_spacing) or 0
                             end
                         end
                     end---[[
-                    print("b")
+                    --print("b")
                     local ap = {}
                     for i = 1, instance.number_of_rows do
                         for j = 1, instance.number_of_cols do
@@ -733,16 +1299,16 @@ LayoutManager = setmetatable(
             end,
             update = function(instance,env)
                 return function()
-                    print("updating")
+                    --print("updating")
                     if env.updating then return end
                     env.updating = true
                     --print("werd")
-                    print("update")
+                    --print("update")
                     if  env.new_placeholder then
                         local v = env.new_placeholder
                         env.new_placeholder = false
                         if v.parent then v:unparent() end
-                        print("add",v.gid)
+                        --print("add",v.gid)
                         env.add(instance,v)
                         v:hide()
                         
@@ -776,31 +1342,32 @@ LayoutManager = setmetatable(
                         env.col_widths  = {}
                         env.for_each(env.cells,env.widths_of_cols) 
                     end
-                    print(#env.col_widths,instance.number_of_cols)
+                    --print(#env.col_widths,instance.number_of_cols)
                     if  env.find_col_heights then
                         env.find_col_heights = false
                         env.row_heights = {}
                         env.for_each(env.cells,env.heights_of_rows) 
                     end
-                    print(#env.row_heights,instance.number_of_rows)
+                    --print(#env.row_heights,instance.number_of_rows)
                     if  env.reposition then
                         env.reposition = false
                         env.position_cells()
                     end
-                    print("a")
+                    --print("a")
                     if  env.find_width then
                         env.find_width = false
                         env.w = 0
                         env.for_each(env.cells,env.find_w) 
+                        instance.w = env.w
                     end
                     if  env.find_height then
                         env.find_height = false
                         env.h = 0
                         env.for_each(env.cells,env.find_h) 
+                        instance.h = env.h
                     end
                     if  env.reassign_neighbors then
                         env.reassign_neighbors = false
-                        env.h = 0
                         env.for_each(env.cells,env.assign_neighbors) 
                     end
                     
@@ -817,10 +1384,13 @@ LayoutManager = setmetatable(
             
             local instance, env = Widget()
             
+            instance.w = 0
+            instance.h = 0
+            
             function instance:on_key_focus_in()    
-                if children_want_focus and focused_child then 
+                if children_want_focus and env.focused_child then 
                     dolater(function()
-                        focused_child:grab_key_focus() 
+                        env.focused_child:grab_key_focus() 
                     end)
                 end
                 
@@ -890,7 +1460,7 @@ LayoutManager = setmetatable(
                             {"h","w","width","height","size"},
                             function(...)
                                 if env.in_on_entries then return end
-                                print("width_changed",obj.w,obj.h)
+                                --print("width_changed",obj.w,obj.h)
                                 env.find_col_widths = true
                                 env.find_col_heights = true
                                 env.reposition = true
@@ -905,7 +1475,7 @@ LayoutManager = setmetatable(
                 end,
                 
                 node_destructor=function(obj,r,c) 
-                    if obj == focused_child then 
+                    if obj == env.focused_child then 
                         local neighbors = env.items[obj].neighbors
                         env.focused_child = 
                             neighbors.up or 
