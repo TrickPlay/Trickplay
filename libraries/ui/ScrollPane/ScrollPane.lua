@@ -67,16 +67,16 @@ ScrollPane = function(parameters)
 	override_property(instance,"pane_w",
 		function(oldf) return   pane.w     end,
 		function(oldf,self,v)   
-            horizontal.track.w = v
-            horizontal.grip.w  = v/10
+            horizontal.track_w = v
+            horizontal.grip_w  = v/10
             pane.w       = v 
         end
     )
 	override_property(instance,"pane_h",
 		function(oldf) return   pane.h     end,
 		function(oldf,self,v)   
-            vertical.track.h   = v
-            vertical.grip.h    = v/10
+            vertical.track_h   = v
+            vertical.grip_h    = v/10
             pane.h     = v 
         end
     )
@@ -85,19 +85,19 @@ ScrollPane = function(parameters)
 		function(oldf) return   slider_thickness     end,
 		function(oldf,self,v)   
             
-            horizontal.track.h = v
-            horizontal.grip.h  = v
-            vertical.track.w   = v
-            vertical.grip.w    = v
+            horizontal.track_h = v
+            horizontal.grip_h  = v
+            vertical.track_w   = v
+            vertical.grip_w    = v
             slider_thickness   = v
         end
     )
     
     vertical:subscribe_to("progress",function()
-        pane.virtual_y = vertical.progress * pane.virtual_h
+        pane.virtual_y = vertical.progress * (pane.virtual_h - pane.h)
     end)
     horizontal:subscribe_to("progress",function()
-        pane.virtual_x = horizontal.progress * pane.virtual_w
+        pane.virtual_x = horizontal.progress * (pane.virtual_w - pane.w)
     end)
     
 	instance:subscribe_to(
