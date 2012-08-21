@@ -2,8 +2,12 @@ SLIDER = true
 
 local default_parameters = {
     direction = "horizontal",
-    grip  = {w =  80, h = 40,color="666666",border_width=2, border_color="ffffff"},
-    track = {w = 500, h = 40,color="000000",border_width=2, border_color="ffffff"},
+    --grip  = {w =  80, h = 40,color="666666",border_width=2, border_color="ffffff"},
+    --track = {w = 500, h = 40,color="000000",border_width=2, border_color="ffffff"},
+    track_w = 400,
+    track_h = 30,
+    grip_w = 60,
+    grip_h = 30,
 }
 Slider = function(parameters)
     
@@ -16,7 +20,7 @@ Slider = function(parameters)
 	----------------------------------------------------------------------------
 	--The Slider Object inherits from Widget
 	
-	local instance = Widget(parameters)
+	local instance, env = Widget(parameters)
     
     local grip, track
     local direction, direction_pos, direction_dim, direction_num 
@@ -45,6 +49,7 @@ Slider = function(parameters)
     }
     
     grip   = NineSlice{
+        name = "grip",
         reactive = true,
         on_button_down = function(self,...)
             
@@ -95,13 +100,16 @@ Slider = function(parameters)
             elseif v > 1 or v < 0 then 
                 error("Must be between [0,1]. Received ".. v,2)
             end
-            grip[direction_pos] = v*(track[direction_dim]-grip[direction_dim]) +track[direction_pos]
+            grip[direction_pos] = 
+                v*(track[direction_dim]-grip[direction_dim]) + 
+                grip[direction_dim]/2
             
             progress = v 
         end
     )
 	----------------------------------------------------------------------------
     track  = NineSlice{
+        name = "track",
         reactive = true,
         on_button_down = function(self,...)
             
@@ -129,7 +137,7 @@ Slider = function(parameters)
     )
 	override_property(instance,"track_w",
 		function(oldf) return   track.w     end,
-		function(oldf,self,v)   track.w = v end
+		function(oldf,self,v)   print("tw",v,track.gid) track.w = v end
     )
 	override_property(instance,"track_h",
 		function(oldf) return   track.h     end,
@@ -145,7 +153,7 @@ Slider = function(parameters)
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
 		function(oldf,self,v)   
-            
+            print("d")
             if v == "horizontal" then
                 direction_pos = "x"
                 direction_num =  1 
@@ -162,9 +170,25 @@ Slider = function(parameters)
     )
     
     instance:subscribe_to(
-        {"direction","track","grip"},
+        {"direction","track","grip","grip_w","grip_h","track_w","track_h"},
         function()
-            grip.position = track.position
+            print("dd")
+            grip.anchor_point = {
+                grip.w/2,
+                grip.h/2
+            }
+            if direction == "horizontal" then
+                grip.x = grip.w/2
+                grip.y = track.h/2
+            elseif direction == "vertical" then
+                grip.x = track.w/2
+                grip.y = grip.h/2
+            else
+                error("invalid direction",2)
+            end
+            
+            print(instance.gid,grip.x,grip.y,track.w)
+            print(instance.gid,grip.w,grip.h)
         end
     )
     
@@ -189,7 +213,7 @@ Slider = function(parameters)
     
     
 	----------------------------------------------------------------------------
-    instance:add(track,grip)
+    env.add( instance, track, grip )
     instance:set(parameters)
     
     return instance
