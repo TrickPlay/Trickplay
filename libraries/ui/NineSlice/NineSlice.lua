@@ -76,7 +76,7 @@ local make_side = function(self,state)
     
     return c:Image()
 end
-local make_canvas = function(self,state)
+local make_canvas = function(self, env, state)
     local corner_canvas = make_corner(self,state)
     local top_canvas    = make_top(self,state)
     local side_canvas   = make_side(self,state)
@@ -85,7 +85,7 @@ local make_canvas = function(self,state)
     side_canvas:hide()
     top_canvas:hide()
     self:clear()
-    self:add(corner_canvas,side_canvas,top_canvas)
+    env.add( self, corner_canvas,side_canvas,top_canvas)
     return {
         {
             Widget_Clone{source = corner_canvas},
@@ -207,23 +207,23 @@ NineSlice = function(parameters)
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	parameters = recursive_overwrite(parameters,default_parameters) 
     
-    local instance = Widget()
+    local instance, env = Widget()
     
     --global row/col sizes
-    local left_col_w  = 0
+    local  left_col_w = 0
     local right_col_w = 0
-    local top_row_h   = 0
-    local btm_row_h   = 0
+    local   top_row_h = 0
+    local   btm_row_h = 0
     
     local make_single_nine_slice = function(cells,state)
         
         
-        local left_col_w  = 0
+        local  left_col_w = 0
         local right_col_w = 0
-        local top_row_h   = 0
-        local btm_row_h   = 0
+        local   top_row_h = 0
+        local   btm_row_h = 0
         
-        local function set_size(self,w,h)
+        local function set_inner_size(self,w,h)
             
             for i = 1, 3 do  self[i][2].w = w  end
             for i = 1, 3 do  self[2][i].h = h  end
@@ -232,6 +232,7 @@ NineSlice = function(parameters)
             vertical_spacing   = 0,
             horizontal_spacing = 0,
         }
+        print("h",instance,instance.w,instance.h)
         ------------------------------------------------------------------------
         -- Fix the size to 3x3
         instance.cells.size = {3,3}
@@ -252,12 +253,12 @@ NineSlice = function(parameters)
                     if btm_row_h   < self[3][i].h then btm_row_h   = self[3][i].h end
                 end
                 
-                set_size( self,
-                    instance.w >= (left_col_w + right_col_w) and 
-                    (instance.w - left_col_w - right_col_w) or 0,
+                set_inner_size( self,
+                     instance.w >= (left_col_w + right_col_w) and 
+                    (instance.w -  (left_col_w + right_col_w)) or 0,
                     
-                    instance.h >= (top_row_h + btm_row_h) and 
-                    (instance.h - top_row_h - btm_row_h) or 0
+                     instance.h >= (top_row_h + btm_row_h) and 
+                    (instance.h  - (top_row_h + btm_row_h)) or 0
                 )
                 
                 --Call the user's on_entries_changed function
@@ -281,13 +282,13 @@ NineSlice = function(parameters)
                 
                 if setting_size then return end
                 setting_size = true
-                
-                set_size( instance.cells,
-                    instance.w >= (left_col_w + right_col_w) and 
-                    (instance.w - left_col_w - right_col_w) or 0,
+                print(instance,instance.w,instance.h)
+                set_inner_size( instance.cells,
+                     instance.w >= (left_col_w + right_col_w) and 
+                    (instance.w -  (left_col_w + right_col_w)) or 0,
                     
-                    instance.h >= (top_row_h + btm_row_h) and 
-                    (instance.h - top_row_h - btm_row_h) or 0
+                     instance.h >= (top_row_h + btm_row_h) and 
+                    (instance.h  - (top_row_h + btm_row_h)) or 0
                 )
                 setting_size = false
                 
@@ -303,8 +304,7 @@ NineSlice = function(parameters)
             function() return top_row_h + btm_row_h end, 
             function() error("Attempt to set 'min_w,' a read-only value",2) end
         )
-        
-        instance.cells = cells == nil and make_canvas(instance,state) or cells
+        instance.cells = cells or make_canvas(instance,env,state)
         
         return instance
     end
@@ -358,7 +358,7 @@ NineSlice = function(parameters)
                 
                 v.size = instance.size
                 
-                instance:add(v)
+                env.add( instance, v)
                 
                 if k ~= "default" then
                     
