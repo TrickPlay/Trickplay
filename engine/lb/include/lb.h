@@ -64,7 +64,9 @@ void lb_strong_deref( lua_State * L , int ref );
 
 #define lb_invoke_callback(L,self,metatable,name,nargs,nresults)    ( UserData::invoke_callback(self,name,nargs,nresults,L) )
 
-#define lb_invoke_callbacks(L,self,metatable,name,nargs,nresults)    ( UserData::invoke_callbacks(self,name,nargs,nresults,L) )
+#define lb_invoke_callbacks(L,self,metatable,name,nargs,nresults)   ( UserData::invoke_callbacks(self,name,nargs,nresults,L) )
+
+#define lb_invoke_callbacks_r(L,self,metatable,name,nargs,nresults,default_ret) ( UserData::invoke_callbacks(self,name,nargs,nresults,L,default_ret) )
 
 #define lb_callback_attached(L,self,name,index)                     ( UserData::is_callback_attached(name,L,index))
 
