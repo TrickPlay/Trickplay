@@ -34,40 +34,50 @@ Button = setmetatable(
         
     end,
     subscriptions = {
-        ["style"] = function(instance,env)
-            return function()
-                
-                instance.style.border:subscribe_to( nil, function()
-                    if env.canvas then 
-                        env.flag_for_redraw = true 
-                        env.update(instance)
-                    end
-                end )
-                instance.style.fill_colors:subscribe_to( nil, function()
-                    if env.canvas then 
-                        env.flag_for_redraw = true 
-                        env.update(instance)
-                    end
-                end )
-                instance.style.text.colors:subscribe_to( nil, function()
-                    env.text_color_changed = true 
-                        env.update(instance)
-                end )
-                instance.style.text:subscribe_to( nil, function()
-                    env.text_style_changed = true 
-                        env.update(instance)
-                end )
-                if env.canvas then 
-                    env.flag_for_redraw = true 
-                end
-                env.text_style_changed = true
-                env.text_color_changed = true 
-                instance:notify()
-            end
-        end,
     },
     public = {
         properties = {
+            style = function(instance,env)
+                return function(oldf,...) return oldf(...) end,
+                function(oldf,self,v)
+                    oldf(self,v)
+                        
+                    instance.style.border:subscribe_to( nil, function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            instance:notify()
+                        end
+                    end )
+                    instance.style.fill_colors:subscribe_to( nil, function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            instance:notify()
+                        end
+                    end )
+                    instance.style.text.colors:subscribe_to( nil, function()
+                        env.text_color_changed = true 
+                        instance:notify()
+                    end )
+                    instance.style.text:subscribe_to( nil, function()
+                        env.text_style_changed = true 
+                        instance:notify()
+                    end )
+                    instance.style:subscribe_to( nil, function()
+                            
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                        end
+                        env.text_style_changed = true
+                        env.text_color_changed = true 
+                        instance:notify()
+                        
+                    end )
+                    
+                    env.flag_for_redraw = true 
+                    env.text_style_changed = true
+                    env.text_color_changed = true 
+                end
+            end,
             enabled = function(instance,env)
                 return function(oldf,...) return oldf(...) end,
                 function(oldf,self,v)
@@ -167,7 +177,13 @@ Button = setmetatable(
             end,
             create_canvas = function(instance,env)
                 return function(oldf) return env.create_canvas     end,
-                function(oldf,self,v) env.flag_for_redraw = true env.create_canvas = v end
+                function(oldf,self,v) 
+                    
+                    env.create_canvas = v 
+                    if env.canvas then
+                        env.flag_for_redraw = true 
+                    end
+                end
             end,
             w = function(instance,env)
                 return function(oldf) return env.w     end,
@@ -369,7 +385,6 @@ Button = setmetatable(
                         end
                     end
                     
-                    
                     env.add(instance, env.label )
                     
                     return true
@@ -378,7 +393,7 @@ Button = setmetatable(
             
             setup_images = function(instance,env)
                 return function(new_images)
-                    print("setup_images")
+                    
                     env.canvas = false
                     
                     env.clear(instance)
