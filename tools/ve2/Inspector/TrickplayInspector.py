@@ -10,6 +10,7 @@ from PropertyIter import *#PropertyIter
 from TrickplayElement import TrickplayElement
 from Data import dataToModel
 from UI.Inspector import Ui_TrickplayInspector
+from UI.PickerItems import Ui_PickerItemTable
 
 class MyDelegate(QItemDelegate):
     def __init__(self):
@@ -27,6 +28,113 @@ class MyStyle (QWidget):
             self._cbFoo.addItem(x)
         lo.addWidget (self._cbFoo, 3)
         self.setLayout (lo)
+
+class DnDTableWidget(QTableWidget):
+    def __init__(self, parent=None, pickerTable = None):
+        super(DnDTableWidget, self).__init__(parent)
+        if parent :
+            self.sendData = pickerTable.sendItemsData
+        self.setAcceptDrops(True)
+        self.setDragEnabled(True)
+        
+    def dragEnterEvent(self, event):
+        event.accept()
+
+    def dragMoveEvent(self, event):
+        event.setDropAction(Qt.MoveAction)
+        event.accept()
+
+    def dropEvent(self, event):
+        table = event.source ()
+        orgItem = table.selectedItems()[0]
+        orgIdx = table.indexFromItem(orgItem).row()
+        newItem = table.itemAt(event.pos())
+        newText = newItem.text()
+        newIdx = table.indexFromItem(newItem).row()
+        newItem.setText(orgItem.text())
+        orgItem.setText(newText)
+        table.setCurrentItem(newItem)
+        self.sendData()
+
+class PickerItemTable(QWidget):
+    def __init__(self, parent, gid) :
+        QWidget.__init__(self,parent)
+        
+        if parent :
+            self.insp = parent
+
+        self.gid = gid
+        self.ui = Ui_PickerItemTable()
+        self.ui.setupUi(self)
+        self.ui.itemTable = DnDTableWidget(self.ui.itemTable, self)
+
+        self.resize(200,100)
+        self.setMinimumSize(200,100)
+
+        self.ui.itemTable.setColumnCount(1)
+        
+        self.ui.itemTable.horizontalHeader().setStretchLastSection(True)
+        self.ui.itemTable.horizontalHeader().setVisible(False)
+        self.ui.itemTable.verticalHeader().setVisible(False)
+        self.ui.itemTable.setShowGrid(False)
+
+        QObject.connect(self.ui.deleteItem, SIGNAL("pressed()"), self.deleteItemHandler)
+        QObject.connect(self.ui.addItem, SIGNAL("pressed()"), self.addItemHandler)
+
+        #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', "{'AA','BB'}") 
+
+    def sendItemsData(self):
+        itemList = []
+        rCnt = self.ui.itemTable.rowCount()
+        for r in range(0, rCnt) : 
+            item = self.ui.itemTable.item(r, 0)
+            itemList.append(str(item.text()))
+        value = "{'"+"', '".join(itemList)+"'}" 
+
+        self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', value)
+
+
+    def getItemList(self):
+        itemList = []
+        rCnt = self.ui.itemTable.rowCount()
+        for r in range(0, rCnt) : 
+            item = self.ui.itemTable.item(r, 0)
+            itemList.append(str(item.text()))
+        return "{'"+"', '".join(itemList)+"'}" 
+
+        
+    def deleteItemHandler(self):
+        item = self.ui.itemTable.selectedItems()
+        if item :
+            selectedItemIdx = self.ui.itemTable.indexFromItem(item[0])
+            self.ui.itemTable.removeRow(selectedItemIdx.row())
+        else :
+            self.ui.itemTable.removeRow(self.ui.itemTable.rowCount() - 1)
+        
+        self.sendItemsData()
+
+        #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', self.getItemList())
+
+    def addItemHandler(self):
+        idx = self.ui.itemTable.rowCount()
+        self.ui.itemTable.setRowCount(idx+1)
+        newitem = QTableWidgetItem()
+        newitem.setText("item"+str(idx+1))
+        self.ui.itemTable.setItem(0, idx, newitem)
+        self.sendItemsData()
+
+        #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', self.getItemList())
+        
+    def populateItemTable(self, itemList):
+        idx = 0
+        for iStr in itemList:
+            self.ui.itemTable.setRowCount(idx + 1)
+            newitem = QTableWidgetItem()
+            newitem.setText(iStr)
+            vh = self.ui.itemTable.verticalHeader()
+            vh.setDefaultSectionSize(18)
+            self.ui.itemTable.setItem(0, idx, newitem)
+            idx = idx + 1
 
 class TrickplayInspector(QWidget):
     
@@ -76,6 +184,8 @@ class TrickplayInspector(QWidget):
         self.ui.property.setHeaderLabels(['Property', 'Value'])
         self.ui.property.setIndentation(10)
         
+        self.itemWidget = None
+
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
         QObject.connect(self.ui.inspector.selectionModel(),
@@ -222,6 +332,7 @@ class TrickplayInspector(QWidget):
         n = 0 
         style_n = 0 
         source_n = 0 
+        items_n = 0 
         
         source_button = None
 
@@ -547,6 +658,17 @@ class TrickplayInspector(QWidget):
                     source_button = QPushButton()
                     source_button.setText(str(data[p]))
                     QObject.connect(source_button, SIGNAL('clicked()'), openFileChooser)
+
+                elif p == "items":
+                    
+                    items_n = n
+                    itemList = data[p] 
+
+                    self.itemWidget = PickerItemTable(self, data['gid'])
+                    #self.itemWidget.resize(100,100)
+                    #self.itemWidget.setMinimumSize(200,100)
+                    self.itemWidget.populateItemTable(itemList)
+
                 elif p in BOOL_PROP:
                     boolPropertyFill(p, n, data) 
                 elif p in COLOR_PROP: 
@@ -559,13 +681,9 @@ class TrickplayInspector(QWidget):
 
                 if p in NESTED_PROP_LIST: 
                     z = data[p]
-                    """
                     if p == "items" and data["type"] == "ButtonPicker":
-                        print type(z)
-                        print type(z)
-                        print type(z)
-                    """
-                    if type(z) ==  list : #size, x_rotation, ... 
+                        pass
+                    elif type(z) ==  list : #size, x_rotation, ... 
                         idx = 0
                         for sp in PropertyIter(p):
                             j = QTreeWidgetItem(i) 
@@ -632,6 +750,19 @@ class TrickplayInspector(QWidget):
 
         self.ui.property.addTopLevelItems(items)
 
+        if self.itemWidget :
+            """
+            self.itemWidget.setMinimumSize(200,100)
+            print self.itemWidget.minimumSize().width()
+            print self.itemWidget.minimumSize().width()
+            print self.itemWidget.minimumSize().height()
+            print self.itemWidget.minimumSize().height()
+            self.ui.property.topLevelItem(items_n).resize(100,100)
+            self.ui.property.topLevelItem(items_n).setMinimumSize(200,100)
+            """
+            self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(items_n),1).setStyleSheet("QWidget{padding-left:2px; padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+            
         if colorPushButton :
             for n, cb in colorPushButton.iteritems() :
                 if type(colorNumber[n]) is not list :
