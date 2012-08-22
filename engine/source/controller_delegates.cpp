@@ -4,6 +4,7 @@
 #include "context.h"
 #include "bitmap.h"
 #include "clutter_util.h"
+#include "lb.h"
 
 //=============================================================================
 
@@ -472,7 +473,7 @@ void ControllerListDelegate::connected(Controller * controller)
 
 	proxies[ d ] = UserData::Handle::make( L , -1 );
 
-    invoke_controllers_on_controller_connected(L,this,1,0);
+    lb_invoke_callbacks(L,this,"CONTROLLERS_METATABLE","on_controller_connected",1,0);
 }
 
 //.........................................................................
@@ -556,4 +557,3 @@ void ControllerListDelegate::start_pointer()
         (*it)->start_pointer();
     }
 }
-
