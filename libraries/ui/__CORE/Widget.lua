@@ -66,19 +66,19 @@ local function Widgetize(instance)
     
     env.is_setting = false
     
-    local updating = false
+    env.updating = false
     
     set_up_subscriptions(mt,mt,
         function(...)
             
             old__newindex(...)
-            if not updating then
+            if not env.updating then
                 
-                updating = true
+                env.updating = true
                 
                 env.update(instance,env)
                 
-                updating = false
+                env.updating = false
                 
             end
         end,
@@ -90,13 +90,13 @@ local function Widgetize(instance)
             
             old_set(...)
             
-            if not updating then
+            if not env.updating then
                 
-                updating = true
+                env.updating = true
                 
                 env.update(instance,env)
                 
-                updating = false
+                env.updating = false
                 
             end
             
