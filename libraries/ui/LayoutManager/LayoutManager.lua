@@ -1178,7 +1178,6 @@ LayoutManager = setmetatable(
                     if cell.w  >= (env.col_widths[c] or 0) then 
                         env.col_widths[c] = cell.w
                     end
-                    --print(r,c,env.col_widths[r])
                 end
             end,
             heights_of_rows = function(instance,env)
@@ -1239,10 +1238,8 @@ LayoutManager = setmetatable(
                     else
                         for i = 1, instance.number_of_rows do
                             for j = 1, instance.number_of_cols do
-                                --print("x",i,j)--,env.cells[i][j-1],env.col_widths[j-1])
                                 env.cells[i][j].x = (j-1) > 0 and 
                                     (env.cells[i][j-1].x + env.col_widths[j-1] + env.horizontal_spacing) or 0
-                                
                             end
                         end
                     end
@@ -1263,6 +1260,7 @@ LayoutManager = setmetatable(
                     end---[[
                     --print("b")
                     local ap = {}
+                    
                     for i = 1, instance.number_of_rows do
                         for j = 1, instance.number_of_cols do
                             ap[1] = 
@@ -1300,8 +1298,10 @@ LayoutManager = setmetatable(
             update = function(instance,env)
                 return function()
                     --print("updating")
-                    if env.updating then return end
-                    env.updating = true
+                    
+                    --if env.updating then return end
+                    --env.updating = true
+                    
                     --print("werd")
                     --print("update")
                     if  env.new_placeholder then
@@ -1325,8 +1325,6 @@ LayoutManager = setmetatable(
                         print(instance.number_of_cols)
                         dumptable(env.new_cells)
                         env.cells:set(env.new_cells)
-                        print(2)
-                        --print(env.cells.number_of_cols,env.cells.number_of_rows)
                         focused_child = env.cells[1][1] 
                         focused_child:grab_key_focus()
                         env.find_col_widths = true
@@ -1342,18 +1340,15 @@ LayoutManager = setmetatable(
                         env.col_widths  = {}
                         env.for_each(env.cells,env.widths_of_cols) 
                     end
-                    --print(#env.col_widths,instance.number_of_cols)
                     if  env.find_col_heights then
                         env.find_col_heights = false
                         env.row_heights = {}
                         env.for_each(env.cells,env.heights_of_rows) 
                     end
-                    --print(#env.row_heights,instance.number_of_rows)
                     if  env.reposition then
                         env.reposition = false
                         env.position_cells()
                     end
-                    --print("a")
                     if  env.find_width then
                         env.find_width = false
                         env.w = 0
@@ -1376,7 +1371,7 @@ LayoutManager = setmetatable(
                         env.focused_child = self[1][1] 
                         env.focused_child:grab_key_focus()
                     end
-                    env.updating = false
+                    
                 end
             end,
         },
@@ -1568,6 +1563,10 @@ LayoutManager = setmetatable(
                 override_function( instance, name, f(instance,env) )
                 
             end
+            
+            env.updating = true
+            instance:set(parameters)
+            env.updating = false
             --[[
             for t,f in pairs(self.subscriptions) do
                 instance:subscribe_to(t,f(instance,env))
