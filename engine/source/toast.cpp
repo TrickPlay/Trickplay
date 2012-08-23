@@ -120,7 +120,7 @@ private:
     {
         if ( lua_State * L = lsp->get_lua_state() )
         {
-            if ( UserData::invoke_global_callback( L , "screen" , "on_toast" , 0 , 1 ) )
+            if ( UserData::invoke_global_callbacks( L , "screen" , "on_toast" , 0 , 1 ) )
             {
                 // If the callback returns true, we hide the toast and disconnect
                 // the key handler.
