@@ -121,6 +121,7 @@ public class DefaultMUGSession implements MUGSession {
 	 */
 	public DefaultMUGSession(DefaultMUGService component,
 			MUGManager mugManager, JID address) {
+		log.info("creating new MUG session for " + address);
 		this.component = component;
 		this.mugManager = mugManager;
 		this.jid = address;
@@ -152,7 +153,11 @@ public class DefaultMUGSession implements MUGSession {
 	 * @return True if the user is an occupant of any game room.
 	 */
 	public boolean isParticipant() {
-		return !((occupants == null) || occupants.isEmpty());
+		boolean hasParticipants = !((occupants == null) || occupants.isEmpty());
+		if (openApps != null && !openApps.isEmpty())
+			return true;
+		else
+			return hasParticipants;
 	}
 
 	/**
@@ -330,6 +335,7 @@ public class DefaultMUGSession implements MUGSession {
 				throw new ConflictException();
 			}
 
+			// TODO: fix the bug in processing private messages. the current implementation doesnt work
 			// An occupant is trying to send a private message
 			String resource = message.getTo().getResource();
 			if (resource != null && resource.trim().length() > 0) {
@@ -383,6 +389,7 @@ public class DefaultMUGSession implements MUGSession {
 				}
 				return;
 			}
+			
 
 			// Try to start or continue the match
 			childElement = message.getChildElement("start",
@@ -397,7 +404,7 @@ public class DefaultMUGSession implements MUGSession {
 					MUGService.mugUserNS);
 			if (childElement != null) {
 				room.leave(occupant);
-				occupants.remove(occupant);
+				occupants.remove(roomName);
 				return;
 			}
 
@@ -478,7 +485,7 @@ public class DefaultMUGSession implements MUGSession {
 			}
 			boolean freerole = childElement.element("freerole") != null;
 			boolean newmatch = childElement.element("newmatch") != null;
-			String nick= childElement.elementText("nick");
+			String nick= childElement.elementText("nickname");
 			String role = childElement.elementText("role");
 			
 			boolean acquire_role = freerole || (role!=null && !role.isEmpty());
@@ -585,6 +592,9 @@ public class DefaultMUGSession implements MUGSession {
 				matchElement.addAttribute("matchId", room.getJID().toBareJID());
 				matchElement.addElement("status").setText(
 						room.getMatch().getStatus().name());
+				MUGOccupant occupant = room.getOccupant(jid);
+				matchElement.addElement("nickname").setText(occupant.getNickname());
+				matchElement.addElement("inRoomId").setText(Integer.toString(occupant.getInRoomId()));
 
 				Element matchState = room.getMatch().getState();
 				if (matchState != null)
@@ -788,15 +798,21 @@ public class DefaultMUGSession implements MUGSession {
 
 		for (MUGRoom room : component.getGameRoomsByGame(gamens)) {
 			synchronized (room) {
+				MUGMatch.Status matchStatus = room.getMatch().getStatus();
 				if (!room.isMembersOnly()
 						&& !room.isPasswordProtected()
 						&& !room.isLocked()
-						&& !MUGMatch.Status.completed.equals(room.getMatch()
-								.getStatus()) && !room.isOccupant(jid)
-						&& room.getMatch().getFreeRoles().size() > 0) {
+						&& !room.isOccupant(jid)
+						&& room.getMatch().getFreeRoles().size() > 0
+						&& 
+						( MUGMatch.Status.created.equals(matchStatus)
+								||
+								MUGMatch.Status.active.equals(matchStatus)
+						)
+						) {
 					if (reserveRole(room, nick, jid, requestedRole)) {
 						return room;
-					}						
+					}
 				}
 			}
 		}
@@ -839,12 +855,14 @@ public class DefaultMUGSession implements MUGSession {
 			String appns = childElement != null ? childElement.attributeValue("appId") : null;
 			if (appns == null || appns.isEmpty()) {
 				// close all open apps
+				log.info("user=" + request.getFrom() + ", room=" + request.getTo() + ". closing all apps. apps="+openApps);
 				List<MUGRoom> rooms = component.getGameRooms(request.getFrom());
 				doClose(rooms);
 				openApps.clear();
 				occupants.clear();
 			} else {
 				AppID appID = CommonUtils.extractAppID(appns);
+				log.info("user=" + request.getFrom() + ", room=" + request.getTo() + ". closing apps="+appID);
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doClose(rooms);
 				openApps.remove(appID);
@@ -886,7 +904,13 @@ public class DefaultMUGSession implements MUGSession {
 				if (openApps.contains(appID)) {
 					return;
 				}
-					
+
+				// check if the app is registered otherwise silently register the app
+				// TODO: address the consequences of registering an app silently
+				if (null == component.getApp(appID)) {
+					component.registerApp(appID.getName(), appID.getVersion(), request.getFrom());
+				}
+				
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doOpen(rooms);
 				openApps.add(appID);
@@ -929,6 +953,7 @@ public class DefaultMUGSession implements MUGSession {
 		if (roomName == null) {
 			boolean appClosingPresence = Presence.Type.unavailable.equals(presence.getType());
 			if (appClosingPresence) {
+				log.info("user=" + presence.getFrom() + ", room=" + recipient + ". received unavailable presence. closing app(s)");
 				CloseAppHandler handler = new CloseAppHandler(presence);
 				handler.execute();
 			} else {

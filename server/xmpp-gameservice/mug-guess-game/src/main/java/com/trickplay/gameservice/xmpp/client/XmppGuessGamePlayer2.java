@@ -10,6 +10,9 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 		super();
 	}
 	
+	public XmppGuessGamePlayer2(String domain, String host, int port) throws Exception {
+		super(domain, host, port);
+	}
 	
 
 	@Override
@@ -94,7 +97,7 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 
 
 	private static void printUsageAndExit() {
-		System.out.println("usage is java XmppGuessGamePlayer1 [correspondence [roomToJoin] | online]");
+		System.out.println("usage is java XmppGuessGamePlayer2 [use_localhost] [correspondence [roomToJoin] | online]");
 		System.exit(0);
 	}
 
@@ -104,6 +107,27 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 		boolean correspondenceMode = false;
 		XmppGuessGamePlayer2 p2 = null;
 		String roomToJoin = "";
+		
+		String domain = "gameservice.trickplay.com";
+		String host = "gameservice.gameservice.trickplay.com";
+		int port = 5222;
+		for (int i=0; i<args.length; i++) {
+			if ("use_localhost".equals(args[i])) {
+				domain = "internal.trickplay.com";
+				host = "localhost";
+				port = 5222;
+			} else if ("online".equals(args[i])) {
+				correspondenceMode = false;
+			} else if ("correspondence".equals(args[i])) {
+				correspondenceMode = true;
+				
+				if (i+1 < args.length) {
+					roomToJoin = args[i+1];
+					i += 1;
+				}
+			}
+		}
+		
 		try {
 			if (args.length==0 || args.length>2) {
 				correspondenceMode = false;
@@ -117,7 +141,7 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 				System.out.println("unknown game play mode "+args[0]+". defaulting to online mode");
 				correspondenceMode = false;
 			}
-			p2 = new XmppGuessGamePlayer2();
+			p2 = new XmppGuessGamePlayer2(domain, host, port);
 			String appname = "tpapps";
 			int appversion = 1;
 			String appId = "urn:xmpp:mug:tp:"+appname+":"+appversion;

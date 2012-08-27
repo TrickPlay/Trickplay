@@ -16,6 +16,7 @@ import org.dom4j.Element;
 import org.frogx.service.api.AppID;
 import org.frogx.service.api.MUGApp;
 import org.frogx.service.api.MUGManager;
+import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGMatch.TurnInfo;
 import org.frogx.service.api.MUGPersistenceProvider;
 import org.frogx.service.api.MUGRoom;
@@ -467,7 +468,7 @@ public class DefaultMUGService implements MUGService {
 	}
 
 	public MUGApp getApp(AppID appID) {
-		return null;
+		return apps.get(appID);
 	}
 
 	/**
@@ -726,18 +727,34 @@ public class DefaultMUGService implements MUGService {
 	}
 	
 	public void removeGameRoom(String roomName) {
+		
+		
 		MUGRoom room = rooms.get(roomName);
 		
 		if (room == null) {
 			// No room found
 			return;
 		}
-		
-		String category = room.getGame().getCategory().toLowerCase();
-		room.destroy();
 		rooms.remove(roomName);
+		
+		String category = "";
+		if (room != null && room.getGame() != null && room.getGame().getCategory() != null) {
+			category = room.getGame().getCategory().toLowerCase();
+		}
 		if (roomsByCategory.containsKey(category))
-			roomsByCategory.get(category).remove(room);
+			if (roomsByCategory.get(category) != null)
+				roomsByCategory.get(category).remove(room);
+		
+		String gamens = null;
+		if (room != null && room.getGame() != null && room.getGame().getGameID() != null)
+			gamens = room.getGame().getGameID().getNamespace();
+			
+		if (roomsByGame.containsKey(gamens)) {
+			if (roomsByGame.get(gamens) != null)
+				roomsByGame.get(gamens).remove(room);
+		}
+		
+		room.destroy();
 	}
 	
 	public Collection<MUGRoom> getGameRoomsByCategory(String category) {
@@ -766,12 +783,14 @@ public class DefaultMUGService implements MUGService {
 	}
 	
 	private void checkForTimedOutSessions() {
+		log.info("checking for timedout sessions at " + System.currentTimeMillis());
 		final long deadline = System.currentTimeMillis() - sessiontimeout;
 		for (DefaultMUGSession session : sessions.values()) {
 			try {
 				synchronized (session) {
 				// If user is not present in any room then remove the session
 					if (!session.isParticipant()) {
+						log.info("expiring session " + session.getAddress() + ". session no participants");
 						removeSession(session.getAddress());
 						continue;
 					}
@@ -780,6 +799,7 @@ public class DefaultMUGService implements MUGService {
 						continue;
 					}
 					if (session.getLastPacketTime() < deadline) {
+						log.info("expiring session " + session.getAddress());
 						removeSession(session.getAddress());
 					}
 				}
@@ -792,12 +812,27 @@ public class DefaultMUGService implements MUGService {
 		// go through all the rooms and make sure the matches are progressing
 		if (rooms != null) {
 			for (MUGRoom room: rooms.values()) {
+				log.info("checking for inactivity in room = " + room.getName());
 				synchronized(room) {
+					log.info(room.getName()+".status=" + room.getMatch().getStatus());
+					if (!MUGMatch.Status.active.equals(room.getMatch().getStatus())) {
+						log.info(room.getName() + ".status is not active. skipping it.");
+						continue;
+					}
 					TurnInfo tinfo = room.getMatch() != null ? room.getMatch().getTurnInfo() : null;
 					if (tinfo != null && tinfo.getTarget() != null) {
-						long expireUntil = System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
-						if (tinfo.getTarget().getLastPacketTime() < expireUntil)
-							room.leave(tinfo.getTarget());
+						log.info("room = " + room.getName() + " has a valid target = " + tinfo.getTarget().getNickname());
+						long expireTime = tinfo.getExpirationTime();//System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
+						log.info("room = " + room.getName() 
+								+ ", target = " + tinfo.getTarget().getNickname()
+								+ ", turn expirationTime = " + expireTime
+								+ ", currentTime = " + System.currentTimeMillis());
+								
+						
+						if (expireTime < System.currentTimeMillis()) {
+							log.info("turn expired. aborting match = " +  room.getJID());
+							room.abortMatch();
+						}
 					}
 				}
 			}

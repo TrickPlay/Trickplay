@@ -1711,7 +1711,7 @@ void TPContext::load_external_configuration()
         TP_FONTS_PATH,
         TP_DOWNLOADS_PATH,
         TP_NETWORK_DEBUG,
-        TP_SSL_VERIFY_PEER,
+        TP_SSL_VERIFYPEER,
         TP_SSL_CA_CERT_FILE,
         TP_LIRC_ENABLED,
         TP_LIRC_UDS,

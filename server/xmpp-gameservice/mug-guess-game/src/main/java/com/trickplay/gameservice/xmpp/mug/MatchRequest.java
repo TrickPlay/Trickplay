@@ -59,7 +59,7 @@ public class MatchRequest implements PacketExtension {
 			gameElement.addElement("freerole");
 		}
 		if (nick != null && !nick.isEmpty()) {
-			gameElement.addElement("nick").setText(nick);
+			gameElement.addElement("nickname").setText(nick);
 		}
 
 		return gameElement;

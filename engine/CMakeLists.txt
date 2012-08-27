@@ -22,9 +22,9 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
 
 if ( TP_WITH_GAMESERVICE )
-	add_subdirectory( libgameservice )
-	include_directories( ${ENGINE_SRC}/libgameservice )
-	add_definitions( -DTP_WITH_GAMESERVICE=1 )
+    add_subdirectory( libgameservice )
+    include_directories( ${ENGINE_SRC}/libgameservice )
+    add_definitions( -DTP_WITH_GAMESERVICE=1 )
 endif( TP_WITH_GAMESERVICE )
 
 
@@ -162,7 +162,7 @@ ELSE ( PKG_CONFIG_FOUND )
         json-glib-1.0
 
         sndfile
-        
+
         exif
     )
 
@@ -239,8 +239,8 @@ endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 if ( TP_FONT_DEBUG )
 
     add_definitions( -DTP_FONT_DEBUG=1 )
-    
-endif( TP_FONT_DEBUG )    
+
+endif( TP_FONT_DEBUG )
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
@@ -314,9 +314,9 @@ if ( TP_FORCE_VERIFICATION )
 
     add_definitions( -DTP_FORCE_VERIFICATION=1 )
     add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
-    
+
     string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
-    
+
     if ( NOT CODE_LENGTH EQUAL 3 )
         message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
     endif( NOT CODE_LENGTH EQUAL 3 )
@@ -382,9 +382,9 @@ endif (TP_PRODUCTION)
 if (TP_JPEG_FORCE_ALPHA)
 
     add_definitions( -DTP_JPEG_FORCE_ALPHA=1 )
-    
+
 endif (TP_JPEG_FORCE_ALPHA)
-    
+
 #------------------------------------------------------------------------------
 # Profiling
 #------------------------------------------------------------------------------
@@ -437,7 +437,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
-	${BINDINGS_SRC}/regex.lb
+    ${BINDINGS_SRC}/regex.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
@@ -469,12 +469,13 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
     ${BINDINGS_SRC}/physics_bullet.lb
+
 )
 
 if (TP_WITH_GAMESERVICE)
-	list ( APPEND LB_FILES
-		${BINDINGS_SRC}/gameservice.lb
-	)	
+    list ( APPEND LB_FILES
+        ${BINDINGS_SRC}/gameservice.lb
+    )
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -579,19 +580,19 @@ list( APPEND
 )
 
 if (TP_WITH_GAMESERVICE)
-	list ( APPEND ENGINE_SOURCE_FILES
-		${ENGINE_SRC}/source/gameservice_support.cpp
-		${ENGINE_SRC}/source/gameservice_util.cpp
-	)	
-	
-	list( APPEND
+    list ( APPEND ENGINE_SOURCE_FILES
+        ${ENGINE_SRC}/source/gameservice_support.cpp
+        ${ENGINE_SRC}/source/gameservice_util.cpp
+    )
 
-	    ENGINE_LIBRARIES
-	
-	    gameservice
-	    tptxmpp
-	)
-	
+    list( APPEND
+
+        ENGINE_LIBRARIES
+
+        gameservice
+        tptxmpp
+    )
+
 endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
@@ -658,11 +659,9 @@ target_link_libraries(
     dl
     tplua
     clutteralphamode
-    
+
     LinearMath
     BulletDynamics
     BulletCollision
     BulletSoftBody
 )
-
-

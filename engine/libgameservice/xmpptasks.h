@@ -14,6 +14,8 @@
 #include "participant.h"
 #include "turn.h"
 #include "item.h"
+#include "matchdata.h"
+#include "usergamedata.h"
 
 namespace libgameservice {
 
@@ -46,67 +48,71 @@ class MUGPresenceListenerTask : public txmpp::XmppTask {
 
 class ListGamesTask : public txmpp::XmppTask {
 	public:
-		explicit ListGamesTask(txmpp::TaskParent *parent);
+		explicit ListGamesTask(txmpp::TaskParent *parent, void* cb_data);
 		virtual ~ListGamesTask();
 		virtual int ProcessStart();
 		virtual int ProcessResponse();
 		bool HandleStanza(const txmpp::XmlElement *stanza);
 
-		txmpp::signal2<const ResponseStatus&, const std::vector<GameId>&> SignalListOfGames;
+		txmpp::signal3<const ResponseStatus&, const std::vector<GameId>&, void*> SignalListOfGames;
 	//	txmpp::signal1<
 		private:
-
+		void* cb_data_;
 };
 
 class RegisterAppTask : public txmpp::XmppTask {
 public:
-	RegisterAppTask(txmpp::TaskParent *parent, const AppId& app_id);
+	RegisterAppTask(txmpp::TaskParent *parent, const AppId& app_id, void* cb_data);
 	virtual ~RegisterAppTask();
 	virtual int ProcessStart();
 	virtual int ProcessResponse();
 	bool HandleStanza(const txmpp::XmlElement *stanza);
 
-	txmpp::signal2<const ResponseStatus&, const AppId&> SignalDone;
+	txmpp::signal3<const ResponseStatus&, const AppId&, void*> SignalDone;
 private:
 	AppId app_id_;
+	void* cb_data_;
 };
 
 class RegisterGameTask : public txmpp::XmppTask {
 public:
-	RegisterGameTask(txmpp::TaskParent *parent, const Game& game);
+	RegisterGameTask(txmpp::TaskParent *parent, const Game& game, void* cb_data);
 	virtual ~RegisterGameTask();
 	virtual int ProcessStart();
 	virtual int ProcessResponse();
 	bool HandleStanza(const txmpp::XmlElement *stanza);
 
-	txmpp::signal2<const ResponseStatus&, const Game&> SignalDone;
+	txmpp::signal3<const ResponseStatus&, const Game&, void*> SignalDone;
 private:
 	Game game_;
+	void* cb_data_;
 };
 
 class OpenAppTask : public txmpp::XmppTask {
 public:
-	OpenAppTask(txmpp::TaskParent *parent, const AppId& app_id);
+	OpenAppTask(txmpp::TaskParent *parent, const AppId& app_id, void* cb_data);
 	virtual ~OpenAppTask();
 	virtual int ProcessStart();
 	virtual int ProcessResponse();
 
-	txmpp::signal2<const ResponseStatus&, const AppId&> SignalDone;
+	txmpp::signal3<const ResponseStatus&, const AppId&, void*> SignalDone;
 private:
 	AppId app_id_;
+	void* cb_data_;
 };
 
 
 class CloseAppTask : public txmpp::XmppTask {
 public:
-	CloseAppTask(txmpp::TaskParent *parent, const AppId& app_id);
+	CloseAppTask(txmpp::TaskParent *parent, const AppId& app_id, void* cb_data);
 	virtual ~CloseAppTask();
 	virtual int ProcessStart();
 	virtual int ProcessResponse();
 
-	txmpp::signal2<const ResponseStatus&, const AppId&> SignalDone;
+	txmpp::signal3<const ResponseStatus&, const AppId&, void*> SignalDone;
 private:
 	AppId app_id_;
+	void* cb_data_;
 };
 
 class AssignMatchTask : public txmpp::XmppTask {
@@ -179,7 +185,61 @@ private:
 	void* cb_data_;
 };
 
+/*
+ * returns a list of all matches in which the requestor is currently participating.
+ */
+class GetMatchDataTask : public txmpp::XmppTask {
+public:
+	explicit GetMatchDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
+	virtual ~GetMatchDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
 
+	txmpp::signal3<const ResponseStatus&, const MatchData&, void*> SignalDone;
+
+private:
+	std::string game_id_;
+	void* cb_data_;
+};
+
+
+/*
+ * returns game data opaque data for the requesting user
+ */
+class GetUserGameDataTask : public txmpp::XmppTask {
+public:
+	explicit GetUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, void* cb_data);
+	virtual ~GetUserGameDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
+
+	txmpp::signal3<const ResponseStatus&, const UserGameData&, void*> SignalDone;
+
+private:
+	std::string game_id_;
+	void* cb_data_;
+};
+
+/*
+ * update user game data
+ */
+class UpdateUserGameDataTask : public txmpp::XmppTask {
+public:
+	explicit UpdateUserGameDataTask(txmpp::TaskParent *parent, const std::string& game_id, const std::string& opaque, void* cb_data);
+	virtual ~UpdateUserGameDataTask();
+	virtual int ProcessStart();
+	virtual int ProcessResponse();
+	bool HandleStanza(const txmpp::XmlElement *stanza);
+
+	txmpp::signal3<const ResponseStatus&, const UserGameData&, void*> SignalDone;
+
+private:
+	std::string game_id_;
+	std::string opaque_;
+	void* cb_data_;
+};
 
 }  // namespace libgameservice
 

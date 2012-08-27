@@ -194,6 +194,9 @@ class TrickplayInspector(QWidget):
             item = self.inspectorModel.itemFromIndex(index)
             data = item.TPJSON()
             
+            print "-----------"
+            print data
+            print "-----------"
             self.propertyModel.fill(data)
             
             self.preventChanges = False

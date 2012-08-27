@@ -25,14 +25,62 @@ class TrickplayElementModel(QStandardItemModel):
                         break
                 
                 if child is None:
-                    print( "Could not find screen element." )
+                    print( "[VDBG] Could not find screen element." )
                 else:
                     self.tpData = pdata
                     self.insertElement(root, child, pdata, True)
                 self.inspector.ui.refresh.setText("Refresh")
+                return
 
-            else:
-                print("Could not retreive data.")
+        elif self.reply.error()== QNetworkReply.ConnectionRefusedError:	
+            print "[VDBG] ConnectionRefusedError"	
+        elif self.reply.error() == QNetworkReply.RemoteHostClosedError :	
+            print "[VDBG] RemoteHostClosedError 	"
+        elif self.reply.error() == QNetworkReply.HostNotFoundError :	
+            print "[VDBG] HostNotFoundError "	
+        elif self.reply.error() == QNetworkReply.TimeoutError :	
+            print "[VDBG] TimeoutError 	"
+        elif self.reply.error() == QNetworkReply.SslHandshakeFailedError :	
+            print "[VDBG] SslHandshakeFailedError 	"
+        elif self.reply.error() == QNetworkReply.TemporaryNetworkFailureError: 	
+            print "[VDBG] TemporaryNetworkFailureError "	
+        elif self.reply.error() == QNetworkReply.ProxyConnectionRefusedError :	
+            print "[VDBG] ProxyConnectionRefusedError "	
+        elif self.reply.error() == QNetworkReply.ProxyConnectionClosedError: 
+            print "[VDBG] ProxyConnectionClosedError "
+        elif self.reply.error() == QNetworkReply.ProxyNotFoundError :	
+            print "[VDBG] ProxyNotFoundError 	"
+        elif self.reply.error() == QNetworkReply.ProxyTimeoutError :	
+            print "[VDBG] ProxyTimeoutError 	"
+        elif self.reply.error() == QNetworkReply.ProxyAuthenticationRequiredError :	
+            print "[VDBG] ProxyAuthenticationRequiredError 	"
+        elif self.reply.error() == QNetworkReply.ContentAccessDenied :	
+            print "[VDBG] ContentAccessDenied 	"
+        elif self.reply.error() == QNetworkReply.ContentOperationNotPermittedError :	
+            print "[VDBG] ContentOperationNotPermittedError 	"
+        elif self.reply.error() == QNetworkReply.ContentNotFoundError :	
+            print "[VDBG] ContentNotFoundError 	"
+        elif self.reply.error() == QNetworkReply.AuthenticationRequiredError :	
+            print "[VDBG] AuthenticationRequiredError "	
+        elif self.reply.error() == QNetworkReply.ContentReSendError :	
+            print "[VDBG] ContentReSendError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolUnknownError: 	
+            print "[VDBG] ProtocolUnknownError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolInvalidOperationError: 
+            print "[VDBG] ProtocolInvalidOperationError "
+        elif self.reply.error() == QNetworkReply.UnknownNetworkError :	
+            print "[VDBG] UnknownNetworkError 	"
+        elif self.reply.error() == QNetworkReply.UnknownProxyError :	
+            print "[VDBG] UnknownProxyError 	"
+        elif self.reply.error() == QNetworkReply.UnknownContentError: 	
+            print "[VDBG] UnknownContentError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolFailure :
+            print "[VDBG] ProtocolFailure"
+        else : 
+            print "[VDBG] UnknownCommunicationError"
+
+        self.inspector.ui.refresh.setText("Refresh")
+        self.inspector.ui.refresh.setEnabled(False)
 
     def getInspectorData(self):
         """

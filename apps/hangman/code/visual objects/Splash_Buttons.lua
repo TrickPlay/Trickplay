@@ -7,8 +7,8 @@ local keybd_w = 410
 local launch_key_board = function()
     
     keyboard:show{
-        { id = "username", caption = "Enter Your Username:" },
-        { id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
+        { id = "username", caption = "Enter Your Screen Name:" },
+        --{ id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
     }
     
     screen:animate{
@@ -44,14 +44,14 @@ local launch_key_board = function()
                     }
                     
                     keyboard:show{
-                        { id = "username", caption = "Username is Required:" },
-                        { id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
+                        { id = "username", caption = "Screen Name is Required:" },
+                        --{ id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
                     }
                     
                 end
             )
             
-            print("User left the Username field blank, prompting again")
+            print("User left the Screen Name field blank, prompting again")
             
         elseif g_user.name:match("^[a-zA-Z0-9]*$") ~= g_user.name then
             
@@ -68,15 +68,15 @@ local launch_key_board = function()
                     }
                     
                     keyboard:show{
-                        { id = "username", caption = "Username is aplha-numeric:" },
-                        { id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
+                        { id = "username", caption = "Screen Name is aplha-numeric:" },
+                        --{ id = "password", caption = "Enter Your Password:",type = "password", password_char = "*"  },
                     }
                     
                 end
             )
             
-            print("Username is not alpha numeric, prompting again")
-            
+            print("Screen Name is not alpha numeric, prompting again")
+            --[[
         elseif # results.password == 0 then
             
             dolater(
@@ -124,7 +124,7 @@ local launch_key_board = function()
             )
             
             print("Username is not alpha numeric, prompting again")
-            
+            --]]
         else
             
             print("User gave username: '"..g_user.name.."'")
@@ -132,11 +132,77 @@ local launch_key_board = function()
             
             
             screen:grab_key_focus()
+                        
             
+            game_server:set_screen_name(g_user.name)
+            
+                    
+        game_server:init{
+            
+            screen_name = g_user.name,
+            
+            on_connection = function(t)
+            	print("init called back")
+                if t then
+                    
+                    g_user.id = gsm:get_user_id()
+                    
+                    gsm:register_game(
+                        
+                        hangman_game_config(),
+                        
+                        function(success)
+                            
+                            print("register called back")
+                            
+                            gsm:get_game_history( function(scores)
+                                
+                                if scores then
+                                    g_user.wins   = scores.wins
+                                    g_user.losses = scores.losses
+                                    
+                                    Game_History:set_wins(  scores.wins)
+                                    Game_History:set_losses(scores.losses)
+                                else
+                                    g_user.wins   = 0
+                                    g_user.losses = 0
+                                    
+                                    Game_History:set_wins(   0 )
+                                    Game_History:set_losses( 0 )
+                                end
+                                
+                                app_state.state = APP_STATE_MAIN_PAGE
+                            
+                                front_page:setup_lists()
+                            
+                            end)
+                            
+                        end
+                    
+                    )
+                    
+                else
+                    app_state.state = APP_STATE_LOADING
+                    print("init failed")
+                    --TODO: need to try again
+                end
+            end,
+            
+        }
+        
+
+            print("init called")
+            
+
+            
+            --front_page:setup_lists()
+            
+            --app_state.state = "MAIN_PAGE"
+            --[[
             game_server:login{
                 user        = g_user.name,
-                pswd        = results.password,
-                email       = g_user.name.."@"..g_user.name..".com",
+                --pswd        = results.password,
+                --email       = g_user.name.."@"..g_user.name..".com",
                 game_definition = game_definition,
                 session_callback = function(t)
                     
@@ -181,6 +247,7 @@ local launch_key_board = function()
                     
                 end
             }
+            --]]
             
             
         end

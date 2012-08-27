@@ -19,7 +19,7 @@ local create_fill = function(self)
         
     else
         
-        return Rectangle{name = "fill", size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.focus or "ff0000"}
         
     end
     
@@ -77,7 +77,7 @@ end
 
 local default_parameters = {
     w = 200, 
-    h = 50,
+    h = 50,--[[
     style = {
         fill_colors = {
             default_upper = {  0,  0,  0,255},
@@ -89,7 +89,7 @@ local default_parameters = {
             corner_radius = 10,
             colors = { default_upper = "ffffff",default_lower = "444444"}
         }
-    }
+    }--]]
 }
 
 ProgressBar = function(parameters)
