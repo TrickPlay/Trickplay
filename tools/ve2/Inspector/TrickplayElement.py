@@ -129,7 +129,9 @@ class TrickplayElement(QStandardItem):
         """
         Get a property of this UI element
         """
-        
+        if not self.TPJSON():
+            return None
+ 
         return self.TPJSON()[key]
         
     def __setitem__(self, key, value):

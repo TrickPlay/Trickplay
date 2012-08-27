@@ -930,9 +930,15 @@ class TrickplayInspector(QWidget):
             
             index = self.selected(self.ui.inspector)
             item = self.inspectorModel.itemFromIndex(index)
+
+            if not item.TPJSON() :
+                self.preventChanges = False
+                return
+
             sdata = self.inspectorModel.styleData
             self.curData = item.TPJSON()
             
+                
             if self.curData.has_key('gid') == True:
                 if self.curData['name'][:5] == "Layer":
                     self.curLayerName = self.curData['name']
