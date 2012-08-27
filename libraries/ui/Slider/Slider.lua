@@ -77,6 +77,14 @@ Slider = function(parameters)
             grip:set(v)
         end
     )
+	override_property(instance,"grip_w",
+		function(oldf) return   grip.w     end,
+		function(oldf,self,v)   grip.w = v end
+    )
+	override_property(instance,"grip_h",
+		function(oldf) return   grip.h     end,
+		function(oldf,self,v)   grip.h = v end
+    )
     local progress = 0
 	override_property(instance,"progress",
 		function(oldf) return   progress     end,
@@ -119,6 +127,14 @@ Slider = function(parameters)
             track:set(v)
         end
     )
+	override_property(instance,"track_w",
+		function(oldf) return   track.w     end,
+		function(oldf,self,v)   track.w = v end
+    )
+	override_property(instance,"track_h",
+		function(oldf) return   track.h     end,
+		function(oldf,self,v)   track.h = v end
+    )
 	instance:subscribe_to( "enabled",
 		function()
             grip.enabled  = instance.enabled
@@ -160,8 +176,10 @@ Slider = function(parameters)
             
             t.direction = self.direction
             t.progress  = self.progress
-            t.grip  = {w = grip.w, h = grip.h, }
-            t.track = {w = track.w,h = track.h,}
+            t.grip_w    = self.grip_w
+            t.grip_h    = self.grip_h
+            t.track_w   = self.track_w
+            t.track_h   = self.track_h
             
             t.type = "Slider"
             

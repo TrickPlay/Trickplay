@@ -154,7 +154,10 @@ ButtonPicker = function(parameters)
                 window_w,
                 window_h,
             }
-            
+            if next_item then
+                next_item.x = window_w/2
+                next_item.y = window_h/2
+            end
 		end
 	)
     ----------------------------------------------------------------------------
@@ -298,8 +301,8 @@ ButtonPicker = function(parameters)
         end
 	)
     
-    prev_arrow.on_released = prev_i
-    next_arrow.on_released = next_i
+    prev_arrow:add_mouse_handler("on_button_up",prev_i)
+    next_arrow:add_mouse_handler("on_button_up",next_i)
     
     
 	override_property(instance,"attributes",
@@ -314,6 +317,8 @@ ButtonPicker = function(parameters)
             t.cell_h = nil
             t.cell_w = nil
             t.cells = nil
+            
+            t.style = instance.style
             
             t.window_w = instance.window_w
             t.window_h = instance.window_h

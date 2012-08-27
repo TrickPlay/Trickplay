@@ -134,9 +134,10 @@ local function make_button(t)
     
     button:add(
         unfocused,
-        focused,
-        type(passive) == "userdata" and passive or nil
+        focused
     )
+    
+    if type(passive) == "userdata" then button:add(passive) end
     
     if t.text then
         

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Debugger2.ui'
+# Form implementation generated from reading ui file 'Debugger.ui'
 #
-# Created: Mon Jan 30 12:16:31 2012
+# Created: Tue May  8 16:41:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_TrickplayDebugger(object):
     def setupUi(self, TrickplayDebugger):
         TrickplayDebugger.setObjectName(_fromUtf8("TrickplayDebugger"))
-        TrickplayDebugger.resize(272, 496)
+        TrickplayDebugger.resize(558, 573)
         self.gridLayout = QtGui.QGridLayout(TrickplayDebugger)
         self.gridLayout.setMargin(0)
         self.gridLayout.setSpacing(0)
@@ -46,7 +46,38 @@ class Ui_TrickplayDebugger(object):
         self.gridLayout_3.setMargin(0)
         self.gridLayout_3.setSpacing(0)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.breakTable = QtGui.QTableWidget(self.Breaks)
+        self.breakTable.setObjectName(_fromUtf8("breakTable"))
+        self.breakTable.setColumnCount(0)
+        self.breakTable.setRowCount(0)
+        self.breakTable.horizontalHeader().setStretchLastSection(True)
+        self.gridLayout_3.addWidget(self.breakTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Breaks, _fromUtf8(""))
+        self.Globals = QtGui.QWidget()
+        self.Globals.setObjectName(_fromUtf8("Globals"))
+        self.gridLayout_4 = QtGui.QGridLayout(self.Globals)
+        self.gridLayout_4.setMargin(0)
+        self.gridLayout_4.setSpacing(0)
+        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        self.globalTable = QtGui.QTableWidget(self.Globals)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.globalTable.sizePolicy().hasHeightForWidth())
+        self.globalTable.setSizePolicy(sizePolicy)
+        self.globalTable.setMinimumSize(QtCore.QSize(100, 0))
+        self.globalTable.setAutoFillBackground(False)
+        self.globalTable.setTabKeyNavigation(False)
+        self.globalTable.setDragDropOverwriteMode(False)
+        self.globalTable.setAlternatingRowColors(True)
+        self.globalTable.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.globalTable.setObjectName(_fromUtf8("globalTable"))
+        self.globalTable.setColumnCount(0)
+        self.globalTable.setRowCount(0)
+        self.globalTable.horizontalHeader().setStretchLastSection(True)
+        self.globalTable.verticalHeader().setStretchLastSection(False)
+        self.gridLayout_4.addWidget(self.globalTable, 0, 0, 1, 1)
+        self.tabWidget.addTab(self.Globals, _fromUtf8(""))
         self.Locals = QtGui.QWidget()
         self.Locals.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -75,7 +106,6 @@ class Ui_TrickplayDebugger(object):
         self.localTable.setColumnCount(0)
         self.localTable.setRowCount(0)
         self.localTable.horizontalHeader().setStretchLastSection(True)
-        self.localTable.verticalHeader().setVisible(False)
         self.localTable.verticalHeader().setStretchLastSection(False)
         self.gridLayout_2.addWidget(self.localTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Locals, _fromUtf8(""))
@@ -88,5 +118,6 @@ class Ui_TrickplayDebugger(object):
     def retranslateUi(self, TrickplayDebugger):
         TrickplayDebugger.setWindowTitle(QtGui.QApplication.translate("TrickplayDebugger", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Breaks), QtGui.QApplication.translate("TrickplayDebugger", "Breaks", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Globals), QtGui.QApplication.translate("TrickplayDebugger", "Globals", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Locals), QtGui.QApplication.translate("TrickplayDebugger", "Locals", None, QtGui.QApplication.UnicodeUTF8))
 
