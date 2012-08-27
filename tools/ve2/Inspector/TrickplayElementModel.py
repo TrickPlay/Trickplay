@@ -88,7 +88,11 @@ class TrickplayElementModel(QStandardItemModel):
         if data is None:
             return
 
-        value = data["name"]
+        try:
+            value = data["name"]
+        except:
+            value = "noname"
+
         title = data["type"]
         gid = data['gid']
 
@@ -150,25 +154,50 @@ class TrickplayElementModel(QStandardItemModel):
         
         parent.appendRow([node, partner])
         
+        # Recurse through tabs
+        try:
+            tabs = data['tabs']
+            print ("#Tabs:", len(tabs))
+
+            for r in range (0, len(tabs)) :
+                tempnode = TrickplayElement("Tab"+str(r))
+                #self.node = tempnode
+                tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
+                partner = tempnode.partner()
+                partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+                partner.setData("", Qt.DisplayRole)
+                node.appendRow([tempnode, partner])
+                #print r, (tabs[r]['contents'][1])
+                for c in range (0, len(tabs[r]['contents'])) :
+                    self.insertElement(tempnode, tabs[r]['contents'][c], data, False)
+        # Element has no tabs
+        except KeyError:
+            pass
+
         # Recurse through cells
         try:
             cells = data['cells']
-            print ("Rows:", len(cells))
-            print ("Cols:", len(cells[0]))
-            self.insertElement(node, cells[0][0], data, False)
-            self.insertElement(node, cells[1][0], data, False)
-            """
-            for i in range(len(cells)-1, -1, -1):
-                print ("****************** iiii", i)
-                self.insertElement(node, cells[1][1], data, False)
-                self.insertElement(node, cells[1][0], data, False)
-                self.insertElement(node, cells[0][1], data, False)
-                self.insertElement(node, cells[0][0], data, False)
-                for j in range(len(cells[i])-1, -1, -1):
-                    print ("****************** jjjj", j)
-                    self.insertElement(node, cells[i][j], data, False)
-            """
-        
+            #print ("Rows:", len(cells))
+            #print ("Cols:", len(cells[0]))
+            for r in range (0, len(cells)) :
+                tempnode = TrickplayElement("Row"+str(r))
+                #self.node = tempnode
+                tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
+                partner = tempnode.partner()
+                partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+                partner.setData("", Qt.DisplayRole)
+                node.appendRow([tempnode, partner])
+                for c in range (0, len(cells[0])) :
+                    if type(cells[r][c]) == dict:
+                        self.insertElement(tempnode, cells[r][c], data, False)
+                    else:
+                        emptynode = TrickplayElement("Empty")
+                        emptynode.setFlags(emptynode.flags() ^ Qt.ItemIsEditable)
+                        partner = emptynode.partner()
+                        partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+                        partner.setData("", Qt.DisplayRole)
+                        tempnode.appendRow([emptynode, partner])
+
         # Element has no cells
         except KeyError:
             pass
