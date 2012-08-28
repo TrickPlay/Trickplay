@@ -84,14 +84,13 @@ class TrickplayElementModel(QStandardItemModel):
         ParentData is a reference to the dictionary containing data
         """
         
-        #print("insertElelement")
         if data is None:
             return
 
         try:
             value = data["name"]
         except:
-            value = "noname"
+            value = ""
 
         title = data["type"]
         gid = data['gid']
@@ -157,10 +156,11 @@ class TrickplayElementModel(QStandardItemModel):
         # Recurse through tabs
         try:
             tabs = data['tabs']
-            print ("#Tabs:", len(tabs))
-
             for r in range (0, len(tabs)) :
-                tempnode = TrickplayElement("Tab"+str(r))
+                #tempnode = TrickplayElement("Tab"+str(r))
+                tempnode = TrickplayElement(tabs[r]['label'])
+                tempnode.tabdata = data
+                tempnode.tabIndex = r
                 #self.node = tempnode
                 tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
                 partner = tempnode.partner()
@@ -254,6 +254,9 @@ class TrickplayElementModel(QStandardItemModel):
        
     def recSearch(self, property, value, item):
         
+        if item[property] == None:
+            return 
+
         if item[property] == value:
             return item
         

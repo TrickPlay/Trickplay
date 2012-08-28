@@ -316,6 +316,7 @@ class TrickplayInspector(QWidget):
         self.layerGid = {}
         self.screens = {"_AllScreens":[],"Default":[]}
         self.cbStyle_textChanged = False
+        self.cbStyle = None
         self.screen_textChanged = False
         self.addItemToScreens = False
         
@@ -499,6 +500,17 @@ class TrickplayInspector(QWidget):
         boolHandlers = {}
 
 
+        if data['type'] == "Tab" : #IIII
+            for p in ['gid', 'name', 'type', 'label']:
+                i = QTreeWidgetItem() 
+                i.setText (0, p)  # first col : property name
+                i.setText (1, str(data[p])) # second col : property value (text input field) 
+                if p == 'label':
+                    i.setFlags(i.flags() ^Qt.ItemIsEditable)
+                items.append(i)
+            self.ui.property.addTopLevelItems(items)
+            return 
+            
         def boolPropertyFill(propName, propOrder, data, gid=None) :
             def makeBoolHandler(gid, prop_name):
                 def handler(state):
@@ -761,7 +773,6 @@ class TrickplayInspector(QWidget):
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
-
                 i.setText (0, p)  # first col : property name
                 #i.setText (0, p[:1].upper()+p[1:])
 
@@ -970,7 +981,7 @@ class TrickplayInspector(QWidget):
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
-        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
+        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
 
     def screen_json(self):
         #[{"Default":["Layer1","Layer2"], "New":["Layer2"]}]
@@ -1084,15 +1095,24 @@ class TrickplayInspector(QWidget):
             item = self.inspectorModel.itemFromIndex(index)
 
             if not item.TPJSON() :
+                print "KKK" 
+                if item.tabdata :
+                    tempdata = {}
+                    tempdata['gid'] = item.tabdata['gid']
+                    tempdata['name'] = item.tabdata['name']
+                    tempdata['label'] = item.text() 
+                    tempdata['type'] = "Tab"
+                    self.propertyFill(tempdata)
                 self.preventChanges = False
                 return
 
             sdata = self.inspectorModel.styleData
             self.curData = item.TPJSON()
-            
                 
             if self.curData.has_key('gid') == True:
-                if self.curData['name'][:5] == "Layer":
+                if self.curData.has_key('name') == False:
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Gid - "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
+                elif self.curData['name'][:5] == "Layer":
                     self.curLayerName = self.curData['name']
                     self.curLayerGid = self.curData['gid']
                     self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
@@ -1178,6 +1198,10 @@ class TrickplayInspector(QWidget):
         g_item = self.ui.property.findItems("gid", Qt.MatchExactly, 0)
         return int(g_item[0].text(1))
 
+    def getType (self):
+        g_item = self.ui.property.findItems("type", Qt.MatchExactly, 0)
+        return g_item[0].text(1)
+
     def getParentInfo(self, item):
         n = self.ui.property.indexFromItem(item).row()
         while self.ui.property.indexOfTopLevelItem(item) < 0 :
@@ -1227,7 +1251,12 @@ class TrickplayInspector(QWidget):
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
             self.sendData(self.getGid(), str(pItem.text(0)), tValue)
         else :
-            self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
+            if str(item.text(0)) == "label" and self.getType() == "Tab":
+                #self.sendData(self.getGid(), "tabs[1].label", str(item.text(1)))
+                #self.main._emulatorManager.setUIInfo(self.getGid(), "tabs[1].label",  str(item.text(1))) 
+                self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), 1) 
+            else:
+                self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
 
     def oopropertyDataChanged(self, topLeft, bottomRight):
         """
