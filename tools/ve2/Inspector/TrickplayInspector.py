@@ -1,9 +1,7 @@
 import re, os
-
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #import connection
-
 from TrickplayElementModel import TrickplayElementModel
 from Data import BadDataException, modelToData, summarizeSource
 from PropertyIter import *#PropertyIter
@@ -56,6 +54,165 @@ class DnDTableWidget(QTableWidget):
         table.setCurrentItem(newItem)
         self.sendData()
 
+
+class SlotItem(QGraphicsRectItem):
+    SIZE = 10
+    def __init__(self, parent, pos, name):
+        self.parent = parent
+        self.name = name
+        QGraphicsRectItem.__init__(self)
+        self.setRect(pos.x(), pos.y(), self.SIZE, self.SIZE)
+        self.setBrush(Qt.white)
+        self.setAcceptHoverEvents(True)
+
+    #def hoverEnterEvent(self, event):
+    def mousePressEvent(self, event):
+        if self.brush().color() != Qt.red :
+            self.parent.resetAnchorPoint()
+            self.parent.sendAnchorPointSetCommand(self.name)
+            #self.setBrush(Qt.red)
+        QGraphicsRectItem.mousePressEvent(self, event)
+
+class DiagramScene(QGraphicsScene):
+    def __init__(self, insp, data):
+        QGraphicsScene.__init__(self)
+
+        self.insp = insp
+        self.gid = data['gid']
+        self.curAp = data['anchor_point']
+        self.curSz = data['size']
+        
+        self.drawAnchorPointSetter()
+        self.findCurrentAnchorPoint()
+        self.setCurrentAnchorPoint()
+
+    def drawAnchorPointSetter(self):
+        self.topLeft = SlotItem(self, QPointF(-200,-30), "tl")
+        self.middleLeft = SlotItem(self, QPointF(-200,-15), "ml") 
+        self.bottomLeft = SlotItem(self, QPointF(-200,0), "bl")
+
+        self.topCenter = SlotItem(self, QPointF(-185,-30), "tc")
+        self.middleCenter = SlotItem(self, QPointF(-185,-15), "mc") 
+        self.bottomCenter = SlotItem(self, QPointF(-185,0), "bc")
+
+        self.topRight = SlotItem(self, QPointF(-170,-30), "tr")
+        self.middleRight = SlotItem(self, QPointF(-170,-15), "mr") 
+        self.bottomRight = SlotItem(self, QPointF(-170,0), "br")
+
+        self.addItem(self.topLeft)
+        self.addItem(self.middleLeft)
+        self.addItem(self.bottomLeft)
+
+        self.addItem(self.topCenter)
+        self.addItem(self.middleCenter)
+        self.addItem(self.bottomCenter)
+
+        self.addItem(self.topRight)
+        self.addItem(self.middleRight)
+        self.addItem(self.bottomRight)
+
+        hiddenItem = SlotItem(self, QPointF(0,0), "")
+        hiddenItem.hide()
+        self.addItem(hiddenItem)
+
+    def resetAnchorPoint(self):
+        self.topLeft.setBrush(Qt.white)
+        self.middleLeft.setBrush(Qt.white)
+        self.bottomLeft.setBrush(Qt.white)
+
+        self.topCenter.setBrush(Qt.white)
+        self.middleCenter.setBrush(Qt.white)
+        self.bottomCenter.setBrush(Qt.white)
+
+        self.topRight.setBrush(Qt.white)
+        self.middleRight.setBrush(Qt.white)
+        self.bottomRight.setBrush(Qt.white)
+
+    def findCurrentAnchorPoint(self):
+        if self.curAp[0] < self.curSz[0]/2:
+            self.h_pos = 0
+        elif self.curAp[0] > self.curSz[0]/2:
+            self.h_pos = 2 
+        else :
+            self.h_pos = 1
+
+        if self.curAp[1] < self.curSz[1]/2:
+            self.v_pos = 0
+        elif self.curAp[1] > self.curSz[1]/2:
+            self.v_pos = 2 
+        else :
+            self.v_pos = 1
+
+    def sendAnchorPointSetCommand(self, name):
+        if name == "tl" :
+            anchorStr = '{0,0,0}'
+        elif name == "ml" : 
+            anchorStr = '{0,'+str(self.curSz[1]/2)+'}'
+        elif name == "bl" : 
+            anchorStr = '{0,'+str(self.curSz[1])+'}'
+		    #anchor_pnt.extra.anchor_point = {0, v.h}
+        elif name == "tc" : 
+            anchorStr = '{'+str(self.curSz[0]/2)+',0}'
+		    #anchor_pnt.extra.anchor_point = {v.w/2, 0}
+        elif name == "mc" : 
+            anchorStr = '{'+str(self.curSz[0]/2)+','+str(self.curSz[1]/2)+'}'
+		    #anchor_pnt.extra.anchor_point = {v.w/2, v.h/2}
+        elif name == "bc" : 
+            anchorStr = '{'+str(self.curSz[0]/2)+','+str(self.curSz[1])+'}'
+		    #anchor_pnt.extra.anchor_point = {v.w/2, v.h}
+
+        elif name == "tr" : 
+            anchorStr = '{'+str(self.curSz[0])+',0}'
+		    #anchor_pnt.extra.anchor_point = {v.w, 0}
+        elif name == "mr" : 
+            anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1]/2)+'}'
+		    #anchor_pnt.extra.anchor_point = {v.w, v.h/2}
+        elif name == "br" : 
+            anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1])+'}'
+		    #anchor_pnt.extra.anchor_point = {v.w, v.h}
+        self.insp.main._emulatorManager.setUIInfo(self.gid, 'anchor_point', anchorStr)
+
+    def setCurrentAnchorPoint(self):
+        if self.h_pos == 0 and self.v_pos == 0 :
+            self.topLeft.setBrush(Qt.red)
+        elif self.h_pos == 0 and self.v_pos == 1 :
+            self.middleLeft.setBrush(Qt.red)
+        elif self.h_pos == 0 and self.v_pos == 2  : 
+            self.bottomLeft.setBrush(Qt.red)
+        elif self.h_pos == 1 and self.v_pos == 0  : 
+            self.topCenter.setBrush(Qt.red)
+        elif self.h_pos == 1 and self.v_pos == 1  : 
+            self.middleCenter.setBrush(Qt.red)
+        elif self.h_pos == 1 and self.v_pos == 2  : 
+            self.bottomCenter.setBrush(Qt.red)
+        elif self.h_pos == 2 and self.v_pos == 0  : 
+            self.topRight.setBrush(Qt.red)
+        elif self.h_pos == 2 and self.v_pos == 1 :
+            self.middleRight.setBrush(Qt.red)
+        elif self.h_pos == 2 and self.v_pos == 2  : 
+            self.bottomRight.setBrush(Qt.red)
+
+        
+
+class AnchorPointGraphicSchene(QWidget): 
+    #def __init__(self, parent, gid, currentAnchor, currentSize) :
+    def __init__(self, parent, data):
+        QWidget.__init__(self,parent)
+        
+        if parent : 
+            self.insp = parent
+
+        self.scene = DiagramScene(parent, data)
+        #self.scene.setCurrentAnchorPoint()
+
+        self.view = QGraphicsView(self.scene)
+        self.view.setRenderHint(QPainter.Antialiasing)
+        layout = QVBoxLayout()
+        layout.addWidget(self.view)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0,0,0,0)
+        self.setLayout(layout)
+    
 class PickerItemTable(QWidget):
     def __init__(self, parent, gid) :
         QWidget.__init__(self,parent)
@@ -333,6 +490,7 @@ class TrickplayInspector(QWidget):
         style_n = 0 
         source_n = 0 
         items_n = 0 
+        anchor_n = 0 
         
         source_button = None
 
@@ -665,10 +823,12 @@ class TrickplayInspector(QWidget):
                     itemList = data[p] 
 
                     self.itemWidget = PickerItemTable(self, data['gid'])
-                    #self.itemWidget.resize(100,100)
-                    #self.itemWidget.setMinimumSize(200,100)
                     self.itemWidget.populateItemTable(itemList)
 
+                elif p == "anchor_point":
+                    anchor_n = n
+                    #self.anchor = AnchorPointGraphicSchene(self, data['gid'], data['anchor_point'], data['size'])
+                    self.anchor = AnchorPointGraphicSchene(self, data)
                 elif p in BOOL_PROP:
                     boolPropertyFill(p, n, data) 
                 elif p in COLOR_PROP: 
@@ -750,19 +910,12 @@ class TrickplayInspector(QWidget):
 
         self.ui.property.addTopLevelItems(items)
 
+        if self.anchor :
+            self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
+            self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{margin:-5px;padding:-15;border-width:0px}")
         if self.itemWidget :
-            """
-            self.itemWidget.setMinimumSize(200,100)
-            print self.itemWidget.minimumSize().width()
-            print self.itemWidget.minimumSize().width()
-            print self.itemWidget.minimumSize().height()
-            print self.itemWidget.minimumSize().height()
-            self.ui.property.topLevelItem(items_n).resize(100,100)
-            self.ui.property.topLevelItem(items_n).setMinimumSize(200,100)
-            """
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
-            #self.ui.property.itemWidget(self.ui.property.topLevelItem(items_n),1).setStyleSheet("QWidget{padding-left:2px; padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
-            
         if colorPushButton :
             for n, cb in colorPushButton.iteritems() :
                 if type(colorNumber[n]) is not list :
@@ -777,7 +930,6 @@ class TrickplayInspector(QWidget):
                         self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
                         self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                     
-
         if fontPushButton :
             for n, pb in fontPushButton.iteritems() :
                 if type(fontNumber[n]) is not list :

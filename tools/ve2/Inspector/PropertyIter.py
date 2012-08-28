@@ -141,7 +141,7 @@ TEXT_PROP = [
     'window_w', 
     'window_h', 
     'animate_duration', 
-    'anchor_point',
+    #'anchor_point',
     'scale',
     'clip',
     'x_rotation',
