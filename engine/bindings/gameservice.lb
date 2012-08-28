@@ -1104,13 +1104,13 @@ global gameservice [[GameServiceSupport*]]
 void gameservice_app_ready_handler(TPContext * context, const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    lb_invoke_callback(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_ready",0,0);
+    lb_invoke_callbacks(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_ready",0,0);
 }
 
 void gameservice_app_error_handler(TPContext * context, const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    lb_invoke_callback(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_error",0,0);
+    lb_invoke_callbacks(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_error",0,0);
 }
 ]]
 }
