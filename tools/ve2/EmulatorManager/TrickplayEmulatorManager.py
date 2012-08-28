@@ -41,8 +41,11 @@ class TrickplayEmulatorManager(QWidget):
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
         
-    def setUIInfo(self, gid, property, value):
-        inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"',"+str(value)+")")
+    def setUIInfo(self, gid, property, value, n=None):
+        if n:
+            inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"','"+str(value)+"',"+str(n)+")")
+        else:
+            inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"',"+str(value)+")")
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()

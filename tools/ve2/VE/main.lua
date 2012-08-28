@@ -1423,7 +1423,7 @@ _VE_.delete = function(gid)
 end 
 
 -- SET
-_VE_.setUIInfo = function(gid, property, value)
+_VE_.setUIInfo = function(gid, property, value, n)
     if property == 'source' then 
         the_obj = screen:find_child(value) 
         if the_obj ~= nil then 
@@ -1434,7 +1434,12 @@ _VE_.setUIInfo = function(gid, property, value)
     elseif property == 'visible' then 
         screen_ui.n_selected_all()
         devtools:gid(gid)[property] = value 
-    else 
+    elseif n ~= nil then 
+        devtools:gid(gid)['tabs'][n].label = value 
+        print (n, value)
+        print (n, value)
+        print (n, value)
+    else
         devtools:gid(gid)[property] = value 
     end 
 end 

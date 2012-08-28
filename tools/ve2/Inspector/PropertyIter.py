@@ -33,7 +33,7 @@ class PropertyIter:
 
 
  
-NO_STYLE_WIDGET = ["Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group", "LayoutManager", "ProgressBar", "ProgressSpinner", "OrbitingDots"] 
+NO_STYLE_WIDGET = ["Tab", "Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group", "LayoutManager", "ProgressBar", "ProgressSpinner", "OrbitingDots"] 
 
 READ_ONLY= ["gid", "baseline", "selected_text", "base_size", "loaded", "tags"]
 
