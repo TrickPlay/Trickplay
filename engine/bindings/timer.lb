@@ -205,22 +205,6 @@ class Timer [[timer*]]
     stop()
     [[self->stop();]];
 
-
-    int add_ontimer_listener(function f)
-    [[
-        result = self->add_ontimer_listener( UserData::get( L ) , L );
-    ]];
-
-    remove_ontimer_listener(int ref )
-    [[
-        UserData * ud = UserData::get( L );
-        self->remove_ontimer_listener( ud , L );
-        if ( ! ud->callback_attached( (char*) "on_timer" ) )
-        {
-            self->stop();
-        }
-    ]];
-
     /*
         Event Handler: on_timer
 
@@ -250,31 +234,25 @@ class Timer [[timer*]]
     [[
         char * name = (char*) "on_timer";
         UserData * ud = UserData::get( L );
-
-        // timer.on_timer=nil ==> remove
-        if ( lua_isnil( L , -1 ) )
+        ud->set_last_callback( name , L );
+        if ( ! ud->callback_attached( name ) )
         {
-            ud->remove_last_callback( name , L );
-            if ( ! ud->callback_attached( name ) )
-            {
-               self->stop();
-            }
+           self->stop();
         }
-        else
-        {
+    ]];
 
-        // callback already exists ==> replace
-        if ( ud->callback_attached( name ) )
-        {
-            ud->remove_last_callback( name , L );
-            ud->add_last_callback( name , L );
-        }
+    int add_ontimer_listener(function f)
+    [[
+        result = self->add_ontimer_listener( UserData::get( L ) , L );
+    ]];
 
-        // no current callback ==> add
-        else
+    remove_ontimer_listener(int ref )
+    [[
+        UserData * ud = UserData::get( L );
+        self->remove_ontimer_listener( ud , L );
+        if ( ! ud->callback_attached( (char*) "on_timer" ) )
         {
-            ud->add_callback( name , L );
-        }
+            self->stop();
         }
     ]];
 
@@ -353,7 +331,7 @@ gboolean timer::timer_fired(gpointer _handle)
 
     timer * self = ( timer* ) handle->get_user();
 
-    if ( ! handle->get_user_data()->invoke_callbacks( "on_timer" , 0 , 1 ) )
+    if ( ! handle->invoke_callbacks( "on_timer" , 1 , 1 ) )
     {
         self->cancel();
         return FALSE;
