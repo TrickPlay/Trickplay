@@ -501,7 +501,7 @@ class TrickplayInspector(QWidget):
 
 
         if data['type'] == "Tab" : #IIII
-            for p in ['gid', 'name', 'type', 'label']:
+            for p in ['gid', 'name', 'type', 'index', 'label']:
                 i = QTreeWidgetItem() 
                 i.setText (0, p)  # first col : property name
                 i.setText (1, str(data[p])) # second col : property value (text input field) 
@@ -1095,14 +1095,16 @@ class TrickplayInspector(QWidget):
             item = self.inspectorModel.itemFromIndex(index)
 
             if not item.TPJSON() :
-                print "KKK" 
                 if item.tabdata :
                     tempdata = {}
                     tempdata['gid'] = item.tabdata['gid']
                     tempdata['name'] = item.tabdata['name']
                     tempdata['label'] = item.text() 
                     tempdata['type'] = "Tab"
+                    tempdata['index'] = item.tabIndex
                     self.propertyFill(tempdata)
+                    self.curLayerName = self.layerName[int(item.tabdata['gid'])] 
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                 self.preventChanges = False
                 return
 
@@ -1111,7 +1113,7 @@ class TrickplayInspector(QWidget):
                 
             if self.curData.has_key('gid') == True:
                 if self.curData.has_key('name') == False:
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Gid - "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
                 elif self.curData['name'][:5] == "Layer":
                     self.curLayerName = self.curData['name']
                     self.curLayerGid = self.curData['gid']
@@ -1202,6 +1204,10 @@ class TrickplayInspector(QWidget):
         g_item = self.ui.property.findItems("type", Qt.MatchExactly, 0)
         return g_item[0].text(1)
 
+    def getIndex (self):
+        g_item = self.ui.property.findItems("index", Qt.MatchExactly, 0)
+        return g_item[0].text(1)
+
     def getParentInfo(self, item):
         n = self.ui.property.indexFromItem(item).row()
         while self.ui.property.indexOfTopLevelItem(item) < 0 :
@@ -1252,9 +1258,8 @@ class TrickplayInspector(QWidget):
             self.sendData(self.getGid(), str(pItem.text(0)), tValue)
         else :
             if str(item.text(0)) == "label" and self.getType() == "Tab":
-                #self.sendData(self.getGid(), "tabs[1].label", str(item.text(1)))
-                #self.main._emulatorManager.setUIInfo(self.getGid(), "tabs[1].label",  str(item.text(1))) 
-                self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), 1) 
+                # YYY
+                self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), self.getIndex()) 
             else:
                 self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
 

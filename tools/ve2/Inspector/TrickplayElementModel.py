@@ -160,7 +160,7 @@ class TrickplayElementModel(QStandardItemModel):
                 #tempnode = TrickplayElement("Tab"+str(r))
                 tempnode = TrickplayElement(tabs[r]['label'])
                 tempnode.tabdata = data
-                tempnode.tabIndex = r
+                tempnode.tabIndex = r + 1
                 #self.node = tempnode
                 tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
                 partner = tempnode.partner()
