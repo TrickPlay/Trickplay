@@ -904,6 +904,8 @@ LayoutManager = function(parameters)
                 end
                 if not placeholders[obj] then
                     t.cells[r][c] = obj.attributes
+                else
+                    t.cells[r][c] = json.null
                 end
             end)
             
