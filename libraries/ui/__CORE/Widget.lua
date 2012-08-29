@@ -63,6 +63,48 @@ local function Widgetize(instance)
     end
     
     ----------------------------------------------------------------------------
+    
+    local neighbors_unsubscribe = {}
+    local neighbors = {}
+    
+    local external_neighbors = setmetatable(
+        {},
+        {
+            __newindex = function(t,k,v)
+                
+                if neighbors[k] then
+                    neighbors_unsubscribe[k]()
+                end
+                
+                neighbors_unsubscribe[k] = instance:add_key_handler(
+                    
+                    k,
+                    
+                    function()   v:grab_key_focus()   end
+                )
+                
+                neighbors[k] = v
+                
+            end,
+            __index = function(t,k)
+                
+                return neighbors[k]
+                
+            end,
+        }
+    )
+    
+	override_property(instance,"neighbors",
+        function(oldf,self) return external_neighbors end,
+        function(oldf,self,v) 
+            
+            if type(v) ~= "table" then error("Expected table. Received "..type(v),2) end
+            
+            for k,v in pairs(v) do  external_neighbors[k] = v  end
+        end
+    )
+    
+    ----------------------------------------------------------------------------
     local enabled_upval, retval
     local __call = function(t,...) 
         
