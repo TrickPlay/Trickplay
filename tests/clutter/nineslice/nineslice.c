@@ -1,4 +1,5 @@
-//#include <clutter/clutter.h>
+#include "nineslice.h"
+
 
 /*
 TODO:
