@@ -82,26 +82,29 @@ static void nineslice_effect_dispose(GObject *gobject) {
   
   G_OBJECT_CLASS(nineslice_effect_parent_class)->dispose(gobject);
 }
-/*
+
 static gboolean nineslice_effect_get_paint_volume(ClutterEffect *self, ClutterPaintVolume *volume) {
   gfloat w, h;
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
   
-  clutter_actor_get_size(clutter_actor_meta_get_actor(CLUTTER_ACTOR_META(self)), &w, &h);
-  ClutterVertex *origin = clutter_vertex_new(-priv->border[0] - priv->padding[0],
-                                             -priv->border[2] - priv->padding[2], 0);
+  ClutterVertex origin;
+  clutter_paint_volume_get_origin(volume, &origin);
+  origin.x += -priv->border[0] - priv->padding->x1;
+  origin.y += -priv->border[2] - priv->padding->y1;
+  clutter_paint_volume_set_origin(volume, &origin);
   
-  clutter_paint_volume_set_origin(volume, origin);
-  clutter_paint_volume_set_width (volume, w + priv->border[0] + priv->padding[0]
-                                            + priv->border[1] + priv->padding[1]);
-  clutter_paint_volume_set_height(volume, h + priv->border[2] + priv->padding[2]
-                                            + priv->border[3] + priv->padding[3]);
+  w = clutter_paint_volume_get_width( volume );
+  h = clutter_paint_volume_get_height( volume );
   
-  clutter_vertex_free(origin);
+  clutter_paint_volume_set_width (volume, w + priv->border[0] + priv->padding->x1
+                                            + priv->border[1] + priv->padding->x2);
+  clutter_paint_volume_set_height(volume, h + priv->border[2] + priv->padding->y1
+                                            + priv->border[3] + priv->padding->y2);
   
-  return FALSE;
+
+  return TRUE;
 }
- */
+
 /*
 void nineslice_effect_set_padding_left(NineSliceEffect *effect, gfloat value) {
   effect->priv->padding[0] = value;
@@ -224,7 +227,7 @@ static void nineslice_effect_class_init(NineSliceEffectClass *klass) {
   
   ClutterEffectClass *cklass = CLUTTER_EFFECT_CLASS(klass);
   cklass->pre_paint = nineslice_effect_pre_paint;
-  //cklass->get_paint_volume = nineslice_effect_get_paint_volume;
+  cklass->get_paint_volume = nineslice_effect_get_paint_volume;
   
   GObjectClass *gklass = G_OBJECT_CLASS(klass);
   gklass->dispose = nineslice_effect_dispose;
