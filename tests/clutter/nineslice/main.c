@@ -132,7 +132,7 @@ main (int argc, char **argv)
   clutter_actor_set_position(actor, 200, 100);
   //clutter_actor_set_rotation(actor, CLUTTER_Z_AXIS, 30.0, 130, 50, 0);
   
-  
+  /*
   GValue cvalue = G_VALUE_INIT;
   g_value_init(&cvalue, CLUTTER_TYPE_ACTOR_BOX);
   g_value_set_boxed(&cvalue, clutter_actor_box_new(0.0, 0.0, 0.0, 0.0));
@@ -151,6 +151,9 @@ main (int argc, char **argv)
   
   clutter_state_warp_to_state(transition, "close");
   clutter_state_set_state(transition, "open");
+  */
+  
+  clutter_actor_animate(rect, CLUTTER_LINEAR, 5000, "height", 200.0, NULL);
   
   clutter_actor_show_all (stage);
   
