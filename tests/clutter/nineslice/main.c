@@ -133,11 +133,11 @@ main (int argc, char **argv)
   //clutter_actor_set_rotation(actor, CLUTTER_Z_AXIS, 30.0, 130, 50, 0);
   
   
-  GValue cvalue = {0};
+  GValue cvalue = G_VALUE_INIT;
   g_value_init(&cvalue, CLUTTER_TYPE_ACTOR_BOX);
   g_value_set_boxed(&cvalue, clutter_actor_box_new(0.0, 0.0, 0.0, 0.0));
   
-  GValue ovalue = {0};
+  GValue ovalue = G_VALUE_INIT;
   g_value_init(&ovalue, CLUTTER_TYPE_ACTOR_BOX);
   g_value_set_boxed(&ovalue, clutter_actor_box_new(50.0, 50.0, 50.0, 50.0));
   
