@@ -14,7 +14,7 @@
 #define CLUTTER_ANGLE_FROM_RAD(x) ((x) * 180.0 / G_PI)
 #endif
 
-#include "nineslice.c"
+#include "nineslice.h"
 
 static void
 circle_paint_cb (ClutterActor *actor)
