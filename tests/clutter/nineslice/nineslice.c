@@ -36,14 +36,8 @@ static gboolean nineslice_effect_pre_paint(ClutterEffect *self) {
   clutter_actor_get_size(actor, &w, &h);
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
   
-  gfloat xs[] = {-priv->border[0],
-                 0.0,
-                 w,
-                 w + priv->border[1]};
-  gfloat ys[] = {-priv->border[2],
-                 0.0,
-                 h,
-                 h + priv->border[3]};
+  gfloat xs[] = {0.0, priv->border[0], w - priv->border[1], w};
+  gfloat ys[] = {0.0, priv->border[2], h - priv->border[3], h};
   
   gint i, j;
   for (i = 0; i < 3; i++) {
