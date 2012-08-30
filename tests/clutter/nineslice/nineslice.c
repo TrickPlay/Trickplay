@@ -1,13 +1,5 @@
 #include "nineslice.h"
 
-
-/*
-TODO:
-  border needs to affect size of group as seen by parent group - implement get_paint_volume()
-  3-slice functionality
-  padding
-*/
-
 GType nineslice_effect_get_type(void);
 
 #define TYPE_NINESLICE_EFFECT             (nineslice_effect_get_type())
@@ -34,8 +26,6 @@ struct _NineSliceEffectClass {
 struct _NineSliceEffectPrivate {
   CoglHandle* material[9];
   gfloat border[4];
-  ClutterActorBox* padding;
-  //ClutterMargin* margin;
 };
 
 G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
@@ -45,16 +35,15 @@ static gboolean nineslice_effect_pre_paint(ClutterEffect *self) {
   ClutterActor *actor = clutter_actor_meta_get_actor(CLUTTER_ACTOR_META(self));
   clutter_actor_get_size(actor, &w, &h);
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
-  //clutter_actor_set_margin(actor, priv->margin);
   
-  gfloat xs[] = {-priv->padding->x1 - priv->border[0],
-                 -priv->padding->x1,
-                 w + priv->padding->x2,
-                 w + priv->padding->x2 + priv->border[1]};
-  gfloat ys[] = {-priv->padding->y1 - priv->border[2],
-                 -priv->padding->y1,
-                 h + priv->padding->y2,
-                 h + priv->padding->y2 + priv->border[3]};
+  gfloat xs[] = {-priv->border[0],
+                 0.0,
+                 w,
+                 w + priv->border[1]};
+  gfloat ys[] = {-priv->border[2],
+                 0.0,
+                 h,
+                 h + priv->border[3]};
   
   gint i, j;
   for (i = 0; i < 3; i++) {
@@ -83,6 +72,7 @@ static void nineslice_effect_dispose(GObject *gobject) {
   G_OBJECT_CLASS(nineslice_effect_parent_class)->dispose(gobject);
 }
 
+/*
 static gboolean nineslice_effect_get_paint_volume(ClutterEffect *self, ClutterPaintVolume *volume) {
   gfloat w, h;
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
@@ -105,51 +95,15 @@ static gboolean nineslice_effect_get_paint_volume(ClutterEffect *self, ClutterPa
   return TRUE;
 }
 
-/*
-void nineslice_effect_set_padding_left(NineSliceEffect *effect, gfloat value) {
-  effect->priv->padding[0] = value;
-}
-void nineslice_effect_set_padding_right(NineSliceEffect *effect, gfloat value) {
-  effect->priv->padding[1] = value;
-}
-void nineslice_effect_set_padding_top(NineSliceEffect *effect, gfloat value) {
-  effect->priv->padding[2] = value;
-}
-void nineslice_effect_set_padding_bottom(NineSliceEffect *effect, gfloat value) {
-  effect->priv->padding[3] = value;
-}
-void nineslice_effect_set_padding(NineSliceEffect* effect, gfloat values[4]) {
-  NineSliceEffectPrivate *priv = effect->priv;
-  priv->padding[0] = values[0];
-  priv->padding[1] = values[1];
-  priv->padding[2] = values[2];
-  priv->padding[3] = values[3];
-}
-
-gfloat nineslice_effect_get_padding_left(NineSliceEffect *effect) {
-  return effect->priv->padding[0];
-}
-gfloat nineslice_effect_get_padding_right(NineSliceEffect *effect) {
-  return effect->priv->padding[1];
-}
-gfloat nineslice_effect_get_padding_top(NineSliceEffect *effect) {
-  return effect->priv->padding[2];
-}
-gfloat nineslice_effect_get_padding_bottom(NineSliceEffect *effect) {
-  return effect->priv->padding[3];
-}
- */
 enum {
   PROP_0,
   
-  PROP_LEFT,
-  PROP_RIGHT,
-  PROP_TOP,
-  PROP_BOTTOM,
   PROP_PADDING,
   
   N_PROPERTIES
 };
+
+static GParamSpec *obj_props[N_PROPERTIES];
 
 static gboolean nineslice_padding_interval(const GValue *a, const GValue *b, gdouble progress, GValue *r) {
   ClutterActorBox *rbox = clutter_actor_box_new(0.0, 0.0, 0.0, 0.0);
@@ -158,8 +112,6 @@ static gboolean nineslice_padding_interval(const GValue *a, const GValue *b, gdo
   
   return TRUE;
 }
-
-static GParamSpec *obj_props[N_PROPERTIES];
 
 void nineslice_effect_set_padding(NineSliceEffect* effect, ClutterActorBox* value) {
   clutter_actor_box_free(effect->priv->padding);
@@ -171,20 +123,6 @@ static void nineslice_effect_set_property(GObject *gobject, guint prop_id,
   NineSliceEffect *effect = NINESLICE_EFFECT(gobject);
   
   switch (prop_id) {
-    /*
-    case PROP_LEFT:
-      nineslice_effect_set_padding_left(effect, g_value_get_float(value));
-      break;
-    case PROP_RIGHT:
-      nineslice_effect_set_padding_right(effect, g_value_get_float(value));
-      break;
-    case PROP_TOP:
-      nineslice_effect_set_padding_top(effect, g_value_get_float(value));
-      break;
-    case PROP_BOTTOM:
-      nineslice_effect_set_padding_bottom(effect, g_value_get_float(value));
-      break;
-    */
     case PROP_PADDING:
       nineslice_effect_set_padding(effect, clutter_actor_box_copy(g_value_get_boxed(value)));
       break;
@@ -199,20 +137,6 @@ static void nineslice_effect_get_property(GObject *gobject, guint prop_id,
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(gobject)->priv;
   
   switch (prop_id) {
-    /*
-    case PROP_LEFT:
-      g_value_set_float(value, priv->padding[0]);
-      break;
-    case PROP_RIGHT:
-      g_value_set_float(value, priv->padding[1]);
-      break;
-    case PROP_TOP:
-      g_value_set_float(value, priv->padding[2]);
-      break;
-    case PROP_BOTTOM:
-      g_value_set_float(value, priv->padding[3]);
-      break;
-    */
     case PROP_PADDING:
       g_value_set_boxed(value, clutter_actor_box_copy(priv->padding));
       break;
@@ -221,39 +145,34 @@ static void nineslice_effect_get_property(GObject *gobject, guint prop_id,
       break;
   }
 }
+ */
 
 static void nineslice_effect_class_init(NineSliceEffectClass *klass) {
   g_type_class_add_private(klass, sizeof(NineSliceEffectPrivate));
   
   ClutterEffectClass *cklass = CLUTTER_EFFECT_CLASS(klass);
   cklass->pre_paint = nineslice_effect_pre_paint;
-  cklass->get_paint_volume = nineslice_effect_get_paint_volume;
+  //cklass->get_paint_volume = nineslice_effect_get_paint_volume;
   
   GObjectClass *gklass = G_OBJECT_CLASS(klass);
   gklass->dispose = nineslice_effect_dispose;
+  
+  /*
   gklass->set_property = nineslice_effect_set_property;
   gklass->get_property = nineslice_effect_get_property;
-  
-  obj_props[PROP_LEFT] = g_param_spec_float("padding_left", "Padding_Left",
-            "Padding on the left",    0.0, 100.0, 0.0, G_PARAM_READWRITE);
-  obj_props[PROP_RIGHT] = g_param_spec_float("padding_right", "Padding_Right",
-            "Padding on the right",   0.0, 100.0, 0.0, G_PARAM_READWRITE);
-  obj_props[PROP_TOP] = g_param_spec_float("padding_top", "Padding_Top",
-            "Padding on the top",     0.0, 100.0, 0.0, G_PARAM_READWRITE);
-  obj_props[PROP_BOTTOM] = g_param_spec_float("padding_bottom", "Padding_Bottom",
-            "Padding on the botttom", 0.0, 100.0, 0.0, G_PARAM_READWRITE);
   
   obj_props[PROP_PADDING] = g_param_spec_boxed("padding", "Padding",
             "Padding all around", CLUTTER_TYPE_ACTOR_BOX, G_PARAM_READWRITE);
   clutter_interval_register_progress_func(CLUTTER_TYPE_ACTOR_BOX, nineslice_padding_interval);
   
   g_object_class_install_properties(gklass, N_PROPERTIES, obj_props);
+  */
 }
 
 static void nineslice_effect_init (NineSliceEffect *self) {
   NineSliceEffectPrivate *priv;
   priv = self->priv = NINESLICE_EFFECT_GET_PRIVATE(self);
-  priv->padding = clutter_actor_box_new(20.0, 20.0, 20.0, 20.0);
+  //priv->padding = clutter_actor_box_new(20.0, 20.0, 20.0, 20.0);
 }
 
 ClutterEffect* nineslice_effect_new_from_source(gchar* source[]) {
@@ -273,14 +192,6 @@ ClutterEffect* nineslice_effect_new_from_source(gchar* source[]) {
     if ((gfloat) h > priv->border[2] && i < 3)      priv->border[2] = (gfloat) h; else
     if ((gfloat) h > priv->border[3] && i >= 6)     priv->border[3] = (gfloat) h;
   }
-  
-  /*
-   priv->margin = clutter_margin_new();
-  priv->margin->left = priv->border[0];
-  priv->margin->right = priv->border[1];
-  priv->margin->top = priv->border[2];
-  priv->margin->bottom = priv->border[3];
-  */
   
   return self;
 }
