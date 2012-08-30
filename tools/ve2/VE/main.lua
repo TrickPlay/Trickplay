@@ -324,14 +324,15 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 	    end 
 
         if snapToGuide == true then 
-		    for i=1, v_guideline,1 do 
+		    for i=1, v_guideline, 1 do 
 			    if(screen:find_child("v_guideline"..i) ~= nil) then 
 			            local gx = screen:find_child("v_guideline"..i).x 
+                        gx = gx + 9 
 			     	    if(15 >= math.abs(gx - x + dx)) then  
-							uiInstance.x = gx + screen:find_child("v_guideline"..i).w 
+							uiInstance.x = gx + screen:find_child("v_guideline"..i).w - 18 
 							if (am ~= nil) then 
 			     	     	    am.x = am.x - (x-dx-gx)
-			     	     	    border.x = border.x - (x-dx-gx)
+			     	     	    border.x = border.x - (x-dx-gx-1)
 							end
 			     		elseif(15>= math.abs(gx - x + dx - uiInstance.w)) then
 							uiInstance.x = gx - uiInstance.w 
@@ -345,12 +346,13 @@ local function create_mouse_event_handler(uiInstance, uiTypeStr)
 			for i=1, h_guideline,1 do 
 			    if(screen:find_child("h_guideline"..i) ~= nil) then 
 			        local gy =  screen:find_child("h_guideline"..i).y 
+                    gy = gy + 9
 			      	if(15 >= math.abs(gy - y + dy)) then 
 					    uiInstance.y = gy
-					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h 
+					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h - 18 
 						if (am ~= nil) then 
 			     	        am.y = am.y - (y-dy - gy) 
-			     	        border.y = border.y - (y-dy - gy) 
+			     	        border.y = border.y - (y-dy-gy) + 2 
 						end
 			      	elseif(15>= math.abs(gy - y + dy - uiInstance.h)) then
 						uiInstance.y =  gy - uiInstance.h 
@@ -1749,19 +1751,20 @@ _VE_.addHorizonGuide = function()
     h_guideline = h_guideline + 1
 
      local h_gl =Group{
-		name="h_guideline"..tostring(h_guideline),
-		position = {0, screen.h/2-10, 0}, 
-		size = {screen.w, 20},
-		reactive = true,
-        children = { Rectangle {
-        name = "line",
-		border_color= hdr.DEFAULT_COLOR, 
-		color={0,255,255,255},
-		position = {0, 9, 0},
-		size = {screen.w, 2},
-		opacity = 255,
-        }
-        }
+		    name="h_guideline"..tostring(h_guideline),
+		    position = {0, screen.h/2-10, 0}, 
+		    size = {screen.w, 20},
+		    reactive = true,
+            children = { 
+                Rectangle {
+                    name = "line",
+		            border_color= hdr.DEFAULT_COLOR, 
+		            color={0,255,255,255},
+		            position = {0, 9, 0},
+		            size = {screen.w, 2},
+		            opacity = 255,
+                }
+            }
         }
      create_on_line_down_f(h_gl)
      screen:add(h_gl)
