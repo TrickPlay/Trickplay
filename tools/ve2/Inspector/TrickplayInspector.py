@@ -70,7 +70,7 @@ class SlotItem(QGraphicsRectItem):
         if self.brush().color() != Qt.red :
             self.parent.resetAnchorPoint()
             self.parent.sendAnchorPointSetCommand(self.name)
-            #self.setBrush(Qt.red)
+            self.setBrush(Qt.red)
         QGraphicsRectItem.mousePressEvent(self, event)
 
 class DiagramScene(QGraphicsScene):
@@ -150,26 +150,18 @@ class DiagramScene(QGraphicsScene):
             anchorStr = '{0,'+str(self.curSz[1]/2)+'}'
         elif name == "bl" : 
             anchorStr = '{0,'+str(self.curSz[1])+'}'
-		    #anchor_pnt.extra.anchor_point = {0, v.h}
         elif name == "tc" : 
             anchorStr = '{'+str(self.curSz[0]/2)+',0}'
-		    #anchor_pnt.extra.anchor_point = {v.w/2, 0}
         elif name == "mc" : 
             anchorStr = '{'+str(self.curSz[0]/2)+','+str(self.curSz[1]/2)+'}'
-		    #anchor_pnt.extra.anchor_point = {v.w/2, v.h/2}
         elif name == "bc" : 
             anchorStr = '{'+str(self.curSz[0]/2)+','+str(self.curSz[1])+'}'
-		    #anchor_pnt.extra.anchor_point = {v.w/2, v.h}
-
         elif name == "tr" : 
             anchorStr = '{'+str(self.curSz[0])+',0}'
-		    #anchor_pnt.extra.anchor_point = {v.w, 0}
         elif name == "mr" : 
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1]/2)+'}'
-		    #anchor_pnt.extra.anchor_point = {v.w, v.h/2}
         elif name == "br" : 
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1])+'}'
-		    #anchor_pnt.extra.anchor_point = {v.w, v.h}
         self.insp.main._emulatorManager.setUIInfo(self.gid, 'anchor_point', anchorStr)
 
     def setCurrentAnchorPoint(self):

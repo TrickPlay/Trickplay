@@ -1424,24 +1424,30 @@ end
 
 -- SET
 _VE_.setUIInfo = function(gid, property, value, n)
+    
+    uiInstance = devtools:gid(gid)
+	screen_ui.n_selected(uiInstance) 
     if property == 'source' then 
         the_obj = screen:find_child(value) 
         if the_obj ~= nil then 
-            devtools:gid(gid)[property] = the_obj 
-            devtools:gid(gid).extra.source = value
-		    screen_ui.n_selected(devtools:gid(gid))
+            uiInstance[property] = the_obj 
+            uiInstance.extra.source = value
+		    --screen_ui.n_selected(uiInstance)
         end 
     elseif property == 'visible' then 
         screen_ui.n_selected_all()
-        devtools:gid(gid)[property] = value 
+        uiInstance[property] = value 
+    elseif property == "anchor_point" then 
+        ax = table.remove(value, 1)
+        ay = table.remove(value, 1) 
+        uiInstance:move_anchor_point(ax, ay)
     elseif n ~= nil then 
-        devtools:gid(gid)['tabs'][n].label = value 
-        print (n, value)
-        print (n, value)
+        uiInstance['tabs'][n].label = value 
         print (n, value)
     else
-        devtools:gid(gid)[property] = value 
+        uiInstance[property] = value 
     end 
+	screen_ui.selected(uiInstance) 
 end 
 
 -- REPORT 
@@ -1705,159 +1711,6 @@ local function guideline_inspector(v)
         print("openH_GLI"..org_position)
     end 
 
---[[
-	-- Text Input Field 	
-	local org_position 
-
-	if(util.guideline_type(v.name) == "v_guideline") then
-		org_position = tostring(math.floor(v.x))
-		title.text = "Vertical Guideline"
-		title_shadow.text = "Vertical Guideline"
-		message.text = "X Position:"
-		message_shadow.text = "X Position:"
-	else
-		org_position = tostring(math.floor(v.y))
-		title.text =  "Horizontal Guideline"
-		title_shadow.text = "Horizontal Guideline"
-		message.text = "Y Position:"
-		message_shadow.text = "Y Position:"
-	end 
-
-	local text_input = TextInput{width = WIDTH - 2 * PADDING , height = 22 , text = org_position}
-
-	--Buttons 
-   	local button_cancel = Button{width = 80, height = 27, label = "Cancel"}
-		  button_cancel.name = "button_cancel"
-   	local button_delete = Button{ width = 80, height = 27, label = "Delete"}
-		  button_delete.name = "button_delete"
-	local button_ok = Button{ width = 80, height = 27, label = "OK"}
-		  button_ok.name = "button_ok"
-
-	-- Button Event Handlers
-	button_cancel.on_press = function() xbox:on_button_down() end 
-	button_delete.on_press = function() screen:remove(screen:find_child(v.name))
- 									   xbox:on_button_down() 
-							end 
-
-	button_ok.on_press = function() 
-		if text_input.text == "" then 
-			editor.error_message("006", nil, nil) 
-			xbox:on_button_down() 
-			return 
-   		end    
-		if(util.guideline_type(v.name) == "v_guideline") then
-				v.x = tonumber(text_input.text)
-		else 
-				v.y = tonumber(text_input.text)
-		end 
-		xbox:on_button_down() 
-	end
-
-	local ti_func = function()
-		if current_focus then 
-			current_focus.clear_focus()
-		end 
-		--button_ok.active.opacity = 255
-		--button_ok.dim.opacity = 0
-        button_ok.focused = true
-		--text_input.set_focus()
-        text_input.focused = true
-	endUi_horizGuideDialog
-
-	local tab_func = function()
-		text_input.clear_focus()
-		--button_ok.active.opacity = 0
-		--button_ok.dim.opacity = 255
-		button_ok.focused = false
-		--button_cancel.set_focus()
-		--button_cancel:grab_key_focus()
-		button_cancel.focused = true
-	end
-
-	-- Focus Destination 
-	button_cancel.extra.focus = {[keys.Right] = "button_delete", [keys.Tab] = "button_delete", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
-	button_delete.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Left] = "button_cancel", [keys.Return] = "button_delete", [keys.Up] = ti_func}
-	button_ok.extra.focus = {[keys.Left] = "button_delete", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
-
-	text_input.extra.focus = {[keys.Tab] = tab_func, [keys.Return] = "button_ok",}
-
-	-- Button Position Set
- 		button_cancel:set{position ={WIDTH-button_delete.w-button_ok.w-button_cancel.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
- 		button_delete:set{position ={WIDTH-button_delete.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
- 		button_ok:set{position ={WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
-
-	local msgw = Group {
-		name = "msgw",  --ui_element_insert
-		position ={650, 250},
-	 	anchor_point = {0,0},
-		reactive = true,
-        children = {
-        	msgw_bg,
-	  		xbox:set{position = {275, 0}},
-			title_shadow:set{position = {PADDING,PADDING/3}, }, 
-			title:set{position = {PADDING+1, PADDING/3+1}}, 
-			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
-			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
-			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
-			button_cancel,Ui_horizGuideDialog
-			button_delete,
-			button_ok
-		}
-		,scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
-	}
-
-	function xbox:on_button_down()
-		screen:remove(msgw)
-		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil
-        screen.grab_key_focus(screen) 
-	    input_mode = hdr.S_SELECT
-		return true
-	end 
-
-	function text_input:on_key_down(key)
-
-		local key_focus_obj 
-
-		if text_input.focus[key] == nil then return end 
-
-		if text_input.focus[key] then
-			if type(text_input.focus[key]) == "function" then
-				text_input.focus[key]()
-				return true
-			else
-				local key_focus_obj = screen:find_child(text_input.focus[key]) 
-
-				if key_focus_obj == nil then return end 
-Ui_horizGuideDialog
-				if text_input.clear_focus then
-					text_input.clear_focus()
-				end
-				key_focus_obj:grab_key_focus()
-				if key_focus_obj.set_focus then
-					key_focus_obj.set_focus(key)
-				end
-			end
-		end
-
-	end
-
-	if(util.guideline_type(v.name) == "v_guideline") then
-		msgw.x= v.x - msgw.w/2
-		msgw.y= screen.h/2 - msgw.h/2
-	else
-		msgw.y= v.y - msgw.h/2
-		msgw.x= screen.w/2 - msgw.w/2
-	end 
-
-	msgw.extra.lock = false
- 	screen:add(msgw)
-	util.create_on_button_down_f(msgw)	Ui_horizGuideDialog
-	-- Set focus 
-	ti_func()
-
-    ]]
 end 
 
 local function create_on_line_down_f(v)
