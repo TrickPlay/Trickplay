@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Trickplay Visual Debugger
+Exec=trickplay-debugger
+Icon=trickplay
+Categories=Development;Application;
+Comment=Trickplay Visual Debugger

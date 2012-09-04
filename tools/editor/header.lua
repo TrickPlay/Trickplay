@@ -152,6 +152,6 @@ BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, scre
 BG_IMAGE_import = Image{src = "assets/white.png"}
 BG_IMAGE_import:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 
-debugger_script = "~/code/trickplay/sdk/trickplay-debugger"
+debugger_script = "trickplay-debugger"
 
 return hdr
