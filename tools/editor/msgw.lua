@@ -302,7 +302,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 		   		local f 
 		   		f = function (k, c) 
      		    	if type(c) == "table" then
-	 		   			table.foreach(c, f)
+	 		   			--table.foreach(c, f)
+                        for p, q in pairs(c) do
+                            f(p, c[p])
+                        end
      		    	elseif not c.extra.is_in_group then 
 						if c.extra.type and c.extra.type == "Group" then 
 							there(d,false)
@@ -311,7 +314,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 						end 
      		    	end 
 		   		end 
-		   		table.foreach(v.cells, f)
+		   		--table.foreach(v.cells, f)
+                for p, q in pairs(v.cells) do
+                    f(p, v.cells[p])
+                end
 	       end 
 	  	end 
 	end 
