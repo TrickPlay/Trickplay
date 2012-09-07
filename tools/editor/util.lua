@@ -1032,7 +1032,7 @@ function util.make_attr_t(v)
   local obj_map = {
        ["Rectangle"] = function() return {"border_color", "color", "border_width", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus"} end,
        ["Text"] = function() return {"color", "font", "wrap_mode", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus",} end,
-       ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
+       ["Image"] = function() return {"src","scale", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color", "focus_border_color", "fill_color", "focus_fill_color","text_color","focus_text_color","text_font","border_width","border_corner_radius"} end,
@@ -1044,7 +1044,7 @@ function util.make_attr_t(v)
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color",} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","focus","rows","columns","variable_cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset",} end,
+       ["LayoutManager"] = function() return {"lock", "scale","skin","x_rotation","anchor_point", "opacity","focus","rows","columns","variable_cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset",} end,
        ["ScrollPane"] = function() return {"lock", "skin", "visible_width", "visible_height",  "virtual_width", "virtual_height","opacity", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer","empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width"} end,  
        ["ArrowPane"] = function() return {"lock", "skin","visible_width", "visible_height",  "virtual_width", "virtual_height","opacity",  "arrow_color","focus_arrow_color","box_color", "focus_box_color", "arrow_size", "arrow_dist_to_frame", "arrows_visible", "box_border_width", "scroll_distance"} end,
        ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","focus_border_color","fill_color","focus_fill_color","text_color", "focus_text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","show_ring", "items"} end,
