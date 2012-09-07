@@ -1,8 +1,8 @@
 Title: Complete Tutorial Source Code
 
-The final versions of each source file in the TrickPlay SDK Tutorial application are listed below.
+The final versions of each source file in the TrickPlay SDK Tutorial application are listed below. The source files can also be <downloaded here at https://github.com/TrickPlay/SampleApps>.
 
-File: app
+File: app Metadata File
 
 	(code)
 	-- TrickPlay SDK Tutorial's app Metadata File
@@ -156,8 +156,8 @@ File: loadImages.lua
 			sphereClone - Clone object of Red Sphere image
 	--]]
 	
-	-- Synchronously load the TrickPlay logo image from the TrickPlay website
-	logoImage = Image( { src = "https://developer.trickplay.com/sites/default/files/tpLogo.png" } )
+	-- Load the TrickPlay logo image
+	logoImage = Image( { src = "tpLogo.png" } )
 	if( logoImage.loaded == false ) then
 		print( "Could not load TrickPlay logo" )
 		return
@@ -174,7 +174,7 @@ File: loadImages.lua
 	demoArea1:add( logoImage )
 	
 	-- Load the red sphere image
-	sphereImage = Image( { src = "https://developer.trickplay.com/sites/default/files/sphereRed.png" } )
+	sphereImage = Image( { src = "sphereRed.png" } )
 	if( sphereImage.loaded == false ) then
 		print( "Could not load sphere image" )
 		return
@@ -222,7 +222,7 @@ File: logoAnimation.lua
 					duration     = 3000,            -- 3000 milliseconds = 3 seconds
 					scale        = { 0, 0 },        -- scale down to nothing
 					z_rotation   = 360,             -- rotate 360 degrees, clockwise
-					mode         = "EASE_IN_QUART", -- Alpha mode
+					mode         = "EASE_IN_QUART", -- Ease mode
 					on_completed = logoCompleted    -- called when finished
 				  } )
 	end

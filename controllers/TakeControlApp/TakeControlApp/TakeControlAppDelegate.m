@@ -21,11 +21,11 @@
 {
     [TestFlight takeOff:@"6ff472dad8451a622a5f2e1c5f6fe20a_MzY1NDUyMDExLTEwLTI0IDE1OjA1OjIyLjI0MDk1NA"];
     // Override point for customization after application launch.
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        self.viewController = [[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPhone" bundle:nil]; 
+        self.viewController = [[[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPhone" bundle:nil] autorelease]; 
     } else {
-        self.viewController = [[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPad" bundle:nil]; 
+        self.viewController = [[[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPad" bundle:nil] autorelease]; 
     }
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];

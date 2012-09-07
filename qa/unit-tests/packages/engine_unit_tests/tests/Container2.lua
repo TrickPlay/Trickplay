@@ -49,12 +49,12 @@ g:foreach_child(move_each_child)
 
 -- Verify that each item was moved 100 pixels on both x and y coordinate.
 function test_Container_group_foreach_child ()
-	assert_equal( children[1].x , 400 , "foreach_child 1 item  failed" )
-	assert_equal( children[1].y , 500 , "foreach_child 1 item  failed" )
-	assert_equal( children[2].x , 800 , "foreach_child 1 item  failed" )
-	assert_equal( children[2].y , 800 , "foreach_child 1 item  failed" )
-	assert_equal( children[3].x , 420 , "foreach_child 1 item  failed" )
-	assert_equal( children[3].y , 580 , "foreach_child 1 item  failed" )
+	assert_equal( children[1].x , 400 , "Returned: "..children[1].x.." Expected: 400" )
+	assert_equal( children[1].y , 500 , "Returned: "..children[1].y.." Expected: 500" )
+	assert_equal( children[2].x , 800 , "Returned: "..children[2].x.." Expected: 800" )
+	assert_equal( children[2].y , 800 , "Returned: "..children[2].y.." Expected: 800" )
+	assert_equal( children[3].x , 420 , "Returned: "..children[3].x.." Expected: 420" )
+	assert_equal( children[3].y , 580 , "Returned: "..children[3].y.." Expected: 580" )
 end
 
 

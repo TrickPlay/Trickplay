@@ -3,6 +3,7 @@
 
 //------------------------------------------------------------------------------
 #include "server.h"
+#include "util.h"
 //------------------------------------------------------------------------------
 static gsize SERVER_BUFFER_SIZE = 128;
 //------------------------------------------------------------------------------
@@ -24,10 +25,14 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
         if(g_socket_listener_add_inet_port( listener, p, NULL, &sub_error ))
         {
             port = p;
-        } else {
+        }
+        else
+        {
             port = 0; // failure
         }
-    } else {
+    }
+    else
+    {
         port = g_socket_listener_add_any_inet_port( listener, NULL, &sub_error );
     }
 
@@ -36,6 +41,7 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
         g_socket_listener_close( listener );
         g_object_unref( G_OBJECT( listener ) );
         listener = NULL;
+        port = 0;
 
         g_propagate_error( error, sub_error );
     }
@@ -136,7 +142,18 @@ bool Server::write_printf( gpointer connection, const char * format, ... )
 
 void Server::write_to_all( const char * data )
 {
+	FreeLater free_later;
+
+	ConnectionSet tc;
+
     for ( ConnectionSet::iterator it = connections.begin(); it != connections.end(); ++it )
+    {
+    	tc.insert( *it );
+
+    	free_later( g_object_ref( *it ) , g_object_unref );
+    }
+
+    for ( ConnectionSet::iterator it = tc.begin(); it != tc.end(); ++it )
     {
         write( *it, data );
     }

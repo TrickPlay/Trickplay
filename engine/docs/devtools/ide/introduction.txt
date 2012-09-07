@@ -1,0 +1,38 @@
+
+Title: TrickPlay IDE Introduction
+
+The TrickPlay IDE (Integrated Development Environment) provides editing and debugging capabilities that streamline the creation of a TrickPlay application.
+
+(see TrickPlayIDE.png)
+
+The IDE Editor can be used to create and modify a TrickPlay application's Lua source files. To layout the user interface, such as defining menus and positioning buttons and other screen components, the TrickPlay Visual Editor enables swift development, and the project files it generates can be loaded into the IDE Editor to add further functionality and also to run and debug the application.
+
+A TrickPlay application is typically developed on a computer terminal, but the finished application is expected to run on a television. The IDE can run a TrickPlay application on either of these devices, thus the IDE can be used from a project's initial conception to its final production.
+
+While running, the application can be tested and debugged by stepping through the code and monitoring variable values. The application can be stopped at any code statement by setting a breakpoint on the statement. Using the debugging capabilities, it's possible to see exactly what a program is doing and how variable values are affected. The debugger is especially effective in locating problems that exist deep within a program's logic where the use of print statements would be difficult.
+
+Prerequisites:
+
+To run the TrickPlay IDE, you should have completed the following steps.
+- Installed the TrickPlay SDK
+- Installed the Ubuntu packages listed below. These can be installed with the Ubuntu Software Center.
+
+	(code)
+	python-qt4
+	python-qscintilla2
+	(end)
+	
+The Python version must be v2.7 or later, but not Python 3.x. The PyQt version must be v4.7.2 or later.
+	
+Running the TrickPlay IDE:
+
+The TrickPlay IDE can be run from either the command line or from a graphical interface.
+
+To run from the command line: Enter the following command from any directory.
+
+	(code)
+	./start.py
+	(end)
+
+To run from a graphical user interface: Click on the "TrickPlay IDE" icon, which is located in either the Applications->Developer Tools or Applications->Programming window, depending on the Linux graphic shell you are running.
+

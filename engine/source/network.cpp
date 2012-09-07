@@ -466,7 +466,7 @@ void Network::Response::replace_body( gpointer data , gsize size )
 Network::Settings::Settings( TPContext * context )
 :
     debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
-    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFYPEER, true ) ),
     ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
 {
 }
@@ -939,6 +939,10 @@ public:
                 cc( curl_easy_setopt( eh, CURLOPT_POST, 1 ) );
                 cc( curl_easy_setopt( eh, CURLOPT_POSTFIELDSIZE, closure->request.body.size() ) );
             }
+            else if ( closure->request.method == "HEAD" )
+            {
+            	cc( curl_easy_setopt( eh, CURLOPT_NOBODY , 1 ) );
+            }
             else if ( closure->request.method != "GET" )
             {
                 cc( curl_easy_setopt( eh, CURLOPT_CUSTOMREQUEST, closure->request.method.c_str() ) );
@@ -991,7 +995,6 @@ public:
 
         // Variables pulled out of the loop
 
-        GTimeVal tv;
         long timeout;
         glong pop_wait;
         int running_handles = 0;
@@ -1005,7 +1008,7 @@ public:
                 // If there are running requests, we just wait a tiny bit - to
                 // throttle this thread.
 
-                // 20 ms
+                // 20 µs
 
                 pop_wait = 20 * 1000;
             }
@@ -1026,10 +1029,7 @@ public:
             {
                 // Wait for a new request
 
-                g_get_current_time( &tv );
-                g_time_val_add( &tv, pop_wait );
-
-                event = ( Event * ) g_async_queue_timed_pop( queue, &tv );
+                event = ( Event *) Util::g_async_queue_timeout_pop( queue , pop_wait );
             }
             else
             {

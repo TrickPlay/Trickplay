@@ -2,6 +2,7 @@
 #define _TRICKPLAY_HTTP_SERVER_H_
 
 #include "common.h"
+#include "util.h"
 #include "libsoup/soup.h"
 
 class HttpServer
@@ -103,6 +104,8 @@ public:
 
         enum Method { HTTP_GET , HTTP_POST , HTTP_PUT , HTTP_DELETE , HTTP_HEAD , OTHER };
 
+        virtual ~Request() {}
+
         virtual Method get_method() const = 0;
 		virtual guint16 get_server_port( ) const = 0;
 		virtual String get_path( ) const = 0;
@@ -129,7 +132,7 @@ public:
 
     //.........................................................................
 
-	class Response
+	class Response : public RefCounted
 	{
 	public:
 
@@ -161,11 +164,29 @@ public:
 	    virtual void set_content_length( goffset content_length ) = 0;
 	    virtual String get_content_type( ) const = 0;
 	    virtual void set_stream_writer( StreamWriter * stream_writer ) = 0;
-	    virtual bool respond_with_file_contents( const String & file_name , const String & content_type = String() ) = 0;
+	    virtual bool respond_with_file_contents( const String & file_name_or_uri , const String & content_type = String() ) = 0;
+
+	    // pause increases the ref count on this response and returns a pointer to it.
+	    // This is so that you can defer processing of the response beyond the
+	    // handler callback.
+
+	    virtual Response * pause() = 0;
+
+	    virtual bool is_paused() const = 0;
+
+	    // Resume decreases the ref count and tells the server the response
+	    // is ready to be sent.
+
+	    virtual void resume() = 0;
 
 	protected:
+
 	    Response() {};
+
+	    virtual ~Response() {}
+
 	private:
+
 	    Response( const Response & ) {};
 	};
 
@@ -196,7 +217,7 @@ public:
 
     //.........................................................................
 
-    HttpServer( guint16 port = 0 );
+    HttpServer( guint16 port = 0 , GMainContext * context = 0 );
 
     ~HttpServer();
 
@@ -205,6 +226,12 @@ public:
     void unregister_handler( const String & path );
 
     guint16 get_port() const;
+
+    // Only for servers that were created with their own GMainContext
+
+    void run();
+
+    void quit();
 
 private:
 

@@ -376,7 +376,7 @@ def parse( source ):
     return output
 
 
-def emit( stuff , f ):
+def emit( stuff , f , header ):
 
     global globals
 
@@ -618,6 +618,12 @@ def emit( stuff , f ):
                 f.write( "}\n" )
 
         else:
+
+            #-----------------------------------------------------------------------
+            # GETTER FROM UDATA
+            #-----------------------------------------------------------------------
+            
+            header.write( '#define LB_GET_%s(L,i) ((%s)lb_get_udata_check(L,i,"%s"))\n' % ( bind_name.upper() , udata_type , bind_name ) )
 
             #-----------------------------------------------------------------------
             # METATABLE
@@ -1136,7 +1142,7 @@ def emit( stuff , f ):
             )
 
             f.write(
-                "  luaL_register(L,NULL,meta_methods);\n"
+                "  luaL_setfuncs(L,meta_methods,0);\n"
             )
 
             # If there are no properties, we set the __index metafield to point to
@@ -1180,7 +1186,7 @@ def emit( stuff , f ):
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
-                    "  luaL_register(L,NULL,getters);\n"
+                    "  luaL_setfuncs(L,getters,0);\n"
                     "  lua_rawset(L,-3);\n"
                 )
 
@@ -1205,7 +1211,7 @@ def emit( stuff , f ):
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
-                    "  luaL_register(L,NULL,setters);\n"
+                    "  luaL_setfuncs(L,setters,0);\n"
                     "  lua_rawset(L,-3);\n"
                 )
 
@@ -1236,7 +1242,7 @@ def emit( stuff , f ):
 
                 f.write(
                     "  new_%s(L);\n"
-                    '  lua_setglobal(L,"%s");\n'
+                    '  lb_setglobal(L,"%s");\n'
                     %
                     ( bind_name , bind_name )
                 )
@@ -1251,7 +1257,7 @@ def emit( stuff , f ):
 
                 f.write(
                     "  lua_pushcfunction(L,new_%s);\n"
-                    '  lua_setglobal(L,"%s");\n'
+                    '  lb_setglobal(L,"%s");\n'
                     %
                     ( bind_name , bind_name )
                 )
@@ -1261,6 +1267,7 @@ def emit( stuff , f ):
 
         #-----------------------------------------------------------------------
 
+    header.write( '#include "lb.h"\n' );
 
     f.write( '#include "lb.h"\n' );
 
@@ -1308,7 +1315,7 @@ def emit( stuff , f ):
         for g in globals:
             f.write(
                 "  lua_pushcfunction(L,global_%s);\n"
-                '  lua_setglobal(L,"%s");\n'
+                '  lb_setglobal(L,"%s");\n'
                 %
                 ( g , g )
             )
@@ -1328,15 +1335,26 @@ if __name__ == "__main__":
     (options,args) = parser.parse_args()
 
     for file_name in args:
+        
+        bn = os.path.basename( file_name )
 
         if options.mac:
-            output = open( os.path.basename( file_name ) + ".mm" , "w")
+            output = open( bn + ".mm" , "w")
         else:
-            output = open( os.path.basename( file_name ) + ".cpp" , "w")
+            output = open( bn + ".cpp" , "w")
+            
+        header = open( bn + ".h" , "w")
 
         binding = parse( open( file_name ).read() )
 
 
-        emit( binding , output )
+        header_guard = "_TRICKPLAY_%s_H" % bn.replace(".","_").upper()
+        header.write( "#ifndef %s\n#define %s\n\n" % ( header_guard , header_guard ) )
+
+        emit( binding , output , header )
+
+        header.write( "#endif //%s\n" % header_guard )
 
         output.close()
+        
+        header.close()

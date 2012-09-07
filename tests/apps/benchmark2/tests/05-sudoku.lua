@@ -470,12 +470,20 @@ local function solve_file( file )
         end
     end
     
-    finish_test( solved / total , "Hz" )    
+    if trickplay then
+	    finish_test( solved / total , "Hz" )    
+	else
+		print( _VERSION , "DONE" )
+	end
 end
 
 -------------------------------------------------------------------------------
 
-title( "Sudoku" )
+if trickplay then
+	title( "Sudoku" )
 
-dolater( solve_file , "assets/sudoku-top95.txt" )
+	dolater( solve_file , "assets/sudoku-top95.txt" )
+else
+	solve_file( "../assets/sudoku-top95.txt" )
+end
 

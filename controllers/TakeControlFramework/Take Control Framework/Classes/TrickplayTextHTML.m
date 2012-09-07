@@ -11,7 +11,6 @@
 
 @implementation TrickplayTextHTML
 
-@synthesize webview;
 @synthesize text;
 @synthesize origText;
 @synthesize fontFamily;
@@ -24,14 +23,12 @@
 
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:textID objectManager:objectManager])) {
-        //self.view = [[[UIView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
-        self.view = [[[UIWebView alloc] initWithFrame:CGRectMake(0.0, 0.0, 2000.0, 2000.0)] autorelease];
-        //[view addSubview:webview];
+        self.frame = [[UIScreen mainScreen] applicationFrame];
+        self.view = [[[UIWebView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
+        ((UIWebView *)self.view).delegate = self;
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         view.layer.position = CGPointMake(0.0, 0.0);
-        //webview.layer.anchorPoint = CGPointMake(0.0, 0.0);
-        //webview.layer.position = CGPointMake(0.0, 0.0);
-                
+        
         self.text = @"";
         self.origText = @"";
         
@@ -43,8 +40,6 @@
         
         view.backgroundColor = [UIColor clearColor];
         view.opaque = NO;
-        //webview.backgroundColor = [UIColor clearColor];
-        //webview.opaque = NO;
         
         maxLength = 0;
         
@@ -81,8 +76,11 @@
         // .line_spacing
         line_spacing = 0.0;
         
+        markup = nil;
+        use_markup = NO;
+        
         [self setValuesFromArgs:args];
-                
+        
         [self addSubview:view];
     }
     
@@ -110,8 +108,8 @@
 #pragma mark Setters
 
 - (NSString *)getHtml {
-    NSString *html = [NSString stringWithFormat:@"<html><body><div style='vertical-align:baseline;"];
-
+    NSString *html = [NSString stringWithFormat:@"<html><body><div id='maintext' style='vertical-align:baseline;"];
+    
     // .color property
     html = [NSString stringWithFormat:@"%@color:#%02x%02x%02x;", html, red, green, blue];
     html = [NSString stringWithFormat:@"%@opacity:%f;", html, textAlpha];
@@ -183,16 +181,66 @@
         html = [NSString stringWithFormat:@"%@</div></body></html>", html];
     } else {
         html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
-        // html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
     }
     
-    NSLog(@"html: %@", html);
     return html;
-    //return [NSString stringWithFormat:@"<html><body><span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>%@</span></body></html>", html];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+  float new_h, new_w;
+  if(!(h_size > 0.0))
+  {
+    NSString *height = [(UIWebView *)webView stringByEvaluatingJavaScriptFromString:@"document.getElementById(\"maintext\").offsetHeight;"];
+    new_h = [height floatValue];
+  } else {
+    new_h = h_size;
+  }
+  
+  if(!(w_size > 0.0))
+  {
+    NSString *width = [(UIWebView *)webView stringByEvaluatingJavaScriptFromString:@"document.getElementById(\"maintext\").offsetWidth;"];
+    new_w = [width floatValue];
+  } else {
+    new_w = w_size;
+  }
+  CGRect frame = webView.frame;
+  frame.size.width = new_w;
+  frame.size.height = new_h;
+  webView.frame = frame;
 }
 
 - (void)setHTML {
     [(UIWebView *)view loadHTMLString:[self getHtml] baseURL:nil];
+}
+
+- (NSNumber *)do_set_markup:(NSArray *)args {
+    if ([args objectAtIndex:0]) {
+        [markup release];
+        if ([[args objectAtIndex:0] isKindOfClass:[NSString class]]) {
+            markup = [[args objectAtIndex:0] retain];
+            [(UIWebView *)view loadHTMLString:markup baseURL:nil];
+            use_markup = YES;
+        } else {
+            markup = nil;
+            [self setHTML];
+            use_markup = NO;
+        }
+        return [NSNumber numberWithBool:use_markup];
+    }
+    
+    return [NSNumber numberWithBool:NO];
+}
+
+- (void)set_use_markup:(NSDictionary *)args {
+    if ([[args objectForKey:@"use_markup"] isKindOfClass:[NSNumber class]]) {
+        use_markup = [[args objectForKey:@"use_markup"] boolValue];
+        if (use_markup && markup) {
+            [(UIWebView *)view loadHTMLString:markup baseURL:nil];
+        } else {
+            use_markup = NO;
+            [self setHTML];
+        }
+    }
 }
 
 /**
@@ -215,24 +263,10 @@
 - (void)set_text:(NSDictionary *)args {
     if (args) {
         NSString *atext = [args objectForKey:@"text"];
-    
-        if (atext) {
-            self.origText = atext;
-            if (maxLength) {
-                atext = [atext substringToIndex:maxLength];
-            }
-            self.text = atext;
-            
-            [self on_text_changed:atext];
-        }
-    }
-}
-
-- (void)do_set_text:(NSDictionary *)args {
-    if (args) {
-        NSString *atext = [args objectForKey:@"text"];
         
         if (atext) {
+          atext = [atext stringByReplacingOccurrencesOfString:@"<" withString:@"&lt;"];
+          atext = [atext stringByReplacingOccurrencesOfString:@">" withString:@"&gt;"];
             self.origText = atext;
             if (maxLength) {
                 atext = [atext substringToIndex:maxLength];
@@ -334,7 +368,7 @@
                 if ([pixelScanner scanFloat:&fontSize]) {
                     [components removeLastObject];
                 }
-                        
+                
                 // get style attributes
                 for (int i = 1; i < components.count; i++) {
                     if (i == 1) {
@@ -412,7 +446,6 @@
  */
 
 - (void)set_max_length:(NSDictionary *)args {
-    NSLog(@"origText: %@", origText);
     maxLength = [[args objectForKey:@"max_length"] unsignedIntValue];
     
     if (origText && [origText length] > maxLength && maxLength > 0) {
@@ -515,7 +548,11 @@
         }
     }
     
-    [self setHTML];
+    if (use_markup && markup) {
+        [(UIWebView *)view loadHTMLString:markup baseURL:nil];
+    } else {
+        [self setHTML];
+    }
 }
 
 #pragma mark -
@@ -527,12 +564,12 @@
 
 - (void)get_color:(NSMutableDictionary *)dictionary {
     NSNumber *a_red, *a_green, *a_blue, *an_alpha;
-        
+    
     a_red = [NSNumber numberWithUnsignedInt:red];
     a_green = [NSNumber numberWithUnsignedInt:green];
     a_blue = [NSNumber numberWithUnsignedInt:blue];
     an_alpha = [NSNumber numberWithFloat:textAlpha * 255.0];
-        
+    
     NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
     [dictionary setObject:colorArray forKey:@"color"];
 }
@@ -543,13 +580,13 @@
 
 - (void)get_background_color:(NSMutableDictionary *)dictionary {
     NSNumber *a_red, *a_green, *a_blue, *an_alpha;
-        
+    
     const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
     a_red = [NSNumber numberWithFloat:components[0] * 255.0];
     a_green = [NSNumber numberWithFloat:components[1] * 255.0];
     a_blue = [NSNumber numberWithFloat:components[2] * 255.0];
     an_alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
-        
+    
     NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
     [dictionary setObject:colorArray forKey:@"background_color"];
 }
@@ -666,6 +703,14 @@
 }
 
 /**
+ * Gets use_markup bool
+ */
+
+- (void)get_use_markup:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithBool:use_markup] forKey:@"use_markup"];
+}
+
+/**
  * Getter function
  */
 
@@ -685,11 +730,26 @@
     return JSON_Dictionary;
 }
 
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    id result = nil;
+    
+    SEL selector = NSSelectorFromString([NSString stringWithFormat:@"do_%@:", method]);
+    
+    if ([TrickplayTextHTML instancesRespondToSelector:selector]) {
+        result = [self performSelector:selector withObject:args];
+    } else {
+        result = [super callMethod:method withArgs:args];
+    }
+    
+    return result;
+}
+
+#pragma mark -
+#pragma mark Deallocation
 
 - (void)dealloc {
     NSLog(@"TrickplayTextHTML dealloc");
     
-    self.webview = nil;
     self.text = nil;
     self.origText = nil;
     self.fontFamily = nil;

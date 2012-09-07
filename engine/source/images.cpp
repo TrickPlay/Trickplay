@@ -1200,7 +1200,7 @@ void Images::shutdown()
 
 void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1217,7 +1217,7 @@ void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder,
 
 Images::DecoderList Images::get_decoders( const char * _hint )
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1546,7 +1546,7 @@ void Images::dump()
 
 void Images::dump_cache()
 {
-    Images * self( Images::get() );
+    Images * self( Images::get(false) );
 
     if ( ! self->cache )
     {
@@ -1577,7 +1577,7 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
         return false;
     }
 
-    load_texture( texture, image );
+    load_texture( texture, image, 0, 0, image->width, image->height );
 
     destroy_image( image );
 
@@ -1595,7 +1595,7 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
         return false;
     }
 
-    load_texture( texture, image );
+    load_texture( texture, image, 0, 0, image->width, image->height );
 
     destroy_image( image );
 
@@ -1613,7 +1613,7 @@ bool Images::cache_put( TPContext * context , const String & key , CoglHandle te
 		return false;
 	}
 
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	// If the cache has not been created yet, do so now
 
@@ -1636,7 +1636,7 @@ bool Images::cache_put( TPContext * context , const String & key , CoglHandle te
 
 CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
 {
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	if ( ! self->cache )
 	{
@@ -1650,7 +1650,7 @@ CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
 
 bool Images::cache_has( const String & key )
 {
-	Images * self = Images::get();
+	Images * self = Images::get(false);
 
 	if ( ! self->cache )
 	{
@@ -1662,6 +1662,12 @@ bool Images::cache_has( const String & key )
 
 //=============================================================================
 
+#ifdef CLUTTER_VERSION_1_10
+#define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
+#else
+#define TP_COGL_TEXTURE(t) (t)
+#endif
+
 Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
 :
     handle( cogl_handle_ref( _handle ) ),
@@ -1670,7 +1676,7 @@ Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
 {
 	// Size in MB
 
-	size = ( cogl_texture_get_height( handle ) * cogl_texture_get_rowstride( handle ) ) / ( 1024.0 * 1024.0 );
+	size = ( cogl_texture_get_height( TP_COGL_TEXTURE( handle ) ) * cogl_texture_get_rowstride( TP_COGL_TEXTURE( handle ) ) ) / ( 1024.0 * 1024.0 );
 }
 
 Images::Cache::Entry::~Entry()
@@ -1840,8 +1846,8 @@ void Images::Cache::dump()
 		{
 			g_info( "  %3d) %4u x %-4u : %8.2f KB : %8.3f s : %s" ,
 					i ,
-					cogl_texture_get_width( it->second->handle ),
-					cogl_texture_get_height( it->second->handle ),
+					cogl_texture_get_width( TP_COGL_TEXTURE( it->second->handle ) ),
+					cogl_texture_get_height( TP_COGL_TEXTURE( it->second->handle ) ),
 					it->second->size * 1024.0,
 					( now - it->second->timestamp ) / 1000,
 					it->first.c_str() );

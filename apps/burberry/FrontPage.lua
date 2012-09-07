@@ -129,7 +129,7 @@ umbrella:add(unpack(right_tiles))
 
 umbrella:add(unpack(right_text))
 
-umbrella:add(bottom_buttons_base,bottom_buttons_foci,right_focus,overlay,title)
+umbrella:add(bottom_buttons_base,bottom_buttons_foci,right_focus,overlay)
 
 umbrella.func_tbls = {
     fade_in_from = {

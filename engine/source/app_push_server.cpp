@@ -6,6 +6,7 @@
 #include "app.h"
 #include "util.h"
 #include "json.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -259,6 +260,8 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     {
         PushInfo push_info = compare_files( app_contents , file_list );
 
+        push_info.debug = root[ "debug" ].is<bool>() ? root[ "debug" ].as<bool>() : false;
+
         // Stop any other push that is going on
 
         if ( current_push_path )
@@ -360,7 +363,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
     gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
 
-    push_info.metadata.sandbox = Sandbox( app_path );
+    push_info.metadata.set_root( app_path );
 
     free_later( app_path );
 
@@ -380,25 +383,25 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
         FreeLater free_later;
 
-        gchar * target_path = Util::rebase_path( app_path , it->name.c_str() , false );
+        AppResource resource( app_path , it->name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
 
-        if ( ! target_path )
+        if ( ! resource || ! resource.is_native() )
         {
             throw Util::format( "Invalid file path '%s'" , it->name.c_str() );
         }
+
+        String target_path( resource.get_native_path() );
 
         TargetInfo target_info;
 
         target_info.source = * it;
         target_info.path = target_path;
 
-        free_later( target_path );
-
         //.....................................................................
         // If the target file does not exist, mark it as such and add it to the
         // list of changed files.
 
-        if ( ! g_file_test( target_path , G_FILE_TEST_EXISTS ) )
+        if ( ! g_file_test( target_path.c_str() , G_FILE_TEST_EXISTS ) )
         {
             push_info.target_files.push_back( target_info );
 
@@ -408,7 +411,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         //.....................................................................
         // It exists. Lets get a GFile for it.
 
-        GFile * file = g_file_new_for_path( target_path );
+        GFile * file = g_file_new_for_path( target_path.c_str() );
 
         free_later( file , g_object_unref );
 
@@ -660,11 +663,26 @@ void AppPushServer::write_file( const TargetInfo & target_info , const HttpServe
 
 bool AppPushServer::launch_it( )
 {
-    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.sandbox.get_root_uri().c_str() );
+    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.get_root_uri().c_str() );
+
+    // If there is an app running right now, we
+    // uninstall its debugger so that it a) will clear pending commands
+    // and b) won't break while it is closing.
+
+	if ( App * current_app = context->get_current_app() )
+	{
+        if ( Debugger * debugger = current_app->get_debugger() )
+        {
+        	debugger->uninstall();
+        }
+	}
 
     context->close_current_app();
 
-    int result = context->launch_app( current_push_info.metadata.sandbox.get_root_uri().c_str() , App::LaunchInfo() , true );
+    App::LaunchInfo launch_info;
+    launch_info.debug = current_push_info.debug;
+
+    int result = context->launch_app( current_push_info.metadata.get_root_uri().c_str() , launch_info , true );
 
     return 0 == result;
 }

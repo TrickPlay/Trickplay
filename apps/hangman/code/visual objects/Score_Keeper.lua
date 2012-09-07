@@ -3,11 +3,12 @@
 local score_keeper = Group{ name = "Score Keeper", y = 20}
 
 
-local make_button, player_1_txt, player_2_txt,max_x_s
+local make_button, player_1_txt, player_2_txt, player_1_s, player_2_s, max_x_s
 local player_1_x_s = {}
 local player_2_x_s = {}
 
 local initialized = false
+local max_name_size = 350
 
 function score_keeper:init(t)
     
@@ -19,18 +20,6 @@ function score_keeper:init(t)
     
     make_button = t.make_button or error("Didn't pass score_keeper make_button",2)
     max_x_s     = t.max_x_s or error("Didn't pass score_keeper max_x_s",2)
-    
-    local player_1_box = Clone{
-        source         =  t.img_srcs.player_box,
-        x              = screen_w/2-50,
-        anchor_point   = {t.img_srcs.player_box.w,0}
-    }
-    
-    local player_2_box = Clone{
-        source         = t.img_srcs.player_box,
-        x              = screen_w/2+50,
-    }
-    
     
     local vs = Clone{
         source = t.img_srcs.vs
@@ -53,9 +42,6 @@ function score_keeper:init(t)
             focused_image   = t.img_srcs.x_on,
         }
         
-        player_1_x_s[i].x = player_1_box.x - player_1_box.w - 47*(i-1) - 10 - t.img_srcs.x_off.w - 8 -- minus '8' for the stupid shadow
-        player_2_x_s[i].x = player_2_box.x + player_2_box.w + 47*(i-1) + 10
-        
         player_1_x_s[i].y = 10
         player_2_x_s[i].y = 10
         
@@ -67,25 +53,84 @@ function score_keeper:init(t)
     vs.x = screen_w/2 - vs.w/2
     vs.y = 15
     
-    player_1_txt = Text{
-        text  = "Player_1",
-        font  = t.font.." 35px",
-        color = "b1bcbe",
-        x     = player_1_box.x - player_1_box.w/2,
-        y     = 10,
+    player_1_txt  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "b1bcbe",
+        y         = 10,
+        on_text_changed = function(self)
+            self.w = -1
+            
+            if  self.w > max_name_size then
+                self.w = max_name_size
+                self.ellipsize = "END"
+            else
+                self.ellipsize = "NONE"
+            end
+            
+            self.x = vs.x - self.w - 10
+            
+            for i = 1,t.max_x_s do
+                player_1_x_s[i].x = self.x  - 47*(i-1) - 10 - t.img_srcs.x_off.w - 8 -- minus '8' for the stupid shadow
+            end
+            
+            player_1_s.text = self.text
+        end,
     }
-    player_1_txt.anchor_point = {player_1_txt.w/2,0}
     
-    player_2_txt = Text{
-        text  = "Player_2",
-        font  = t.font.." 35px",
-        color = "b1bcbe",
-        x     = player_2_box.x + player_2_box.w/2,
-        y     = 10,
+    player_2_txt  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "b1bcbe",
+        y         = 10,
+        on_text_changed = function(self)
+            self.w = -1
+            
+            if  self.w > max_name_size then
+                self.w = max_name_size
+                self.ellipsize = "END"
+            else
+                self.ellipsize = "NONE"
+            end
+            
+            self.x = vs.x + vs.w + 10
+            
+            for i = 1,t.max_x_s do
+                player_2_x_s[i].x = self.x + self.w + 47*(i-1) + 10
+            end
+            
+            player_2_s.text = self.text
+        end,
     }
-    player_2_txt.anchor_point = {player_2_txt.w/2,0}
     
-    score_keeper:add(player_1_box,player_2_box,player_1_txt,player_2_txt,vs)
+    player_1_s  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "000000",
+        y         = player_1_txt.y+2,
+        on_text_changed = function(self)
+            
+            self.w = player_1_txt.w
+            self.x = player_1_txt.x+2
+            self.ellipsize = player_1_txt.ellipsize
+            
+        end,
+    }
+    
+    player_2_s  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "000000",
+        y         = player_2_txt.y+2,
+        on_text_changed = function(self)
+            
+            self.w = player_2_txt.w
+            self.x = player_2_txt.x+2
+            self.ellipsize = player_2_txt.ellipsize
+            
+        end,
+    }
+    
+    player_1_txt.text = "Player_1"
+    player_2_txt.text = "Player_2"
+    
+    score_keeper:add(player_1_s,player_2_s,player_1_txt,player_2_txt,vs)
     
 end
 
@@ -118,11 +163,8 @@ function score_keeper:update(t)
         
     end
     
-    player_1_txt.text = g_username      or ""
+    player_1_txt.text = g_user.name      or ""
     player_2_txt.text = t.opponent_name or ""
-    
-    player_1_txt.anchor_point = {player_1_txt.w/2,0}
-    player_2_txt.anchor_point = {player_2_txt.w/2,0}
     
 end
 

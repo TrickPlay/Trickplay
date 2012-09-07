@@ -29,10 +29,8 @@ end
 
 
 function test_global_profile_basic ()
-	assert_equal( profile.id, 1, "profile.id not returned")
-	assert_equal( profile.name, "TrickPlay User", "profile.name not returned")
-  --  assert_equal( profile_id_changed , true, "profile.on_changed failed" )
-  --  assert_equal( profile_id_changing , true, "profile.on_changing failed" )
+	assert_equal( profile.id, 1, "profile.id returned: "..profile.id.." Expected: 1")
+	assert_equal( profile.name, "TrickPlay User", "profile.name returned: "..profile.name.." Expected Trickplay User")
 end
 
 

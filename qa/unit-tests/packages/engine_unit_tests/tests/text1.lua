@@ -14,7 +14,7 @@ Description:   Verify use_markup returns correct value
 local myText_markup = Text ()
 myText_markup.font = "DejaVu Sans 38px"
 myText_markup.color = "FFFFFFAA"
-textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
+textString = "<span foreground=\"blue\" size=\"x-large\">Trickplay</span> rizzocks the <i>hizzouse</i>!" 
 myText_markup.markup = string.format( "%s" , textString ) 
 test_group:add(myText_markup)
 
@@ -28,8 +28,8 @@ test_group:add(myText_no_markup)
 
 
 function test_Text_use_markup ()
-    assert_equal( myText_markup.use_markup , true, "use market ~= true" )
-    assert_false( myText_no_markup.use_markup , "use market ~= false" )
+    assert_equal( myText_markup.use_markup , true, "myText_markup.use_markup returned: "..tostring(myText_markup.use_markup).." Expected: true")
+    assert_false( myText_no_markup.use_markup , "myText_no_markup.use_markup returned: "..tostring(myText_no_markup.use_markup).." Expected: false")
 end
 
 

@@ -21,7 +21,7 @@
  *
  * Loads a TableViewController whose view lists possible TVs to connect to.
  * These TVs advertise their connection information via an mDNS service broadcast.
- * From here on the words TV and service will be used synonymously.
+ * From here onwards, 'TV' and 'service' will be used synonymously.
  *
  * Refer to RootViewController.xib for the Controller's View.
  */

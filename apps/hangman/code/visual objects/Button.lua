@@ -134,9 +134,10 @@ local function make_button(t)
     
     button:add(
         unfocused,
-        focused,
-        type(passive) == "userdata" and passive or nil
+        focused
     )
+    
+    if type(passive) == "userdata" then button:add(passive) end
     
     if t.text then
         
@@ -166,6 +167,8 @@ local function make_button(t)
             if self.is_visible == false then return false end
             
             animation.state = "FOCUSED"
+            
+            return true
             
         elseif new_state == "UNFOCUSED" then
             

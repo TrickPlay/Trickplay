@@ -63,6 +63,19 @@ function screen:on_motion(x,y)
     
 end
 
+function screen:on_scroll(_,_,dir)
+	--print(dir)
+	if dir == 0 then
+		
+		App_State.rolodex.scroll_up()
+		
+	elseif dir == 1 then
+		
+		App_State.rolodex.scroll_dn()
+		
+	end
+end
+
 function screen:on_button_down(x,y)
     
 	if using_keys then

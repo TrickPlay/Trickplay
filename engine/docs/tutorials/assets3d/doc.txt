@@ -1,0 +1,37 @@
+
+Title: Using 3D Assets in a TrickPlay Application
+
+The 3D Assets sample application demonstrates how 3D assets, such as 3D models, animations, and still images, can be used to provide a visually unique effect in a standard TrickPlay application.
+
+The complete sample application, including source code and 3D assets, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
+(see Assets3dDemo.png)
+
+Group: Preparing the 3D Assets
+
+The 3D assets are generated in an external program, such as Blender, Maya, 3DS Max or similar 3D application. The sample application uses an empty 3D stage, a 3D coin and an animation of the coin flipping through the air. Each of these items is created in the external 3D application. The 3D stage is saved as a still image large enough to fill the entire TV screen. Although generated from a 3D model, the resulting still image (shown below) is simply a standard PNG image that will be used as the screen's background.
+
+(see Stage.png)
+
+The 3D coin is surfaced with front and back images and an animation is generated of the coin flipping through the air. The animation is saved as a series of individual still-frame images. The coin-flip, from start to finish, takes one second and is generated at 24 frames per second (fps), so 24 individual still-frame images are created (24fps * 1 second = 24 frames). Some of the frames are shown below.
+
+(see CoinAnimationFrames.png)
+
+Additional processing of each still-frame is performed by an image editor, such as Gimp or Photoshop. Using the image editor, the area surrounding the coin is removed so that only the coin remains. The remaining area around the coin is made transparent. For memory efficiency, the image can be cropped to the minimum size necessary to hold the coin. Some of the edited still-frames are shown below.
+
+(see CoinFramesEdited.png)
+
+At this point, the 3D assets are ready to be used by the TrickPlay application. The stage image is loaded as a regular Image object and displayed onscreen. Each of the 24 coin images is loaded as an Image object, but only the first image, Frame/Cel #1, is shown onscreen at its initial location.
+
+The correct screen location for each frame of the flipping coin animation must be determined manually. The sample application includes a utility function called showTwoCels() that displays any two cel frames onscreen simultaneously: a "base" cel and a "next" cel. By viewing the two cels together, the "next" cel can be manually positioned in relation to the "base" cel. To get an idea of where to place the "next" cel, it might be useful to compare the spacing of the coins in the two original, full-size still-frames. The positioning process can be repeated for each cel in the animation, with the "next" cel becoming the "base" cel and the subsequent animation cel becoming the new "next" cel. Each frame image can be positioned using this technique. The image below shows two frame cels being displayed by the showTwoCels() function.
+
+(see ShowTwoCels.png)
+
+The location of the animation's first cel is considered its "resting position." The X and Y coordinates of the resting position are saved in two global variables: gCoinRestingX and gCoinRestingY. The positions of the remaining cels are saved as offsets from this resting position. By using offsets to position the cels, the entire animation can be moved by simply changing the resting position. This enables the coin to flip to the right or left without having to recalculate each cel's position.
+
+Group: Playing the Animation
+
+The sample application recognizes the Right-Arrow, Left-Arrow and Up-Arrow keystrokes to initiate a version of the coin-flip animation. Each version uses the same frame images, but moves the images to the right, left or straight up.
+
+The original animation was generated at 24 frames per second. To replay the animation in the TrickPlay application, each frame cel must be drawn onscreen at the same rate or close to it. To accomplish this, a Timer object is created and set to invoke an event handler 24 times per second. In the sample application, the event handler is implemented in the nextCoinFrame() function. The event handler hides the previous frame and displays the next frame, achieving the illusion of movement. It also checks to see if the coin has moved off-screen to the left or right; if so, it repositions the coin in the center of the screen. Finally, at the completion of the animation, the handler saves the coin's new resting position so that the next time the animation plays, the frames will be offset from this updated position.
+

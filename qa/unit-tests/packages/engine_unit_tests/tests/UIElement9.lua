@@ -1,8 +1,8 @@
 --[[
 Filename: UIElement9.lua
 Author: Peter von dem Hagen
-Date: January 19, 2011
-Description: Complete an animation using complete_animation.
+Date: January 26, 2012
+Description: Complete an animation using stop_animation.
 --]]
 
 -- Test Set up --
@@ -22,9 +22,9 @@ image1:animate{duration=6000, loop=true, x=500, y=500,}
 -- Tests --
 
 -- Verify that animation was stopped.
-function test_UIElement_image_complete_animation ()
-	image1:complete_animation()
-	assert_false(image1.is_animating, "image1.is_animating ~= false")
+function test_UIElement_image_stop_animation ()
+	image1:stop_animation()
+	assert_false(image1.is_animating, "image1.is_animating returned: ".. tostring(image1.is_animating).. " Expected: false")
 end
 
 

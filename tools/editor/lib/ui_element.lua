@@ -202,7 +202,7 @@ Arguments:
 
 function ui_element.change_all_skin(skin_name)
     
-	for i = 1, table.getn(g.children), 1 do
+	for i = 1, #g.children, 1 do
 		if g.children[i].skin then 
 	     	g.children[i].skin = skin_name
 		end 
@@ -222,7 +222,7 @@ Arguments:
 
 function ui_element.change_button_skin(skin_name)
     
-	for i = 1, table.getn(g.children), 1 do
+	for i = 1, #g.children, 1 do
 		if g.children[i].extra.type == "Button" then 
 	     	g.children[i].skin = skin_name
 		end 
@@ -261,7 +261,7 @@ local function orderedNext(t, state)
     end
     -- fetch the next value
     key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
+    for i = 1,#t.__orderedIndex do
         if t.__orderedIndex[i] == state then
             key = t.__orderedIndex[i+1]
         end
@@ -1407,7 +1407,7 @@ function ui_element.timeline(t)
 			for l,k in pairs (attr_map[m.type]()) do 
 				 if type(m[k]) == "table" then 
 					local temptable = {}
-					for o = 1, table.getn(m[k]),1 do 
+					for o = 1, #m[k],1 do
 				      		local interval = Interval(m.extra.timeline[current_point][k][o], m.extra.timeline[next_point][k][o])
 						temptable[o] = interval:get_value(p)
 				        end 
@@ -1428,7 +1428,7 @@ function ui_element.timeline(t)
 			for l,k in pairs (attr_map[m.type]()) do 
 				if type(m[k]) == "table" then 
 				    local temptable = {}
-				    for o = 1, table.getn(m[k]),1 do 
+				    for o = 1, #m[k],1 do
 					temptable[o] = m.extra.timeline[next_point][k][o]
 				    end
 				    m[k] = temptable
@@ -3606,7 +3606,7 @@ function ui_element.checkBoxGroup(t)
     end
 
     function cb_group.extra.clear_focus()
-		for i=1, table.getn(boxes.children)/2 do 
+		for i=1, #boxes.children/2 do
 	    	boxes:find_child("box"..i).opacity = 255 
 	    	boxes:find_child("focus"..i).opacity = 0 
 		end 
@@ -3708,7 +3708,7 @@ function ui_element.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == next_key then 
-						if box_num < table.getn(boxes.children)/2 then 
+						if box_num < #boxes.children/2 then
 							next_num = box_num + 1
 	    					boxes:find_child("box"..box_num).opacity = 255 
 	    					boxes:find_child("focus"..box_num).opacity = 0 
@@ -4074,13 +4074,13 @@ local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top
 
     local stroke_width = 2
 	local RAD = 6
-	local top    = math.ceil(stroke_width/2)
-	local left   = math.ceil(stroke_width/2)
+	local top    = math.ceil(stroke_width)
+	local left   = math.ceil(stroke_width)
 
-	local bottom = c_shell_h - math.ceil(stroke_width/2)
-	local right  = c_shell_w - math.ceil(stroke_width/2)
+	local bottom = c_shell_h - math.ceil(stroke_width)
+	local right  = c_shell_w - math.ceil(stroke_width)
         
-	local c_fill  = Canvas{ size = {1,ui_height-stroke_width} }  
+	local c_fill  = Canvas{ size = {1,ui_height} }  
         
 	c_fill:begin_painting()
         
@@ -4104,7 +4104,7 @@ local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top
 	end
 
 	c_fill.x=stroke_width
-    c_fill.y=stroke_width/2
+    --c_fill.y=stroke_width/2
     c_fill.scale = {(ui_width-4)*(progress),1}
    
 	return c_fill

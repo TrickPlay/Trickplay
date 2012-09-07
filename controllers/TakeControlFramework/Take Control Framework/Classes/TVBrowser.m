@@ -13,7 +13,8 @@
 #import "Protocols.h"
 
 @interface TVBrowserContext : TVBrowser <NetServiceManagerDelegate, TVConnectionDidConnectDelegate> {
-    @protected
+    
+@protected
     // The netServiceManager informs the TVBrowser of mDNS broadcasts
     NetServiceManager *netServiceManager;
     
@@ -21,6 +22,7 @@
     NSMutableArray *connectedServices;
     NSMutableArray *viewControllers;
     
+    // publicly exposed vars
     id <TVBrowserDelegate> delegate;
 }
 
@@ -35,8 +37,6 @@
 
 - (TVConnection *)getConnectionForService:(NSNetService *)service;
 - (void)invalidateTVConnection:(TVConnection *)tvConnection;
-
-- (void)connectToService:(NSNetService *)service;
 
 @end
 
@@ -110,6 +110,7 @@
 
 - (void)invalidateViewController:(TVBrowserViewController *)viewController {
     NSUInteger i;
+    // Check that viewController is in the viewControllers array
     for (i = 0; i < viewControllers.count; i++) {
         TVBrowserViewController *_viewController = [[viewControllers objectAtIndex:i] pointerValue];
         if (viewController == _viewController) {
@@ -117,6 +118,7 @@
         }
     }
     
+    // Remove the weak reference to the invalidating TVBrowserViewController
     if (viewControllers.count > i && viewController == [[viewControllers objectAtIndex:i] pointerValue]) {
         [viewControllers removeObjectAtIndex:i];
     } else {
@@ -346,7 +348,7 @@
     [netServiceManager stop];
     [netServiceManager release];
     netServiceManager = nil;
-        
+    
     [super dealloc];
 }
 
@@ -502,7 +504,7 @@
     
     [super dealloc];
 }
- */
+*/
 
 @end
 

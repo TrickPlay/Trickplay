@@ -134,7 +134,7 @@ namespace JSON
                 //
                 // If in Lua it is {} , should it be {} or [] in JSON?
 
-                if ( lua_objlen( L, index ) > 0 )
+                if ( lua_rawlen( L, index ) > 0 )
                 {
                     Array & array( result.as< Array >() );
 
@@ -759,6 +759,16 @@ namespace JSON
         return map.find( key ) != map.end();
     }
 
+    Object::Map::iterator Object::find( const String & key )
+    {
+    	return map.find( key );
+    }
+
+    Object::Map::const_iterator Object::find( const String & key ) const
+    {
+    	return map.find( key );
+    }
+
     Object::Map::iterator Object::begin()
     {
         return map.begin();
@@ -813,6 +823,10 @@ namespace JSON
     	return map.size();
     }
 
+    void Object::clear()
+    {
+    	map.clear();
+    }
 
     //=============================================================================
 
@@ -905,6 +919,16 @@ namespace JSON
 
         return os.str();
     }
+
+    template <> Object & Array::append< Object > ()
+	{
+    	return append().as<Object>();
+	}
+
+    template <> Array & Array::append< Array >( )
+	{
+    	return append().as<Array>();
+	}
 
     //=============================================================================
 

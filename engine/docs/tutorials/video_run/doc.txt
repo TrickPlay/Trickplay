@@ -1,0 +1,45 @@
+
+Title: Run a Video in a TrickPlay Application
+
+The Run Video sample application demonstrates how to display a video in a TrickPlay application.
+
+The complete application, including source code, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
+(see VideoRunDemo.png)
+
+Group: General Program Structure
+
+The output screen is constructed in the displayMainScreen() function. Header and footer areas are defined, and the remaining central region is available for displaying video. When not running a video, this central region is filled with static images of the TrickPlay logo and a pleasant textured background, as shown in the screenshot at the top of this page.
+
+Pressing any key invokes the playVideo() function, which begins the process of running the video. Video play is accomplished by calling functions provided by the TrickPlay SDK library's <mediaplayer> global variable. The standard procedure is: (1) load the video, (2) run the video, and (3) perform any necessary clean-up when the video is finished. The mediaplayer variable provides event handlers to notify a program when a video is loaded (<mediaplayer.on_loaded>) and when it has finished running (<mediaplayer.on_end_of_stream>). The playVideo() function hooks into those two event handlers and starts to load the video by calling the <mediaplayer.load> function. When the video is loaded, the videoLoaded() function (which is hooked to the mediaplayer.on_loaded() event handler) is invoked.
+
+Note: The actual amount of video loaded when the mediaplayer.on_loaded() handler is invoked may vary between platforms. It is possible that one platform loads the entire video into memory, while another only verifies that the video exists and doesn't load any of it before invoking the handler. Other platforms may do anything between these two extremes, such as load a portion of the video. The loading behavior is platform-specific, and a TrickPlay application cannot alter this behavior.
+
+The majority of the sample application's logic is performed in the videoLoaded() function. Its main task is to create a display area for the video. This is made a little tricky because video output by the mediaplayer is always positioned *behind* the TrickPlay SDK's screen. This means that all objects on the screen will cover and hide a video played behind them. There is no technique available to move the video to the front of the display screen. Instead, objects on the screen must be hidden so the video behind them can be seen.
+
+In the sample application, the screen area between the header and footer sections is available for video display. For the video to be seen, however, the screen objects in this area (i.e., the background and logo images) must be hidden, so as to expose the area behind them. Because it is doubtful that the video will be the exact size as the entire exposed area, a new background is generated to frame the space around the video. To prevent this new background from covering and hiding the video, a hole the size of the video is removed from the new background. This new background and hole are created programmatically using a <Canvas> object and the Canvas supporting functions. Alternatively, if you know the video's resolution ahead of time, you can generate the background frame and hole using an image-editing program and then load the file at runtime into an <Image> object. The advantage of the general-purpose Canvas method used in the sample application is that it's capable of handling multiple videos of varying sizes.
+
+Group: Virtual Screen vs. Actual Display
+
+Another situation that must be addressed when displaying video is the difference between the "virtual screen" and the "actual display." The TrickPlay screen variable represents a virtual screen that always presents a fixed size of 1920x1080 pixels. When positioning objects on the screen (that is, when adding objects to the screen variable), the coordinate positions used are always in relation to this 1920x1080 fixed size and are called "screen coordinates."
+
+The actual display, however, may be smaller or larger than this virtual screen. The shape of the actual display may also differ from the rectangular 1920x1080 proportions of the virtual screen. The actual display's width and height can be retrieved from the <screen.display_size> property. Coordinate positions on the actual display are always in relation to these actual width and height values and are called "display coordinates." When positioning a video on the display, the mediaplayer variable accepts display coordinates.
+
+If the actual display size differs from the virtual screen size, it is said to be "scaled." The scale factor, or amount that the display is scaled, can be retrieved from the <UIElement.scale> property. Because the display's shape may differ from the rectangular screen, the scaling factors for the X and Y axes may also differ. For example, an actual display that is square will have to scale the rectangular screen dimensions more along its width than its height.
+
+Any screen coordinate can be converted to its equivalent display coordinate by multiplying the screen coordinate by the appropriate scale factor (width/X or height/Y). This is demonstrated in the code statements below.
+
+	(code)
+	-- Convert X,Y screen coordinates to display coordinates
+	displayX = screenX * screen.scale[ 1 ]
+	displayY = screenY * screen.scale[ 2 ]
+	(end)
+
+Similarly, any display coordinate can be converted to the equivalent screen coordinate by dividing the display coordinate by the scale factor.
+
+	(code)
+	-- Convert X,Y display coordinates to screen coordinates
+	screenX = displayX / screen.scale[ 1 ]
+	screenY = displayY / screen.scale[ 2 ]
+	(end)
+

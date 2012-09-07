@@ -1,19 +1,120 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 from TrickplayElement import TrickplayElement
-from connection import getTrickplayData
-
-
+from connection import *
 
 class TrickplayElementModel(QStandardItemModel):
     
+    def __init__(self, inspector, parent=None):
+        QWidget.__init__(self, parent)
+        self.inspector = inspector
+        self.manager = QNetworkAccessManager()
+        self.reply = None
+
+    def inspector_reply_finished(self):
+        if self.reply.error()== QNetworkReply.NoError:
+            pdata = json.loads(str(self.reply.readAll()))
+            if pdata is not None:
+                root = self.invisibleRootItem()
+                child = None
+                for c in pdata["children"]:
+                    if c["name"] == "screen":
+                        child = c
+                        break
+                
+                if child is None:
+                    print( "[VDBG] Could not find screen element." )
+                else:
+                    self.tpData = pdata
+                    self.insertElement(root, child, pdata, True)
+                self.inspector.ui.refresh.setText("Refresh")
+                return
+
+        elif self.reply.error()== QNetworkReply.ConnectionRefusedError:	
+            print "[VDBG] ConnectionRefusedError"	
+        elif self.reply.error() == QNetworkReply.RemoteHostClosedError :	
+            print "[VDBG] RemoteHostClosedError 	"
+        elif self.reply.error() == QNetworkReply.HostNotFoundError :	
+            print "[VDBG] HostNotFoundError "	
+        elif self.reply.error() == QNetworkReply.TimeoutError :	
+            print "[VDBG] TimeoutError 	"
+        elif self.reply.error() == QNetworkReply.SslHandshakeFailedError :	
+            print "[VDBG] SslHandshakeFailedError 	"
+        elif self.reply.error() == QNetworkReply.TemporaryNetworkFailureError: 	
+            print "[VDBG] TemporaryNetworkFailureError "	
+        elif self.reply.error() == QNetworkReply.ProxyConnectionRefusedError :	
+            print "[VDBG] ProxyConnectionRefusedError "	
+        elif self.reply.error() == QNetworkReply.ProxyConnectionClosedError: 
+            print "[VDBG] ProxyConnectionClosedError "
+        elif self.reply.error() == QNetworkReply.ProxyNotFoundError :	
+            print "[VDBG] ProxyNotFoundError 	"
+        elif self.reply.error() == QNetworkReply.ProxyTimeoutError :	
+            print "[VDBG] ProxyTimeoutError 	"
+        elif self.reply.error() == QNetworkReply.ProxyAuthenticationRequiredError :	
+            print "[VDBG] ProxyAuthenticationRequiredError 	"
+        elif self.reply.error() == QNetworkReply.ContentAccessDenied :	
+            print "[VDBG] ContentAccessDenied 	"
+        elif self.reply.error() == QNetworkReply.ContentOperationNotPermittedError :	
+            print "[VDBG] ContentOperationNotPermittedError 	"
+        elif self.reply.error() == QNetworkReply.ContentNotFoundError :	
+            print "[VDBG] ContentNotFoundError 	"
+        elif self.reply.error() == QNetworkReply.AuthenticationRequiredError :	
+            print "[VDBG] AuthenticationRequiredError "	
+        elif self.reply.error() == QNetworkReply.ContentReSendError :	
+            print "[VDBG] ContentReSendError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolUnknownError: 	
+            print "[VDBG] ProtocolUnknownError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolInvalidOperationError: 
+            print "[VDBG] ProtocolInvalidOperationError "
+        elif self.reply.error() == QNetworkReply.UnknownNetworkError :	
+            print "[VDBG] UnknownNetworkError 	"
+        elif self.reply.error() == QNetworkReply.UnknownProxyError :	
+            print "[VDBG] UnknownProxyError 	"
+        elif self.reply.error() == QNetworkReply.UnknownContentError: 	
+            print "[VDBG] UnknownContentError 	"
+        elif self.reply.error() == QNetworkReply.ProtocolFailure :
+            print "[VDBG] ProtocolFailure"
+        else : 
+            print "[VDBG] UnknownCommunicationError"
+
+        self.inspector.ui.refresh.setText("Refresh")
+        self.inspector.ui.refresh.setEnabled(False)
+
+    def getInspectorData(self):
+        """
+        Get Trickplay UI tree data for the inspector
+        """
+
+        self.inspector.ui.refresh.setText("Retrieving...")
+
+        if CON.address is None or CON.port is None:
+            raise "NO HTTP PORT"
+		
+        self.manager = QNetworkAccessManager()
+
+        url = QUrl()
+        url.setScheme( "http" )
+        url.setHost( CON.address )
+        url.setPort( int(CON.port) )
+        url.setPath( "/debug/ui" )
+		    
+        self.request = QNetworkRequest( url )
+        self.reply = self.manager.get( self.request )
+
+        QObject.connect( self.reply , SIGNAL( 'finished()' ) , self.inspector_reply_finished )
+		
+        #return None
+
     def fill(self):
         """
         Get UI data from Trickplay and fill the tree with it.
         If no data is available, do nothing.
         """
         self.tpData = None
+        self.getInspectorData()
+        """
         data = getTrickplayData()
         if data:
         
@@ -33,6 +134,7 @@ class TrickplayElementModel(QStandardItemModel):
                 
         else:
             print("Could not retreive data.")
+        """
             
     def insertElement(self, parent, data, parentData, screen):
         """
@@ -62,6 +164,7 @@ class TrickplayElementModel(QStandardItemModel):
             value = str(gid)
         
         node = TrickplayElement(title)
+        self.node = node
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)

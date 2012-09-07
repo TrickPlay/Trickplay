@@ -290,3 +290,9 @@ void Console::disable()
 
     enabled = false;
 }
+
+guint16 Console::get_port() const
+{
+	return server.get() ? server->get_port() : 0;
+}
+

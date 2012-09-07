@@ -26,6 +26,13 @@ if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 
 #------------------------------------------------------------------------------
+# enable TP_WITH_GAMESERVICE by default
+
+if (NOT TP_WITH_GAMESERVICE)
+	set( TP_WITH_GAMESERVICE 1 )
+endif(NOT TP_WITH_GAMESERVICE)
+
+#------------------------------------------------------------------------------
 
 include(util.cmake)
 
@@ -48,6 +55,7 @@ if(NOT GIT_CURRENT_TAG)
 endif (NOT GIT_CURRENT_TAG)
 
 string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
+string(REPLACE "#"  "~"  GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
 
 set(GIT_VERSION "${GIT_CURRENT_TAG}")
 
@@ -86,4 +94,5 @@ add_subdirectory( engine/docs EXCLUDE_FROM_ALL )
 add_subdirectory ( apps EXCLUDE_FROM_ALL )
 
 add_subdirectory( plugins )
+
 
