@@ -2271,8 +2271,11 @@ function editor.delete()
 					current_fn_without_screen = string.sub(current_fn, 9, -1)
 	   			end 
 
-	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+	   			local fileUpper, fileLower
+                if current_fn_without_screen then 
+	   			    fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		        fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+                end 
 
 			    local main = readfile("main.lua")
 			    if main then 
