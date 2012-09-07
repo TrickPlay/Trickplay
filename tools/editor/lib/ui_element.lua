@@ -151,7 +151,7 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
      	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
 			g = next_grp
-			screen:add(g)
+			--screen:add(g)
 			screen:grab_key_focus()
 			prev_grp.opacity = 255
      	end 
