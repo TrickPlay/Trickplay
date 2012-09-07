@@ -1,24 +1,44 @@
 --[[
-Filename: UIElement4.lua
+Filename: UIElement12.lua
 Author: Peter von dem Hagen
-Date: January 13, 2011
-Description: Animate an image and verify that is_animating returns true.
+Date: April 19, 2011
+Description:  This test verifies that UIElement objects call the on_key_focus events accordingly
 --]]
 
-
-
 -- Test Set up --
-local image1 = Image()
+local on_key_focus_in_called = false
+local on_key_focus_out_called = false
 
-image1:set ( x = 500, y = 500, h = 150, w = 150 )
+logo_image = Image()
+globe_image = Image()
 
-test_group:add(image1)
+logo_image.src = "packages/engine_unit_tests/tests/assets/logo.png"
+logo_image.position = { 150, 120 }
+test_group:add(logo_image)
+
+globe_image.src = "packages/engine_unit_tests/tests/assets/globe.png"
+globe_image.position = { 200, 200 }
+test_group:add(globe_image)
+
+function logo_image.on_key_focus_in (self)
+	on_key_focus_in_called = true
+end
+
+function logo_image.on_key_focus_out (self)
+	on_key_focus_out_called = true
+end
+
+--[[
+Note: The following code is in the main.lua as the focus was switching before the events were set up.
+	logo_image:grab_key_focus()
+	globe_image:grab_key_focus()
+--]]
 
 -- Tests --
 
--- Default properties of loading a simple image.
-function test_UIElementImageProperties ()
-    assert_equal(image1.is_animating, true, "new image1.is_animating ~= false")
+function test_UIElement_on_key_focus_events ()
+    assert_equal( on_key_focus_in_called , true , "on_key_focus_in not called" )
+    assert_equal( on_key_focus_out_called , true , "on_key_focus_out not called" )
 end
 
 

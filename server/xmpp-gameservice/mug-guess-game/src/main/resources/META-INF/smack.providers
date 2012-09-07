@@ -1,0 +1,12 @@
+<?xml version="1.0"?> 
+<!-- Providers file for default Smack extensions -->
+<smackProviders> 
+    
+    <!-- MUG newGame -->
+    <extensionProvider>
+        <elementName>newGameResponse</elementName>
+        <namespace>http://jabber.org/protocol/mug#owner</namespace>
+        <className>com.trickplay.gameservice.xmpp.mug.NewGameResponse$Provider</className>
+    </extensionProvider>
+    
+</smackProviders>

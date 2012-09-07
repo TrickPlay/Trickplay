@@ -5,6 +5,11 @@
 #include "lb.h"
 
 //.........................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.........................................................................
 
 void lb_get_extras_table( lua_State * L , bool create );
 
@@ -273,7 +278,7 @@ void lb_strong_deref( lua_State * L , int ref )
 int lb_index(lua_State*L)
 {
     LSG;
-    
+
     if(!lua_getmetatable(L,1))      // get mt for user data
         return LSG_END(0);
     lua_pushvalue(L,2);             // push the key
@@ -328,7 +333,7 @@ int lb_index(lua_State*L)
 int lb_newindex(lua_State*L)
 {
     LSG;
-    
+
     if(!lua_getmetatable(L,1))      // get the mt
         return LSG_END(0);
     lua_pushliteral(L,"__setters__");// push "_setters_"
@@ -369,15 +374,15 @@ int lb_copy_table(lua_State*L,int target,int source)
 {
     if (lua_isnil(L,source))
         return 0;
-    
+
     LSG;
-    
+
     int result = 0;
     lua_pushnil(L);
     while(lua_next(L,source))           // pops old key, pushes new key and value
     {
         // If the key is not a string or it is a string that does not start
-        // with two underscores, copy it        
+        // with two underscores, copy it
         bool copy_it = true;
         if ( lua_type( L , -2 ) == LUA_TSTRING )
         {
@@ -409,9 +414,9 @@ int lb_copy_table(lua_State*L,int target,int source)
             lua_pop(L,1);           // pop the value
         }
     }
-    
+
     LSG_END(0);
-    
+
     return result;
 }
 
@@ -424,9 +429,9 @@ int lb_copy_table(lua_State*L,int target,int source)
 void lb_inherit(lua_State*L,const char*metatable)
 {
     LSG;
-    
+
     int target=lua_gettop(L);
-    
+
     if (!metatable)
     {
         --target;
@@ -441,10 +446,10 @@ void lb_inherit(lua_State*L,const char*metatable)
     int source=lua_gettop(L);
 
     lb_copy_table(L,target,source);
-    
+
     static const char * subs[3] = { "__getters__" , "__setters__" , "__types__" };
     int i=0;
-    
+
     for(i=0;i<3;++i)
     {
         lua_pushstring(L,subs[i]);
@@ -466,7 +471,7 @@ void lb_inherit(lua_State*L,const char*metatable)
         }
         lua_pop(L,2);                   // pop the two sub tables
     }
-    
+
     if (metatable)
     {
         lua_pop(L,1);                       // pop the source metatable
@@ -482,12 +487,15 @@ void lb_inherit(lua_State*L,const char*metatable)
 void lb_chain(lua_State*L,int index,const char * metatable )
 {
     g_assert( lua_isuserdata( L , index ) );
-    g_assert( metatable );
 
     LSG;
     lua_newtable( L );
     int t = lua_gettop( L );
-    lb_inherit( L , metatable );
+
+    if ( metatable )
+    {
+    	lb_inherit( L , metatable );
+    }
 
     lua_getmetatable( L , index );
     lb_inherit( L , 0 );
@@ -518,20 +526,20 @@ void lb_chain(lua_State*L,int index,const char * metatable )
 void lb_set_props_from_table(lua_State*L)
 {
     LSG;
-    
+
     luaL_checktype(L,-1,LUA_TTABLE);
     int source_table=lua_gettop(L);
     int udata=source_table-1;
-    
+
     // Get the table of setters
     if (!luaL_getmetafield(L,udata,"__setters__"))
     {
         LSG_END(0);
         return;
     }
-    
+
     int setters=lua_gettop(L);
-    
+
     lua_pushnil(L);
     while(lua_next(L,source_table))     // pops old key, pushes next key and value
     {
@@ -553,7 +561,7 @@ void lb_set_props_from_table(lua_State*L)
         lua_pop(L,1);                   // pop the value pushed by lua_next
     }
     lua_pop(L,1);                       // pop the setters table
-    
+
     LSG_END(0);
 }
 
@@ -569,41 +577,41 @@ void lb_set_props_from_table(lua_State*L)
 int lb_wrap(lua_State*L,void*self,const char*metatable)
 {
     LSG;
-    
+
     if (!self)
     {
         lua_pushnil(L);
         LSG_END(1);
         return 0;
     }
-    
+
     luaL_getmetatable(L,metatable);
     assert(!lua_isnil(L,-1));
-    
+
     lua_pushstring(L,"__instances__");
     lua_rawget(L,-2);
-    
+
     if (!lua_isnil(L,-1))
     {
         lua_pushlightuserdata(L,self);
         lua_rawget(L,-2);
-        
+
         if(!lua_isnil(L,-1))
         {
             lua_replace(L,-3);
             lua_pop(L,1);
-            
+
             LSG_END(1);
             return 0;
         }
-        
+
         lua_pop(L,1);
     }
-    
+
     lua_pop(L,1);
-    
+
     void**new_self=(void**)lua_newuserdata(L,sizeof(void**));
-    
+
     *new_self=self;
     // push the metatable again
     lua_pushvalue(L,-2);
@@ -611,11 +619,11 @@ int lb_wrap(lua_State*L,void*self,const char*metatable)
     lua_setmetatable(L,-2);
     // Get rid of the original metatable - user data is left on top
     lua_remove(L,-2);
-    
+
     lb_store_weak_ref(L,lua_gettop(L),self);
-    
+
     LSG_END(1);
-    
+
     return 1;
 }
 
@@ -625,7 +633,7 @@ const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len)
 {
     if (lua_isstring(L,narg))
         return lua_tolstring(L,narg,len);
-          
+
     if (len)
       *len = (def ? strlen(def) : 0);
     return def;
@@ -842,7 +850,7 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 {
     LSG;
 
-    lua_pushvalue( L , LUA_GLOBALSINDEX );
+    lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
 
     // There is no metatable on the globals table, so we create it and plug in
     // our own index function.
@@ -1032,7 +1040,7 @@ std::string lb_value_desc( lua_State * L , int index )
             break;
 
         case LUA_TUSERDATA:
-        	if ( lua_objlen( L , index ) == sizeof( UserData ) )
+        	if ( lua_rawlen( L , index ) == sizeof( UserData ) )
         	{
         		result = result + " (" + UserData::get(L,index)->get_type() + ")";
         	}
@@ -1160,7 +1168,8 @@ bool lb_check_udata_type( lua_State * L , int index , const char * type , bool f
     {
         if ( lua_getmetatable( L , index ) )
         {
-            lua_getfield( L , -1 , "__types__" );
+        	lua_pushliteral( L , "__types__" );
+            lua_rawget( L , -2 );
 
             if ( lua_type( L , -1 ) == LUA_TTABLE )
             {
@@ -1181,4 +1190,32 @@ bool lb_check_udata_type( lua_State * L , int index , const char * type , bool f
     LSG_CHECK(0);
 
     return result;
+}
+
+
+void * lb_get_udata_check( lua_State * L , int index , const char * type )
+{
+    assert( L );
+    assert( type );
+
+    if ( index )
+    {
+        index = abs_index( L , index );
+
+        if ( lb_check_udata_type( L , index , type , false ) )
+        {
+            return UserData::get_client_check( L , index );
+        }
+    }
+    return 0;
+}
+
+
+void lb_setglobal( lua_State * L , const char * name )
+{
+	lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+	lua_pushstring( L , name );
+	lua_pushvalue( L , -3 );
+	lua_rawset( L , -3 );
+	lua_pop( L , 2 );
 }

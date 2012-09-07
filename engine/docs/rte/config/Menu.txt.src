@@ -63,27 +63,40 @@ Group: SDK Tutorial {
 	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
-Group: Programmer's Guide  {
+Group: Sample Applications {
+	File: Using Animator (no auto-title, docs/tutorials/animator/doc.txt)
+	File: Using AnimationState (no auto-title, docs/tutorials/animationState/doc.txt)
+	File: Program Localization (no auto-title, docs/tutorials/localization/doc.txt)
+	File: Using Canvas (no auto-title, docs/tutorials/canvasDemo/doc.txt)
+	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
+	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
+	File: Using 3D Assets (no auto-title, docs/tutorials/assets3d/doc.txt)
+	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
+}
+
+Group: Programmer's Guide {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
 	File: Specifying Colors (no auto-title, docs/rte/progguide/color_specs.txt)
 	File: TrickPlay SDK Color Names (no auto-title, docs/rte/progguide/color_names.txt)
+	File: Extending TrickPlay Objects (no auto-title, docs/rte/progguide/extra.txt)
 	File: Understanding the Z-Axis (no auto-title, docs/rte/progguide/z_axis.txt)
+	File: Interacting with Smart Devices (no auto-title, docs/rte/progguide/externalConnect.txt)
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
 }
 
-Group: Engine Reference  {
-	File: Overview* (no auto-title, docs/rte/reference/overview_rte.txt)
+Group: Engine Reference {
+	File: Overview (no auto-title, docs/rte/reference/overview_rte.txt)
 	
 	Group: Animation {
 		File: Overview (no auto-title, docs/rte/reference/overview_animation.txt)
 		
 		Group: Classes {
-			File: Alpha (no auto-title, bindings/clutter_alpha.lb)
 	        File: Animator (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState (no auto-title, bindings/clutter_state.lb)
+    	    File: Ease (no auto-title, bindings/ease.lb)
             File: Interval (no auto-title, bindings/clutter_interval.lb)
             File: Path (no auto-title, bindings/clutter_path.lb)
             File: Score (no auto-title, bindings/clutter_score.lb)
@@ -91,59 +104,60 @@ Group: Engine Reference  {
         }
 	}
 	
-	Group: Data Persistence {
-		File: Overview* (no auto-title, docs/rte/reference/overview_datapers.txt)
-		
-		Group: Globals {
-			File: profile* (no auto-title, bindings/profile.lb)
-      		File: settings* (no auto-title, bindings/settings.lb)
-      	}
-    }
-	
-	Group: Media Playback {
-		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
-		
-		Group: Globals {
-			File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
-		}
-	}
-	
 	Group: External Connections {
-		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_external.txt)
 		
 		Group: Globals {
 			File: controllers (no auto-title, bindings/controllers.lb)
-			File: json* (no auto-title, bindings/json.lb)
-			File: uri* (no auto-title, bindings/uri.lb)
+			File: json (no auto-title, bindings/json.lb)
+			File: uri (no auto-title, bindings/uri.lb)
 		}
 		
 		Group: Classes {
-			File: URLRequest* (no auto-title, bindings/url_request.lb)
-			File: XMLParser* (no auto-title, bindings/xml.lb)
+			File: URLRequest (no auto-title, bindings/url_request.lb)
+			File: XMLParser (no auto-title, bindings/xml.lb)
 		}
 		
 		Group: Interfaces {
 			File: Controller (no auto-title, bindings/controller.lb)
-			File: URLRequestCancel* (no auto-title, docs/rte/reference/url_request_cancel_ph.txt)
-			File: URLResponse* (no auto-title, docs/rte/reference/url_response_ph.txt)
+			File: URLRequestCancel (no auto-title, bindings/url_request_cancel.lb)
+			File: URLResponse (no auto-title, bindings/url_response.lb)
 		}
 	}
 
-	Group: Physics Engine {
-		File: Overview* (no auto-title, docs/rte/reference/overview_physics.txt)
+	Group: Media Playback {
+		File: Overview (no auto-title, docs/rte/reference/overview_media.txt)
 		
-		Group: Classes {
-			File: Shape, Body and Physics* (no auto-title, bindings/physics.lb)
+		Group: Globals {
+			File: mediaplayer (no auto-title, bindings/mediaplayer.lb)
 		}
 	}
 	
-	Group: System Settings {
-		File: Overview* (no auto-title, docs/rte/reference/overview_system.txt)
+	Group: 2D Physics Engine {
+		File: Overview (no auto-title, docs/rte/reference/overview_physics.txt)
 		
 		Group: Globals {
-			File: app* (no auto-title, bindings/app.lb)
-			File: system* (no auto-title, bindings/system.lb)
-			File: trickplay* (no auto-title, bindings/trickplay.lb)
+			File: physics Global Variable and Body Interface (no auto-title, bindings/physics.lb)
+		}
+	}
+	
+	Group: Profiles {
+		File: Overview (no auto-title, docs/rte/reference/overview_profile.txt)
+		
+		Group: Globals {
+			File: profile (no auto-title, bindings/profile.lb)
+      		File: settings (no auto-title, bindings/settings.lb)
+      	}
+    }
+	
+	Group: System Information {
+		File: Overview (no auto-title, docs/rte/reference/overview_system.txt)
+		
+		Group: Globals {
+			File: app (no auto-title, bindings/app.lb)
+			File: devtools (no auto-title, bindings/devtools.lb)
+#			File: system* (no auto-title, bindings/system.lb)
+			File: trickplay (no auto-title, bindings/trickplay.lb)
 		}
 	}
 	
@@ -192,11 +206,12 @@ Group: Engine Reference  {
         }
     }
     
-    Group: Utility {
-    	File: Overview* (no auto-title, docs/rte/reference/overview_util.txt)
+    Group: Utility Functions {
+    	File: Overview (no auto-title, docs/rte/reference/overview_util.txt)
     	
     	Group: Globals {
-			File: Utility Functions* (no auto-title, bindings/globals.lb)
+			File: regex (no auto-title, bindings/regex.lb)
+			File: Misc. Utility Functions (no auto-title, bindings/globals.lb)
 		}
 	}
 
@@ -216,7 +231,25 @@ Group: Engine Reference  {
 }  # Group: Reference
 
 Group: Development Tools {
-	File: Overview* (no auto-title, docs/devtools/overview_tools.txt)
+	File: Overview (no auto-title, docs/devtools/overview_tools.txt)
+	
+	Group: TrickPlay IDE {
+		File: Overview (no auto-title, docs/devtools/ide/introduction.txt)
+		
+#		Group: Tutorial {
+#			File: Introduction* (no auto-title, docs/devtools/ide/tutorial/introduction.txt)
+#			File: Create New TrickPlay Application* (no auto-title, docs/devtools/ide/tutorial/editor.txt)
+#			File: Run the Application* (no auto-title, docs/devtools/ide/tutorial/runApp.txt)
+#			File: Debug the Application* (no auto-title, docs/devtools/ide/tutorial/debug.txt)
+#		}
+		
+		Group: Reference {
+			File: IDE User Interface (no auto-title, docs/devtools/ide/reference/ui.txt)
+			File: Editor Reference (no auto-title, docs/devtools/ide/reference/editor.txt)
+			File: Running a TrickPlay Application (no auto-title, docs/devtools/ide/reference/run.txt)
+			File: Debugger Reference (no auto-title, docs/devtools/ide/reference/debugger.txt)
+		}
+	}
 	
 	Group: Visual Editor {
 		File: Overview (no auto-title, docs/devtools/editor/introduction.txt)
@@ -250,4 +283,3 @@ Group: Development Tools {
 	}
 }
 
-Text: (*) section docs not yet complete

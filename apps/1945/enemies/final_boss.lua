@@ -110,7 +110,7 @@ enemies.final_boss = function(is_boss,o)
         },
         dying = false,
 		remove = function(self)
-			print("grrrr")
+			--print("grrrr")
 			self.group:unparent()
 		end,
         stages = {

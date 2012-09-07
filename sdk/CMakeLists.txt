@@ -161,6 +161,18 @@ if (UNIX AND NOT APPLE)
 
 	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
 	    
+		# Debugger script
+
+		install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-debugger DESTINATION bin )
+
+		# Debugger app
+
+		install(DIRECTORY ${PROJECT_SOURCE_DIR}/tools/debug DESTINATION share/trickplay/ )
+
+		# Debugger icons
+
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-debugger.desktop DESTINATION share/applications/ )
+
     endif ( EXISTS ${PROJECT_SOURCE_DIR}/tools/editor )
 
     #--------------------------------------------------------------------------	

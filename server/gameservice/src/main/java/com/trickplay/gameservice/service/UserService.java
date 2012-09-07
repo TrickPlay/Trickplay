@@ -13,18 +13,22 @@ import com.trickplay.gameservice.domain.Vendor;
 
 public interface UserService {
 
+    /*
 	@PostFilter("filterObject.username == principal.username or hasRole('ROLE_ADMIN')")
 	public List<User> findAll();
-
+     */
+    
 //	@PreAuthorize("principal.username == #username or hasRole('ROLE_ADMIN')")
 	//public User findByName(String username, boolean detached);
 	
+   // @PreAuthorize("isAuthenticated()")
 	public User findByName(String username);
 
 	@PreAuthorize("isAuthenticated()")
 	@Transactional
 	public void update(User entity);
 
+	@PreAuthorize("isAuthenticated()")
 	public User find(Long id);
 	
 	@PreAuthorize("hasRole('ROLE_ADMIN')")

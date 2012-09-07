@@ -32,7 +32,7 @@
 
 //-----------------------------------------------------------------------------
 
-#define CONTROLLER_PROTOCOL_VERSION		"43"
+#define CONTROLLER_PROTOCOL_VERSION		"44"
 
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
@@ -169,17 +169,17 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_ACCELEROMETER   :
         {
-            TPControllerStartAccelerometer * sa = ( TPControllerStartAccelerometer * )parameters;
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
 
             const char * filter = "N";
 
             switch ( sa->filter )
             {
-                case TP_CONTROLLER_ACCELEROMETER_FILTER_LOW:
+                case TP_CONTROLLER_MOTION_FILTER_LOW:
                     filter = "L";
                     break;
 
-                case TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH:
+                case TP_CONTROLLER_MOTION_FILTER_HIGH:
                     filter = "H";
                     break;
             }
@@ -192,6 +192,51 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         case TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    :
         {
             server->write( connection, "PA\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_GYROSCOPE  :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SGY\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_GYROSCOPE    :
+        {
+            server->write( connection, "PGY\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_MAGNETOMETER   :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SMM\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER    :
+        {
+            server->write( connection, "PMM\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_ATTITUDE   :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SAT\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_ATTITUDE   :
+        {
+            server->write( connection, "PAT\n" );
             break;
         }
 
@@ -295,28 +340,34 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         {
             TPControllerDeclareResource * ds = ( TPControllerDeclareResource * )parameters;
 
-            const char * uri = NULL;
+            GFile * file = g_file_new_for_uri( ds->uri );
 
+            bool native = g_file_is_native( file );
+
+            g_object_unref( file );
+
+
+            const char * uri = 0;
             String path;
 
-            if ( g_str_has_prefix( ds->uri, "http://" ) || g_str_has_prefix( ds->uri, "https://" ) )
+            if ( ! native )
             {
                 uri = ds->uri;
             }
-            else if ( g_str_has_prefix( ds->uri, "file://" ) )
+            else
             {
-                path = start_serving_resource( connection , ( ds->uri ) + 7 , ds->group );
+                path = start_serving_resource( connection , ds->uri , ds->group );
                 uri = path.c_str();
             }
 
-            if ( !uri )
+            if ( ! uri )
             {
                 return 5;
             }
 
             if ( * uri == '/' )
             {
-                ++uri;
+            	++uri;
             }
 
             server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
@@ -365,6 +416,26 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 			        ra->cancel_label ? ra->cancel_label : "");
 			break;
 		}
+
+        case TP_CONTROLLER_COMMAND_VIDEO_START_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVSC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_END_CALL:
+        {
+            const char *address = (const char *)parameters;
+            server->write_printf( connection, "SVEC\t%s\n", address );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS:
+        {
+            server->write_printf( connection, "SVSS\n" );
+            break;
+        }
 
         case TP_CONTROLLER_COMMAND_ADVANCED_UI:
         {
@@ -500,17 +571,17 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 void ControllerServer::connection_closed( gpointer connection )
 {
     ConnectionInfo * info = find_connection( connection );
+    gpointer aui_connection = NULL;
 
     if ( info && info->controller )
     {
         tp_context_remove_controller( context, info->controller );
+        aui_connection = info->aui_connection;
     }
 
     drop_resource_group( connection , String() );
 
     drop_post_endpoint( connection );
-
-    gpointer aui_connection = info->aui_connection;
 
     connections.erase( connection );
 
@@ -550,6 +621,16 @@ void ControllerServer::connection_data_received( gpointer connection, const char
 static inline bool cmp2( const char * a, const char * b )
 {
     return ( a[0] == b[0] ) && ( a[1] == b[1] );
+}
+
+static inline bool cmp3( const char * a, const char * b )
+{
+    return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] );
+}
+
+static inline bool cmp4( const char * a, const char * b )
+{
+    return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] ) && ( a[3] == b[3] );
 }
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
@@ -642,6 +723,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "FM" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_FULL_MOTION;
+                }
                 else if ( cmp2( cap, "PT" ) )
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
@@ -686,6 +771,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 else if ( cmp2( cap , "VR" ) )
                 {
                 	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
+                }
+                else if ( cmp2( cap , "SV" ) )
+                {
+                	spec.capabilities |= TP_CONTROLLER_HAS_STREAMING_VIDEO;
                 }
                 else
                 {
@@ -808,6 +897,42 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         }
 
         tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "GY" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_gyroscope( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "MM" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_magnetometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "AT" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_attitude( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
@@ -986,6 +1111,66 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         tp_controller_advanced_ui_ready( parent_info->controller );
     }
+    else if ( cmp4( cmd, "SVCC" ) )
+    {
+        // Streaming video call connected
+        // SVCC <address>
+
+        if ( count < 2 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_connected( info.controller, parts[1] );
+    }
+    else if ( cmp4( cmd, "SVCF" ) )
+    {
+        // Streaming video call failed
+        // SVCF <address> <reason>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_failed( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCD" ) )
+    {
+        // Streaming video call was dropped
+        // SVCD <address> <reason>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_dropped( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCE" ) )
+    {
+        // Streaming video call ended
+        // SVCE <address> <who>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_ended( info.controller, parts[1], parts[2] );
+    }
+    else if ( cmp4( cmd, "SVCS" ) )
+    {
+        // Streaming video call status
+        // SVCS <status> <address>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_streaming_video_status( info.controller, parts[1], parts[2] );
+    }
     else
     {
         g_warning( "UNKNOWN CONTROLLER COMMAND '%s'", cmd );
@@ -994,9 +1179,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
 //-----------------------------------------------------------------------------
 
-String ControllerServer::start_serving_resource( gpointer connection , const String & file_name , const String & group )
+String ControllerServer::start_serving_resource( gpointer connection , const String & native_uri , const String & group )
 {
-    String path = group + ":" + file_name;
+    String path = group + ":" + native_uri;
 
     gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
 
@@ -1006,12 +1191,12 @@ String ControllerServer::start_serving_resource( gpointer connection , const Str
 
     path = String( "/controllers/resource/" ) + path;
 
-    tplog( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
+    tplog( "SERVING %s : %s" , path.c_str() , native_uri.c_str() );
 
     ResourceInfo & info( resources[ path ] );
 
     info.connection = connection;
-    info.file_name = file_name;
+    info.native_uri = native_uri;
     info.group = group;
 
     return path;
@@ -1025,7 +1210,7 @@ void ControllerServer::drop_resource_group( gpointer connection , const String &
     {
         if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
         {
-            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
+            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.native_uri.c_str() );
 
             resources.erase( it++ );
         }
@@ -1060,7 +1245,7 @@ void ControllerServer::handle_http_get( const HttpServer::Request & request , Ht
         return;
     }
 
-    response.respond_with_file_contents( it->second.file_name );
+    response.respond_with_file_contents( it->second.native_uri );
 }
 
 //-----------------------------------------------------------------------------
@@ -1170,4 +1355,8 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
 
 //-----------------------------------------------------------------------------
 
+guint16 ControllerServer::get_port() const
+{
+	return server.get() ? server->get_port() : 0;
+}
 

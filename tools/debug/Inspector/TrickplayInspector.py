@@ -22,6 +22,8 @@ class TrickplayInspector(QWidget):
         
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
+        self.ui.refresh.setEnabled(False)
+        self.ui.search.setEnabled(False)
         
         # Ignore signals while updating elements internally
         self.preventChanges = False
@@ -31,7 +33,7 @@ class TrickplayInspector(QWidget):
         #self.lastSearchedItem = None
         
         # Models
-        self.inspectorModel = TrickplayElementModel()
+        self.inspectorModel = TrickplayElementModel(self)
         self.propertyModel = TrickplayPropertyModel()
         
         self.ui.inspector.setModel(self.inspectorModel)
@@ -76,8 +78,8 @@ class TrickplayInspector(QWidget):
         Fill the inspector with Trickplay UI element data
         """
         
-        self.preventChanges = True
         
+        self.preventChanges = True
         # Reselect gid of last item selected
         gid = None
         try:
@@ -87,8 +89,6 @@ class TrickplayInspector(QWidget):
         except:
             gid = 1
             
-        print(gid)
-        
         # Get all new data
         self.inspectorModel.empty()
         self.inspectorModel.fill()
@@ -101,7 +101,7 @@ class TrickplayInspector(QWidget):
         result = self.search(gid, 'gid')
         if result:
             self.selectItem(result)
-        
+                
     def setHeaders(self, model, headers):
         """
         Set headers for a given model
@@ -184,6 +184,7 @@ class TrickplayInspector(QWidget):
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
+        print (selected, deselected)
         
         if not self.preventChanges:
             
@@ -193,6 +194,9 @@ class TrickplayInspector(QWidget):
             item = self.inspectorModel.itemFromIndex(index)
             data = item.TPJSON()
             
+            print "-----------"
+            print data
+            print "-----------"
             self.propertyModel.fill(data)
             
             self.preventChanges = False

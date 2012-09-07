@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Console2.ui'
+# Form implementation generated from reading ui file 'Console.ui'
 #
-# Created: Wed Nov  2 16:01:23 2011
+# Created: Thu Feb  9 13:57:03 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,16 +17,20 @@ except AttributeError:
 class Ui_Console(object):
     def setupUi(self, Console):
         Console.setObjectName(_fromUtf8("Console"))
-        Console.resize(1060, 178)
-        self.gridLayout = QtGui.QGridLayout(Console)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.formLayout = QtGui.QFormLayout()
-        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
-        self.formLayout.setObjectName(_fromUtf8("formLayout"))
+        Console.resize(811, 166)
+        font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Inconsolata')
+        font.setPointSize(12)
+        Console.setFont(font)
+        self.verticalLayout = QtGui.QVBoxLayout(Console)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setMargin(1)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.textEdit = QtGui.QTextEdit(Console)
+        self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.textEdit)
-        self.gridLayout.addLayout(self.formLayout, 0, 0, 1, 1)
+        self.verticalLayout.addWidget(self.textEdit)
 
         self.retranslateUi(Console)
         QtCore.QMetaObject.connectSlotsByName(Console)

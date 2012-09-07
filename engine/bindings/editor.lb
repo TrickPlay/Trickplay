@@ -1,12 +1,13 @@
 [[
 #include <gio/gio.h>
 #include <stdlib.h>
+#include <cstdio>
 #include "common.h"
 #include "util.h"
 #include "app.h"
 #include "context.h"
 #include "actions.h"
-#include <cstdio>
+#include "app_resource.h"
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 #ifndef __APPLE__
@@ -28,24 +29,19 @@ restricted global editor [[ void * ]]
 
     table readdir(string dir_name)
         [[
-             gchar *filename = NULL;
-             GDir *dir = NULL;
-
-             dir = g_dir_open(dir_name, 0, NULL);
-
-            if(dir)
+            if ( GDir * dir = g_dir_open( dir_name , 0 , 0 ) )
             {
-                filename = (gchar *)g_dir_read_name(dir);
                 lua_newtable( L );
                 int t = lua_gettop( L );
                 int i = 1;
-                while(filename != NULL)
+                
+                for ( const gchar * name = g_dir_read_name( dir ); name; name = g_dir_read_name( dir ) )
                 {
-                    lua_pushstring( L , filename );
+                    lua_pushstring( L , name );
                     lua_rawseti( L , t , i++ );
-                    filename = (gchar *)g_dir_read_name(dir);
                 }
-                g_dir_close(dir);
+                
+                g_dir_close( dir );
             }
             else
             {
@@ -56,27 +52,15 @@ restricted global editor [[ void * ]]
 
      bool writefile(string file_name, lstring contents, bool overwrite=true)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
-
             result = false;              
 
-            if ( path && ! is_uri )
+            AppResource r( L , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
+
+            if ( r.good() && r.is_native() )
             {
-                const char *mode;
+                FILE * fp;
 
-                if( overwrite )
-                {
-                    mode = "w";
-                }
-                else
-                {
-                    mode = "a";
-                }
-
-                FILE *fp;
-
-                if( ( fp = fopen( path , mode ) ) )
+                if( ( fp = fopen( r.get_native_path().c_str() , overwrite ? "w" : "a" ) ) )
                 {
                     if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
                     {
@@ -84,9 +68,7 @@ restricted global editor [[ void * ]]
                     }
                     fclose( fp );
                 }
-            }
-
-            g_free( path );
+            }            
         ]];
 
      bool change_app_path( string path )
@@ -199,9 +181,9 @@ restricted global editor [[ void * ]]
 #endif
         ]];
 		
-	execute( string command_str )
+	int execute( string command_str )
 		[[
-			system(command_str);
+			result = system(command_str);
 		]];
 
 }

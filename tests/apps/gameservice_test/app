@@ -1,0 +1,11 @@
+app=
+{
+    id          = "com.trickplay.guess_game",
+    release     = "1",
+    version     = "1.0",
+    name        = "tpapps",
+    author      = "Bhaskar",
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher", "gameservice" },
+}
+

@@ -248,7 +248,15 @@ Context::Context( ClutterActor * actor )
 
 	// Get the Clutter GL texture id and target
 
-	CoglHandle th = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+#ifdef CLUTTER_VERSION_1_10
+
+    CoglTexture * th = COGL_TEXTURE( clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) ) );
+
+#else
+
+    CoglHandle th = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+
+#endif
 
 	if ( ! cogl_texture_get_gl_texture( th , & texture , & texture_target ) )
 	{
@@ -456,7 +464,7 @@ bool Context::try_create_fbo( GLsizei width , GLsizei height , int flags )
 		for ( GLuintSet::const_iterator it = rb.begin(); it != rb.end(); ++it )
 		{
 			tplog2( "  DESTROYING RENDERBUFFER %u" , *it );
-			glDeleteBuffers( 1 , & * it );
+			glDeleteRenderbuffers( 1 , & * it );
 		}
 
 		tplog2( "* FRAMEBUFFER IS NOT COMPLETE" );
@@ -557,11 +565,38 @@ void Context::context_op( Context::Operation op )
 
 		case CREATE_CONTEXT:
 		{
-		    // This function does not exist in Clutter - we added it with a patch
+          EGLint cfg_attribs[] = {
+              EGL_STENCIL_SIZE,    2,
 
-		    EGLConfig config = clutter_egl_get_egl_config();
+              EGL_RED_SIZE,        1,
+              EGL_GREEN_SIZE,      1,
+              EGL_BLUE_SIZE,       1,
+              EGL_ALPHA_SIZE,      1,
 
-		    const EGLint attribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+              EGL_DEPTH_SIZE,      1,
+
+              EGL_BUFFER_SIZE,     EGL_DONT_CARE,
+
+              EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+
+              EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+
+              EGL_NONE
+          };
+          EGLint config_count = 0;
+          EGLConfig config;
+
+          const EGLint attribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+
+          EGLBoolean status = eglChooseConfig (clutter_display,
+                                    cfg_attribs,
+                                    &config, 1,
+                                    &config_count);
+          if (status != EGL_TRUE || config_count == 0)
+            {
+              tpwarn("UNABLE TO FIND A USABLE EGL CONFIGURATION");
+              break;
+            }
 
 			my_context = eglCreateContext( clutter_display , config , clutter_context , attribs );
 

@@ -11,6 +11,8 @@
 
 @implementation ResourceManager
 
+@synthesize resources;
+
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
     if ((self = [super init])) {
         tvConnection = [_tvConnection retain];
@@ -74,11 +76,72 @@
 }
 
 /**
+ * Asynchronous loading mechanism
+ */
+
+- (void)loadResource:(NSString *)name {
+    fprintf(stderr, "Loading resource: %s", [name UTF8String]);
+    
+    if ([resources objectForKey:name]) {
+        fprintf(stderr, " ; object already loaded\n");
+    } else {    // pull resource
+        fprintf(stderr, " ; from network\n");
+        
+        NSString *dataURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
+        
+        if (![dataURLString hasPrefix:@"http:"] && ![dataURLString hasPrefix:@"https:"]) {
+            dataURLString = [NSString stringWithFormat:@"http://%@:%d/%@", tvConnection.hostName, tvConnection.http_port, dataURLString];
+        }
+        NSURL *dataURL = [NSURL URLWithString:dataURLString];
+        
+        /*
+        NSURLRequest *request = [NSURLRequest requestWithURL:dataURL];
+        [NSURLConnection sendAsynchronousRequest:request
+                                           queue:[NSOperationQueue mainQueue]
+                               completionHandler:
+            ^(NSURLResponse *response, NSData *data, NSError *error) {
+                if (data) {
+                    size_t length = [data length];
+                    unsigned char buffer[length+1];
+                    [data getBytes:buffer length:length];
+                    buffer[length] = 0;
+                    NSLog(@"data: %@ ; length: %d ; error: %@ ; %@", data, [data length], error, [NSString stringWithCharacters:[data bytes] length:[data length]]);
+                    [resources setObject:data forKey:name];
+                } else {
+                    NSLog(@"Could not load resource '%@': %@", [resourceNames objectForKey:name], error);
+                }
+            }
+         ];
+         //*/
+        
+        
+        dispatch_queue_t load_queue = dispatch_queue_create("load_queue", NULL);
+        dispatch_async(load_queue, ^(void) {
+            NSError *error = nil;
+            NSData *tempData = [NSData dataWithContentsOfURL:dataURL options:NSDataReadingMappedIfSafe error:&error];
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                if (tempData) {
+                    size_t length = [tempData length];
+                    unsigned char buffer[length+1];
+                    [tempData getBytes:buffer length:length];
+                    buffer[length] = 0;
+                    NSLog(@"data: %@ ; length: %d ; error: %@ ; %@", tempData, [tempData length], error, [NSString stringWithCharacters:[tempData bytes] length:[tempData length]]);
+                    [resources setObject:tempData forKey:name];
+                } else {
+                    NSLog(@"Could not load resource '%@': %@", [resourceNames objectForKey:name], error);
+                }
+            });
+        });
+    }
+}
+
+/**
  * Synchronous method of getting resource
  */
 
 - (NSData *)fetchResource:(NSString *)name {
-    fprintf(stderr, "Fetching resource %s", [name UTF8String]);
+    fprintf(stderr, "Fetching resource: %s", [name UTF8String]);
     NSData *tempData;
     
     if ((tempData = [resources objectForKey:name])) {

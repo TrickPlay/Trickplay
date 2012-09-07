@@ -252,7 +252,7 @@ local function new_coin()
 		
 		self:unparent()
 		--]]
-		print("recycle")
+		--print("recycle")
 		self.state:change_state_to("RECYCLED")
 		
 	end

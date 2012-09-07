@@ -59,11 +59,12 @@ struct Event
     {
         ADDED, REMOVED,
         KEY_DOWN, KEY_UP,
-        ACCELEROMETER,
-        POINTER_MOVE , POINTER_DOWN , POINTER_UP,
+        ACCELEROMETER, GYROSCOPE, MAGNETOMETER, ATTITUDE,
+        POINTER_MOVE , POINTER_DOWN , POINTER_UP, POINTER_ACTIVE, POINTER_INACTIVE,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
-        ADVANCED_UI_READY, ADVANCED_UI_EVENT
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT , SCROLL,
+        STREAMING_VIDEO_CONNECTED, STREAMING_VIDEO_FAILED, STREAMING_VIDEO_DROPPED, STREAMING_VIDEO_ENDED, STREAMING_VIDEO_STATUS
     };
 
 public:
@@ -112,6 +113,26 @@ public:
 				g_free( event->data.mime_type );
 				break;
 
+            case STREAMING_VIDEO_CONNECTED:
+                g_free( event->streaming_video.address );
+                break;
+
+            case STREAMING_VIDEO_FAILED:
+            case STREAMING_VIDEO_DROPPED:
+                g_free( event->streaming_video.address );
+                g_free( event->streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_ENDED:
+                g_free( event->streaming_video.address );
+                g_free( event->streaming_video.who );
+                break;
+
+            case STREAMING_VIDEO_STATUS:
+                g_free( event->streaming_video.status );
+                g_free( event->streaming_video.arg );
+                break;
+
 			default:
 				break;
         };
@@ -139,6 +160,42 @@ public:
         event->accelerometer.x = x;
         event->accelerometer.y = y;
         event->accelerometer.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_gyroscope( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    {
+        Event * event = make( GYROSCOPE, controller );
+
+        event->gyroscope.x = x;
+        event->gyroscope.y = y;
+        event->gyroscope.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_magnetometer( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    {
+        Event * event = make( MAGNETOMETER, controller );
+
+        event->magnetometer.x = x;
+        event->magnetometer.y = y;
+        event->magnetometer.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_attitude( Controller * controller, double roll, double pitch, double yaw, unsigned long int modifiers )
+    {
+        Event * event = make( ATTITUDE, controller );
+
+        event->attitude.roll = roll;
+        event->attitude.pitch = pitch;
+        event->attitude.yaw = yaw;
         event->modifiers = modifiers;
 
         return event;
@@ -185,12 +242,74 @@ public:
 		return event;
 	}
 
+    inline static Event * make_scroll( Controller * controller , int direction , unsigned long int modifiers )
+    {
+    	Event * event = make( SCROLL , controller );
+
+    	event->scroll.direction = direction;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_connected( Controller * controller, const char * address )
+    {
+        Event * event = make( STREAMING_VIDEO_CONNECTED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_failed( Controller * controller, const char * address, const char * reason )
+    {
+        Event * event = make( STREAMING_VIDEO_FAILED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.reason = g_strdup(reason);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_dropped( Controller * controller, const char * address, const char * reason )
+    {
+        Event * event = make( STREAMING_VIDEO_DROPPED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.reason = g_strdup(reason);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_ended( Controller * controller, const char * address, const char * who )
+    {
+        Event * event = make( STREAMING_VIDEO_ENDED, controller );
+
+        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.who = g_strdup(who);
+
+        return event;
+    }
+
+    inline static Event * make_streaming_video_status( Controller * controller, const char * status, const char * arg )
+    {
+        Event * event = make( STREAMING_VIDEO_STATUS, controller );
+
+        event->streaming_video.status = g_strdup(status);
+        event->streaming_video.arg = g_strdup(arg);
+
+        return event;
+    }
+
     inline void process()
     {
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( timestamp() - create_time ) );
+        gsize t = timestamp();
+
+        g_debug( "EVENT TYPE %d : ARRIVED AT %" G_GSIZE_FORMAT " : PROCESSED AT %" G_GSIZE_FORMAT " : %d ms" , type , create_time , t ,  int( t - create_time ) );
+
 #endif
 
         switch ( type )
@@ -213,6 +332,18 @@ public:
 
             case ACCELEROMETER:
                 controller->accelerometer( accelerometer.x, accelerometer.y, accelerometer.z , modifiers );
+                break;
+
+            case GYROSCOPE:
+                controller->gyroscope( gyroscope.x, gyroscope.y, gyroscope.z , modifiers );
+                break;
+
+            case MAGNETOMETER:
+                controller->magnetometer( magnetometer.x, magnetometer.y, magnetometer.z , modifiers );
+                break;
+
+            case ATTITUDE:
+                controller->attitude( attitude.roll, attitude.pitch, attitude.yaw, modifiers );
                 break;
 
             case POINTER_MOVE:
@@ -266,6 +397,38 @@ public:
             case ADVANCED_UI_EVENT:
             	controller->advanced_ui_event( ui.parameters );
             	break;
+
+            case SCROLL:
+            	controller->scroll( scroll.direction , modifiers );
+            	break;
+
+            case POINTER_ACTIVE:
+            	controller->pointer_active();
+            	break;
+
+            case POINTER_INACTIVE:
+            	controller->pointer_inactive();
+            	break;
+
+            case STREAMING_VIDEO_CONNECTED:
+                controller->streaming_video_connected( streaming_video.address );
+                break;
+
+            case STREAMING_VIDEO_FAILED:
+                controller->streaming_video_failed( streaming_video.address, streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_DROPPED:
+                controller->streaming_video_dropped( streaming_video.address, streaming_video.reason );
+                break;
+
+            case STREAMING_VIDEO_ENDED:
+                controller->streaming_video_ended( streaming_video.address, streaming_video.who );
+                break;
+
+            case STREAMING_VIDEO_STATUS:
+                controller->streaming_video_status( streaming_video.status, streaming_video.arg );
+                break;
         }
     }
 
@@ -276,7 +439,7 @@ private:
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-    gulong          create_time;
+    gsize          	create_time;
 
 #endif
 
@@ -288,32 +451,68 @@ private:
         {
             unsigned int key_code;
             unsigned long int unicode;
-        }    key;
+        }    						key;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     accelerometer;
+        }                     		accelerometer;
+
+        struct
+        {
+            double x;
+            double y;
+            double z;
+        }                     		gyroscope;
+
+        struct
+        {
+            double x;
+            double y;
+            double z;
+        }                     		magnetometer;
+
+        struct
+        {
+            double roll;
+            double pitch;
+            double yaw;
+        }                     		attitude;
 
         struct
         {
             int button_or_finger;
             int x;
             int y;
-        }                        click_touch;
+        }                        	click_touch;
 
         struct
         {
             char * parameters;
-        }            ui;
+        }							ui;
+
+        struct
+        {
+        	int direction;
+        }							scroll;
+
         struct
         {
         	void * data;
         	unsigned int size;
         	char * mime_type;
-        }	data;
+        }							data;
+
+        struct
+        {
+            char * address;
+            char * reason;
+            char * who;
+            char * status;
+            char * arg;
+        }                           streaming_video;
     };
 };
 
@@ -330,6 +529,9 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
     context( _context ),
     loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
+    ts_gyroscope_started( 0 ),
+    ts_magnetometer_started( 0 ),
+    ts_attitude_started( 0 ),
     ts_pointer_started( 0 ),
     ts_touch_started( 0 ),
     advanced_ui_is_ready( false )
@@ -399,7 +601,7 @@ String Controller::get_name() const
 
 //.............................................................................
 
-unsigned int Controller::get_capabilities() const
+unsigned long long Controller::get_capabilities() const
 {
     return spec.capabilities;
 }
@@ -627,6 +829,51 @@ void Controller::accelerometer( double x, double y, double z , unsigned long int
 
 //.............................................................................
 
+void Controller::gyroscope( double x, double y, double z , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->gyroscope( x, y, z , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::magnetometer( double x, double y, double z , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->magnetometer( x, y, z , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::attitude( double roll, double pitch, double yaw, unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->attitude( roll, pitch, yaw, modifiers );
+    }
+}
+
+//.............................................................................
+
 void Controller::pointer_move( int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
@@ -717,6 +964,36 @@ void Controller::pointer_button_up( int button, int x, int y , unsigned long int
 
 //.............................................................................
 
+void Controller::pointer_active( )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->pointer_active();
+    }
+}
+
+//.............................................................................
+
+void Controller::pointer_inactive( )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->pointer_inactive();
+    }
+}
+
+//.............................................................................
+
 void Controller::touch_down( int finger, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
@@ -757,6 +1034,31 @@ void Controller::touch_up( int finger, int x, int y , unsigned long int modifier
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->touch_up( finger, x, y , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::scroll( int direction , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    bool inject = true;
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        if ( ! ( *it )->scroll( direction , modifiers ) )
+        {
+            inject = false;
+        }
+    }
+
+    if ( inject )
+    {
+        ClutterUtil::inject_scroll( direction , modifiers );
     }
 }
 
@@ -870,6 +1172,81 @@ void Controller::advanced_ui_event( const char * json )
 
 //.............................................................................
 
+void Controller::streaming_video_connected( const char * address )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_connected( address );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_failed( const char * address, const char * reason )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_failed( address, reason );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_dropped( const char * address, const char * reason )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_dropped( address, reason );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_ended( const char * address, const char * who )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_ended( address, who );
+    }
+}
+
+//.............................................................................
+
+void Controller::streaming_video_status( const char * status, const char * arg )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->streaming_video_status( status, arg );
+    }
+}
+
+//.............................................................................
+
 void Controller::add_delegate( Delegate * delegate )
 {
     delegates.insert( delegate );
@@ -887,6 +1264,9 @@ void Controller::remove_delegate( Delegate * delegate )
 bool Controller::reset()
 {
     g_atomic_int_set( & ts_accelerometer_started , 0 );
+    g_atomic_int_set( & ts_gyroscope_started , 0 );
+    g_atomic_int_set( & ts_magnetometer_started , 0 );
+    g_atomic_int_set( & ts_attitude_started , 0 );
     g_atomic_int_set( & ts_pointer_started , 0 );
     g_atomic_int_set( & ts_touch_started , 0 );
 
@@ -899,7 +1279,7 @@ bool Controller::reset()
               data ) == 0 );
 }
 
-bool Controller::start_accelerometer( AccelerometerFilter filter, double interval )
+bool Controller::start_accelerometer( MotionFilter filter, double interval )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) )
     {
@@ -907,20 +1287,20 @@ bool Controller::start_accelerometer( AccelerometerFilter filter, double interva
 
     }
 
-    TPControllerStartAccelerometer parameters;
+    TPControllerStartMotion parameters;
 
     switch ( filter )
     {
         case LOW:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_LOW;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_LOW;
             break;
 
         case HIGH:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_HIGH;
             break;
 
         default:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_NONE;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
             break;
     }
 
@@ -947,6 +1327,123 @@ bool Controller::stop_accelerometer()
         ( spec.execute_command(
               tp_controller,
               TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_gyroscope( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool gyroscope_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_GYROSCOPE,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_gyroscope_started , gyroscope_started ? 1 : 0 );
+
+    return gyroscope_started;
+}
+
+bool Controller::stop_gyroscope()
+{
+    g_atomic_int_set( & ts_gyroscope_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_GYROSCOPE,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_magnetometer( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool magnetometer_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_MAGNETOMETER,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_magnetometer_started , magnetometer_started ? 1 : 0 );
+
+    return magnetometer_started;
+}
+
+bool Controller::stop_magnetometer()
+{
+    g_atomic_int_set( & ts_magnetometer_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_attitude( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool attitude_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_ATTITUDE,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_attitude_started , attitude_started ? 1 : 0 );
+
+    return attitude_started;
+}
+
+bool Controller::stop_attitude()
+{
+    g_atomic_int_set( & ts_attitude_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_ATTITUDE,
               NULL,
               data ) == 0 );
 }
@@ -980,6 +1477,50 @@ bool Controller::stop_pointer()
               NULL,
               data ) == 0 );
 }
+
+bool Controller::show_pointer_cursor()
+{
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::hide_pointer_cursor()
+{
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::set_pointer_cursor( int x , int y , const String & image_uri )
+{
+	TPControllerSetPointerCursor parameters;
+
+	parameters.x = x;
+	parameters.y = y;
+	parameters.image_uri = image_uri.c_str();
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR,
+              &parameters,
+              data ) == 0 );
+
+}
+
 
 bool Controller::start_touches()
 {
@@ -1307,6 +1848,48 @@ bool Controller::hide_virtual_remote()
                data ) == 0;
 }
 
+bool Controller::streaming_video_start_call( const String & address )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_START_CALL,
+                (void *)address.c_str(),
+                data ) == 0;
+}
+
+bool Controller::streaming_video_end_call( const String & address )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_END_CALL,
+                (void *)address.c_str(),
+                data ) == 0;
+}
+
+bool Controller::streaming_video_send_status()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+                tp_controller,
+                TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS,
+                0,
+                data ) == 0;
+}
+
 //==============================================================================
 
 #define LOCK Util::GSRMutexLock _lock(&mutex)
@@ -1512,6 +2095,36 @@ void tp_controller_accelerometer( TPController * controller, double x, double y,
     }
 }
 
+void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_gyroscope_events() )
+    {
+        controller->list->post_event( Event::make_gyroscope( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_magnetometer_events() )
+    {
+        controller->list->post_event( Event::make_magnetometer( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_attitude_events() )
+    {
+        controller->list->post_event( Event::make_attitude( controller->controller, roll, pitch, yaw , modifiers ) );
+    }
+}
+
 void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
@@ -1542,6 +2155,20 @@ void tp_controller_pointer_button_up( TPController * controller, int button, int
     }
 }
 
+void tp_controller_pointer_active( TPController * controller )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make( Event::POINTER_ACTIVE , controller->controller ) );
+}
+
+void tp_controller_pointer_inactive( TPController * controller )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make( Event::POINTER_INACTIVE , controller->controller ) );
+}
+
 void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
@@ -1570,6 +2197,13 @@ void tp_controller_touch_up( TPController * controller, int finger, int x, int y
     {
         controller->list->post_event( Event::make_click_touch( Event::TOUCH_UP, controller->controller, finger, x, y , modifiers ) );
     }
+}
+
+void tp_controller_scroll( TPController * controller, int direction , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_scroll( controller->controller , direction , modifiers ) );
 }
 
 void tp_controller_ui_event( TPController * controller, const char * parameters )
@@ -1642,4 +2276,54 @@ void tp_controller_advanced_ui_event( TPController * controller , const char * j
 
 	TPController::check(controller);
     controller->list->post_event( Event::make_advanced_ui_event( controller->controller , json ) );
+}
+
+
+void tp_controller_streaming_video_connected( TPController * controller, const char * address )
+{
+    g_assert( address );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_connected( controller->controller, address ) );
+}
+
+void tp_controller_streaming_video_failed( TPController * controller, const char * address, const char * reason )
+{
+    g_assert( address );
+    g_assert( reason );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_failed( controller->controller, address, reason ) );
+}
+
+void tp_controller_streaming_video_dropped( TPController * controller, const char * address, const char * reason )
+{
+    g_assert( address );
+    g_assert( reason );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_dropped( controller->controller, address, reason ) );
+}
+
+void tp_controller_streaming_video_ended( TPController * controller, const char * address, const char * who )
+{
+    g_assert( address );
+    g_assert( who );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_ended( controller->controller, address, who ) );
+}
+
+void tp_controller_streaming_video_status( TPController * controller, const char * status, const char * arg )
+{
+    g_assert( status );
+    g_assert( arg );
+
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_streaming_video_status( controller->controller, status, arg ) );
 }

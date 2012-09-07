@@ -11,7 +11,7 @@ public class GameStepId {
 	@NotBlank
 	private String key;
 
-	@Column(unique=true,nullable=false,updatable=false)
+	@Column(name="key_string",unique=true,nullable=false,updatable=false)
 	public String getKey() {
 		return key;
 	}

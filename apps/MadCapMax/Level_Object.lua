@@ -1716,6 +1716,22 @@ lvls = {
                 opacity = 0,
             },
         },
+        intro = {
+            {
+                duration = .1,
+                on_step = function()
+                end,
+                on_completed = function()
+                    
+                    for _,f in pairs(lvls[2].intro.post_intro_funcs) do
+                        
+                        f()
+                        
+                    end
+                    Animation_Loop:add_animation(LVL_Object.on_idle,"ACTIVE")
+                end,
+            },
+        },
         outro = {
             {
                 duration = 1,
@@ -2505,10 +2521,10 @@ function LVL_Object:setup_for_level(t)
         dumptable(lvls[curr_lvl_i].intro)
         
     else
-        
+        lvls[curr_lvl_i].intro.post_intro_funcs = t.call_after_intro
         self:scroll_by(physics_world.x)
         
-        Animation_Loop:add_animation(LVL_Object.on_idle,"ACTIVE")
+        Animation_Loop:add_animation(lvls[curr_lvl_i].intro[1],"ACTIVE")
         
     end
     
@@ -2815,7 +2831,7 @@ function LVL_Object:scroll_by(dx,need_actors)
             obj = Item{
                 source         = obj,
                 item_type      = "collectable",
-                initial_impact = Max.collect_seed,
+                initial_impact = Max.collect_cracker,
                 pieces = {
                     generic_imgs["cracker-crumble1"],
                     generic_imgs["cracker-crumble2"],

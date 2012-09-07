@@ -402,6 +402,63 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
+
+#if 0
+
+class StartDebuggerRequestHandler: public Handler
+{
+public:
+
+    StartDebuggerRequestHandler( TPContext * ctx )
+	:
+	    Handler( ctx , "/debug/start" )
+	{
+	}
+
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+
+		String result = JSON::Object().stringify();
+
+		App * current_app = context->get_current_app();
+
+        {
+		    using namespace JSON;
+
+            if( current_app )
+            {
+                if ( Debugger * debugger = current_app->get_debugger() )
+                {
+                	// This makes sure the debugger is up and running and will
+                	// not break on the next line for the current app.
+
+                	debugger->install( false );
+
+                    Object object;
+
+                    object[ "port" ] = debugger->get_server_port();
+
+                    result = object.stringify();
+                }
+            }
+        }
+
+		if ( ! result.empty() )
+		{
+			response.set_response( "application/json", result );
+		}
+		else
+		{
+			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
+		}
+	}
+
+};
+
+#endif
+
 #endif // TP_PRODUCTION
 
 //-----------------------------------------------------------------------------
@@ -593,6 +650,37 @@ public:
 	}
 };
 
+#ifndef TP_PRODUCTION
+
+class ControlInfoRequestHandler : public Handler
+{
+public:
+
+    ControlInfoRequestHandler( TPContext * ctx )
+	:
+	    Handler( ctx , "/api/control" )
+	{
+	}
+
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+
+		String result = context->get_control_message();
+
+		if ( ! result.empty() )
+		{
+			response.set_response( "application/json", result );
+		}
+		else
+		{
+			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
+		}
+	}
+};
+
+#endif
+
 //-----------------------------------------------------------------------------
 
 HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
@@ -606,6 +694,10 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
 #ifndef TP_PRODUCTION
 
 	handlers.push_back( new DebugUIRequestHandler( context ) );
+#if 0
+	handlers.push_back( new StartDebuggerRequestHandler( context ) );
+#endif
+	handlers.push_back( new ControlInfoRequestHandler( context ) );
 
 #endif
 }

@@ -10,6 +10,9 @@
 extern int new_Controller( lua_State * );
 
 extern int invoke_Controller_on_accelerometer( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_gyroscope( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_magnetometer( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_attitude( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_advanced_ui_event( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_advanced_ui_ready( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_audio_clip_cancelled( lua_State * , ControllerDelegate * , int , int );
@@ -21,18 +24,26 @@ extern int invoke_Controller_on_key_up( lua_State * , ControllerDelegate * , int
 extern int invoke_Controller_on_pointer_button_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_button_up( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_move( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_active( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_inactive( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_move( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_scroll( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_ui_event( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_streaming_video_connected( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_failed( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_dropped( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_ended( lua_State *, ControllerDelegate *, int, int );
+extern int invoke_Controller_on_streaming_video_status( lua_State *, ControllerDelegate *, int, int );
 
 extern int invoke_controllers_on_controller_connected( lua_State * , ControllerListDelegate * , int , int );
 
 //=============================================================================
 
-ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,ControllerListDelegate * _list)
+ControllerDelegate::ControllerDelegate(lua_State * _LS,Controller * _controller,ControllerListDelegate * _list)
 :
-    L(_L),
+    L(_LS),
     controller(_controller),
     list(_list)
 {
@@ -123,6 +134,39 @@ void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long 
 
 //.........................................................................
 
+void ControllerDelegate::gyroscope(double x,double y,double z,unsigned long int modifiers)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    lua_pushnumber(L,z);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_gyroscope(L,this,4,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::magnetometer(double x,double y,double z,unsigned long int modifiers)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    lua_pushnumber(L,z);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_magnetometer(L,this,4,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::attitude(double roll,double pitch,double yaw,unsigned long int modifiers)
+{
+    lua_pushnumber(L,roll);
+    lua_pushnumber(L,pitch);
+    lua_pushnumber(L,yaw);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_attitude(L,this,4,0);
+}
+
+//.........................................................................
+
 bool ControllerDelegate::pointer_move(int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,x);
@@ -191,6 +235,20 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
 
 //.........................................................................
 
+void ControllerDelegate::pointer_active()
+{
+    invoke_Controller_on_pointer_active(L,this,0,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::pointer_inactive()
+{
+    invoke_Controller_on_pointer_inactive(L,this,0,0);
+}
+
+//.........................................................................
+
 void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
@@ -220,6 +278,28 @@ void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modi
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
     invoke_Controller_on_touch_up(L,this,4,0);
+}
+
+//.........................................................................
+
+bool ControllerDelegate::scroll( int direction , unsigned long int modifiers )
+{
+	lua_pushnumber( L , direction );
+    ClutterUtil::push_event_modifiers(L,modifiers);
+
+    bool result = true;
+
+    if ( invoke_Controller_on_scroll(L,this,2,1) )
+    {
+    	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+    	{
+    		result = false;
+    	}
+
+    	lua_pop( L , 1 );
+    }
+
+    return result;
 }
 
 //.........................................................................
@@ -306,6 +386,51 @@ void ControllerDelegate::advanced_ui_event( const char * json )
 
     invoke_Controller_on_advanced_ui_event( L , this , 1 , 0 );
 }
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_connected(const char *address)
+{
+    lua_pushstring(L, address);
+    invoke_Controller_on_streaming_video_connected(L, this, 1, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_failed(const char *address, const char *reason)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, reason);
+    invoke_Controller_on_streaming_video_failed(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_dropped(const char *address, const char *reason)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, reason);
+    invoke_Controller_on_streaming_video_dropped(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_ended(const char *address, const char *who)
+{
+    lua_pushstring(L, address);
+    lua_pushstring(L, who);
+    invoke_Controller_on_streaming_video_ended(L, this, 2, 0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::streaming_video_status(const char *status, const char *arg)
+{
+    lua_pushstring(L, status);
+    lua_pushstring(L, arg);
+    invoke_Controller_on_streaming_video_status(L, this, 2, 0);
+}
+
 
 //=============================================================================
 

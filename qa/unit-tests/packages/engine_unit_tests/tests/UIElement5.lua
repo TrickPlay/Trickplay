@@ -25,8 +25,8 @@ image1:move_by(100,100)
 
 -- Verify that move_by moves the image to the expected location.
 function test_UIElement_image_move_by ()
-    assert_equal( image1.x , 600 , "image1.x failed" )
-    assert_equal( image1.y , 600 , "image1.y failed" ) 
+    assert_equal( image1.x , 600 , "image1.x returned: "..image1.x.." Expected: 600")
+    assert_equal( image1.y , 600 , "image1.y returned: "..image1.y.." Expected: 600")
 end
 
 

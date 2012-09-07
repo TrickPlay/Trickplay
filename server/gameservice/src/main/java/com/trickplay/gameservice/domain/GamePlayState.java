@@ -9,10 +9,12 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@Table(name="game_play_state")
 @XmlRootElement
 public class GamePlayState extends BaseEntity implements Serializable {
 	
@@ -44,15 +46,6 @@ public class GamePlayState extends BaseEntity implements Serializable {
 		this.stepId = stepId;
 	}
 
-//	@Id
-//	@GeneratedValue
-//	public Long getId() {
-//		return id;
-//	}
-//
-//	public void setId(Long id) {
-//		this.id = id;
-//	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="creator_id", updatable=false, nullable=false)

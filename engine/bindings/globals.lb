@@ -7,6 +7,7 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
+#include "app_resource.h"
 
 struct DoLater
 {
@@ -20,11 +21,11 @@ struct DoLater
 	static void add(lua_State * L,int delay,int function_ref,int args_table_ref)
 	{
 		DoLater * dl = g_new0( DoLater , 1 );
-		
+
 		dl->lsp = App::get(L)->ref_lua_state_proxy();
 		dl->function_ref = function_ref;
 		dl->args_table_ref = args_table_ref;
-		
+
 		if ( delay <= 0 )
 		{
 		    g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
@@ -33,30 +34,30 @@ struct DoLater
 		{
 		    g_timeout_add_full( TRICKPLAY_PRIORITY , delay , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
 		}
-	}  
-	
+	}
+
 	static gboolean do_it( DoLater * self )
 	{
 		lua_State * L = self->lsp->get_lua_state();
-		
+
 		if ( L )
 		{
 			// Get the function
-			
+
 			lua_rawgeti(L,LUA_REGISTRYINDEX,self->function_ref);
-			
+
 			// Count and push the arguments
-			
+
 			int nargs = 0;
-			
+
 			if ( self->args_table_ref != LUA_NOREF )
 			{
 				lua_rawgeti(L,LUA_REGISTRYINDEX,self->args_table_ref);
-				
+
 				if ( lua_type(L,-1) == LUA_TTABLE )
 				{
 					lua_pushnil(L);
-					
+
 					while( lua_next(L,-2) )
 					{
 					    if ( lua_islightuserdata( L , -1 ) && lua_touserdata( L , -1 ) == nil() )
@@ -69,32 +70,32 @@ struct DoLater
 						++nargs;
 					}
 				}
-				
+
 				// Pop the table
-				
+
 				lua_pop(L,1);
 			}
-			
+
 			// Now call it
-			
+
 			lua_call(L,nargs,0);
 		}
-		
+
 		return FALSE;
-	} 
-	
+	}
+
 	static void destroy( DoLater * self )
 	{
 		lua_State * L = self->lsp->get_lua_state();
-		
+
 		if ( L )
 		{
 			luaL_unref(L,LUA_REGISTRYINDEX,self->function_ref);
 			luaL_unref(L,LUA_REGISTRYINDEX,self->args_table_ref);
 		}
-		
+
 		self->lsp->unref();
-		
+
 		g_free( self );
 	}
 
@@ -108,37 +109,37 @@ private:
 String hash( GChecksumType type , const void * data , gsize length , bool binary )
 {
 	String result;
-	
+
 	GChecksum * cs = g_checksum_new( type );
 	g_checksum_update( cs , ( const guchar * ) data , length );
 
-	if ( binary ) 
+	if ( binary )
 	{
 		gsize digest_length=g_checksum_type_get_length( type );
 		guint8 digest[ digest_length  ];
 		g_checksum_get_digest( cs , digest , & digest_length );
-		result = String( ( const char * ) digest , digest_length ); 
+		result = String( ( const char * ) digest , digest_length );
 	}
 	else
 	{
 		result = g_checksum_get_string( cs );
 	}
-	
+
 	g_checksum_free( cs );
-	
+
 	return result;
-} 
+}
 
 String hmac( GChecksumType type , const void * key , gsize key_len , const void * message , gsize message_len , bool binary )
 {
 	static guint BLOCK_SIZE = 64; // This could be incorrect if new checksum types are used
-	
+
 	guint HASH_SIZE = g_checksum_type_get_length( type );
-	
+
 	guint8 key_buffer[ BLOCK_SIZE ];
-	
+
 	memset( key_buffer , 0 , BLOCK_SIZE );
-	 
+
 	if ( key_len > BLOCK_SIZE )
 	{
 		GChecksum * cs = g_checksum_new( type );
@@ -146,24 +147,24 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 		gsize size = BLOCK_SIZE;
 		g_checksum_get_digest( cs , key_buffer , & size );
 		g_assert( size == HASH_SIZE );
-		g_checksum_free( cs ); 	
+		g_checksum_free( cs );
 	}
 	else
 	{
-		g_memmove( key_buffer , key , key_len );	
+		g_memmove( key_buffer , key , key_len );
 	}
-	
+
 	guint8 o_pad[ BLOCK_SIZE ];
 	guint8 i_pad[ BLOCK_SIZE ];
-	
+
 	for( guint i = 0; i < BLOCK_SIZE; ++i )
 	{
 		o_pad[ i ] = key_buffer[ i ] ^ 0x5c;
 		i_pad[ i ] = key_buffer[ i ] ^ 0x36;
 	}
-	
+
 	guint8 message_hash[ HASH_SIZE ];
-	
+
 	{
 		GChecksum * cs = g_checksum_new( type );
 		g_checksum_update( cs , ( const guchar * ) i_pad , BLOCK_SIZE );
@@ -172,15 +173,15 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 		g_checksum_get_digest( cs , message_hash , & size );
 		g_assert( size == HASH_SIZE );
 		g_checksum_free( cs );
-	} 	
-	
+	}
+
 	String result;
-	
+
 	{
 		GChecksum * cs = g_checksum_new( type );
 		g_checksum_update( cs , ( const guchar * ) o_pad , BLOCK_SIZE );
 		g_checksum_update( cs , ( const guchar * ) message_hash , HASH_SIZE );
-		
+
 		if ( binary )
 		{
 			guint8 digest[ HASH_SIZE ];
@@ -196,23 +197,40 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 		g_checksum_free( cs );
 	}
 
-	return result;	
+	return result;
 }
 
 ]]
 
 /*
-	File: global functions
+	File: Miscellaneous Utility Functions
+
+	This section describes utility functions provided by the TrickPlay SDK Libraries. A TrickPlay application can call any of the functions described here.
 */
 
 globals
 {
 	/*
 		Function: print
-		
-		Prints all the arguments to the console.
+
+		The print() function outputs all its arguments to the TrickPlay Console.
+
+		*Arguments:*
+
+			... - the print() function accepts a variable number of arguments of any supported type
+
+		*Return Value:* None
+
+		*Code Example:* Output various messages to the console
+
+			(code)
+			print( "Process completed" )
+			print( "Code:", error_code, ", Message:", error_message )
+			(end)
+
+		*See Also:* the <dumptable> and <warn> functions
 	*/
-	
+
     print()
         [[
             std::string result;
@@ -234,162 +252,222 @@ globals
               result += s;
               lua_pop(L, 1);  /* pop result */
             }
-            g_message("%s",result.c_str());                
+            g_message("%s",result.c_str());
         ]];
-    
+
+    /*
+        Function: warn
+
+        The warn() function outputs all its arguments to the TrickPlay Console. Unlike <print>, the output of the warn function is displayed more prominently.
+
+        *Arguments:*
+
+            ... - the warn() function accepts a variable number of arguments of any supported type
+
+        *Return Value:* None
+
+        *Code Example:* Output various messages to the console
+
+            (code)
+            warn( "Something went wrong!" )
+            (end)
+
+        *See Also:* the <dumptable> and <print> functions
+    */
+
+    warn()
+        [[
+            std::string result;
+            int n = lua_gettop(L);  /* number of arguments */
+            int i;
+            lua_getglobal(L, "tostring");
+            for (i=1; i<=n; i++)
+            {
+              const char *s;
+              lua_pushvalue(L, -1);  /* function to be called */
+              lua_pushvalue(L, i);   /* value to print */
+              lua_call(L, 1, 1);
+              s = lua_tostring(L, -1);  /* get result */
+              if (s == NULL)
+                return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                                     LUA_QL("print"));
+              if (i>1)
+                result += ' ';
+              result += s;
+              lua_pop(L, 1);  /* pop result */
+            }
+            g_warning("%s",result.c_str());
+        ]];
+
     /*
     	Function: dofile
-    	
-    	Opens the named file and executes it as a Lua chunk.
-    	
-    	Arguments:
-    	
-    		file_name - The name of the file (in your app bundle).
-    		
-    	Returns:
-    	
-    		values - All values returned by the chunk.
+
+    	The dofile() function loads a file containing Lua source code and executes the code. If any error occurs during the running of the Lua code, an error is raised.
+
+		*Arguments:*
+
+			file_name - name of Lua source file to load and execute. The file must be located within the application's app bundle directory structure. If a file extension is not specified, an extension of .lua is assumed.
+
+    	*Return Values:* Returns the value or values returned by the executed Lua code.
+
+    	*See Also:* the <loadfile> function
     */
-    
+
     multi dofile(string file_name)
         [[
-            String path;
-            
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            String path( file_name );
+
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
+                path += ".lua";
             }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
-            }
-            
-            App * app = App::get( L );
-            
+
             int n = lua_gettop(L);
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) != 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) != 0 )
             {
                 lua_error(L);
             }
             lua_call(L,0,LUA_MULTRET);
-            return lua_gettop(L) - n;            
+            return lua_gettop(L) - n;
         ]];
-        
+
     /*
     	Function: loadfile
-    	
-    	Loads the file as a Lua chunk and returns its contents as a function. If there
-    	is an error, returns nil and an error message.
-    	
-    	Arguments: 
-    	
-    		file_name - The name of the file (in your app bundle).
-    		
-    	Returns:
-    	
-    		a function - That can be called to execute the chunk.
-    		nil , error message - If there is something wrong.
+
+    	The loadfile() function loads a file containing Lua source code, compiles the code, and returns the compiled chunk as a function. If an error occurs, an error is not raised, but the function returns nil and an error message.
+
+    	*Arguments:*
+
+    		file_name - name of Lua source file to load. The file must be located within the application's app bundle directory structure. If a file extension is not specified, an extension of .lua is assumed.
+
+    	*Return Values:* Returns the compiled Lua code which can be called as a function. If an error occurred, returns nil and a descriptive string error message.
+
+		*See Also:* the <dofile> function
     */
-    
+
     multi loadfile(string file_name)
         [[
-            String path;
-            
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            String path( file_name );
+
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
-            }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
+                path += ".lua";
             }
 
-            App * app = App::get( L );
-            
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) == 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) == 0 )
             {
                 return 1;
             }
             else
             {
                 lua_pushnil(L);
-                lua_insert(L, -2);  
-                return 2;  
-            }            
+                lua_insert(L, -2);
+                return 2;
+            }
         ]];
 
     /*
     	Function: readfile
-    	
-    	Loads the contents of the given file and returns them as a string. If
-    	there are any problems, it returns nil.
-    	
-    	Arguments:
-    	
-    		file_name - The name of the file to read (in your app bundle).
-    		
-    	Returns:
-    	
-    		string - The contents of the file or
-    		nil - If something went wrong.
+
+    	The readfile() function loads a file and returns the contents in a Lua string. If an error occurs, the function returns nil.
+
+    	*Arguments:*
+
+    		file_name - name of file to load. The file must be located within the application's app bundle directory structure.
+
+    	*Return Value:* String containing the file's contents. If an error occurred, returns nil.
+
+    	*See Also:* the <loadfile> function
     */
-    
+
 	lstring readfile(string file_name )
 		[[
 			result = 0;
 			result_len = 0;
 
-            gsize length = 0;
-            gchar * contents = App::get( L )->get_metadata().sandbox.get_pi_child_contents( file_name , length );
-            
-            FreeLater free_later;
-            
+            App * app = App::get( L );
+
+            Util::Buffer contents = AppResource( app , file_name , AppResource::URI_NOT_ALLOWED ).load_contents( app );
+
             if ( contents )
             {
-                free_later( contents );
-                
-                result = contents;
-                result_len = length;
+                result = contents.data();
+                result_len = contents.length();
             }
-		]];       
-        
+		]];
+
     /*
     	Function: exit
-    	
-    	Exits/closes the app. This does not happen immediately, so exit does return control to
-    	you. Your app will exit the next time through TrickPlay's event loop.
+
+    	The exit() function schedules the TrickPlay application for termination. The next time the TrickPlay event loop executes, the <app.on_closing> event handler will be invoked and, afterward, the application will terminate.
+
+    	*Arguments:* None
+
+    	*Return Value:* None
+
+    	*See Also:* the <reload> function
     */
-    
+
     exit()
         [[
-            App::get(L)->get_context()->close_app();        
+            App::get(L)->get_context()->close_app();
         ]];
 
     /*
         Function: reload
-        
-        Reloads the app, as though it had been shutdown then restarted
+
+        The reload() function restarts the application as if it had been freshly loaded and initialized.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <exit> function
     */
 
     reload()
     	[[
-    		App::get(L)->get_context()->reload_app();
+            class ReloadAction : public Action
+            {
+            public:
+
+                ReloadAction( lua_State * L )
+                {
+                    app = App::get( L );
+                    app->ref();
+                }
+
+                virtual ~ReloadAction()
+                {
+                    app->unref();
+                }
+
+            protected:
+
+                virtual bool run()
+                {
+                    app->get_context()->reload_app();
+                    return false;
+                }
+
+            private:
+
+                App * app;
+            };
+
+    	    Action::post( new ReloadAction( L ) );
     	]];
-        
-    /*    
-    	Function: launch_action
-    	
-    	TODO
+
+    /*
+    	Undocumented_Function: launch_action
+
+    	The launch_action() function will remain undocumented until it is more fully fleshed out.
     */
-    
+
     multi launch_action( string app_id = NULL, string action = NULL, string uri = NULL, string type = NULL , table parameters = 0 )
     	[[
     		String serialized_parameters;
-    		
+
     		if ( parameters )
     		{
             	lua_getglobal( L, "serialize" );
@@ -399,76 +477,73 @@ globals
             	{
             		size_t len = 0;
             		const char * s = lua_tolstring( L, -1, &len );
-            		
+
             		serialized_parameters = String( s, len );
             	}
             	lua_pop( L, 1 );
     		}
-    		
-    		
+
+
     		Actions actions( App::get( L )->get_context() );
     		String caller( App::get( L )->get_id() );
-    		
+
     		SystemDatabase::AppActionMap matches;
-    		
-    		bool result = actions.launch_action( 
-    			caller.c_str(), 
-    			app_id, 
-    			action, 
-    			uri, 
-    			type, 
-    			serialized_parameters.empty() ? NULL : serialized_parameters.c_str(), 
+
+    		bool result = actions.launch_action(
+    			caller.c_str(),
+    			app_id,
+    			action,
+    			uri,
+    			type,
+    			serialized_parameters.empty() ? NULL : serialized_parameters.c_str(),
     			matches );
-    		
+
     		lua_pushboolean( L, result );
-    		
+
 			lua_newtable( L );
-			
+
 			int i = 1;
-			
+
 			for ( SystemDatabase::AppActionMap::const_iterator it = matches.begin(); it != matches.end(); ++it )
 			{
 				for ( App::Action::Map::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait, ++i )
 				{
 					lua_newtable( L );
-					
+
 					lua_pushstring( L, it->first.c_str() );
 					lua_setfield( L, -2, "app" );
-					
+
 					lua_pushstring( L, ait->first.c_str() );
 					lua_setfield( L, -2, "action" );
-					
+
 					lua_pushstring( L, ait->second.description.c_str() );
 					lua_setfield( L, -2, "description" );
-					
+
 					lua_rawseti( L, -2, i );
-				} 
+				}
 			}
-			
-			
+
+
 			return 2;
-    		
+
     	]];
-      
+
     /*
     	Function: choose
-    	
-    	Receives 3 parameters. If the first one is true, it returns the second one, 
-    	otherwise, it returns the third one.  Equivalent to ((expression)?(a):(b)) in C.
-    	
-    	Arguments:
-    	
-    		expression - An expression. Remember that in Lua, only false and nil evaluate to false.
-    		a - The value to return if the expression is true.
-    		b - The value to return if the expression is false.
-    		
-    	Returns:
-    	
-    		a - If the expression is true.
-    		b - If the expression is false.
-    		nil - If you pass less than 3 arguments. 
+
+    	The choose() function accepts three arguments and applies an IF-THEN-ELSE operation to them; IF the first argument is true THEN it returns the second argument ELSE it returns the third argument.
+
+    	The first argument must evaluate to a Lua true or false condition. Note: In Lua, only false and nil evaluate to false.
+
+    	*Arguments:*
+
+    		expression - Lua code segment that evaluates to either true or false
+    		a - value to return if expression is true
+    		b - value to return if expression is false
+
+    	*Return Value:* If first argument evaluates to true, returns second argument, else returns third argument. If fewer than three arguments are passed to the function, returns nil.
     */
-      
+
     multi choose()
         [[
             if (lua_gettop(L)<3)
@@ -484,35 +559,50 @@ globals
 
 	/*
 		Function: serialize
-		
-		Converts some Lua values to a string.  
-		
-		TODO cycles
-		
-		Arguments:
-		
-			value - A number, string, boolean or table.
-			
-		Returns:
-		
-			string - A string representation of the value.
+
+		The serialize() function converts an explicit value or a variable value to a string. Variables of the following types can be converted: integer, boolean, string, and table. When a table is converted to a string, each table entry is preceded by the string "[n]=" where n is the entry's index value. Examples are shown in the Code Examples section below.
+
+		*Arguments:*
+
+			arg1 - variable or value to convert to string. The argument must be one of the following data types: integer, boolean, string or table
+
+		*Return Value:* String representation of the converted value
+
+		*Code Examples:* Demonstrate the serialize() function's output for various data types
+
+		(code)
+		-- Serialize some simple types
+		x, y, z = 5, true, "hello"
+		print( serialize( x ), serialize( y ), serialize( z ) )
+		-- Outputs: 5 true "hello"
+
+		-- Serialize a table
+		print( serialize( { x, y, z } ) )
+		-- Outputs: {[1]=5,[2]=true,[3]="hello"}
+
+		-- Serialize a nested table
+		print( serialize( { 10, { x, y, z } } ) )
+		-- Outputs: {[1]=10,[2]={[1]=5,[2]=true,[3]="hello"}}
+		(end)
+
+		*See Also:* the <json.stringify> function
 	*/
-	
+
     string serialize()
         [[
             String buffer;
 
             int n=1;
-            
+
             bool pretty=false;
             int level=0;
-            
+
             if (lua_gettop(L)>1)
             {
                 pretty=lua_toboolean(L,2);
-                level=lua_tointeger(L,2);                
+                level=lua_tointeger(L,2);
             }
-            
+
             switch(lua_type(L,n))
             {
                 case LUA_TNUMBER:
@@ -520,7 +610,7 @@ globals
                     buffer=lua_tostring(L,n);
                     break;
                 }
-                
+
                 case LUA_TSTRING:
                 {
                     LSG;
@@ -534,36 +624,36 @@ globals
                     LSG_END(0);
                     break;
                 }
-                
+
                 case LUA_TBOOLEAN:
                 {
                     buffer=lua_toboolean(L,n)?"true":"false";
                     break;
                 }
-                
+
                 case LUA_TTABLE:
                 {
                     if (pretty)
                     {
                         buffer += "\n" + String(2*level,' ');
                     }
-                    
+
                     buffer+="{";
-                    
+
                     if (pretty)
                     {
                         buffer += "\n";
                     }
-                    
+
                     // Lookup the serialize function only once
                     lua_getglobal(L,"serialize");
                     int ser=lua_gettop(L);
-                    
+
                     // Prepare to iterate over the table
                     lua_pushnil(L);
-                    
+
                     bool first=true;
-                    
+
                     while (lua_next(L,n)!=0)
                     {
                         if (first)
@@ -573,18 +663,18 @@ globals
                         else
                         {
                             buffer+=",";
-                            
+
                             if (pretty)
                             {
                                 buffer += "\n";
                             }
                         }
-                        
+
                         if (pretty)
                         {
-                            buffer += String(2*(level+1),' ');                            
+                            buffer += String(2*(level+1),' ');
                         }
-                        
+
                         // Serialize the key
                         buffer+="[";
                         lua_pushvalue(L,ser);
@@ -611,64 +701,68 @@ globals
                         // from lua_next
                         lua_pop(L,2);
                     }
-                    
+
                     if (pretty)
                     {
                         buffer += "\n" + String(2*level,' ');
                     }
 
                     buffer+="}";
-                    
+
                     lua_pop(L,1);
-                    
+
                     break;
                 }
-                
+
                 default:
                     break;
             }
-            
+
             result=buffer.empty()?NULL:buffer.c_str();
         ]];
 
 	/*
 		Function: md5
-		
-		Returns the MD5 hash of the string passed in.
-		
-		Arguments:
-		
-			string - A string to hash.
-			binary - If true, the result is a binary string, otherwise, it is hex.
-			
-		Returns:
-		
-			string - The MD5 hash of the string. 
+
+		The md5() function calculates a string's checksum value using the MD5 (Message Digest) hashing algorithm. The checksum is returned as a string in either hexadecimal or binary format. When returned in hexadecimal format, all hex characters are returned in lower-case.
+
+		Note: The MD5 algorithm is not as secure as the SHA-1 and SHA-256 hashing algorithms used by the <sha1> and <sha256> functions, respectively.
+
+		*Arguments:*
+
+			s - string to process
+			binary - boolean flag indicating the calculated checksum string's format: hexadecimal or binary (true=binary). If not specified, the default string format is hexadecimal (binary=false).
+
+		*Return Value:* String containing MD5 checksum value in either hexadecimal or binary format
+
+		*See Also:* the <sha1> and <sha256> functions
 	*/
-	
-    lstring md5( lstring s , bool binary = false )
+
+    lstring md5( lstring s, bool binary = false )
         [[
         	String h( hash( G_CHECKSUM_MD5 , s , s_len , binary ) );
         	result = h.data();
         	result_len = h.length();
         ]];
-        
+
 	/*
 		Function: sha1
-		
-		Returns the SHA-1 hash of the string passed in.
-		
-		Arguments:
-		
-			string - A string to hash.
-			binary - If true, the result is a binary string, otherwise, it is hex.
-			
-		Returns:
-		
-			string - The SHA-1 hash of the string. 
+
+		The sha1() function calculates a string's checksum value using the SHA-1 (Secure Hash Algorithm) hash function. The checksum is returned as a string in either hexadecimal or binary format. When returned in hexadecimal format, all hex characters are returned in lower-case.
+
+		Note: The SHA-256 algorithm used by the <sha256> function is more secure than the SHA-1 function.
+
+		*Arguments:*
+
+			s - string to process
+			binary - boolean flag indicating the calculated checksum string's format: hexadecimal or binary (true=binary). If not specified, the default string format is hexadecimal (binary=false).
+
+		*Return Value:* String containing SHA-1 checksum value in either hexadecimal or binary format
+
+		*See Also:* the <sha256> and <md5> functions
 	*/
-	
-    lstring sha1( lstring s , bool binary = false )
+
+    lstring sha1( lstring s, bool binary = false )
         [[
         	String h( hash( G_CHECKSUM_SHA1 , s , s_len , binary ) );
         	result = h.data();
@@ -677,124 +771,170 @@ globals
 
 	/*
 		Function: sha256
-		
-		Returns the SHA-256 hash of the string passed in.
-		
-		Arguments:
-		
-			string - A string to hash.
-			binary - If true, the result is a binary string, otherwise, it is hex.
-			
-		Returns:
-		
-			string - The SHA-256 hash of the string. 
+
+		The sha256() function calculates a string's checksum value using the SHA-256 (Secure Hash Algorithm) hash function. The checksum is returned as a string in either hexadecimal or binary format. When returned in hexadecimal format, all hex characters are returned in lower-case.
+
+		*Arguments:*
+
+			s - string to process
+			binary - boolean flag indicating the calculated checksum string's format: hexadecimal or binary (true=binary). If not specified, the default string format is hexadecimal (binary=false).
+
+		*Return Value:* String containing SHA-256 checksum value in either hexadecimal or binary format
+
+		*See Also:* the <sha1> and <md5> functions
 	*/
-	
-    lstring sha256( lstring s , bool binary = false )
+
+    lstring sha256( lstring s, bool binary = false )
         [[
         	String h( hash( G_CHECKSUM_SHA256 , s , s_len , binary ) );
         	result = h.data();
         	result_len = h.length();
         ]];
-        
+
 	/*
 		Function: hmac_sha1
-		
-		Returns the HMAC/SHA-1 hash of the key and message.
-		
-		Arguments:
-		
-			key - The key.
-			message - The message.
-			binary - If true, the result is a binary string, otherwise, it is hex.
-			
-		Returns:
-		
-			string - The HMAC/SHA-1 hash. 
+
+		The hmac_sha1() function accepts a message and secret key to construct an HMAC (Hash-based Message Authentication Code) using the SHA-1 (Secure Hash Algorithm) hash function. The MAC is returned as a string in either hexadecimal or binary format. When returned in hexadecimal format, all hex characters are returned in lower-case.
+
+		*Arguments:*
+
+			key - string containing the secret key
+			message - string containing the message to process
+			binary - boolean flag indicating the MAC string's format: hexadecimal or binary (true=binary). If not specified, the default string format is hexadecimal (binary=false).
+
+		*Return Value:* String containing the HMAC-SHA-1 key/message in either hexadecimal or binary format
+
+		*See Also:* the <hmac_sha256> function
 	*/
-	
-    lstring hmac_sha1( lstring key , lstring message , bool binary = false)
+
+    lstring hmac_sha1( lstring key, lstring message, bool binary = false)
     	[[
     		String h( hmac( G_CHECKSUM_SHA1 , key , key_len , message , message_len , binary ) );
     		result = h.data();
     		result_len = h.length();
     	]];
-        
+
 	/*
 		Function: hmac_sha256
-		
-		Returns the HMAC/SHA-256 hash of the key and message.
-		
-		Arguments:
-		
-			key - The key.
-			message - The message.
-			binary - If true, the result is a binary string, otherwise, it is hex.
-			
-		Returns:
-		
-			string - The HMAC/SHA-256 hash. 
+
+		The hmac_sha256() function accepts a message and secret key to construct an HMAC (Hash-based Message Authentication Code) using the SHA-256 (Secure Hash Algorithm) hash function. The MAC is returned as a string in either hexadecimal or binary format. When returned in hexadecimal format, all hex characters are returned in lower-case.
+
+		*Arguments:*
+
+			key - string containing the secret key
+			message - string containing the message to process
+			binary - boolean flag indicating the MAC string's format: hexadecimal or binary (true=binary). If not specified, the default string format is hexadecimal (binary=false).
+
+		*Return Value:* String containing the HMAC-SHA-256 key/message in either hexadecimal or binary format
+
+		*See Also:* the <hmac_sha1> function
 	*/
 
-    lstring hmac_sha256( lstring key , lstring message , bool binary = false )
+    lstring hmac_sha256( lstring key, lstring message, bool binary = false )
     	[[
     		String h( hmac( G_CHECKSUM_SHA256 , key , key_len , message , message_len , binary ) );
     		result = h.data();
     		result_len = h.length();
     	]];
-    	
+
     /*
     	Function: base64_encode
-    	
-    	Encodes a string to base 64.
-    	
-    	Arguments:
-    	
-    		s - The string to encode.
-    		
-    	Returns:
-    		
-    		string - The encoded result.
+
+    	The base64_encode() function translates a string of binary data to its radix-64 string representation. Base64 encoding is often used when binary data needs to be stored or transferred using methods that expect text data.
+
+    	*Arguments:*
+
+    		s - string containing data to encode
+
+    	*Return Value:*
+
+    		string - translated string in Base64 format
+
+    	*See Also:* the <base64_decode> function
     */
-    
+
     string base64_encode( lstring s )
     	[[
-    		gchar * encoded = g_base64_encode( ( const guchar * ) s , s_len ); 
+    		gchar * encoded = g_base64_encode( ( const guchar * ) s , s_len );
     		FreeLater free_later( encoded );
-    		
-    		result = encoded; 
+
+    		result = encoded;
     	]];
-    	
+
     /*
     	Function: base64_decode
-    	
-    	Decodes a base 64 string.
-    	
-    	Arguments:
-    	
-    		s - The string to decode.
-    		
-    	Returns:
-    		
-    		string - The decoded result.
+
+    	The base64_decode() function translates a Base64-encoded string to its original binary data format.
+
+    	*Arguments:*
+
+    		s - string containing Base64-encoded data to decode
+
+    	*Return Value:* string containing original binary data
+
+    	*See Also:* the <base64_encode> function
     */
 
     lstring base64_decode( string s )
     	[[
     		gsize length;
-    		
+
     		guchar * decoded = g_base64_decode( ( const gchar * ) s , & length );
-    		
+
     		FreeLater free_later( decoded );
-    		
+
     		result = ( const char * ) decoded;
     		result_len = length;
     	]];
 
+    /*
+        Function: xml_escape
+
+        The xml_escape() function escapes XML text, converting less than (<), greater than (>) and other characters to their corresponding HTML entity values, e.g., &lt; and &gt;. Also converted are all characters within the range of &x1; thru &x1f;, inclusive, except for tabstop, newline, and carriage return characters.
+
+        *Argument:*
+
+        	s - string to process
+
+        *Return Value:* Converted string with appropriate characters escaped
+
+        *Code Example:* Escape relevant characters in source string
+
+        (code)
+		print( xml_escape( [=[<People>
+								<Person>
+									<ID>#001</ID>
+									<Name>John Doe</Name>
+									<email>john@doe.com</email>
+								</Person>
+							 </People>
+						   ]=] ) )
+		Outputs:
+			&lt;People&gt;
+				&lt;Person&gt;
+					&lt;ID&gt;#001&lt;/ID&gt;
+					&lt;Name&gt;John Doe&lt;/Name&gt;
+					&lt;email&gt;john@doe.com&lt;/email&gt;
+				&lt;/Person&gt;
+           &lt;/People&gt;
+        (end)
+
+        *See Also:* the <XMLParser> class
+    */
+
+    string xml_escape( lstring s )
+        [[
+            gchar * encoded = g_markup_escape_text( (const gchar *) s, s_len );
+
+            FreeLater free_later( encoded );
+
+            result = (const char *)encoded;
+        ]];
+
 	lstring uint32_to_be( int n )
 		[[
 			guint32 i = GUINT32_TO_BE( n );
-			
+
 			result = ( char * ) & i;
 			result_len = 4;
 		]];
@@ -802,72 +942,73 @@ globals
 	lstring uint32_to_le( int n )
 		[[
 			guint32 i = GUINT32_TO_LE( n );
-			
+
 			result = ( char * ) & i;
 			result_len = 4;
-		]];       
+		]];
 
 	int uint32_from_be( lstring s )
 		[[
 			if ( s_len >= 4 )
 			{
 				// TODO: Could have alignment problems
-				
+
 				result = GUINT32_FROM_BE( * ( ( guint32 * ) s ) );
 			}
 			else
 			{
 				result = 0;
-			} 
-		]];		
+			}
+		]];
 
 	int uint32_from_le( lstring s )
 		[[
 			if ( s_len >= 4 )
 			{
 				// TODO: Could have alignment problems
-				
+
 				result = GUINT32_FROM_LE( * ( ( guint32 * ) s ) );
 			}
 			else
 			{
 				result = 0;
-			} 
-		]];		
+			}
+		]];
 
 	detach( udata o )
 		[[
 			UserData::clear_callbacks( L , o );
-		]];		       
-		
+		]];
+
 	/*
 		Function: dolater
-		
-		Posts a function and arguments for execution during the next pass of the event loop. Note
-		that there is no way to receive any values returned by the function. 
-		
-		If the first argument is a number, it is interpreted as a number of milliseconds to wait
-		before executing the function, which must be the second argument. This can act as a simple
-		alternative to a timer.
 
-		Arguments:
-		
-            delay - Otional. A number of milliseconds to wait.
-			f - The function to execute.
-			others - Any number of arguments to pass to the function.
+		The dolater() function schedules a function to execute at a later time during a subsequent pass through the TrickPlay Engine. By specifying the minimum amount of time to expire before executing, the dolater() function can simulate a simple timer operation. Note: It is not possible to receive return values from the scheduled function.
 
-        Example:
+		*Arguments:*
 
-	    (code)
+			delay - minimum number of milliseconds to expire before executing function. This argument is optional. If not specified, the function will execute during the next pass through the TrickPlay Engine.
+			func - function to execute
+			args, ... - argument(s) to pass to func. These arguments are optional and there can be any number of them.
 
-	      dolater( print , 1 ) -- Will call print as soon as it can and pass 1 as a parameter
+		*Return Value:* None
 
-	      dolater( 1000 , print , 1 ) -- Will call print in a second, with 1 as a parameter
+		*Code Examples:* Demonstrate various dolater() invocations
 
-	    (end)
+			(code)
+			-- Execute sendMail() during next pass through the TrickPlay Engine
+			dolater( sendMail )
 
+			-- Execute sendMail( textMsg ) during next pass through the Engine
+			dolater( sendMail, textMsg )
+
+			-- Execute sendMail( textMsg ) in a second (or later)
+			dolater( 1000, sendMail, textMsg )
+			(end)
+
+		*See Also:* the <Timer> class
 	*/
-	
+
 	dolater( ... )
 		[[
 			int nargs = lua_gettop(L);
@@ -917,40 +1058,42 @@ globals
                 DoLater::add(L,delay,func,args);
             }
 		]];
-		
+
 	/*
 		Function: uuid
-		
-		Generates a random (v4) UUID.
-		
-		Returns:
-		
-			uuid - A new UUID.
-			
-	*/ 
-	
+
+		The uuid() function generates a version 4 (random) UUID (universally unique identifier). Note: While the probability of producing duplicate UUIDs is extremely remote, UUIDs must be considered "practically unique" and not "guaranteed unique."
+
+		*Arguments:* None
+
+		*Return Value:* string containing a new UUID
+	*/
+
 	string uuid()
 		[[
 			String uuid( Util::make_v4_uuid() );
-			
+
 			result = uuid.c_str();
 		]];
-		
+
 	/*
 		Function: dumptable
-		
-		Prints a table to the console; for debugging purposes. It handles 
-		cyclic references.
-		
-		Arguments:
-		
-			t - The table to print.
-			filter - A function that receives the table, the current key and the
-				recursion depth. If the function returns false, the key is not printed.
-			 
+
+		The dumptable() function outputs the contents of a table to the TrickPlay Console. Cyclic references are handled appropriately.
+
+		This function is intended for debugging purposes and can be entered directly on the Console command line.
+
+		*Arguments:*
+
+			t - table to output
+			filter - function that can be used to filter output. The function's prototype is: func( key, value, table_depth ). The function is invoked for each entry in the table. The key and value arguments are the current key/value pair from the table. The table_depth indicates the table level in which the key/value resides. The top-level table has a table_depth of 1; a table entry contained within the top-level table has a table_depth of 2, and so on. If the function returns false, the table entry is not output. The filter argument is optional. If not specified, no filter function will be called, and all the table's contents will be output.
+
+		*Return Value:* None
+
+		*See Also:* the <print> function
 	*/
-	
-	dumptable( table t , function filter = 0 )
+
+	dumptable( table t, function filter = 0 )
 		[[
 			lb_dump_table(L);
 		]];
@@ -958,12 +1101,15 @@ globals
 	/*
         Function: time
 
-        Returns the current time, but includes microseconds, so it has more resolution than
-        os.time.
+        The time() function returns the number of seconds since the Epoch (00:00:00 UTC, January 1, 1970). The precision of the seconds can go to microseconds (1/millionth of a second), depending on the capabilities of the underlying hardware. For example, in the value 10800.4507 seconds, the fractional portion specifies the number of microseconds.
 
-        Returns:
+        The time() function has finer resolution than the Lua library's os.time() function, which returns whole seconds.
 
-        time - Fractional number of seconds since the Epoch.
+        *Arguments:* None
+
+        *Return Value:* Number of seconds, including fractional seconds, since the Epoch (00:00:00 UTC, January 1, 1970)
+
+		*See Also:* the <timestamp> function
 	*/
 
 	double time()
@@ -978,7 +1124,13 @@ globals
 	/*
 	    Function: timestamp
 
-	    Returns the number of milliseconds elapsed since Trickplay was started.
+	    The timestamp() function returns the number of milliseconds elapsed since the TrickPlay Engine started.
+
+	    *Arguments:* None
+
+	    *Return Value:* Number of milliseconds, including fractional milliseconds, since the TrickPlay Engine started
+
+		*See Also:* the <time> function
 	*/
 
 	double timestamp()
@@ -995,21 +1147,32 @@ globals
 
     /*
         Function: split
-        
-        Split the given string using delimiters, returning the result in a Lua table
-        
-        Arguments:
-        source - The string to tokenize
-        delimiter - The delimiter on which to split up the source string
-        max_tokens - Optional parameter limiting the number of tokens returned.  If the limit is exceeded, the final element of the table will contain the remainder of the source String
-        
-        Returns:
-        strings - a Lua table containing the split elements of the string, with the delimiters removed.
-        
-        eg. split("a,b,c,d,e",",",3) ==> { "a","b","c,d,e" }
+
+        The split() function parses a string into tokens separated by a specified delimiter character. Delimiters are not included in the generated token list, but non-delimiter whitespace is retained.
+
+        *Arguments:*
+
+        	source - string to parse
+        	delimiter - character used to separate tokens. Only a single character may be specified.
+        	max_tokens - maximum number of tokens to parse. If max_tokens is reached before the entire source has been parsed, the final entry in the returned token table will contain the remainder of the source. The max_tokens argument is optional; if not specified, all tokens will be parsed.
+
+        *Return Value:* table containing the parsed tokens with the delimiters removed
+
+		*Code Example:* Parse some sample strings using the split() function
+
+		(code)
+		-- Use comma delimiter
+		dumptable( split( "a, b, c, d:e:f", "," ) )     -- Outputs: { "a", " b", " c", " d:e:f" }
+
+		-- Use colon delimiter
+		dumptable( split( "a, b, c, d:e:f", ":" ) )     -- Outputs: { "a, b, c, d", "e", "f" }
+
+		-- Use comma delimiter, parse first 3 tokens
+		dumptable( split( "a, b, c, d:e:f", ",", 3 ) )  -- Outputs: { "a", " b", " c, d:e:f" }
+		(end)
     */
 
-	table split( string source , string delimiter , int max_tokens = 0 )
+	table split( string source, string delimiter, int max_tokens = 0 )
         [[
             lua_newtable( L );
 
@@ -1027,6 +1190,47 @@ globals
             }
         ]];
 
+    /*
+        Function: where_am_i
+
+        The where_am_i() function returns information about the current execution context.  It provides similar functionality to the C macros __FILE __ and __LINE __, but the information is generated at runtime.
+
+        *Return Value:* A table containing information about the current location in code
+
+        file  - The path and filename of the current file
+        line  - The line number in that file
+        function - If the current line is inside a named function, then the name of that function; otherwise nil
+
+        *Code Example:* Determine where in the code we are
+
+        (code)
+        -- Get the table
+        local state = where_am_i()
+        dumptable(state)
+        (end)
+    */
+
+    table where_am_i()
+        [[
+            lua_Debug my_debug;
+
+            lua_newtable( L );
+
+            if( lua_getstack( L, 1, &my_debug ) )
+            {
+                if( lua_getinfo( L, "Sln", &my_debug ) )
+                {
+                    lua_pushstring( L, my_debug.source );
+                    lua_setfield( L, -2, "file" );
+                    lua_pushstring( L, my_debug.name );
+                    lua_setfield( L, -2, "function" );
+                    lua_pushnumber( L, my_debug.currentline );
+                    lua_setfield( L, -2, "line" );
+                }
+            }
+        ]];
+
+
 	string random_string( int length )
         [[
             String rs( "" );
@@ -1037,5 +1241,12 @@ globals
             }
 
             result = rs.c_str();
+        ]];
+
+    # Experimental, do not document
+
+    dupmetatable( udata ud )
+        [[
+            lb_chain( L , ud , 0 );
         ]];
 }

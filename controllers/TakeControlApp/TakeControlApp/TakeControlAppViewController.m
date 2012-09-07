@@ -106,7 +106,8 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
-    return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+    //return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+    return interfaceOrientation == UIInterfaceOrientationPortrait;
 }
 
 #pragma mark -
@@ -404,7 +405,7 @@
     
     pushingAppViewController = YES;
     if (viewController == tvBrowserViewController) {
-        [tvBrowserViewController.tvBrowser startSearchForServices];
+        //[tvBrowserViewController.tvBrowser startSearchForServices];
     } else if (viewController == appBrowserViewController) {
         [appBrowserViewController refresh];
     } else {
@@ -423,6 +424,10 @@
     [self presentModalViewController:camera animated:YES];
 }
 
+- (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController {
+    
+}
+
 #pragma mark -
 #pragma mark TVConnectionDelegate stuff
 
@@ -437,44 +442,6 @@
     [self destroyTPAppViewController];
     
     [tvBrowserViewController.tvBrowser refreshServices];
-}
-
-/**
- * Generic operations to perform when the network fails. Includes deallocating
- * other view controllers and their resources and restarting the NetServiceManager
- * which will then begin browsing for advertised services.
- */
-- (void)handleSocketProblems {
-    if (pushingAppBrowser || pushingAppViewController) {
-        return;
-    }
-    
-    [self.navController popToRootViewControllerAnimated:YES];
-    
-    [self destroyTPAppViewController];
-    [self destroyAppBrowserViewController];
-    
-    [tvBrowserViewController refresh];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
- * when an error occurs over the network.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-    
-    [self handleSocketProblems];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
- * when the stream socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in Root");
-    
-    [self handleSocketProblems];
 }
 
 #pragma mark -

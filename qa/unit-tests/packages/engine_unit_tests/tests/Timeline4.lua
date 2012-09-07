@@ -2,7 +2,7 @@
 Filename: Timeline4.lua
 Author: Peter von dem Hagen
 Date: January 21, 2011
-Description:  Verify rewind starts that timeline from 0 by never letting progress get beyond 350.
+Description:  Verify reverse starts that timeline from 0 by never letting progress get beyond 350.
 --]]
 
 -- Test Set up --
@@ -14,14 +14,25 @@ test_group:add (image1)
 
 local myTimeline = Timeline ()
 local frameCount = 0
-myTimeline.duration = 2000
-myTimeline.loop = true
+local highest_progress
+local last_progress
+local progress_track = ""
+myTimeline.duration = 10000
+myTimeline.loop = false
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 
 	frameCount= frameCount + 1
 	image1.x = 1000 * progress
-	if progress > 0.3 then
-		myTimeline:rewind()
+	progress_track = progress_track..progress.." / "
+	if progress > 0.2 and myTimeline.direction == "FORWARD" then
+		myTimeline:reverse ()
+		highest_progress = progress
+		
+	end
+	last_progress = progress
+
+	if frameCount > 7 then 
+		timeline_4_test_completed = true
 	end
 end
 
@@ -30,9 +41,9 @@ myTimeline:start()
 
 -- Tests --
 
--- Verify that rewind is starting the timeline from 0 and is always less then 350.
-function test_Timeline_rewind ()
-    assert_less_than ( image1.x , 350,  "timeline.rewind not restarting" )
+-- Verify that reverse is starting the timeline from 0 and is always less then 350.
+function test_Timeline_reverse ()
+    assert_less_than ( last_progress, highest_progress,  "Returned: "..last_progress.." Expected less than: "..highest_progress..". Frame_count: "..frameCount..". Progress: "..progress_track )
 end
 
 

@@ -32,11 +32,13 @@ if (NATURAL_DOCS)
 			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/reference/images
 			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/progguide/images
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/internal
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
             -xi ${PROJECT_SOURCE_DIR}/engine/lb
             -xi ${PROJECT_SOURCE_DIR}/engine/lua
             -xi ${PROJECT_SOURCE_DIR}/engine/public
             -xi ${PROJECT_SOURCE_DIR}/engine/source
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools/ide/tutorial
             -o HTML ${PROJECT_BINARY_DIR}/docs/rte
             -p ${PROJECT_SOURCE_DIR}/engine/docs/rte/config
             -s Default Trickplay
@@ -64,8 +66,11 @@ if (NATURAL_DOCS)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/oem
         COMMAND ${NATURAL_DOCS}
 			-r
+			--highlight Off
             -i ${PROJECT_SOURCE_DIR}/engine            
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/rte
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/internal
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/tutorials
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools
             -xi ${PROJECT_SOURCE_DIR}/engine/bindings
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
@@ -77,6 +82,21 @@ if (NATURAL_DOCS)
             -s Default Trickplay
 	)
 
+	add_custom_target(
+		internal-docs
+		COMMENT "Generating Internal docs"
+		VERBATIM
+		COMMAND $(CMAKE_COMMAND) -E make_directory ${PROJECT_BINARY_DIR}/docs/internal
+		COMMAND ${NATURAL_DOCS}
+			-r
+			--highlight Off
+			-i ${PROJECT_SOURCE_DIR}/engine/docs/internal
+			-xi ${PROJECT_SOURCE_DIR}/engine/docs/internal/misc
+			-o HTML ${PROJECT_BINARY_DIR}/docs/internal
+			-p ${PROJECT_SOURCE_DIR}/engine/docs/internal/config
+			-s Default Trickplay
+	)		
+		
     add_custom_target(
         docs
         ALL
@@ -85,6 +105,7 @@ if (NATURAL_DOCS)
 		docs
 			rte-docs
 			oem-docs
+			internal-docs
 	)
     
 endif(NATURAL_DOCS)

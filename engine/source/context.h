@@ -9,6 +9,7 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
+
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -44,6 +45,11 @@
 #define TP_APP_PUSH_ENABLED_DEFAULT     	true
 #define TP_APP_PUSH_PORT_DEFAULT        	8888
 #define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
+#define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
+#define TP_GAMESERVICE_ENABLED_DEFAULT		false
+#define TP_GAMESERVICE_DOMAIN_DEFAULT	    "gameservice.trickplay.com"
+#define TP_GAMESERVICE_HOST_DEFAULT			"gameservice.gameservice.trickplay.com"
+#define TP_GAMESERVICE_PORT_DEFAULT			5222
 
 // TODO: Don't like hard-coding this app id here
 
@@ -62,6 +68,11 @@ class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
 class HttpTrickplayApiSupport;
+
+#ifdef TP_WITH_GAMESERVICE
+class GameServiceSupport;
+#endif
+
 
 //-----------------------------------------------------------------------------
 
@@ -168,6 +179,12 @@ public:
 
     //.........................................................................
 
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * get_gameservice() const;
+#endif
+
+    //.........................................................................
+
     Image * load_icon( const gchar * path );
 
     //.........................................................................
@@ -198,6 +215,11 @@ public:
     // Get a resource loader
 
     bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+
+    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
+    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
+
+    String get_control_message( App * app = 0 ) const;
 
 private:
 
@@ -344,6 +366,10 @@ private:
 
     App *                       current_app;
 
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * gameservice_support;
+#endif
+
     String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
@@ -365,9 +391,6 @@ private:
     typedef std::map<String, RequestHandlerClosure>             RequestHandlerMap;
 
     RequestHandlerMap                                           request_handlers;
-
-    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
-    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
     OutputHandlerSet                                            output_handlers;
 

@@ -69,7 +69,7 @@ local function set_new_project (pname, replace)
 
 	if(pname~= "") then
     	project = pname
-    	if table.getn(projects) ~= 0 then 
+    	if #projects ~= 0 then
 			for i, j in pairs (projects) do 
 				if j == pname then 
 					if replace == nil then 
@@ -287,7 +287,8 @@ end
 ------------------------------------
 
 function project_mng.open_debugger()
-	editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) 
+	--editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) 
+	editor_lb:execute(debugger_script.." "..current_dir) 
 end 
 ------------------------------------
 -- project_mng.open_project 

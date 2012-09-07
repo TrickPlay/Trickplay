@@ -1,12 +1,15 @@
 
 local keybd_bgs      = {}
 local keybd_letters  = {}
-local letter_scores = {}
+local letter_scores  = {}
+local right_side_txt = {}
+
+local min_word_length = 2
 
 local controller = Group{ name = "Make Word", x = 490, y = 700, }
 
 local img_srcs,
-    create_game_state,
+    right_side_list,
     main_menu_list,
     letter_values,
     word_count_n,
@@ -14,6 +17,7 @@ local img_srcs,
     get_letters,
     make_button,
     game_server,
+    keybd_list,
     check_word,
     make_list,
     session,
@@ -38,10 +42,7 @@ function controller:init(t)
     check_word     = t.check_word     or error("must pass check_word",     2)
     guess_word     = t.guess_word     or error("must pass guess_word",     2)
     main_menu      = t.main_menu      or error("must pass main_menu",      2)
-    main_menu_list = t.main_menu_list or error("must pass main_menu_list", 2)
     sk             = t.sk             or error("must pass sk",             2)
-    
-    create_game_state = t.create_game_state or error("must pass create_game_state", 2)
     
     
     --Key board
@@ -57,6 +58,12 @@ function controller:init(t)
                 if letter_slot_i > ls:num_slots() then return end
                 
                 if keybd_letters[i].used then return end
+                
+                if letter_slot_i > min_word_length then
+                    right_side_list:whiten_text(1)
+                end
+                right_side_list:whiten_text(2)
+                --right_side_txt[1].color = "ffffff"
                 
                 ls:put_letter( keybd_letters[i].text, letter_slot_i )
                 
@@ -109,7 +116,7 @@ function controller:init(t)
     
     mesg = Text{
         font  = t.font.." 30px",
-        text  = "Create a word for Player_2 to guess",
+        text  = "Create a word for the other player to guess",
         color = "999999",
         x     = (5 + img_srcs.keybd_off.w)*(t.num_letters/2),
         y     = 20,
@@ -128,185 +135,167 @@ function controller:init(t)
     }
     
     
-    
-    
-    local right_side_txt = {}
-    local right_side_bar = {}
-    right_side_bar[1] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()
-            
-            print("play word")
-            local s = string.lower(ls:get_word())
-            
-            if check_word(s) then
+    right_side_list = t.side_buttons:make{
+        resets_focus_to = 1, 
+        x = keybd_bgs[#keybd_bgs].x+480, y = 0, spacing = 874-784-66, buttons = {
+            {name = "Play Word", select = function()
                 
-                session.word = s
+                print("play word")
+                local s = string.lower(ls:get_word())
                 
-                session:opponents_turn()
+                if s:len() <= min_word_length then return end
                 
-                session:toggle_phase()
-                
-                session:remove_view(sk)
-                
-                controller:change_message("Sending...")
-                
-                list:set_state("UNFOCUSED")
-                
-                if session.opponent_name == false then
+                if check_word(s) then
                     
-                    main_menu_list:add_entry(session,"MAKE_A_WORD")
+                    session.word = s
                     
-                    game_server:launch_wildcard_session(session,function(id)
+                    session:opponents_turn()
+                    
+                    session:toggle_phase()
+                    
+                    session:remove_view(sk)
+                    
+                    controller:change_message("Sending...")
+                    
+                    list:set_state("UNFOCUSED")
+                    screen:grab_key_focus()
+                    
+                    session.viewing = false
+                    
+                    if session.opponent_name == false then
                         
-                        print("got id back")
+                        main_menu:add_entry(session,"MAKE_A_WORD")
                         
-                        app_state.state = "MAIN_PAGE"
+                        game_server:launch_wildcard_session(session,function(match)
+                            
+                            print("got id back",match)
+                            
+                            if not match then 
+                            	
+                            	list:set_state("FOCUSED")
+
+                            	return 
+                            end
+                            
+                            app_state.state = "MAIN_PAGE"
+                            bg:slide_in_hangman()
+                            session.match_id = match.match_id
+                            session = nil
+                            
+                        end)
                         
-                        session.id = id
+                    else
                         
-                    end)
+                        session:update_views()
+                        
+                        game_server:respond(session,function()
+                            app_state.state = "MAIN_PAGE"
+                            session = nil
+                            bg:slide_in_hangman()
+                            
+                        end)
+                        
+                        
+                    end
                     
                 else
                     
-                    session:update_views()
-                    
-                    game_server:respond(session,function()
-                        
-                        app_state.state = "MAIN_PAGE"
-                        
-                        
-                    end)
-                    
+                    controller:change_message(s:upper().." is not in the dictionary. Please try something else.")
                     
                 end
                 
-            else
+            end},
+            {name = "Reset", select = function()     
+                print("reset")
+                if ls:get_word():len() == 0 then return end
+                right_side_list:blacken_text(1)
+                right_side_list:blacken_text(2)
+                for i,l in pairs(keybd_letters) do
+                    
+                    l.color = "ffffff"
+                    l.used  = false
+                    
+                end
                 
-                controller:change_message("'"..s.."' is not a vaild word")
+                letter_slot_i = 1
+                word_count_n = 0
                 
-            end
-            
-        end,
-        unfocused_image = img_srcs.button_r,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[1].x = keybd_bgs[#keybd_bgs].x+480
-    right_side_bar[1].y = 0
-    right_side_txt[1] = Text{
-        color = "ffffff",
-        text  = "Play Word",
-        font  = t.font .. " Bold 28px",
-        x     = right_side_bar[1].x+30,
-        y     = right_side_bar[1].y+15,
-    }
-    
-    right_side_bar[2] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()     
-            print("reset")
-            
-            for i,l in pairs(keybd_letters) do
+                word_count_t.text = "Word Count: "..word_count_n
+                ls:reset()
                 
-                l.color = "ffffff"
-                l.used  = false
+            end},
+            {name = "Menu", select = function()
+                print("Main Menu")
+                list:set_state("UNFOCUSED")
+                screen:grab_key_focus()
+                session:remove_view(sk)
+                session:update_views()
                 
-            end
-            
-            letter_slot_i = 1
-            word_count_n = 0
-            
-            word_count_t.text = "Word Count: "..word_count_n
-            ls:reset()
-            
-        end,
-        unfocused_image = img_srcs.button_g,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[2].x = right_side_bar[1].x
-    right_side_bar[2].y = right_side_bar[1].y + img_srcs.button_f.h + 20
-    right_side_txt[2] = Text{
-        color = "ffffff",
-        text  = "Reset",
-        font  = t.font .. " Bold 28px",
-        x     = right_side_bar[2].x+30,
-        y     = right_side_bar[2].y+15,
-    }
-    
-    right_side_bar[3] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()
-            print("Main Menu")
-            list:set_state("UNFOCUSED")
-            screen:grab_key_focus()
-            session:remove_view(sk)
-            session:update_views()
-            app_state.state = "MAIN_PAGE"
-        end,
-        unfocused_image = img_srcs.button_y,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[3].x = right_side_bar[1].x
-    right_side_bar[3].y = right_side_bar[2].y + img_srcs.button_f.h + 20
-    right_side_txt[3] = Text{
-        color = "ffffff",
-        text  = "Menu",
-        font  = t.font .. " Bold 28px",
-        x     = right_side_bar[3].x+30,
-        y     = right_side_bar[3].y+15,
+                session.viewing = false
+                if session.opponent_name then
+                    game_server:update(
+                        session,
+                        function(t)
+                            app_state.state = "MAIN_PAGE"
+                        end
+                    )
+                else
+                    app_state.state = "MAIN_PAGE"
+                end
+                session = nil
+            end},
+            {name = "Quit", select = function()
+                
+                print("quit")
+                screen:grab_key_focus()
+                
+                
+                session.viewing = false
+                if session.opponent_name ~= false then
+                    controller:change_message("Saving...")
+                    game_server:update(
+                        session,
+                        function(t)
+                            game_server:update_game_history(function()
+                                exit()
+                                
+                                print("successfully updated")
+                            end)
+                            
+                        end
+                    )
+                else
+                    exit()
+                end
+            end},
+        }
     }
     
-    right_side_bar[4] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()
-            
-            print("quit")
-            
-            exit()
-            
-        end,
-        unfocused_image = img_srcs.button_b,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[4].x = right_side_bar[1].x
-    right_side_bar[4].y = right_side_bar[3].y + img_srcs.button_f.h + 20
-    right_side_txt[4] = Text{
-        color = "ffffff",
-        text  = "Quit",
-        font  = t.font .. " Bold 28px",
-        x     = right_side_bar[4].x+30,
-        y     = right_side_bar[4].y+15,
-    }
+    --keybd_bgs[# keybd_bgs + 1] = right_side_list
     
-    
-    local right_side_list = t.make_list{
-        orientation = "VERTICAL",
-        elements = right_side_bar,
-        display_passive_focus = false,
-        resets_focus_to = 1,
-    }
-    
-    keybd_bgs[# keybd_bgs + 1] = right_side_list
-    
-    list = t.make_list{
+    keybd_list = t.make_list{
         orientation = "HORIZONTAL",
         elements = keybd_bgs,
         display_passive_focus = false,
+        --resets_focus_to = 1,
+        --wrap = true,
+    }
+    list = t.make_list{
+        orientation = "HORIZONTAL",
+        elements = {keybd_list,right_side_list},
+        display_passive_focus = false,
         resets_focus_to = 1,
+        wrap = true,
     }
     
-    list:define_key_event(keys.RED,    right_side_bar[1].select)
-    list:define_key_event(keys.GREEN,  right_side_bar[2].select)
-    list:define_key_event(keys.YELLOW, right_side_bar[3].select)
-    list:define_key_event(keys.BLUE,   right_side_bar[4].select)
+    keybd_list:define_key_event(keys.Up,    function() list:on_key_down(keys.Right) end )
+    --list:define_key_event(keys.GREEN,  right_side_bar[2].select)
+    --list:define_key_event(keys.YELLOW, right_side_bar[3].select)
+    --list:define_key_event(keys.BLUE,   right_side_bar[4].select)
     
-    controller:add(word_count_t,list,mesg)
+    controller:add(--[[word_count_t,--]]list,mesg)
     controller:add(unpack(keybd_letters))
-    controller:add(unpack(letter_scores))
+    --controller:add(unpack(letter_scores))
     controller:add(unpack(right_side_txt))
     
 end
@@ -351,17 +340,48 @@ function controller:new_letters()
     
     word_count_t.text = "Word Count: "..word_count_n
     
-    controller:change_message("Create a word for '"..(session.opponent_name or 'Player_2').."' to guess")
+    controller:change_message("Create a word for "..(session.opponent_name or "the other player").." to guess")
 end
 
 function controller:gain_focus(num)
     list:set_state("FOCUSED")
+    bg:slide_out_hangman()
 end
 function controller:set_session(s)
     session = s
+    session.viewing = true
     
+    if session.opponent_name then
+        
+        game_server:update(
+            session,
+            function()
+                
+                print("Updated server - Make Word Vieiwing session")
+                
+            end
+        )
+        
+    end
+    
+    if s.opponent_name then
+        
+        sk:animate{
+            duration = 300,
+            opacity  = 255,
+        }
+        
+    else
+        
+        sk:animate{
+            duration = 300,
+            opacity  = 0,
+        }
+        
+    end
     session:add_view(sk)
-    
+    right_side_list:blacken_text(1)
+    right_side_list:blacken_text(2)
 end
 
 return controller

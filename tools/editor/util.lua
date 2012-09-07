@@ -128,7 +128,7 @@ local function orderedNext(t, state)
     end
     -- fetch the next value
     key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
+    for i = 1,#t.__orderedIndex do
         if t.__orderedIndex[i] == state then
             key = t.__orderedIndex[i+1]
         end
@@ -1298,7 +1298,7 @@ function util.itemTostring(v, d_list, t_list)
 				     			table.insert(tile_name_table, "nil")
 				   			end 
 						end 
-		        		if table.getn(tile_name_table) ~= 0 then 
+		        		if #tile_name_table ~= 0 then
 							table.insert(tiles_name_table, tile_name_table)
 						end
 					end 
@@ -1460,7 +1460,7 @@ function util.itemTostring(v, d_list, t_list)
 						   ["65293"] = function() return "keys.Return" end, 
 						  }
 
-		itm_str = itm_str..v.name.."\.extra\.focus = {" 
+		itm_str = itm_str..v.name..".extra.focus = {"
 		for m,n in pairs (v.extra.focus) do 
 			if type(n) ~= "function" then 
 		     	itm_str = itm_str.."["..focus_map[tostring(m)]().."] = \""..n.."\", " 
@@ -1472,17 +1472,17 @@ function util.itemTostring(v, d_list, t_list)
 			for q=1, #v.tab_labels do 
 				if v.tab_position == "top" then 
 					if v.tabs[q].extra.up_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.up_focus = \""..v.tabs[q].extra.up_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.up_focus = \""..v.tabs[q].extra.up_focus.."\"\n"
 					end 
 					if v.tabs[q].extra.down_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.down_focus = \""..v.tabs[q].extra.down_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.down_focus = \""..v.tabs[q].extra.down_focus.."\"\n"
 					end 
 				else 
 					if v.tabs[q].extra.left_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.left_focus = \""..v.tabs[q].extra.left_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.left_focus = \""..v.tabs[q].extra.left_focus.."\"\n"
 					end 
 					if v.tabs[q].extra.right_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.right_focus = \""..v.tabs[q].extra.right_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.right_focus = \""..v.tabs[q].extra.right_focus.."\"\n"
 					end 
 				end 
 			end 
@@ -1507,15 +1507,15 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.reactive ~= nil then 
-		itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+		itm_str = itm_str..v.name..".extra.reactive = "..tostring(v.extra.reactive).."\n\n"
     end 
 	if v.extra.type == "Group" then 
-		itm_str = itm_str..v.name.."\.extra\.type= \"Group\"".."\n\n"
+		itm_str = itm_str..v.name..".extra.type= \"Group\"".."\n\n"
 	end 
 
 
     if v.extra.timeline then 
-	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
+	    itm_str = itm_str..v.name..".extra.timeline = {"
 	    for m,n in pairs (v.extra.timeline) do 
 	         itm_str = itm_str.."["..m.."] = { \n"
 	         for q,r in pairs (n) do

@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
@@ -709,11 +710,23 @@ static void trickplay_exiting( TPContext * context , const char * subject , void
 
 //-----------------------------------------------------------------------------
 
+static TPContext * context = 0;
+
+static void quit( int sig )
+{
+	if ( context )
+	{
+		tp_context_quit( context );
+	}
+}
+
 int main(int argc,char * argv[])
 {
+    signal( SIGINT , quit );
+
     tp_init(&argc,&argv);
     
-    TPContext * context = tp_context_new();
+    context = tp_context_new();
     
     if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {

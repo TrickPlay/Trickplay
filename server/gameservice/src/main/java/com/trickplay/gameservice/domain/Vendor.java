@@ -10,12 +10,14 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
+@Table(name="vendor")
 @XmlRootElement(name = "vendor")
 public class Vendor extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
