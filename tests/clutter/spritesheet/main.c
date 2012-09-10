@@ -43,11 +43,32 @@ circle_paint_cb (ClutterActor *actor)
       cogl_path_close ();
       cogl_path_fill ();
     }
-}
+};
 
-gchar *source[] = {"slice-00.png", "slice-10.png", "slice-20.png",
-                   "slice-01.png", "slice-11.png", "slice-21.png",
-                   "slice-02.png", "slice-12.png", "slice-22.png"};
+typedef struct SpriteSheet {
+  CoglMaterial* (*material)[];
+  gint (*w)[];
+  gint (*h)[];
+  gint n;
+} SpriteSheet;
+
+static SpriteSheet* spritesheet_new(CoglHandle *texture, gint x[], gint y[], gint w[], gint h[], gint n) {
+  CoglMaterial* sm[n];
+  gint sw[n];
+  gint sh[n];
+  
+  gint i;
+  for (i = 0; i < n; i++) {
+    sw[i] = w[i];
+    sh[i] = h[i];
+    sm[i] = cogl_material_new();
+    cogl_material_set_layer(sm[i], 0, cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]));
+  }
+  
+  SpriteSheet sheet = {&sm, &sw, &sh, n};
+  SpriteSheet *ptr = &sheet;
+  return ptr;
+}
 
 int
 main (int argc, char **argv)
@@ -105,7 +126,28 @@ main (int argc, char **argv)
       clutter_behaviour_apply (behaviour, actor);
     }
   
+  gchar *source[] = {"slice-00.png", "slice-10.png", "slice-20.png",
+                     "slice-01.png", "slice-11.png", "slice-21.png",
+                     "slice-02.png", "slice-12.png", "slice-22.png"};
   
+  gint width = 48, height = 48, left = 16, right = 16, top = 16, bottom = 16;
+  
+  gint xs[] = {0, left, width-right, width};
+  gint ys[] = {0, top, height-bottom, bottom};
+  gint x[9], y[9], w[9], h[9], j, k;
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      k = i*3 + j;
+      x[k] = xs[j];
+      y[k] = ys[i];
+      w[k] = xs[j+1] - xs[j];
+      h[k] = ys[i+1] - ys[i];
+    }
+  }
+  
+  CoglHandle *texture = clutter_texture_get_cogl_texture(
+      CLUTTER_TEXTURE(clutter_texture_new_from_file("spritesheet.png", NULL)) );
+  SpriteSheet *sheet = spritesheet_new(texture, x, y, w, h, 9);
   
   ClutterActor *actor2 = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor2);
