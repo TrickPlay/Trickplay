@@ -177,6 +177,11 @@ print("tttttttttttttttttttttttttttttttttt")
 
 screen:add(b0,b1,b2,b3)
 
+b0.reactive = true
+b1.reactive = true
+b2.reactive = true
+b3.reactive = true
+
 controllers:start_pointer()
 
 

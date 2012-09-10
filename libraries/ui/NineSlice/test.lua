@@ -10,13 +10,17 @@ if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
 if not NINESLICE         then dofile("NineSlice/NineSlice.lua")             end
-
-ns1 = NineSlice{}
+---[[
+ns1 = NineSlice()
+--[[
 ns2 = NineSlice{w=200,h=50,x=100}
+--]]
+--[[
 ns3 = NineSlice{
     x = 400,
     w = 400,
     h = 300,
+    reactive = true,
     cells = {
         default = {
             {
@@ -54,5 +58,8 @@ ns3 = NineSlice{
         },
     }
 }
-
+--]]
+print("changing colors")
+--ns1.style.fill_colors.default = {0,255,0}
 screen:add(Rectangle{size = screen.size,color = "444444"},ns1,ns2,ns3)
+print(get_all_styles())

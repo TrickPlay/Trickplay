@@ -39,7 +39,7 @@ local style = {
         activation = {155,155,155}
     }
 }
----[[
+--[[
 tb1 = TabBar{
     position = {100,100},
     tabs = {
@@ -52,6 +52,7 @@ tb1 = TabBar{
     }
 }
 --]]
+--[[
 tb2 = TabBar{
     pane_w = 500,
     tab_h  = 100,
@@ -66,7 +67,7 @@ tb2 = TabBar{
         {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
     }
 }
----[[
+--]]
 tb3 = TabBar{
     tab_location = "left",
     style = style,
