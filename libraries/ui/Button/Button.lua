@@ -37,49 +37,22 @@ Button = setmetatable(
     },
     public = {
         properties = {
+        --[[
             style = function(instance,env)
                 return function(oldf,...) return oldf(...) end,
                 function(oldf,self,v)
                     oldf(self,v)
-                        
-                    instance.style.border:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            instance:notify()
-                        end
-                    end )
-                    instance.style.fill_colors:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            instance:notify()
-                        end
-                    end )
-                    instance.style.text.colors:subscribe_to( nil, function()
-                        env.text_color_changed = true 
-                        instance:notify()
-                    end )
-                    instance.style.text:subscribe_to( nil, function()
-                        env.text_style_changed = true 
-                        instance:notify()
-                    end )
-                    instance.style:subscribe_to( nil, function()
-                            
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                        end
-                        env.text_style_changed = true
-                        env.text_color_changed = true 
-                        instance:notify()
-                        
-                    end )
+                    
+                    env.subscribe_to_sub_styles()
                     
                     env.flag_for_redraw = true 
                     env.text_style_changed = true
                     env.text_color_changed = true 
                 end
             end,
+            --]]
             enabled = function(instance,env)
-                return function(oldf,...) return oldf(...) end,
+                return function(oldf,...) return oldf(...) end, --TODO, nil getter
                 function(oldf,self,v)
                     oldf(self,v)
                     if not v then
@@ -259,6 +232,49 @@ Button = setmetatable(
         },
     },
     private = {
+            --[[
+            subscribe_to_sub_styles = function(instance,env)
+                return function()
+                    instance.style.border:subscribe_to( nil, function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            env.call_update()
+                        end
+                    end )
+                    instance.style.fill_colors:subscribe_to( nil, function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            env.call_update()
+                        end
+                    end )
+                    instance.style.text.colors:subscribe_to( nil, function()
+                        env.text_color_changed = true 
+                        env.call_update()
+                    end )
+                    instance.style.text:subscribe_to( nil, function()
+                        env.text_style_changed = true 
+                        env.call_update()
+                    end )
+                    instance.style:subscribe_to( nil, function(style_t)
+                        
+                        for style_k,style_v in pairs(style_t) do
+                            if style_k == "border" then
+                                for border_k,border_v in pairs(border_t) do
+                                end
+                            end
+                        end
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                        end
+                        env.text_style_changed = true
+                        env.text_color_changed = true 
+                        env.call_update()
+                        
+                    end )
+                    
+                end
+            end,
+            --]]
             update = function(instance,env)
                 return function()
                     
@@ -484,6 +500,16 @@ Button = setmetatable(
         
         local getter, setter
         
+        env.style_flags = {
+            border = "flag_for_redraw",
+            text = {
+                "text_style_changed",
+                colors = "text_color_changed",
+            },
+            fill_colors = "flag_for_redraw"
+        }
+        
+        
         env.canvas = true
         env.states = states
         env.pressed = false
@@ -511,8 +537,6 @@ Button = setmetatable(
             env[name] = f(instance,env)
         end
         
-        
-        
         for name,f in pairs(self.public.properties) do
             getter, setter = f(instance,env)
             override_property( instance, name,
@@ -535,6 +559,8 @@ Button = setmetatable(
             instance:subscribe_to(nil,f(instance,env))
         end
         --]]
+        
+        --env.subscribe_to_sub_styles()
         
         --instance.images = nil
         return instance, env
