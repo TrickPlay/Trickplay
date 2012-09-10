@@ -3,6 +3,7 @@ LAYOUTMANAGER = true
 
 local LIST_default_parameters = {spacing = 20, direction = "vertical"}
 
+--[[
 ListManager = function(parameters)
     
 	-- input is either nil or a table
@@ -440,7 +441,7 @@ ListManager = function(parameters)
     
 end
 
-
+--]]
 
 
 
@@ -607,8 +608,10 @@ ListManager = setmetatable(
                         t.cells                = {}
                         env.for_each(env.cells,function(obj,i)
                             
-                            if not placeholders[obj] then
+                            if not env.placeholders[obj] then
                                 t.cells[i] = obj.attributes
+                            else
+                                t.cells[i] = false
                             end
                         end)
                         
@@ -690,7 +693,7 @@ ListManager = setmetatable(
                             self[i].y =  0
                         end
                     elseif env.direction == "vertical" then
-                        for i = 1, instance.length do
+                        for i = 1, self.length do
                             self[i].x =  0
                             self[i].y =  (i-1) > 0 and (self[i-1].y + self[i-1].h + env.spacing) or 0
                         end
@@ -742,8 +745,6 @@ ListManager = setmetatable(
             update = function(instance,env)
                 return function()
                     
-                    if env.updating then return end
-                    env.updating = true
                     if  env.new_placeholder then
                         local v = env.new_placeholder
                         env.new_placeholder = false
@@ -820,11 +821,12 @@ ListManager = setmetatable(
                         env.focused_child = self[1]
                         env.focused_child:grab_key_focus()
                     end
-                    env.updating = false
                 end
             end,
         },
         declare = function(self,parameters)
+            
+            parameters = parameters or {}
             
             local instance, env = Widget()
             
@@ -849,7 +851,7 @@ ListManager = setmetatable(
                         
                     else -- default node_constructor
                         
-                        if obj == nil then  
+                        if obj == nil or obj == false then  
                             
                             obj = Widget_Clone{source=env.placeholder}
                             env.placeholders[obj] = true
@@ -909,7 +911,7 @@ ListManager = setmetatable(
                             function(...)
                                 if env.in_on_entries then return end
                                 --print("width_changed",obj.w,obj.h)
-                                --[[
+                                ---[[
                                 env.find_col_widths = true
                                 env.find_col_heights = true
                                 env.reposition = true
@@ -943,7 +945,8 @@ ListManager = setmetatable(
                 on_entries_changed = function(self)
                     
                     if not env.is_setting then
-                        env.update()
+                        env.call_update()
+                        env.on_entries_changed(self)
                     end
                     --[[
                     max_w = 0
@@ -1013,6 +1016,9 @@ ListManager = setmetatable(
                 instance:subscribe_to(nil,f(instance,env))
             end
             --]]
+            env.updating = true
+            instance:set(parameters)
+            env.updating = false
             return instance, env
             
         end
@@ -1057,6 +1063,13 @@ LayoutManager = setmetatable(
                         env.find_width         = true
                         env.find_height        = true
                         env.reassign_neighbors = true
+                    end
+                end,
+                on_entries_changed = function(instance,env)
+                    return function(oldf) return env.on_entries_changed     end,
+                    function(oldf,self,v) 
+                         
+                        env.on_entries_changed = v 
                     end
                 end,
                 number_of_cols = function(instance,env)
@@ -1140,6 +1153,7 @@ LayoutManager = setmetatable(
                         env.new_cells = v  
                         --print("herp")
                         dumptable(v)
+                        --print("dim",env.cells.number_of_rows,env.cells.number_of_cols)
                     end
                 end,
                 attributes = function(instance,env)
@@ -1159,7 +1173,12 @@ LayoutManager = setmetatable(
                             if not t.cells[r] then
                                 t.cells[r] = {}
                             end
-                            t.cells[r][c] = obj.attributes
+                            
+                            if not env.placeholders[obj] then
+                                t.cells[r][c] = obj.attributes
+                            else
+                                t.cells[r][c] = false
+                            end
                         end)
                         
                         t.type = "LayoutManager"
@@ -1227,31 +1246,31 @@ LayoutManager = setmetatable(
                 end
             end,
             position_cells = function(instance,env)
-                return function()
-                    --print("c")
+                return function(...)
+                    print(env.cells)
                     if env.cell_w then
-                        for i = 1, instance.number_of_rows do
-                            for j = 1, instance.number_of_cols do
+                        for i = 1, env.cells.number_of_rows do
+                            for j = 1, env.cells.number_of_cols do
                                 env.cells[i][j].x = (env.horizontal_spacing + env.cell_w) * (i-1)
                             end
                         end
                     else
-                        for i = 1, instance.number_of_rows do
-                            for j = 1, instance.number_of_cols do
+                        for i = 1, env.cells.number_of_rows do
+                            for j = 1, env.cells.number_of_cols do
                                 env.cells[i][j].x = (j-1) > 0 and 
                                     (env.cells[i][j-1].x + env.col_widths[j-1] + env.horizontal_spacing) or 0
                             end
                         end
                     end
                     if env.cell_h then
-                        for i = 1, instance.number_of_rows do
-                            for j = 1, instance.number_of_cols do
+                        for i = 1, env.cells.number_of_rows do
+                            for j = 1, env.cells.number_of_cols do
                                 env.cells[i][j].y = (env.vertical_spacing + env.cell_h) * (i-1)
                             end
                         end
                     else
-                        for i = 1, instance.number_of_rows do
-                            for j = 1, instance.number_of_cols do
+                        for i = 1, env.cells.number_of_rows do
+                            for j = 1, env.cells.number_of_cols do
                                 --print("y",i,j)
                                 env.cells[i][j].y = (i-1) > 0 and 
                                     (env.cells[i-1][j].y + env.row_heights[i-1] + env.vertical_spacing) or 0
@@ -1261,8 +1280,8 @@ LayoutManager = setmetatable(
                     --print("b")
                     local ap = {}
                     
-                    for i = 1, instance.number_of_rows do
-                        for j = 1, instance.number_of_cols do
+                    for i = 1, env.cells.number_of_rows do
+                        for j = 1, env.cells.number_of_cols do
                             ap[1] = 
                                 env.horizontal_alignment == "right"  and env.cells[i][j].w   or
                                 env.horizontal_alignment == "center" and env.cells[i][j].w/2 or
@@ -1288,8 +1307,8 @@ LayoutManager = setmetatable(
             end,
             for_each = function(instance,env)
                 return function(cells,f)
-                    for r = 1, instance.number_of_rows do
-                        for c = 1, instance.number_of_cols do
+                    for r = 1, cells.number_of_rows do
+                        for c = 1, cells.number_of_cols do
                             if env.cells[r][c] then f(env.cells[r][c],r,c,env.cells) end
                         end
                     end
@@ -1356,11 +1375,13 @@ LayoutManager = setmetatable(
                         instance.w = env.w
                     end
                     if  env.find_height then
+                        print("here")
                         env.find_height = false
                         env.h = 0
                         env.for_each(env.cells,env.find_h) 
                         instance.h = env.h
                     end
+                    print("SZ",instance.w,instance.h)
                     if  env.reassign_neighbors then
                         env.reassign_neighbors = false
                         env.for_each(env.cells,env.assign_neighbors) 
@@ -1377,6 +1398,8 @@ LayoutManager = setmetatable(
         },
         declare = function(self,parameters)
             
+            parameters = parameters or {}
+            
             local instance, env = Widget()
             
             instance.w = 0
@@ -1392,7 +1415,7 @@ LayoutManager = setmetatable(
             end 
             
             local getter, setter
-            
+            env.on_entries_changed = function() end
             env.node_constructor = false
             env.cells = GridManager{  
                 
@@ -1485,9 +1508,18 @@ LayoutManager = setmetatable(
                 end,
                 
                 on_entries_changed = function(self)
-                    
+                    print("hehere")
+                        env.find_col_widths = true
+                        env.find_col_heights = true
+                        env.reposition = true
+                        env.find_width = true
+                        env.find_height = true
+                        env.reassign_neighbors = true
                     if not env.is_setting then
-                        env.update()
+                        print("call")
+                        env.on_entries_changed(self)
+                        env.call_update()
+                        
                     end
                     --[=[
                     if env.in_on_entries then return end
@@ -1520,6 +1552,7 @@ LayoutManager = setmetatable(
                     --]=]
                 end
             }
+            print("wut")
             env.new_cells = false
             env.w = 0
             env.h = 0
