@@ -30,6 +30,7 @@ ArrowPane = setmetatable(
         
     
         subscriptions = {
+            --[[
             ["style"] = function(instance,env)
                 return function()
                     
@@ -42,58 +43,76 @@ ArrowPane = setmetatable(
                     env.arrow_colors_on_changed()
                 end
             end,
-            ["enabled"] = function(instance,env)
-                return function()
-
-		            for _,arrow in pairs(env.arrows) do
-		                arrow.enabled = instance.enabled
-		            end
-
-                end
-            end,
+            --]]
         },
         public = {
             properties = {
+                --[[
+                style = function(instance,env)
+                    return function(oldf,...) return oldf(...) end,
+                    function(oldf,self,v)
+                        oldf(self,v)
+                        
+                        env.subscribe_to_sub_styles()
+                        --TODO: double check this
+                        env.flag_for_redraw = true 
+                        env.text_style_changed = true
+                        env.text_color_changed = true 
+                    end
+                end,
+                --]]
+                enabled = function(instance,env)
+                    return nil,
+                    function(oldf,self,v)
+                        oldf(self,v)
+                        
+                        for _,arrow in pairs(env.arrows) do
+                            arrow.enabled = v
+                        end
+                        
+                    end
+                end,
                 w = function(instance,env)
-                    return function(oldf,self) return env.w     end,
+                    return nil,
                     function(oldf,self,v) 
-                        env.w = v
-                        env.reclip = true
+                        print("w",v)
                         env.new_w  = true
+                        oldf(self,v)
                     end
                 end,
                 width = function(instance,env)
-                    return function(oldf,self) return env.w     end,
+                    return nil,
                     function(oldf,self,v) 
-                        env.w = v
-                        env.reclip = true
+                        print("width",v)
                         env.new_w  = true
+                        oldf(self,v)
                     end
                 end,
                 h = function(instance,env)
-                    return function(oldf,self) return env.h     end,
+                    return nil,
                     function(oldf,self,v) 
-                        env.h = v
-                        env.reclip = true
+                        if v == 20 then
+                            print("h",v)
+                        end
                         env.new_h  = true
+                        oldf(self,v)
                     end
                 end,
                 height = function(instance,env)
-                    return function(oldf,self) return env.h     end,
+                    return nil,
                     function(oldf,self,v) 
-                        env.h = v
-                        env.reclip = true
+                        print("height",v)
                         env.new_h  = true
+                        oldf(self,v)
                     end
                 end,
                 size = function(instance,env)
-                    return function(oldf,self) return {env.w,env.h} end,
+                    return nil,
                     function(oldf,self,v) 
-                        env.w = v[1]
-                        env.h = v[2]
-                        env.reclip = true
+                        print("size",v[1],v[2])
                         env.new_w  = true
                         env.new_h  = true
+                        oldf(self,v)
                     end
                 end,
                 virtual_w = function(instance,env)
@@ -145,48 +164,52 @@ ArrowPane = setmetatable(
                         print(self)
                         local t = oldf(self)
 						
-						t.number_of_cols       = nil
-			            t.number_of_rows       = nil
-			            t.vertical_alignment   = nil
-            			t.horizontal_alignment = nil
-            			t.vertical_spacing     = nil
-            			t.horizontal_spacing   = nil
-            			t.cell_h               = nil
-            			t.cell_w               = nil
-            			t.cells                = nil
+                        t.number_of_cols       = nil
+                        t.number_of_rows       = nil
+                        t.vertical_alignment   = nil
+            			 t.horizontal_alignment = nil
+                        t.vertical_spacing     = nil
+                        t.horizontal_spacing   = nil
+                        t.cell_h               = nil
+                        t.cell_w               = nil
+                        t.cells                = nil
+                        
+                       -- t.contents = self.contents
             			
-            			t.contents = self.contents
-            			
-            			t.pane_w    = instance.pane_w
-            			t.pane_h    = instance.pane_h
-            			t.virtual_x = instance.virtual_x
-            			t.virtual_y = instance.virtual_y
-            			t.virtual_w = instance.virtual_w
-            			t.virtual_h = instance.virtual_h
-            			t.arrow_move_by   = instance.arrow_move_by
-            
+                        t.pane_w    = instance.pane_w
+                        t.pane_h    = instance.pane_h
+                        t.virtual_x = instance.virtual_x
+                        t.virtual_y = instance.virtual_y
+                        t.virtual_w = instance.virtual_w
+                        t.virtual_h = instance.virtual_h
+                        t.arrow_move_by   = instance.arrow_move_by
+                        
+                        t.children = {}
+                        
+                        for i, child in ipairs(env.pane.children) do
+                            t.children[i] = child.attributes
+                        end
                         
                         t.type = "ArrowPane"
                         
                         return t
                     end
                 end,
-                contents = function(instance,env)
-                    return function(oldf,self)
-						return env.pane.contents
-					end,
-					function(oldf,self,v)
-						env.pane.contents = v
-                    end
+                children = function(instance,env)
+                    return function(oldf) return env.pane.children     end,
+                    function(oldf,self,v)        env.pane.children = v end
                 end,
             },
             functions = {
-                add = function(instance,env) return function(oldf,self,...) env.pane:add(...) end end,
+                add    = function(instance,env) return function(oldf,self,...) env.pane:add(   ...) end end,
+                remove = function(instance,env) return function(oldf,self,...) env.pane:remove(...) end end,
             },
         },
         private = {
+            --[[
             arrow_on_changed = function(instance,env)
                 return function() 
+                    print("\n\n\narrow_on_changed\n\n\n")
                     for _,arrow in pairs(env.arrows) do
                         arrow:set{
                             w = instance.style.arrow.size,
@@ -199,7 +222,7 @@ ArrowPane = setmetatable(
                     end
                     
                     instance.horizontal_spacing = instance.style.arrow.offset
-                    instance.vertical_spacing = instance.style.arrow.offset
+                    instance.vertical_spacing   = instance.style.arrow.offset
                 end
             end,
             arrow_colors_on_changed = function(instance,env)
@@ -210,14 +233,11 @@ ArrowPane = setmetatable(
                     end
                 end
             end,
-            pane_on_changed = function(instance,env)
-                return function() 
-                    env.pane.style:set(instance.style.attributes)
-                end
-            end,
+            --]]
             style_buttons = function(instance,env)
                 return function()
                     env.up:set{
+                        name = "Up Button",
                         w = instance.style.arrow.size,
                         h = instance.style.arrow.size,
                         anchor_point = {
@@ -232,6 +252,7 @@ ArrowPane = setmetatable(
                         on_released = function() env.pane.virtual_y = env.pane.virtual_y - env.move_by end,
                     }
                     env.down:set{ 
+                        name = "Down Button",
                         w = instance.style.arrow.size,
                         h = instance.style.arrow.size,
                         anchor_point = {
@@ -246,6 +267,7 @@ ArrowPane = setmetatable(
                         on_released = function() env.pane.virtual_y = env.pane.virtual_y + env.move_by end,
                     }
                     env.left:set{ 
+                        name = "Left Button",
                         w = instance.style.arrow.size,
                         h = instance.style.arrow.size,
                         anchor_point = {
@@ -260,6 +282,7 @@ ArrowPane = setmetatable(
                     }
                     print(env.left.w,instance.style.arrow.size)
                     env.right:set{ 
+                        name = "Right Button",
                         w = instance.style.arrow.size,
                         h = instance.style.arrow.size,
                         anchor_point = {
@@ -276,6 +299,7 @@ ArrowPane = setmetatable(
                     
                     --redefine function
                     env.style_buttons = function()
+                        print("\n\n\nRESTYLE BUTTONS\n\n\n")
                         for _,arrow in pairs(env.arrows) do
                             arrow:set{
                                 w = instance.style.arrow.size,
@@ -292,13 +316,28 @@ ArrowPane = setmetatable(
             end,
             update = function(instance,env)
                 return function()
-                    env.lm_update()
-                    if env.ap_updating then return end
-                    env.ap_updating = true
                     if env.redraw_buttons then
                         env.redraw_buttons = false
                         env.style_buttons()
                     end
+                    if env.respace_buttons then
+                        env.respace_buttons = false
+                        instance.horizontal_spacing = instance.style.arrow.offset
+                        instance.vertical_spacing   = instance.style.arrow.offset
+                    end
+                    if env.redraw_pane then
+                        env.redraw_pane = false
+                        env.pane:set{
+                            style = {
+                                name=false,
+                                fill_colors=instance.style.fill_colors.attributes,
+                                border={colors=instance.style.border.colors.attributes},
+                            }
+                        }
+                    end
+                    env.lm_update()
+                    
+                    print("before instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
                     if  env.new_w then
                         env.new_w = false
                         
@@ -340,70 +379,49 @@ ArrowPane = setmetatable(
                             end
                         end
                     end
+                    print("after instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
                     
-                    print(env.left.w,instance.style.arrow.size)
-                    env.ap_updating = false
                 end
             end,
         },
         declare = function(self,parameters)
             
-            local instance, env = LayoutManager:declare()
+            --local instance, env = LayoutManager:declare()
+            --local getter, setter
+            
+            local pane  = ClippingRegion{style = false}
+            local up    = Button:declare()
+            local down  = Button:declare()
+            local left  = Button:declare()
+            local right = Button:declare()
+            
+            local instance, env = LayoutManager:declare{
+                number_of_rows = 3,
+                number_of_cols = 3,
+                placeholder = Widget_Clone(),
+                cells = {
+                    {  nil,   up,   nil },
+                    { left, pane, right },
+                    {  nil, down,   nil },
+                },
+            }
+            env.style_flags = {
+                border = "recolor_pane",
+                arrow = {
+                    size = "redraw_buttons",
+                    offset = "respace_arrows",
+                    colors = "redraw_buttons",
+                },
+                fill_colors = "recolor_pane"
+            }
+            print("way before instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
             local getter, setter
             
-            env.pane = ClippingRegion{style = false}--:set(parameters)
-            print("fffff",env.pane.virtual_w,env.pane.virtual_h)
-            env.up    = Button:declare()--[[{
-                w = instance.style.arrow.size,
-                h = instance.style.arrow.size,
-                anchor_point = {
-                    instance.style.arrow.size/2,
-                    instance.style.arrow.size/2
-                },
-                label = "", 
-                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                create_canvas = create_arrow, 
-                z_rotation = { 90,0,0} ,
-                on_released = function() env.pane.virtual_y = env.pane.virtual_y - env.move_by end,
-            }--]]
-            env.down  = Button:declare()--[[{ 
-                w = instance.style.arrow.size,
-                h = instance.style.arrow.size,
-                anchor_point = {
-                    instance.style.arrow.size/2,
-                    instance.style.arrow.size/2
-                },
-                label = "", 
-                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                create_canvas = create_arrow, 
-                z_rotation = {270,0,0},
-                on_released = function() env.pane.virtual_y = env.pane.virtual_y + env.move_by end,
-            }--]]
-            env.left  = Button:declare()--[[{ 
-                w = instance.style.arrow.size,
-                h = instance.style.arrow.size,
-                anchor_point = {
-                    instance.style.arrow.size/2,
-                    instance.style.arrow.size/2
-                },
-                label = "", 
-                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                create_canvas = create_arrow,
-                on_released = function() env.pane.virtual_x = env.pane.virtual_x - env.move_by end,
-            }--]]
-            env.right = Button:declare()--[[{ 
-                w = instance.style.arrow.size,
-                h = instance.style.arrow.size,
-                anchor_point = {
-                    instance.style.arrow.size/2,
-                    instance.style.arrow.size/2
-                },
-                label = "", 
-                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                create_canvas = create_arrow, 
-                z_rotation = {180,0,0},
-                on_released = function() env.pane.virtual_x = env.pane.virtual_x + env.move_by end,
-            }--]]
+            env.pane = pane
+            env.up = up
+            env.down = down
+            env.left = left
+            env.right = right
             env.redraw_buttons = true
             
             instance:add_key_handler(keys.Up,       env.up.click)
@@ -431,20 +449,7 @@ ArrowPane = setmetatable(
                 left  = env.left,
                 right = env.right,
             }
-            print(11111)
-            print(33333)
-            instance:set{
-                number_of_rows = 3,
-                number_of_cols = 3,
-                placeholder = Widget_Clone(),
-                horizontal_spacing = instance.style.arrow.offset,
-                vertical_spacing   = instance.style.arrow.offset,
-                cells = {
-                    {  nil,   env.up,   nil },
-                    { env.left, env.pane, env.right },
-                    {  nil, env.down,   nil },
-                },
-            }
+            
             env.lm_update = env.update
             env.new_w = true
             env.new_h = true
@@ -477,7 +482,7 @@ ArrowPane = setmetatable(
                 instance:subscribe_to(nil,f(instance,env))
             end
             --]]
-            dumptable(env.get_children(instance))
+            --dumptable(env.get_children(instance))
             return instance, env
             
         end
