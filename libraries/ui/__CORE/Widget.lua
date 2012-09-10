@@ -68,37 +68,41 @@ local function Widgetize(instance)
     
     env.updating = false
     
+    env.call_update = function()
+        if not env.updating then
+            
+            env.updating = true
+            
+            env.update(instance,env)
+            
+            env.updating = false
+            
+        end
+    end
+    
     set_up_subscriptions(mt,mt,
+        --This function is called every time an attribute is being set
+        --set_up_subscriptions() sets up the real __newindex, and wraps this function
         function(...)
             
+            --print("w1",instance.w)
             old__newindex(...)
-            if not env.updating then
-                
-                env.updating = true
-                
-                env.update(instance,env)
-                
-                env.updating = false
-                
-            end
+            --print("w2",instance.w)
+            
+            env.call_update()
+            
         end,
-        function(...)
+        function(self,v)
+            
+            if type(v) ~= "table" then error("Expected table. Received ".. type(v), 3 ) end
             
             if env.is_setting then error("already setting",2) end
             
             env.is_setting = true
             
-            old_set(...)
+            old_set(self,v)
             
-            if not env.updating then
-                
-                env.updating = true
-                
-                env.update(instance,env)
-                
-                env.updating = false
-                
-            end
+            env.call_update()
             
             if not env.is_setting then error("no",2) end
             
@@ -136,6 +140,48 @@ local function Widgetize(instance)
         end
         
     end
+    
+    ----------------------------------------------------------------------------
+    
+    local neighbors_unsubscribe = {}
+    local neighbors = {}
+    
+    local external_neighbors = setmetatable(
+        {},
+        {
+            __newindex = function(t,k,v)
+                
+                if neighbors[k] then
+                    neighbors_unsubscribe[k]()
+                end
+                
+                neighbors_unsubscribe[k] = instance:add_key_handler(
+                    
+                    k,
+                    
+                    function()   v:grab_key_focus()   end
+                )
+                
+                neighbors[k] = v
+                
+            end,
+            __index = function(t,k)
+                
+                return neighbors[k]
+                
+            end,
+        }
+    )
+    
+	override_property(instance,"neighbors",
+        function(oldf,self) return external_neighbors end,
+        function(oldf,self,v) 
+            
+            if type(v) ~= "table" then error("Expected table. Received "..type(v),2) end
+            
+            for k,v in pairs(v) do  external_neighbors[k] = v  end
+        end
+    )
     
     ----------------------------------------------------------------------------
     local enabled_upval, retval
@@ -298,6 +344,53 @@ local function Widgetize(instance)
     
     ----------------------------------------------------------------------------
     local style = Style("Default")
+    local unsubscribe
+    
+    local function recursive_flag_setter(style_t,style_flags)
+        
+        for k,v in pairs(style_t) do
+            
+            --if there is string for this substyle, then set the flag and move on
+            if type(style_flags[k]) == "string" then
+                
+                env[  style_flags[k]  ] = true
+                mesg("STYLE_SUBSCRITPIONS",0,"1 env[",style_flags[k],"] = true")
+            --if there is a table of flags then
+            elseif type(style_flags[k]) == "table" then
+                
+                if type(v) ~= "table" then
+                    --set the list of flags, ignore further specifics
+                    for _,v in ipairs(style_flags[k]) do
+                        env[v] = true
+                        mesg("STYLE_SUBSCRITPIONS",0,"2 env[",v,"] = true")
+                    end
+                --traverse the table
+                else
+                    for kk,vv in pairs(style_flags[k]) do
+                        if type(kk) == "number" then
+                            env[vv] = true
+                            mesg("STYLE_SUBSCRITPIONS",0,"3 env[",vv,"] = true")
+                        elseif type(v) == "table" then
+                            recursive_flag_setter(v,style_flags[k])
+                        end
+                    end
+                end
+                
+            end
+        end
+    end
+    local subscription = function(style_t)
+        --print("herefdffds")
+        mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
+        --dumptable(style_t)
+        if not env.style_flags then return end
+        
+        recursive_flag_setter(style_t,env.style_flags)
+        
+        env.call_update()
+        
+    end
+    
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
@@ -310,8 +403,20 @@ local function Widgetize(instance)
             else
                 style = matches_nil_table_or_type(Style, "STYLE", v)
             end
+            unsubscribe()
+            --print("\n\nSET UP SUBS",instance.gid)
+            unsubscribe = style:subscribe_to( nil, subscription )
+            
+            if env.style_flags then 
+                mesg("STYLE_SUBSCRIPTIONS",0,"Widget.style was set, initiating the flag setter")
+                --print("style recursive set\n\n\n")
+                --dumptable(style.attributes)
+                recursive_flag_setter(style.attributes,env.style_flags) 
+            end
         end
 	)
+    
+    unsubscribe = style:subscribe_to( nil, subscription )
     
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
