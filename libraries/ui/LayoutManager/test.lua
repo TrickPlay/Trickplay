@@ -31,6 +31,9 @@ test_group:unparent()
 
 screen:show()
 --[[
+lm0 = LayoutManager()
+--]]
+---[[
 lm1 = LayoutManager{
     number_of_rows = 2,
     number_of_cols = 2,
@@ -41,7 +44,7 @@ lm1 = LayoutManager{
     }
 }
 --]]
-
+--[[
 lm2 = LayoutManager{
     y = 400,
     number_of_rows = 3,
@@ -52,6 +55,10 @@ lm2 = LayoutManager{
         {Button(),Button()},
     }
 }
+dolater(function()
+    lm2:grab_key_focus()
+end)
+--]]
 --[[
 lm3 = ListManager{
     x=500,
@@ -61,8 +68,5 @@ lm3 = ListManager{
     }
 }
 --]]
-dolater(function()
-    lm2:grab_key_focus()
-end)
-screen:add(lm1,lm2,lm3)
+screen:add(lm0,lm1,lm2,lm3)
 --]]
