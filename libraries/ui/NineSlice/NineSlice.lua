@@ -77,6 +77,8 @@ local make_side = function(self,state)
     return c:Image()
 end
 local make_canvas = function(self, env, state)
+    print(state,"NS CANVAS")
+    if type(state) ~= "string" then error("Expected string. Recevied "..type(state),2) end
     local corner_canvas = make_corner(self,state)
     local top_canvas    = make_top(self,state)
     local side_canvas   = make_side(self,state)
@@ -84,7 +86,7 @@ local make_canvas = function(self, env, state)
     corner_canvas:hide()
     side_canvas:hide()
     top_canvas:hide()
-    self:clear()
+    env.clear(self)
     env.add( self, corner_canvas,side_canvas,top_canvas)
     return {
         {
@@ -106,7 +108,7 @@ local make_canvas = function(self, env, state)
 end
 local default_parameters = {}
 
-local SingleNineSlice = setmetatable(
+SingleNineSlice = setmetatable(
     {},
     {
         __index = function(self,k)
@@ -116,34 +118,217 @@ local SingleNineSlice = setmetatable(
         end,
         __call = function(self,p)
             
-            return self:declare():set(p or {})
+            self = self:declare()
+            print("post-declare, pre-set")
+            
+            self:set(p or {})
+            
+            print("post-set, pre-return")
+            return self
             
         end,
         subscriptions = {
-            ["style"] = function(instance,env)
-                return function()
-                end
-            end,
         },
         public = {
             properties = {
+                on_entries_changed = function(instance,env)
+                    return nil,nil
+                end,
+                min_w = function(instance,env)
+                    return function(oldf,self) return env.left_col_w + env.right_col_w end,
+                    function(oldf,self,v) error("Attempt to set 'min_w,' a read-only value",2) end
+                end,
+                min_h = function(instance,env)
+                    return function(oldf,self) return env.top_row_h + env.btm_row_h end,
+                    function(oldf,self,v) error("Attempt to set 'min_w,' a read-only value",2) end
+                end,
+                w = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                width = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                h = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                height = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                size = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                cells = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        mesg("DEBUG",{0,2},"setting",v)
+                        if type(v) == "table" then
+                            env.state = nil
+                            env.flag_for_redraw = false
+                            oldf(self,v)
+                        elseif type(v) == "string" then
+                            --update can redirect to here, might be problematic
+                            --need to pull out old cells setter...
+                            env.state = v
+                            oldf(self,make_canvas(instance,env,v))
+                        else
+                            error("Expected table or string. Received "..type(v),2)
+                        end
+                        env.new_sz = true
+                    end
+                end,
             },
             functions = {
             },
         },
         private = {
-            make_single_nine_slice = function(instance,env)
-                return function(cell,r,c)
-                    if cell.w  >= (env.col_widths[c] or 0) then 
-                        env.col_widths[c] = cell.w
+            set_inner_size = function(instance,env)
+                return function(self,w,h)
+                    print("set_inner_size",w,h)
+                    for i = 1, 3 do  self[i][2].w = w  end
+                    for i = 1, 3 do  self[2][i].h = h  end
+                end
+            end,
+            update = function(instance,env)
+                return function()
+                
+                    
+                    print("start singleNS update", instance.gid,"sz",instance.w,instance.h)
+                    if env.flag_for_redraw then
+                        print("\t redraw",env.state)
+                        env.flag_for_redraw = false
+                        instance.cells = env.state
+                        
                     end
-                    print(r,c,env.col_widths[r])
+                    ---[[
+                    if  not env.setting_size and env.new_sz then
+                        print("\t resize, mis:",instance.min_w,instance.min_h)
+                        env.new_sz = false
+                        
+                        env.setting_size = true
+                        --print(instance.w , instance.min_w)
+                        env.set_inner_size( instance.cells,
+                             instance.w >= instance.min_w and 
+                            (instance.w  - instance.min_w) or 0,
+                            
+                             instance.h >= instance.min_h and 
+                            (instance.h  - instance.min_h) or 0
+                        )
+                        
+                        env.setting_size = false
+                    end
+                    env.lm_update()
+                    print("end singleNS update", instance.gid,"sz",instance.w,instance.h)
+                    --dumptable(instance.attributes)
+                    --]]
                 end
             end,
         },
         
         
         declare = function(self,parameters)
+            print("SNS LM:declare()")
+            local instance, env = LayoutManager:declare{
+                number_of_rows = 3,
+                number_of_cols = 3,
+                vertical_spacing   = 0,
+                horizontal_spacing = 0,
+            }
+            print("SNS LM:declare() after",instance.gid)
+            
+            env.style_flags = {
+                border = "flag_for_redraw",
+                fill_colors = "flag_for_redraw"
+            }
+            
+            env.lm_update = env.update
+            print("declared")
+            instance.on_entries_changed = function(self)
+                print(instance.gid,"on_entries_changed1")
+                --if env.setting_size then return end
+                print("on_entries_changed2")
+                --env.setting_size = true
+                env.left_col_w  = 0
+                env.right_col_w = 0
+                env.top_row_h   = 0
+                env.btm_row_h   = 0
+                
+                for i = 1, 3 do
+                    if env.left_col_w  < self[i][1].w then env.left_col_w  = self[i][1].w end
+                    if env.right_col_w < self[i][3].w then env.right_col_w = self[i][3].w end
+                    if env.top_row_h   < self[1][i].h then env.top_row_h   = self[1][i].h end
+                    if env.btm_row_h   < self[3][i].h then env.btm_row_h   = self[3][i].h end
+                end
+                
+                --Call the user's on_entries_changed function
+                --on_entries_changed(self)
+                --setting_size = false
+                env.new_sz=  true
+                --env.call_update()
+            end
+            --[[
+            do
+                local mt = getmetatable(instance.cells)
+                
+                mt.functions.insert       = function() end
+                mt.functions.remove       = function() end
+                mt.setters.size           = function() end
+                mt.setters.number_of_rows = function() end
+                mt.setters.number_of_cols = function() end
+            end
+            --]]
+            
+            local getter, setter
+        
+            env.left_col_w  = 0
+            env.right_col_w = 0
+            env.top_row_h   = 0
+            env.btm_row_h   = 0
+            env.flag_for_redraw = true
+            
+            for name,f in pairs(self.private) do
+                env[name] = f(instance,env)
+            end
+            
+            
+            for name,f in pairs(self.public.properties) do
+                getter, setter = f(instance,env)
+                override_property( instance, name,
+                    getter, setter
+                )
+                
+            end
+            
+            for name,f in pairs(self.public.functions) do
+                
+                override_function( instance, name, f(instance,env) )
+                
+            end
+            
+            for t,f in pairs(self.subscriptions) do
+                instance:subscribe_to(t,f(instance,env))
+            end
+            
+            return instance,env
         end,
     }
 )
@@ -162,303 +347,277 @@ NineSlice = setmetatable(
             
         end,
         subscriptions = {
-            ["style"] = function(instance,env)
-                return function()
-                end
-            end,
         },
         public = {
-            properties = {
+            properties = {--[[
+                style = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        
+                        env.subscribe_to_sub_styles()
+                        
+                        env.flag_for_redraw = true 
+                    end
+                end,
+                --]]
+                w = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                width = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                h = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        print("set h")
+                        env.new_sz = true
+                    end
+                end,
+                height = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                size = function(instance,env)
+                    return nil,
+                    function(oldf,self,v) 
+                        oldf(self,v)
+                        env.new_sz = true
+                    end
+                end,
+                cells = function(instance,env)
+                    return function(oldf,self) return env.states end,
+                    function(oldf,self,v) 
+                        --clear out the existing 9slices
+                        print("NS CELLS")
+                        for state,cells in pairs(env.states) do
+                            cells:unparent()
+                            rawset(env.states,state,nil)
+                        end
+                        env.canvas = false
+                        --if passed nil, this will trigger canvases
+                        if v == nil then 
+                            
+                            env.flag_for_redraw = true
+                            env.canvas = true
+                        elseif type(v) == "table" then
+                            if v.default then
+                                for state,cells in pairs(v) do
+                                    env.states[state] = cells
+                                end
+                            elseif v[1] and v[2] and v[3] then
+                                env.states.default = v
+                            else
+                                error("Expected a 3x3 table, or a table of 3x3 tables (Default is required)",2)
+                            end
+                        else
+                            error("Expected table or nil. Received "..type(v),2)
+                        end
+                        
+                        instance.state = env.curr_state
+                    end
+                end,
+                state = function(instance,env)
+                    return function(oldf,self) return env.curr_state end,
+                    function(oldf,self,v) 
+                        for state,cells in pairs(env.states) do
+                            if cells.state then
+                                if state == v then
+                                    cells.state.state = "ON"
+                                else
+                                    cells.state.state = "OFF"
+                                end
+                            end
+                        end
+                        env.curr_state = v
+                    end
+                end,
             },
             functions = {
             },
         },
-        private = {
-            make_single_nine_slice = function(instance,env)
-                return function(cell,r,c)
-                    if cell.w  >= (env.col_widths[c] or 0) then 
-                        env.col_widths[c] = cell.w
+        private = {--[[
+            subscribe_to_sub_styles = function(instance,env)
+                return function()
+                    instance.style.border:subscribe_to( nil, function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            env.call_update()
+                        end
+                    end )
+                    instance.style.fill_colors:subscribe_to( nil, function()
+                        if env.canvas then 
+                            print("do it",env.updating)
+                            env.flag_for_redraw = true 
+                            env.call_update()
+                        end
+                    end )
+                    instance.style:subscribe_to(  nil,  function()
+                        if env.canvas then 
+                            env.flag_for_redraw = true 
+                            env.call_update()
+                        end
+                    end )
+                end
+            end,
+            --]]
+            define_obj_animation = function(instance,env)
+                return function(obj)
+                    
+                    obj.state = AnimationState{
+                        duration    = 100,
+                        transitions = {
+                            {
+                                source = "*", target = "OFF",
+                                keys   = {  {obj, "opacity",  0},  },
+                            },
+                            {
+                                source = "*", target = "ON",
+                                keys   = {  {obj, "opacity",255},  },
+                            },
+                        }
+                    }
+                    
+                end
+            end,
+            update = function(instance,env)
+                return function()
+                    print("============================================================")
+                    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                    print("NS update start",instance.w,instance.h)
+                    if env.flag_for_redraw and env.canvas then
+                        print("NS redraw")
+                        env.flag_for_redraw = false
+                        print("one")
+                        env.clear(instance)
+                        env.states.default    = nil
+                    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                        env.states.focus      = nil
+                    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                        env.states.activation = nil
                     end
-                    print(r,c,env.col_widths[r])
+                    
+                    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                    if  not env.setting_size and env.new_sz then
+                        print("NS resize")
+                        env.new_sz = false
+                        
+                        env.setting_size = true
+                        
+                        for state, obj in pairs(env.states) do
+                            obj.size = instance.size
+                        end
+                        env.setting_size = false
+                    end
+                    print("NS update end",instance.w,instance.h)
+                    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                    print("============================================================")
+                    
                 end
             end,
         },
         
         
         declare = function(self,parameters)
-            local instance,env = LayoutManager:declare()
-        
+            
+            parameters = parameters or {}
+            local instance, env = Widget()
+            
+            env.style_flags = {
+                border = "flag_for_redraw",
+                fill_colors = "flag_for_redraw"
+            }
+            
             env.left_col_w  = 0
             env.right_col_w = 0
             env.top_row_h   = 0
             env.btm_row_h   = 0
+            
+            env.states = {}
+            env.canvas = true
+            env.flag_for_redraw = true
+            env.states_mt = {
+                __newindex = function(t,k,v)
+                    print("here",v)
+                    --remove the existing 9slice
+                    if t[k] then t[k]:unparent() end
+                    
+                    --make the new one (if v == nil then a canvas one is made)
+                    if env.canvas == false or v == nil then
+                        print("SingleNineSlice",v,k)
+                        
+                        v = SingleNineSlice{ 
+                            name = k, 
+                            cells = v or k 
+                        }--make_single_nine_slice(v,k)
+                        
+                        v.size = instance.size
+                        
+                        env.add( instance, v)
+                        
+                            print("w")
+                        if k ~= "default" then
+                            
+                            env.define_obj_animation(v)
+                            v.state:warp("OFF")
+                        end
+                        print("h")
+                        rawset(t,k, v )
+                    end
+                    
+                end
+            }
+            
+            setmetatable(env.states,env.states_mt)
+            
+            for name,f in pairs(self.private) do
+                env[name] = f(instance,env)
+            end
+            
+            
+            for name,f in pairs(self.public.properties) do
+                getter, setter = f(instance,env)
+                override_property( instance, name,
+                    getter, setter
+                )
+                
+            end
+            
+            for name,f in pairs(self.public.functions) do
+                
+                override_function( instance, name, f(instance,env) )
+                
+            end
+            
+            for t,f in pairs(self.subscriptions) do
+                instance:subscribe_to(t,f(instance,env))
+            end
+            
+            env.updating = true
+            instance.cells = parameters.cells
+            parameters.cells = nil
+            env.updating = false
+            
+            
+            --env.subscribe_to_sub_styles()
+            
+            return instance, env
         end,
     }
 )
 
-
-
-
-NineSlice = function(parameters)
-    
-	--input is either nil or a table
-	parameters = is_table_or_nil("NineSlice",parameters) -- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-    
-	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-	parameters = recursive_overwrite(parameters,default_parameters) 
-    
-    local instance, env = Widget()
-    
-    --global row/col sizes
-    local  left_col_w = 0
-    local right_col_w = 0
-    local   top_row_h = 0
-    local   btm_row_h = 0
-    
-    local make_single_nine_slice = function(cells,state)
-        
-        
-        local  left_col_w = 0
-        local right_col_w = 0
-        local   top_row_h = 0
-        local   btm_row_h = 0
-        
-        local function set_inner_size(self,w,h)
-            
-            for i = 1, 3 do  self[i][2].w = w  end
-            for i = 1, 3 do  self[2][i].h = h  end
-        end
-        local instance = LayoutManager{
-            vertical_spacing   = 0,
-            horizontal_spacing = 0,
-        }
-        print("h",instance,instance.w,instance.h)
-        ------------------------------------------------------------------------
-        -- Fix the size to 3x3
-        instance.cells.size = {3,3}
-        local setting_size = false
-        instance.on_entries_changed = function(self)
-                
-                if setting_size then return end
-                setting_size = true
-                left_col_w  = 0
-                right_col_w = 0
-                top_row_h   = 0
-                btm_row_h   = 0
-                
-                for i = 1, 3 do
-                    if left_col_w  < self[i][1].w then left_col_w  = self[i][1].w end
-                    if right_col_w < self[i][3].w then right_col_w = self[i][3].w end
-                    if top_row_h   < self[1][i].h then top_row_h   = self[1][i].h end
-                    if btm_row_h   < self[3][i].h then btm_row_h   = self[3][i].h end
-                end
-                
-                set_inner_size( self,
-                     instance.w >= (left_col_w + right_col_w) and 
-                    (instance.w -  (left_col_w + right_col_w)) or 0,
-                    
-                     instance.h >= (top_row_h + btm_row_h) and 
-                    (instance.h  - (top_row_h + btm_row_h)) or 0
-                )
-                
-                --Call the user's on_entries_changed function
-                --on_entries_changed(self)
-                setting_size = false
-            end
-        --remove the following functionality from the internal GridManager:
-        do
-            local mt = getmetatable(instance.cells)
-            
-            mt.functions.insert       = function() end
-            mt.functions.remove       = function() end
-            mt.setters.size           = function() end
-            mt.setters.number_of_rows = function() end
-            mt.setters.number_of_cols = function() end
-        end
-        
-        instance:subscribe_to(
-            {"h","w","width","height","size"},
-            function()
-                
-                if setting_size then return end
-                setting_size = true
-                print(instance,instance.w,instance.h)
-                set_inner_size( instance.cells,
-                     instance.w >= (left_col_w + right_col_w) and 
-                    (instance.w -  (left_col_w + right_col_w)) or 0,
-                    
-                     instance.h >= (top_row_h + btm_row_h) and 
-                    (instance.h  - (top_row_h + btm_row_h)) or 0
-                )
-                setting_size = false
-                
-            end
-        )
-        
-        override_property(instance,"on_entries_changed", nil, nil)
-        override_property(instance,"min_w", 
-            function() return left_col_w + right_col_w end, 
-            function() error("Attempt to set 'min_w,' a read-only value",2) end
-        )
-        override_property(instance,"min_h", 
-            function() return top_row_h + btm_row_h end, 
-            function() error("Attempt to set 'min_w,' a read-only value",2) end
-        )
-        instance.cells = cells or make_canvas(instance,env,state)
-        
-        return instance
-    end
-    ----------------------------------------------------------------------------
-    --
-    
-    ----------------------------------------------------------------------------
-    
-    local states, states_mt, setting_size
-	instance:subscribe_to(
-		{"h","w","width","height","size"},
-		function()
-			
-            if setting_size then return end
-            setting_size = true
-            for state, obj in pairs(states) do
-                obj.size = instance.size
-            end
-            setting_size = false
-            
-		end
-	)
-    local define_obj_animation = function(obj)
-		
-		obj.state = AnimationState{
-			duration    = 100,
-			transitions = {
-				{
-					source = "*", target = "OFF",
-					keys   = {  {obj, "opacity",  0},  },
-				},
-				{
-					source = "*", target = "ON",
-					keys   = {  {obj, "opacity",255},  },
-				},
-			}
-		}
-		
-	end
-    states = {}
-    local canvas = false
-    states_mt = {
-        __newindex = function(t,k,v)
-            
-            --remove the existing 9slice
-            if t[k] then t[k]:unparent() end
-            
-            --make the new one (if v == nil then a canvas one is made)
-            if canvas == false or v == nil then
-                v = make_single_nine_slice(v,k)
-                
-                v.size = instance.size
-                
-                env.add( instance, v)
-                
-                if k ~= "default" then
-                    
-                    define_obj_animation(v)
-                    
-                    v.state:warp("OFF")
-                end
-                
-                rawset(t,k, v )
-            end
-            
-        end
-    }
-    setmetatable(states,states_mt)
-    
-    local curr_state = "default"
-	override_property(instance,"cells", 
-        function()
-            return states
-        end,
-		function(oldf,self,v)   
-            
-            --clear out the existing 9slices
-            for state,cells in pairs(states) do
-                cells:unparent()
-                rawset(states,state,nil)
-            end
-            canvas = false
-            --if passed nil, this will trigger canvases
-            if v == nil then 
-                
-                canvas = true
-                states.default    = nil
-                states.focus      = nil
-                states.activation = nil
-            elseif type(v) == "table" then
-                if v.default then
-                    for state,cells in pairs(v) do
-                        states[state] = cells
-                    end
-                elseif v[1] and v[2] and v[3] then
-                    states.default = v
-                else
-                    error("Expected a 3x3 table, or a table of 3x3 tables (Default is required)",2)
-                end
-            else
-                error("Expected table or nil. Received "..type(v),2)
-            end
-            
-            instance.state = curr_state
-        end
-	)
-    
-	override_property(instance,"state", 
-        function()
-            return curr_state
-        end,
-		function(oldf,self,v)   
-            for state,cells in pairs(states) do
-                if cells.state then
-                    if state == v then
-                        cells.state.state = "ON"
-                    else
-                        cells.state.state = "OFF"
-                    end
-                end
-            end
-            curr_state = v
-        end
-    )
-    ----------------------------------------------------------------------------
-	local canvas_callback = function()
-        
-        if not canvas then return end
-        
-        instance:clear()
-        instance.cells = nil
-        
-    end
-    
-    local instance_on_style_changed
-    function instance_on_style_changed()
-        
-        instance.style.border:subscribe_to(      nil, canvas_callback )
-        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
-        
-		canvas_callback()
-	end
-	
-    
-	instance:subscribe_to( "style", instance_on_style_changed )
-    
-    instance_on_style_changed()
-	----------------------------------------------------------------------------
-    if not parameters.cells then instance.cells = nil end
-    
-    instance:set(parameters)
-    
-    return instance
-end
 
 
 
