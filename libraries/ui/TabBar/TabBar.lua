@@ -70,6 +70,401 @@ local side_tabs = function(self,state)
 end
 
 local default_parameters = {tab_w = 200,tab_h = 50,pane_w = 400,pane_h = 300, tab_location = "top"}
+
+
+
+-----------------------------------------------------------------------------
+-- TabBar's base is a ListManager, this allows for easier alignment when
+--         switching the location of the tabs
+-- This ListManager contains 2 items: an ArrowPane and a Group
+-- The ArrowPane contains a ListManager of ToggleButtons, linked with a 
+-- RadioButtonGroup
+-----------------------------------------------------------------------------
+TabBar = setmetatable(
+    {},
+    {
+        __index = function(self,k)
+            
+            return getmetatable(self)[k]
+            
+        end,
+        __call = function(self,p)
+            
+            return self:declare():set(p or {})
+            
+        end,
+        
+        subscriptions = {
+        },
+        public = {
+            properties = {
+                style = function(instance,env)
+                    return function(oldf,...) return oldf(...) end,
+                    function(oldf,self,v)
+                        oldf(self,v)
+                        
+                        env.subscribe_to_sub_styles()
+                        --TODO: double check this
+                    end
+                end,
+                enabled = function(instance,env)
+                    return nil,
+                    function(oldf,self,v)  
+                        oldf(self,v)
+                        for i = 1,env.tabs_lm.length do
+                            env.tabs_lm.cells[i].enabled = v
+                        end
+                        env.tab_pane.enabled = v
+                    end
+                end,
+                pane_w = function(instance,env) -- TODO check need for these upvals
+                    return function(oldf) return   env.pane_w     end,
+                    function(oldf,self,v)  
+                        env.pane_w = v 
+                        env.panes_obj.w = v
+                        if env.tab_location == "top" then
+                            env.tab_pane.pane_w    = env.pane_w
+                        end
+                    end
+                end,
+                pane_h = function(instance,env)
+                    return function(oldf) return   env.pane_h     end,
+                    function(oldf,self,v)   
+                        env.pane_h = v 
+                        env.panes_obj.h = v
+                        if env.tab_location == "left" then
+                            env.tab_pane.pane_h    = env.pane_h
+                        end
+                    end
+                end,
+                tab_w = function(instance,env)
+                    return function(oldf) return   env.tab_w     end,
+                    function(oldf,self,v)          
+                        env.tab_w = v 
+                        env.resize_tabs = true
+                    end
+                end,
+                tab_h = function(instance,env)
+                    return function(oldf) return   env.tab_h     end,
+                    function(oldf,self,v)          
+                        env.tab_h = v 
+                        env.resize_tabs = true
+                    end
+                end,
+                widget_type = function(instance,env)
+                    return function() return "TabBar" end, nil
+                end,
+                tabs = function(instance,env)
+                    return function(oldf) 
+                    
+                        local tabs = {}
+                        
+                        for i = 1,env.tabs_lm.length do
+                            tabs[i]    = {
+                                label    = env.tabs_lm.cells[i].label,
+                                contents = env.tabs_lm.cells[i].pane.children
+                            }
+                            for j,child in ipairs(env.tabs_lm.cells[i].pane.children) do
+                                env.tabs[i].contents[j] = child.attributes
+                            end
+                        end
+                        
+                        return   tabs     
+                    end,
+                    function(oldf,self,v)  
+                        
+                        if type(v) ~= "table" then error("Expected table. Received: ",2) end
+                        
+                        env.tabs_lm:set{
+                            direction = "horizontal",
+                            --length = #v,
+                            cells = v,
+                        }
+                        if env.tab_location == "top" then
+                            env.tab_pane.virtual_w = env.tabs_lm.w
+                        else
+                            env.tab_pane.virtual_h = env.tabs_lm.h
+                        end
+                        
+                    end
+                end,
+                tab_location = function(instance,env)
+                    return function(oldf) return   env.tab_location     end,
+                    function(oldf,self,v)  
+                        if tab_location == v then return end
+                        
+                        if v == "top" then
+                            instance.direction  = "vertical"
+                            env.tabs_lm.direction  = "horizontal"
+                            --TODO set??
+                            env.tab_pane.pane_w    = env.pane_w
+                            env.tab_pane.pane_h    = env.tab_h
+                            env.tab_pane.virtual_w = env.tabs_lm.w
+                            env.tab_pane.virtual_h = env.tab_h
+                            env.tab_pane.arrow_move_by   = env.tab_w + env.tabs_lm.spacing
+                            for _,tab in env.tabs_lm.cells.pairs() do
+                                tab.create_canvas = top_tabs
+                                tab.w = 200
+                            end
+                        elseif v == "left" then
+                            instance.direction  = "horizontal"
+                            env.tabs_lm.direction  = "vertical"
+                            --TODO set??
+                            print("env.pane_h = "..env.pane_h)
+                            env.tab_pane.pane_w    = env.tab_w
+                            env.tab_pane.pane_h    = env.pane_h
+                            env.tab_pane.virtual_w = env.tab_w
+                            env.tab_pane.virtual_h = env.tabs_lm.h
+                            env.tab_pane.arrow_move_by   = env.tab_h + env.tabs_lm.spacing
+                            for _,tab in env.tabs_lm.cells.pairs() do
+                                tab.create_canvas = side_tabs
+                            end
+                        else
+                            error("Expected 'top' or 'left'. Received "..v,2)
+                        end
+                        
+                        env.tab_location = v
+                    end
+                end,
+    
+                attributes = function(instance,env)
+                    return function(oldf,self) 
+                        local t = oldf(self)
+                        
+                        t.length               = nil
+                        t.number_of_cols       = nil
+                        t.number_of_rows       = nil
+                        t.vertical_alignment   = nil
+                        t.horizontal_alignment = nil
+                        t.vertical_spacing     = nil
+                        t.horizontal_spacing   = nil
+                        t.cell_h = nil
+                        t.cell_w = nil
+                        t.cells  = nil
+                        
+                        t.style = instance.style
+                        
+                        t.tab_w  = instance.tab_w
+                        t.tab_h  = instance.tab_h
+                        t.pane_w = instance.pane_w
+                        t.pane_h = instance.pane_h
+                        t.tabs   = instance.tabs
+                        t.tab_location = instance.tab_location
+                        
+                        t.type = "TabBar"
+                        
+                        return t
+                    end
+                end,
+                
+    
+            },
+            functions = {
+            },
+        },  
+        
+        private = {
+        
+            update = function(instance,env)
+                return function()
+                    if env.resize_tabs then
+                        env.resize_tabs = false
+                        for i = 1,env.tabs_lm.length do
+                            
+                            env.tabs_lm.cells[i].size = {env.tab_w,env.tab_h}
+                            
+                        end
+                        if env.tab_location == "top" then
+                            print("tab_h = "..env.tab_h)
+                            env.tab_pane.pane_h        = env.tab_h
+                            env.tab_pane.virtual_h     = env.tab_h
+                            env.tab_pane.arrow_move_by = env.tab_w + env.tabs_lm.spacing
+                        elseif env.tab_location == "left" then
+                            env.tab_pane.pane_w        = env.tab_w
+                            env.tab_pane.virtual_w     = env.tab_w
+                            env.tab_pane.arrow_move_by = env.tab_h + env.tabs_lm.spacing
+                        end
+                    end
+                    
+                    env.old_update()
+                end
+            end,
+            subscribe_to_sub_styles = function(instance,env)
+                return function()
+                    instance.style.border:subscribe_to( nil, function()
+                        for i = 1,env.tabs_lm.length do
+                                
+                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                    end )
+                    instance.style.fill_colors:subscribe_to( nil, function()
+                        for i = 1,env.tabs_lm.length do
+                                
+                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                    end )
+                    instance.style.arrow:subscribe_to( nil, function()
+                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
+                        --env.call_update()
+                    end )
+                    instance.style.arrow.colors:subscribe_to( nil, function()
+                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
+                        --env.call_update()
+                    end )
+                    instance.style.text:subscribe_to( nil, function()
+                        for i = 1,env.tabs_lm.length do
+                                
+                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                    end )
+                    instance.style:subscribe_to( nil, function()
+                        --TODO: resubscribe??? NO, no true substyles anymore
+                        for i = 1,env.tabs_lm.length do
+                                
+                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                        
+                    end )
+                    
+                end
+            end,
+        },
+        declare = function(self,parameters)
+            
+            parameters = parameters or {}
+            
+            
+            local instance,env = ListManager:declare{vertical_alignment = "top",spacing=0}
+            env.panes = {}
+            env.tabs = {}
+            env.rbg= RadioButtonGroup{name = "TabBar",
+                on_selection_change = function()
+                    print("TabBar.rbg.on_selection_change")
+                    for i = 1,env.tabs_lm.length do
+                        local t = env.tabs_lm.cells[i]
+                        if t.selected then
+                            t.pane:show()
+                            t:grab_key_focus()
+                        else
+                            t.pane:hide()
+                        end
+                    end
+                end
+            }
+            
+            env.old_update = env.update
+            
+            env.panes_obj = Widget_Group{name = "Panes",clip_to_size = true}
+            env.pane_w = 400
+            env.pane_h = 300
+            env.tab_w = 200
+            env.tab_h = 50
+            env.tab_images   = nil 
+            env.tab_style    = nil
+            env.tab_location = "top"
+            env.resize_tabs = true
+            env.tabs_lm = ListManager{
+                name = "Tabs ListManager",
+                spacing = 0,
+                vertical_alignment = "top",
+                node_constructor = function(obj)
+                    
+                    if obj == nil then 
+                        obj = {label = "Tab",content = {}}
+                    elseif type(obj) ~= "table" then
+                        error("Expected tab entry to be a string. Received "..type(obj),2)
+                    elseif type(obj.label) ~= "string" then
+                        error("Received a tab without a label",2)
+                    end
+                    for i,c in ipairs(obj.contents or {}) do
+                        if type(c) == "table" and c.type then 
+                            
+                            obj.contents[i] = _G[c.type](c)
+                            
+                        elseif type(c) ~= "userdata" and c.__types__.actor then 
+                            
+                            error("Must be a UIElement or nil. Received "..c,2) 
+                        end
+                    end
+                    local pane = Group{children = obj.contents}
+                    obj = ToggleButton{
+                        label  = obj.label,
+                        w      = env.tab_w,
+                        h      = env.tab_h,
+                        style  = false,
+                        group  = env.rbg,
+                        reactive = true,
+                        create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
+                        --images = tab_images,
+                    }
+                    if env.tab_style then
+                        obj.style:set(env.tab_style.attributes)
+                    else
+                        obj.style.border.colors.selection = "ffffff"
+                    end
+                    
+                    --table.insert(tabs,obj)
+                    obj.pane = pane
+                    --table.insert(panes,pane)
+                    env.panes_obj:add(pane)
+                    
+                    return obj
+                end
+            }
+            --TODO roll into a single set
+            env.tab_pane = ArrowPane{name = "ArrowPane",style = false,arrow_move_by = tab_w}
+            env.tab_pane.style.arrow.offset = -env.tab_pane.style.arrow.size
+            env.tab_pane.style.border.colors.default = "00000000"
+            env.tab_pane.style.fill_colors.default = "00000000"
+            env.tab_pane:add(env.tabs_lm)
+            
+            instance.cells = {env.tab_pane,env.panes_obj}
+            
+            --env.pane_w = env.panes_obj.w
+            --env.pane_h = env.panes_obj.h
+            print("ORIG",env.pane_h)
+            
+            
+            for name,f in pairs(self.private) do
+                env[name] = f(instance,env)
+            end
+            
+            for name,f in pairs(self.public.properties) do
+                getter, setter = f(instance,env)
+                override_property( instance, name,
+                    getter, setter
+                )
+                
+            end
+            
+            for name,f in pairs(self.public.functions) do
+                
+                override_function( instance, name, f(instance,env) )
+                
+            end
+            
+            for t,f in pairs(self.subscriptions) do
+                instance:subscribe_to(t,f(instance,env))
+            end
+            --[[
+            for _,f in pairs(self.subscriptions_all) do
+                instance:subscribe_to(nil,f(instance,env))
+            end
+            --]]
+            
+            dumptable(env.get_children(instance))
+            return instance, env
+            
+        end
+    }
+)
+
+
+--[=[
 TabBar = function(parameters)
     
 	--input is either nil or a table
@@ -354,6 +749,8 @@ TabBar = function(parameters)
     
     return instance
 end
+
+--]=]
 
 --[[
 function ui_element.tabBar(t)
