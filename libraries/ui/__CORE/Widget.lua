@@ -348,13 +348,18 @@ local function Widgetize(instance)
     
     local function recursive_flag_setter(style_t,style_flags)
         
+        if type(style_flags) == "string" then
+            mesg("STYLE_SUBSCRIPTIONS",0,"0 env[",style_flags,"] = true")
+            env[style_flags] = true
+            return
+        end
         for k,v in pairs(style_t) do
             
             --if there is string for this substyle, then set the flag and move on
             if type(style_flags[k]) == "string" then
                 
                 env[  style_flags[k]  ] = true
-                mesg("STYLE_SUBSCRITPIONS",0,"1 env[",style_flags[k],"] = true")
+                mesg("STYLE_SUBSCRIPTIONS",0,"1 env[",style_flags[k],"] = true")
             --if there is a table of flags then
             elseif type(style_flags[k]) == "table" then
                 
@@ -362,14 +367,14 @@ local function Widgetize(instance)
                     --set the list of flags, ignore further specifics
                     for _,v in ipairs(style_flags[k]) do
                         env[v] = true
-                        mesg("STYLE_SUBSCRITPIONS",0,"2 env[",v,"] = true")
+                        mesg("STYLE_SUBSCRIPTIONS",0,"2 env[",v,"] = true")
                     end
                 --traverse the table
                 else
                     for kk,vv in pairs(style_flags[k]) do
                         if type(kk) == "number" then
                             env[vv] = true
-                            mesg("STYLE_SUBSCRITPIONS",0,"3 env[",vv,"] = true")
+                            mesg("STYLE_SUBSCRIPTIONS",0,"3 env[",vv,"] = true")
                         elseif type(v) == "table" then
                             recursive_flag_setter(v,style_flags[k])
                         end
