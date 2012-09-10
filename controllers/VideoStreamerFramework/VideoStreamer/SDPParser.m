@@ -10,6 +10,12 @@
 
 #import "MediaDescription.h"
 
+/**
+ * Before you lie State Machine Lookup Tables for the SDP
+ * parser! These help determine how to parse the SDP packet.
+ * They were painful to write but make teh codes less complexish.
+ */
+
 static int const sdp_state_lookup[][15] = {
     // v  o  s  i* u* e* p* c* b* t  r* z* k* a* m*
     {  1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }, // v
