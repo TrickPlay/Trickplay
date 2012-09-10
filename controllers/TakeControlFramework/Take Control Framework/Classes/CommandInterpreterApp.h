@@ -39,6 +39,11 @@
 - (void)do_SAT:(NSArray *)args;
 - (void)do_PAT:(NSArray *)args;
 
+// Video Streaming Server->Controller
+- (void)do_SVSC:(NSArray *)args;
+- (void)do_SVEC:(NSArray *)args;
+- (void)do_SVSS;
+
 // Welcome Message
 - (void)do_WM:(NSArray *)args;
 

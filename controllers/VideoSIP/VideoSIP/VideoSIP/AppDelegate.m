@@ -21,6 +21,33 @@
     [super dealloc];
 }
 
+- (void)removeVC:(id)object {
+    UIViewController *presented = self.viewController.presentedViewController;
+    NSLog(@"presented: %@", presented);
+    [self.viewController dismissViewControllerAnimated:YES completion:^(void){
+        NSLog(@"View Controller removed");
+        [presented autorelease];
+    }];
+}
+
+- (void)endChat:(id)object {
+    VideoStreamer *videoStreamer = (VideoStreamer *)object;
+
+    [videoStreamer endChat];
+}
+
+- (void)startVideoStreamer:(id)object {
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    VideoStreamer *videostreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    videostreamer.view.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:1.0 alpha:1.0];
+    
+    [self.viewController presentViewController:videostreamer animated:YES completion:^(void) {
+        [videostreamer startChat];
+        //[self performSelector:@selector(removeVC:) withObject:nil afterDelay:5.0];
+        [self performSelector:@selector(endChat:) withObject:videostreamer afterDelay:15];
+    }];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
@@ -33,15 +60,33 @@
     }
     //*/
     
-    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
-    VideoStreamer *videostreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    //VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    //VideoStreamer *videostreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
     //[(VideoStreamer *)self.viewController startChat];
     self.viewController = [[[UIViewController alloc] initWithNibName:nil bundle:nil] autorelease];
     self.window.rootViewController = self.viewController;
+    self.viewController.view.backgroundColor = [UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0];
     [self.window makeKeyAndVisible];
+    
+    [self performSelector:@selector(startVideoStreamer:) withObject:nil afterDelay:2.0];
+    
+    /*
+    UIViewController *aViewController = [[UIViewController alloc] initWithNibName:nil bundle:nil];
+    aViewController.view.backgroundColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.0 alpha:1.0];
+    [self.viewController presentViewController:aViewController animated:YES completion:^(void){
+        NSLog(@"Starting Delay");
+        [self performSelector:@selector(removeVC:) withObject:nil afterDelay:5.0];
+    }];
+    //*/
+    
+    /*
     [self.viewController presentViewController:videostreamer animated:YES completion:^(void) {
         [videostreamer startChat];
     }];
+    UIViewController *presented = self.viewController.presentedViewController;
+    NSLog(@"presented: %@", presented);
+    //*/
+    
     return YES;
 }
 
@@ -96,12 +141,14 @@
     NSLog(@"Chat Started");
 }
 
-- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason {
+- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code {
     NSLog(@"Chat Ended: %@", reason);
+    NSLog(@"Network Code: %d", code);
     UIViewController *presented = self.viewController.presentedViewController;
+    //NSLog(@"presented: %@", presented);
     [self.viewController dismissViewControllerAnimated:YES completion:^(void){
-        // TODO: figure out why this never gets called
-        [presented autorelease];
+        NSLog(@"Video Streamer Dismissed");
+        [presented release];
     }];
 }
 
