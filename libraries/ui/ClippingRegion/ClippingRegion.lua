@@ -17,30 +17,6 @@ ClippingRegion = setmetatable(
         end,
         
         subscriptions = {
-            ["style"] = function(instance,env)
-                return function()
-                    
-                    instance.style.border:subscribe_to( nil, function()
-                        
-                        env.border.border_width = instance.style.border.width 
-                        
-                    end )
-                    instance.style.border.colors:subscribe_to( nil, function()
-                        
-                        env.border.border_color = instance.style.border.colors.default 
-                        
-                    end )
-                    instance.style.fill_colors:subscribe_to( nil, function()
-                        
-                        env.bg.color = instance.style.fill_colors.default 
-                        
-                    end )
-                    env.border.border_width = instance.style.border.width 
-                    env.border.border_color = instance.style.border.colors.default 
-                    dumptable(env.border.border_color)
-                    env.bg.color = instance.style.fill_colors.default 
-                end
-            end,
         },
         public = {
             properties = {
@@ -63,6 +39,7 @@ ClippingRegion = setmetatable(
                 h = function(instance,env)
                     return function(oldf,self) return env.h     end,
                     function(oldf,self,v) 
+                        print("cr_h",v)
                         env.h = v
                         env.reclip = true
                         env.new_h  = true
@@ -127,6 +104,14 @@ ClippingRegion = setmetatable(
                 widget_type = function(instance,env)
                     return function(oldf) return "ClippingRegion" end
                 end,
+                children = function(instance,env)
+                    return function(oldf) return env.contents.children     end,
+                    function(oldf,self,v) 
+                        if type(v) ~= "table" then error("Expected table. Received "..type(v), 2) end
+                        env.contents:clear()
+                        env.contents:add(unpack(v))
+                    end
+                end,
                 attributes = function(instance,env)
                     return function(oldf,self)
                         local t = oldf(self)
@@ -138,6 +123,11 @@ ClippingRegion = setmetatable(
                         t.sets_x_to = instance.sets_x_to
                         t.sets_y_to = instance.sets_y_to
                         
+                        t.children = {}
+                        
+                        for i, child in ipairs(env.contents.children) do
+                            t.children[i] = child.attributes
+                        end
                         t.type = "ClippingRegion"
                         
                         return t
@@ -145,13 +135,23 @@ ClippingRegion = setmetatable(
                 end,
             },
             functions = {
-                add = function(instance,env) return function(oldf,self,...) env.contents:add(...) end end,
+                add    = function(instance,env) return function(oldf,self,...) env.contents:add(   ...) end end,
+                remove = function(instance,env) return function(oldf,self,...) env.contents:remove(...) end end,
             },
         },
         private = {
             update = function(instance,env)
                 return function()
                     
+                    
+                    if  env.restyle then
+                        env.restyle = false
+                        
+                        env.border.border_width = instance.style.border.width 
+                        env.border.border_color = instance.style.border.colors.default 
+                        env.bg.color            = instance.style.fill_colors.default 
+                        
+                    end
                     if  env.new_w then
                         env.new_w = false
                         
@@ -191,6 +191,8 @@ ClippingRegion = setmetatable(
             
             local instance, env = Widget()
             local getter, setter
+            
+            env.style_flags = "restyle"
             
             env.bg       = Rectangle{ 
                 name  = "Background",
