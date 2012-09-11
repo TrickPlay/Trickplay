@@ -1,87 +1,40 @@
-if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("LIB/Widget/__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("LIB/Widget/__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("LIB/Widget/__UTILITIES/Canvas.lua")            end
-if not MISC              then dofile("LIB/Widget/__UTILITIES/Misc.lua")            end
-if not COLORSCHEME       then dofile("LIB/Widget/__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("LIB/Widget/__CORE/Style.lua")                  end
-if not WIDGET            then dofile("LIB/Widget/__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("LIB/Widget/Button/Button.lua")                 end
-if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")           end
-if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
-if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
-if not PROGRESSBAR       then dofile("LIB/Widget/ProgressBar/ProgressBar.lua") end
-if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
-if not TOGGLEBUTTON      then dofile("LIB/Widget/ToggleButton/ToggleButton.lua")     end
-if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
+---------------------------------------------------------
+--		Visual Editor Main.lua 
+---------------------------------------------------------
 
-if not RADIOBUTTONGROUP  then dofile("LIB/Widget/RadioButtonGroup/RadioButtonGroup.lua") end
-if not GRIDMANAGER       then dofile("LIB/Widget/__UTILITIES/ListManagement.lua")   end
-if not NINESLICE         then dofile("LIB/Widget/NineSlice/NineSlice.lua")          end
-if not CLIPPINGREGION    then dofile("LIB/Widget/ClippingRegion/ClippingRegion.lua")end
-if not SLIDER            then dofile("LIB/Widget/Slider/Slider.lua")                end
-if not LAYOUTMANAGER     then dofile("LIB/Widget/LayoutManager/LayoutManager.lua")  end
-if not SCROLLPANE        then dofile("LIB/Widget/ScrollPane/ScrollPane.lua")        end
-if not ARROWPANE         then dofile("LIB/Widget/ArrowPane/ArrowPane.lua")          end
-if not BUTTONPICKER      then dofile("LIB/Widget/ButtonPicker/ButtonPicker.lua")    end
-if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")        end
-if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
-
-dofile("LIB/VE/ve_runtime")
-
--- The asset cache
-assets = dofile( "assets-cache" )
+    -------------------------------
+    -- Constants, Global Variables  
+    -------------------------------
 
 hdr = dofile("header")
-util = dofile("util")
-ui = {
-      assets  = assets,
-      factory = dofile( "ui-factory" ),
-    } 
-editor = dofile("editor")
-screen_ui = dofile("screen_ui")
 
-function dump_properties( o )
-        local t = {}
-        local l = 0
-        for k , v in pairs( getmetatable( o ).__getters__ ) do
-            local s = v( o )
-            if type( s ) == "table" then
-                s = serialize( s )
-            elseif type( s ) == "string" then
-                s = string.format( "%q" , s )
-            else
-                s = tostring( s )
-            end
-            table.insert( t , { k , s } )
-            l = math.max( l , # k )
-        end
-        table.sort( t , function( a , b ) return a[1] < b[1] end )
-        for i = 1 , # t do
-            print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
-        end
-end
-
--- UI Element / Layer Naming Number 
-
+    -- UI Element / Layer Naming Number 
 local uiNum = 0
 local layerNum = 0
+
+    -- current Layer 
 local curLayerGid = nil
 local curLayer= nil
+    
+    -- temporary UI Element 
 local uiDuplicate= nil
 local uiRectangle = nil
+    
+    -- block report flag 
 local blockReport= false
 
--- UI Element Creation Function Map 
+    -------------------------------
+    -- UI Element Creation Function Map 
+    -------------------------------
 
 local uiElementCreate_map = 
 {
     ['Clone'] = function(p)  return Widget_Clone(p) end, 
     ['Group'] = function(p)  return Widget_Group(p) end, 
     ['Rectangle'] = function(p)  return Widget_Rectangle(p) end, 
-
     ['Text'] = function(p)  return Widget_Text(p) end, 
     ['Image'] = function(p)  return Widget_Image(p) end, 
+
     ['Button'] = function(p)  return Button(p) end, 
     ['DialogBox'] = function(p) return DialogBox(p) end,
     ['ToastAlert'] = function(p) return ToastAlert(p) end,
@@ -99,6 +52,39 @@ local uiElementCreate_map =
     ['MenuButton'] = function(p)  return MenuButton(p) end, 
 }
 
+ 
+    ----------------------------------------------------------------------------
+    -- Key Map
+    ----------------------------------------------------------------------------
+    
+    local key_map =
+    {
+        [ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
+        [ keys.d	] = function() editor.duplicate() input_mode = hdr.S_SELECT end,
+        [ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
+        [ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
+        --[ keys.k	] = function() editor_lb:execute(debugger_script.." "..current_dir) end,
+		[ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
+        [ keys.t	] = function() editor.text() input_mode = hdr.S_SELECT end,
+        [ keys.u	] = function() editor.ugroup() input_mode = hdr.S_SELECT end,
+        --[ keys.z	] = function() editor.undo() input_mode = hdr.S_SELECT end,
+        [ keys.v	] = function() editor.v_guideline() input_mode = hdr.S_SELECT end,
+        [ keys.w	] = function() editor.image() input_mode = hdr.S_SELECT end,
+        [ keys.BackSpace ] = function() editor.delete() input_mode = hdr.S_SELECT end,
+        [ keys.Delete    ] = function() editor.delete() input_mode = hdr.S_SELECT end,
+		[ keys.Shift_L   ] = function() shift = true end,
+		[ keys.Shift_R   ] = function() shift = true end,
+		[ keys.Control_L ] = function() control = true end,
+		[ keys.Control_R ] = function() control = true end,
+        [ keys.Return    ] = function() screen_ui.n_select_all() input_mode = hdr.S_SELECT end ,
+        [ keys.Left     ] = function() screen_ui.move_selected_obj("Left") input_mode = hdr.S_SELECT end,
+        [ keys.Right    ] = function() screen_ui.move_selected_obj("Right") input_mode = hdr.S_SELECT end ,
+        [ keys.Down     ] = function() screen_ui.move_selected_obj("Down") input_mode = hdr.S_SELECT end,
+        [ keys.Up       ] = function() screen_ui.move_selected_obj("Up") input_mode = hdr.S_SELECT end,
+    }
+    
+
+
 -- Layer JSON 
 
 json_head = '[{"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
@@ -109,67 +95,6 @@ json_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position"
 sjson_head = '[{"anchor_point":[0,0], "children":'  
 sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
 
-
---[[  For engine UI Element test 
-
-fake_json = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "Layer1", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 3, "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "children": [{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0],"border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [0,0,0], "border_width": 0, "type": "Rectangle", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "clone1", "anchor_point": [0,0], "x_rotation": [0,0,0], "source": {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0], "border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [216,160,0],"border_width": 0, "type": "Rectangle", "size": [212, 186]}, "gid": 5, "z_rotation": [0,0,0], "position": [216, 390, 0], "type": "Clone", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "image2", "clip": [0,0,450,978], "src": "/assets/images/img_big_01.png", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 6, "z_rotation": [0,0,0], "position": [208, 590, 0], "type": "Texture", "size": [978, 450]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "text3", "anchor_point": [0,0], "text": "TEXT", "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 7, "z_rotation": [0,0,0], "position": [224, 1046, 0], "font": "FreeSans Medium 30px", "type": "Text", "size": [39, 75]}], "size": [1186, 1121]}'
-]]
-
---[[
-
-fake_layer_name = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "'
-fake_layer_gid = '", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": '
-fake_layer_children = ', "children" : ['
-fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "size": [1186, 1121]}'
-
-]]
-
---[[ For style json test 
-
-fake_style_json = '{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"offset":10,"size":20},"border":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"corner_radius":10,"width":2},"fill_colors":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"name":"Style","text":{"alignment":"CENTER","colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"font":"Sans 40px","justify":true,"wrap":true,"x_offset":0,"y_offset":0}}}'
-
-]]
-
-
----------------------------------------------------------------------------
----                 Test Functions                                      ---
----------------------------------------------------------------------------
-
-function ll ()
-
-    _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST2/TR.T11/screens")
-
-end 
-
-function ss ()
-
-    dumptable (selected_objs)
-
-end
-
-function rr (gid)
-
-    _VE_.insertUIElement(gid, "Rectangle")
-
-end
-
-function gg ()
-
-    _VE_.insertUIElement(2, "Group")
-
-end
-
-function dd (gid)
-
-    _VE_.delete(gid)
-
-end
-
-function bb (gid)
-
-    _VE_.insertUIElement(gid, "Button")
-
-end
 
 ---------------------------------------------------------------------------
 ---                 Local Editor Functions                              ---
@@ -1969,6 +1894,24 @@ end
 ---           Global  Screen Mouse Event Handler Functions              ---
 ---------------------------------------------------------------------------
 ----[[
+
+      function screen:on_key_down( key )
+
+		if(input_mode ~= hdr.S_POPUP) then 
+          if key_map[key] then
+              key_map[key](self)
+     	  end
+     	end
+
+    end
+
+    function screen:on_key_up( key )
+
+    	if key == keys.Shift_L or key == keys.Shift_R then shift = false end 
+    	if key == keys.Control_L or key == keys.Control_R then control = false end 
+
+    end
+
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
