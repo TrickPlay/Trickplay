@@ -2,6 +2,7 @@
 #include <clutter/clutter.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define N_CIRCLES 3     /* number of circles */
 #define CIRCLE_W 128    /* width */
@@ -45,29 +46,53 @@ circle_paint_cb (ClutterActor *actor)
     }
 };
 
-typedef struct SpriteSheet {
-  CoglMaterial* (*material)[];
-  gint (*w)[];
-  gint (*h)[];
-  gint n;
-} SpriteSheet;
-
-static SpriteSheet* spritesheet_new(CoglHandle *texture, gint x[], gint y[], gint w[], gint h[], gint n) {
-  CoglMaterial* sm[n];
-  gint sw[n];
-  gint sh[n];
+static SpriteSheet* spritesheet_new(CoglHandle *texture, gint x[], gint y[], gint w[], gint h[], gint n, gint filter) {
+  SpriteSheet *sheet = malloc(sizeof(SpriteSheet));
+  sheet->material = calloc(n, sizeof(CoglMaterial *));
+  sheet->texture = calloc(n, sizeof(CoglHandle *));
+  sheet->w = calloc(n, sizeof(gint));
+  sheet->h = calloc(n, sizeof(gint));
+  sheet->n = n;
   
+  ClutterTextureQuality cf = (filter == 1 ? CLUTTER_TEXTURE_QUALITY_LOW : CLUTTER_TEXTURE_QUALITY_MEDIUM);
+
   gint i;
   for (i = 0; i < n; i++) {
-    sw[i] = w[i];
-    sh[i] = h[i];
-    sm[i] = cogl_material_new();
-    cogl_material_set_layer(sm[i], 0, cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]));
+    // don't know why routing through an actor is necessary
+    //*
+    sheet->texture[i] = cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]);
+    ClutterActor *tex = clutter_texture_new();
+    clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(tex), sheet->texture[i]);
+    clutter_texture_set_repeat(CLUTTER_TEXTURE(tex), TRUE, TRUE);
+    clutter_texture_set_filter_quality(CLUTTER_TEXTURE(tex), cf);
+    sheet->material[i] = COGL_MATERIAL(clutter_texture_get_cogl_material(CLUTTER_TEXTURE(tex)));
+    //*/
+    /*
+    sheet->material[i] = cogl_material_new();
+    sheet->texture[i] = cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]);
+    cogl_material_set_layer(sheet->material[i], 0, sheet->texture[i]);
+    cogl_material_set_layer_filters(sheet->material[i], 0, cf, cf);
+    cogl_material_set_layer_wrap_mode(sheet->material[i], 0, COGL_MATERIAL_WRAP_MODE_REPEAT  );
+    //*/
+    sheet->w[i] = w[i];
+    sheet->h[i] = h[i];
   }
   
-  SpriteSheet sheet = {&sm, &sw, &sh, n};
-  SpriteSheet *ptr = &sheet;
-  return ptr;
+  return sheet;
+}
+
+static void spritesheet_free(SpriteSheet *sheet)
+{
+  free(sheet->h);
+  free(sheet->w);
+  gint i;
+  for(i=0; i < sheet->n; i++)
+  {
+    g_free(sheet->texture[i]);
+    g_free(sheet->material[i]);
+  }
+  free(sheet->texture);
+  free(sheet->material);
 }
 
 int
@@ -83,7 +108,7 @@ main (int argc, char **argv)
     return 1;
 
   stage = clutter_stage_new ();
-  clutter_stage_set_title (CLUTTER_STAGE (stage), "Circles");
+  clutter_stage_set_title (CLUTTER_STAGE (stage), "SpriteSheet");
   clutter_stage_set_color (CLUTTER_STAGE (stage), &bg_color);
   clutter_actor_set_size (stage, SCREEN_W, SCREEN_H);
   g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
@@ -126,14 +151,16 @@ main (int argc, char **argv)
       clutter_behaviour_apply (behaviour, actor);
     }
   
+  /*
   gchar *source[] = {"slice-00.png", "slice-10.png", "slice-20.png",
                      "slice-01.png", "slice-11.png", "slice-21.png",
                      "slice-02.png", "slice-12.png", "slice-22.png"};
+  //*/
   
-  gint width = 48, height = 48, left = 16, right = 16, top = 16, bottom = 16;
-  
-  gint xs[] = {0, left, width-right, width};
-  gint ys[] = {0, top, height-bottom, bottom};
+  //gint width = 48, height = 48, left = 16, right = 16, top = 16, bottom = 16;
+  //*
+  gint xs[] = {16, 32, 48, 64}; //left, width-right, width};
+  gint ys[] = {16, 32, 48, 64}; // top, height-bottom, bottom};
   gint x[9], y[9], w[9], h[9], j, k;
   for (i = 0; i < 3; i++) {
     for (j = 0; j < 3; j++) {
@@ -147,19 +174,21 @@ main (int argc, char **argv)
   
   CoglHandle *texture = clutter_texture_get_cogl_texture(
       CLUTTER_TEXTURE(clutter_texture_new_from_file("spritesheet.png", NULL)) );
-  SpriteSheet *sheet = spritesheet_new(texture, x, y, w, h, 9);
-  
+  SpriteSheet *sheet = spritesheet_new(texture, x, y, w, h, 9, 0);
+  //*/
   ClutterActor *actor2 = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor2);
   clutter_actor_set_position(actor2, 10, 10);
   
-  ClutterEffect *effect2 = nineslice_effect_new_from_source(source);
+  //ClutterEffect *effect2 = nineslice_effect_new_from_source(source, TRUE);
+  ClutterEffect *effect2 = nineslice_effect_new_from_spritesheet(sheet, 0, TRUE);
   clutter_actor_add_effect(actor2, effect2);
   
   ClutterActor *actor = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (actor2), actor);
   
-  ClutterEffect *effect = nineslice_effect_new_from_source(source);
+  //ClutterEffect *effect = nineslice_effect_new_from_source(source, TRUE);
+  ClutterEffect *effect = nineslice_effect_new_from_spritesheet(sheet, 0, TRUE);
   clutter_actor_add_effect(actor, effect);
   
   ClutterActor *text = clutter_text_new_with_text("Sans 40px","Example Text");
@@ -202,6 +231,8 @@ main (int argc, char **argv)
   clutter_timeline_start (timeline);
   
   clutter_main ();
+
+  //spritesheet_free(sheet);
   
   return 0;
 }
