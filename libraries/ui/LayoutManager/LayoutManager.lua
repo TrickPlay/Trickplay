@@ -842,6 +842,7 @@ ListManager = setmetatable(
             local getter, setter
             
             env.node_constructor = false
+            env.on_entries_changed   = function() end
             env.cells = ArrayManager{  
                 
                 node_constructor=function(obj)
@@ -984,7 +985,6 @@ ListManager = setmetatable(
             env.children_want_focus   = true
             env.in_on_entries   = false
             env.focused_child   = false
-            env.on_entries_changed   = false
             env.placeholder = nil
             env.new_placeholder = Rectangle{w=200,h=200,color="ff0000"}
             
@@ -1151,7 +1151,7 @@ LayoutManager = setmetatable(
                     return function(oldf) return env.cells     end,
                     function(oldf,self,v)   
                         env.new_cells = v  
-                        --print("herp")
+                        print("LayoutManager.cells set")
                         dumptable(v)
                         --print("dim",env.cells.number_of_rows,env.cells.number_of_cols)
                     end
@@ -1340,9 +1340,9 @@ LayoutManager = setmetatable(
                         env.placeholder = v 
                     end
                     if  env.new_cells then
-                        print(instance.number_of_rows)
-                        print(instance.number_of_cols)
-                        dumptable(env.new_cells)
+                        --print(instance.number_of_rows)
+                        --print(instance.number_of_cols)
+                        --dumptable(env.new_cells)
                         env.cells:set(env.new_cells)
                         focused_child = env.cells[1][1] 
                         focused_child:grab_key_focus()
@@ -1572,7 +1572,7 @@ LayoutManager = setmetatable(
             env.children_want_focus   = true
             env.in_on_entries   = false
             env.focused_child   = false
-            env.on_entries_changed   = false
+            env.on_entries_changed   = function() end
             env.placeholder = nil
             env.new_placeholder = Rectangle{w=200,h=200,color="ff0000"}
             
