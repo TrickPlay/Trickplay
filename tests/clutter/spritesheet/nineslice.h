@@ -9,6 +9,15 @@
 
 #include <clutter/clutter.h>
 
-ClutterEffect* nineslice_effect_new_from_source(gchar* source[]);
+typedef struct SpriteSheet {
+  CoglMaterial* *material;
+  CoglHandle* *texture;
+  gint *w;
+  gint *h;
+  gint n;
+} SpriteSheet;
+
+ClutterEffect* nineslice_effect_new_from_source(gchar* source[], gboolean tiled);
+ClutterEffect* nineslice_effect_new_from_spritesheet(SpriteSheet *sheet, gint offset, gboolean tiled);
 
 #endif
