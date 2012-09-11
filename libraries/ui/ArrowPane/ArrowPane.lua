@@ -406,13 +406,13 @@ ArrowPane = setmetatable(
                 },
             }
             env.style_flags = {
-                border = "recolor_pane",
+                border = "redraw_pane",
                 arrow = {
                     size = "redraw_buttons",
                     offset = "respace_arrows",
                     colors = "redraw_buttons",
                 },
-                fill_colors = "recolor_pane"
+                fill_colors = "redraw_pane"
             }
             print("way before instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
             local getter, setter
