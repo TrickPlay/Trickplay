@@ -126,4 +126,72 @@ BG_IMAGE_white = nil
 BG_IMAGE_import = nil
 ]]
 
+if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
+if not TYPECHECKING      then dofile("LIB/Widget/__UTILITIES/TypeChecking.lua")      end
+if not TABLEMANIPULATION then dofile("LIB/Widget/__UTILITIES/TableManipulation.lua") end
+if not CANVAS            then dofile("LIB/Widget/__UTILITIES/Canvas.lua")            end
+if not MISC              then dofile("LIB/Widget/__UTILITIES/Misc.lua")            end
+if not COLORSCHEME       then dofile("LIB/Widget/__CORE/ColorScheme.lua")            end
+if not STYLE             then dofile("LIB/Widget/__CORE/Style.lua")                  end
+if not WIDGET            then dofile("LIB/Widget/__CORE/Widget.lua")                 end
+if not BUTTON            then dofile("LIB/Widget/Button/Button.lua")                 end
+if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")           end
+if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
+if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
+if not PROGRESSBAR       then dofile("LIB/Widget/ProgressBar/ProgressBar.lua") end
+if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
+if not TOGGLEBUTTON      then dofile("LIB/Widget/ToggleButton/ToggleButton.lua")     end
+if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
+
+if not RADIOBUTTONGROUP  then dofile("LIB/Widget/RadioButtonGroup/RadioButtonGroup.lua") end
+if not GRIDMANAGER       then dofile("LIB/Widget/__UTILITIES/ListManagement.lua")   end
+if not NINESLICE         then dofile("LIB/Widget/NineSlice/NineSlice.lua")          end
+if not CLIPPINGREGION    then dofile("LIB/Widget/ClippingRegion/ClippingRegion.lua")end
+if not SLIDER            then dofile("LIB/Widget/Slider/Slider.lua")                end
+if not LAYOUTMANAGER     then dofile("LIB/Widget/LayoutManager/LayoutManager.lua")  end
+if not SCROLLPANE        then dofile("LIB/Widget/ScrollPane/ScrollPane.lua")        end
+if not ARROWPANE         then dofile("LIB/Widget/ArrowPane/ArrowPane.lua")          end
+if not BUTTONPICKER      then dofile("LIB/Widget/ButtonPicker/ButtonPicker.lua")    end
+if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")        end
+if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
+
+dofile("LIB/VE/ve_runtime")
+
+-- The asset cache
+assets = dofile( "assets-cache" )
+
+
+util = dofile("util")
+ui = {
+      assets  = assets,
+      factory = dofile( "ui-factory" ),
+    } 
+editor = dofile("editor")
+screen_ui = dofile("screen_ui")
+
+function dump_properties( o )
+        local t = {}
+        local l = 0
+        for k , v in pairs( getmetatable( o ).__getters__ ) do
+            local s = v( o )
+            if type( s ) == "table" then
+                s = serialize( s )
+            elseif type( s ) == "string" then
+                s = string.format( "%q" , s )
+            else
+                s = tostring( s )
+            end
+            table.insert( t , { k , s } )
+            l = math.max( l , # k )
+        end
+        table.sort( t , function( a , b ) return a[1] < b[1] end )
+        for i = 1 , # t do
+            print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
+        end
+end
+
+
+
+
 return hdr
+
