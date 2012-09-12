@@ -2,6 +2,7 @@ TABBAR = true
 
 local top_tabs = function(self,state)
 	local c = Canvas(self.w,self.h)
+	print("make top_tab",self.gid,state)
 	
 	c.op = "SOURCE"
 	
@@ -36,7 +37,7 @@ end
 
 local side_tabs = function(self,state)
 	local c = Canvas(self.w,self.h)
-	
+	print("make side_tab",self.gid,state)
 	c.op = "SOURCE"
 	
 	c.line_width = self.style.border.width
@@ -171,8 +172,12 @@ TabBar = setmetatable(
                         
                         return   tabs     
                     end,
-                    function(oldf,self,v)  
-                        
+                    function(oldf,self,v)    
+                        if type(v) ~= "table" then error("Expected table. Received: ",2) end
+                        env.new_tabs = v  
+                        --print("herp")
+                        dumptable(v)
+                        --[[
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
                         
                         env.tabs_lm:set{
@@ -185,7 +190,7 @@ TabBar = setmetatable(
                         else
                             env.tab_pane.virtual_h = env.tabs_lm.h
                         end
-                        
+                        --]]
                     end
                 end,
                 tab_location = function(instance,env)
@@ -267,12 +272,15 @@ TabBar = setmetatable(
         
             update = function(instance,env)
                 return function()
+                    print("------------------------------------------------")
                     if env.resize_tabs then
                         env.resize_tabs = false
-                        for i = 1,env.tabs_lm.length do
-                            
-                            env.tabs_lm.cells[i].size = {env.tab_w,env.tab_h}
-                            
+                        if not env.new_tabs then
+                            for i = 1,env.tabs_lm.length do
+                                
+                                env.tabs_lm.cells[i].size = {env.tab_w,env.tab_h}
+                                
+                            end
                         end
                         if env.tab_location == "top" then
                             print("tab_h = "..env.tab_h)
@@ -285,8 +293,24 @@ TabBar = setmetatable(
                             env.tab_pane.arrow_move_by = env.tab_h + env.tabs_lm.spacing
                         end
                     end
+                    if env.new_tabs then
+                        print("set new_tabs")
+                        env.tabs_lm:set{
+                            direction = "horizontal",
+                            --length = #v,
+                            cells = env.new_tabs,
+                        }
+                        if env.tab_location == "top" then
+                            env.tab_pane.virtual_w = env.tabs_lm.w
+                        else
+                            env.tab_pane.virtual_h = env.tabs_lm.h
+                        end
+                        env.new_tabs = false
+                    end
                     
                     env.old_update()
+                    
+                    --env.tabs_lm:call_update()
                 end
             end,
             subscribe_to_sub_styles = function(instance,env)
@@ -337,7 +361,6 @@ TabBar = setmetatable(
             
             parameters = parameters or {}
             
-            
             local instance,env = ListManager:declare{vertical_alignment = "top",spacing=0}
             env.panes = {}
             env.tabs = {}
@@ -367,12 +390,12 @@ TabBar = setmetatable(
             env.tab_style    = nil
             env.tab_location = "top"
             env.resize_tabs = true
-            env.tabs_lm = ListManager{
+            env.tabs_lm = ListManager:declare{
                 name = "Tabs ListManager",
                 spacing = 0,
                 vertical_alignment = "top",
                 node_constructor = function(obj)
-                    
+                    mesg("TABBAR",{0,3},"New Tab Button")
                     if obj == nil then 
                         obj = {label = "Tab",content = {}}
                     elseif type(obj) ~= "table" then
@@ -395,17 +418,18 @@ TabBar = setmetatable(
                         label  = obj.label,
                         w      = env.tab_w,
                         h      = env.tab_h,
-                        style  = false,
+                        style  = {name=false,border={colors={selection="ffffff"}}},
                         group  = env.rbg,
                         reactive = true,
                         create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
                         --images = tab_images,
                     }
+                    mesg("TABBAR",0,"button made")
+                    ---[[
                     if env.tab_style then
-                        obj.style:set(env.tab_style.attributes)
-                    else
-                        obj.style.border.colors.selection = "ffffff"
+                        obj.style:set(env.tab_style.attributes) -- causes extra redraw
                     end
+                    --]]
                     
                     --table.insert(tabs,obj)
                     obj.pane = pane
@@ -415,11 +439,14 @@ TabBar = setmetatable(
                     return obj
                 end
             }
+            
+            env.tabs_lm_env = get_env(env.tabs_lm)
+            
             --TODO roll into a single set
             env.tab_pane = ArrowPane{name = "ArrowPane",style = false,arrow_move_by = tab_w}
             env.tab_pane.style.arrow.offset = -env.tab_pane.style.arrow.size
             env.tab_pane.style.border.colors.default = "00000000"
-            env.tab_pane.style.fill_colors.default = "00000000"
+            env.tab_pane.style.fill_colors.default   = "00000000"
             env.tab_pane:add(env.tabs_lm)
             
             instance.cells = {env.tab_pane,env.panes_obj}
