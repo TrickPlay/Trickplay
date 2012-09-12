@@ -8,28 +8,29 @@
 #define __TRICKPLAY_NINESLICE_H__
 
 #include <clutter/clutter.h>
+#include "spritesheet.h"
 
-typedef struct SpriteSheet {
-  GHashTable *map;
-  CoglMaterial **material;
-  CoglHandle **texture;
-  gint *w;
-  gint *h;
-  gint n;
-} SpriteSheet;
+GType nineslice_effect_get_type(void);
 
-static void spritesheet_get_sprite(SpriteSheet *sheet, gchar *name, CoglMaterial **material, CoglHandle **texture, gint *w, gint *h);
+#define TYPE_NINESLICE_EFFECT             (nineslice_effect_get_type())
+#define NINESLICE_EFFECT(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj),  TYPE_NINESLICE_EFFECT, NineSliceEffect))
+#define IS_NINESLICE_EFFECT(obj)          (G_TYPE_CHECK_INSTANCE_TYPE((obj),  TYPE_NINESLICE_EFFECT))
+#define NINESLICE_EFFECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
+#define IS_NINESLICE_EFFECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT))
+#define NINESLICE_EFFECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
 
-static void spritesheet_get_sprite(SpriteSheet *sheet, gchar *name, CoglMaterial **material, CoglHandle **texture, gint *w, gint *h) {
-  gpointer p = g_hash_table_lookup(sheet->map, name);
-  if (p != NULL) {
-    gint i = GPOINTER_TO_INT(p) - 1;
-    if (material != NULL) *material = sheet->material[i];
-    if (texture != NULL) *texture = sheet->texture[i];
-    if (w != NULL) *w = sheet->w[i];
-    if (h != NULL) *h = sheet->h[i];
-  }
-}
+typedef struct _NineSliceEffect NineSliceEffect;
+typedef struct _NineSliceEffectClass NineSliceEffectClass;
+typedef struct _NineSliceEffectPrivate NineSliceEffectPrivate;
+
+struct _NineSliceEffect {
+  ClutterEffect parent_instance;
+  NineSliceEffectPrivate *priv;
+};
+
+struct _NineSliceEffectClass {
+  ClutterEffectClass parent_class;
+};
 
 ClutterEffect* nineslice_effect_new_from_names(gchar* names[], SpriteSheet *sheet, gboolean tiled);
 

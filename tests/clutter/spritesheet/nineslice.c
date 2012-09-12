@@ -1,28 +1,9 @@
 #include <math.h>
 #include "nineslice.h"
 
-GType nineslice_effect_get_type(void);
+G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
 
-#define TYPE_NINESLICE_EFFECT             (nineslice_effect_get_type())
-#define NINESLICE_EFFECT(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj),  TYPE_NINESLICE_EFFECT, NineSliceEffect))
-#define IS_NINESLICE_EFFECT(obj)          (G_TYPE_CHECK_INSTANCE_TYPE((obj),  TYPE_NINESLICE_EFFECT))
-#define NINESLICE_EFFECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
-#define IS_NINESLICE_EFFECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT))
-#define NINESLICE_EFFECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
 #define NINESLICE_EFFECT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), TYPE_NINESLICE_EFFECT, NineSliceEffectPrivate))
-
-typedef struct _NineSliceEffect NineSliceEffect;
-typedef struct _NineSliceEffectClass NineSliceEffectClass;
-typedef struct _NineSliceEffectPrivate NineSliceEffectPrivate;
-
-struct _NineSliceEffect {
-  ClutterEffect parent_instance;
-  NineSliceEffectPrivate *priv;
-};
-
-struct _NineSliceEffectClass {
-  ClutterEffectClass parent_class;
-};
 
 struct _NineSliceEffectPrivate {
   CoglMaterial* material[9];
@@ -31,7 +12,15 @@ struct _NineSliceEffectPrivate {
   gboolean tiled;
 };
 
-G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
+enum {
+  PROP_0,
+  
+  //PROP_PADDING,
+  
+  N_PROPERTIES
+};
+
+static GParamSpec *obj_props[N_PROPERTIES];
 
 static gboolean nineslice_effect_pre_paint(ClutterEffect *self) {
   gfloat w, h;
@@ -77,16 +66,6 @@ static void nineslice_effect_dispose(GObject *gobject) {
 }
 
 /*
-
-enum {
-  PROP_0,
-  
-  PROP_PADDING,
-  
-  N_PROPERTIES
-};
-
-static GParamSpec *obj_props[N_PROPERTIES];
 
 static gboolean nineslice_padding_interval(const GValue *a, const GValue *b, gdouble progress, GValue *r) {
   ClutterActorBox *rbox = clutter_actor_box_new(0.0, 0.0, 0.0, 0.0);
