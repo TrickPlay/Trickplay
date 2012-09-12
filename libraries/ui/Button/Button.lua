@@ -481,6 +481,9 @@ Button = setmetatable(
     
     
     declare = function(self,parameters)
+        
+        parameters = parameters or {}
+        
         local instance, env = Widget()
         ----------------------------------------------------------------------------
         --Key events
@@ -563,6 +566,10 @@ Button = setmetatable(
         --env.subscribe_to_sub_styles()
         
         --instance.images = nil
+        env.updating = true
+        instance:set(parameters)
+        env.updating = false
+        
         return instance, env
         
     end
