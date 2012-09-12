@@ -48,9 +48,16 @@ local uielement_properties = {
 -- Yes this is a messy way to set up WidgetGroup, WidgetRectangle, WidgetText,
 -- WidgetImage, and WidgetClone
 --------------------------------------------------------------------------------
+local table_of_envs = {}
+
+function get_env(w) return table_of_envs[w] end
+
 local function Widgetize(instance)
     
     local env = {}
+    
+    table_of_envs[instance] = env
+    
     env.update = function() end
     ----------------------------------------------------------------------------
     
