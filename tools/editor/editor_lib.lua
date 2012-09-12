@@ -1097,7 +1097,7 @@ function editor_ui.checkBoxGroup(t)
 
     function cb_group.extra.clear_focus()
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
-			for i=1, table.getn(boxes.children)/2 do 
+			for i=1, #boxes.children/2 do
 	    		boxes:find_child("box"..i).opacity = 255 
 	    		boxes:find_child("focus"..i).opacity = 0 
 			end 
@@ -1186,7 +1186,7 @@ function editor_ui.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == keys.Down then 
-						if box_num < table.getn(boxes.children)/2 then 
+						if box_num < #boxes.children/2 then
 							next_num = box_num + 1
 				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
 	    						boxes:find_child("box"..box_num).opacity = 255 
