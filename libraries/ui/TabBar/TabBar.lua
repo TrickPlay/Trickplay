@@ -156,22 +156,7 @@ TabBar = setmetatable(
                     return function() return "TabBar" end, nil
                 end,
                 tabs = function(instance,env)
-                    return function(oldf) 
-                    
-                        local tabs = {}
-                        
-                        for i = 1,env.tabs_lm.length do
-                            tabs[i]    = {
-                                label    = env.tabs_lm.cells[i].label,
-                                contents = env.tabs_lm.cells[i].pane.children
-                            }
-                            for j,child in ipairs(env.tabs_lm.cells[i].pane.children) do
-                                env.tabs[i].contents[j] = child.attributes
-                            end
-                        end
-                        
-                        return   tabs     
-                    end,
+                    return function(oldf)  return   env.tabs_interface      end,
                     function(oldf,self,v)    
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
                         env.new_tabs = v  
@@ -260,6 +245,15 @@ TabBar = setmetatable(
                         t.pane_h = instance.pane_h
                         t.tabs   = instance.tabs
                         t.tab_location = instance.tab_location
+                        
+                        t.tabs = {}
+                        
+                        for i = 1,env.tabs_lm.length do
+                            t.tabs[i]    = {
+                                label    = env.tabs_lm.cells[i].label,
+                                --contents = env.tabs_lm.cells[i].pane.attributes
+                            }
+                        end
                         
                         t.type = "TabBar"
                         
@@ -372,10 +366,10 @@ TabBar = setmetatable(
                     for i = 1,env.tabs_lm.length do
                         local t = env.tabs_lm.cells[i]
                         if t.selected then
-                            t.pane:show()
+                            t.contents:show()
                             t:grab_key_focus()
                         else
-                            t.pane:hide()
+                            t.contents:hide()
                         end
                     end
                 end
@@ -392,31 +386,59 @@ TabBar = setmetatable(
             env.tab_style    = nil
             env.tab_location = "top"
             env.resize_tabs = true
+            
+            local function make_tab_interface(tb)
+                --prevents the user from getting/setting any of the other fields of the ToggleButtons
+                local setter = {
+                    label    = function(v) tb.label = v end,
+                    contents = function(v) 
+                        tb.contents:unparent()
+                        tb.contents = v
+                        env.panes_obj:add(v)
+                        if not tb.selected then v:hide() end
+                    end,
+                }
+                local getter = {
+                    label    = function() return tb.label end,
+                    contents = function() return tb.contents end,
+                }
+                return setmetatable({},{
+                    __index = function(_,k)
+                        return getter[k] and getter[k]()
+                    end,
+                    __newindex = function(_,k,v)
+                        return setter[k] and setter[k](v)
+                    end,
+                })
+            end
+            env.tab_to_interface_map = {}
+            
             env.tabs_lm = ListManager:declare{
                 name = "Tabs ListManager",
                 spacing = 0,
                 vertical_alignment = "top",
                 direction = "horizontal",
                 node_constructor = function(obj)
+                    
+                    
+                    
                     mesg("TABBAR",{0,3},"New Tab Button")
                     if obj == nil then 
-                        obj = {label = "Tab",content = {}}
+                        obj = {label = "Tab",contents = Widget_Group()}
                     elseif type(obj) ~= "table" then
                         error("Expected tab entry to be a string. Received "..type(obj),2)
                     elseif type(obj.label) ~= "string" then
                         error("Received a tab without a label",2)
                     end
-                    for i,c in ipairs(obj.contents or {}) do
-                        if type(c) == "table" and c.type then 
-                            
-                            obj.contents[i] = _G[c.type](c)
-                            
-                        elseif type(c) ~= "userdata" and c.__types__.actor then 
-                            
-                            error("Must be a UIElement or nil. Received "..c,2) 
-                        end
+                    if type(obj.contents) == "table" and obj.contents.type then 
+                        
+                        obj.contents = _G[obj.contents.type](obj.contents)
+                        
+                    elseif type(obj.contents) ~= "userdata" and obj.contents.__types__.actor then 
+                        
+                        error("Must be a UIElement or nil. Received "..obj.contents,2) 
                     end
-                    local pane = Group{children = obj.contents}
+                    local pane = obj.contents
                     obj = ToggleButton{
                         label  = obj.label,
                         w      = env.tab_w,
@@ -427,6 +449,7 @@ TabBar = setmetatable(
                         create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
                         --images = tab_images,
                     }
+                    obj.contents = pane
                     mesg("TABBAR",0,"button made")
                     ---[[
                     if env.tab_style then
@@ -434,14 +457,28 @@ TabBar = setmetatable(
                     end
                     --]]
                     
+                    env.tab_to_interface_map[obj] = make_tab_interface(obj)
                     --table.insert(tabs,obj)
-                    obj.pane = pane
+                    --obj.pane = pane
                     --table.insert(panes,pane)
-                    env.panes_obj:add(pane)
+                    env.panes_obj:add(obj.contents)
                     
                     return obj
                 end
             }
+            
+            env.tabs_interface = setmetatable({},{
+                __index = function(_,k)
+                    local v = env.tabs_lm.cells[k]
+                    return type(k) == "number" and v and 
+                        env.tab_to_interface_map[v] or 
+                        v
+                end,
+                --pass through to the ListManager
+                __newindex = function(_,k,v)
+                    env.tabs_lm = v
+                end,
+            })
             
             env.tabs_lm_env = get_env(env.tabs_lm)
             
