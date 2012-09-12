@@ -945,6 +945,11 @@ ListManager = setmetatable(
                 
                 on_entries_changed = function(self)
                     
+                    env.find_col_widths = true
+                    env.find_col_heights = true
+                    env.reposition = true
+                    env.find_width = true
+                    env.find_height = true
                     if not env.is_setting then
                         env.call_update()
                         env.on_entries_changed(self)
@@ -1508,13 +1513,13 @@ LayoutManager = setmetatable(
                 end,
                 
                 on_entries_changed = function(self)
-                    print("hehere")
-                        env.find_col_widths = true
-                        env.find_col_heights = true
-                        env.reposition = true
-                        env.find_width = true
-                        env.find_height = true
-                        env.reassign_neighbors = true
+                    
+                    env.find_col_widths = true
+                    env.find_col_heights = true
+                    env.reposition = true
+                    env.find_width = true
+                    env.find_height = true
+                    env.reassign_neighbors = true
                     if not env.is_setting then
                         print("call")
                         env.on_entries_changed(self)
