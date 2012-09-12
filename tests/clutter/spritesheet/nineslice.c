@@ -156,7 +156,7 @@ static void nineslice_effect_init (NineSliceEffect *self) {
   priv = self->priv = NINESLICE_EFFECT_GET_PRIVATE(self);
 }
 
-ClutterEffect* nineslice_effect_new_from_source(gchar* source[], gboolean tiled) {
+ClutterEffect* nineslice_effect_new_from_names(gchar* names[], SpriteSheet *sheet, gboolean tiled) {
   ClutterEffect* self = g_object_new(TYPE_NINESLICE_EFFECT, NULL);
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
   priv->tiled = tiled;
@@ -165,28 +165,14 @@ ClutterEffect* nineslice_effect_new_from_source(gchar* source[], gboolean tiled)
   ClutterActor *texture;
   gint i;
   for (i = 0; i < 9; i++) {
-    texture = clutter_texture_new_from_file(source[i], &error);
-    priv->material[i] = COGL_MATERIAL(clutter_texture_get_cogl_material(CLUTTER_TEXTURE(texture)));
-    clutter_texture_get_base_size(CLUTTER_TEXTURE(texture), &(priv->w[i]), &(priv->h[i]));
-    
-    cogl_handle_ref(priv->material[i]);
-  }
-  
-  return self;
-}
-
-ClutterEffect* nineslice_effect_new_from_spritesheet(SpriteSheet *sheet, gint offset, gboolean tiled) {
-  ClutterEffect* self = g_object_new(TYPE_NINESLICE_EFFECT, NULL);
-  NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
-  priv->tiled = tiled;
-  
-  gint i;
-  for (i = 0; i < 9; i++) {
-    priv->material[i] = sheet->material[i + offset];
-    priv->w[i] = sheet->w[i + offset];
-    priv->h[i] = sheet->h[i + offset];
-    
-    cogl_handle_ref(priv->material[i]);
+    if (sheet != NULL) {
+      spritesheet_get_sprite(sheet, names[i], &priv->material[i], NULL, &priv->w[i], &priv->h[i]);
+    } else {
+      texture = clutter_texture_new_from_file(names[i], &error);
+      priv->material[i] = COGL_MATERIAL(clutter_texture_get_cogl_material(CLUTTER_TEXTURE(texture)));
+      clutter_texture_get_base_size(CLUTTER_TEXTURE(texture), &priv->w[i], &priv->h[i]);
+    }
+    if (priv->material[i] != NULL) cogl_handle_ref(priv->material[i]);
   }
   
   return self;

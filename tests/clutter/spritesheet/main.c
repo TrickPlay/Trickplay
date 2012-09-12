@@ -46,8 +46,9 @@ circle_paint_cb (ClutterActor *actor)
     }
 };
 
-static SpriteSheet* spritesheet_new(CoglHandle *texture, gint x[], gint y[], gint w[], gint h[], gint n, gint filter) {
+static SpriteSheet* spritesheet_new(CoglHandle *texture, gchar* names[], gint data[], gint n, gint filter) {
   SpriteSheet *sheet = malloc(sizeof(SpriteSheet));
+  sheet->map = g_hash_table_new(g_str_hash, g_str_equal);
   sheet->material = calloc(n, sizeof(CoglMaterial *));
   sheet->texture = calloc(n, sizeof(CoglHandle *));
   sheet->w = calloc(n, sizeof(gint));
@@ -58,24 +59,18 @@ static SpriteSheet* spritesheet_new(CoglHandle *texture, gint x[], gint y[], gin
 
   gint i;
   for (i = 0; i < n; i++) {
+    g_hash_table_insert(sheet->map, names[i], GINT_TO_POINTER(i+1));
+    
     // don't know why routing through an actor is necessary
-    //*
-    sheet->texture[i] = cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]);
+    sheet->texture[i] = cogl_texture_new_from_sub_texture(texture, data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]);
     ClutterActor *tex = clutter_texture_new();
     clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(tex), sheet->texture[i]);
     clutter_texture_set_repeat(CLUTTER_TEXTURE(tex), TRUE, TRUE);
     clutter_texture_set_filter_quality(CLUTTER_TEXTURE(tex), cf);
+    
     sheet->material[i] = COGL_MATERIAL(clutter_texture_get_cogl_material(CLUTTER_TEXTURE(tex)));
-    //*/
-    /*
-    sheet->material[i] = cogl_material_new();
-    sheet->texture[i] = cogl_texture_new_from_sub_texture(texture, x[i], y[i], w[i], h[i]);
-    cogl_material_set_layer(sheet->material[i], 0, sheet->texture[i]);
-    cogl_material_set_layer_filters(sheet->material[i], 0, cf, cf);
-    cogl_material_set_layer_wrap_mode(sheet->material[i], 0, COGL_MATERIAL_WRAP_MODE_REPEAT  );
-    //*/
-    sheet->w[i] = w[i];
-    sheet->h[i] = h[i];
+    sheet->w[i] = data[i*4+2];
+    sheet->h[i] = data[i*4+3];
   }
   
   return sheet;
@@ -88,11 +83,17 @@ static void spritesheet_free(SpriteSheet *sheet)
   gint i;
   for(i=0; i < sheet->n; i++)
   {
-    g_free(sheet->texture[i]);
-    g_free(sheet->material[i]);
+    cogl_handle_unref(sheet->texture[i]);
+    cogl_handle_unref(sheet->material[i]);
   }
   free(sheet->texture);
   free(sheet->material);
+  fprintf(stderr,"6\n");
+  
+  g_hash_table_destroy(sheet->map);
+  fprintf(stderr,"7\n");
+  free(sheet);
+  fprintf(stderr,"8\n");
 }
 
 int
@@ -151,44 +152,39 @@ main (int argc, char **argv)
       clutter_behaviour_apply (behaviour, actor);
     }
   
-  /*
-  gchar *source[] = {"slice-00.png", "slice-10.png", "slice-20.png",
-                     "slice-01.png", "slice-11.png", "slice-21.png",
-                     "slice-02.png", "slice-12.png", "slice-22.png"};
-  //*/
+  gchar *names[] = {"slice-00.png", "slice-10.png", "slice-20.png",
+                    "slice-01.png", "slice-11.png", "slice-21.png",
+                    "slice-02.png", "slice-12.png", "slice-22.png"};
   
-  //gint width = 48, height = 48, left = 16, right = 16, top = 16, bottom = 16;
-  //*
-  gint xs[] = {16, 32, 48, 64}; //left, width-right, width};
-  gint ys[] = {16, 32, 48, 64}; // top, height-bottom, bottom};
-  gint x[9], y[9], w[9], h[9], j, k;
+  gint xs[] = {16, 32, 48, 64};
+  gint ys[] = {16, 32, 48, 64};
+  gint data[9 * 4], j, k;
   for (i = 0; i < 3; i++) {
     for (j = 0; j < 3; j++) {
-      k = i*3 + j;
-      x[k] = xs[j];
-      y[k] = ys[i];
-      w[k] = xs[j+1] - xs[j];
-      h[k] = ys[i+1] - ys[i];
+      k = (i*3 + j) * 4;
+      data[k+0] = xs[j];
+      data[k+1] = ys[i];
+      data[k+2] = xs[j+1] - xs[j];
+      data[k+3] = ys[i+1] - ys[i];
     }
   }
   
   CoglHandle *texture = clutter_texture_get_cogl_texture(
       CLUTTER_TEXTURE(clutter_texture_new_from_file("spritesheet.png", NULL)) );
-  SpriteSheet *sheet = spritesheet_new(texture, x, y, w, h, 9, 0);
-  //*/
+  SpriteSheet *sheet = spritesheet_new(texture, names, data, 9, 0);
+  
   ClutterActor *actor2 = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor2);
   clutter_actor_set_position(actor2, 10, 10);
   
-  //ClutterEffect *effect2 = nineslice_effect_new_from_source(source, TRUE);
-  ClutterEffect *effect2 = nineslice_effect_new_from_spritesheet(sheet, 0, TRUE);
+  ClutterEffect *effect2 = nineslice_effect_new_from_names(names, sheet, TRUE);
   clutter_actor_add_effect(actor2, effect2);
   
   ClutterActor *actor = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (actor2), actor);
+  clutter_actor_set_position(actor, 200, 100);
   
-  //ClutterEffect *effect = nineslice_effect_new_from_source(source, TRUE);
-  ClutterEffect *effect = nineslice_effect_new_from_spritesheet(sheet, 0, TRUE);
+  ClutterEffect *effect = nineslice_effect_new_from_names(names, sheet, TRUE);
   clutter_actor_add_effect(actor, effect);
   
   ClutterActor *text = clutter_text_new_with_text("Sans 40px","Example Text");
@@ -200,39 +196,13 @@ main (int argc, char **argv)
   clutter_actor_set_size(rect, 50, 50);
   clutter_container_add_actor (CLUTTER_CONTAINER (actor), rect);
   
-  clutter_actor_set_position(actor, 200, 100);
-  //clutter_actor_set_rotation(actor, CLUTTER_Z_AXIS, 30.0, 130, 50, 0);
-  
-  /*
-  GValue cvalue = G_VALUE_INIT;
-  g_value_init(&cvalue, CLUTTER_TYPE_ACTOR_BOX);
-  g_value_set_boxed(&cvalue, clutter_actor_box_new(0.0, 0.0, 0.0, 0.0));
-  
-  GValue ovalue = G_VALUE_INIT;
-  g_value_init(&ovalue, CLUTTER_TYPE_ACTOR_BOX);
-  g_value_set_boxed(&ovalue, clutter_actor_box_new(50.0, 50.0, 50.0, 50.0));
-  
-  ClutterState *transition = clutter_state_new();
-  clutter_state_set_duration(transition, NULL, NULL, 5000);
-  clutter_state_set_key (transition, NULL, "close", G_OBJECT(effect), "padding", CLUTTER_LINEAR, &cvalue, 0.0, 0.0);
-  clutter_state_set_key (transition, NULL, "open",  G_OBJECT(effect), "padding", CLUTTER_LINEAR, &ovalue, 0.0, 0.0);
-  
-  //clutter_state_set(transition, NULL, "close", effect, "padding_right", CLUTTER_LINEAR,  0.0, NULL);
-  //clutter_state_set(transition, NULL, "open",  effect, "padding_right", CLUTTER_LINEAR, 50.0, NULL);
-  
-  clutter_state_warp_to_state(transition, "close");
-  clutter_state_set_state(transition, "open");
-  */
-  
   clutter_actor_animate(rect, CLUTTER_LINEAR, 5000, "height", 200.0, NULL);
   
   clutter_actor_show_all (stage);
-  
   clutter_timeline_start (timeline);
-  
   clutter_main ();
 
-  //spritesheet_free(sheet);
+  spritesheet_free(sheet);
   
   return 0;
 }
