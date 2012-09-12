@@ -396,6 +396,7 @@ TabBar = setmetatable(
                 name = "Tabs ListManager",
                 spacing = 0,
                 vertical_alignment = "top",
+                direction = "horizontal",
                 node_constructor = function(obj)
                     mesg("TABBAR",{0,3},"New Tab Button")
                     if obj == nil then 
