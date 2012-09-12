@@ -763,8 +763,8 @@ ListManager = setmetatable(
                     end
                     if  env.new_cells then
                         
-                        env.cells.length = #env.new_cells
-                        env.cells:set(env.new_cells) 
+                        --env.cells.length = #env.new_cells
+                        env.cells:new_data(env.new_cells) 
                         
                         focused_child = env.cells[1]
                         focused_child:grab_key_focus()
