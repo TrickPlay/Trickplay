@@ -196,10 +196,13 @@ TabBar = setmetatable(
                 tab_location = function(instance,env)
                     return function(oldf) return   env.tab_location     end,
                     function(oldf,self,v)  
+                        print("setting tab_location to",v)
                         if tab_location == v then return end
                         
                         if v == "top" then
+                            env.updating = true --TODO need a better way to do a non-updating set of this
                             instance.direction  = "vertical"
+                            env.updating = false
                             env.tabs_lm.direction  = "horizontal"
                             --TODO set??
                             env.tab_pane.pane_w    = env.pane_w
@@ -212,7 +215,9 @@ TabBar = setmetatable(
                                 tab.w = 200
                             end
                         elseif v == "left" then
+                            env.updating = true --TODO need a better way to do a non-updating set of this
                             instance.direction  = "horizontal"
+                            env.updating = false
                             env.tabs_lm.direction  = "vertical"
                             --TODO set??
                             print("env.pane_h = "..env.pane_h)
@@ -273,6 +278,7 @@ TabBar = setmetatable(
             update = function(instance,env)
                 return function()
                     print("------------------------------------------------")
+                    mesg("TABBAR",{0,5},"TabBar update called")
                     if env.resize_tabs then
                         env.resize_tabs = false
                         if not env.new_tabs then
@@ -295,11 +301,7 @@ TabBar = setmetatable(
                     end
                     if env.new_tabs then
                         print("set new_tabs")
-                        env.tabs_lm:set{
-                            direction = "horizontal",
-                            --length = #v,
-                            cells = env.new_tabs,
-                        }
+                        env.tabs_lm.cells = env.new_tabs
                         if env.tab_location == "top" then
                             env.tab_pane.virtual_w = env.tabs_lm.w
                         else
@@ -310,7 +312,7 @@ TabBar = setmetatable(
                     
                     env.old_update()
                     
-                    --env.tabs_lm:call_update()
+                    --env.tabs_lm_env:call_update()
                 end
             end,
             subscribe_to_sub_styles = function(instance,env)
