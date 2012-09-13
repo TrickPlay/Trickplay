@@ -99,15 +99,6 @@ TabBar = setmetatable(
         },
         public = {
             properties = {
-                style = function(instance,env)
-                    return function(oldf,...) return oldf(...) end,
-                    function(oldf,self,v)
-                        oldf(self,v)
-                        
-                        env.subscribe_to_sub_styles()
-                        --TODO: double check this
-                    end
-                end,
                 enabled = function(instance,env)
                     return nil,
                     function(oldf,self,v)  
@@ -273,6 +264,19 @@ TabBar = setmetatable(
                 return function()
                     print("------------------------------------------------")
                     mesg("TABBAR",{0,5},"TabBar update called")
+                    if env.restyle_tabs then
+                        env.restyle_tabs = false
+                        for i = 1,env.tabs_lm.length do
+                                
+                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                    end
+                    if env.restyle_arrows then
+                        env.restyle_arrows = false
+                        
+                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
+                    end
                     if env.resize_tabs then
                         env.resize_tabs = false
                         if not env.new_tabs then
@@ -309,55 +313,18 @@ TabBar = setmetatable(
                     --env.tabs_lm_env:call_update()
                 end
             end,
-            subscribe_to_sub_styles = function(instance,env)
-                return function()
-                    instance.style.border:subscribe_to( nil, function()
-                        for i = 1,env.tabs_lm.length do
-                                
-                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
-                            
-                        end
-                    end )
-                    instance.style.fill_colors:subscribe_to( nil, function()
-                        for i = 1,env.tabs_lm.length do
-                                
-                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
-                            
-                        end
-                    end )
-                    instance.style.arrow:subscribe_to( nil, function()
-                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
-                        --env.call_update()
-                    end )
-                    instance.style.arrow.colors:subscribe_to( nil, function()
-                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
-                        --env.call_update()
-                    end )
-                    instance.style.text:subscribe_to( nil, function()
-                        for i = 1,env.tabs_lm.length do
-                                
-                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
-                            
-                        end
-                    end )
-                    instance.style:subscribe_to( nil, function()
-                        --TODO: resubscribe??? NO, no true substyles anymore
-                        for i = 1,env.tabs_lm.length do
-                                
-                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
-                            
-                        end
-                        
-                    end )
-                    
-                end
-            end,
         },
         declare = function(self,parameters)
             
             parameters = parameters or {}
             
             local instance,env = ListManager:declare{vertical_alignment = "top",spacing=0}
+            env.style_flags = {
+                border = "restyle_tabs",
+                text = "restyle_tabs",
+                fill_colors = "restyle_tabs",
+                arrow = "restyle_arrows",
+            }
             env.panes = {}
             env.tabs = {}
             env.rbg= RadioButtonGroup{name = "TabBar",
@@ -439,11 +406,15 @@ TabBar = setmetatable(
                         error("Must be a UIElement or nil. Received "..obj.contents,2) 
                     end
                     local pane = obj.contents
+                    
+                    local style = instance.style.attributes
+                    style.name = style
+                    style.border.colors.selection = style.border.colors.selection or "ffffff"
                     obj = ToggleButton{
                         label  = obj.label,
                         w      = env.tab_w,
                         h      = env.tab_h,
-                        style  = {name=false,border={colors={selection="ffffff"}}},
+                        style  = style,
                         group  = env.rbg,
                         reactive = true,
                         create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
