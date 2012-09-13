@@ -43,11 +43,29 @@ function screen_ui.draw_selected_container_border(x,y)
 		end 
 	end
 
+    --[[
+    if selected_content then 
+        print ("OK")
+    else
+        print ("NOK")
+    end 
+    ]]
+
+	if selected_container then 
+        print ("*********************")
+        print (selected_container.name)
+    end 
+	if selected_content then 
+        print (selected_content.name)
+        print ("*********************")
+    end 
+
 	if selected_container and selected_content then 
+
 		if selected_content.extra.is_in_group ~= true then 
 			if selected_container.selected == false then
 				screen_ui.container_selected(selected_container,x,y)	
-			elseif selected_container.extra.type == "LayoutManager" then 
+			elseif selected_container.widget_type == "LayoutManager" then 
 				if selected_container.selected == true then
 					local layout_bdr = screen:find_child(selected_container.name.."border")
 					if layout_bdr then 
@@ -79,7 +97,7 @@ function screen_ui.container_selected(obj, x, y)
 			scale = obj.scale, 
 	} 
 
-	if obj.extra.type ~= "LayoutManager" then 
+	if obj.widget_type ~= "LayoutManager" then 
         
 		obj_border.position = obj.position
         obj_border.size = obj.size
@@ -142,13 +160,13 @@ function screen_ui.selected(obj)
 				break
 			else 
 				if c.extra then 
-					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+					if c.widget_type == "ScrollPane" or c.widget_type == "ArrowPane" then 
 						for k, e in pairs (c.content.children) do 
 							if e.name == obj.name then 
 								bumo = c	
 							end 
 						end 
-					elseif c.extra.type == "TabBar" then 
+					elseif c.widget_type == "TabBar" then 
 						for h,q in pairs (c.tabs) do 
 							for k,w in pairs (q.children) do 
 								if w.name == obj.name then 
@@ -400,7 +418,7 @@ end
 
 function screen_ui.dragging_up(x,y)
 
-	if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
+	if current_focus ~= nil and  current_focus.widget_type == "EditorButton" then 
 		local temp_focus = current_focus 
 		current_focus.clear_focus()
 		temp_focus.set_focus()
@@ -485,13 +503,13 @@ function screen_ui.dragging(x,y)
 						break
 					else 
 						if c.extra then 
-							if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+							if c.widget_type == "ScrollPane" or c.widget_type == "ArrowPane" then 
 								for k, e in pairs (c.content.children) do 
 									if e.name == actor.name then 
 										bumo = c	
 									end 
 								end 
-							elseif c.extra.type == "TabBar" then 
+							elseif c.widget_type == "TabBar" then 
 								for h,q in pairs (c.tabs) do 
 									for k,w in pairs (q.children) do 
 										if w.name == actor.name then 

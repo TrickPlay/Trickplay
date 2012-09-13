@@ -52,357 +52,585 @@ local uiElementCreate_map =
     ['MenuButton'] = function(p)  return MenuButton(p) end, 
 }
 
+function util.addIntoLayer (uiInstance, group)
 
-function util.create_on_button_down_f(v)
+    uiInstance.reactive = true
+    uiInstance.lock = false
+    uiInstance.selected = false
+    uiInstance.is_in_group = false
 
-	v.extra.selected = false
-	local org_object, new_object 
+    devtools:gid(curLayerGid):add(uiInstance)
 
-	function v:on_button_down(x,y,button,num_clicks, m)
+    if group == nil then
+        _VE_.refresh()
+    end 
 
-		if m and m.control then 
-			control = true 
-		else 
-			control = false 
-		end 
+    if uiInstance.subscribe_to then  
 
-	   	if (input_mode ~= hdr.S_RECTANGLE) then 
-	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
-	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-					if (v.extra.is_in_group == true and control == false ) then 
+        uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
+    end 
 
-		    			local p_obj = v.parent 
+    return
+end 
 
-						while p_obj.extra.is_in_group == true do
-								p_obj = p_obj.parent
-					    end 
 
-                		if(button == 3) then 
-                			editor.inspector(p_obj, x, y)
-                    		return true
-                		end 
+function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
-	            		if(input_mode == hdr.S_SELECT and p_obj.extra.selected == false) then 
-		     				screen_ui.selected(p_obj)
-	            		elseif (p_obj.extra.selected == true) then 
-		     				screen_ui.n_select(p_obj)
-		    			end
+    uiInstance:add_mouse_handler("on_motion",function(self, x,y)--:on_motion(x,y)
+        if dragging then
+            local actor , dx , dy = unpack( dragging )
+            actor.position = { x - dx , y - dy  }
+            if uiInstance.selected == true then 
+                local border= screen:find_child(uiInstance.name.."border")
+                border.position = { x - dx , y - dy  }
+                local anchor_mark= screen:find_child(uiInstance.name.."a_m")
+                anchor_mark.position = { x - dx , y - dy  }
+            end 
+        end
+    end,true)
 
-	            		org_object = util.copy_obj(p_obj)
+    uiInstance:add_mouse_handler("on_button_down",function(self, x , y , button, num_clicks, m)--:on_button_down(x , y , button, num_clicks, m)
 
-		    			if v.extra.lock == false then 
-           	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
-		    			end 
+		if m and m.control then control = true else control = false end 
 
-           	    		return true
-	      			else 
+        dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
+        uiInstance:grab_pointer()
 
-                		if(button == 3) then	
-                 			editor.inspector(v, x, y)
-                    		return true
-                		end 
+        
+        if control == true then 
 
-	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 
-		     				screen_ui.selected(v) 
-							if(v.type == "Text") then 
-			      				v:set{cursor_visible = true}
-			      				v:set{editable= true}
-     			    			v:grab_key_focus(v)
-							end 
-		    			elseif (v.extra.selected == true) then 
-								if(v.type == "Text") then 
-			      					v:set{cursor_visible = true}
-			      					v:set{editable= true}
-     			    				v:grab_key_focus(v)
-								end 
-								screen_ui.n_select(v) 
-	       				end
+            --[[	SHOW POSSIBLE CONTAINERS
 
-				-----[[	SHOW POSSIBLE CONTAINERS
-		    			if control == true then 
-							if v.type == "Text" then 
-								v.editable = false 
-								v.cursor_visible = false
-								screen:grab_key_focus()
-							end
+            for i, j in ipairs (screen.children) do 
+	            if j.name then 
+                if string.find(j.name, "Layer") and j.visible == true then 
+                    for k,l in ipairs (j.children) do 
+			            if util.is_this_container(l) == true then 
+				            l:lower_to_bottom()
+		                end 
+                    end 
+                end 
+                end 
+	        end 
+            editor_lb:set_cursor(52)
+			cursor_type = 52
+			selected_content = uiInstance 
+            
+            local odr 
+            for i, j in ipairs (screen.children) do 
+	            if j.name then 
+                if string.find(j.name, "Layer") and j.visible == true then 
+                    for k,l in ipairs (j.children) do 
+			            if l.name == uiInstance.name then 
+				            odr = k
+			            end 
+			        end 
+                end
+                end
+            end
 
-							for i,j in pairs (g.children) do 
-								if util.is_this_container(j) == true then 
-									j:lower_to_bottom()
-								end 
-							end 
+			if odr then 
+                for i, j in ipairs (screen.children) do 
+	                if j.name then 
+                    if string.find(j.name, "Layer") and j.visible == true then 
+                        for k,l in ipairs (j.children) do 
+			                if util.is_this_container(l) == true then 
+					            if k > odr then 
+					                l.extra.org_opacity = l.opacity
+                       		        l:set{opacity = 50}
+					            end 	
+					        elseif k ~= odr then  
+					            l.extra.org_opacity = l.opacity
+                       	        l:set{opacity = 50}
+				            end 
+				        end 
+			        end
+			        end
+			    end
+			end
+            --]] 
+        end 
+            _VE_.openInspector(uiInstance.gid)
 
-							editor_lb:set_cursor(52)
-							cursor_type = 52
+	        if input_mode == hdr.S_SELECT then
+	            if(uiInstance.selected == false) then 
+		            screen_ui.selected(uiInstance) 
+		        elseif(uiInstance.selected == true) then 
+			        screen_ui.n_select(uiInstance) 
+	            end
+            end
 
-							selected_content = v 
-			
-							local odr 
-							for i,j in pairs (g.children) do 
-								if j.name == v.name then 
-									odr = i
-								end 
-							end 
+            if uiTypeStr == "Text" then 
+                uiInstance.cursor_visible = true
+                uiInstance.editable= true
+                uiInstance.wants_enter= true
+                uiInstance:grab_key_focus()
+    
+                if(num_clicks == 2) then
+                    uiInstance.cursor_position = 0
+                    uiInstance.selection_end = -1
+                else
+                    for i=1,string.len(uiInstance.text) do
+                        local offset = uiInstance:position_to_coordinates(i-1)[1] + uiInstance.anchor_point[1] + uiInstance.x
+                        if(offset >= x ) then
+                            uiInstance.cursor_position = i-1
+                            uiInstance.selection_end = i-1
+                        return true
+                        end
+                    end
+                    uiInstance.cursor_position = -1
+                    uiInstance.selection_end = -1
+                    return true
+                end
+            end 
+            return true
+        --end 
 
-							if odr then 
-								for i,j in pairs (g.children) do 
-									if util.is_this_container(j) == true then 
-										if i > odr then 
-											j.extra.org_opacity = j.opacity
-                       						j:set{opacity = 50}
-										end 	
-									elseif i ~= odr then  
-										j.extra.org_opacity = j.opacity
-                       					j:set{opacity = 50}
-									end 
-								end 
-							end
-						end 
-				-----]]]] 
+    end,true)
 
-						if v.type ~= "Text" then 
-							for i, j in pairs (g.children) do  
-	           					if j.type == "Text" then 
-	            					if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
-										ui.text = j	
-			  							if ui.text.on_key_down then 
-	                  						ui.text:on_key_down(keys.Return)
-			  							end 
-		    						end
-	           					end 
-	        				end 
-	    				end 
-	    				org_object = util.copy_obj(v)
-						if v.extra.lock == false then 
-        					dragging = {v, x - v.x, y - v.y }
-						end
-        				return true
-					end
-	    		elseif (input_mode == hdr.S_FOCUS) then 
-					if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
-		     			screen_ui.selected(v)
-						local tabs_focus = screen:find_child("tabs_focus")
-						local focus = screen:find_child("focusChanger")
-						if tabs_focus then 
-							for i,j in pairs (tabs_focus.children) do 
-								if j.color[2] == 25 then --활성화 되어 있는 탭 
-									if focus_type == "U" then 
-										focus.extra.tabs[i].up_focus = v.name
-									elseif focus_type == "D" then 
-										focus.extra.tabs[i].down_focus = v.name
-									elseif focus_type == "R" then 
-										focus.extra.tabs[i].right_focus = v.name
-									elseif focus_type == "L" then 
-										focus.extra.tabs[i].left_focus = v.name
-									end 
-								end
-							end 
-						end 
-		     			screen:find_child("text"..focus_type).text = v.name 
-					end 
-					input_mode = hdr.S_FOCUS
-           			return true
-            	end
-	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
-				if v.extra.lock == false then 
-					dragging = {v, x - v.x, y - v.y }
-           			return true
-				end 
-    		end
-		end
-	end
-	
-	function v:on_button_up(x,y,button,num_clicks, m)
-
-		if m  and m.control then 
-			control = true 
-		else 
-			control = false 
-		end 
+    uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)--:on_button_up(x , y , button)
+        
+		if m  and m.control then control = true else control = false end 
 
 		if screen:find_child("multi_select_border") then
 			return 
 		end 
 
-		if (input_mode ~= hdr.S_RECTANGLE) then 
-	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
-	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-	    			if (v.extra.is_in_group == true) then 
-						local p_obj = v.parent 
-						new_object = util.copy_obj(p_obj)
-					    if(dragging ~= nil) then 
-	            			local actor , dx , dy = unpack( dragging )
-							if type(dx) == "number" then 
-	            				new_object.position = {x-dx, y-dy}
-							else 
-								print("dx is function") 
-							end 
-							if new_object == nil or org_object == nil then 
-									return 
-							end 
-							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-								screen_ui.n_select(v, dragging) 
-								screen_ui.n_select(new_object, dragging) 
-								screen_ui.n_select(org_object, dragging) 
-                    			table.insert(undo_list, {p_obj.name, hdr.CHG, org_object, new_object})
-							end 
-	            			dragging = nil
-	            		end 
-		    		return true 
-				elseif( input_mode ~= hdr.S_RECTANGLE) then  
-	      	    	if(dragging ~= nil) then 
-	       	       		local actor = unpack(dragging) 
-		       			if (actor.name == "grip") then  
-							dragging = nil 
-							return true 
-		       			end 
-	               		local actor , dx , dy = unpack( dragging )
-		       			new_object = util.copy_obj(v)
-	               		new_object.position = {x-dx, y-dy}
-					---[[ Content Setting 
-		       			if util.is_in_container_group(x,y) and selected_content then 
-			     			local c, t = util.find_container(x,y) 
-			     			if control == true then 
-			       				if not util.is_this_container(v) or c.name ~= v.name then
-			     					if c and t then 
-				    					if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
-			        						v:unparent()
-											if t ~= "TabBar" then
-			        							v.position = {v.x - c.x, v.y - c.y,0}
-											end 
-			        						v.extra.is_in_group = true
-											if screen:find_child(v.name.."border") then 
-			             						screen:find_child(v.name.."border").position = v.position
-											end
-											if screen:find_child(v.name.."a_m") then 
-			             						screen:find_child(v.name.."a_m").position = v.position 
-			        						end 
-			        						if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
-			            						c.content:add(v) 
-												v.x = v.x - c.content.x
-												v.y = v.y - c.content.y
-			        						elseif t == "LayoutManager" then 
-				     							local col , row=  c:r_c_from_abs_position(x,y)
-				     							c:replace(row,col,v) 
-			        						elseif t == "TabBar" then 
-												local x_off, y_off = c:get_offset()
+        local actor , dx , dy 
+        if dragging ~= nil then 
+            actor , dx , dy = unpack( dragging )
+        end 
 
-												local t_index = c:get_index()
+        --[[ Content Setting 
+		if util.is_in_container_group(x,y) and selected_content then 
+		    local c, t = util.find_container(x,y) 
+			if control == true then 
+			    if not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
+			        if c and t then 
+				        if (uiInstance.extra.selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
+			        	    uiInstance:unparent()
+						    if t ~= "TabBar" then
+			        	        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y,0}
+						    end 
+			        	    uiInstance.extra.is_in_group = true
+							if screen:find_child(uiInstance.name.."border") then 
+			             	    screen:find_child(uiInstance.name.."border").position = uiInstance.position
+							end
+							if screen:find_child(uiInstance.name.."a_m") then 
+			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
+			        		end 
+			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
+			            	    c.content:add(uiInstance) 
+								uiInstance.x = uiInstance.x - c.content.x
+								uiInstance.y = uiInstance.y - c.content.y
+			        	    elseif t == "LayoutManager" then 
+				     		    local col , row=  c:r_c_from_abs_position(x,y)
+				     		    c:replace(row,col,uiInstance) 
+			        		elseif t == "TabBar" then 
+							    local x_off, y_off = c:get_offset()
+
+							    local t_index = c:get_index()
 												
-												if t_index then 
-													v.x = v.x - x_off	
-													v.y = v.y - y_off	
-			            							c.tabs[t_index]:add(v) 
-												end
-											elseif t == "Group" then 
-												c:add(v)
-			        						end 
-			     	       				end 
-				    				end 
-			       				end 
-								editor_lb:set_cursor(68)
-								cursor_type = 68
-			     			end 
-			     			if screen:find_child(c.name.."border") and selected_container then 
-								screen:remove(screen:find_child(c.name.."border"))
-								screen:remove(screen:find_child(c.name.."a_m"))
-								screen:remove(screen:find_child(v.name.."border"))
-								screen:remove(screen:find_child(v.name.."a_m"))
-								selected_content = nil
-								selected_container = nil
-			    			end 
-		       			end 
-					---]] Content Setting 
-		       			for i,j in pairs (g.children) do 
-			     			if j.extra then 
-				   				if j.extra.org_opacity then 
-									j.opacity = j.extra.org_opacity
-				   				end 
-			     			end 
-		       			end 
+							    if t_index then 
+							        uiInstance.x = uiInstance.x - x_off	
+								    uiInstance.y = uiInstance.y - y_off	
+			            			c.tabs[t_index]:add(uiInstance) 
+								end
+							elseif t == "Group" then 
+							    c:add(uiInstance)
+			        		end 
+			     	      end 
+				    	end 
+			       		end 
+					editor_lb:set_cursor(68)
+			    cursor_type = 68
+			end 
+			if screen:find_child(c.name.."border") and selected_container then 
+				screen:remouiInstance(screen:find_child(c.name.."border"))
+				screen:remouiInstance(screen:find_child(c.name.."a_m"))
+				screen:remouiInstance(screen:find_child(uiInstance.name.."border"))
+				screen:remouiInstance(screen:find_child(uiInstance.name.."a_m"))
+				selected_content = nil
+		        selected_container = nil
+	        end 
+	    end 
+	    -- Content Setting --]] 
+
+	    local border = screen:find_child(uiInstance.name.."border")
+		local am = screen:find_child(uiInstance.name.."a_m") 
+	    if(input_mode == hdr.S_SELECT) then
+		    local group_pos
+	       	if(border ~= nil and dragging ~= nil) then 
+		        if (uiInstance.is_in_group == true) then
+			        --group_pos = util.get_group_position(uiInstance)
+			        group_pos = nil
+			        if group_pos then 
+			            if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
+	                    if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
+			        end
+		        else 
+	                border.position = {x -dx, y -dy}
+			        if am then 
+	                    am.position = {x -dx, y -dy}
+			        end
+		        end 
+	        end 
+	    end 
+
+        if snapToGuide == true then 
+		    for i=1, v_guideline, 1 do 
+			    if(screen:find_child("v_guideline"..i) ~= nil) then 
+			            local gx = screen:find_child("v_guideline"..i).x 
+                        gx = gx + 9 
+			     	    if(15 >= math.abs(gx - x + dx)) then  
+							uiInstance.x = gx + screen:find_child("v_guideline"..i).w - 18 
+							if (am ~= nil) then 
+			     	     	    am.x = am.x - (x-dx-gx)
+			     	     	    border.x = border.x - (x-dx-gx-1)
+							end
+			     		elseif(15>= math.abs(gx - x + dx - uiInstance.w)) then
+							uiInstance.x = gx - uiInstance.w 
+							if (am ~= nil) then 
+			     	     	    am.x = am.x - (x-dx+uiInstance.w - gx)
+			     	     	    border.x = border.x - (x-dx+uiInstance.w - gx)
+							end
+			     		end 
+			   	end 
+		    end 
+			for i=1, h_guideline,1 do 
+			    if(screen:find_child("h_guideline"..i) ~= nil) then 
+			        local gy =  screen:find_child("h_guideline"..i).y 
+                    gy = gy + 9
+			      	if(15 >= math.abs(gy - y + dy)) then 
+					    uiInstance.y = gy
+					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h - 18 
+						if (am ~= nil) then 
+			     	        am.y = am.y - (y-dy - gy) 
+			     	        border.y = border.y - (y-dy-gy) + 2 
+						end
+			      	elseif(15>= math.abs(gy - y + dy - uiInstance.h)) then
+						uiInstance.y =  gy - uiInstance.h 
+						if (am ~= nil) then 
+			     	        am.y = am.y - (y-dy + uiInstance.h - gy)  
+			     	        border.y = border.y - (y-dy + uiInstance.h - gy)  
+						end
+			      	end 
+			   	end
+			end
+		end 
+
+        dragging = nil
+        uiInstance:ungrab_pointer()
+        uiInstance:set{}
+	end,true) 
+end 
+
+function util.assign_right_name (uiInstance, uiTypeStr)
+
+    for m,n in ipairs (screen.children) do
+        if n.name then 
+        if string.find(n.name, "Layer") then  
+            for k,l in ipairs (n.children) do 
+                if l.name == uiTypeStr:lower()..uiNum then 
+                    uiNum = uiNum + 1
+                end
+            end
+        end
+        end
+    end 
+
+    uiInstance.name = uiTypeStr:lower()..uiNum
+    uiNum = uiNum + 1
+
+end 
 	
-		       			local border = screen:find_child(v.name.."border")
-		       			local am = screen:find_child(v.name.."a_m") 
-		       			local group_pos
-	       	       		if(border ~= nil) then 
-		             		if (v.extra.is_in_group == true) then
-			     				group_pos = util.get_group_position(v)
-			     				if group_pos then 
-									if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
-	                     				if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
-								end
-		             		else 
-	                     		border.position = {x -dx, y -dy}
-			     				if am then 
-	                     			am.position = {x -dx, y -dy}
-			     				end
-		             		end 
-	                	end 
-			
-						if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
-						    for i=1, v_guideline,1 do 
-			   					if(screen:find_child("v_guideline"..i) ~= nil) then 
-			     					local gx = screen:find_child("v_guideline"..i).x 
-			     					if(15 >= math.abs(gx - x + dx)) then  
-									    new_object.x = gx
-										v.x = gx + screen:find_child("v_guideline"..i).w 
-										if (am ~= nil) then 
-			     	     						am.x = am.x - (x-dx-gx)
-										end
-			     					elseif(15>= math.abs(gx - x + dx - new_object.w)) then
-										new_object.x = gx - new_object.w  
-										v.x = gx - new_object.w 
-										if (am ~= nil) then 
-			     	     						am.x = am.x - (x-dx+new_object.w - gx)
-										end
-			     					end 
-			   					end 
-		        			end 
-							for i=1, h_guideline,1 do 
-			   					if(screen:find_child("h_guideline"..i) ~= nil) then 
-			      					local gy =  screen:find_child("h_guideline"..i).y 
-			      					if(15 >= math.abs(gy - y + dy)) then 
-									    new_object.y = gy
-										v.y =gy + screen:find_child("h_guideline"..i).h 
-										if (am ~= nil) then 
-			     	     						am.y = am.y - (y-dy - gy) 
-										end
-			      						elseif(15>= math.abs(gy - y + dy - new_object.h)) then
-											new_object.y = gy - new_object.h
-											v.y =  gy - new_object.h 
-											if (am ~= nil) then 
-			     	     						am.y = am.y - (y-dy + new_object.h - gy)  
-											end
-			      						end 
-			   						end
-								end
-							end 
-		        			if(border ~= nil )then 
-			     				border.position = v.position
-							end 
-							if(org_object ~= nil) then  
-		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			     					screen_ui.n_select(v, dragging) 
-			     					screen_ui.n_select(new_object, dragging) 
-			     					screen_ui.n_select(org_object, dragging) 
-			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
-			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
-                    	     		table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
-			   					end
-							end 
-	            			dragging = nil
-              	  		end
-              	  		return true
-	      			end 
-             	end
-	   		else 
-	      		dragging = nil
-          		return true
-       		end
-		end
-	end
+
+function util.setBGImages (path)
+
+    if path then 
+        editor_lb:change_app_path(path)
+    end
+
+    if BG_IMAGE_20 == nil then 
+
+        BG_IMAGE_20 = Image{src ="LIB/assets/transparency-grid-20-2.png"}
+        BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
+
+        BG_IMAGE_40 = Image{src="LIB/assets/transparency-grid-40-2.png"}
+        BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+        
+        BG_IMAGE_80 = Image{src="LIB/assets/transparency-grid-80-2.png"}
+        BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+        BG_IMAGE_white = Image{src="LIB/assets/white.png"}
+        BG_IMAGE_white:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+        BG_IMAGE_import = Image{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+    end 
+
+    screen:add(BG_IMAGE_20,BG_IMAGE_40,BG_IMAGE_80,BG_IMAGE_white,BG_IMAGE_import)
+end 
+
+function util.guideline_inspector(v)
+
+	local org_position 
+    guideline_inspector_on = true
+    selected_guideline = v
+
+    if(util.guideline_type(v.name) == "v_guideline") then
+		org_position = tostring(math.floor(v.x))
+        print("openV_GLI"..org_position)
+	else
+		org_position = tostring(math.floor(v.y))
+        print("openH_GLI"..org_position)
+    end 
+
+end 
+
+function util.create_on_line_down_f(v)
+
+        function v:on_button_down(x,y,button,num_clicks)
+            if selected_guideline ~= nil or guideline_inspector_on == true then 
+                return true 
+            end 
+
+            v:find_child("line").color = {255,0,0,255}
+            dragging = {v, x - v.x, y - v.y }
+	     	if(button == 3) then
+		  		util.guideline_inspector(v)
+                return true
+            end 
+            return true
+        end
+
+        function v:on_button_up(x,y,button,num_clicks)
+	     	if(dragging ~= nil) then 
+
+	        	local actor , dx , dy = unpack( dragging )
+		  		if(util.guideline_type(v.name) == "v_guideline") then 
+					v.x = x - dx
+		  		elseif(util.guideline_type(v.name) == "h_guideline") then  
+					v.y = y - dy
+		  		end 
+                if guideline_inspector_on ~= true then 
+                    v:find_child("line").color = {0,255,255,255}
+                end 
+	          	dragging = nil
+            end
+            return true
+        end
+
+end 
+
+function util.close_guideInspector () 
+    selected_guideline:find_child("line").color = {0,255,255,255}
+    selected_guideline = nil
+    guideline_inspector_on = false
+end 
+
+function util.get_min_max () 
+     local min_x = screen.w
+     local max_x = 0
+     local min_y = screen.h
+     local max_y = 0
+
+     for i, v in pairs(curLayer.children) do
+          if curLayer:find_child(v.name) then
+	        if(v.extra.selected == true) then
+			if(v.x < min_x) then min_x = v.x end 
+			if(v.x > max_x) then max_x = v.x end
+			if(v.y < min_y) then min_y = v.y end 
+			if(v.y > max_y) then max_y = v.y end
+		end 
+          end
+    end
+    return min_x, max_x, min_y, max_y
+end 
+
+
+function util.getObjName (border_n) 
+     local i, j = string.find(border_n, "border")
+     return string.sub(border_n, 1, i-1)
+end 
+
+function util.org_cord() 
+    for i, v in pairs(curLayer.children) do
+		if(v.extra.selected == true) then
+		     v.x = v.x - v.anchor_point[1] 
+		     v.y = v.y - v.anchor_point[2] 
+		end 
+    end 
+end  
+
+function util.ang_cord() 
+    for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true) then
+		    screen_ui.n_selected(v)
+		    v.x = v.x + v.anchor_point[1] 
+		    v.y = v.y + v.anchor_point[2] 
+	  	end 
+    end 
+end  
+
+function util.getTypeStr(m) 
+    if m.widget_type == "Widget" then 
+        return m.type
+    else 
+        return m.widget_type
+    end 
+end 
+
+function util.getCurLayer(gid) 
+
+    curLayerGid = gid 
+    curLayer = devtools:gid(gid)
+
+end 
+
+function util.copy_obj (v)
+
+      local new_object 
+      uiTypeStr = getTypeStr(v) 
+      if uiElementCreate_map[uiTypeStr] then
+        new_object = uiElementCreate_map[uiTypeStr](v.attributes)
+      end 
+
+      return new_object
+end	
+ 
+function util.get_x_sort_t()
+     
+     local x_sort_t = {}
+     
+     for i, v in pairs(curLayer.children) do
+	    if(v.extra.selected == true) then
+		    local n = #x_sort_t
+			if(n ==0) then
+				table.insert(x_sort_t, v) 
+			elseif (v.x >= x_sort_t[n].x) then
+				table.insert(x_sort_t, v) 
+			elseif (v.x < x_sort_t[n].x) then  
+				local tmp_cord = {}
+				while (v.x < x_sort_t[n].x) do
+					table.insert(tmp_cord, table.remove(x_sort_t))
+					n = #x_sort_t
+					if n == 0 then 
+						break
+					end 
+				end 
+				table.insert(x_sort_t, v) 
+				while (#tmp_cord ~= 0 ) do 
+					table.insert(x_sort_t, table.remove(tmp_cord))
+				end 
+			end
+		end 
+     end
+     
+     return x_sort_t 
 end
 
+function util.get_reverse_t(sort_t)
+     local reverse_t = {}
+
+	while(#sort_t ~= 0) do
+		table.insert(reverse_t, table.remove(sort_t))
+	end 
+	return reverse_t 
+end
+
+function util.get_x_space(x_sort_t)
+     local f, b 
+     local space = 0
+     b = table.remove(x_sort_t) 
+     while (#x_sort_t ~= 0) do 
+          f = table.remove(x_sort_t) 
+          space = space + b.x - f.x - f.w
+          b = f
+     end 
+     
+     local n = #selected_objs
+     if (n > 2) then 
+     	space = space / (n - 1)
+     end 
+
+     return space
+end 
+
+function util.is_in_list(item, list)
+
+    if list == nil then 
+        return false
+    end 
+
+    for i, j in pairs (list) do
+		if item == j then 
+			return true
+		end 
+    end 
+    return false
+
+end 
+ 
+function util.is_this_container(v)
+
+    if v.extra then 
+        if util.is_in_list(v.widget_type, hdr.uiContainers) == true then 
+	    	return true
+        else 
+	    	return false
+        end 
+    else 
+        return false
+    end 
+
+end 
+
+function util.find_container(x_pos, y_pos)
+
+	local c_tbl = {}
+
+	for i, j in ipairs (screen.children) do 
+	    if j.name then 
+        if string.find(j.name, "Layer") and j.visible == true then 
+            for k,l in ipairs (j.children) do 
+		        if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
+				    if util.is_this_container(l) then
+					    table.insert(c_tbl, l)
+				    end 
+		        end 
+            end 
+        end 
+        end 
+	end 
+
+	if #c_tbl > 0 then 
+		local j = table.remove(c_tbl)
+		return j, j.widget_type 
+	else 
+		return nil
+	end 
+
+end 
+
+function util.is_in_container_group(x_pos, y_pos) 
+
+	for i, j in ipairs (screen.children) do 
+	    if j.name then 
+        if string.find(j.name, "Layer") and j.visible == true then 
+            for k,l in ipairs (j.children) do 
+	            if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
+		            if util.is_this_container(l) then
+		                return true 
+		            end 
+		        end 
+	        end 
+  	    end 
+  	    end 
+    end 
+  	return false 
+
+end 
 
 function util.is_there_guideline () 
 
@@ -417,7 +645,6 @@ function util.is_there_guideline ()
 
 end 
 
-
 function util.guideline_type(name) 
     local i, j = string.find(name,"v_guideline")
     if(i ~= nil and j ~= nil)then 
@@ -429,7 +656,6 @@ function util.guideline_type(name)
     end 
     return ""
 end 
-
 
 function util.copy_obj (v)
 
@@ -701,21 +927,6 @@ function util.is_mp4_file(fn)
 
 end 
 
-function util.is_in_list(item, list)
-
-    if list == nil then 
-        return false
-    end 
-
-    for i, j in pairs (list) do
-		if item == j then 
-			return true
-		end 
-    end 
-    return false
-
-end 
-
 function util.need_stub_code(v)
 
     local lists = {"Button", "ButtonPicker", "RadioButtonGroup", "CheckBoxGroup", "MenuButton"}
@@ -746,20 +957,6 @@ function util.is_this_widget(v)
 
 end 
 
- 
-function util.is_this_container(v)
-
-    if v.extra then 
-        if util.is_in_list(v.extra.type, hdr.uiContainers) == true then 
-	    	return true
-        else 
-	    	return false
-        end 
-    else 
-        return false
-    end 
-
-end 
  
 function util.is_this_group(v)
 
@@ -802,44 +999,7 @@ function util.getObjnames()
 end
 
 
-function util.is_in_container_group(x_pos, y_pos) 
-
-	for i, j in pairs (g.children) do 
-	if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
-		if j.extra then 
-		    if util.is_this_container(j) then
-		        return true 
-		    end 
-		end 
-	end 
-  	end 
-  	return false 
-
-end 
-
-function util.find_container(x_pos, y_pos)
-
-	local c_tbl = {}
-
-	for i, j in pairs (g.children) do 
-		if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
-			if j.extra then 
-				if util.is_this_container(j) then
-					table.insert(c_tbl, j)
-				end 
-			end 
-		end 
-	end 
-
-	if #c_tbl > 0 then 
-		local j = table.remove(c_tbl)
-		return j, j.extra.type 
-	else 
-		return nil
-	end 
-
-end 
-
+]=]--
 function util.create_on_button_down_f(v)
 
 	v.extra.selected = false
@@ -891,13 +1051,13 @@ function util.create_on_button_down_f(v)
 
 	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 
 		     				screen_ui.selected(v) 
-							if(v.type == "Text") then 
+							if(v.widget_type == "Text") then 
 			      				v:set{cursor_visible = true}
 			      				v:set{editable= true}
      			    			v:grab_key_focus(v)
 							end 
 		    			elseif (v.extra.selected == true) then 
-								if(v.type == "Text") then 
+								if(v.widget_type == "Text") then 
 			      					v:set{cursor_visible = true}
 			      					v:set{editable= true}
      			    				v:grab_key_focus(v)
@@ -907,7 +1067,7 @@ function util.create_on_button_down_f(v)
 
 				-----[[	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
-							if v.type == "Text" then 
+							if v.widget_type == "Text" then 
 								v.editable = false 
 								v.cursor_visible = false
 								screen:grab_key_focus()
@@ -947,9 +1107,9 @@ function util.create_on_button_down_f(v)
 						end 
 				-----]]]] 
 
-						if v.type ~= "Text" then 
+						if v.widget_type ~= "Text" then 
 							for i, j in pairs (g.children) do  
-	           					if j.type == "Text" then 
+	           					if j.widget_type == "Text" then 
 	            					if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
 										ui.text = j	
 			  							if ui.text.on_key_down then 
@@ -1190,6 +1350,7 @@ function util.create_on_button_down_f(v)
 	end
 end
 
+--[=[
 function util.get_group_position(child_obj)
 
      for i, v in pairs(g.children) do
