@@ -5,58 +5,22 @@
     -------------------------------
     -- Constants, Global Variables  
     -------------------------------
+    hdr = dofile("header")
 
-hdr = dofile("header")
 
-    -- UI Element / Layer Naming Number 
-local uiNum = 0
-local layerNum = 0
+    --TEST Function 
+    aa = function ()
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TEST_LIB/screens")
+        _VE_.insertUIElement(9, 'Button')
+        _VE_.insertUIElement(9, 'Button')
+        _VE_.insertUIElement(9, 'Rectangle')
+    end 
 
-    -- current Layer 
-local curLayerGid = nil
-local curLayer= nil
-    
-    -- temporary UI Element 
-local uiDuplicate= nil
-local uiRectangle = nil
-    
-    -- block report flag 
-local blockReport= false
 
-    -------------------------------
-    -- UI Element Creation Function Map 
-    -------------------------------
-
-local uiElementCreate_map = 
-{
-    ['Clone'] = function(p)  return Widget_Clone(p) end, 
-    ['Group'] = function(p)  return Widget_Group(p) end, 
-    ['Rectangle'] = function(p)  return Widget_Rectangle(p) end, 
-    ['Text'] = function(p)  return Widget_Text(p) end, 
-    ['Image'] = function(p)  return Widget_Image(p) end, 
-
-    ['Button'] = function(p)  return Button(p) end, 
-    ['DialogBox'] = function(p) return DialogBox(p) end,
-    ['ToastAlert'] = function(p) return ToastAlert(p) end,
-    ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
-    ['ProgressBar'] = function(p) return ProgressBar(p) end,
-    ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
-    ['TextInput'] = function(p) return TextInput(p) end,
-    ['ToggleButton'] = function(p) return ToggleButton(p) end,
-    ['LayoutManager'] = function(p)  return LayoutManager(p) end, 
-    ['Slider'] = function(p)  return Slider(p) end, 
-    ['ArrowPane'] = function(p)  return ArrowPane(p) end, 
-    ['ScrollPane'] = function(p)  return ScrollPane(p) end, 
-    ['TabBar'] = function(p)  return TabBar(p) end, 
-    ['ButtonPicker'] = function(p)  return ButtonPicker(p) end, 
-    ['MenuButton'] = function(p)  return MenuButton(p) end, 
-}
-
- 
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
-    
+ 
     local key_map =
     {
         [ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
@@ -64,7 +28,7 @@ local uiElementCreate_map =
         [ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
         [ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
         --[ keys.k	] = function() editor_lb:execute(debugger_script.." "..current_dir) end,
-		[ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
+	    [ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
         [ keys.t	] = function() editor.text() input_mode = hdr.S_SELECT end,
         [ keys.u	] = function() editor.ugroup() input_mode = hdr.S_SELECT end,
         --[ keys.z	] = function() editor.undo() input_mode = hdr.S_SELECT end,
@@ -72,10 +36,10 @@ local uiElementCreate_map =
         [ keys.w	] = function() editor.image() input_mode = hdr.S_SELECT end,
         [ keys.BackSpace ] = function() editor.delete() input_mode = hdr.S_SELECT end,
         [ keys.Delete    ] = function() editor.delete() input_mode = hdr.S_SELECT end,
-		[ keys.Shift_L   ] = function() shift = true end,
-		[ keys.Shift_R   ] = function() shift = true end,
-		[ keys.Control_L ] = function() control = true end,
-		[ keys.Control_R ] = function() control = true end,
+	    [ keys.Shift_L   ] = function() shift = true end,
+	    [ keys.Shift_R   ] = function() shift = true end,
+	    [ keys.Control_L ] = function() control = true end,
+	    [ keys.Control_R ] = function() control = true end,
         [ keys.Return    ] = function() screen_ui.n_select_all() input_mode = hdr.S_SELECT end ,
         [ keys.Left     ] = function() screen_ui.move_selected_obj("Left") input_mode = hdr.S_SELECT end,
         [ keys.Right    ] = function() screen_ui.move_selected_obj("Right") input_mode = hdr.S_SELECT end ,
@@ -83,446 +47,24 @@ local uiElementCreate_map =
         [ keys.Up       ] = function() screen_ui.move_selected_obj("Up") input_mode = hdr.S_SELECT end,
     }
     
+    -------------------------------
+    -- Local Variables  
+    -------------------------------
+    -- temporary UI Element 
+    local uiDuplicate= nil
+    local uiRectangle = nil
 
-
--- Layer JSON 
-
-json_head = '[{"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
-json_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
-
--- Style JSON 
-
-sjson_head = '[{"anchor_point":[0,0], "children":'  
-sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
-
+    -- Layer JSON 
+    local json_head = '[{"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
+    local json_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
+    
+    -- Style JSON 
+    local sjson_head = '[{"anchor_point":[0,0], "children":'  
+    local sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
 
 ---------------------------------------------------------------------------
 ---                 Local Editor Functions                              ---
 ---------------------------------------------------------------------------
-
-local rect_init_x = 0
-local rect_init_y = 0
-
-local function getObjName (border_n) 
-     local i, j = string.find(border_n, "border")
-     return string.sub(border_n, 1, i-1)
-end 
-
-local function org_cord() 
-    for i, v in pairs(curLayer.children) do
-		if(v.extra.selected == true) then
-		     v.x = v.x - v.anchor_point[1] 
-		     v.y = v.y - v.anchor_point[2] 
-		end 
-    end 
-end  
-
-local function ang_cord() 
-    for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
-		    screen_ui.n_selected(v)
-		    v.x = v.x + v.anchor_point[1] 
-		    v.y = v.y + v.anchor_point[2] 
-	  	end 
-    end 
-end  
-
-local function getTypeStr(m) 
-    if m.widget_type == "Widget" then 
-        return m.type
-    else 
-        return m.widget_type
-    end 
-end 
-
-local function getCurLayer(gid) 
-
-    curLayerGid = gid 
-    curLayer = devtools:gid(gid)
-
-end 
-
-local function copy_obj (v)
-
-      local new_object 
-      uiTypeStr = getTypeStr(v) 
-      if uiElementCreate_map[uiTypeStr] then
-        new_object = uiElementCreate_map[uiTypeStr](v.attributes)
-      end 
-
-      return new_object
-end	
-
-local function create_mouse_event_handler(uiInstance, uiTypeStr)
-
-    uiInstance:add_mouse_handler("on_motion",function(self, x,y)--:on_motion(x,y)
-        if dragging then
-            local actor , dx , dy = unpack( dragging )
-            actor.position = { x - dx , y - dy  }
-            if uiInstance.selected == true then 
-                local border= screen:find_child(uiInstance.name.."border")
-                border.position = { x - dx , y - dy  }
-                local anchor_mark= screen:find_child(uiInstance.name.."a_m")
-                anchor_mark.position = { x - dx , y - dy  }
-            end 
-        end
-    end,true)
-
-    uiInstance:add_mouse_handler("on_button_down",function(self, x , y , button, num_clicks, m)--:on_button_down(x , y , button, num_clicks, m)
-
-		if m and m.control then control = true else control = false end 
-
-        dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
-        uiInstance:grab_pointer()
-
-        _VE_.openInspector(uiInstance.gid)
-
-	    if input_mode == hdr.S_SELECT then
-	        if(uiInstance.selected == false) then 
-		        screen_ui.selected(uiInstance) 
-		    elseif(uiInstance.selected == true) then 
-			    screen_ui.n_select(uiInstance) 
-	        end
-        end
-
-        if uiTypeStr == "Text" then 
-            uiInstance.cursor_visible = true
-            uiInstance.editable= true
-            uiInstance.wants_enter= true
-            uiInstance:grab_key_focus()
-
-            if(num_clicks == 2) then
-                uiInstance.cursor_position = 0
-                uiInstance.selection_end = -1
-            else
-                for i=1,string.len(uiInstance.text) do
-                    local offset = uiInstance:position_to_coordinates(i-1)[1] + uiInstance.anchor_point[1] + uiInstance.x
-                    if(offset >= x ) then
-                        uiInstance.cursor_position = i-1
-                        uiInstance.selection_end = i-1
-                        return true
-                    end
-                end
-                uiInstance.cursor_position = -1
-                uiInstance.selection_end = -1
-                return true
-            end
-        end 
-        return true
-    end,true)
-
-    uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)--:on_button_up(x , y , button)
-        
-		if m  and m.control then 
-			control = true 
-		else 
-			control = false 
-		end 
-
-		if screen:find_child("multi_select_border") then
-			return 
-		end 
-
-        local actor , dx , dy 
-        if dragging ~= nil then 
-            actor , dx , dy = unpack( dragging )
-        end 
-	    local border = screen:find_child(uiInstance.name.."border")
-		local am = screen:find_child(uiInstance.name.."a_m") 
-	    if(input_mode == hdr.S_SELECT) then
-		    local group_pos
-	       	if(border ~= nil and dragging ~= nil) then 
-		        if (uiInstance.is_in_group == true) then
-			        --group_pos = util.get_group_position(uiInstance)
-			        group_pos = nil
-			        if group_pos then 
-			            if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
-	                    if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
-			        end
-		        else 
-	                border.position = {x -dx, y -dy}
-			        if am then 
-	                    am.position = {x -dx, y -dy}
-			        end
-		        end 
-	        end 
-	    end 
-
-        if snapToGuide == true then 
-		    for i=1, v_guideline, 1 do 
-			    if(screen:find_child("v_guideline"..i) ~= nil) then 
-			            local gx = screen:find_child("v_guideline"..i).x 
-                        gx = gx + 9 
-			     	    if(15 >= math.abs(gx - x + dx)) then  
-							uiInstance.x = gx + screen:find_child("v_guideline"..i).w - 18 
-							if (am ~= nil) then 
-			     	     	    am.x = am.x - (x-dx-gx)
-			     	     	    border.x = border.x - (x-dx-gx-1)
-							end
-			     		elseif(15>= math.abs(gx - x + dx - uiInstance.w)) then
-							uiInstance.x = gx - uiInstance.w 
-							if (am ~= nil) then 
-			     	     	    am.x = am.x - (x-dx+uiInstance.w - gx)
-			     	     	    border.x = border.x - (x-dx+uiInstance.w - gx)
-							end
-			     		end 
-			   	end 
-		    end 
-			for i=1, h_guideline,1 do 
-			    if(screen:find_child("h_guideline"..i) ~= nil) then 
-			        local gy =  screen:find_child("h_guideline"..i).y 
-                    gy = gy + 9
-			      	if(15 >= math.abs(gy - y + dy)) then 
-					    uiInstance.y = gy
-					    uiInstance.y =gy + screen:find_child("h_guideline"..i).h - 18 
-						if (am ~= nil) then 
-			     	        am.y = am.y - (y-dy - gy) 
-			     	        border.y = border.y - (y-dy-gy) + 2 
-						end
-			      	elseif(15>= math.abs(gy - y + dy - uiInstance.h)) then
-						uiInstance.y =  gy - uiInstance.h 
-						if (am ~= nil) then 
-			     	        am.y = am.y - (y-dy + uiInstance.h - gy)  
-			     	        border.y = border.y - (y-dy + uiInstance.h - gy)  
-						end
-			      	end 
-			   	end
-			end
-		end 
-
-        dragging = nil
-        uiInstance:ungrab_pointer()
-        uiInstance:set{}
-	end,true) 
-end 
-
-local function assign_right_name (uiInstance, uiTypeStr)
-
-    for m,n in ipairs (screen.children) do
-        if n.name then 
-        if string.find(n.name, "Layer") then  
-            for k,l in ipairs (n.children) do 
-                if l.name == uiTypeStr:lower()..uiNum then 
-                    uiNum = uiNum + 1
-                end
-            end
-        end
-        end
-    end 
-
-    uiInstance.name = uiTypeStr:lower()..uiNum
-    uiNum = uiNum + 1
-
-end 
-
-local function addIntoLayer (uiInstance, group)
-
-    uiInstance.reactive = true
-    uiInstance.lock = false
-    uiInstance.selected = false
-    uiInstance.is_in_group = false
-
-    devtools:gid(curLayerGid):add(uiInstance)
-
-    if group == nil then
-        _VE_.refresh()
-    end 
-
-    if uiInstance.subscribe_to then  
-
-        uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
-    end 
-
-    return
-end 
-
-local function editor_rectangle(x, y)
-
-    local dragging = nil 
-
-    rect_init_x = x 
-    rect_init_y = y 
-    
-    uiRectangle = Widget_Rectangle()
-
-    assign_right_name(uiRectangle, "Rectangle")
-
-    uiRectangle.size = {1,1}
-    uiRectangle.color= hdr.DEFAULT_COLOR
-    uiRectangle.position = {x,y,0}
-    uiRectangle.org_x = x
-    uiRectangle.org_y = y
-
-    create_mouse_event_handler(uiRectangle,"Rectangle")
-
-    addIntoLayer(uiRectangle)
-
-    return uiRectangle
-end 
-
-
-local function editor_rectangle_move(x,y)
-
-	if uiRectangle then 
-        uiRectangle.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
-        if(x- rect_init_x < 0) then
-            uiRectangle.x = x
-        end
-        if(y- rect_init_y < 0) then
-            uiRectangle.y = y
-        end
-	end
-
-end
-
-
-local function editor_rectangle_done(x,y)
-	if uiRectangle == nil then return end 
-    uiRectangle.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
-    if(x-rect_init_x < 0) then
-    	uiRectangle.x = x
-    end
-    if(y-rect_init_y < 0) then
-    	uiRectangle.y = y
-    end
-
-    _VE_.refresh()
-    blockReport = false
-    screen.grab_key_focus(screen)
-end 
-
-local function editor_text(uiText)
-
-    uiText.position ={0, 0, 0}
-	--uiText.wants_enter = true
-	uiText.editable = true
-	uiText.text = "Hello World"
-    uiText.font= "FreeSans Medium 30px"
-    uiText.color = "white"
-    uiText.reactive = true
-    --uiText.wrap=true 
-    --uiText.wrap_mode="CHAR" 
-	--extra = {org_x = 200, org_y = 200}
-
-    uiText:grab_key_focus()
-
-    function uiText:on_key_down(key,u,t,m)
-
-    	if key == keys.Return then 
-			uiText:set{cursor_visible = false}
-        	screen.grab_key_focus(screen)
-			uiText:set{editable= false}
-			local text_len = string.len(uiText.text) 
-			local font_len = string.len(uiText.font) 
-	        local font_sz = tonumber(string.sub(uiText.font, font_len - 3, font_len -2))	
-			local total = math.floor((font_sz * text_len / uiText.w) * font_sz *2/3) 
-			if(total > uiText.h) then 
-				uiText.h = total 
-			end 
-			return true
-	    end 
-
-	end 
-end 
-	
-local function get_min_max () 
-     local min_x = screen.w
-     local max_x = 0
-     local min_y = screen.h
-     local max_y = 0
-
-     for i, v in pairs(curLayer.children) do
-          if curLayer:find_child(v.name) then
-	        if(v.extra.selected == true) then
-			if(v.x < min_x) then min_x = v.x end 
-			if(v.x > max_x) then max_x = v.x end
-			if(v.y < min_y) then min_y = v.y end 
-			if(v.y > max_y) then max_y = v.y end
-		end 
-          end
-    end
-    return min_x, max_x, min_y, max_y
-end 
-
-local function editor_clone()
-
-    blockReport = true
-
-	if #selected_objs == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
-		    screen_ui.n_selected(v)
-		    uiClone = Widget_Clone {
-		        source = v,
-                position = {v.x + 20, v.y +20}
-        	}
-            assign_right_name(uiClone, "Clone")
-
-            create_mouse_event_handler(uiClone, "Clone")
-
-            addIntoLayer(uiClone, true)
-
-			if v.extra.clone then 
-			    table.insert(v.extra.clone, uiClone.name)
-			else 
-			    v.extra.clone = {}
-			    table.insert(v.extra.clone, uiClone.name)
-			end 
-        end
-	end
-
-    _VE_.refresh()
-    blockReport = false
-
-	input_mode = hdr.S_SELECT
-	screen:grab_key_focus()
-end
-
-local function editor_group()
-
-    blockReport = true
-
-	if #(selected_objs) == 0 then 
-		print ("there is no selected object !!")
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return nil
-   	end 
-
-    local min_x, max_x, min_y, max_y = get_min_max () 
-       
-    uiGroup = Widget_Group{
-        position = {min_x, min_y}
-    }
-
-
-	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
-			screen_ui.n_selected(v)
-			v:unparent()
-			v.is_in_group = true
-			v.reactive = false
-			v.group_position = uiGroup.position
-			v.x = v.x - min_x
-			v.y = v.y - min_y
-        	uiGroup:add(v)
-		end 
-    end
-
-    _VE_.refresh()
-    blockReport = false
-
-    screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-
-    return uiGroup
-end
-
 
 ---------------------------------------------------------------------------
 ---            Global  Visual Editor Functions                          ---
@@ -593,44 +135,12 @@ _VE_.printInstanceName = function(layernames)
         end
         end
     end 
-
     print("prtObjNme"..theNames)
-
-end 
-
-local arrange_prep = function(gid) 
-
-    getCurLayer(gid)
-    blockReport = true
-
-	if #selected_objs == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-    org_cord()
-
-    local basis_obj_name = getObjName(selected_objs[1])
-    local basis_obj = curLayer:find_child(basis_obj_name)
-
-    return basis_obj_name, basis_obj
-
-end
-
-local arrange_end = function() 
-
-    ang_cord()
-    screen.grab_key_focus(screen)
-    input_mode = hdr.S_SELECT
-    blockReport = false
-    _VE_.refresh() 
-
 end 
 
 _VE_.alignLeft = function(gid)
 
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
    
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -640,13 +150,13 @@ _VE_.alignLeft = function(gid)
     	end
     end
 
-    arrange_end()
+    editor.arrange_end()
 
 end 
 
 _VE_.alignRight = function(gid)
 
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -656,13 +166,13 @@ _VE_.alignRight = function(gid)
 		end 
     end
 
-    arrange_end()
+    editor.arrange_end()
 
 end 
 
 _VE_.alignTop = function(gid)
 
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name ) then
@@ -673,12 +183,13 @@ _VE_.alignTop = function(gid)
 		end 
    end
 
-    arrange_end()
+    editor.arrange_end()
     
 end 
 
 _VE_.alignBottom = function(gid)
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and  v.name ~= basis_obj_name) then
@@ -689,13 +200,13 @@ _VE_.alignBottom = function(gid)
 		end 
     end
 
-    arrange_end()
+    editor.arrange_end()
 
 end 
  
 _VE_.alignHorizontalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -706,13 +217,13 @@ _VE_.alignHorizontalCenter = function(gid)
 		end 
     end
 
-    arrange_end()
+    editor.arrange_end()
 
 end 
  
 _VE_.alignVerticalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = arrange_prep(gid)
+    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -723,72 +234,14 @@ _VE_.alignVerticalCenter = function(gid)
 		end 
     end
   
-    arrange_end()
-end 
- 
-local function get_x_sort_t()
-     
-     local x_sort_t = {}
-     
-     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
-		    local n = #x_sort_t
-			if(n ==0) then
-				table.insert(x_sort_t, v) 
-			elseif (v.x >= x_sort_t[n].x) then
-				table.insert(x_sort_t, v) 
-			elseif (v.x < x_sort_t[n].x) then  
-				local tmp_cord = {}
-				while (v.x < x_sort_t[n].x) do
-					table.insert(tmp_cord, table.remove(x_sort_t))
-					n = #x_sort_t
-					if n == 0 then 
-						break
-					end 
-				end 
-				table.insert(x_sort_t, v) 
-				while (#tmp_cord ~= 0 ) do 
-					table.insert(x_sort_t, table.remove(tmp_cord))
-				end 
-			end
-		end 
-     end
-     
-     return x_sort_t 
-end
-
-local function get_reverse_t(sort_t)
-     local reverse_t = {}
-
-	while(#sort_t ~= 0) do
-		table.insert(reverse_t, table.remove(sort_t))
-	end 
-	return reverse_t 
-end
-
-local function get_x_space(x_sort_t)
-     local f, b 
-     local space = 0
-     b = table.remove(x_sort_t) 
-     while (#x_sort_t ~= 0) do 
-          f = table.remove(x_sort_t) 
-          space = space + b.x - f.x - f.w
-          b = f
-     end 
-     
-     local n = #selected_objs
-     if (n > 2) then 
-     	space = space / (n - 1)
-     end 
-
-     return space
+    editor.arrange_end()
 end 
 
 _VE_.distributeHorizontal = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
     --[[
-    getCurLayer(gid)
+    util.getCurLayer(gid)
     blockReport = true
 
     if #selected_objs == 0 then 
@@ -850,7 +303,7 @@ _VE_.distributeHorizontal = function(gid)
         end 
     end 
 
-    arrange_end(gid)
+    editor.arrange_end(gid)
     --[[
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
@@ -861,9 +314,9 @@ end
 
 _VE_.distributeVertical = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
     --[[
-    getCurLayer(gid)
+    util.getCurLayer(gid)
     blockReport = true
 
     if #selected_objs == 0 then 
@@ -925,7 +378,7 @@ _VE_.distributeVertical = function(gid)
         end 
     end 
 
-    arrange_end(gid)
+    editor.arrange_end(gid)
     --[[
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
@@ -936,9 +389,9 @@ end
 
 _VE_.bringToFront = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
     --[[
-    getCurLayer(gid)
+    util.getCurLayer(gid)
     blockReport = true
 
     if #selected_objs == 0 then 
@@ -956,7 +409,7 @@ _VE_.bringToFront = function(gid)
         end
     end
 
-    arrange_end(gid)
+    editor.arrange_end(gid)
 
     --[[
     screen.grab_key_focus(screen)
@@ -969,7 +422,7 @@ end
 
 _VE_.bringForward = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -992,20 +445,20 @@ _VE_.bringForward = function(gid)
     	table.insert(tmp_g, table.remove(slt_g))
     end 
 
-    tmp_g = get_reverse_t(tmp_g)
+    tmp_g = util.get_reverse_t(tmp_g)
 
     while(table.getn(tmp_g) ~= 0) do
     	v = table.remove(tmp_g)
 	    curLayer:add(v)
     end 
 
-    arrange_end(gid)
+    editor.arrange_end(gid)
 
 end
 
 _VE_.sendToBack = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -1025,19 +478,19 @@ _VE_.sendToBack = function(gid)
 	    curLayer:add(v)	
     end 
     
-    tmp_g = get_reverse_t(tmp_g) 
+    tmp_g = util.get_reverse_t(tmp_g) 
     while #tmp_g ~= 0 do
 	    v = table.remove(tmp_g)
 	    g:add(v)	
     end 
 	
-    arrange_end(gid)
+    editor.arrange_end(gid)
 
 end
 
 _VE_.sendBackward = function(gid)
 
-    arrange_prep(gid)
+    editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -1065,147 +518,34 @@ _VE_.sendBackward = function(gid)
 	    table.insert(tmp_g, f) 
     end 
 
-    tmp_g = get_reverse_t(tmp_g)
+    tmp_g = util.get_reverse_t(tmp_g)
     while #tmp_g ~= 0 do
 	    v = table.remove(tmp_g)
 	    curLayer:add(v) 
     end 
 
-    arrange_end(gid)
+    editor.arrange_end(gid)
 
 end
 
 _VE_.refresh = function()
+
     _VE_.getUIInfo()
     _VE_.getStInfo()
+
 end 
 
--- UnGroup
+-- Ungroup
 _VE_.ungroup = function(gid)
-    
-    getCurLayer(gid) 
 
-    if #selected_objs == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-    blockReport = true
-    for i, v in pairs(curLayer.children) do
-        if curLayer:find_child(v.name) then
-		  	if(v.extra.selected == true) then
-				if util.is_this_group(v) == true then
-			     	screen_ui.n_selected(v)
-			     	for i,c in pairs(v.children) do 
-						c:unparent()
-				     	c.extra.is_in_group = false
-				     	c.x = c.x + v.x 
-				     	c.y = c.y + v.y 
-						c.reactive = true	
-                        if c.widget_type == "Widget" then 
-                            uiTypeStr = c.widget_type..c.type
-                        else 
-                            uiTypeStr = c.widget_type
-                        end
-                        create_mouse_event_handler(c, uiTypeStr)
-                        addIntoLayer(c, true)
-			     	end
-			     	curLayer:remove(v)
-                    _VE_.refresh()
-		        end 
-		   end 
-		end
-	end
-
-    screen.grab_key_focus(screen)
-	input_mode = hdr.S_SELECT
-    blockReport = false
-
+    editor.ungroup(gid)
+ 
 end 
 
 -- Duplicate
-
-local function duplicate_child(new, org)
-
-    local uiTypeStr, n, l, m
-
-    for l,m in pairs (org.children) do 
-
-        uiTypeStr = getTypeStr(m) 
-
-        if uiElementCreate_map[uiTypeStr] then
-            n = uiElementCreate_map[uiTypeStr](m.attributes)
-        end 
-
-        assign_right_name(n, uiTypeStr)
-
-        n.reactive = false
-        n.lock = false
-        n.selected = false
-        n.is_in_group = true
-
-        if n.subscribe_to then  
-            n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
-        end 
-
-        if uiTypeStr == "Group" then  
-            duplicate_child(n, m)
-        end
-
-        new:add(n) 
-    end 
-
-end 
-
-
 _VE_.duplicate = function(gid)
 
-    -- no selected object 
-	if #(selected_objs) == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-    getCurLayer(gid)
-
-    blockReport = true
-
-    for i, v in pairs(curLayer.children) do
-		if util.is_this_selected(v) == true then 
-		    if uiDuplicate then
-		    	if uiDuplicate.name == v.name then 
-					next_position = {2 * v.x - uiDuplicate.extra.position[1], 2 * v.y - uiDuplicate.extra.position[2]}
-				else 
-					uiDuplicate = nil 
-					next_position = nil 
-			  	end 
-		    end 
-
-			uiTypeStr = getTypeStr(v) 
-            if uiElementCreate_map[uiTypeStr] then
-                uiDuplicate = uiElementCreate_map[uiTypeStr](v.attributes)
-            end 
-
-            uiDuplicate.position = {v.x + 20, v.y +20}
-
-            assign_right_name(uiDuplicate, uiTypeStr)
-            create_mouse_event_handler(uiDuplicate, uiTypeStr)
-
-            if uiTypeStr == "Group" then 
-                duplicate_child(uiDuplicate, v)
-            end 
-
-            addIntoLayer(uiDuplicate)
-
-		end --if selected == true
-    end -- for 
-
-    blockReport = false
-
-	input_mode = hdr.S_SELECT
-	screen:grab_key_focus()
+    editor.duplicate(gid)
 
 end 
 
@@ -1258,7 +598,7 @@ _VE_.delete = function(gid)
        ]=]
     end 
 
-    getCurLayer(gid)
+    util.getCurLayer(gid)
 
     blockReport = true
 
@@ -1394,30 +734,6 @@ _VE_.openInspector = function(gid)
     print("openInspc"..gid)
 end 
 
-_VE_.setBGImages = function(path)
-
-    if path then 
-        editor_lb:change_app_path(path)
-    end
-
-    if BG_IMAGE_20 == nil then 
-        BG_IMAGE_20 = Image{src ="LIB/assets/transparency-grid-20-2.png"}
-        BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
-        BG_IMAGE_40 = Image{src="LIB/assets/transparency-grid-40-2.png"}
-        BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-        
-        BG_IMAGE_80 = Image{src="LIB/assets/transparency-grid-80-2.png"}
-        BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-
-        BG_IMAGE_white = Image{src="LIB/assets/white.png"}
-        BG_IMAGE_white:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-
-        BG_IMAGE_import = Image{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-    end 
-
-    screen:add(BG_IMAGE_20,BG_IMAGE_40,BG_IMAGE_80,BG_IMAGE_white,BG_IMAGE_import)
-end 
-
 _VE_.setAppPath = function(path)
     editor_lb:change_app_path(path)
 end 
@@ -1425,7 +741,7 @@ end
 _VE_.openFile = function(path)
     blockReport = true
     screen:clear()
-    _VE_.setBGImages(path)
+    util.setBGImages(path)
     editor_lb:change_app_path(path)
 
     layers_file = "layers.json"
@@ -1472,12 +788,12 @@ _VE_.openFile = function(path)
                     m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
                 end 
 
-                local uiTypeStr = getTypeStr(m) 
+                local uiTypeStr = util.getTypeStr(m) 
 
                 if uiTypeStr == "LayoutManager" then 
                     m.placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
-                create_mouse_event_handler(m, uiTypeStr)
+                util.create_mouse_event_handler(m, uiTypeStr)
 
                 m.reactive = true 
                 m.lock = false
@@ -1599,78 +915,20 @@ _VE_.white = function()
     BG_IMAGE_white.opacity = 255
 end
 
-local guideline_inspector_on = false
-local selected_guideline = nil
-
-
-_VE_.close_guideInspector = function() 
-    selected_guideline:find_child("line").color = {0,255,255,255}
-    selected_guideline = nil
-    guideline_inspector_on = false
-end 
-
 _VE_.setHGuideY = function(y)
     selected_guideline.y = y - 10 
-    _VE_.close_guideInspector()
+    util.close_guideInspector()
 end 
 
 _VE_.setVGuideX = function(x)
     selected_guideline.x = x - 10 
-    _VE_.close_guideInspector()
+    util.close_guideInspector()
 end 
 
 _VE_.deleteGuideLine = function()
     screen:remove(selected_guideline) 
     _VE_.close_guideInspector()
 end 
-
-local function guideline_inspector(v)
-
-	local org_position 
-    guideline_inspector_on = true
-    selected_guideline = v
-
-    if(util.guideline_type(v.name) == "v_guideline") then
-		org_position = tostring(math.floor(v.x))
-        print("openV_GLI"..org_position)
-	else
-		org_position = tostring(math.floor(v.y))
-        print("openH_GLI"..org_position)
-    end 
-
-end 
-
-local function create_on_line_down_f(v)
-
-        function v:on_button_down(x,y,button,num_clicks)
-            v:find_child("line").color = {255,0,0,255}
-            dragging = {v, x - v.x, y - v.y }
-	     	if(button == 3) then
-		  		guideline_inspector(v)
-                return true
-            end 
-            return true
-        end
-
-        function v:on_button_up(x,y,button,num_clicks)
-	     	if(dragging ~= nil) then 
-
-	        	local actor , dx , dy = unpack( dragging )
-		  		if(util.guideline_type(v.name) == "v_guideline") then 
-					v.x = x - dx
-		  		elseif(util.guideline_type(v.name) == "h_guideline") then  
-					v.y = y - dy
-		  		end 
-                if guideline_inspector_on ~= true then 
-                    v:find_child("line").color = {0,255,255,255}
-                end 
-	          	dragging = nil
-            end
-            return true
-        end
-
-end 
-
 
 _VE_.addHorizonGuide = function()
     h_guideline = h_guideline + 1
@@ -1691,7 +949,7 @@ _VE_.addHorizonGuide = function()
                 }
             }
         }
-     create_on_line_down_f(h_gl)
+     util.create_on_line_down_f(h_gl)
      screen:add(h_gl)
      screen:grab_key_focus()
 
@@ -1720,7 +978,7 @@ _VE_.addVerticalGuide = function()
         }
      }
      }
-     create_on_line_down_f(v_gl)
+     util.create_on_line_down_f(v_gl)
      screen:add(v_gl)
      screen:grab_key_focus()
 
@@ -1781,7 +1039,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     local uiInstance, dragging = nil 
 
-    getCurLayer(layerGid)
+    util.getCurLayer(layerGid)
 
     blockReport = true
 
@@ -1793,18 +1051,18 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     elseif uiTypeStr == "Group" then 
         
-        uiInstance = editor_group()
+        uiInstance = editor.group()
         if uiInstance == nil then 
             return
         end 
 
     elseif uiTypeStr == "Clone" then 
         
-        editor_clone()
+        editor.clone()
         return
 
-    elseif uiElementCreate_map[uiTypeStr] then
-        uiInstance = uiElementCreate_map[uiTypeStr]()
+    elseif hdr.uiElementCreate_map[uiTypeStr] then
+        uiInstance = hdr.uiElementCreate_map[uiTypeStr]()
     end 
     
     -- Default Settings
@@ -1817,15 +1075,14 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     elseif uiTypeStr == "LayoutManager" then 
         
         uiInstance:set{
-        number_of_rows = 2,
-        number_of_cols = 3,
-        placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
-        cells = {
-            {Widget_Rectangle{name = "star", w=30,h=30},Widget_Rectangle{name = "moon", w=100,h=100}},
-            {Widget_Rectangle{name = "rainbow", w=100,h=100},nil,Widget_Rectangle{name="sun",w=100,h=100}},
+            number_of_rows = 2,
+            number_of_cols = 3,
+            placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
+            cells = {
+                {Widget_Rectangle{name = "star", w=30,h=30},Widget_Rectangle{name = "moon", w=100,h=100}},
+                {Widget_Rectangle{name = "rainbow", w=100,h=100},nil,Widget_Rectangle{name="sun",w=100,h=100}},
+            }
         }
-        }
-
     
     --[[
         uiInstance:set{ number_of_rows = 2, number_of_cols = 2}
@@ -1875,27 +1132,34 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     end 
         
-    assign_right_name(uiInstance, uiTypeStr)
+    util.assign_right_name(uiInstance, uiTypeStr)
 
     if uiTypeStr == "Image" then 
         uiInstance.src = path
     elseif uiTypeStr == "Text" then 
-        editor_text(uiInstance)
+        editor.text(uiInstance)
     end
 
-    create_mouse_event_handler(uiInstance, uiTypeStr)
+    util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
-    addIntoLayer(uiInstance)
+    util.addIntoLayer(uiInstance)
     blockReport = false
 
 end
 
+
+    local function styleUpdate()
+        if blockReport ~= true then
+            _VE_.refresh()
+        end 
+    end 
+
+
 ---------------------------------------------------------------------------
 ---           Global  Screen Mouse Event Handler Functions              ---
 ---------------------------------------------------------------------------
-----[[
 
-      function screen:on_key_down( key )
+    function screen:on_key_down( key )
 
 		if(input_mode ~= hdr.S_POPUP) then 
           if key_map[key] then
@@ -1912,7 +1176,6 @@ end
 
     end
 
-
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
@@ -1924,7 +1187,7 @@ end
 		end 
 
       	if(input_mode == hdr.S_RECTANGLE) then 
-	       uiRectanle = editor_rectangle( x, y) 
+	       uiRectanle = editor.rectangle( x, y) 
 		   return
 	  	end
 
@@ -1941,7 +1204,7 @@ end
 
         if (mouse_state == hdr.BUTTON_DOWN) then
             if input_mode == hdr.S_RECTANGLE then 
-	           editor_rectangle_done(x, y) 
+	           editor.rectangle_done(x, y) 
 	           input_mode = hdr.S_SELECT 
 	      	else
 				screen_ui.multi_select_done(x,y)
@@ -1967,7 +1230,7 @@ end
 
         if(mouse_state == hdr.BUTTON_DOWN) then
             if (input_mode == hdr.S_RECTANGLE) then 
-				editor_rectangle_move(x, y) 
+				editor.rectangle_move(x, y) 
 			end
             if (input_mode == hdr.S_SELECT) then 
 		    	screen_ui.multi_select_move(x, y) 
@@ -1976,22 +1239,29 @@ end
         end
 	end
 
-local function styleUpdate()
-    if blockReport ~= true then
-        _VE_.refresh()
+-------------------------------------------------------------------------------
+-- Main
+-------------------------------------------------------------------------------
+
+    function main()
+
+        -- to activate mouse handlers 
+    	if controllers.start_pointer then 
+  			controllers:start_pointer()
+    	end
+
+        Style:subscribe_to(styleUpdate)
+
+        screen.reactive = true
+
+        util.setBGImages()
+
+        print("<<VE_READY>>:")
+
     end 
-end 
 
-Style:subscribe_to(styleUpdate)
-
-screen.reactive = true
-
-_VE_.setBGImages()
-screen:show()
-
-controllers:start_pointer()
-dolater(print("<<VE_READY>>:"))
-
+    screen:show()
+    dolater(main)
 
 
 

@@ -21,138 +21,365 @@ local editorUiElements 	= {
 							"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
 							"ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", 
 							"ScrollPane", "ArrowPane" 
-				     	  }
+						  }
 
-local widget_f_map = 
-{
-     ["Rectangle"]	= function () input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end, 
-     ["Text"]		= function () editor.text() input_mode = hdr.S_SELECT end, 
-     ["Image"]		= function () input_mode = hdr.S_SELECT editor.image() end, 	
-     ["Video"] 		= function () input_mode = hdr.S_SELECT editor.video() end,
-     ["Button"]     = function () return ui_element.button()       end, 
-     ["TextInput"] 	= function () return ui_element.textInput()    end, 
-     ["DialogBox"] 	= function () return ui_element.dialogBox()    end, 
-     ["ToastAlert"] = function () return ui_element.toastAlert()     end,   
-     ["RadioButtonGroup"]   = function () return ui_element.radioButtonGroup()  end, 
-     ["CheckBoxGroup"]      = function () return ui_element.checkBoxGroup()     end, 
-     ["ButtonPicker"]   	= function () return ui_element.buttonPicker() end, 
-     ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
-     ["ProgressBar"]     	= function () return ui_element.progressBar()   end,
-     ["MenuButton"]       	= function () return ui_element.menuButton()  end,
-     ["MenuBar"]        	= function () return ui_element.menuBar()      end,
-     ["LayoutManager"]      = function () return ui_element.layoutManager()   end,
-     ["ScrollPane"]    		= function () return ui_element.scrollPane() end, 
-     ["ArrowPane"]    		= function () return ui_element.arrowPane() end, 
-	 ["TabBar"]		 		= function () return ui_element.tabBar() end, 
-     ["MenuBar"]    		= function () return ui_element.menuBar() end, 
+---------------------------------------------
+-- Rectangle --------------------------------
+---------------------------------------------
 
-}
-
-local widget_n_map = {
-     ["Button"]    	= function () return "Button" end, 
-     ["TextInput"] 	= function () return "Text Input" end, 
-     ["DialogBox"] 	= function () return "Dialog Box" end, 
-     ["ToastAlert"]	= function () return "Toast Alert" end,   
-     ["RadioButtonGroup"]    = function () return "Radio Button Group" end, 
-     ["CheckBoxGroup"]       = function () return "Checkbox Group" end, 
-     ["ButtonPicker"]   	 = function () return "Button Picker" end, 
-     ["ProgressSpinner"]     = function () return "Progress Spinner" end, 
-     ["ProgressBar"]     	 = function () return "Progress Bar" end,
-     ["MenuButton"]      	 = function () return "Menu Button" end,
-     ["LayoutManager"]       = function () return "Layout Manager" end,
-     ["ScrollPane"]    		 = function () return "Scroll Pane" end, 
-     ["ArrowPane"]    		 = function () return "Arrow Pane" end, 
-     ["TabBar"]    			 = function () return "Tab Bar" end, 
-     ["MenuBar"]     		 = function () return "Menu Bar" end, 
-}
-
+local rect_init_x = 0
+local rect_init_y = 0
 
 function editor.rectangle(x, y)
+
+    local dragging = nil 
+
     rect_init_x = x 
     rect_init_y = y 
-
     
-    uiInstance = Widget_Rectangle{}
-    for m,n in ipairs (screen.children) do
-        if string.find(n.name, "Layer") then  
-            for k,l in ipairs (n.children) do 
-                if l.name == uiTypeStr:lower()..uiNum then 
-                    uiNum = uiNum + 1
-                end
-            end
-        end
-    end 
-    uiInstance.name = uiTypeStr:lower()..uiNum
-    uiNum = uiNum + 1
+    uiRectangle = Widget_Rectangle()
 
---[[
-	uiInstance = Rectangle{
-    	name="rectangle"..tostring(item_num),
-    	border_color= hdr.DEFAULT_COLOR,
-    	border_width=0,
-    	color= hdr.DEFAULT_COLOR,
-    	size = {1,1},
-    	position = {x,y,0}, 
-		extra = {org_x = x, org_y = y}
-    }
-]]
-    uiInstance.reactive = true
+    util.assign_right_name(uiRectangle, "Rectangle")
 
-    return uiInstance
+    uiRectangle.size = {1,1}
+    uiRectangle.color= hdr.DEFAULT_COLOR
+    uiRectangle.position = {x,y,0}
+    uiRectangle.org_x = x
+    uiRectangle.org_y = y
+
+    util.create_mouse_event_handler(uiRectangle,"Rectangle")
+
+    util.addIntoLayer(uiRectangle)
+
+    return uiRectangle
 end 
 
-function editor.rectangle_done(x,y)
-	if ui.rect == nil then return end 
-    ui.rect.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
-    if(x-rect_init_x < 0) then
-    	ui.rect.x = x
-    end
-    if(y-rect_init_y < 0) then
-    	ui.rect.y = y
-    end
-    item_num = item_num + 1
-    screen.grab_key_focus(screen)
-
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-	    ui.rect.extra.timeline = {}
-        ui.rect.extra.timeline[0] = {}
-	    local prev_point = 0
-	    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	    for l,k in pairs (attr_map["Rectangle"]()) do 
-	        ui.rect.extra.timeline[0][k] = ui.rect[k]
-	    end
-	    if cur_focus_n ~= 0 then 
-                ui.rect.extra.timeline[0]["hide"] = true  
-	    end 
-
-	    for i, j in util.orderedPairs(timeline.points) do 
-	        if not ui.rect.extra.timeline[i] then 
-		    	ui.rect.extra.timeline[i] = {} 
-	            for l,k in pairs (attr_map["Rectangle"]()) do 
-		         ui.rect.extra.timeline[i][k] = ui.rect.extra.timeline[prev_point][k] 
-		    	end 
-		    	prev_point = i 
-			end 
-	        if i < cur_focus_n  then 
-            	ui.rect.extra.timeline[i]["hide"] = true  
-			end 
-	    end 
-	end 
-end 
 
 function editor.rectangle_move(x,y)
 
-	if ui.rect then 
-        ui.rect.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
+	if uiRectangle then 
+        uiRectangle.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
         if(x- rect_init_x < 0) then
-            ui.rect.x = x
+            uiRectangle.x = x
         end
         if(y- rect_init_y < 0) then
-            ui.rect.y = y
+            uiRectangle.y = y
         end
 	end
 
 end
+
+
+function editor.rectangle_done(x,y)
+	if uiRectangle == nil then return end 
+    uiRectangle.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
+    if(x-rect_init_x < 0) then
+    	uiRectangle.x = x
+    end
+    if(y-rect_init_y < 0) then
+    	uiRectangle.y = y
+    end
+
+    _VE_.refresh()
+    blockReport = false
+    screen.grab_key_focus(screen)
+
+end 
+
+---------------------------------------------
+-- Text -------------------------------------
+---------------------------------------------
+
+function editor.text(uiText)
+
+    uiText.position ={0, 0, 0}
+	--uiText.wants_enter = true
+	uiText.editable = true
+	uiText.text = "Hello World"
+    uiText.font= "FreeSans Medium 30px"
+    uiText.color = "white"
+    uiText.reactive = true
+    --uiText.wrap=true 
+    --uiText.wrap_mode="CHAR" 
+	--extra = {org_x = 200, org_y = 200}
+
+    uiText:grab_key_focus()
+
+    function uiText:on_key_down(key,u,t,m)
+
+    	if key == keys.Return then 
+			uiText:set{cursor_visible = false}
+        	screen.grab_key_focus(screen)
+			uiText:set{editable= false}
+			local text_len = string.len(uiText.text) 
+			local font_len = string.len(uiText.font) 
+	        local font_sz = tonumber(string.sub(uiText.font, font_len - 3, font_len -2))	
+			local total = math.floor((font_sz * text_len / uiText.w) * font_sz *2/3) 
+			if(total > uiText.h) then 
+				uiText.h = total 
+			end 
+			return true
+	    end 
+
+	end 
+end 
+
+
+---------------------------------------------
+-- Clone ------------------------------------
+---------------------------------------------
+function editor.clone()
+
+    blockReport = true
+
+	if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	for i, v in pairs(curLayer.children) do
+		if(v.selected == true) then
+            print (v.name)
+            print (v.name)
+            print (v.name)
+            print (v.name)
+		    screen_ui.n_selected(v)
+		    uiClone = Widget_Clone {
+		        source = v,
+                position = {v.x + 20, v.y +20}
+        	}
+            util.assign_right_name(uiClone, "Clone")
+
+            util.create_mouse_event_handler(uiClone, "Clone")
+
+            util.addIntoLayer(uiClone, true)
+
+			if v.extra.clone then 
+			    table.insert(v.extra.clone, uiClone.name)
+			else 
+			    v.extra.clone = {}
+			    table.insert(v.extra.clone, uiClone.name)
+			end 
+        end
+	end
+
+    _VE_.refresh()
+    blockReport = false
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+end
+
+---------------------------------------------
+-- Group ------------------------------------
+---------------------------------------------
+function editor.group()
+
+    blockReport = true
+
+	if #(selected_objs) == 0 then 
+		print ("there is no selected object !!")
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return nil
+   	end 
+
+    local min_x, max_x, min_y, max_y = util.get_min_max () 
+       
+    uiGroup = Widget_Group{
+        position = {min_x, min_y}
+    }
+
+
+	for i, v in pairs(curLayer.children) do
+		if(v.selected == true) then
+			screen_ui.n_selected(v)
+			v:unparent()
+			v.is_in_group = true
+			v.reactive = false
+			v.group_position = uiGroup.position
+			v.x = v.x - min_x
+			v.y = v.y - min_y
+        	uiGroup:add(v)
+		end 
+    end
+
+    _VE_.refresh()
+    blockReport = false
+
+    screen:grab_key_focus()
+	input_mode = hdr.S_SELECT
+
+    return uiGroup
+end
+
+---------------------------------------------
+-- UnGroup ----------------------------------
+---------------------------------------------
+   
+function editor.ungroup(gid)
+
+    util.getCurLayer(gid) 
+
+    if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    blockReport = true
+    for i, v in pairs(curLayer.children) do
+        if curLayer:find_child(v.name) then
+		  	if(v.extra.selected == true) then
+				if util.is_this_group(v) == true then
+			     	screen_ui.n_selected(v)
+			     	for i,c in pairs(v.children) do 
+						c:unparent()
+				     	c.extra.is_in_group = false
+				     	c.x = c.x + v.x 
+				     	c.y = c.y + v.y 
+						c.reactive = true	
+                        if c.widget_type == "Widget" then 
+                            uiTypeStr = c.widget_type..c.type
+                        else 
+                            uiTypeStr = c.widget_type
+                        end
+                        util.create_mouse_event_handler(c, uiTypeStr)
+                        util.addIntoLayer(c, true)
+			     	end
+			     	curLayer:remove(v)
+                    _VE_.refresh()
+		        end 
+		   end 
+		end
+	end
+
+    screen.grab_key_focus(screen)
+	input_mode = hdr.S_SELECT
+    blockReport = false
+
+end
+
+---------------------------------------------
+-- Duplicate --------------------------------
+---------------------------------------------
+
+local function duplicate_child(new, org)
+
+    local uiTypeStr, n, l, m
+
+    for l,m in pairs (org.children) do 
+
+        uiTypeStr = util.getTypeStr(m) 
+
+        if hdr.uiElementCreate_map[uiTypeStr] then
+            n = hdr.uiElementCreate_map[uiTypeStr](m.attributes)
+        end 
+
+        util.assign_right_name(n, uiTypeStr)
+
+        n.reactive = false
+        n.lock = false
+        n.selected = false
+        n.is_in_group = true
+
+        if n.subscribe_to then  
+            n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
+        end 
+
+        if uiTypeStr == "Group" then  
+            duplicate_child(n, m)
+        end
+
+        new:add(n) 
+    end 
+
+end 
+ 
+function editor.duplicate(gid)
+
+    -- no selected object 
+	if #(selected_objs) == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    util.getCurLayer(gid)
+
+    blockReport = true
+
+    for i, v in pairs(curLayer.children) do
+		if util.is_this_selected(v) == true then 
+		    if uiDuplicate then
+		    	if uiDuplicate.name == v.name then 
+					next_position = {2 * v.x - uiDuplicate.extra.position[1], 2 * v.y - uiDuplicate.extra.position[2]}
+				else 
+					uiDuplicate = nil 
+					next_position = nil 
+			  	end 
+		    end 
+
+			uiTypeStr = util.getTypeStr(v) 
+            if hdr.uiElementCreate_map[uiTypeStr] then
+                uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
+            end 
+
+            uiDuplicate.position = {v.x + 20, v.y +20}
+
+            util.assign_right_name(uiDuplicate, uiTypeStr)
+            util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
+
+            if uiTypeStr == "Group" then 
+                duplicate_child(uiDuplicate, v)
+            end 
+
+            util.addIntoLayer(uiDuplicate)
+
+		end --if selected == true
+    end -- for 
+
+    blockReport = false
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+
+end
+
+
+---------------------------------------------
+-- Arrange ----------------------------------
+---------------------------------------------
+
+function editor.arrange_prep (gid) 
+
+    util.getCurLayer(gid)
+    blockReport = true
+
+	if #selected_objs == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    util.org_cord()
+
+    local basis_obj_name = util.getObjName(selected_objs[1])
+    local basis_obj = curLayer:find_child(basis_obj_name)
+
+    return basis_obj_name, basis_obj
+
+end
+
+function editor.arrange_end () 
+
+    util.ang_cord()
+    screen.grab_key_focus(screen)
+    input_mode = hdr.S_SELECT
+    blockReport = false
+    _VE_.refresh() 
+
+end 
 
 return editor
