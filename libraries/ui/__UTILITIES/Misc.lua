@@ -87,16 +87,17 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
             end
         end
     end
+    local setting = false
     do
-        local setting = false
+        
         obj.set = function(self,t)
             if setting then
                 old_set(self, t)
             else
                 setting = true
                 old_set(self, t)
-                self:notify(t)
                 setting = false
+                self:notify(t)
             end
             
             return self
@@ -107,15 +108,16 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         local notifying = false
         local p = {}
         obj.notify = function(self,t,force)
-            mesg("DEBUG",0,self,":notify() was called ")
             
-            if notifying and not force then 
+            if (setting or notifying) and not force then 
                 print("WARNING. Object is already notifying subscribers")
                 return 
             end
+            mesg("DEBUG",0,self,":notify() was called ")
             notifying = true
             p = nil
             if type(t) == "table" then
+                --dumptable(t)
                 p = {}
                 for k,v in pairs(t) do
                     if subscriptions[key] then
@@ -146,7 +148,7 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         --print(self,"old__newindex",key,"being called")
         old__newindex(self,key,value)
         --print(self,"old__newindex",key,"was called")
-        
+        if not(setting or notifying) then
         if subscriptions[key] then
             
             for f,_ in pairs(subscriptions[key]) do 
@@ -158,6 +160,6 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
             mesg("NOTIFY",0,"newindex",key," calling allsubscriber",f) 
             f({[key]=value}) 
         end
-        
+        end
     end
 end
