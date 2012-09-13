@@ -136,6 +136,34 @@ TabBar = setmetatable(
                         env.resize_tabs = true
                     end
                 end,
+                tab_images = function(instance,env)
+                    return function(oldf) return   env.tab_images     end, -- TODO either return clone, or metatable for changes
+                    function(oldf,self,v)          
+                        local old_images = env.tab_images or {}
+                        env.tab_images = v
+                        
+                        for k,v in pairs(v) do
+                            env.add(instance,v)
+                            v:hide()
+                        end
+                        
+                        for i = 1,env.tabs_lm.length do
+                            
+                            local clones = {}
+                            
+                            for k,v in pairs(v) do
+                                clones[k] = Clone{source=v}
+                            end
+                            
+                            env.tabs_lm.cells[i].images = clones
+                            
+                        end
+                        
+                        for k,v in pairs(old_images) do
+                            v:unparent()
+                        end
+                    end
+                end,
                 tab_h = function(instance,env)
                     return function(oldf) return   env.tab_h     end,
                     function(oldf,self,v)          
@@ -410,12 +438,21 @@ TabBar = setmetatable(
                     local style = instance.style.attributes
                     style.name = style
                     style.border.colors.selection = style.border.colors.selection or "ffffff"
+                    local clones
+                    if env.tab_images then
+                        clones = {}
+                        
+                        for k,v in pairs(env.tab_images) do
+                            clones[k] = Clone{source=v}
+                        end
+                    end
                     obj = ToggleButton{
                         label  = obj.label,
                         w      = env.tab_w,
                         h      = env.tab_h,
                         style  = style,
                         group  = env.rbg,
+                        images = clones,
                         reactive = true,
                         create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
                         --images = tab_images,
