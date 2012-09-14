@@ -35,12 +35,14 @@ local function pcall_error(mesg,stack)
     --      ["__UTILITIES/Misc.lua"]:133: table: 0x2097e90:notify() was called
     
     --return "["..( (( {pcall(error,mesg,4+stack)} )[2]):sub(9) )
+    --[[
     print(pcall(error,mesg,4))
     print(pcall(error,mesg,(4+stack)))
     if 4+stack == 6 then
         error(mesg,4+stack)
     end
     print(( {pcall(error,mesg,4+stack)} )[2])
+    --]]
     return "["..( (( {pcall(error,mesg,4+stack)} )[2]) )
     
 end
