@@ -35,6 +35,7 @@ lm0 = LayoutManager()
 --]]
 ---[[
 lm1 = LayoutManager{
+    x = 1000,
     number_of_rows = 4,
     number_of_cols = 2,
     cells = {
@@ -45,6 +46,10 @@ lm1 = LayoutManager{
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
     }
 }
+lm1.reactive = true
+function lm1:on_button_down(x,y)
+    print(lm1:r_c_from_abs_x_y(x,y))
+end
 --]]
 --[[
 lm2 = LayoutManager{

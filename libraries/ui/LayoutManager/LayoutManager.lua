@@ -1196,6 +1196,37 @@ LayoutManager = setmetatable(
                
             },
             functions = {
+                r_c_from_x_y = function(instance,env)
+                    return function(old_function,self,x,y)
+                        if  instance.number_of_rows == 0 or 
+                            instance.number_of_cols == 0 then
+                            
+                            return 0, 0
+                        end
+                        local r,c = instance.number_of_rows, instance.number_of_cols
+                        for i=1,instance.number_of_rows do
+                            if y < (env.cells[i][1].y - env.cells[i][1].anchor_point[2]) then
+                                r = i - 1
+                                break
+                            end
+                        end
+                        for i=1,instance.number_of_cols do
+                            if x < (env.cells[1][i].x - env.cells[1][i].anchor_point[1]) then
+                                c = i - 1
+                                break
+                            end
+                        end
+                        return r,c
+                    end
+                end,
+                r_c_from_abs_x_y = function(instance,env)
+                    return function(old_function,self,x,y)
+                        return self:r_c_from_x_y(
+                            x - self.transformed_position[1]/screen.scale[1],
+                            y - self.transformed_position[2]/screen.scale[2]
+                        )
+                    end
+                end,
             },
         },
         private = {
