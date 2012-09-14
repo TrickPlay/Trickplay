@@ -108,7 +108,8 @@ local make_canvas = function(self, env, state)
 end
 local default_parameters = {}
 
-SingleNineSlice = setmetatable(
+--SingleNineSlice
+NineSlice = setmetatable(
     {},
     {
         __index = function(self,k)
@@ -180,16 +181,17 @@ SingleNineSlice = setmetatable(
                 cells = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        mesg("DEBUG",{0,2},"setting",v)
+                        print("setting NS.cells = ",v)
+                        mesg("DEBUG",{0,2},"setting cell",v)
                         if type(v) == "table" then
                             env.state = nil
                             env.flag_for_redraw = false
                             oldf(self,v)
-                        elseif type(v) == "string" then
+                        elseif type(v) == "nil" then
                             --update can redirect to here, might be problematic
                             --need to pull out old cells setter...
                             env.state = v
-                            oldf(self,make_canvas(instance,env,v))
+                            oldf(self,make_canvas(instance,env,"default"))
                         else
                             error("Expected table or string. Received "..type(v),2)
                         end
@@ -333,7 +335,7 @@ SingleNineSlice = setmetatable(
     }
 )
 
-NineSlice = setmetatable(
+MultiNineSlice = setmetatable(
     {},
     {
         __index = function(self,k)
