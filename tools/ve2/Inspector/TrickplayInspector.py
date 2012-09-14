@@ -27,6 +27,72 @@ class MyStyle (QWidget):
         lo.addWidget (self._cbFoo, 3)
         self.setLayout (lo)
 
+class DnDTreeView(QTreeView):
+    def __init__(self, parent=None, insp= None):
+        super(DnDTreeView, self).__init__(parent)
+        if insp :
+            self.insp = insp
+
+    def dragMoveEvent(self, event):
+        event.setDropAction(Qt.MoveAction)
+        self.insp.inspectorModel.preventChanges = True
+        #if event.answerRect().x() < 70 :
+        event.accept()
+        #print event.answerRect().y()
+    """
+    def eventFilter(self, sender, event):
+        print "Event Filter"
+    def dropEvent(self, event):
+        dropIndex = self.indexAt(event.pos())
+        if dropIndex.parent().isValid() : 
+            event.accept()
+
+    def dragMoveEvent(self, event):
+        event.setDropAction(Qt.MoveAction)
+        event.accept()
+        #print event.answerRect().x()
+        #print event.answerRect().y()
+
+    def eventFilter(self, sender, event):
+        print "Event Filter"
+        if event.type() == QEvent.DropEvent:
+            print "asjdfhlajkfhlaskfhdlkajshdfklj"
+            dropIndex = self.indexAt(event.pos())
+            if not dropIndex.parent().isValid() : 
+                event.ignore()
+            
+        if event.type() == QEvent.ChildRemoved:
+            print "Tree item Removed"
+        #if event.type() == QEvent.dataChanged or event.type() == QEvent.selectionChanged or event.type() == QEvent.ChildRemoved:
+
+    def dropEvent(self, event):
+        dropIndex = self.indexAt(event.pos())
+        if dropIndex.parent().isValid() : 
+            event.accept()
+    def dragEnterEvent(self, event):
+        event.accept()
+
+    def dragMoveEvent(self, event):
+        #event.setDropAction(Qt.MoveAction)
+        event.accept()
+        print event.answerRect().x()
+        print event.answerRect().y()
+
+    def dropEvent(self, event):
+        tree = event.source()
+        print tree.currentIndex().row(), "*"
+        print tree.currentIndex().column(), "*"
+        print tree.currentIndex().child(0,0).row(), "*"
+        print tree.currentIndex().child(0,0).column(), "*"
+        #event.setDropAction(Qt.CopyAction)
+        #event.setDropAction(Qt.MoveAction)
+        #event.acceptProposedAction()
+
+        #print "dropEvent : y ", event.pos().y()
+        #event.proposedAction()
+        #event.dropAction()
+    """
+
 class DnDTableWidget(QTableWidget):
     def __init__(self, parent=None, pickerTable = None):
         super(DnDTableWidget, self).__init__(parent)
@@ -297,6 +363,14 @@ class TrickplayInspector(QWidget):
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
               
+        self.ui.inspector = DnDTreeView(self.ui.ObjectInspector, self)
+        
+        self.ui.inspector.setDragEnabled(True)
+        self.ui.inspector.setDragDropMode(QAbstractItemView.InternalMove)
+        self.ui.inspector.setDefaultDropAction(Qt.MoveAction)
+
+        self.ui.gridLayout_3.addWidget(self.ui.inspector, 2, 0, 1, 1)
+
         # Ignore signals while updating elements internally
         self.preventChanges = False
 
@@ -370,6 +444,7 @@ class TrickplayInspector(QWidget):
         """
         Fill the inspector with Trickplay UI element data
         """
+        print ("refresh....")
         self.preventChanges = True
         # Reselect gid of last item selected
         gid = None
@@ -1081,6 +1156,7 @@ class TrickplayInspector(QWidget):
         self.ui.screenCombo.setEditable (False)
 
         if not self.preventChanges:
+            #print "selectionChanged..................."
             self.preventChanges = True
             
             index = self.selected(self.ui.inspector)
@@ -1125,15 +1201,33 @@ class TrickplayInspector(QWidget):
         Change UI Element visibility using checkboxes
         """     
           
+        ###print "inspectorDataChanged"
+        #print "inspectorDataChanged"
+        #print "inspectorDataChanged"
+        #print "inspectorDataChanged"
+
         if not self.preventChanges:
+            #print "1111111111111111111"
             
             self.preventChanges = True
+
+            #if not topLeft.model() :
+                #return 
+
             item = topLeft.model().itemFromIndex(topLeft)
+
+            #if not item.isEditable() :
+                #return
             
             # Only nodes in the first column have checkboxes
             if 0 == item.column():
+                #print "22222222222222222222"
                 
                 checkState = bool(item.checkState())
+
+                if self.inspectorModel.preventChanges == True :
+                    #print "YUGI !!!!!!!!!!!!!!!!!!!!!!!!!"
+                    return 
 
                 if self.sendData(item['gid'], 'is_visible', checkState):        
                 #if self.sendData(item['gid'], 'visible', checkState):        
@@ -1261,6 +1355,7 @@ class TrickplayInspector(QWidget):
         """
         
         if not self.preventChanges:
+            print "oooopropertyDataChanged"
             
             self.preventChanges = True
             
