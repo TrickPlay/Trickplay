@@ -5,7 +5,7 @@ local game_server
 
 
 
-local reset_expiration = function() return os.time() + 24*60*60 end
+local reset_expiration = function() return os.time() + 60*2 end --24*60*60 end
 
 
 all_seshs = {}
@@ -61,7 +61,7 @@ local default_state = function()
                     {name = g_user.name, score = 0, id = g_user.id, counted_score = false},
                     {name = false,       score = 0, id = false,     counted_score = false}
                 },
-                turn    = g_user.name, --waiting for wildcard opponent
+                turn    = g_user.id, --waiting for wildcard opponent
                 word    = false,
                 viewing = false,
                 phase   = "MAKING",
@@ -146,7 +146,7 @@ local make_from_existing = function(p_data)
             data.state.players[2].name = g_user.name
             data.state.players[2].id   = g_user.id
             data.state.expires = reset_expiration()
-            data.state.turn = g_user.name
+            data.state.turn = g_user.id
         end
         
     end
@@ -216,7 +216,7 @@ local make_from_existing = function(p_data)
     
     function session:opponents_turn()
         
-        data.state.turn = self.opponent_name
+        data.state.turn = self.opponent_id
         
     end
     
@@ -234,6 +234,61 @@ local make_from_existing = function(p_data)
         
     end
     
+    function session:abort(new_state)--t)
+        
+        if new_state == nil or new_state == "" then
+            print("WARNING. abort called with no state")
+            
+        end
+        
+        --sanity check on its state
+        if new_state == json.null then 
+            
+            dumptable(data)
+            
+            error("got a sesssion with no data",2)
+        end
+        
+        if type(new_state) == "string" then
+            
+            data.state = json:parse(base64_decode(new_state))
+            
+        end
+        
+        if data.state.state then error("got a state.state",2) end
+        
+        
+        if self.my_turn then
+            print("I Expired. Leaving Match.")
+            
+            if session.viewing then
+                
+                --list:set_state("UNFOCUSED")
+                screen:grab_key_focus()
+                
+                session.viewing = false
+                
+                bg:fade_out_vic()
+                bg:slide_out_hangman()
+                app_state.state = "MAIN_PAGE"
+            end
+            
+            session.my_score = 3
+        elseif not self.opponent_counted_score and not synching then
+            print("They Expired. Leaving Match.")
+            session.opponent_score = 3
+        end
+        session:update_views()
+        
+        game_server:leave_match(session,function()
+            
+            session:delete()
+            
+        end)
+        
+        return false
+        
+    end
    
     function session:sync_callback(new_state)--t)
         
@@ -295,18 +350,39 @@ local make_from_existing = function(p_data)
             self:update_views()
             return
         end
+        --[[
         if session.viewing then
             time_rem = "Viewing"
             self:update_views()
             return
         end
-        
+        --]]
         delta = os.difftime(
             data.state.expires,
             os.time()
         )
         --print(delta)
         if delta < 0 then
+            
+            time_rem = "Checking..."
+            if self.my_turn then
+                
+                print("I Expired. Waiting for Server to call Abort")
+                
+                game_server:end_session(
+                    session,
+                    function()
+                        session:abort()
+                    end
+                )
+                
+            elseif not self.opponent_counted_score and not synching then
+                print("They Expired. Waiting for Server to call Abort")
+            end
+            
+            
+            
+            --[=[
             if self.my_turn then
                 print("i expired")
                 self.my_score = 3
@@ -337,7 +413,8 @@ local make_from_existing = function(p_data)
                             self.opponent_score = 3
                             dumptable(data)
                             
-                        --[[ if changes then 
+                        --[[ 
+                        if changes then 
                         elseif self.opponent_counted_score then
                             print("changes")
                             assert(self.opponent_score == 3)
@@ -362,9 +439,9 @@ local make_from_existing = function(p_data)
                         
                     end
                 )
-                --
+                --]=]
                 
-            end
+            --end
             
         else
             
@@ -436,6 +513,7 @@ local make_from_existing = function(p_data)
         word            = function(v) data.state.word    = v end,
         match_id        = function(v) all_seshs[v] = session; data.match_id = v end,
         opponent_score  = function(v) opponent().score = v  end,
+        opponent_name   = function(v) opponent().name  = v  end,
         viewing         = function(v)
             
             data.state.viewing = v
@@ -461,7 +539,7 @@ local make_from_existing = function(p_data)
         match_id        = function() return data.match_id      end,
         viewing         = function() return data.state.viewing end,
         
-        my_turn                 = function() return data.state.turn == g_user.name end,
+        my_turn                 = function() return data.state.turn == g_user.id end,
         opaque_state            = function() return base64_encode(json:stringify(data.state)) end,
         opponent_counted_score  = function() return opponent().counted_score    end,
     }

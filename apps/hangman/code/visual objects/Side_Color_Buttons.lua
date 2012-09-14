@@ -41,6 +41,7 @@ function self:make(t)
             y     = 15,
             w= buttons[i].w,
             alignment = "CENTER",
+            wrap = true,
         }
         
         buttons[i]:add(
@@ -50,8 +51,9 @@ function self:make(t)
                 font  = g_font .. " 36px",
                 x     = -2,
                 y     = 15-2,
-            w= buttons[i].w,
-            alignment = "CENTER",
+                w= buttons[i].w,
+                alignment = "CENTER",
+                wrap = true,
             },
             text[i]
         )

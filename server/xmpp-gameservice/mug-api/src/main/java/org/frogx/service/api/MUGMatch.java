@@ -66,7 +66,7 @@ public interface MUGMatch {
 		completed,
 		
 		/**
-		 * the match was aborted. happens when a partcipant leaves the match
+		 * the match was aborted. happens when a partcipant leaves an active match
 		 */
 		aborted;
 	}
@@ -216,6 +216,7 @@ public interface MUGMatch {
 	 */
 	public void leave(MUGOccupant occupant);
 	
+	public void abort();
 	/**
 	 * This method is called when the match will be destroyed.
 	 */

@@ -99,8 +99,9 @@ const std::string& matchStatusToString(MatchStatus status) {
 		return completedStatus;
 	case aborted:
 		return abortedStatus;
+	case unknown:
+        return unknownStatus;
 	}
-	return unknownStatus;
 }
 
 MatchStatus stringToMatchStatus(const std::string& str) {

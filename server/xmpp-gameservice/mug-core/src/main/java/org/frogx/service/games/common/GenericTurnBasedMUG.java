@@ -49,7 +49,7 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	private int minPlayersForStart = -1;
 	private boolean joinAfterStart = true;
 	private boolean abortWhenPlayerLeaves = true;
-	private long maxDurationForTurn=-1;
+	private long maxDurationPerTurn=-1;
 	private GameID gameID;
 	
 	public GenericTurnBasedMUG(MUGManager mugManager, Element gameDescriptor) {
@@ -132,12 +132,12 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 					log.warn("Invalid value specified for abortOnIdleTimeout in game="+name+". defaulting to true");
 					abortWhenPlayerLeaves = true;
 				}
-			} else if ("maxDurationForTurn".equals(child.getName())) {
+			} else if ("maxDurationPerTurn".equals(child.getName())) {
 				try {
-					maxDurationForTurn = Long.parseLong(child.getTextTrim());
+					maxDurationPerTurn = Long.parseLong(child.getTextTrim());
 				} catch (NumberFormatException ex) {
-					log.warn("Invalid value specified for maxDurationForTurn in game="+name+". Defaults will be used");
-					maxDurationForTurn = -1;
+					log.warn("Invalid value specified for maxDurationPerTurn in game="+name+". Defaults will be used");
+					maxDurationPerTurn = -1;
 				}
 				
 			} else if ("attribute".equals(child.getName())) {
@@ -347,10 +347,10 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 			gameType = GameType.correspondence;
 		switch (gameType) {
 		case online:
-			return maxDurationForTurn > 0 ? maxDurationForTurn : TURN_TIME_LIMIT_ONLINE;
+			return maxDurationPerTurn > 0 ? maxDurationPerTurn : TURN_TIME_LIMIT_ONLINE;
 		case correspondence:
 		default:
-			return maxDurationForTurn > 0 ? maxDurationForTurn : TURN_TIME_LIMIT_CORRESPONDENCE;
+			return maxDurationPerTurn > 0 ? maxDurationPerTurn : TURN_TIME_LIMIT_CORRESPONDENCE;
 		}
 	}
 

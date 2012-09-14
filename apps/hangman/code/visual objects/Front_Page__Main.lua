@@ -32,6 +32,7 @@ function self:init(t)
         color = {0,0,0},
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 319-2,
         y     = 720-2,
     }, Text{
@@ -40,6 +41,7 @@ function self:init(t)
         color = "b7b7b7",
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 319,
         y     = 720,
     })
@@ -49,6 +51,7 @@ function self:init(t)
         color = {0,0,0},
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 729-2,
         y     = 720-2,
     }, Text{
@@ -57,6 +60,7 @@ function self:init(t)
         color = "b7b7b7",
         w     = t.img_srcs.their_move_bg.w,
         alignment = "CENTER",
+        wrap = true,
         x     = 729,
         y     = 720,
     })
@@ -118,7 +122,7 @@ function self:init(t)
                     
                     game_server:get_a_wild_card_invite(
                         function(match_id)
-                            print(match_id)
+                            print("Called back from game_server:get_a_wild_card_invite(), result is:",match_id)
                             status.stop = true
                             if match_id == nil then -- TODO, find what would be passed
                                 
@@ -131,6 +135,7 @@ function self:init(t)
                                 
                                     function(t)
                                         
+                                        print("Making GameState from accepted invite: ", match_id)
                                         t = game_state:make(t)
                                         
                                         game_server:update(t,function()
@@ -412,13 +417,28 @@ function self:won_against(entry)
     
     their_turn_list:remove_entry(entry,function()
         
-        g_user.wins = g_user.wins + 1
+        local session = entry:get_session()
         
-        if g_user.wins > 9999 then g_user.wins = 9999 end
+        if not session.i_counted_score then
         
-        self:add_win(entry:get_session().opponent_name)
+            session.i_counted_score = true
+            
+            game_server:update(
+                
+                session,  function(t)
+                    
+                    g_user.wins = g_user.wins + 1
+                    
+                    if g_user.wins > 9999 then g_user.wins = 9999 end
+                    
+                    game_history:set_wins( g_user.wins )
+                    
+                end
+            )
+            
+        end
         
-        game_history:set_wins( g_user.wins )
+        self:add_win(session.opponent_name)
         
     end)
 
@@ -427,15 +447,30 @@ end
 
 function self:lost_against(entry)
     
-    my_turn_list:remove_entry(entry,function()
+    my_turn_list:remove_entry( entry, function()
         
-        g_user.losses = g_user.losses + 1
+        local session = entry:get_session()
         
-        if g_user.losses > 9999 then g_user.losses = 9999 end
+        if not session.i_counted_score then
         
-        self:add_loss(entry:get_session().opponent_name)
+            session.i_counted_score = true
+            
+            game_server:update(
+                
+                session,  function(t)
+                    
+                    g_user.losses = g_user.losses + 1
+                    
+                    if g_user.losses > 9999 then g_user.losses = 9999 end
+                    
+                    game_history:set_losses( g_user.losses )
+                    
+                end
+            )
+            
+        end
         
-        game_history:set_losses( g_user.losses )
+        self:add_loss(session.opponent_name)
         
     end)
     
@@ -481,12 +516,12 @@ function self:reset()
 end
 
 function self:setup_lists()
-    print(333)
+    print("FrontPage:setup_lists(). Getting list of sessions...")
     status.text = "Logging in"
     status.wobble:start()
     
     game_server:get_list_of_sessions(function(sessions)
-        
+        print("got list of sessions")
         --game_state.check_server:start()
         
         
@@ -508,29 +543,66 @@ function self:setup_lists()
                 sesh = game_state:make(sesh)
                 
                 print("make sesh",sesh.i_counted_score,sesh.opponent_counted_score)
-                if sesh.opponent_counted_score then
-                    print("weeeeeeeee")
+                
+                if sesh.i_counted_score then
+                    
+                    print("I already marked a win/loss for this session, deleting")
+                    
+                    sesh:delete()
+                    
+                elseif sesh.opponent_counted_score then
+                    print("My opponent marked a win/loss for this session, I should do the same")
+                    --[[
                     game_server:end_session(sesh,function()
                         print("sesh "..sesh.match_id.." terminated")
                         sesh:delete()
                     end)
+                    --]]
                     
-                    if not sesh.i_counted_score then
+                    if sesh.opponent_score == 3 then
+                        self:add_win(sesh.opponent_name)
                         
                         sesh.i_counted_score = true
                         
-                        if sesh.opponent_score == 3 then
-                            self:add_win(sesh.opponent_name)
-                            g_user.wins = g_user.wins + 1
-                            game_history:set_wins( g_user.wins )
-                        else
-                            self:add_loss(sesh.opponent_name)
-                            g_user.losses = g_user.losses + 1
-                            game_history:set_wins( g_user.losses )
-                        end
+                        game_server:update(
+                            
+                            sesh,  function(t)
+                                
+                                g_user.wins = g_user.wins + 1
+                                
+                                if g_user.wins > 9999 then g_user.wins = 9999 end
+                                
+                                game_history:set_wins( g_user.wins )
+                                
+                            end
+                        )
+                        
+                        
+                    else
+                    
+                        sesh.i_counted_score = true
+                        
+                        game_server:update(
+                            
+                            sesh,  function(t)
+                                
+                                g_user.losses = g_user.losses + 1
+                                
+                                if g_user.losses > 9999 then g_user.losses = 9999 end
+                                
+                                game_history:set_losses( g_user.losses )
+                                
+                            end
+                        )
+                    
+                    
+                    
+                        self:add_loss(sesh.opponent_name)
+                        g_user.losses = g_user.losses + 1
+                        game_history:set_losses( g_user.losses )
                     end
                     
-                elseif not sesh.i_counted_score then
+                else
                     
                     sesh = list_entry:make(sesh)
                     
@@ -540,8 +612,8 @@ function self:setup_lists()
             
         --end
         
-        game_history:set_wins(   g_user.wins   )
-        game_history:set_losses( g_user.losses )
+        --game_history:set_wins(   g_user.wins   )
+        --game_history:set_losses( g_user.losses )
         game_state.check_server:on_timer()
     end)
     
