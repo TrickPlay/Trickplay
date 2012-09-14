@@ -592,6 +592,9 @@ ListManager = setmetatable(
                         dumptable(v)
                     end
                 end,
+                widget_type = function(instance,env)
+                    return function(oldf) return "ListManager" end
+                end,
 
                 attributes = function(instance,env)
                     return function(oldf,self)

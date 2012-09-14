@@ -178,6 +178,9 @@ NineSlice = setmetatable(
                         env.new_sz = true
                     end
                 end,
+                widget_type = function(instance,env)
+                    return function() return "NineSlice" end
+                end,
                 cells = function(instance,env)
                     return nil,
                     function(oldf,self,v) 

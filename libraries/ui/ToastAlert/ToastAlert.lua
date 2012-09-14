@@ -114,6 +114,9 @@ ToastAlert = setmetatable(
                     return function(oldf,...) return env.animate_out_duration     end,
                     function(oldf,self,v)            env.animate_out_duration = v end
                 end,
+                widget_type = function(instance,env)
+                    return function() return "ToastAlert" end
+                end,
                 attributes = function(instance,env)
                     return function(oldf,self) 
                         local t = oldf(self)
