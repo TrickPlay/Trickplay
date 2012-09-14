@@ -110,7 +110,15 @@ local on_turn_received =
         
         if all_seshs[match_id] then 
             
-            all_seshs[match_id]:sync_callback(turn_message.new_state) 
+            if turn_message.terminate then
+                
+                all_seshs[match_id]:abort(turn_message.new_state) 
+                
+            else
+                
+                all_seshs[match_id]:sync_callback(turn_message.new_state) 
+                
+            end
             
         end
 	end
@@ -120,7 +128,25 @@ local on_participant_joined =
     
         print("on_participant_joined",gameservice, match_id, from, item)
         dumptable(item)
-    
+        dumptable(from)
+        
+        if  all_seshs[match_id] then
+            all_seshs[match_id].opponent_name = from.nick
+            all_seshs[match_id]:update_views()
+        end
+        --[[
+ on_participant_joined userdata: 0x20b8668 room4@mug.gameservice.trickplay.com table: 0x2132e70 table: 0x2132ec0
+ table: 0x2132ec0
+ {
+   "jid" = "72b05536-e30d-11e1-9c3d-109add46f936@gameservice.trickplay.com"
+   "nick" = ""
+   "affiliation" = "none"
+   "role" = "p2"
+ }
+
+        --]]
+        
+        
 	end
 	
 local on_participant_left =
@@ -128,6 +154,7 @@ local on_participant_left =
     
         print("on_participant_left",gameservice, match_id, participant)
         dumptable(participant)
+        
 	end
 	
 local on_match_updated =
@@ -139,14 +166,20 @@ local on_match_updated =
         	
             print("WARNING. Updating a match that was not in the table. Match id: ",match_id)
             
-            if match_status == "completed" then 
-                print("Received update for a completed match that I was not tracking. Ignoring")
+            if match_status == "completed" or match_status == "aborted" then 
+                print("Received update for a aborted/completed match that I was not tracking. Ignoring")
                 return
             end
             matches[match_id] = {}
             --matches[match_id].id = in_room_id
             --matches[match_id].nick = g_user.name
             matches[match_id].match_id = match_id
+            
+        elseif match_status == "aborted" then
+            
+            all_seshs[match_id]:abort(match_state.opaque)
+            
+            return
             
         end
         
@@ -157,13 +190,13 @@ local on_match_updated =
         
 	end
 	
-gameservice.on_ready =  on_ready 
-gameservice.on_error = on_error
-gameservice.on_match_started = on_match_started
-gameservice.on_turn_received = on_turn_received
+gameservice.on_ready              = on_ready 
+gameservice.on_error              = on_error
+gameservice.on_match_started      = on_match_started
+gameservice.on_turn_received      = on_turn_received
 gameservice.on_participant_joined = on_participant_joined
-gameservice.on_participant_left = on_participant_left
-gameservice.on_match_updated = on_match_updated
+gameservice.on_participant_left   = on_participant_left
+gameservice.on_match_updated      = on_match_updated
 	
 function Game_Server:get_screen_name()    
     
@@ -187,7 +220,6 @@ end
 function Game_Server:init(t)    
     if type(t) ~= "table" then        
         error("Invalid parameter. must pass a table", 2)        
-    gameservice:send_turn( session.match_id, session.opaque_state, false, callback )
     end
     
     props.screen_name      = t.screen_name      or error("Must pass in a screen_name",2)
@@ -283,8 +315,29 @@ function Game_Server:update_game_history(callback)
     
     
 	check_gameservice_is_available( )
+    
+    print("wins = ".. g_user.wins, "losses = "..g_user.losses)
     gameservice:update_user_game_data( 
     		game_id, base64_encode(json:stringify{wins = g_user.wins, losses = g_user.losses}), callback
+    )
+    
+end
+
+function Game_Server:get_game_history(callback)
+    --[[    
+        this function gets the Win Loss Record of the logged in user
+    --]]
+    
+    
+	check_gameservice_is_available( )
+    
+    gameservice:get_user_game_data( 
+    		game_id, 
+            function(gameservice, response_status, game_data )
+                
+                callback( json:parse( base64_decode(  game_data.opaque  ) ) )
+                
+            end
     )
     
 end
@@ -370,7 +423,7 @@ function Game_Server:get_a_wild_card_invite(callback)
 			
 			callback( new_match_id )
 		end
-				callback( matches[match_id] )
+				--callback( matches[match_id] )
 
 	match_request = {
 			game_id = game_id_urn,
@@ -436,7 +489,7 @@ function Game_Server:get_list_of_sessions(callback)
 				dumptable(match_data)
     			-- load the matches table with list of returned matches
     			for index, match in ipairs( match_data.match_infos ) do
-                    if not( match.match_status == "completed" and matches[match.match_id] == nil) then
+                    if not( (match.match_status == "completed" or match.match_state.terminate) and matches[match.match_id] == nil) then
                         print("match",index,match)
                         if  matches[match.match_id] == nil then
                             matches[match.match_id] = { }
@@ -447,6 +500,15 @@ function Game_Server:get_list_of_sessions(callback)
                         
                         matches[match.match_id].match_state  = match.match_state
                         matches[match.match_id].match_status = match.match_status
+                    else
+                        
+                        Game_Server:leave_match(
+                            
+                            { match_id = match.match_id },
+                            
+                            function() print("left match") end
+                            
+                        )
         			end
         		end
     		end

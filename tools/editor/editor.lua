@@ -1192,7 +1192,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 	tabs.tabs[1]:add(scroll_info) 
 
 	scroll_more.virtual_h = item_group_more.h 
-	local tab_n = table.getn(tabs.tab_labels) 
+	local tab_n = #tabs.tab_labels
 	if item_group_more.h ~= 0 then 
    		scroll_more.content:add(item_group_more)
 		scroll_more.position = {0, 0}
@@ -1315,7 +1315,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		if fname == "" then
 			return
    		end   
-		current_fn = "screens\/"..fname
+		current_fn = "screens/"..fname
 	end 
 
 	if(current_dir == "") then 
@@ -1326,7 +1326,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	contents = ""
 
     local obj_names = util.getObjnames()
-    local n = table.getn(g.children)
+    local n = #g.children
 
 	for i, v in pairs(g.children) do
 		if v.extra then 
@@ -1397,7 +1397,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
 	if current_fn then 
 		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "screens/unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
-			local back_file = current_fn.."\.back"
+			local back_file = current_fn..".back"
 			editor_lb:writefile(back_file, contents, true)	
 		end
 	end 
@@ -1447,8 +1447,8 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		   				if util.need_stub_code(j) == true then 
 							if j.extra.prev_name then 
 									-- object 의 이름이 변경된 경우 찾아서 변경해 준다. 
-								if string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then  			
-			          				local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") 
+								if string.find(main, "-- "..fileUpper.."."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then
+			          				local q, w = string.find(main, "-- "..fileUpper.."."..string.upper(j.extra.prev_name).." SECTION\n")
 				  					local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
 				  					local main_first = string.sub(main, 1, q-1)
 				  					local main_temp = string.sub(main, q,r)
@@ -1461,25 +1461,25 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	       		     			end 
 							end 
 							
-	                 		if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  	
+	                 		if string.find(main, "-- "..fileUpper.."."..string.upper(j.name).." SECTION\n") == nil then
 								-- object의 코드가 없을경우에 새로히 추가해 주어야 한다.
-					 			added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
+					 			added_stub_code = added_stub_code.."-- "..fileUpper.."."..string.upper(j.name).." SECTION\n"
 					    		if j.extra.type == "Button" then 
-					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_unfocus = function() -- Handler for "..j.name.."\.on_unfocus in this screen\nend\n"
+					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".on_focus = function() -- Handler for "..j.name..".on_focus in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".on_press = function() -- Handler for "..j.name..".on_press in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".on_unfocus = function() -- Handler for "..j.name..".on_unfocus in this screen\nend\n"
 			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".on_selection_change = function(selected_item) -- Handler for "..j.name..".on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "CheckBoxGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_items) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".on_selection_change = function(selected_items) -- Handler for "..j.name..".on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "MenuButton" then 
 			   						for k,l in pairs (j.items) do 
 			   	     		     		if l["type"] == "item" then 
-	                   			    		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+	                   			    		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]."..j.name..".items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
 			   	     		     		end 
 			   						end 
 			   		     		end 
-	                   			added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
+	                   			added_stub_code = added_stub_code.."-- END "..fileUpper.."."..string.upper(j.name).." SECTION\n\n"
 						   end
 						else 
 							if util.is_this_container(j) == true then 
@@ -1500,7 +1500,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 											end 
 										end 
 									end 
-									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+									added_stub_code = added_stub_code.."-- "..fileUpper.."."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]."..lm_name..".rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]."..lm_name..".columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]."..lm_name..".cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."."..string.upper(lm_name).." SECTION\n\n"
 
 								elseif j.extra.type == "Group" then  
 									gen_added_stub_code(j)
@@ -1966,7 +1966,7 @@ function editor.text()
 	end 
 
     ui.text.grab_key_focus(ui.text)
-    local n = table.getn(g.children)
+    local n = #g.children
 
     function ui.text:on_key_down(key,u,t,m)
 
@@ -2007,7 +2007,7 @@ end
 
 function editor.clone()
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2183,7 +2183,7 @@ end
 
 function editor.duplicate()
 	-- no selected object 
-	if(table.getn(selected_objs) == 0 )then 
+	if(#selected_objs == 0 )then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2246,7 +2246,7 @@ function editor.duplicate()
 end
 
 function editor.delete()
-	if(table.getn(selected_objs) == 0 )then 
+	if(#selected_objs == 0 )then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2271,14 +2271,17 @@ function editor.delete()
 					current_fn_without_screen = string.sub(current_fn, 9, -1)
 	   			end 
 
-	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+	   			local fileUpper, fileLower
+                if current_fn_without_screen then 
+	   			    fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		        fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+                end 
 
 			    local main = readfile("main.lua")
 			    if main then 
-			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
-			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
-				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
+			    	if string.find(main, "-- "..fileUpper.."."..string.upper(del_obj.name).." SECTION\n") ~= nil then
+			        	local q, w = string.find(main, "-- "..fileUpper.."."..string.upper(del_obj.name).." SECTION\n")
+				  		local e, r = string.find(main, "-- END "..fileUpper.."."..string.upper(del_obj.name).." SECTION\n\n")
 				  		local main_first = string.sub(main, 1, q-1)
 						local main_delete = string.sub(main, q, r-1) 
 				  		local main_last = string.sub(main, r+1, -1)
@@ -2371,7 +2374,7 @@ function editor.delete()
 		end 
 	end 
 
-	if table.getn(g.children) == 0 then 
+	if #g.children == 0 then
 	    if screen:find_child("timeline") then 
 			screen:remove(screen:find_child("timeline"))
 	    end 
@@ -2404,7 +2407,7 @@ end
 
 function editor.group()
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2478,7 +2481,7 @@ end
 
 
 function editor.ugroup()
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2588,7 +2591,7 @@ end
 function editor.left() 
 	local org_object, new_object 
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2622,7 +2625,7 @@ end
 function editor.right() 
 	local org_object, new_object 
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2657,7 +2660,7 @@ end
 function editor.top()
 	local org_object, new_object 
 	
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2691,7 +2694,7 @@ end
 function editor.bottom()
     local org_object, new_object 
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2725,7 +2728,7 @@ end
 function editor.hcenter()
      local org_object, new_object 
 
-	 if table.getn(selected_objs) == 0 then 
+	 if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2761,7 +2764,7 @@ end
 function editor.vcenter()
      local org_object, new_object 
 
-	 if table.getn(selected_objs) == 0 then 
+	 if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2801,7 +2804,7 @@ local function get_x_sort_t()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		        local n = table.getn(x_sort_t)
+		        local n = #x_sort_t
 			if(n ==0) then
 				table.insert(x_sort_t, v) 
 			elseif (v.x >= x_sort_t[n].x) then
@@ -2810,13 +2813,13 @@ local function get_x_sort_t()
 				local tmp_cord = {}
 				while (v.x < x_sort_t[n].x) do
 					table.insert(tmp_cord, table.remove(x_sort_t))
-					n = table.getn(x_sort_t)
+					n = #x_sort_t
 					if n == 0 then 
 						break
 					end 
 				end 
 				table.insert(x_sort_t, v) 
-				while (table.getn(tmp_cord) ~= 0 ) do 
+				while (#tmp_cord ~= 0 ) do
 					table.insert(x_sort_t, table.remove(tmp_cord))
 				end 
 			end
@@ -2830,7 +2833,7 @@ end
 local function get_reverse_t(sort_t)
      local reverse_t = {}
 
-	while(table.getn(sort_t) ~= 0) do
+	while(#sort_t ~= 0) do
 		table.insert(reverse_t, table.remove(sort_t))
 	end 
 	return reverse_t 
@@ -2840,13 +2843,13 @@ local function get_x_space(x_sort_t)
      local f, b 
      local space = 0
      b = table.remove(x_sort_t) 
-     while (table.getn(x_sort_t) ~= 0) do 
+     while (#x_sort_t ~= 0) do
           f = table.remove(x_sort_t) 
           space = space + b.x - f.x - f.w
           b = f
      end 
      
-     local n = table.getn(selected_objs)
+     local n = #selected_objs
      if (n > 2) then 
      	space = space / (n - 1)
      end 
@@ -2857,7 +2860,7 @@ end
 function editor.hspace()
     local org_object, new_object 
 
-    if(table.getn(selected_objs) == 0 )then 
+    if(#selected_objs == 0 )then
 	print("there are  no selected objects") 
 	input_mode = hdr.S_SELECT
 	return 
@@ -2886,7 +2889,7 @@ function editor.hspace()
 ]]
 
     f = table.remove(reverse_t)
-    while(table.getn(reverse_t) ~= 0) do  
+    while(#reverse_t ~= 0) do
          b = table.remove(reverse_t)
 	 if(b.x ~= f.x + f.w + space) then 
 	      org_object = util.copy_obj(b)
@@ -2917,7 +2920,7 @@ local function get_y_sort_t()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		        n = table.getn(y_sort_t)
+		        n = #y_sort_t
 			if(n ==0) then
 				table.insert(y_sort_t, v) --{v.x, v.w})
 			elseif (v.y >= y_sort_t[n].y) then
@@ -2927,12 +2930,12 @@ local function get_y_sort_t()
 				while (v.y < y_sort_t[n].y) do
 					table.insert(tmp_cord, table.remove(y_sort_t))
 					n = n - 1
-					if(table.getn(y_sort_t) == 0) then 
+					if(#y_sort_t == 0) then
 						break
 					end 
 				end 
 				table.insert(y_sort_t, v) -- {v.x, v.w})
-				while (table.getn(tmp_cord) ~= 0 ) do 
+				while (#tmp_cord ~= 0 ) do
 					table.insert(y_sort_t, table.remove(tmp_cord))
 				end 
 			end
@@ -2948,13 +2951,13 @@ local function get_y_space(y_sort_t)
      local f, b 
      local space = 0
      b = table.remove(y_sort_t) 
-     while (table.getn(y_sort_t) ~= 0) do 
+     while (#y_sort_t ~= 0) do
           f = table.remove(y_sort_t) 
           space = space + b.y - f.y - f.h
           b = f
      end 
      
-     local n = table.getn(selected_objs)
+     local n = #selected_objs
      space = space / (n - 1)
      return space
 end 
@@ -2962,7 +2965,7 @@ end
 function editor.vspace()
     local org_object, new_object 
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -2981,7 +2984,7 @@ function editor.vspace()
     reverse_t = get_reverse_t(y_sort_t)
 
     f = table.remove(reverse_t)
-    while(table.getn(reverse_t) ~= 0) do  
+    while(#reverse_t ~= 0) do
          b = table.remove(reverse_t)
 	 if(b.y ~= f.y + f.h + space) then 
 	      org_object = util.copy_obj(b)
@@ -3008,7 +3011,7 @@ end
 
 function editor.bring_to_front()
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -3032,7 +3035,7 @@ end
 
 function editor.send_to_back()
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -3054,14 +3057,14 @@ function editor.send_to_back()
           end
     end
     
-    while(table.getn(slt_g) ~= 0) do
+    while(#slt_g ~= 0) do
 	v = table.remove(slt_g)
          table.insert(undo_list, {v.name, hdr.ARG, hdr.SEND_BK})
 	g:add(v)	
     end 
     
     tmp_g = get_reverse_t(tmp_g) 
-    while(table.getn(tmp_g) ~= 0) do
+    while(#tmp_g ~= 0) do
 	v = table.remove(tmp_g)
         table.insert(undo_list, {v.name, hdr.ARG, hdr.SEND_BK})
 	g:add(v)	
@@ -3073,7 +3076,7 @@ end
 
 function editor.send_backward()
 
-	if table.getn(selected_objs) == 0 then 
+	if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -3086,7 +3089,7 @@ function editor.send_backward()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        g:remove(v)  -- 1,2,(3)
-		if(table.getn(slt_g) ~= 0) then 
+		if(#slt_g ~= 0) then
 			local b = table.remove(slt_g)
 			local f = table.remove(tmp_g)
 			table.insert(tmp_g, b)
@@ -3102,7 +3105,7 @@ function editor.send_backward()
     end
 
 
-    if(table.getn(slt_g) ~= 0) then 
+    if(#slt_g ~= 0) then
 	local b = table.remove(slt_g) 
 	local f = table.remove(tmp_g) 
 	table.insert(tmp_g, b) 
@@ -3110,7 +3113,7 @@ function editor.send_backward()
     end 
 
     tmp_g = get_reverse_t(tmp_g)
-    while(table.getn(tmp_g) ~= 0) do
+    while(#tmp_g ~= 0) do
 	v = table.remove(tmp_g)
 	g:add(v) 
         table.insert(undo_list, {v.name, hdr.ARG, hdr.SEND_BW})
@@ -3124,7 +3127,7 @@ end
 
 function editor.bring_forward()
 	
-	 if table.getn(selected_objs) == 0 then 
+	 if #selected_objs == 0 then
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -3138,7 +3141,7 @@ function editor.bring_forward()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        g:remove(v) 
-		if(table.getn(slt_g) ~= 0) then 
+		if(#slt_g ~= 0) then
 			table.insert(tmp_g, v)
 			table.insert(tmp_g, table.remove(slt_g))
 		end 
@@ -3151,11 +3154,11 @@ function editor.bring_forward()
           end
     end
 
-    if(table.getn(slt_g) ~= 0) then
+    if(#slt_g ~= 0) then
     	table.insert(tmp_g, table.remove(slt_g))
     end 
     tmp_g = get_reverse_t(tmp_g)
-    while(table.getn(tmp_g) ~= 0) do
+    while(#tmp_g ~= 0) do
 	v = table.remove(tmp_g)
         table.insert(undo_list, {v.name, hdr.ARG, hdr.BRING_FW})
 	g:add(v)

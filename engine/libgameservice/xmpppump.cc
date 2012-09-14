@@ -63,6 +63,9 @@ void XmppPump::OnStateChange(txmpp::XmppEngine::State state) {
     case txmpp::XmppEngine::STATE_CLOSED:
       std::cout << "Error: " << client_->GetError(NULL) << std::endl;
       break;
+    case txmpp::XmppEngine::STATE_NONE:
+      std::cout << "Error: new state is STATE_NONE" << std::endl;
+      break;
   }
   state_ = state;
   if (notify_ != NULL)
@@ -141,6 +144,9 @@ void XmppRegisterPump::OnStateChange(txmpp::XmppEngine::State state) {
       break;
     case txmpp::XmppEngine::STATE_CLOSED:
       std::cout << "XmppRegisterPump::OnStateChange(). Error: " << client_->GetError(NULL) << std::endl;
+      break;
+    case txmpp::XmppEngine::STATE_NONE:
+      std::cout << "Error: new state is STATE_NONE" << std::endl;
       break;
   }
   state_ = state;

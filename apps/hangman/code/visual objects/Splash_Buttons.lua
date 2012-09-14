@@ -152,10 +152,30 @@ local launch_key_board = function()
                         hangman_game_config(),
                         
                         function(success)
-                            print("register called back")
-                            app_state.state = APP_STATE_MAIN_PAGE
                             
-                            front_page:setup_lists()
+                            print("register called back")
+                            
+                            gsm:get_game_history( function(scores)
+                                
+                                if scores then
+                                    g_user.wins   = scores.wins
+                                    g_user.losses = scores.losses
+                                    
+                                    Game_History:set_wins(  scores.wins)
+                                    Game_History:set_losses(scores.losses)
+                                else
+                                    g_user.wins   = 0
+                                    g_user.losses = 0
+                                    
+                                    Game_History:set_wins(   0 )
+                                    Game_History:set_losses( 0 )
+                                end
+                                
+                                app_state.state = APP_STATE_MAIN_PAGE
+                            
+                                front_page:setup_lists()
+                            
+                            end)
                             
                         end
                     

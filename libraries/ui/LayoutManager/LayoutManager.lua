@@ -292,7 +292,7 @@ ListManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
-                if obj == nil then  
+                if obj == nil or obj == false then  
                     
                     obj = Widget_Clone{source=placeholder}
                     placeholders[obj] = true
@@ -408,6 +408,8 @@ ListManager = function(parameters)
                 
                 if not placeholders[obj] then
                     t.cells[i] = obj.attributes
+                else
+                    t.cells[i] = false
                 end
             end)
             
@@ -1913,7 +1915,7 @@ LayoutManager = function(parameters)
                 
             else -- default node_constructor
                 
-                if obj == nil then  
+                if obj == nil or obj == false then  
                     
                     obj = Widget_Clone{source=placeholder}
                     placeholders[obj] = true
@@ -2072,6 +2074,8 @@ LayoutManager = function(parameters)
                 end
                 if not placeholders[obj] then
                     t.cells[r][c] = obj.attributes
+                else
+                    t.cells[r][c] = false
                 end
             end)
             
