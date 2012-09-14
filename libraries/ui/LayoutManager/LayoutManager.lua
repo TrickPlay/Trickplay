@@ -463,7 +463,7 @@ ListManager = setmetatable(
             
         end,
         __call = function(self,p)
-            dumptable(p)
+            --dumptable(p)
             return self:declare():set(p or {})
             
         end,
