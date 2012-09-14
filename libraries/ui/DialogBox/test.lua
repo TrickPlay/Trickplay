@@ -8,6 +8,7 @@ if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
 if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
 if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
+if not BUTTON            then dofile("Button/Button.lua")                 end
 
 
 
@@ -26,12 +27,15 @@ d2.style.border.corner_radius = 40
 d3 = DialogBox{style = false,x = 1000,separator_y = 200}
 d3.style.border.width = 10
 
-d4 = DialogBox{style = false,y = 400, image = "DialogBox/panel.png"}
+d4 = DialogBox{style = false,y = 400, image = "DialogBox/panel.png",children = {Button()}}
 d4.style.text.font = "Sans 80px"
-
+print("da")
+d4.style.text.colors.default = "red"
+--[[
 print(d1:to_json())
 print(d2:to_json())
 print(d3:to_json())
 print(d4:to_json())
+--]]
 screen:add(Rectangle{size = screen.size,color = "000033"},d1,d2,d3,d4)
 

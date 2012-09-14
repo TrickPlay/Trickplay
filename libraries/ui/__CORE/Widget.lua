@@ -1,11 +1,38 @@
 WIDGET = true
 
+--List of Properties copied from docs
 local uielement_properties = {
-	"position","size","anchor_point","name","gid",
-	"x_rotation","y_rotation","z_rotation","scale",
-	"opacity","clip","is_visible"
+    "name",
+    "gid",
+    --"x",   redundant to position
+    --"y",
+    --"z",
+    --"depth",
+    "position",
+    --"w",   redundant to size
+    --"h",
+    --"width",
+    --"height",
+    "size",
+    "center",
+    "anchor_point",
+    "scale",
+    "x_rotation",
+    "y_rotation",
+    "z_rotation",
+    "is_scaled",
+    "is_rotated",
+    "opacity",
+    "clip",
+    "has_clip",
+    --"clip_to_size",    only applies to Groups
+    --"parent",          handled separately in Widget.attributes
+    "reactive",
+    "transformed_size",
+    "transformed_position",
+    "is_animating",
+    "is_visible",
 }
-
 --------------------------------------------------------------------------------
 -- This function receives a UIElement as its parameter sets up the attributes
 -- and methods of Widget. Namely:
@@ -21,7 +48,18 @@ local uielement_properties = {
 -- Yes this is a messy way to set up WidgetGroup, WidgetRectangle, WidgetText,
 -- WidgetImage, and WidgetClone
 --------------------------------------------------------------------------------
+local table_of_envs = {}
+
+function get_env(w) return table_of_envs[w] end
+
 local function Widgetize(instance)
+    
+    local env = {}
+    
+    table_of_envs[instance] = env
+    
+    env.update = function() end
+    ----------------------------------------------------------------------------
     
     --Pablo's function to duplicate the metatable of UIElements
     dupmetatable(instance)
@@ -29,11 +67,59 @@ local function Widgetize(instance)
     local mt = getmetatable(instance)
     ----------------------------------------------------------------------------
     -- subscribe_to() / unsubscribe()
-    set_up_subscriptions(mt,mt,mt.__newindex,mt.set)
+    
+    local old__newindex = mt.__newindex
+    local old_set       = mt.set
+    
+    env.is_setting = false
+    
+    env.updating = false
+    
+    env.call_update = function()
+        if not env.updating then
+            
+            env.updating = true
+            
+            env.update(instance,env)
+            
+            env.updating = false
+            
+        end
+    end
+    
+    set_up_subscriptions(mt,mt,
+        --This function is called every time an attribute is being set
+        --set_up_subscriptions() sets up the real __newindex, and wraps this function
+        function(...)
+            
+            --print("w1",instance.w)
+            old__newindex(...)
+            --print("w2",instance.w)
+            
+            env.call_update()
+            
+        end,
+        function(self,v)
+            
+            if type(v) ~= "table" then error("Expected table. Received ".. type(v), 3 ) end
+            
+            if env.is_setting then error("already setting",2) end
+            
+            env.is_setting = true
+            
+            old_set(self,v)
+            
+            env.call_update()
+            
+            if not env.is_setting then error("no",2) end
+            
+            env.is_setting = false
+        end
+    )
     ----------------------------------------------------------------------------
     local key_functions = {}
     
-    function instance:add_key_handler(key,func)
+    override_function(instance,"add_key_handler",function(oldf,self,key,func)
         
         if not key_functions[key] then
             
@@ -49,7 +135,7 @@ local function Widgetize(instance)
             
         end
         
-    end
+    end)
     
     function instance:on_key_down(key)
         if not instance.enabled then return end
@@ -152,7 +238,7 @@ local function Widgetize(instance)
         )
     end
     
-    function instance:add_mouse_handler(event,func,ignore_enabled)
+    override_function(instance,"add_mouse_handler",function(oldf,self,event,func,ignore_enabled)
         
         if not event or not mouse_functions[event] then
             
@@ -171,7 +257,7 @@ local function Widgetize(instance)
         mouse_functions[event][func] = ignore_enabled
         
         return function()  mouse_functions[event][func] = nil  end
-    end
+    end)
     
     ----------------------------------------------------------------------------
     
@@ -201,6 +287,7 @@ local function Widgetize(instance)
                 
             end
             
+            t.parent  = self.parent and self.parent.gid
             t.style   = self.style.name
             t.focused = self.focused
             t.enabled = self.enabled
@@ -264,6 +351,58 @@ local function Widgetize(instance)
     
     ----------------------------------------------------------------------------
     local style = Style("Default")
+    local unsubscribe
+    
+    local function recursive_flag_setter(style_t,style_flags)
+        
+        if type(style_flags) == "string" then
+            mesg("STYLE_SUBSCRIPTIONS",0,"0 env[",style_flags,"] = true")
+            env[style_flags] = true
+            return
+        end
+        for k,v in pairs(style_t) do
+            
+            --if there is string for this substyle, then set the flag and move on
+            if type(style_flags[k]) == "string" then
+                
+                env[  style_flags[k]  ] = true
+                mesg("STYLE_SUBSCRIPTIONS",0,"1 env[",style_flags[k],"] = true")
+            --if there is a table of flags then
+            elseif type(style_flags[k]) == "table" then
+                
+                if type(v) ~= "table" then
+                    --set the list of flags, ignore further specifics
+                    for _,v in ipairs(style_flags[k]) do
+                        env[v] = true
+                        mesg("STYLE_SUBSCRIPTIONS",0,"2 env[",v,"] = true")
+                    end
+                --traverse the table
+                else
+                    for kk,vv in pairs(style_flags[k]) do
+                        if type(kk) == "number" then
+                            env[vv] = true
+                            mesg("STYLE_SUBSCRIPTIONS",0,"3 env[",vv,"] = true")
+                        elseif type(v) == "table" then
+                            recursive_flag_setter(v,style_flags[k])
+                        end
+                    end
+                end
+                
+            end
+        end
+    end
+    local subscription = function(style_t)
+        --print("herefdffds")
+        mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
+        --dumptable(style_t)
+        if not env.style_flags then return end
+        
+        recursive_flag_setter(style_t,env.style_flags)
+        
+        env.call_update()
+        
+    end
+    
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
@@ -276,13 +415,25 @@ local function Widgetize(instance)
             else
                 style = matches_nil_table_or_type(Style, "STYLE", v)
             end
+            unsubscribe()
+            --print("\n\nSET UP SUBS",instance.gid)
+            unsubscribe = style:subscribe_to( nil, subscription )
+            
+            if env.style_flags then 
+                mesg("STYLE_SUBSCRIPTIONS",0,"Widget.style was set, initiating the flag setter")
+                --print("style recursive set\n\n\n")
+                --dumptable(style.attributes)
+                recursive_flag_setter(style.attributes,env.style_flags) 
+            end
         end
 	)
+    
+    unsubscribe = style:subscribe_to( nil, subscription )
     
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-    return instance
+    return instance, env
 end
 
 --------------------------------------------------------------------------------
@@ -290,12 +441,40 @@ end
 
 Widget = function(parameters)
     
-    return  Widgetize(  Group()  ):set( 
+    local instance, env = Widgetize(  Group()  )
+    
+    instance:set( 
         
         is_table_or_nil( "Widget_Group", parameters ) 
         
     )
     
+    env.add           = instance.add
+    env.remove        = instance.remove
+    env.clear         = instance.clear
+    env.foreach_child = instance.foreach_child
+    env.find_child    = instance.find_child
+    env.raise_child   = instance.raise_child
+    env.lower_child   = instance.lower_child
+    env.set_children  = getmetatable(instance).__setters__.children
+    env.get_children  = getmetatable(instance).__getters__.children
+    
+    override_function( instance, "add",           function() print(          "'add' method is removed") end )
+    override_function( instance, "remove",        function() print(       "'remove' method is removed") end )
+    override_function( instance, "clear",         function() print(        "'clear' method is removed") end )
+    override_function( instance, "foreach_child", function() print("'foreach_child' method is removed") end )
+    override_function( instance, "find_child",    function() print(   "'find_child' method is removed") end )
+    override_function( instance, "raise_child",   function() print(  "'raise_child' method is removed") end )
+    override_function( instance, "lower_child",   function() print(  "'lower_child' method is removed") end )
+    
+	override_property(
+        instance,"children", 
+        function() print("'children' property is removed") end, 
+        function() print("'children' property is removed") end
+    )
+    
+    
+    return instance, env
 end
 Widget_Group = function(parameters)
     

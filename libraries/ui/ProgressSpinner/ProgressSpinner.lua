@@ -54,7 +54,7 @@ ProgressSpinner = function(parameters)
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
-	local instance = Widget( parameters )
+	local instance, env = Widget( parameters )
 	
 	--the default w and h does not count as setting the size
 	if not size_is_set then instance:reset_size_flag() end
@@ -73,7 +73,7 @@ ProgressSpinner = function(parameters)
 		
 		image = canvas_dot(instance)
 		
-		instance:add( image )
+		env.add( instance, image )
 		
 		image:move_anchor_point(image.w/2,image.h/2)
 		image:move_by(image.w/2,image.h/2)
@@ -99,7 +99,7 @@ ProgressSpinner = function(parameters)
 		
 		image = v
 		
-		instance:add( image )
+		env.add( instance, image )
 		
 		image:move_anchor_point(image.w/2,image.h/2)
 		image:move_by(image.w/2,image.h/2)
