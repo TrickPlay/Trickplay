@@ -179,22 +179,6 @@ TabBar = setmetatable(
                     function(oldf,self,v)    
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
                         env.new_tabs = v  
-                        --print("herp")
-                        dumptable(v)
-                        --[[
-                        if type(v) ~= "table" then error("Expected table. Received: ",2) end
-                        
-                        env.tabs_lm:set{
-                            direction = "horizontal",
-                            --length = #v,
-                            cells = v,
-                        }
-                        if env.tab_location == "top" then
-                            env.tab_pane.virtual_w = env.tabs_lm.w
-                        else
-                            env.tab_pane.virtual_h = env.tabs_lm.h
-                        end
-                        --]]
                     end
                 end,
                 tab_location = function(instance,env)
