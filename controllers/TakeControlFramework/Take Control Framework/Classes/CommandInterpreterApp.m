@@ -111,6 +111,12 @@
         [delegate do_HV];
     } else if ([command compare:@"PI"] == NSOrderedSame) {
         [delegate do_PI:args];
+    } else if ([command compare:@"SVSC"] == NSOrderedSame) {
+        [delegate do_SVSC:args];
+    } else if ([command compare:@"SVEC"] == NSOrderedSame) {
+        [delegate do_SVEC:args];
+    } else if ([command compare:@"SVSS"] == NSOrderedSame) {
+        [delegate do_SVSS];
     } else {
         NSLog(@"Command not recognized %@", command);
     }
