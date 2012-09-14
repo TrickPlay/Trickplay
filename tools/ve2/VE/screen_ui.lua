@@ -43,25 +43,7 @@ function screen_ui.draw_selected_container_border(x,y)
 		end 
 	end
 
-    --[[
-    if selected_content then 
-        print ("OK")
-    else
-        print ("NOK")
-    end 
-    ]]
-
-	if selected_container then 
-        print ("*********************")
-        print (selected_container.name)
-    end 
-	if selected_content then 
-        print (selected_content.name)
-        print ("*********************")
-    end 
-
 	if selected_container and selected_content then 
-
 		if selected_content.extra.is_in_group ~= true then 
 			if selected_container.selected == false then
 				screen_ui.container_selected(selected_container,x,y)	
@@ -84,6 +66,7 @@ function screen_ui.draw_selected_container_border(x,y)
 end 
 
 function screen_ui.container_selected(obj, x, y)
+
 
 	local obj_border = Rectangle {
 			name = obj.name.."border", 
@@ -114,6 +97,9 @@ function screen_ui.container_selected(obj, x, y)
 
    	else -- Layout Manager Tile border
 
+        print (obj.name, obj.widget_type)
+        return 
+--[[
 		local tile_x, tile_y, tile_w, tile_h 
 	  	local col, row=  obj:r_c_from_abs_position(x,y)
 
@@ -126,7 +112,7 @@ function screen_ui.container_selected(obj, x, y)
         obj_border.position = {tile_x, tile_y, 0} 
         obj_border.size = {tile_w, tile_h}
 	  	obj_border.extra.r_c = {row, col}
-
+]]
    end 
 
    screen:add(obj_border)
@@ -184,7 +170,6 @@ function screen_ui.selected(obj)
 				end
 			end
     	end
-        print("here 1")
 		group_pos = util.get_group_position(obj)
 		--group_pos = obj.position
 		if bumo then 
@@ -534,7 +519,6 @@ function screen_ui.dragging(x,y)
 					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 	             	border.position = {cur_x, cur_y}
 				 else 
-                    print("here 2")
 				 	local group_pos = util.get_group_position(actor)
 	             	border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
 				 end 
@@ -566,7 +550,6 @@ function screen_ui.dragging(x,y)
 					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 	                anchor_mark.position = {cur_x, cur_y}
 				else 
-                    print ("here 3")
 			 		local group_pos = util.get_group_position(actor)
 	                anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
 				end 

@@ -12,7 +12,13 @@
     aa = function ()
         _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TEST_LIB/screens")
         _VE_.insertUIElement(9, 'Button')
-        _VE_.insertUIElement(9, 'Button')
+        _VE_.insertUIElement(9, 'DialogBox')
+        --_VE_.insertUIElement(9, 'ArrowPane')
+        --_VE_.insertUIElement(9, 'ToastAlert')
+        --_VE_.insertUIElement(9, 'LayoutManager')
+        --_VE_.insertUIElement(9, 'TabBar')
+        --_VE_.insertUIElement(9, 'ScrollPane')
+        --_VE_.insertUIElement(9, 'MenuButton')
         _VE_.insertUIElement(9, 'Rectangle')
     end 
 
@@ -1117,8 +1123,9 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         b = Button{name="pretty_button"}
         uiInstance:add(b)
     elseif uiTypeStr == "DialogBox" then 
-        b = Button{name="pretty_button"}
+        local b = Button{name="pretty_button"}
         uiInstance.content = {b}
+
     elseif uiTypeStr == "MenuButton" then 
         --b = Button{name="pretty_button"}
         uiInstance.items = {Button{name="pretty_button"}}
@@ -1237,6 +1244,7 @@ end
 				move = true
 			end
         end
+
 	end
 
 -------------------------------------------------------------------------------
