@@ -12,6 +12,7 @@ if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
 if not NINESLICE         then dofile("NineSlice/NineSlice.lua")             end
 ---[[
 ns1 = NineSlice()
+print("DONE WITH NS1")
 --[[
 ns2 = NineSlice{w=200,h=50,x=100}
 --]]
