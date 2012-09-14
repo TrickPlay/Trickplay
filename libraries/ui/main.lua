@@ -1,19 +1,7 @@
 
---[[
-dolater(
-dofile,"Button/test.lua"
-)
---]]
---[[
-dolater(
-dofile,"ToggleButton/test.lua"
-)
-dolater(
-dofile,"RadioButtonGroup/test.lua"
-)
---]]
-controllers:start_pointer()
-screen:show() 
+
+
+if not APPVERBOSITY      then dofile("__UTILITIES/AppVerbosity.lua")      end
 if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
 if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
 if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
@@ -22,58 +10,42 @@ if not MISC              then dofile("__UTILITIES/Misc.lua")              end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
 if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
----[[
-dolater( dofile, "ButtonPicker/test.lua" )
---]]
---[[
-dolater(
-dofile,"OrbittingDots/test.lua"
-)
---]]
-
---[[
-screen:show()
-
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
 if not BUTTON            then dofile("Button/Button.lua")                 end
+if not TEXTINPUT         then dofile("TextInput/TextInput.lua")           end
+if not ORBITTINGDOTS     then dofile("OrbittingDots/OrbittingDots.lua")   end
+if not PROGRESSSPINNER   then dofile("ProgressSpinner/ProgressSpinner.lua") end
+if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
+if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
 
+--add_verbosity("STYLE_SUBSCRIPTIONS")
+--add_verbosity("DEBUG")
+add_verbosity("TABBAR")
+add_verbosity("ArrayManager")
+
+
+dofile("MenuButton/test.lua")
+screen:show()
+controllers:start_pointer()
+
+r = Rectangle{w=10,h=10,y = 1070}
+screen:add(r)
+
+r:animate{
+    loop = true,
+    duration = 60000,
+    w = screen.w
+}
+--[=[
+g = Group{name="Layer1"}
+
+--dofile("LIB/VE/ve_runtime")
+do
 
 --------------------------------------------------------------------------------
-
 
 local color_scheme_uri = 'app/color_schemes.json'
 local style_uri        = 'app/styles.json'
 local layer_dir        = 'app/'
-
-local color_scheme_json = '{"ColorScheme":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (10)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (11)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (12)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (13)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (14)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (15)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (16)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (17)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (18)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (20)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (21)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (22)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (4)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (5)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (6)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (7)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (8)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (9)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]}}'
-
-local styles_json = '{"Style (1)":{"arrow":"ArrowStyle (1)","border":"BorderStyle (1)","fill_colors":"ColorScheme (6)","text":"TextStyle (1)"},"Style (2)":{"arrow":"ArrowStyle (2)","border":"BorderStyle (2)","fill_colors":"ColorScheme (9)","text":"TextStyle (2)"},"Style (3)":{"arrow":"ArrowStyle (3)","border":"BorderStyle (3)","fill_colors":"ColorScheme (12)","text":"TextStyle (3)"},"Style (4)":{"arrow":"ArrowStyle (4)","border":"BorderStyle (6)","fill_colors":"ColorScheme (21)","text":"TextStyle (6)"},"Style (5)":{"arrow":"ArrowStyle (5)","border":"BorderStyle (5)","fill_colors":"ColorScheme (18)","text":"TextStyle (5)"},"Style (6)":{"arrow":"ArrowStyle (6)","border":"BorderStyle (4)","fill_colors":"ColorScheme (16)","text":"TextStyle (4)"}}'
-local arrow_json = '{"ArrowStyle (1)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (2)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (3)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (4)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (5)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (6)":{"colors":"ColorScheme (22)","offset":10,"size":20}}'
-local border_json = '{"BorderStyle (1)":{"colors":"ColorScheme","corner_radius":10,"width":2},"BorderStyle (2)":{"colors":"ColorScheme (4)","corner_radius":10,"width":2},"BorderStyle (3)":{"colors":"ColorScheme (7)","corner_radius":10,"width":2},"BorderStyle (4)":{"colors":"ColorScheme (14)","corner_radius":10,"width":10},"BorderStyle (5)":{"colors":"ColorScheme (13)","corner_radius":10,"width":10},"BorderStyle (6)":{"colors":"ColorScheme (10)","corner_radius":10,"width":2}}'
-local text_json = '{"TextStyle (1)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (5)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (2)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (8)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (3)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (11)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (4)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (15)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (5)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (17)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":200,"y_offset":-50},"TextStyle (6)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (20)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0}}'
-
-
-styles_json = '{"style":'..styles_json..',"arrow":'..arrow_json..',"border":'..border_json..',"text":'..text_json..'}'
-
-
-
-local screen_json = '['
-screen_json = screen_json.. '{"name":"b1","anchor_point":[0,0],"focused":false,"gid":22,"h":50,"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (3)","type":"Button","w":200,"x":0,"x_rotation":[0,0,0],"y":0,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b2","anchor_point":[0,0],"focused":false,"gid":17,"h":50,"label":"lAbel","opacity":255,"scale":[1,1,0,0],"style":"Style (5)","type":"Button","w":200,"x":100,"x_rotation":[0,0,0],"y":200,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b3","anchor_point":[0,0],"focused":false,"gid":29,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":400,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b4","anchor_point":[0,0],"focused":false,"gid":34,"h":150,"images":{"default":"Button\/button3.png","focus":"Button\/button-focus.png"},"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (4)","type":"Button","w":300,"x":200,"x_rotation":[0,0,0],"y":600,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b5","anchor_point":[0,0],"focused":false,"gid":35,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":700,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..']'
-
-
-
---------------------------------------------------------------------------------
 
 local color_schemes
 
@@ -121,70 +93,31 @@ end
 
 local styles
 
-local function load_styles()
+function load_styles(str)
     
-    if not color_schemes then load_color_schemes() end
-    
-    local input = styles_json--readfile(style_uri)
-    
-    if input == nil then
-        
-        print("'"..style_uri.."' does not exist, Default styles and colors will be used")
-        
-        styles = {}
-        
-        return
-        
+    if type(styles) == "table" then
+        print("WARNING. Styles table already exists")
     end
     
-    input = json:parse(input)
-    
-    if input == nil then
-        
-        error("'"..style_uri.."' is invalid json",2)
-        
+    if type(str) ~= "string" then
+        error("Expected string. Received "..type(str),2)
     end
     
-    if type(input) ~= "table" or not (input.arrow and input.border and input.text and input.style) then
-        
-        error("JSON in '"..style_uri.."' is not formatted as expected.",2)
-        
+    styles = json:parse(str)
+    
+    if type(styles) ~= "table" then
+        error("String is not valid json",2)
     end
     
-    styles = {}
-    
-    local arrow_styles, text_styles, border_styles = {},{},{}
-    
-    for k,v in pairs(input.arrow)  do
-        --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
-        v.name = k
-		arrow_styles[k]  = ArrowStyle(v)
-    end
-    for k,v in pairs(input.border) do
-        --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
-        v.name = k
-		border_styles[k] = BorderStyle(v)
-    end
-    for k,v in pairs(input.text)   do
-        --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
-        v.name = k
-		text_styles[k]   = TextStyle(v)
+    for name,attributes in pairs(styles) do
+        styles[name] = Style(name):set(attributes)
     end
     
-    for k,v in pairs(input.style) do
-        
-        --v.arrow       = type(v.arrow)       == "string" and arrow_styles[v.arrow]        or v.arrow
-        --v.border      = type(v.border)      == "string" and border_styles[v.border]      or v.border
-        --v.text        = type(v.text)        == "string" and text_styles[v.text]          or v.text
-        --v.fill_colors = type(v.fill_colors) == "string" and color_schemes[v.fill_colors] or v.fill_colors
-        v.name = k
-        styles[k] = Style(v)
-        
-    end
+    return styles
     
 end
 
---------------------------------------------------------------------------------
+
 
 local constructors = {
     Group     = Group,
@@ -196,102 +129,365 @@ local constructors = {
 }
 
 local construct
-
 construct = function(t)
     
     if type(t) ~= "table" then
         
-        return error("Expects table, received "..type(t))
+        return error("Expects table, received "..type(t),2)
         
     end
     
-    if t.children then
+    for i,v in ipairs(t.children or {}) do
         
-        for i,v in ipairs(t.children) do
-            
-            t.children[i] = construct(t)
-            
-        end
+        t.children[i] = construct(v)
         
     end
     
-    return constructors[t.type] and constructors[t.type](t) or
+    return _G[t.type] and _G[t.type](t) or
         
         error("Received invalid type "..t.type)
     
 end
 
---------------------------------------------------------------------------------
-
-load_layer = function(layer_name)
+function load_layer(str)
     
-    if type(layer_name) ~= "string" then
+    if type(styles) ~= "table" then
+        print("WARNING. Styles table is empty")
+    end
+    if type(str) ~= "string" then
+        error("Expected string. Received "..type(str),2)
+    end
+    
+    local layer = json:parse(str)
+    
+    if type(layer) ~= "table" then
+        error("String is not valid json",2)
+    end
+    
+    return construct(layer)
+    
+end
+
+
+
+
+
+
+
+
+end
+loadfile("test1.lua")(g)
+
+local function dump_properties( o )
+        local t = {}
+        local l = 0
+        for k , v in pairs( getmetatable( o ).__getters__ ) do
+            local s = v( o )
+            if type( s ) == "table" then
+                s = serialize( s )
+            elseif type( s ) == "string" then
+                s = string.format( "%q" , s )
+            else
+                s = tostring( s )
+            end
+            table.insert( t , { k , s } )
+            l = math.max( l , # k )
+        end
+        table.sort( t , function( a , b ) return a[1] < b[1] end )
+        for i = 1 , # t do
+            print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
+        end
+end
+
+local uiNum = 0
+local layerNum = 0
+local dragging = nil
+json_head = '[{"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
+json_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
+
+sjson_head = '[{"anchor_point":[0,0], "children":'  
+sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
+fake_json = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "Layer1", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 3, "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "children": [{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0],"border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [0,0,0], "border_width": 0, "type": "Rectangle", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "clone1", "anchor_point": [0,0], "x_rotation": [0,0,0], "source": {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0], "border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [216,160,0],"border_width": 0, "type": "Rectangle", "size": [212, 186]}, "gid": 5, "z_rotation": [0,0,0], "position": [216, 390, 0], "type": "Clone", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "image2", "clip": [0,0,450,978], "src": "/assets/images/img_big_01.png", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 6, "z_rotation": [0,0,0], "position": [208, 590, 0], "type": "Texture", "size": [978, 450]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "text3", "anchor_point": [0,0], "text": "TEXT", "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 7, "z_rotation": [0,0,0], "position": [224, 1046, 0], "font": "FreeSans Medium 30px", "type": "Text", "size": [39, 75]}], "size": [1186, 1121]}'
+
+fake_layer_name = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "'
+fake_layer_gid = '", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": '
+fake_layer_children = ', "children" : ['
+fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "size": [1186, 1121]}'
+
+fake_style_json =
+'{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"offset":10,"size":20},"border":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"corner_radius":10,"width":2},"fill_colors":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"name":"Style","text":{"alignment":"CENTER","colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"font":"Sans 40px","justify":true,"wrap":true,"x_offset":0,"y_offset":0}}}'
+
+_VE_ = {}
+
+-- GET 
+_VE_.getStInfo = function()
+
+    local t = {}
+    --table.insert(t, json:parse(fake_style_json))
+    table.insert(t, json:parse(get_all_styles()))
+    print("getStInfo"..json:stringify(t))
+end 
+
+_VE_.repStInfo = function()
+    local t = {}
+    table.insert(t, json:parse(get_all_styles()))
+    print("repStInfo"..json:stringify(t))
+end 
+
+_VE_.getUIInfo = function()
+    local t = {}
+    for m,n in ipairs (screen.children) do
+    --[[
+        if string.find(n.name, "Layer") then  
+            fake_layer = fake_layer_name..n.name..fake_layer_gid..n.gid..fake_layer_children
+            for i,j in ipairs(n.children) do 
+                if j.to_json then 
+                    if i > 1 then
+                        fake_layer = fake_layer..','..j:to_json()
+                    else 
+                        fake_layer = fake_layer..j:to_json()
+                    end
+                end 
+            end 
+            fake_layer = fake_layer..fake_layer_end
+            table.insert(t, json:parse(fake_layer))
+        else]]
+        if n.to_json then -- s1.b1
+            table.insert(t, json:parse(n:to_json()))
+        end
+    end
+    
+    print("getUIInfo"..json_head..json:stringify(t)..json_tail)
+end 
+-- SET
+_VE_.setUIInfo = function(gid, property, value)
+    
+    devtools:gid(gid)[property] = value 
+end 
+
+-- REPORT 
+_VE_.repUIInfo = function(uiInstance)
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
+    --[[
+    local t = {}
+    if uiInstance.to_json then 
+        table.insert(t, json:parse(uiInstance:to_json()))
+    end 
+    print("repUIInfo"..json:stringify(t))
+    ]] 
+end
+
+_VE_.repUIInfoWfakeJson = function(uiInstance)
+    local t = {}
+    if uiInstance.to_json then 
+        table.insert(t, json:parse(uiInstance.extra.to_json()))
+    end 
+    print("repUIInfo"..json_head..json:stringify(t)..json_tail)
+end
+
+_VE_.openInspector = function(gid)
+    print("openInspc"..gid)
+end 
+--print(get_all_styles())
+--local s = Style{name="gggg"}
+---[[
+_VE_.setAppPath = function(path)
+    editor:change_app_path(path)
+end 
+--]]
+
+_VE_.openFile = function(path)
+    --s = load_layer("layer1.json")
+    --editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
+    editor:change_app_path(path)
+    screen:clear()
+
+    layers_file = "layers.json"
+    styles_file = "styles.json"
+    screens_file = "screens.json"
+
+    --local scrJson = readfile(screens_file)
+    --print("scrJSInfo"..scrJson)
+
+    print("scrJSInfo"..readfile(screens_file))
+
+    if type(styles_file) ~= "string" then
         
-        error("'load_layer()' expects type 'string'. Recieved "..type(layer_name),2)
+        error("'load_layer()' expects type 'string'. Recieved "..type(styles_file),2)
         
     end
     
     --the first time this function is called, styles will get set up
-    if not styles then load_styles() end
+    --if not styles then load_styles() end
     
     --load the json
-    local layer = screen_json--readfile(layer_dir..layer_name..".json")
+    local style = readfile(styles_file)
+    
+
+    style = string.sub(style, 2, string.len(style)-1)
+
+
+    load_styles(style) 
+
+    local layer = readfile(layers_file)
+    layer = string.sub(layer, 2, string.len(layer)-1)
     
     if layer == nil then
         
-        error("Layer '"..layer_name.."' does not exist.",2)
+        error("Layer '"..layers_file.."' does not exist.",2)
         
     end
-    
-    --parse it
-    layer = json:parse(layer)
-    
-    if layer == nil then
-        
-        error("Layer '"..layer_name.."' has invalid json",2)
-        
-    end
-    
-    if type(layer) ~= "table" then
-        
-        error("Layer '"..layer_name.."' contained expected json. Top-Level is not an array.",2)
-        
-    end
-    
-    --make it a group
-    local layer_object = Group()
-    
-    layer_object.elements = {}
-    
-    for i,v in ipairs(layer) do
-        print(v.name,v.style)
-        v.style = type(v.style) == "string" and styles[v.style] or v.style
-        print(v.name,v.style.name)
-        local current_object = construct(v)
-        
-        if type(current_object) ~= "userdata" and not current_object.__types__.actor then
-            
-            error(i.."-th entry in the '"..layer_name.."' layer is not a UIElement",2)
-            
+
+    s = load_layer(layer)
+    --screen:add(s)
+
+    for i,j in ipairs(s.children) do
+        if j.subscribe_to then  
+            j:subscribe_to(nil, function()  _VE_.repUIInfo(j) end)
+        end 
+        function j.on_button_down( j , x , y , button )
+            dragging = { j , x - j.x , y - j.y }
+            if button == 3 then
+                _VE_.openInspector(j.gid)
+            end
         end
-        
-        if type(current_object.name) ~= "string" then
-            
-            error(i.."-th entry in the '"..layer_name.."' layer does not have a name",2)
-            
+    
+        function j.on_button_up( j , x , y , button )
+            dragging = nil
         end
-        
-        layer_object.elements[ string.gsub( current_object.name, " ", "_" ) ] = current_object
-        print(current_object.name,current_object.style.name)
-        layer_object:add(  current_object  )
-        
+    
+        j.reactive = true 
+        --_VE_.repUIInfo(j)
+        j:unparent()
+        screen:add(j)
     end
+    _VE_.repUIInfo()
+end 
+
+
+_VE_.openLuaFile = function()
+    --s = load_layer("layer1.json")
+    screen:clear()
+    g.reactive = false
     
-    return layer_object
+    screen:add(g)
+
+    for i,j in ipairs(screen.children) do
+        --dump_properties(j)
+        --print (j.name)
+        j.extra.to_json = function() return fake_json end
+        function j.on_button_down( j , x , y , button )
+            dragging = { j , x - j.x , y - j.y }
+            if button == 3 then
+                _VE_.openInspector(4)
+            end
+        end
     
+        function j.on_button_up( j , x , y , button )
+            dragging = nil
+        end
+    
+        j.reactive = true 
+        _VE_.repUIInfoWfakeJson(j)
+    end
+end 
+
+
+_VE_.newLayer = function()
+    screen:add(Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    layerNum = layerNum + 1
+    --_VE_.repUIInfo()
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
+end 
+
+_VE_.saveFile = function(scrJson)
+    local layer_t = {}
+    local style_t = {}
+
+    for a, b in ipairs (screen.children) do
+            --editor:writefile("layer1.json", b.name, true) 
+            if b.to_json then -- s1.b1
+                table.insert(layer_t, json:parse(b:to_json()))
+                --print (b.name, b:to_json())
+            end
+    end
+
+    table.insert(style_t, json:parse(get_all_styles()))
+
+    --editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
+    editor:writefile("layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
+    editor:writefile("styles.json", json:stringify(style_t), true) 
+    editor:writefile("screens.json", scrJson, true) 
+    --editor:writefile("layer1_user.lua", , true) 
+
+end 
+
+
+local uiElementCreate_map = 
+{
+    ['Button'] = function()  return Button() end, 
+    ['DialogBox'] = function() return DialogBox() end,
+    ['ToastAlert'] = function() return ToastAlert() end,
+    ['ProgressSpinner'] = function() return ProgressSpinner() end,
+    ['OrbittingDots'] = function() return OrbittingDots() end,
+    ['TextInput'] = function() return TextInput() end,
+}
+
+_VE_.insertUIElement = function(curLayerGid, uiTypeStr)
+    
+    if uiElementCreate_map[uiTypeStr] then
+        uiInstance = uiElementCreate_map[uiTypeStr](self)
+        uiInstance.name = uiTypeStr:lower()..uiNum
+        --TODO : need to check if ui.name is existing 
+        uiNum = uiNum + 1
+    else
+        print "error"
+    end
+
+    --print("--------------------")
+    --print (uiInstance:to_json())
+    --print("--------------------")
+
+    if uiInstance.subscribe_to then  
+        -- not nil because there is no in_use property supported
+        uiInstance:subscribe_to(nil, function()  _VE_.repUIInfo(uiInstance) end) 
+ 
+    end 
+
+    function uiInstance.on_button_down( uiInstance , x , y , button )
+        dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
+        if button == 3 then
+            _VE_.openInspector(uiInstance.gid)
+        end
+    end
+
+    function uiInstance.on_button_up( uiInstance , x , y , button )
+        dragging = nil
+    end
+
+    devtools:gid(curLayerGid):add(uiInstance)
+    --screen:add(uiInstance)
+
+    --_VE_.repUIInfo(uiInstance)
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
 end
 
-l = load_layer("fake")
+function screen.on_motion( screen , x , y )
+    if dragging then
+        local actor , dx , dy = unpack( dragging )
+        actor.position = { x - dx , y - dy  }
+    end
+end
 
-screen:add(l)
---]]
+screen.reactive = true
+screen:show()
+
+controllers:start_pointer()
+dolater(print("<<VE_READY>>:"))
+
+
+
+--]=]

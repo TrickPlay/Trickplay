@@ -60,7 +60,7 @@ local style = {
 screen:show()
 
 mb0 = MenuButton()
----[[
+--[[
 mb1 = MenuButton{
     x = 300,
     items = {
@@ -99,7 +99,7 @@ wg:add(
     mb0,mb1,mb2,mb3,mb4
 )
 
-print(get_all_styles())
+--print(get_all_styles())
 print("\n\n\n")
-print(wg:to_json())
+--print(wg:to_json())
 

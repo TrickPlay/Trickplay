@@ -38,7 +38,7 @@ function override_function( object , name , newf )
     
 end
 
-
+--TODO add override_private_function
 
 
 metatable_to_G = {

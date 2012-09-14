@@ -102,6 +102,41 @@ ArrayManager = function(p)
                 end
             end,
             
+            new_data = function(self,t)
+                test_and_set("set")
+                if type(t) ~= "table" then
+                    error("Expected table. Received "..type(t),2) 
+                end
+                
+                
+                if instance.length > #t then
+                    
+                    for i = instance.length,#t+1,-1 do
+                    --while number_of_rows < v do
+                        
+                        instance:remove(i)--number_of_rows)
+                    end
+                    
+                    for k,v in ipairs(t) do   self[k] = v   end
+                    
+                elseif instance.length < #t then
+                    
+                    for i = 1,instance.length+1 do
+                        self[i] = t[i]
+                    end
+                    for i = instance.length+1,#t do
+                    --while number_of_rows < v do
+                        print("inserting",i,t[i])
+                        instance:insert(i,t[i])--number_of_rows+1)
+                    end
+                    
+                end
+                
+                
+                
+                --for k,v in pairs(t) do   self[k] = v   end
+                report_change("set")
+            end,
             set = function(self,t)
                 test_and_set("set")
                 if type(t) ~= "table" then
@@ -565,7 +600,7 @@ GridManager = function(p)
             
             elseif type(k) == "number" then
                 if k < 1 or k > number_of_rows then
-                    --error("Invalid index. 0 < '"..k.."' < "..number_of_rows,2)
+                    print("Invalid row index. 0 < '"..k.."' < "..number_of_rows)
                     return
                 end
                 

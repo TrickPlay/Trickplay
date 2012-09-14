@@ -39,7 +39,7 @@ TextInput = function(parameters)
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
-	local instance = Widget( parameters )
+	local instance, env = Widget( parameters )
 	local bg
 	local text = Text{
 		editable = true,
@@ -54,7 +54,7 @@ TextInput = function(parameters)
             text.editable = instance.enabled
         end
 	)
-	instance:add(text)
+	env.add(instance,text)
 	--the default w and h does not count as setting the size
 	if not size_is_set then instance:reset_size_flag() end
 	
@@ -93,7 +93,7 @@ TextInput = function(parameters)
 		
 		bg = create_canvas(instance)
 		
-		instance:add(bg)
+		env.add(instance,bg)
 		
 		bg.reactive = true
 		
