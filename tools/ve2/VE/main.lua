@@ -144,6 +144,12 @@ _VE_.printInstanceName = function(layernames)
     print("prtObjNme"..theNames)
 end 
 
+_VE_.contentMove = function(newChildGid, newParentGid)
+    local newChild = devtools:gid(newChildGid)
+    newChild:unparent()
+    devtools:gid(newParentGid):add(newChild)
+end 
+
 _VE_.alignLeft = function(gid)
 
     local basis_obj_name, basis_obj = editor.arrange_prep(gid)
