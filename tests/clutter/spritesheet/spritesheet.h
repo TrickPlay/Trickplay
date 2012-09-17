@@ -10,6 +10,11 @@
 #include <clutter/clutter.h>
 #include <stdlib.h>
 
+typedef enum {
+  SPRITESHEET_NONE    = 0,
+  SPRITESHEET_NEAREST  = 1 << 0,
+} SpriteSheetFlags;
+
 typedef struct SpriteSheet {
   GHashTable *map;
   CoglMaterial **material;
@@ -19,7 +24,7 @@ typedef struct SpriteSheet {
   gint n;
 } SpriteSheet;
 
-SpriteSheet* spritesheet_new(CoglHandle *texture, gchar* names[], gint data[], gint n, gint filter);
+SpriteSheet* spritesheet_new(CoglHandle *texture, gchar* names[], gint data[], gint n, SpriteSheetFlags flags);
 
 void spritesheet_get_sprite(SpriteSheet *sheet, gchar *name, CoglMaterial **material, CoglHandle **texture, gint *w, gint *h);
 
