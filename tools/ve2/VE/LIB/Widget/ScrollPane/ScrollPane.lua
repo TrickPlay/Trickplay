@@ -163,7 +163,7 @@ ScrollPane = setmetatable(
                     end
                 end,
                 widget_type = function(instance,env)
-                    return function(oldf) return "ArrowPane" end
+                    return function(oldf) return "ScrollPane" end
                 end,
                 attributes = function(instance,env)
                     return function(oldf,self)
