@@ -104,18 +104,23 @@ ProgressBar = function(parameters)
     local redraw_shell = false
     local redraw_fill  = false
     
-	local instance = Widget( parameters )
+    dumptable(parameters)
+    
+	local instance, env = Widget( parameters )
     local fill, shell
     local progress = 0
+	
+    instance:add(bg,contents,border)
     
 	----------------------------------------------------------------------------
     
 	override_property(instance,"widget_type",
 		function() return "ProgressBar" end, nil
 	)
-    
+    local scale_t = {0,1}
     local expand_fill = function() 
-        fill.w = (shell.w-2*instance.style.border.width)*progress
+        scale_t[1] = progress
+        fill.scale = scale_t--(shell.w-2*instance.style.border.width)*progress
     end
 	override_property(instance,"progress",
 		function(oldf) return progress end,
@@ -140,18 +145,22 @@ ProgressBar = function(parameters)
 	instance:subscribe_to(
 		nil,
 		function()
-			if redraw_shell then 
+			if redraw_shell then
+                redraw_shell = false
                 if shell then shell:unparent() end
                 redraw_shell = false
                 shell = create_shell(instance)
-                instance:add(shell)
+                env.add(instance,shell)
                 shell:lower_to_bottom()
             end
             if redraw_fill then
+                redraw_fill = false
                 if fill then fill:unparent() end
                 redraw_fill = false
                 fill = create_fill(instance)
-                instance:add(fill)
+                fill.w = shell.w-2*instance.style.border.width
+                fill.scale = scale_t
+                env.add(instance,fill)
                 
                 fill.x = instance.style.border.width
                 fill.y = instance.style.border.width

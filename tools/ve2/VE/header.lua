@@ -1,5 +1,7 @@
 local hdr = {}
 
+if not APPVERBOSITY then dofile("LIB/Widget/__UTILITIES/AppVerbosity.lua") end
+
 if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
 if not TYPECHECKING      then dofile("LIB/Widget/__UTILITIES/TypeChecking.lua")      end
 if not TABLEMANIPULATION then dofile("LIB/Widget/__UTILITIES/TableManipulation.lua") end

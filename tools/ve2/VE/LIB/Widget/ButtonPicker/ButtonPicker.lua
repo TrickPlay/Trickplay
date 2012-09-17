@@ -63,11 +63,13 @@ ButtonPicker = function(parameters)
         style = false,
         label = "",
         create_canvas = create_arrow,
+        reactive = true,
     }
     local next_arrow = Button{
         style = false,
         label = "",
         create_canvas = create_arrow,
+        reactive = true,
     }
 	local instance = ListManager{
         cells = {

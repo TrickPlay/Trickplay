@@ -43,41 +43,53 @@ local style = {
 tb1 = TabBar{
     position = {100,100},
     tabs = {
-        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
-        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
-        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
-        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
-        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
-        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+        {label="One",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff0000"},Button()}}},
+        {label="Two",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ff00"}}}},
+        {label="Three", contents = Widget_Group{children={Rectangle{w=400,h=400,color="0000ff"}}}},
+        {label="Four",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ffff00"}}}},
+        {label="Five",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ffff"}}}},
+    },
+    tab_images = {
+        default = Widget_Image{src="Button/button3.png"},
+        focus   = Widget_Image{src="Button/button-focus.png"},
     }
 }
+print("\n\n\n inject new tab")
+tb1.tabs:insert(2,{label="New",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="30f0f0"}}}})
+
+tb1.tabs[3].label = "3333"
+tb1.tabs[3].contents = Widget_Group{children={Rectangle{w=40,h=40,color="30f0f0"}}}
+dumptable(tb1.attributes)
 --]]
+---[[
 tb2 = TabBar{
     pane_w = 500,
     tab_h  = 100,
     style = style,
     position = {100,600},
     tabs = {
-        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
-        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
-        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
-        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
-        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
-        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+        {label="One",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="ff0000"},Button()}}},
+        {label="Two",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="00ff00"}}}},
+        {label="Three", contents = Widget_Group{children={Rectangle{w=500,h=400,color="0000ff"}}}},
+        {label="Four",  contents = Widget_Group{children={Rectangle{w=500,h=400,color="ffff00"}}}},
+        {label="Five",  contents = Widget_Group{children={Rectangle{w=500,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="00ffff"}}}},
     }
 }
----[[
+--]]
+--[[
 tb3 = TabBar{
     tab_location = "left",
     style = style,
     position = {600,100},
     tabs = {
-        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"}}},
-        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
-        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
-        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
-        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
-        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+        {label="One",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff0000"}}}},
+        {label="Two",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ff00"}}}},
+        {label="Three", contents = Widget_Group{children={Rectangle{w=400,h=400,color="0000ff"}}}},
+        {label="Four",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ffff00"}}}},
+        {label="Five",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ffff"}}}},
     }
 }
 --]]
