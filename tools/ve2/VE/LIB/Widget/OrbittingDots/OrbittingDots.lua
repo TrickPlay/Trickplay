@@ -37,7 +37,7 @@ OrbittingDots = function(parameters)
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
-	local instance = Widget( parameters )
+	local instance, env = Widget( parameters )
 	
 	
 	local image
@@ -98,7 +98,7 @@ OrbittingDots = function(parameters)
 		
 		image = canvas_dot(instance)
 		
-		instance:add( image )
+		env.add( instance, image )
 		
 		image:hide()
 		
@@ -114,7 +114,7 @@ OrbittingDots = function(parameters)
 		
 		image = v
 		
-		instance:add( image )
+		env.add( instance, image )
 		
 		image:hide()
 		
@@ -234,7 +234,7 @@ OrbittingDots = function(parameters)
 						w            = dot_size,
 						h            = dot_size,
 					}
-					instance:add(clones[i])
+					env.add( instance, clones[i])
 				end
 				
 			end
