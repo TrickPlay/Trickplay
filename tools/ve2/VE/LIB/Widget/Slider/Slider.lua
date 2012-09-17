@@ -102,6 +102,9 @@ Slider = setmetatable(
                         env.progress = v 
                     end
                 end,
+                widget_type = function(instance,env)
+                    return function(oldf) return "Slider" end
+                end,
                 attributes = function(instance,env)
                     return function(oldf,self) 
                         local t = oldf(self)
