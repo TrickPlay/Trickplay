@@ -17,15 +17,15 @@ enum SpriteSheetFlags {
 
 class SpriteSheet {
   public:
-    SpriteSheet(guint w, guint h, const guchar* pixels, gchar* names[], gint data[], gint n, SpriteSheetFlags flags);
-    void get_sprite(gchar *name, CoglMaterial **material, gint *w, gint *h);
+    SpriteSheet(CoglHandle texture, const gchar **names, gint *data, gint n, SpriteSheetFlags flags);
+    void get_sprite(const gchar *name, CoglMaterial **material, CoglHandle *texture, gint *w, gint *h);
     ~SpriteSheet();
     
   private:
     gint num_sprites;
     GHashTable *map;
     CoglMaterial **material;
-    CoglHandle **texture;
+    CoglHandle *texture;
     gint *width;
     gint *height;
 };

@@ -1,13 +1,15 @@
 LIBS=`pkg-config --libs clutter-1.0`
 INCS=`pkg-config --cflags clutter-1.0`
 
-.c.o: nineslice.h spritesheet.h
-	$(CC) -g -Wall $(CFLAGS) $(INCS) -c $*.c
+%.o : %.c
+
+.cpp.o: nineslice.cpp.h spritesheet.cpp.h
+	$(CXX) -g -Wall $(CFLAGS) $(INCS) -c $*.cpp
 
 all: spritesheet
 
 spritesheet: main.o nineslice.o spritesheet.o
-	$(CC) -g -Wall $(CFLAGS) -o $@ $^ -lm $(LIBS)
+	$(CXX) -g -Wall $(CFLAGS) -o $@ $^ -lm $(LIBS)
 
 clean:
 	rm -fr *.o spritesheet
