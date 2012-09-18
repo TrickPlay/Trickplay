@@ -720,7 +720,7 @@ ListManager = setmetatable(
                             self[i].y =  (i-1) > 0 and (self[i-1].y + self[i-1].h + env.spacing) or 0
                         end
                     else
-                        error("Invalid direction: "..env.direction,2)
+                        error("Invalid direction: "..tostring(env.direction),2)
                     end
                     
                     local ap = {}
@@ -1524,11 +1524,15 @@ LayoutManager = setmetatable(
                         
                     else -- default node_constructor
                         
-                        if obj == nil then  
+                        if obj == nil or obj == false then  
                             
                             obj = Widget_Clone{source=env.placeholder}
                             env.placeholders[obj] = true
                             
+                        elseif type(obj) == "table" and obj.type then 
+                            
+                            obj = _G[obj.type](obj)
+                            print("setting from table",obj)
                         elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                             
                             error("Must be a UIElement or nil. Received "..obj,2) 
