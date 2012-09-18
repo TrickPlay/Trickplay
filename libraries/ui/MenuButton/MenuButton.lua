@@ -9,6 +9,21 @@ local default_parameters = {
     popup_offset = 10,
 }
 
+local create_canvas = function(self,state)
+	print("mb:cc",self.w,self.h)
+	local c = Canvas(self.w,self.h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+	
+	c:set_source_color( self.style.fill_colors[state] or "ffffff66" )     c:fill(true)
+	
+	c:set_source_color( self.style.border.colors[state] or self.style.border.colors.default )   c:stroke(true)
+	
+	return c:Image()
+	
+end
 
 MenuButton = setmetatable(
     {},
@@ -163,7 +178,13 @@ MenuButton = setmetatable(
             
             
             local instance, env = LayoutManager:declare()
-            env.button = Button{style = false,w=300,reactive=true}
+            env.button = ToggleButton{
+                create_canvas=create_canvas,
+                style = false,
+                w=300,
+                reactive=true, 
+                selected = true
+            }
             
             env.popup = ListManager{focus_to_index=1}
             env.style_flags = "restyle_button"
@@ -171,14 +192,18 @@ MenuButton = setmetatable(
             env.new_direction  = "down"
             env.button:add_key_handler(   keys.OK, function() env.button:click()   end)
             
+            env.old_on_pressed = env.button.on_pressed
+            ---[[
             function env.button:on_pressed()
+                
+                env.old_on_pressed(self)
                 
                 env.popup[ env.popup.is_visible and "hide" or "show" ](env.popup)
                 
                 env.popup.enabled = env.popup.is_visible
                 
             end
-            
+            --]]
             
             for name,f in pairs(self.private) do
                 env[name] = f(instance,env)
