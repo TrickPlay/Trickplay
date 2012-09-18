@@ -203,19 +203,14 @@ ToggleButton = setmetatable(
         },
         
         functions = {
-            press = function(instance,env)
-                return function(old_function,self)
-                    
-                    self.selected = not self.selected
-                    
-                    old_function(self)
-                    
-                end
-            end,
         }
     },
     declare = function(self,parameters)
-        local instance, env = Button:declare()
+        local instance, env = Button:declare{
+            on_pressed = function(self) 
+                self.selected = not self.selected
+            end
+        }
         
         env.radio_button_group = false
         env.on_deselection     = false
