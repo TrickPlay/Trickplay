@@ -207,7 +207,7 @@ Button = setmetatable(
                     --text
                     env.label_state.state = "ACTIVATION"
                     --event callback
-                    if env.on_pressed then env.on_pressed() end
+                    if env.on_pressed then env.on_pressed(instance) end
                     
                 end
             end,
@@ -225,56 +225,13 @@ Button = setmetatable(
                     --text
                     env.label_state.state = env.focused and "FOCUS" or "DEFAULT"
                     --event callback
-                    if env.on_released then env.on_released() end
+                    if env.on_released then env.on_released(instance) end
                     
                 end
             end,
         },
     },
     private = {
-            --[[
-            subscribe_to_sub_styles = function(instance,env)
-                return function()
-                    instance.style.border:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            env.call_update()
-                        end
-                    end )
-                    instance.style.fill_colors:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            env.call_update()
-                        end
-                    end )
-                    instance.style.text.colors:subscribe_to( nil, function()
-                        env.text_color_changed = true 
-                        env.call_update()
-                    end )
-                    instance.style.text:subscribe_to( nil, function()
-                        env.text_style_changed = true 
-                        env.call_update()
-                    end )
-                    instance.style:subscribe_to( nil, function(style_t)
-                        
-                        for style_k,style_v in pairs(style_t) do
-                            if style_k == "border" then
-                                for border_k,border_v in pairs(border_t) do
-                                end
-                            end
-                        end
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                        end
-                        env.text_style_changed = true
-                        env.text_color_changed = true 
-                        env.call_update()
-                        
-                    end )
-                    
-                end
-            end,
-            --]]
             update = function(instance,env)
                 return function()
                     
