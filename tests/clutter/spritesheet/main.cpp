@@ -15,8 +15,8 @@
 #define CLUTTER_ANGLE_FROM_RAD(x) ((x) * 180.0 / G_PI)
 #endif
 
-#include "spritesheet.h"
-#include "nineslice.h"
+#include "spritesheet.cpp.h"
+#include "nineslice.cpp.h"
 
 static void circle_paint_cb (ClutterActor *actor)
 {
@@ -101,9 +101,9 @@ int main (int argc, char **argv)
       clutter_behaviour_apply (behaviour, actor);
     }
   
-  gchar *names[] = {"slice-00.png", "slice-10.png", "slice-20.png",
-                    "slice-01.png", "slice-11.png", "slice-21.png",
-                    "slice-02.png", "slice-12.png", "slice-22.png"};
+  const gchar *names[] = {"slice-00.png", "slice-10.png", "slice-20.png",
+                          "slice-01.png", "slice-11.png", "slice-21.png",
+                          "slice-02.png", "slice-12.png", "slice-22.png"};
   
   gint xs[] = {16, 32, 48, 64};
   gint ys[] = {16, 32, 48, 64};
@@ -118,10 +118,10 @@ int main (int argc, char **argv)
     }
   }
   
-  CoglHandle *texture = clutter_texture_get_cogl_texture(
-      CLUTTER_TEXTURE(clutter_texture_new_from_file("spritesheet.png", NULL)) );
+  ClutterActor *actor3 = clutter_texture_new_from_file("spritesheet.png", NULL);
+  CoglHandle texture = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor3 ) );
   //SpriteSheet *sheet = spritesheet_new(texture, names, data, 9, 0);
-  SpriteSheet *sheet = new SpriteSheet(texture, names, data, 9, 0); 
+  SpriteSheet *sheet = new SpriteSheet(texture, names, data, 9, SPRITESHEET_NONE); 
   
   ClutterActor *actor2 = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor2);
@@ -152,7 +152,7 @@ int main (int argc, char **argv)
   clutter_timeline_start (timeline);
   clutter_main ();
 
-  spritesheet_free(sheet);
+  delete sheet;
   
   return 0;
 }
