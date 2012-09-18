@@ -11,6 +11,7 @@ if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
 if not BUTTON            then dofile("Button/Button.lua")                   end
+if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")     end
 if not MENUBUTTON        then dofile("MenuButton/MenuButton.lua")           end
 
 local test_group = Group()
