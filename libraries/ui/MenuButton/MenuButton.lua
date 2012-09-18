@@ -63,35 +63,14 @@ MenuButton = setmetatable(
                             --items[i] = {item}
                         end
                         
-                        env.popup:set{
-                            length = #items,
-                            cells = v,
-                        }
+                        env.popup.cells = v
                     end
                 end,
-                item_spacing = function(instance,env)
-                    local possible_directions = {
-                        up    = { {env.popup},{env.button}},
-                        down  = {{env.button}, {env.popup}},
-                        left  = {{ env.popup,  env.button}},
-                        right = {{env.button,   env.popup}},
-                    }
+                direction = function(instance,env)
                     return function(oldf)  return   env.direction      end,
                     function(oldf,self,v)
-                        if not possible_directions[v] then
-                            error("MenuButton.direction expects 'up', 'down', 'left', or 'right'. Received: "..v,2)
-                        end
                         if direction == v then return end
-                        instance:set{
-                            number_of_rows = 
-                                ((v == "up"   or v == "down")  and 2) or
-                                ((v == "left" or v == "right") and 1),
-                            number_of_cols = 
-                                ((v == "up"   or v == "down")  and 1) or
-                                ((v == "left" or v == "right") and 2),
-                            cells = possible_directions[v],
-                        }
-                        env.direction = v
+                        env.new_direction = v
                     end
                 end,
                 focused = function(instance,env)
@@ -141,8 +120,40 @@ MenuButton = setmetatable(
         },
         private = {
             update = function(instance,env)
+                local possible_directions = {
+                    up    = { {env.popup},{env.button}},
+                    down  = {{env.button}, {env.popup}},
+                    left  = {{ env.popup,  env.button}},
+                    right = {{env.button,   env.popup}},
+                }
                 return function()
                     
+                    if env.new_direction then
+                        env.direction = env.new_direction
+                        env.new_direction = false
+                        
+                        instance.number_of_rows = 
+                                ((env.direction == "up"   or env.direction == "down")  and 2) or
+                                ((env.direction == "left" or env.direction == "right") and 1)
+                        instance.number_of_cols = 
+                                ((env.direction == "up"   or env.direction == "down")  and 1) or
+                                ((env.direction == "left" or env.direction == "right") and 2)
+                        instance.cells = possible_directions[env.direction]
+                        
+                        instance.focus_to_index = {
+                            env.direction == "up"   and 2 or 1,
+                            env.direction == "left" and 2 or 1
+                        }
+                        
+                        print("here")
+                    end
+                    if env.restyle_button then
+                        env.restyle_button = false
+                        local t = instance.style.attributes
+                        t.name = nil
+                        env.button.style:set(t)
+                    end
+                    env.old_update()
                 end
             end
         },
@@ -150,17 +161,21 @@ MenuButton = setmetatable(
             
             parameters = parameters or {}
             
+            
             local instance, env = LayoutManager:declare()
-            env.button = Button{style = false,w=300}
+            env.button = Button{style = false,w=300,reactive=true}
             
-            env.popup = ListManager()
-            
-            
-            instance:add_key_handler(   keys.OK, function() env.button:click()   end)
+            env.popup = ListManager{focus_to_index=1}
+            env.style_flags = "restyle_button"
+            env.old_update = env.update
+            env.new_direction  = "down"
+            env.button:add_key_handler(   keys.OK, function() env.button:click()   end)
             
             function env.button:on_pressed()
                 
-                popup[ popup.is_visible and "hide" or "show" ](popup)
+                env.popup[ env.popup.is_visible and "hide" or "show" ](env.popup)
+                
+                env.popup.enabled = env.popup.is_visible
                 
             end
             
