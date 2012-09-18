@@ -1,5 +1,5 @@
 #include <math.h>
-#include "nineslice.h"
+#include "nineslice.cpp.h"
 
 G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
 
@@ -135,8 +135,8 @@ static void nineslice_effect_init (NineSliceEffect *self) {
   priv = self->priv = NINESLICE_EFFECT_GET_PRIVATE(self);
 }
 
-ClutterEffect* nineslice_effect_new_from_names(gchar* names[], SpriteSheet *sheet, gboolean tiled) {
-  ClutterEffect* self = g_object_new(TYPE_NINESLICE_EFFECT, NULL);
+ClutterEffect* nineslice_effect_new_from_names(const gchar* names[], SpriteSheet *sheet, gboolean tiled) {
+  ClutterEffect* self = (ClutterEffect*) g_object_new(TYPE_NINESLICE_EFFECT, NULL);
   NineSliceEffectPrivate *priv = NINESLICE_EFFECT(self)->priv;
   priv->tiled = tiled;
   
