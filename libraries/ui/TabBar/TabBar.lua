@@ -179,6 +179,7 @@ TabBar = setmetatable(
                     function(oldf,self,v)    
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
                         env.new_tabs = v  
+                        env.resize_tabs = true
                     end
                 end,
                 tab_location = function(instance,env)
@@ -254,7 +255,7 @@ TabBar = setmetatable(
                         for i = 1,env.tabs_lm.length do
                             t.tabs[i]    = {
                                 label    = env.tabs_lm.cells[i].label,
-                                --contents = env.tabs_lm.cells[i].pane.attributes
+                                contents = env.tabs_lm.cells[i].contents.attributes
                             }
                         end
                         
