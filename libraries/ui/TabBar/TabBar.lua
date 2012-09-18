@@ -179,6 +179,7 @@ TabBar = setmetatable(
                     function(oldf,self,v)    
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
                         env.new_tabs = v  
+                        env.resize_tabs = true
                     end
                 end,
                 tab_location = function(instance,env)
