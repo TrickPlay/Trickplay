@@ -255,7 +255,7 @@ TabBar = setmetatable(
                         for i = 1,env.tabs_lm.length do
                             t.tabs[i]    = {
                                 label    = env.tabs_lm.cells[i].label,
-                                --contents = env.tabs_lm.cells[i].pane.attributes
+                                contents = env.tabs_lm.cells[i].contents.attributes
                             }
                         end
                         
