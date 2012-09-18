@@ -683,7 +683,12 @@ namespace ImageDecoders
         {
             PROFILER( "Images::GIF_decode/file" , PROFILER_INTERNAL_CALLS );
 
+#if defined(GIFLIB_MAJOR) && (GIFLIB_MAJOR >= 5)
+            int error;
+            GifFileType * g = DGifOpenFileName( filename , &error );
+#else
             GifFileType * g = DGifOpenFileName( filename );
+#endif
 
             if ( ! g )
             {
