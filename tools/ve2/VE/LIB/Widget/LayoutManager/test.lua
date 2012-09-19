@@ -51,14 +51,14 @@ function lm1:on_button_down(x,y)
     print(lm1:r_c_from_abs_x_y(x,y))
 end
 --]]
---[[
+---[[
 lm2 = LayoutManager{
     y = 400,
     number_of_rows = 3,
     number_of_cols = 2,
     cells = {
         {Button(),Button()},
-        {Button(),Button()},
+        {Button(),Button{enabled = false}},
         {Button(),Button()},
     }
 }

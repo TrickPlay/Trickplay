@@ -155,9 +155,9 @@ print("ssssssssssssssssssssssssssssssssss")
 b0 = ToggleButton()
 b0.x = 400
 
-b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text"}
+b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text",reactive=true}
 
-b2 = ToggleButton{x=400,y=200,style = style,selected = true,enabled = false}
+b2 = ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,reactive=true}
 
 --]]
 b3 = ToggleButton{
@@ -168,6 +168,7 @@ b3 = ToggleButton{
         focus   = Group{children={Image{src="Button/button-focus.png"},Image{src="Button/strike-off.png"}}},
         selection = Group{children={Image{src="Button/strike-on.png",x=-8,y=-8}}},
     },
+    reactive=true
 }
 
 --]]

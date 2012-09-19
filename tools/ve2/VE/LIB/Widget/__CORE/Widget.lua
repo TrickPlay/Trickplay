@@ -141,9 +141,14 @@ local function Widgetize(instance)
         if not instance.enabled then return end
         
         if key_functions[key] then
+            
+            local retval = false
+            
             for f,_ in pairs(key_functions[key]) do
-                f()
+                retval = f() or retval
             end
+            
+            return retval
         end
         
     end
