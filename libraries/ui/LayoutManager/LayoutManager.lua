@@ -1419,6 +1419,11 @@ LayoutManager = setmetatable(
                         end
                         
                         if env.placeholder then env.placeholder:unparent() end
+                        env.find_col_widths = true
+                        env.find_col_heights = true
+                        env.reposition = true
+                        env.find_width = true
+                        env.find_height = true
                         
                         env.placeholder = v 
                     end
