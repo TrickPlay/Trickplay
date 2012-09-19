@@ -150,11 +150,15 @@ _VE_.contentMove = function(newChildGid, newParentGid)
     newChild:unparent()
 
     if util.is_this_container(newParent) == false then 
+		newChild.group_position = {0,0,0}
+        newChild.is_in_group = false
         newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
     else
         newChild.reactive = false
         newChild.position = {0,0,0}
+        newChild.is_in_group = true
+		newChild.group_position = newParent.position
     end
 
     newParent:add(newChild)
