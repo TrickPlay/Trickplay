@@ -10,14 +10,14 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TEST_LIB/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TESTSPAP/screens")
         _VE_.insertUIElement(9, 'Button')
         _VE_.insertUIElement(9, 'DialogBox')
-        --_VE_.insertUIElement(9, 'ArrowPane')
+        _VE_.insertUIElement(9, 'ArrowPane')
         --_VE_.insertUIElement(9, 'ToastAlert')
         --_VE_.insertUIElement(9, 'LayoutManager')
         --_VE_.insertUIElement(9, 'TabBar')
-        --_VE_.insertUIElement(9, 'ScrollPane')
+        _VE_.insertUIElement(9, 'ScrollPane')
         --_VE_.insertUIElement(9, 'MenuButton')
         _VE_.insertUIElement(9, 'Rectangle')
     end 
@@ -146,8 +146,17 @@ end
 
 _VE_.contentMove = function(newChildGid, newParentGid)
     local newChild = devtools:gid(newChildGid)
+    local newParent = devtools:gid(newParentGid)
     newChild:unparent()
+    if util.is_this_container(newParent) == false then 
+        newChild.reactive = true
+        util.create_mouse_event_handler(newChild, newChild.widget_type)
+    else
+        newChild.reactive = false
+        newChild.position = {0,0,0}--{newChild.x - newParent.x, newChild.y - newParent.y, newChild.z - newParent.z}
+    end
     devtools:gid(newParentGid):add(newChild)
+    --newParent:add(newChild)
 end 
 
 _VE_.alignLeft = function(gid)
@@ -1081,8 +1090,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     if uiTypeStr == "ButtonPicker" then 
         uiInstance.items = {"item1","item2","item3", "item4", "item5", "item6", "item7", "item8", "item9", "item10", "item11", "item12", "item13", "item14"}
     ---[[ for arrow_move_by test
-        elseif uiTypeStr == "ArrowPane" then 
-        uiInstance:add(Widget_Rectangle{w=1000,h=1000,color="ffff00"},Widget_Rectangle{w=100,h=100,color="ff0000"},Widget_Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
+        --elseif uiTypeStr == "ArrowPane" then 
+        --uiInstance:add(Widget_Rectangle{w=1000,h=1000,color="ffff00"},Widget_Rectangle{w=100,h=100,color="ff0000"},Widget_Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
     --]]--
     elseif uiTypeStr == "LayoutManager" then 
         
@@ -1114,24 +1123,24 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="Tab1",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}, Button{}} },
-                {label="Tab2",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
-                {label="Tab3",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
-                {label="Tab4",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
-                {label="Tab5",   contents = {Widget_Rectangle{w=400,h=400,color={255,255,255,255}}} },
+                {label="One",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff0000"},Button()}}},
+                {label="Two",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ff00"}}}},
+                {label="Three", contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
+                {label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
+                {label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
+                {label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ffff"}}}},
             }
         }
 
         --uiInstance.tabs[1]:add()
     elseif uiTypeStr == "ProgressBar" then 
         uiInstance.progress = 0.25
-    elseif uiTypeStr == "ScrollPane" then 
-        b = Button{name="pretty_button"}
-        uiInstance:add(b)
+    --elseif uiTypeStr == "ScrollPane" then 
+        --b = Button{name="pretty_button"}
+        --uiInstance:add(b)
     elseif uiTypeStr == "DialogBox" then 
         local b = Button{name="pretty_button"}
-        uiInstance.content = {b}
-
+        uiInstance:add(b)
     elseif uiTypeStr == "MenuButton" then 
         --b = Button{name="pretty_button"}
         uiInstance.items = {Button{name="pretty_button"}}

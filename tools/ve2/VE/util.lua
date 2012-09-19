@@ -48,7 +48,6 @@ function util.addIntoLayer (uiInstance, group)
     return
 end 
 
-
 function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
@@ -74,7 +73,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		if m and m.control then control = true else control = false end 
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
-        uiInstance:grab_pointer()
+        --kkk
+        --uiInstance:grab_pointer()
 
         
         if control == true then 
@@ -199,27 +199,29 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
 			        		end 
 			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
-			            	    --c.content:add(uiInstance) 
-                                temp_content_t = {}
 
-                                for i, j in ipairs (c.content) do
-                                    table.insert(temp_content_t, j)
+                                if t == "DialogBox" then 
+								    uiInstance.y = uiInstance.y - c.separator_y
+                                elseif t == "ArrowPane" then 
+                                    uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
+                                    uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
+                                elseif t == "ScrollPane" then 
+                                    uiInstance.x = uiInstance.x + c.virtual_x
+                                    uiInstance.y = uiInstance.y + c.virtual_y
                                 end 
+                                c:add(uiInstance)
 
-								uiInstance.y = uiInstance.y - c.separator_y
-			            	    table.insert(temp_content_t, uiInstance) 
-                                --dumptable (temp_content_t)
-                                --c.content = {}
-                                --c.content = temp_contnet_t
-                                c.content = {uiInstance}
                                 if blockReport ~= true then
                                     _VE_.refresh()
                                 end 
 
 			        	    elseif t == "LayoutManager" then 
+
 				     		    local col , row=  c:r_c_from_abs_position(x,y)
 				     		    c:replace(row,col,uiInstance) 
+
 			        		elseif t == "TabBar" then 
+
 							    local x_off, y_off = c:get_offset()
 
 							    local t_index = c:get_index()
@@ -229,6 +231,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 								    uiInstance.y = uiInstance.y - y_off	
 			            			c.tabs[t_index]:add(uiInstance) 
 								end
+
 							elseif t == "Group" then 
 							    c:add(uiInstance)
 			        		end 
@@ -323,11 +326,14 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			end
 		end 
 
+
 		selected_content = nil
 		selected_container = nil
         dragging = nil
-        uiInstance:ungrab_pointer()
+        --kkk
+        --uiInstance:ungrab_pointer()
         uiInstance:set{}
+        return true 
 	end,true) 
 end 
 
