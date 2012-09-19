@@ -148,15 +148,17 @@ _VE_.contentMove = function(newChildGid, newParentGid)
     local newChild = devtools:gid(newChildGid)
     local newParent = devtools:gid(newParentGid)
     newChild:unparent()
+
     if util.is_this_container(newParent) == false then 
         newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
     else
         newChild.reactive = false
-        newChild.position = {0,0,0}--{newChild.x - newParent.x, newChild.y - newParent.y, newChild.z - newParent.z}
+        newChild.position = {0,0,0}
     end
-    devtools:gid(newParentGid):add(newChild)
-    --newParent:add(newChild)
+
+    newParent:add(newChild)
+    _VE_.refresh()
 end 
 
 _VE_.alignLeft = function(gid)
