@@ -20,17 +20,9 @@ class TrickplayElementModel(QStandardItemModel):
         self.newParentGid = None
 
         QObject.connect(self, SIGNAL("rowsRemoved(const QModelIndex&, int, int)"), self.rr)
-        QObject.connect(self, SIGNAL("rowsMoved(const QModelIndex&, int, int, QModelIndex&, int)"), self.rm)
         QObject.connect(self, SIGNAL("rowsInserted (const QModelIndex&, int, int)"), self.ri)
         QObject.connect(self, SIGNAL("rowsAboutToBeRemoved(const QModelIndex&, int, int)"), self.rar)
-        QObject.connect(self, SIGNAL("rowsAboutToBeMoved(const QModelIndex&, int, int, QModelIndex&, int)"), self.ram)
         QObject.connect(self, SIGNAL("rowsAboutToBeInserted (const QModelIndex&, int, int)"), self.rai)
-
-    def rm(self, idx, i , j, idx2, k):
-        print "rowsMoved**********************"
-
-    def ram(self, idx, i , j, idx2, k):
-        print "rowsAboutMoved**********************"
 
     def rai(self, idx, i , j):
         #print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
@@ -61,10 +53,9 @@ class TrickplayElementModel(QStandardItemModel):
 
         if self.newChildGid and self.newParentGid :
             inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+")")
+            print inputCmd
             self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
             self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
-
-
     """
     #---------------------------------------------------------------------------
     #def supportedDropActions(self): 
@@ -321,8 +312,9 @@ class TrickplayElementModel(QStandardItemModel):
                 partner.setData("", Qt.DisplayRole)
                 node.appendRow([tempnode, partner])
                 #print r, (tabs[r]['contents'][1])
-                for c in range (0, len(tabs[r]['contents'])) :
-                    self.insertElement(tempnode, tabs[r]['contents'][c], data, False)
+                for c in range (0, len(tabs[r]['contents']['children'])) :
+                    self.insertElement(tempnode, tabs[r]['contents']['children'][c], data, False)
+
         # Element has no tabs
         except KeyError:
             pass

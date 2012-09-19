@@ -582,6 +582,7 @@ class TrickplayInspector(QWidget):
             def makeBoolHandler(gid, prop_name):
                 def handler(state):
                     if not self.preventChanges:
+                        print("qqqq")
                         self.preventChanges = True
 
                         if state == 2 :
@@ -1162,17 +1163,30 @@ class TrickplayInspector(QWidget):
             index = self.selected(self.ui.inspector)
             item = self.inspectorModel.itemFromIndex(index)
 
-            if not item.TPJSON() :
-                if item.tabdata :
-                    tempdata = {}
-                    tempdata['gid'] = item.tabdata['gid']
-                    tempdata['name'] = item.tabdata['name']
-                    tempdata['label'] = item.text() 
-                    tempdata['type'] = "Tab"
-                    tempdata['index'] = item.tabIndex
-                    self.propertyFill(tempdata)
-                    self.curLayerName = self.layerName[int(item.tabdata['gid'])] 
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
+            try : 
+                if not item.TPJSON() :
+                    if item.tabdata :
+                        tempdata = {}
+                        tempdata['gid'] = item.tabdata['gid']
+                        tempdata['name'] = item.tabdata['name']
+                        tempdata['label'] = item.text() 
+                        tempdata['type'] = "Tab"
+                        tempdata['index'] = item.tabIndex
+                        self.propertyFill(tempdata)
+                        self.curLayerName = self.layerName[int(item.tabdata['gid'])] 
+                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
+                    self.preventChanges = False
+                    return
+            except:
+                self.main._emulatorManager.getUIInfo() 
+                self.main._emulatorManager.getStInfo() 
+
+                #TODO : find/store gid to set currentIndex after tree refresh
+
+                #theItem = self.search(theLayer, 'name')
+                #self.ui.inspector.setCurrentIndex(theItem.index())
+                #self.ui.inspector.setCurrentIndex(self.prev_idx)
+
                 self.preventChanges = False
                 return
 
@@ -1207,8 +1221,6 @@ class TrickplayInspector(QWidget):
         #print "inspectorDataChanged"
 
         if not self.preventChanges:
-            #print "1111111111111111111"
-            
             self.preventChanges = True
 
             #if not topLeft.model() :
@@ -1221,12 +1233,11 @@ class TrickplayInspector(QWidget):
             
             # Only nodes in the first column have checkboxes
             if 0 == item.column():
-                #print "22222222222222222222"
                 
                 checkState = bool(item.checkState())
 
                 if self.inspectorModel.preventChanges == True :
-                    #print "YUGI !!!!!!!!!!!!!!!!!!!!!!!!!"
+                    self.preventChanges = False
                     return 
 
                 if self.sendData(item['gid'], 'is_visible', checkState):        
@@ -1355,7 +1366,6 @@ class TrickplayInspector(QWidget):
         """
         
         if not self.preventChanges:
-            print "oooopropertyDataChanged"
             
             self.preventChanges = True
             

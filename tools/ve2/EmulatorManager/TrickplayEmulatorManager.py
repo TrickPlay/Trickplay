@@ -209,6 +209,8 @@ class TrickplayEmulatorManager(QWidget):
 
 					except:
 					    print("error :(")
+					    self.getUIInfo()
+					    self.getStInfo()
 
 				    if luaCmd == "repStInfo":
 				        if self.main.command == "openFile" :
