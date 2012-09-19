@@ -11,6 +11,7 @@ if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
 if not BUTTON            then dofile("Button/Button.lua")                   end
+if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")     end
 if not MENUBUTTON        then dofile("MenuButton/MenuButton.lua")           end
 
 local test_group = Group()
@@ -60,13 +61,15 @@ local style = {
 screen:show()
 
 mb0 = MenuButton()
---[[
+---[[
 mb1 = MenuButton{
     x = 300,
     items = {
-        Button(),Button()
+        Button(),Button(),Button{enabled = false},Button()
     }
 }
+--]]
+---[[
 mb2 = MenuButton{
     x = 600,
     direction = "up",
@@ -74,13 +77,20 @@ mb2 = MenuButton{
         Button(),Button()
     }
 }
+--]]
+---[[
 mb3 = MenuButton{
-    x = 300, y = 250,
+    x = 300, y = 350,
     direction = "right",
     items = {
         Button(),Button()
     }
 }
+dolater(function()
+    mb3:grab_key_focus()
+end)
+--]]
+---[[
 mb4 = MenuButton{
     x = 300, y = 500,
     style = style,
@@ -90,6 +100,12 @@ mb4 = MenuButton{
     }
 }
 mb4.items:insert(2,Button())
+--]]
+---[[
+
+mb4.neighbors[keys.Up] = mb3
+mb3.neighbors[keys.Down] = mb4
+
 --]]
 wg = Widget_Group()
 screen:add(wg)
