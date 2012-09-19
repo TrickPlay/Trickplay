@@ -126,7 +126,7 @@ ArrayManager = function(p)
                     end
                     for i = instance.length+1,#t do
                     --while number_of_rows < v do
-                        print("inserting",i,t[i])
+                        mesg("ArrayManager",0,"ArrayManager inserting",i,t[i])
                         instance:insert(i,t[i])--number_of_rows+1)
                     end
                     
@@ -230,7 +230,7 @@ ArrayManager = function(p)
                 data[k] = node_constructor(v)
                 
             else
-                error("Invalid index: "..k,2)
+                error("Invalid index: "..tostring(k),2)
             end
             report_change("__newindex")
             
@@ -325,7 +325,7 @@ GridManager = function(p)
         row_mt.__insert = function(self,i,d)
             if i < 1 or i > number_of_cols+1 then
                 --error("Invalid index. 0 < '"..k.."' < "..number_of_cols,2)
-                print("row_mt.__index oob",1,i,number_of_cols)
+                mesg("GridManager",0,"GridManager row insert row_mt.__index oob",1,i,number_of_cols)
                 return 
             else
                 return table.insert(row_data,i,d)
@@ -335,7 +335,7 @@ GridManager = function(p)
         row_mt.__remove = function(self,i)
             if i < 1 or i > number_of_cols then
                 --error("Invalid index. 0 < '"..k.."' < "..number_of_cols,2)
-                print("row_mt.__index oob",1,i,number_of_cols)
+                mesg("GridManager",0,"GridManager row remove row_mt.__index oob",1,i,number_of_cols)
                 return 
             else
                 return table.remove(row_data,i)
@@ -600,7 +600,7 @@ GridManager = function(p)
             
             elseif type(k) == "number" then
                 if k < 1 or k > number_of_rows then
-                    print("Invalid row index. 0 < '"..k.."' < "..number_of_rows)
+                    mesg("GridManager",0,"GridManager Invalid row index. 0 < '"..k.."' < "..number_of_rows)
                     return
                 end
                 
