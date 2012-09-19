@@ -174,7 +174,7 @@ function screen_ui.selected(obj)
 		--group_pos = obj.position
 		if bumo then 
 			obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
-		else 
+		elseif group_pos then 
      		obj_border.x = obj.x + group_pos[1]
      	   	obj_border.y = obj.y + group_pos[2]
 		end
@@ -203,7 +203,7 @@ function screen_ui.selected(obj)
     if(obj.extra.is_in_group == true)then 
 		if bumo then 
     		anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
-		else
+		elseif group_pos then
     		anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
 		end
     else 
@@ -520,7 +520,9 @@ function screen_ui.dragging(x,y)
 	             	border.position = {cur_x, cur_y}
 				 else 
 				 	local group_pos = util.get_group_position(actor)
-	             	border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+                    if  group_pos then 
+	             	    border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+                    end 
 				 end 
 		    else -- if 
 	             border.position = {x -dx, y -dy}
@@ -551,7 +553,9 @@ function screen_ui.dragging(x,y)
 	                anchor_mark.position = {cur_x, cur_y}
 				else 
 			 		local group_pos = util.get_group_position(actor)
-	                anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
+                    if group_pos then 
+	                    anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
+                    end
 				end 
 		    end 
         end
