@@ -1,37 +1,52 @@
 #include <magick/MagickCore.h>
+#include <string.h>
 
-int main(int argc,char **argv)
+int main(int ,char **argv)
 {
     MagickCoreGenesis(*argv, MagickTrue);
 
-    ExceptionInfo
-      *exception;
+    ExceptionInfo *exception;
 
-    Image
-      *image,
-      *images;
+    Image *image, *images;
 
-    ImageInfo
-      *image_info;
+    ImageInfo *image_info;
 
 
     image_info=AcquireImageInfo();
-    (void) CopyMagickString(image_info->filename,argv[1],MaxTextExtent);
+    CopyMagickString(image_info->filename, argv[1], MaxTextExtent);
     exception=AcquireExceptionInfo();
     images=ReadImage(image_info,exception);
 
     if (exception->severity != UndefinedException)
-      CatchException(exception);
+    {
+        CatchException(exception);
+    }
     if (images == (Image *) NULL)
-      exit(1);
+    {
+        exit(1);
+    }
 
-    unsigned int i=0;
     while ((image=RemoveFirstImageFromList(&images)) != (Image *) NULL)
     {
-      const char *prop = GetImageProperty(image, "label");
-      if(prop)
-          printf("Image (%s): %lu x %lu @ (%lu,%lu) - %s\n", prop, image->page.width, image->page.height, image->page.x, image->page.y, (NoCompositeOp==image->compose)?"HIDDEN":"SHOWN" );
-      DestroyImage(image);
+        const char *prop = GetImageProperty(image, "label");
+        if(prop)
+        {
+            printf("Image (%s): %lu x %lu @ (%lu,%lu) - %s\n", prop, image->page.width, image->page.height, image->page.x, image->page.y, (NoCompositeOp==image->compose)?"HIDDEN":"SHOWN" );
+
+            CopyMagickString(image->filename, prop, MaxTextExtent );
+            ConcatenateMagickString(image->filename, ".png", MaxTextExtent );
+            ImageInfo *output_info = AcquireImageInfo();
+            CopyMagickString(output_info->filename, image->filename, MaxTextExtent);
+            // Set the file-type, just in case
+            CopyMagickString(output_info->magick, "png", MaxTextExtent);
+            if(!WriteImage(output_info, image))
+            {
+                printf("WRITE FAILED FOR %s", output_info->filename);
+            }
+            DestroyImageInfo(output_info);
+        }
+
+        DestroyImage(image);
     }
 
     exception=DestroyExceptionInfo(exception);
