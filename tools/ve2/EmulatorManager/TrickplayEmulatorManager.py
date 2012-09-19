@@ -13,6 +13,7 @@ class TrickplayEmulatorManager(QWidget):
         QWidget.__init__(self, parent)
                 
         self.main = main
+        self.contentMoveBlock = False
         self.inspector = main._inspector
         self._path = os.path.join(self.main.apath, 'VE')
         self.trickplay = QProcess()
@@ -209,8 +210,8 @@ class TrickplayEmulatorManager(QWidget):
 
 					except:
 					    print("error :(")
-					    self.getUIInfo()
-					    self.getStInfo()
+					    #self.getUIInfo()
+					    #self.getStInfo()
 
 				    if luaCmd == "repStInfo":
 				        if self.main.command == "openFile" :
@@ -233,9 +234,11 @@ class TrickplayEmulatorManager(QWidget):
 				        return
 
 				    if sdata is not None and self.pdata is not None:
+				        self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
+				        self.contentMoveBlock = False 
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
