@@ -23,7 +23,7 @@ add_verbosity("TABBAR")
 add_verbosity("ArrayManager")
 
 
-dofile("TabBar/test.lua")
+dofile("MenuButton/test.lua")
 screen:show()
 controllers:start_pointer()
 
