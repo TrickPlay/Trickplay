@@ -31,31 +31,34 @@ class TrickplayElementModel(QStandardItemModel):
     def ri(self, idx, i , j):
         #idx is parent's idx 
         #print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
-        the_item= self.itemFromIndex(idx)
-        if the_item : 
-            self.newParentGid = the_item['gid']
+        if self.inspector.main._emulatorManager.contentMoveBlock == False :
+            the_item= self.itemFromIndex(idx)
+            if the_item : 
+                self.newParentGid = the_item['gid']
         #print the_item['gid'], "inserted"
         #print the_item['gid'], "newParent"
 
     def rar(self, idx, i , j):
         #print "rowsAboutRemoved", i,j 
-        the_item= self.itemFromIndex(idx)
-        if the_item :
-            the_child_item = the_item.takeChild(i)
-            if the_child_item : 
-                self.newChildGid = the_child_item['gid']
+        if self.inspector.main._emulatorManager.contentMoveBlock == False :
+            the_item= self.itemFromIndex(idx)
+            if the_item :
+                the_child_item = the_item.takeChild(i)
+                if the_child_item : 
+                    self.newChildGid = the_child_item['gid']
 
 
     def rr(self, idx, i , j):
         #print "rowsRemoved"
-        self.preventChanges = False
-        the_item= self.itemFromIndex(idx)
+        #self.preventChanges = False
+        if self.inspector.main._emulatorManager.contentMoveBlock == False :
+            the_item= self.itemFromIndex(idx)
 
-        if self.newChildGid and self.newParentGid :
-            inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+")")
-            print inputCmd
-            self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
-            self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
+            if self.newChildGid and self.newParentGid :
+                inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+")")
+                print inputCmd
+                self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
+                self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
     """
     #---------------------------------------------------------------------------
     #def supportedDropActions(self): 

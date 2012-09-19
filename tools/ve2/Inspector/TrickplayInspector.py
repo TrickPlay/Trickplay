@@ -1178,8 +1178,8 @@ class TrickplayInspector(QWidget):
                     self.preventChanges = False
                     return
             except:
-                self.main._emulatorManager.getUIInfo() 
-                self.main._emulatorManager.getStInfo() 
+                #self.main._emulatorManager.getUIInfo() 
+                #self.main._emulatorManager.getStInfo() 
 
                 #TODO : find/store gid to set currentIndex after tree refresh
 
