@@ -27,19 +27,54 @@ class MyStyle (QWidget):
         lo.addWidget (self._cbFoo, 3)
         self.setLayout (lo)
 
+
 class DnDTreeView(QTreeView):
     def __init__(self, parent=None, insp= None):
         super(DnDTreeView, self).__init__(parent)
         if insp :
             self.insp = insp
+        self.viewport().installEventFilter(self)
+
 
     def dragMoveEvent(self, event):
         event.setDropAction(Qt.MoveAction)
         self.insp.inspectorModel.preventChanges = True
-        #if event.answerRect().x() < 70 :
-        event.accept()
+        if event.answerRect().x() < 99 : 
+            event.accept()
+        else :
+            event.ignore()
+            #self.insp.main._emulatorManager.getUIInfo() 
+            #self.insp.main._emulatorManager.getStInfo() 
         #print event.answerRect().y()
+    def eventFilter(self, sender, event):
+        #print "Event Filter"
+        if event.type() == QEvent.Drop:
+            print "asjdfhlajkfhlaskfhdlkajshdfklj"
+            dropIndex = self.indexAt(event.pos())
+            the_item= self.insp.inspectorModel.itemFromIndex(dropIndex)
+            if the_item.text() in ['Widget_Rectangle', "Group", "Button","ButtonPicker","ProgressBar",
+            "ProgressSpinner","OrbittingDots","Slider","TextInput", "ToastAlert", "ToggleButton","Widget_Text",
+            "Widget_Image"]:
+                print the_item.text() , "is not a container UI"
+                event.ignore()
+                self.insp.inspectorModel.preventChanges = False
+                return True
+
+            if not dropIndex.parent().isValid() == True: 
+                print("Drop Event Ignored ... ")
+                event.ignore()
+                self.insp.inspectorModel.preventChanges = False
+                return True
+
+        return False
+            
+        #if event.type() == QEvent.ChildRemoved:
+            #print "Tree item Removed"
+        #if event.type() == QEvent.dataChanged or event.type() == QEvent.selectionChanged or event.type() == QEvent.ChildRemoved:
+
     """
+    def dropEvent(self, event):
+        event.accept()
     def eventFilter(self, sender, event):
         print "Event Filter"
     def dropEvent(self, event):
@@ -52,18 +87,6 @@ class DnDTreeView(QTreeView):
         event.accept()
         #print event.answerRect().x()
         #print event.answerRect().y()
-
-    def eventFilter(self, sender, event):
-        print "Event Filter"
-        if event.type() == QEvent.DropEvent:
-            print "asjdfhlajkfhlaskfhdlkajshdfklj"
-            dropIndex = self.indexAt(event.pos())
-            if not dropIndex.parent().isValid() : 
-                event.ignore()
-            
-        if event.type() == QEvent.ChildRemoved:
-            print "Tree item Removed"
-        #if event.type() == QEvent.dataChanged or event.type() == QEvent.selectionChanged or event.type() == QEvent.ChildRemoved:
 
     def dropEvent(self, event):
         dropIndex = self.indexAt(event.pos())
