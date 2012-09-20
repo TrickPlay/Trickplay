@@ -464,13 +464,13 @@ Widget = function(parameters)
     env.set_children  = getmetatable(instance).__setters__.children
     env.get_children  = getmetatable(instance).__getters__.children
     
-    override_function( instance, "add",           function() print(          "'add' method is removed") end )
-    override_function( instance, "remove",        function() print(       "'remove' method is removed") end )
-    override_function( instance, "clear",         function() print(        "'clear' method is removed") end )
-    override_function( instance, "foreach_child", function() print("'foreach_child' method is removed") end )
-    override_function( instance, "find_child",    function() print(   "'find_child' method is removed") end )
-    override_function( instance, "raise_child",   function() print(  "'raise_child' method is removed") end )
-    override_function( instance, "lower_child",   function() print(  "'lower_child' method is removed") end )
+    override_function( instance, "add",           function() print(pcall(error,          "'add' method is removed",3)) end )
+    override_function( instance, "remove",        function() print(pcall(error,       "'remove' method is removed",3)) end )
+    override_function( instance, "clear",         function() print(pcall(error,        "'clear' method is removed",3)) end )
+    override_function( instance, "foreach_child", function() print(pcall(error,"'foreach_child' method is removed",3)) end )
+    override_function( instance, "find_child",    function() print(pcall(error,   "'find_child' method is removed",3)) end )
+    override_function( instance, "raise_child",   function() print(pcall(error,  "'raise_child' method is removed",3)) end )
+    override_function( instance, "lower_child",   function() print(pcall(error,  "'lower_child' method is removed",3)) end )
     
 	override_property(
         instance,"children", 
