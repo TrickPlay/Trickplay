@@ -63,20 +63,29 @@ tb1.tabs[3].contents = Widget_Group{children={Rectangle{w=40,h=40,color="30f0f0"
 dumptable(tb1.attributes)
 --]]
 ---[[
-tb2 = TabBar{
+tb2 = TabBar()
+tb2:set{
     pane_w = 500,
+    --tab_w  = 200,
     tab_h  = 100,
+    --direction = "vertical",
+    tab_location = "top",
     style = style,
     position = {100,600},
     tabs = {
-        {label="One",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="ff0000"},Button()}}},
-        {label="Two",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="00ff00"}}}},
-        {label="Three", contents = Widget_Group{children={Rectangle{w=500,h=400,color="0000ff"}}}},
-        {label="Four",  contents = Widget_Group{children={Rectangle{w=500,h=400,color="ffff00"}}}},
-        {label="Five",  contents = Widget_Group{children={Rectangle{w=500,h=400,color="ff00ff"}}}},
-        {label="Six",   contents = Widget_Group{children={Rectangle{w=500,h=400,color="00ffff"}}}},
+        {label="One",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ff0000"},Button()}}},
+        {label="Two",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="00ff00"}}}},
+        {label="Three", contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="0000ff"}}}},
+        {label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ffff00"}}}},
+        {label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="00ffff"}}}},
     }
 }
+---[[
+s = tb2:to_json()
+tb2 = TabBar()
+tb2:from_json(s)
+--tb2.style = style
 --]]
 --[[
 tb3 = TabBar{
