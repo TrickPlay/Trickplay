@@ -34,13 +34,15 @@ screen:show()
 lm0 = LayoutManager()
 --]]
 ---[[
-lm1 = LayoutManager{
+lm1 = LayoutManager()
+lm1:set{
     x = 1000,
     number_of_rows = 4,
     number_of_cols = 2,
+    --placeholder = Widget_Rectangle{w=300,h=300},
     cells = {
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        {Widget_Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
+        {Widget_Rectangle{w=100,h=100},false},--Rectangle{w=100,h=100}},
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
         {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
@@ -50,8 +52,29 @@ lm1.reactive = true
 function lm1:on_button_down(x,y)
     print(lm1:r_c_from_abs_x_y(x,y))
 end
+
+print("===============================================================")
+print("===============================================================")
+print("===============================================================")
+lm1.placeholder = Widget_Rectangle{w=300,h=300}
 --]]
----[[
+--[[
+
+tj = lm1:to_json()
+lm1 = nil
+lmj = LayoutManager()
+print("===============================================================")
+print("===============================================================")
+print("===============================================================")
+dumptable(json:parse(tj))
+print("===============================================================")
+print("===============================================================")
+print("===============================================================")
+lmj:from_json(tj)
+screen:add(lmj)
+lmj.placeholder = Widget_Rectangle{w=300,h=300}
+--]]
+--[[
 lm2 = LayoutManager{
     y = 400,
     number_of_rows = 3,
