@@ -26,15 +26,29 @@ class TrickplayElementModel(QStandardItemModel):
 
     def rai(self, idx, i , j):
         #print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
-        pass
+        if self.inspector.main._emulatorManager.contentMoveBlock == False :
+            the_item= self.itemFromIndex(idx)
+            if the_item : 
+                try:
+                    self.newParentGid = the_item['gid']
+                except:
+                    self.newParentGid = None
+                    print ("merong")
+        #pass
 
     def ri(self, idx, i , j):
         #idx is parent's idx 
         #print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
+        pass
+        """
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
             if the_item : 
-                self.newParentGid = the_item['gid']
+                try:
+                    self.newParentGid = the_item['gid']
+                except:
+                    
+        """
         #print the_item['gid'], "inserted"
         #print the_item['gid'], "newParent"
 
@@ -45,7 +59,11 @@ class TrickplayElementModel(QStandardItemModel):
             if the_item :
                 the_child_item = the_item.takeChild(i)
                 if the_child_item : 
-                    self.newChildGid = the_child_item['gid']
+                    try:
+                        self.newChildGid = the_child_item['gid']
+                    except:
+                        self.newChildGid = None
+                        print ("merong2")
 
 
     def rr(self, idx, i , j):
@@ -59,6 +77,7 @@ class TrickplayElementModel(QStandardItemModel):
                 print inputCmd
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
+            
     """
     #---------------------------------------------------------------------------
     #def supportedDropActions(self): 
