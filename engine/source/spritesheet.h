@@ -1,9 +1,3 @@
-/*
-
-    spritesheet.cpp.h
-
-*/
-
 #ifndef __TRICKPLAY_SPRITESHEET_H__
 #define __TRICKPLAY_SPRITESHEET_H__
 
@@ -21,8 +15,6 @@ public:
 
     bool map_subtexture( const gchar * id , int x , int y , int w , int h );
     CoglHandle get_subtexture( const gchar * id );
-
-    // Utility functions
     GList * get_ids();
     void dump();
     void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
