@@ -1,0 +1,39 @@
+/*
+
+    spritesheet.cpp.h
+
+*/
+
+#ifndef __TRICKPLAY_SPRITESHEET_H__
+#define __TRICKPLAY_SPRITESHEET_H__
+
+#include <clutter/clutter.h>
+#include <stdlib.h>
+#include "util.h"
+
+class SpriteSheet : public RefCounted
+{
+public:
+    inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
+
+    SpriteSheet( CoglHandle texture );
+    ~SpriteSheet();
+
+    bool map_subtexture( const gchar * id , int x , int y , int w , int h );
+    CoglHandle get_subtexture( const gchar * id );
+
+    // Utility functions
+    void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
+    void dump();
+
+    // DELETE THIS
+    inline CoglHandle get_texture(){ return texture; }
+
+private:
+    GHashTable *map;
+    CoglHandle texture;
+
+    SpriteSheet( const SpriteSheet& ){}
+};
+
+#endif
