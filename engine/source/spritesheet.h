@@ -23,8 +23,9 @@ public:
     CoglHandle get_subtexture( const gchar * id );
 
     // Utility functions
-    void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
+    GList * get_ids();
     void dump();
+    void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
 
     // DELETE THIS
     inline CoglHandle get_texture(){ return texture; }
