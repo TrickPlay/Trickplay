@@ -20,9 +20,6 @@ void refresh_texture( GObject * sprite )
         if ( cogl_is_texture( sprite_texture ) && sprite_texture != clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( sprite ) ) )
         {
             clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , COGL_TEXTURE( sprite_texture ) );
-
-            // We hold a reference to the SpriteSheet so we don't need a reference to the subtexture itself
-            cogl_handle_unref( sprite_texture );
         }
     }
 }
