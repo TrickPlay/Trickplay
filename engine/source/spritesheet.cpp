@@ -38,7 +38,6 @@ bool SpriteSheet::map_subtexture( const gchar * id , int x , int y , int w , int
 
 CoglHandle SpriteSheet::get_subtexture( const gchar * id )
 {
-    printf("\t\t\t==== %p %s\n", map, id);
     return (CoglHandle) g_hash_table_lookup( map , id );
 }
 
