@@ -17,7 +17,7 @@ void refresh_texture( GObject * sprite )
     if ( id && sheet )
     {
         CoglHandle sprite_texture = sheet->get_subtexture( id );
-        if ( cogl_is_texture( sprite_texture ) )
+        if ( cogl_is_texture( sprite_texture ) && sprite_texture != clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( sprite ) ) )
         {
             clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , COGL_TEXTURE( sprite_texture ) );
 
@@ -70,7 +70,13 @@ class Sprite [[ClutterActor*]] actor
         [[
             GObject * g_self = G_OBJECT( self );
 
-            g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
-            refresh_texture( g_self );
+            char * old_id = (char*) g_object_get_data( g_self , "tp-id" );
+            char * new_id = (char*) lua_tostring( L , -1 );
+
+            if ( ! old_id || strcmp( old_id , new_id ) != 0 )
+            {
+                g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
+                refresh_texture( g_self );
+            }
         ]];
 }
