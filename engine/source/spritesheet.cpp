@@ -41,6 +41,18 @@ CoglHandle SpriteSheet::get_subtexture( const gchar * id )
     return (CoglHandle) g_hash_table_lookup( map , id );
 }
 
+GList * SpriteSheet::get_ids()
+{
+    return g_hash_table_get_keys( map );
+}
+
+void SpriteSheet::dump()
+{
+    tpinfo( "{" );
+    g_hash_table_foreach( map , (GHFunc) log_subtexture , NULL );
+    tpinfo( "}" );
+}
+
 void SpriteSheet::make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h )
 {
     CoglTexture * subtexture = COGL_TEXTURE( (CoglHandle) g_hash_table_lookup( map , id ) );
@@ -51,13 +63,6 @@ void SpriteSheet::make_material_from_subtexture( const gchar * id , CoglMaterial
     *material = new_material;
     *w = cogl_texture_get_width( subtexture );
     *h = cogl_texture_get_height( subtexture );
-}
-
-void SpriteSheet::dump()
-{
-    tpinfo( "{" );
-    g_hash_table_foreach( map , (GHFunc) log_subtexture , NULL );
-    tpinfo( "}" );
 }
 
 void log_subtexture( gpointer id_ptr , gpointer subtexture_ptr , gpointer none )

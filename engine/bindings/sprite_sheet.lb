@@ -180,6 +180,22 @@ class SpriteSheet [[SpriteSheet*]]
             self = lb_construct( SpriteSheet , sheet );
         ]];
 
+    table get_ids()
+        [[
+            GList * iter = self->get_ids();
+
+            int index = 1;
+
+            lua_newtable( L );
+
+            for ( ; iter ; iter = iter->next )
+            {
+                lua_pushstring( L , (char*) iter->data );
+                lua_rawseti( L , -2 , index );
+                ++index;
+            }
+        ]];
+
     ~SpriteSheet()
         [[
         ]];
