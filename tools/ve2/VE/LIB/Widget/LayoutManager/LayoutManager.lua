@@ -1261,7 +1261,7 @@ LayoutManager = setmetatable(
                                 break
                             end
                         end
-                        return r,c
+                        return (r < 1 and 1 or r),(c < 1 and 1 or c)
                     end
                 end,
                 r_c_from_abs_x_y = function(instance,env)
