@@ -485,6 +485,9 @@ Widget_Group = function(parameters)
     
     local instance =  Widgetize(  Group()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Group" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"children",
@@ -557,6 +560,9 @@ Widget_Rectangle = function(parameters)
     
     local instance = Widgetize(  Rectangle()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Rectangle" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -591,6 +597,9 @@ Widget_Text = function(parameters)
     
     local instance = Widgetize(  Text()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Text" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -622,6 +631,9 @@ Widget_Image = function(parameters)
     
     local instance = Widgetize(  Image()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Image" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -653,6 +665,9 @@ Widget_Clone = function(parameters)
     
     local instance = Widgetize(  Clone()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Clone" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
