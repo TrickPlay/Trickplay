@@ -11,8 +11,10 @@
 
 #import "rtpenc_h264.h"
 
+
 @interface _VideoStreamerContext : VideoStreamerContext {
 @private
+    NSString *fullAddress;
     NSString *SIPPassword;
     NSString *SIPUserName;
     NSString *SIPRemoteUserName;
@@ -27,6 +29,10 @@
 
 #pragma mark -
 #pragma mark Property Getters
+
+- (NSString *)fullAddress {
+    return fullAddress;
+}
 
 - (NSString *)SIPPassword {
     return SIPPassword;
@@ -59,20 +65,50 @@
     return [self initWithUserName:nil password:nil remoteUserName:nil serverHostName:nil serverPort:0 clientPort:0];
 }
 
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)remoteAddress serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
+    if (!user || !password || !remoteAddress) {
+        [self release];
+        return nil;
+    }
+    
+    NSArray *components = [remoteAddress componentsSeparatedByString:@":"];
+    if (components.count != 2) {
+        [self release];
+        return nil;
+    }
+    NSString *protocol = [components objectAtIndex:0]; // For now this should be "sip"
+    if ([protocol compare:@"sip"] != NSOrderedSame) {
+        [self release];
+        return nil;
+    }
+    NSString *userAndHost = [components objectAtIndex:1];
+    components = [userAndHost componentsSeparatedByString:@"@"];
+    if (components.count != 2) {
+        [self release];
+        return nil;
+    }
+    NSString *remoteUser = [components objectAtIndex:0];
+    NSString *host = [components objectAtIndex:1];
+    
+    return [self initWithUserName:user password:password remoteUserName:remoteUser serverHostName:host serverPort:serverPort clientPort:clientPort];
+}
+
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     if (!user || !password || !remoteUser || !hostName) {
+        [self release];
         return nil;
     }
     
     self = [super init];
     if (self) {
+        fullAddress = [[NSString stringWithFormat:@"sip:%@@%@", remoteUser, hostName] retain];
         SIPUserName = [user retain];
         SIPPassword = [password retain];
         SIPRemoteUserName = [remoteUser retain];
         SIPServerHostName = [hostName retain];
         SIPServerPort = serverPort;
         // TODO: May want to figure out something better to do for ports. I.E. if two different devices
-        // on the same network decide to use 5060, SIP packets with be directed to only one of
+        // on the same network decide to use 5060, SIP packets will be directed to only one of
         // them from FreeSwitch
         if (SIPServerPort < 1025 || SIPServerPort > 65355) {
             SIPServerPort = 5060;
@@ -86,7 +122,10 @@
     return self;
 }
 
-- (void)dealloc {    
+- (void)dealloc {
+    NSLog(@"VideoStreamerContext dealloc");
+    
+    [fullAddress release];
     [SIPUserName release];
     [SIPPassword release];
     [SIPRemoteUserName release];
@@ -132,6 +171,18 @@
 
 - (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteAddress:(NSString *)address serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)fullAddress {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException 
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
@@ -189,15 +240,9 @@
 
 
 
-@interface VideoStreamer()
-
-- (void)initCapture;
-- (void)terminateCaptureWithInfo:(NSString *)info;
-
-@end
-
 
 @interface _VideoStreamer : VideoStreamer <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
+    
     NetworkManager *networkMan;
     
     AVCaptureSession *captureSession;
@@ -207,8 +252,24 @@
     
     VideoStreamerContext *streamerContext;
     
+    enum CONNECTION_STATUS status;
+    
+    NSString *terminationInfo;
+    enum NETWORK_TERMINATION_CODE terminationCode;
+            
     id <VideoStreamerDelegate> delegate;
 }
+
+@property (nonatomic, retain) AVCaptureSession *captureSession;
+@property (nonatomic, retain) CALayer *customLayer;
+
+// AVCaptureSessions cleanup asynchronously after a call to stopRunning.
+// This callback is thus called after the AVCaptureSession cleans up
+// its internal stuff.
+void capture_cleanup(void *context);
+
+- (void)initCapture;
+- (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code;
 
 @end
 
@@ -216,17 +277,28 @@
 
 @implementation _VideoStreamer
 
+@synthesize captureSession;
+
+void capture_cleanup(void *context) {
+    _VideoStreamer *self = (_VideoStreamer *)context;
+    if (self->networkMan) {
+        [self->networkMan release];
+        self->networkMan = nil;
+    }
+    
+    self.customLayer = nil;
+    
+    self.captureSession = nil;
+    
+    if (self->pxbuffer) {
+        CVPixelBufferUnlockBaseAddress(self->pxbuffer, 0);
+    }
+        
+    [self.delegate videoStreamer:self chatEndedWithInfo:self->terminationInfo networkCode:self->terminationCode];
+}
+
 #pragma mark -
 #pragma mark properties
-
-- (AVCaptureSession *)captureSession {
-    return captureSession;
-}
-
-- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
-    [captureSession release];
-    captureSession = [_captureSession retain];
-}
 
 - (CALayer *)customLayer {
     return customLayer;
@@ -237,12 +309,60 @@
     customLayer = [_customLayer retain];
 }
 
+- (VideoStreamerContext *)streamerContext {
+    return streamerContext;
+}
+
+- (enum CONNECTION_STATUS)status {
+    return status;
+}
+
 - (id <VideoStreamerDelegate>)delegate {
     return delegate;
 }
 
 - (void)setDelegate:(id <VideoStreamerDelegate>)_delegate {
     delegate = _delegate;
+}
+
+#pragma mark -
+#pragma mark code descriptions
+
+// TODO: Provide better descriptions of how or why the called did what it did
+- (NSString *)networkTerminationDescription:(enum NETWORK_TERMINATION_CODE)code {
+    switch (code) {
+        case CALL_FAILED:
+            return @"CALL_FAILED";
+            
+        case CALL_DROPPED:
+            return @"CALL_DROPPED";
+            
+        case CALL_ENDED_BY_CALLEE:
+            return @"CALL_ENDED_BY_CALLEE";
+            
+        case CALL_ENDED_BY_CALLER:
+            return @"CALL_ENDED_BY_CALLER";
+            
+        default:
+            return @"CALL_ENDED";
+    }
+}
+
+// TODO: Provide better state descriptions
+- (NSString *)connectionStatusDescription:(enum CONNECTION_STATUS)_status {
+    switch (_status) {
+        case CONNECTED:
+            return @"CONNECTED";
+
+        case INITIATING:
+            return @"INITIATING";
+            
+        case DISCONNECTED:
+            return @"DISCONNECTED";
+            
+        default:
+            return @"DISCONNECTED";
+    }
 }
 
 #pragma mark -
@@ -284,6 +404,9 @@
     
     if (self) {
         streamerContext = [_streamerContext retain];
+        status = INITIATING;
+        terminationCode = CALL_ENDED_BY_CALLEE;
+        terminationInfo = nil;
         self.delegate = _delegate;
     }
     
@@ -300,36 +423,29 @@
         networkMan.delegate = self;
         [delegate videoStreamerInitiatingChat:self];
     } else {
-        [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure"];
+        status = DISCONNECTED;
+        [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure" networkCode:CALL_FAILED];
     }
 }
 
 - (void)endChat {
-    [self terminateCaptureWithInfo:@"Call to method '- (void)endChat'"];
+    [networkMan endChat];
 }
 
 #pragma mark -
 #pragma Video Capture
 
 - (void)initCapture {
-    //glEnable(GL_TEXTURE_2D);
-	//glDisable(GL_DEPTH_TEST);
-    
     AVCaptureDeviceInput *captureInput = [AVCaptureDeviceInput deviceInputWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] error:nil];
     
-    AVCaptureVideoDataOutput *captureOutput = [[AVCaptureVideoDataOutput alloc] init];
-    
-    /*
-     if ([self setUpNetwork] != 0) {
-     NSLog(@"could not set up network");
-     return;
-     }
-     //*/
+    AVCaptureVideoDataOutput *captureOutput = [[[AVCaptureVideoDataOutput alloc] init] autorelease];
     
     captureOutput.alwaysDiscardsLateVideoFrames = YES;
     
     dispatch_queue_t video_capture_queue;
     video_capture_queue = dispatch_queue_create("video_capture_queue", NULL);
+    dispatch_set_context(video_capture_queue, self);
+    dispatch_set_finalizer_f(video_capture_queue, (dispatch_function_t)capture_cleanup);
     [captureOutput setSampleBufferDelegate:self queue:video_capture_queue];
     dispatch_release(video_capture_queue);
     
@@ -362,26 +478,18 @@
      prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
      [self.view.layer addSublayer:prevLayer];
      */
-    
-    //[networkMan startEncoder];
-    //[captureSession startRunning];
 }
 
-- (void)terminateCaptureWithInfo:(NSString *)info {
-    if (networkMan) {
-        [networkMan release];
-        networkMan = nil;
-    }
+- (void)terminateCaptureWithInfo:(NSString *)info networkCode:(enum NETWORK_TERMINATION_CODE)code {
+    status = DISCONNECTED;
+    terminationInfo = [info retain];
+    terminationCode = code;
     
-    self.customLayer = nil;
-    
+    // By calling stopRunning the capture_cleanup
+    // handler will be called when the iOS internal
+    // video processing block cleans up.
+    [captureSession stopRunning];
     self.captureSession = nil;
-    
-    if (pxbuffer) {
-        CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
-    }
-    
-    [delegate videoStreamer:self chatEndedWithInfo:info];
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
@@ -509,7 +617,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
     //CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     
-    [networkMan.avcEncoder encode:sampleBuffer];
+    [networkMan packetize:sampleBuffer];
     //});
     
     [pool drain];
@@ -520,15 +628,16 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (void)networkManagerEncoderReady:(NetworkManager *)networkManager {
     if (networkManager == networkMan) {
+        status = CONNECTED;
         [networkMan startEncoder];
         [captureSession startRunning];
     } else {
-        [self terminateCaptureWithInfo:@"Network Connection Failure"];
+        [self terminateCaptureWithInfo:@"Network Connection Failure" networkCode:CALL_FAILED];
     }
 }
 
-- (void)networkManagerInvalid:(NetworkManager *)networkManager {
-    [self terminateCaptureWithInfo:@"Chat Ended"];
+- (void)networkManagerInvalid:(NetworkManager *)networkManager endedWithCode:(enum NETWORK_TERMINATION_CODE)code {
+    [self terminateCaptureWithInfo:@"Chat Ended" networkCode:code];
 }
 
 #pragma mark - 
@@ -549,7 +658,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     
-    [self terminateCaptureWithInfo:@"Chat Ended: VideoStreamer UIView Did Unload"];
+    [self terminateCaptureWithInfo:@"Chat Ended: VideoStreamer UIView Did Unload" networkCode:CALL_FAILED];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -592,6 +701,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 - (void)dealloc {
+    NSLog(@"VideoStreamer dealloc");
+    
     if (networkMan) {
         [networkMan release];
         networkMan = nil;
@@ -608,6 +719,10 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (pxbuffer) {
         CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     }
+    
+    [terminationInfo release];
+    
+    self.delegate = nil;
     
     [super dealloc];
 }
@@ -648,13 +763,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     }
 }
 
-- (AVCaptureSession *)captureSession {
+- (VideoStreamerContext *)streamerContext {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
 
-- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
+- (enum CONNECTION_STATUS)status {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
@@ -703,6 +818,18 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                  userInfo:nil];
 }
 
+- (NSString *)networkTerminationDescription:(enum NETWORK_TERMINATION_CODE)code {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)connectionStatusDescription:(enum CONNECTION_STATUS)_status {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
 #pragma mark -
 #pragma User Chat controls
 
@@ -713,21 +840,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 - (void)endChat {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-#pragma mark -
-#pragma Video Capture
-
-- (void)initCapture {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (void)terminateCaptureWithInfo:(NSString *)info {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

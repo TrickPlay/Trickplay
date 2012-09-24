@@ -113,7 +113,7 @@ ArrowStyle = function(parameters)
     instance.size   = parameters.size
     instance.offset = parameters.offset
     instance.colors = parameters.colors
-    colors:subscribe_to( nil, function() instance:set{} end )
+    colors:subscribe_to( nil, function(t) instance:notify({colors=t}) end )
     
     return instance
     
@@ -184,7 +184,7 @@ BorderStyle = function(parameters)
     instance.width         = parameters.width
     instance.corner_radius = parameters.corner_radius
     instance.colors        = parameters.colors
-    colors:subscribe_to( nil, function() instance:set{} end )
+    colors:subscribe_to( nil, function(t) instance:notify({colors=t}) end )
     
     return instance
     
@@ -292,7 +292,7 @@ TextStyle = function(parameters)
     
     if parameters.colors == nil then instance.colors = nil end
     instance:set(parameters)
-    colors:subscribe_to( nil, function() instance:set{} end )
+    colors:subscribe_to( nil, function(t) instance:notify({colors=t}) end )
     
     --properties.color = parameters.color or instance.colors.default
     
@@ -461,12 +461,14 @@ Style = setmetatable({},
             instance.border      = parameters.border
             instance.text        = parameters.text
             instance.fill_colors = parameters.fill_colors
-            
-            arrow:subscribe_to(       nil, function() instance:set{} end )
-            border:subscribe_to(      nil, function() instance:set{} end )
-            text:subscribe_to(        nil, function() instance:set{} end )
-            fill_colors:subscribe_to( nil, function() instance:set{} end )
-            
+            ---[[
+            -- if a substyle was modified, notify my subscribers
+            print(instance.name,"Style object is subscribing to sub-styles")
+            arrow:subscribe_to(       nil, function(t) instance:notify({arrow       = t}) end )
+            border:subscribe_to(      nil, function(t) instance:notify({border      = t}) end )
+            text:subscribe_to(        nil, function(t) instance:notify({text        = t}) end )
+            fill_colors:subscribe_to( nil, function(t) instance:notify({fill_colors = t}) end )
+            --]]
             for f,_ in pairs(global_style_subscriptions) do
                 instance:subscribe_to(nil,f)
             end

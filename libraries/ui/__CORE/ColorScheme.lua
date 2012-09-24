@@ -143,7 +143,7 @@ ColorScheme = function(parameters)
                 
                 colors[k] = is_color(v)
                 
-                t:update()
+                t:update() -- this is not Widget.update
                 
             end
             
