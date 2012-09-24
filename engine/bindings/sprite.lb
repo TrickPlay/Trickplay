@@ -1,0 +1,79 @@
+module sprite;
+
+[[
+#include "clutter/clutter.h"
+#include "cogl/cogl.h"
+#include "clutter_util.h"
+#include "spritesheet.h"
+#include <glib.h>
+]]
+
+[[
+void refresh_texture( GObject * sprite )
+{
+    char * id = (char*) g_object_get_data( sprite , "tp-id" );
+    SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( sprite , "tp-sheet" );
+
+    if ( id && sheet )
+    {
+        CoglHandle sprite_texture = sheet->get_subtexture( id );
+        if ( cogl_is_texture( sprite_texture ) && sprite_texture != clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( sprite ) ) )
+        {
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , COGL_TEXTURE( sprite_texture ) );
+        }
+    }
+}
+]]
+
+class Sprite [[ClutterActor*]] actor
+{
+    Sprite(table props = 0 )
+        [[
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
+            ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
+
+            ClutterUtil::set_props_from_table( L, props );
+            g_object_unref( self );
+        ]];
+
+    ~Sprite()
+        [[
+        ]];
+
+    SpriteSheet sheet
+        [[
+            SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( G_OBJECT( self ), "tp-sheet" );
+            lua_pushlightuserdata( L , sheet );
+        ]]
+        [[
+            luaL_checkudata(L,2,"SPRITESHEET_METATABLE");
+            GObject * g_self = G_OBJECT( self );
+
+            SpriteSheet * old_sheet = (SpriteSheet*) g_object_get_data( g_self , "tp-sheet" );
+            SpriteSheet * new_sheet = (SpriteSheet*) UserData::get_client( L , -1 );
+
+            if ( old_sheet != new_sheet )
+            {
+                g_object_set_data_full( g_self , "tp-sheet" , new_sheet , (GDestroyNotify) SpriteSheet::unref );
+                refresh_texture( g_self );
+                RefCounted::ref( new_sheet );
+            }
+        ]];
+
+    string id
+        [[
+            id = (char*) g_object_get_data( G_OBJECT( self ) , "tp-id" );
+        ]]
+        [[
+            GObject * g_self = G_OBJECT( self );
+
+            char * old_id = (char*) g_object_get_data( g_self , "tp-id" );
+            char * new_id = (char*) lua_tostring( L , -1 );
+
+            if ( ! old_id || strcmp( old_id , new_id ) != 0 )
+            {
+                g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
+                refresh_texture( g_self );
+            }
+        ]];
+}
