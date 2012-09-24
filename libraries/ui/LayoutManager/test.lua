@@ -53,10 +53,13 @@ function lm1:on_button_down(x,y)
     print(lm1:r_c_from_abs_x_y(x,y))
 end
 
+lm1.cells:insert_row(3,{})
+
 print("===============================================================")
 print("===============================================================")
 print("===============================================================")
 lm1.placeholder = Widget_Rectangle{w=300,h=300}
+lm1.cells[2][2] = Widget_Rectangle{size={200,10}}
 --]]
 --[[
 
