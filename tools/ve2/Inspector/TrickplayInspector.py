@@ -43,13 +43,11 @@ class DnDTreeView(QTreeView):
             event.accept()
         else :
             event.ignore()
-            #self.insp.main._emulatorManager.getUIInfo() 
-            #self.insp.main._emulatorManager.getStInfo() 
         #print event.answerRect().y()
+
     def eventFilter(self, sender, event):
         #print "Event Filter"
         if event.type() == QEvent.Drop:
-            print "asjdfhlajkfhlaskfhdlkajshdfklj"
             dropIndex = self.indexAt(event.pos())
             the_item= self.insp.inspectorModel.itemFromIndex(dropIndex)
             if the_item.text() in ['Widget_Rectangle', "Group", "Button","ButtonPicker","ProgressBar",
