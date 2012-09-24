@@ -37,15 +37,26 @@ class TrickplayElementModel(QStandardItemModel):
                     self.newParentGid = the_item['gid']
                     print ("newParentGid", self.newParentGid)
                     if self.newParentGid == None :
-                        print ("LayoutManager") 
+                        print ("LayoutManager")
+                        #self.newParentGid = int(the_item.parent()['gid']) #LayoutManager
                         #print the_item.row() # layout manager col number 
-                        self.lmCol = int(the_item.row()) # layout manager col number 
-                        self.lmRow = int(the_item.parent().text()[3:])
-                        print "[", self.lmRow, self.lmCol ,"]"
-                        #print the_parent_item.text()
-                        #the_parent_item = the_item.parent().parent()
-                        #print the_parent_item.text()
-                        self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
+                        if the_item.text()[:3] == "Row" : #Drop into Row 
+                            self.lmRow = int(the_item.text()[3:])
+                            for x in range(0, the_item.rowCount()):
+                                temp_item = the_item.takeChild(x)
+                                print temp_item.text()
+                                if temp_item.text() == "Empty" :
+                                    self.lmCol = int( x ) 
+                                    break
+                            if self.lmCol == "nil" :
+                                self.lmCol = int( the_item.rowCount() )
+                            print "[", self.lmRow, self.lmCol ,"]"
+                            self.newParentGid = the_item.parent()['gid'] #LayoutManager
+                        else : #Drop into Empty Cell 
+                            self.lmCol = int(the_item.row()) # layout manager col number 
+                            self.lmRow = int(the_item.parent().text()[3:])
+                            print "[", self.lmRow, self.lmCol ,"]"
+                            self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
                 except:
                     self.newParentGid = None
                     print ("merong : newParentGid nil")
@@ -73,6 +84,8 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if the_item :
                 the_child_item = the_item.takeChild(i)
+
+                # child's parent 
 
                 if the_item.parent() and the_item.parent()['type'] == "LayoutManager" :
                     self.lmChild = "true"
