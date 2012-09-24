@@ -356,12 +356,15 @@ GridManager = function(p)
             
         end
         row_mt.__newindex = function(self,k,v)
+            test_and_set("row_mt.__newindex")
             if type(k) == "number" and k >= 1 and 
                 k <= number_of_cols then
+                if row_data[k] then node_destructor(row_data[k]) end
                 row_data[k] = node_constructor(v)
             else
                 --error("Invalid index. 0 < '"..k.."' < "..number_of_cols,2)
             end
+            report_change("row_mt.__newindex")
         end
                 
         setmetatable(row,row_mt)
