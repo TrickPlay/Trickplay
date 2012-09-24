@@ -61,9 +61,13 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             actor.position = { x - dx , y - dy  }
             if uiInstance.selected == true then 
                 local border= screen:find_child(uiInstance.name.."border")
-                border.position = { x - dx , y - dy  }
+                if border then 
+                    border.position = { x - dx , y - dy  }
+                end 
                 local anchor_mark= screen:find_child(uiInstance.name.."a_m")
-                anchor_mark.position = { x - dx , y - dy  }
+                if anchor_mark then
+                    anchor_mark.position = { x - dx , y - dy  }
+                end
             end 
         end
     end,true)
@@ -133,7 +137,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             _VE_.openInspector(uiInstance.gid)
 
 	        if input_mode == hdr.S_SELECT then
-	            if(uiInstance.selected == false) then 
+	            if uiInstance.selected == nil or uiInstance.selected == false then 
 		            screen_ui.selected(uiInstance) 
 		        elseif(uiInstance.selected == true) then 
 			        screen_ui.n_select(uiInstance) 
@@ -209,6 +213,11 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                     uiInstance.x = uiInstance.x + c.virtual_x
                                     uiInstance.y = uiInstance.y + c.virtual_y
                                 end 
+
+                                uiInstance.reactive = false
+                                uiInstance.is_in_group = true
+		                        uiInstance.group_position = c.position
+
                                 c:add(uiInstance)
 
                                 if blockReport ~= true then
@@ -217,8 +226,18 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
 			        	    elseif t == "LayoutManager" then 
 
-				     		    local col , row=  c:r_c_from_abs_position(x,y)
-				     		    c:replace(row,col,uiInstance) 
+				     		    local row , col=  c:r_c_from_abs_x_y(x,y)
+                                if col and row then 
+                                    uiInstance.reactive = false
+                                    uiInstance.is_in_group = true
+		                            uiInstance.group_position = c.position
+                                    c.cells[row][col] = uiInstance
+                                else 
+                                    print " no col, row information error:("
+                                end
+                                if blockReport ~= true then
+                                    _VE_.refresh()
+                                end 
 
 			        		elseif t == "TabBar" then 
 
@@ -864,22 +883,25 @@ end
 function util.get_group_position(child_obj)
 
      print ("get_group_position")
-     if child_obj then
-        print (child_obj.type)
-     else 
-        print ("ehheheheheh")
+     if child_obj == nil then
+        print("fail, child_obj is nil")
+        return 
      end 
-     curLayer = child_obj.parent
-     if curLayer == nil then print ("WHAHAHAHAHAH") end 
-     for i, v in pairs(curLayer.children) do
-          if curLayer:find_child(v.name) then
-	       		if (v.type == "Group") then 
-		    		if(v:find_child(child_obj.name)) then
-						return v.position 
-		    		end 
-	       		end 
-          end
-     end
+     parent_obj = child_obj.parent
+     if parent_obj == nil then 
+        print("fail, parent_obj is nil")
+        return 
+     end 
+     print (parent_obj.name, parent_obj.type, parent_obj.widget_type)
+     if parent_obj.widget_type ~= nil then
+        for i, v in pairs(parent_obj.children) do
+	        if (v.type == "Group") then 
+		        if v.find_child and (v:find_child(child_obj.name)) then
+			        return v.position 
+		        end 
+	        end 
+        end
+    end 
 end 
 	
 return util

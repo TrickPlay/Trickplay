@@ -18,6 +18,10 @@ class TrickplayElementModel(QStandardItemModel):
         self.preventChanges = False
         self.newChildGid = None
         self.newParentGid = None
+        self.lmRow = None
+        self.lmCol = None
+        self.lmChild = "false"
+        self.lmParentGid = "nil"
 
         QObject.connect(self, SIGNAL("rowsRemoved(const QModelIndex&, int, int)"), self.rr)
         QObject.connect(self, SIGNAL("rowsInserted (const QModelIndex&, int, int)"), self.ri)
@@ -31,9 +35,20 @@ class TrickplayElementModel(QStandardItemModel):
             if the_item : 
                 try:
                     self.newParentGid = the_item['gid']
+                    print ("newParentGid", self.newParentGid)
+                    if self.newParentGid == None :
+                        print ("LayoutManager") 
+                        #print the_item.row() # layout manager col number 
+                        self.lmCol = int(the_item.row()) # layout manager col number 
+                        self.lmRow = int(the_item.parent().text()[3:])
+                        print "[", self.lmRow, self.lmCol ,"]"
+                        #print the_parent_item.text()
+                        #the_parent_item = the_item.parent().parent()
+                        #print the_parent_item.text()
+                        self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
                 except:
                     self.newParentGid = None
-                    print ("merong")
+                    print ("merong : newParentGid nil")
         #pass
 
     def ri(self, idx, i , j):
@@ -58,12 +73,18 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if the_item :
                 the_child_item = the_item.takeChild(i)
+
+                if the_item.parent() and the_item.parent()['type'] == "LayoutManager" :
+                    self.lmChild = "true"
+                    self.lmParentGid = the_item.parent()['gid'] 
+
                 if the_child_item : 
                     try:
                         self.newChildGid = the_child_item['gid']
+                        print("newChildGid", self.newChildGid)
                     except:
                         self.newChildGid = None
-                        print ("merong2")
+                        print ("merong : newChildGid nil")
 
 
     def rr(self, idx, i , j):
@@ -73,10 +94,21 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
 
             if self.newChildGid and self.newParentGid :
-                inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+")")
+                if self.lmRow == None or self.lmCol == None :
+                    self.lmRow = "nil"
+                    self.lmCol = "nil"
+                
+                inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+","+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 print inputCmd
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
+            else:
+                print ("newChildGid or newParentGid is nil ...")
+
+            self.lmChild = "false"
+            self.lmRow = "nil"
+            self.lmCol = "nil"
+            self.lmParentGid = "nil"
             
     """
     #---------------------------------------------------------------------------

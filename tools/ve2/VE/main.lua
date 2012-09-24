@@ -10,6 +10,14 @@
 
     --TEST Function 
     aa = function ()
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
+
+        
+        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
+
+    
+    --_VE_.contentMove(11,16,0,2)
+    --[[
         _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TESTSPAP/screens")
         _VE_.insertUIElement(9, 'Button')
         _VE_.insertUIElement(9, 'DialogBox')
@@ -20,9 +28,19 @@
         _VE_.insertUIElement(9, 'ScrollPane')
         --_VE_.insertUIElement(9, 'MenuButton')
         _VE_.insertUIElement(9, 'Rectangle')
+    ]]
     end 
 
+    bb = function ()
+        _VE_.contentMove(20,9,nil,nil,true,10)
+    end 
 
+    cc = function ()
+        _VE_.contentMove(22,9,nil,nil,true,10)
+    end 
+    dd = function ()
+        _VE_.contentMove(21,9,nil,nil,true,10)
+    end 
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
@@ -144,24 +162,50 @@ _VE_.printInstanceName = function(layernames)
     print("prtObjNme"..theNames)
 end 
 
-_VE_.contentMove = function(newChildGid, newParentGid)
+_VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmParentGid)
     local newChild = devtools:gid(newChildGid)
     local newParent = devtools:gid(newParentGid)
-    newChild:unparent()
+    local lmParent 
+    
+    if lmChild == false then 
+        newChild:unparent()
+    end 
 
+    blockReport = true 
     if util.is_this_container(newParent) == false then 
+        if lmChild == true then 
+            lmParent = devtools:gid(lmParentGid)
+            for r = 1, lmParent.number_of_rows, 1 do 
+                for c = 1, lmParent.number_of_cols, 1 do 
+                    if lmParent.cells[r][c].gid == newChildGid then 
+                        lmParent.cells[r][c] = nil    
+                    end 
+                end 
+            end 
+        end 
 		newChild.group_position = {0,0,0}
         newChild.is_in_group = false
         newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
+        newParent:add(newChild)
     else
         newChild.reactive = false
         newChild.position = {0,0,0}
         newChild.is_in_group = true
 		newChild.group_position = newParent.position
-    end
 
-    newParent:add(newChild)
+        if newParent.widget_type == "LayoutManager" then 
+            lmRow = lmRow + 1 
+            lmCol = lmCol + 1
+            newParent.cells[lmRow][lmCol] = newChild
+        else
+            newParent:add(newChild)
+            --util.n_selected(newChild)
+        end
+    end
+    blockReport = false 
+
+    
     _VE_.refresh()
 end 
 

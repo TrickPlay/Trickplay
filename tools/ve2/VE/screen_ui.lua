@@ -52,7 +52,7 @@ function screen_ui.draw_selected_container_border(x,y)
 					local layout_bdr = screen:find_child(selected_container.name.."border")
 					if layout_bdr then 
 				    	local r_c = layout_bdr.r_c
-				     	local col , row = selected_container:r_c_from_abs_position(x,y)
+				     	local row, col = selected_container:r_c_from_abs_x_y(x,y)
 						if r_c then 
 				     		if r_c[1] ~= row or r_c[2] ~= col then  
 		    					screen_ui.n_selected(selected_container)
@@ -67,12 +67,11 @@ end
 
 function screen_ui.container_selected(obj, x, y)
 
-
 	local obj_border = Rectangle {
 			name = obj.name.."border", 
         	color = {0,0,0,0},
         	border_color = {255,25,25,255},
-        	border_width = 2,
+        	border_width = 4,
         	anchor_point = obj.anchor_point,
         	x_rotation = obj.x_rotation,
         	y_rotation = obj.y_rotation,
@@ -97,14 +96,16 @@ function screen_ui.container_selected(obj, x, y)
 
    	else -- Layout Manager Tile border
 
-        print (obj.name, obj.widget_type)
-        return 
---[[
 		local tile_x, tile_y, tile_w, tile_h 
-	  	local col, row=  obj:r_c_from_abs_position(x,y)
+	  	local row, col=  obj:r_c_from_abs_x_y(x,y)
+        local tile = obj.cells[row][col]
 
 	  	if row and col then 
-			tile_x, tile_y, tile_w, tile_h = obj:cell_x_y_w_h(row,col)
+			tile_x = tile.x - tile.anchor_point[1]
+			tile_y = tile.y - tile.anchor_point[2]
+			tile_w = tile.w
+			tile_h = tile.h
+            --print (">>>"..row..":"..col.." ("..tile_x..","..tile_y..","..tile_w..","..tile_h)
 			tile_x = obj.x + tile_x
 			tile_y = obj.y + tile_y
 		end
@@ -112,13 +113,13 @@ function screen_ui.container_selected(obj, x, y)
         obj_border.position = {tile_x, tile_y, 0} 
         obj_border.size = {tile_w, tile_h}
 	  	obj_border.extra.r_c = {row, col}
-]]
    end 
 
-   screen:add(obj_border)
-   obj.extra.selected = true
-   table.insert(selected_objs, obj_border.name)
-
+    if not screen:find_child(obj_border.name) then 
+        screen:add(obj_border)
+        obj.extra.selected = true
+        --table.insert(selected_objs, obj_border.name)
+    end
 end  
 
 function screen_ui.selected(obj)
@@ -147,7 +148,7 @@ function screen_ui.selected(obj)
 			else 
 				if c.extra then 
 					if c.widget_type == "ScrollPane" or c.widget_type == "ArrowPane" then 
-						for k, e in pairs (c.content.children) do 
+						for k, e in pairs (c.children) do 
 							if e.name == obj.name then 
 								bumo = c	
 							end 
@@ -489,7 +490,7 @@ function screen_ui.dragging(x,y)
 					else 
 						if c.extra then 
 							if c.widget_type == "ScrollPane" or c.widget_type == "ArrowPane" then 
-								for k, e in pairs (c.content.children) do 
+								for k, e in pairs (c.children) do 
 									if e.name == actor.name then 
 										bumo = c	
 									end 
