@@ -32,11 +32,11 @@
     end 
 
     bb = function ()
-        _VE_.contentMove(20,9,nil,nil,true,10)
+        _VE_.contentMove(25,10,0,2,false,nil)
     end 
 
     cc = function ()
-        _VE_.contentMove(22,9,nil,nil,true,10)
+        _VE_.contentMove(24,10,0,3,false,nil)
     end 
     dd = function ()
         _VE_.contentMove(21,9,nil,nil,true,10)
@@ -172,7 +172,10 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     end 
 
     blockReport = true 
-    if util.is_this_container(newParent) == false then 
+
+    -- Drop into Layer 
+
+    if util.is_this_container(newParent) == false then  
         if lmChild == true then 
             lmParent = devtools:gid(lmParentGid)
             for r = 1, lmParent.number_of_rows, 1 do 
@@ -188,15 +191,31 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
         newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
         newParent:add(newChild)
+
+    -- Drop into Container 
+
     else
+    
         newChild.reactive = false
         newChild.position = {0,0,0}
         newChild.is_in_group = true
 		newChild.group_position = newParent.position
 
         if newParent.widget_type == "LayoutManager" then 
-            lmRow = lmRow + 1 
-            lmCol = lmCol + 1
+            if lmRow and lmCol then 
+                lmRow = lmRow + 1 
+                lmCol = lmCol + 1
+
+                if lmRow > newParent.number_of_rows then 
+                    newParent.cells:insert_row(lmRow, {})
+                elseif lmCol > newParent.number_of_cols then 
+                    newParent.cells:insert_col(lmCol, {})
+                end
+            else
+                lmRow = newParent.number_of_rows + 1
+                lmCol = 1
+                newParent.cells:insert_row(lmRow, {})
+            end 
             newParent.cells[lmRow][lmCol] = newChild
         else
             newParent:add(newChild)
