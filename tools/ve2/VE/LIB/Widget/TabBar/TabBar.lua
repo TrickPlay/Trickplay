@@ -501,6 +501,8 @@ TabBar = setmetatable(
                     --table.insert(panes,pane)
                     obj.contents:hide()
                     env.panes_obj:add(obj.contents)
+                    obj.contents.w = env.pane_w
+                    obj.contents.h = env.pane_h
                     
                     if sel then env.new_selection = sel end
                     return obj
