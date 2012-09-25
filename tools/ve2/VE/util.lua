@@ -252,7 +252,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			        		elseif t == "TabBar" then 
                                 ---[[
 							    --local x_off, y_off = c:get_offset() TODO : Tab direction 
-							    local t_index = 1 -- = c:get_index()
+							    local t_index = c.selected_tab
 							    if t_index then 
                                     uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
 								    uiInstance.y = uiInstance.y - c.y - c.tab_h
