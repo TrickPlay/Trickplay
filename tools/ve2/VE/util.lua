@@ -621,6 +621,9 @@ end
 function util.is_this_container(v)
 
     if v.extra then 
+        if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") then
+	        return false
+        end 
         if util.is_in_list(v.widget_type, hdr.uiContainers) == true then 
 	    	return true
         else 
