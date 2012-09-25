@@ -1,5 +1,7 @@
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
-#include <clutter/clutter.h>
+#include <glib.h>
+#include <glib-object.h>
+#include <gio/gio.h>
 #include <magick/MagickCore.h>
 #include <math.h>
 #include <stdio.h>
@@ -7,76 +9,49 @@
 
 char * basepath;
 
-//ClutterActor * sheet, * bgrect, * bestrect;
-int bottom_edge,
-    right_edge,
-	min_width = 0,
-	best_width = 0,
-	best_area = 0,
-	coveredArea = 0;
+typedef struct Page {
+  int width,
+      height,
+	  area;
+} Page;
+Page current, minimum = {0, 0, 0}, best = {0, 0, 0};
 
-GSequence * sortArea;
-GHashTable * sameWidth, * sameHeight;
+GSequence * leavesSortedByArea;
+GHashTable * leavesOfWidth, * leavesOfHeight;
 
 typedef struct Item {
   int x, y, w, h, area;
-  char * path, * fullpath;
-  //ClutterActor *rect, *group, *image;
+  char * id,
+       * path;
 } Item;
 
 Item * item_new(char *path) {
   Item * item = malloc(sizeof(Item));
-  item->path = path;
+  item->id = path;
   GString * str = g_string_new(basepath);
   g_string_append(str, "/");
   g_string_append(str, path);
-  item->fullpath = g_string_free(str, FALSE);
+  item->path = g_string_free(str, FALSE);
   
   ExceptionInfo * exception = AcquireExceptionInfo();
-  ImageInfo * image_info = AcquireImageInfo();
-  CopyMagickString(image_info->filename, item->fullpath, MaxTextExtent);
-  Image * temp = PingImage(image_info, exception);
+  ImageInfo * inputInfo = AcquireImageInfo();
+  CopyMagickString(inputInfo->filename, item->path, MaxTextExtent);
+  Image * tempImage = PingImage(inputInfo, exception);
   
   // handle exceptions
   
   item->x = 0;
   item->y = 0;
-  item->w = (int) temp->columns + 2;
-  item->h = (int) temp->rows + 2;
+  item->w = (int) tempImage->columns + 2;
+  item->h = (int) tempImage->rows + 2;
   item->area = item->w * item->h;
-  coveredArea += item->area;
-  min_width = MAX(min_width, item->w);
+  minimum.area += item->area;
+  minimum.width = MAX(minimum.width, item->w);
   
-  temp = DestroyImage(temp);
+  tempImage = DestroyImage(tempImage);
   exception = DestroyExceptionInfo(exception);
   
   return item;
-
-  //const ClutterColor c = { rand() % 127 + 128, rand() % 127 + 128, rand() % 127 + 128, 255 };
-  //item->group = clutter_group_new();
-  //item->rect = clutter_rectangle_new_with_color(&c);
-  //item->image = clutter_texture_new_from_file(str->str, NULL);
-  //ClutterActor *img = clutter_texture_new_from_file(str->str, NULL);
-  //if (img == NULL) {
-	//fprintf(stderr, "failed to load %s\n", str->str);
-  //} else {
-	//fprintf(stderr, "loaded %s\n", str->str);
-  //}
-  //clutter_container_add_actor(CLUTTER_CONTAINER(item->group), item->rect);
-  //clutter_container_add_actor(CLUTTER_CONTAINER(item->group), item->image);
-  //g_object_ref(item->group);
-  
-  //gfloat w, h;
-  //clutter_actor_get_size(img, &w, &h);
-  //clutter_actor_destroy(img);
-  //clutter_actor_set_size(item->rect, w, h);
-}
-
-void item_free(Item * item) {
-  //clutter_actor_destroy(item->rect);
-  //clutter_actor_destroy(item->image);
-  //clutter_actor_destroy(item->group);
-  free(item);
 }
 
 gint item_compare_area(gconstpointer a, gconstpointer b, gpointer user_data) {
@@ -91,58 +66,65 @@ GSequence * items;
 void gather(GFile * file) {
   GFileInfo * info = g_file_query_info(file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL);
   GFileType type = g_file_info_get_file_type(info);
+  
   if (type == G_FILE_TYPE_REGULAR) {
-	if (file == base) {
+	if (file == base)
 	  fprintf(stderr,"error!");
-	} else {
+	else
 	  g_sequence_insert_sorted(items, item_new(g_file_get_relative_path(base,file)), item_compare_area, NULL);
-	}
+	  
   } else if (type == G_FILE_TYPE_DIRECTORY) {
 	GFileEnumerator * children = g_file_enumerate_children(file ,"standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL);
-	GFileInfo * childinfo;
+	GFileInfo * childInfo;
 	GFile * child;
-	while ((childinfo = g_file_enumerator_next_file(children, NULL, NULL)) != NULL) {
-	  child = g_file_get_child(file, g_file_info_get_name(childinfo));
+	
+	while ((childInfo = g_file_enumerator_next_file(children, NULL, NULL)) != NULL) {
+	  child = g_file_get_child(file, g_file_info_get_name(childInfo));
 	  gather(child);
+	  g_object_unref(child);
+	  g_object_unref(childInfo);
 	}
+	
 	g_file_enumerator_close(children, NULL, NULL);
+	g_object_unref(children);
   }
 }
 
-GSequence * hash_get(GHashTable * map, int key) {
-  gpointer k = GINT_TO_POINTER(key+1);
-  GSequence * s = g_hash_table_lookup(map, k);
-  if (s == NULL) {
-	s = g_sequence_new(NULL);
-	g_hash_table_insert(map, k, s);
-  }
-  return s;
+GSequence * get_sequence(GHashTable * table, int key) {
+  gpointer ptr = GINT_TO_POINTER(key + 1);
+  
+  GSequence * seq = g_hash_table_lookup(table, ptr);
+  if (seq == NULL)
+	g_hash_table_insert(table, ptr, (seq = g_sequence_new(NULL)) );
+	
+  return seq;
 }
+
+#define AREA GINT_TO_POINTER(1)
+#define WIDTH GINT_TO_POINTER(2)
+#define HEIGHT GINT_TO_POINTER(3)
 
 typedef struct Leaf {
   int x, y, w, h, area;
 } Leaf;
 
-int leaf_compare_area(gconstpointer a, gconstpointer b, gpointer user_data) {
-  return ((Leaf *) a)->area - ((Leaf *) b)->area;
-}
-int leaf_compare_width(gconstpointer a, gconstpointer b, gpointer user_data) {
-  return ((Leaf *) a)->w - ((Leaf *) b)->w;
-}
-int leaf_compare_height(gconstpointer a, gconstpointer b, gpointer user_data) {
-  return ((Leaf *) a)->h - ((Leaf *) b)->h;
+int leaf_compare(gconstpointer a, gconstpointer b, gpointer user_data) {
+  Leaf * aa = (Leaf *) a, * bb = (Leaf *) b;
+  return user_data == AREA   ? aa->area - bb->area :
+	     user_data == WIDTH  ? aa->w    - bb->w    :
+		 user_data == HEIGHT ? aa->h    - bb->h    : 0;
 }
 
-GSequenceIter * g_sequence_lookup_exact(GSequence * seq, Leaf * leaf, GCompareDataFunc func) {
-  GSequenceIter * sj, * si = g_sequence_lookup(seq, leaf, func, NULL);
+void g_sequence_remove_sorted(GSequence * seq, gpointer data, GCompareDataFunc cmp_func, gpointer cmp_data) {
+  GSequenceIter * sj, * si = g_sequence_lookup(seq, data, cmp_func, cmp_data);
   if (si != NULL) {
-	Leaf * found;
+	gpointer found;
 	sj = si;
 	while (!g_sequence_iter_is_end(sj)) {
 	  found = g_sequence_get(sj);
-	  if (found == leaf)
-		return sj;
-	  else if (func(found, leaf, NULL) != 0)
+	  if (found == data)
+		return g_sequence_remove(sj);
+	  else if (cmp_func(found, data, cmp_data) != 0)
 		break;
 	  sj = g_sequence_iter_next(sj);
 	}
@@ -151,13 +133,12 @@ GSequenceIter * g_sequence_lookup_exact(GSequence * seq, Leaf * leaf, GCompareDa
 	while (!g_sequence_iter_is_begin(sj)) {
 	  sj = g_sequence_iter_prev(sj);
 	  found = g_sequence_get(sj);
-	  if (found == leaf)
-		return sj;
-	  else if (func(found, leaf, NULL) != 0)
+	  if (found == data)
+		return g_sequence_remove(sj);
+	  else if (cmp_func(found, data, cmp_data) != 0)
 		break;
 	}
   }
-  return NULL;
 }
 
 Leaf * leaf_new(int x, int y, int w, int h) {
@@ -168,61 +149,39 @@ Leaf * leaf_new(int x, int y, int w, int h) {
   leaf->h = h;
   leaf->area = w * h;
   
-  g_sequence_insert_sorted(sortArea, leaf, leaf_compare_area, NULL);
-  g_sequence_insert_sorted(hash_get(sameWidth,leaf->w), leaf, leaf_compare_height, NULL);
-  g_sequence_insert_sorted(hash_get(sameHeight,leaf->h), leaf, leaf_compare_width, NULL);
+  g_sequence_insert_sorted(leavesSortedByArea, leaf, leaf_compare, AREA);
+  g_sequence_insert_sorted(get_sequence(leavesOfWidth, leaf->w), leaf, leaf_compare, WIDTH);
+  g_sequence_insert_sorted(get_sequence(leavesOfHeight, leaf->h), leaf, leaf_compare, HEIGHT);
   
   return leaf;
 }
 
-void leaf_drop(Leaf * leaf) {
-  g_sequence_remove(g_sequence_lookup_exact(sortArea, leaf, leaf_compare_area));
-  g_sequence_remove(g_sequence_lookup_exact(hash_get(sameWidth, leaf->w), leaf, leaf_compare_height));
-  g_sequence_remove(g_sequence_lookup_exact(hash_get(sameHeight, leaf->h), leaf, leaf_compare_width));
+void leaf_cut(Leaf * leaf, int w, int h) {
+  gboolean b = leaf->w - w > leaf->h - h;
+  if (leaf->w - w > 2) leaf_new(leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h);
+  if (leaf->h - h > 2) leaf_new(leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h);
+  
+  g_sequence_remove_sorted(leavesSortedByArea, leaf, leaf_compare, AREA);
+  g_sequence_remove_sorted(get_sequence(leavesOfWidth, leaf->w), leaf, leaf_compare, WIDTH);
+  g_sequence_remove_sorted(get_sequence(leavesOfHeight, leaf->h), leaf, leaf_compare, HEIGHT);
   
   free(leaf);
 }
 
-void leaf_cut(Leaf * leaf, int d, gboolean acrossWidth) {
-  if (acrossWidth) {
-	if (leaf->h - d > 2)
-	  leaf_new(leaf->x, leaf->y + d, leaf->w, leaf->h - d);
-  } else {
-	if (leaf->w - d > 2)
-	  leaf_new(leaf->x + d, leaf->y, leaf->w - d, leaf->h);
-  }
-  leaf_drop(leaf);
-}
-
-void leaf_bite(Leaf * leaf, int w, int h) {
-  gboolean b = leaf->w > leaf->h; // or (leaf->w - w > leaf->h - h) ?
-  if (leaf->w - w > 2)
-    leaf_new(leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h);
-  if (leaf->h - h > 2)
-    leaf_new(leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h);
-  leaf_drop(leaf);
-}
-
-void insert_rect(Item * item, Leaf * leaf) {
-  right_edge = MAX(right_edge, leaf->x + item->w);
-  bottom_edge = MAX(bottom_edge, leaf->y + item->h);
+void insert_item(Item * item, Leaf * leaf) {
+  current.width = MAX(current.width, leaf->x + item->w);
+  current.height = MAX(current.height, leaf->y + item->h);
   item->x = leaf->x;
   item->y = leaf->y;
-  //clutter_actor_set_position(item->group, leaf->x + 1, leaf->y + 1);
-  //clutter_container_add_actor (CLUTTER_CONTAINER(sheet), item->group);
+  leaf_cut(leaf, item->w, item->h);
 }
 
 void recalculate_layout(int width) {
-  bottom_edge = 0;
-  right_edge = 0;
-  sortArea = g_sequence_new(NULL);
-  sameWidth = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
-  sameHeight = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
-  
-  width = MAX(width, min_width);
-  
-  leaf_new(0, 0, width, 4096);
-  //clutter_group_remove_all(CLUTTER_GROUP(sheet));
+  current = (Page) {0, 0, 0};
+  leavesSortedByArea = g_sequence_new(NULL);
+  leavesOfWidth = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
+  leavesOfHeight = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
+  leaf_new(0, 0, MAX(width, minimum.width), 4096);
   
   GSequenceIter * i = g_sequence_get_begin_iter(items);
   while (!g_sequence_iter_is_end(i)) {
@@ -230,141 +189,100 @@ void recalculate_layout(int width) {
     Leaf * leaf;
     GSequenceIter * si;
 	
-	// among leaves with the same width as the item, looks for the first leaf tall enough to hold it
-	si = g_sequence_search(hash_get(sameWidth,item->w), item, leaf_compare_height, NULL);
-	if (!g_sequence_iter_is_end(si)) {
-	  leaf = g_sequence_get(si);
-	  insert_rect(item, leaf);
-	  leaf_cut(leaf, item->h, TRUE);
-	  goto next;
-	}
+	/* among leaves exactly as wide as the item, looks for the first leaf tall enough to hold it
+	 * else, among leaves exactly as tall as the item, looks for the first leaf wide enough to hold it
+	 * else, starting with the first leaf larger than the item, looks for the first leaf that can hold it
+	 */
 	
-	// among leaves with the same height as the item, looks for the first leaf wide enough to hold it
-	si = g_sequence_search(hash_get(sameHeight,item->h), item, leaf_compare_width, NULL);
-	if (!g_sequence_iter_is_end(si)) {
-	  leaf = g_sequence_get(si);
-	  insert_rect(item, leaf);
-	  leaf_cut(leaf, item->w, FALSE);
-	  goto next;
-	}
-	
-	// starting with the first leaf larger than the item, looks for the first leaf that can hold it
-	si = g_sequence_search(sortArea, item, leaf_compare_area, NULL);
-    while (!g_sequence_iter_is_end(si)) {
-	  leaf = g_sequence_get(si);
-	  if (leaf->w > item->w && leaf->h > item->h) {
-	    insert_rect(item, leaf);
-	    leaf_bite(leaf, item->w, item->h);
-	    goto next;
-	  }
-	  si = g_sequence_iter_next(si);
-	}
-	
-	// error to reach this point
-	  //fprintf(stderr,"failed\n");
+	si = g_sequence_search(get_sequence(leavesOfWidth, item->w), item, leaf_compare, HEIGHT);
+	if (g_sequence_iter_is_end(si))
+	  si = g_sequence_search(get_sequence(leavesOfHeight, item->h), item, leaf_compare, WIDTH);
 	  
-	next:
+	if (!g_sequence_iter_is_end(si))
+	  insert_item(item, g_sequence_get(si));
+	else {
+	  si = g_sequence_search(leavesSortedByArea, item, leaf_compare, AREA);
+      while (!g_sequence_iter_is_end(si)) {
+	    leaf = g_sequence_get(si);
+	    if (leaf->w > item->w && leaf->h > item->h) {
+	      insert_item(item, leaf);
+	      break;
+	    }
+	    si = g_sequence_iter_next(si);
+	  }
+	}
+	
 	i = g_sequence_iter_next(i);
   }
   
-  g_sequence_foreach(sortArea, (GFunc) free, NULL);
-  g_hash_table_destroy(sameWidth);
-  g_hash_table_destroy(sameHeight);
-  g_sequence_free(sortArea);
+  g_sequence_foreach(leavesSortedByArea, (GFunc) free, NULL);
+  g_hash_table_destroy(leavesOfWidth);
+  g_hash_table_destroy(leavesOfHeight);
+  g_sequence_free(leavesSortedByArea);
   
-  if (bottom_edge <= 4096 && (best_area == 0 || right_edge * bottom_edge < best_area)) {
-	best_area = right_edge * bottom_edge;
-	best_width = right_edge;
-    //clutter_actor_set_size(bestrect, (gfloat) right_edge, (gfloat) bottom_edge);
-  }
-  //clutter_actor_set_size(bgrect, (gfloat) right_edge, (gfloat) bottom_edge);
+  current.area = current.width * current.height;
+  if (current.height <= 4096 && (best.area == 0 || current.area < best.area))
+	best = current;
 }
 
 int main (int argc, char ** argv) {
-  if (clutter_init (NULL, NULL) != CLUTTER_INIT_SUCCESS)
-    return 1;
-  
   if (argc == 1)
 	return 1;
 
+  g_type_init();
   basepath = argv[1];
   base = g_file_new_for_commandline_arg(basepath);
   items = g_sequence_new(NULL);
   gather(base);
   
-  gint i;
-  for (i = min_width; i <= 4096; i++)
+  int i;
+  for (i = minimum.width; i <= 4096; i++)
 	recalculate_layout(i);
-  recalculate_layout(best_width);
+  recalculate_layout(best.width);
   
-  fprintf(stderr,"best match coverage: %i x %i pixels, %f%% match\n", best_width, bottom_edge, (gfloat) coveredArea / (gfloat) best_area);
-  
+  fprintf(stderr,"best match coverage: %i x %i pixels, %f%% match\n", best.width, best.height, (gfloat) minimum.area / (gfloat) best.area);
   
   MagickCoreGenesis(* argv, MagickTrue);
 
   MagickPixelPacket * bg = malloc(sizeof(MagickPixelPacket));
   ExceptionInfo * exception = AcquireExceptionInfo();
-  ImageInfo * image_info = AcquireImageInfo(),
-			* temp_info;
-  Image * image = NewMagickImage(image_info, right_edge, bottom_edge, bg),
-        * temp;
+  ImageInfo * outputInfo = AcquireImageInfo(),
+			* tempInfo;
+  Image * image = NewMagickImage(outputInfo, best.width, best.height, bg),
+        * tempImage;
   SetImageOpacity(image, QuantumRange);
   Item * item;
   
   GSequenceIter * si = g_sequence_get_begin_iter(items);
   while (!g_sequence_iter_is_end(si)) {
 	item = g_sequence_get(si);
-	temp_info = AcquireImageInfo();
-	CopyMagickString(temp_info->filename, item->fullpath, MaxTextExtent);
-	temp = ReadImage(temp_info, exception);
+	tempInfo = AcquireImageInfo();
+	CopyMagickString(tempInfo->filename, item->path, MaxTextExtent);
+	tempImage = ReadImage(tempInfo, exception);
 	if (exception->severity != UndefinedException)
       CatchException(exception);
 	
-	CompositeImage(image, ReplaceCompositeOp , temp, item->x + 1, item->y + 1);
+	CompositeImage(image, ReplaceCompositeOp , tempImage, item->x + 1, item->y + 1);
 	
-	temp = DestroyImage(temp);
-	temp_info = DestroyImageInfo(temp_info);
+	tempImage = DestroyImage(tempImage);
+	tempInfo = DestroyImageInfo(tempInfo);
 	si = g_sequence_iter_next(si);
   }
-  fprintf(stderr, "done loading\n");
-  CopyMagickString(image_info->filename, "output.png", MaxTextExtent);
-  CopyMagickString(image_info->magick, "png", MaxTextExtent);
-  image_info->file = fopen("output.png", "w+b");
-  WriteImage(image_info, image);
+  
+  GString * str = g_string_new(basepath);
+  g_string_append(str, ".png");
+  
+  CopyMagickString(outputInfo->filename, g_string_free(str, FALSE), MaxTextExtent);
+  CopyMagickString(outputInfo->magick, "png", MaxTextExtent);
+  outputInfo->file = fopen(outputInfo->filename, "w+b");
+  WriteImage(outputInfo, image);
+  
+  fprintf(stderr, "Output to %s\n", outputInfo->filename);
 
   free(bg);
   exception = DestroyExceptionInfo(exception);
-  image_info = DestroyImageInfo(image_info);
+  outputInfo = DestroyImageInfo(outputInfo);
   MagickCoreTerminus();
   
   return 0;
-
-  /*
-  ClutterActor *stage = clutter_stage_new();
-  clutter_actor_set_reactive(stage, TRUE);
-  g_signal_connect(stage, "motion-event", G_CALLBACK(motion_callback), NULL);
-  const ClutterColor bg_color = { 0x00, 0x00, 0x00, 0xff };
-  const ClutterColor br_color = { 0xff, 0xff, 0xff, 0xff };
-  const ClutterColor best_color = { 0xff, 0x00, 0x00, 0x88 };
-  
-  clutter_stage_set_title (CLUTTER_STAGE (stage), "GeneratorDebug");
-  clutter_stage_set_color (CLUTTER_STAGE (stage), &bg_color);
-  clutter_actor_set_size (stage, 1600, 900);
-  g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-  
-  bgrect = clutter_rectangle_new_with_color(&br_color);
-  clutter_actor_set_position(bgrect, 10, 10);
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), bgrect);
-  
-  sheet = clutter_group_new();
-  clutter_actor_set_position(sheet, 10, 10);
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), sheet);
-  
-  bestrect = clutter_rectangle_new_with_color(&best_color);
-  clutter_actor_set_position(bestrect, 10, 10);
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), bestrect);
-  
-  //clutter_actor_show_all (stage);
-  //clutter_main ();
-  //*/
 }
