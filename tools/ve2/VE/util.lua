@@ -240,16 +240,21 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 end 
 
 			        		elseif t == "TabBar" then 
-
-							    local x_off, y_off = c:get_offset()
-
-							    local t_index = c:get_index()
-												
+                                ---[[
+							    --local x_off, y_off = c:get_offset() TODO : Tab direction 
+							    local t_index = 1 -- = c:get_index()
 							    if t_index then 
-							        uiInstance.x = uiInstance.x - x_off	
-								    uiInstance.y = uiInstance.y - y_off	
-			            			c.tabs[t_index]:add(uiInstance) 
+                                    uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
+								    uiInstance.y = uiInstance.y - c.y - c.tab_h
+                                    uiInstance.reactive = false
+                                    uiInstance.is_in_group = true
+		                            uiInstance.group_position = c.position
+			            			c.tabs[t_index].contents:add(uiInstance) 
 								end
+                                if blockReport ~= true then
+                                    _VE_.refresh()
+                                end 
+                                --]]
 
 							elseif t == "Group" then 
 							    c:add(uiInstance)

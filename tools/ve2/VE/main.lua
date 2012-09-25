@@ -10,7 +10,8 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
+        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
 
         
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
@@ -32,14 +33,18 @@
     end 
 
     bb = function ()
-        _VE_.contentMove(25,10,0,2,false,nil)
+        --_VE_.contentMove(25,10,0,2,false,nil)
+        --_VE_.contentMove(58,9,nil,nil,false,nil)
+        _VE_.contentMove(149,10,1,nil,false,nil)
+
     end 
 
     cc = function ()
         _VE_.contentMove(24,10,0,3,false,nil)
     end 
     dd = function ()
-        _VE_.contentMove(21,9,nil,nil,true,10)
+        tb = devtools:gid(16)
+        for i, j in ipairs (tb.tabs[1].contents.children) do print (i, j.name, j.type) end 
     end 
     ----------------------------------------------------------------------------
     -- Key Map
@@ -217,6 +222,15 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
                 newParent.cells:insert_row(lmRow, {})
             end 
             newParent.cells[lmRow][lmCol] = newChild
+        elseif newParent.widget_type == "TabBar" then 
+            if lmRow then 
+			    newParent.tabs[lmRow].contents:add(newChild) 
+            else 
+                newIndex = newParent.tabs.length + 1
+                newParent.tabs:insert(newIndex, {label="Tab"..newIndex, contents = Widget_Group{}})
+			    newParent.tabs[newIndex].contents:add(newChild) 
+            end 
+
         else
             newParent:add(newChild)
             --util.n_selected(newChild)
@@ -1192,8 +1206,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff0000"},Button()}}},
-                {label="Two",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ff00"}}}},
+                {label="One",   contents = Widget_Group{children={Button{name="b1"}}}},
+                {label="Two",   contents = Widget_Group{children={}}},
                 {label="Three", contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
                 {label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
                 {label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
