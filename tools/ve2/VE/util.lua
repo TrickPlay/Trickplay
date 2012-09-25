@@ -224,6 +224,16 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                     _VE_.refresh()
                                 end 
 
+			        	    elseif t == "MenuButton" then 
+
+                                uiInstance.reactive = false
+                                uiInstance.is_in_group = true
+		                        uiInstance.group_position = c.position
+                                c.items:insert(c.items.length+1, uiInstance)
+                                if blockReport ~= true then
+                                    _VE_.refresh()
+                                end 
+                                
 			        	    elseif t == "LayoutManager" then 
 
 				     		    local row , col=  c:r_c_from_abs_x_y(x,y)

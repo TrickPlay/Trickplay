@@ -89,10 +89,16 @@ class TrickplayElementModel(QStandardItemModel):
                 the_child_item = the_item.takeChild(i)
 
                 # child's parent 
-
-                if the_item.parent() and the_item.parent()['type'] == "LayoutManager" :
+                if the_item['type'] == "MenuButton" :
                     self.lmChild = "true"
-                    self.lmParentGid = the_item.parent()['gid'] 
+                    self.lmParentGid = the_item['gid']
+                if the_item.parent() :
+                    pType = the_item.parent()['type']
+                    pGid = the_item.parent()['gid']
+
+                    if pType == "LayoutManager":
+                        self.lmChild = "true"
+                        self.lmParentGid = pGid
 
                 if the_child_item : 
                     try:

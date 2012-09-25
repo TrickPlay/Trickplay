@@ -10,10 +10,9 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
+        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
-
-        
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
 
     
@@ -33,9 +32,12 @@
     end 
 
     bb = function ()
+        _VE_.contentMove(32,9,nil,nil,true,10)
         --_VE_.contentMove(25,10,0,2,false,nil)
         --_VE_.contentMove(58,9,nil,nil,false,nil)
-        _VE_.contentMove(149,10,1,nil,false,nil)
+        --_VE_.contentMove(10,11,nil,nil,false,nil)
+        --_VE_.contentMove(32,9,nil,nil,true,11)
+        --_VE_.contentMove(149,10,1,nil,false,nil)
 
     end 
 
@@ -181,14 +183,27 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     -- Drop into Layer 
 
     if util.is_this_container(newParent) == false then  
-        if lmChild == true then 
+        --if lmChild == true then 
+        if lmParentGid then
             lmParent = devtools:gid(lmParentGid)
-            for r = 1, lmParent.number_of_rows, 1 do 
-                for c = 1, lmParent.number_of_cols, 1 do 
-                    if lmParent.cells[r][c].gid == newChildGid then 
-                        lmParent.cells[r][c] = nil    
+            if lmParent.widget_type  == "LayoutManager" then 
+                for r = 1, lmParent.number_of_rows, 1 do 
+                    for c = 1, lmParent.number_of_cols, 1 do 
+                        if lmParent.cells[r][c].gid == newChildGid then 
+                            lmParent.cells[r][c] = nil    
+                        end 
                     end 
                 end 
+            elseif lmParent.widget_type  == "MenuButton" then
+                newChild:unparent()
+
+                local sz = lmParent.items.length
+                for i=1, sz, 1 do 
+                    if i and lmParent.items[i].name == newChild.name then 
+                        lmParent.items:remove(i)
+                        break
+                    end
+                end
             end 
         end 
 		newChild.group_position = {0,0,0}
@@ -230,7 +245,15 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
                 newParent.tabs:insert(newIndex, {label="Tab"..newIndex, contents = Widget_Group{}})
 			    newParent.tabs[newIndex].contents:add(newChild) 
             end 
-
+        elseif newParent.widget_type == "MenuButton" then 
+            newChild:unparent()
+            local newIndex
+            if newParent.items.length then 
+                newIndex = newParent.items.length + 1
+            else
+                newIndex = 1
+            end
+            newParent.items:insert(newIndex, newChild)
         else
             newParent:add(newChild)
             --util.n_selected(newChild)
@@ -238,7 +261,6 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     end
     blockReport = false 
 
-    
     _VE_.refresh()
 end 
 
@@ -1225,16 +1247,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         local b = Button{name="pretty_button"}
         uiInstance:add(b)
     elseif uiTypeStr == "MenuButton" then 
-        --b = Button{name="pretty_button"}
         uiInstance.items = {Button{name="pretty_button"}}
-
-        --uiInstance:add(b)
-        --table.insert(uiInstance.items, b)
-        --uiInstance.items.length = 3
-        --uiInstance.items[1] = b
-        --uiInstance.items[2] = b
-        --uiInstance.items[3] = b
-
     end 
         
     util.assign_right_name(uiInstance, uiTypeStr)
