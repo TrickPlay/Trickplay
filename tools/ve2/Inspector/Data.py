@@ -36,6 +36,7 @@ modelToDataTable = {
     'border_colora': lambda v: ('border_color', color(v)),
     'is_visible': lambda v:('visible', toBool(v)),
     'name': lambda v: ('name',  toString(v)),
+    'direction': lambda v: ('direction',  toString(v)),
     'style': lambda v: ('style',  toString(v)),
     'title': lambda v: ('title',  toString(v)),
     'alignment': lambda v: ('alignment',  toString(v)),
