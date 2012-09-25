@@ -81,6 +81,9 @@ MenuButton = setmetatable(
                         env.popup.cells = v
                     end
                 end,
+                widget_type = function(instance,env)
+                    return function(oldf)  return   "MenuButton"      end
+                end,
                 direction = function(instance,env)
                     return function(oldf)  return   env.direction      end,
                     function(oldf,self,v)
