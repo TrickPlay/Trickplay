@@ -1,5 +1,5 @@
-LIBS=`pkg-config --libs clutter-1.0`
-INCS=`pkg-config --cflags clutter-1.0`
+LIBS=`pkg-config --libs clutter-1.0 MagickCore`
+INCS=`pkg-config --cflags clutter-1.0 MagickCore`
 
 .c.o:
 	$(CC) -g -Wall $(CFLAGS) $(INCS) -c $*.c
