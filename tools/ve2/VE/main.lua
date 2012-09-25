@@ -10,7 +10,8 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
+        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
@@ -1228,12 +1229,12 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One",   contents = Widget_Group{children={Button{name="b1"}}}},
-                {label="Two",   contents = Widget_Group{children={}}},
-                {label="Three", contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
-                {label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
-                {label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
-                {label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ffff"}}}},
+                {label="One" , contents = Widget_Group()},   --contents = Widget_Group{children={Button{name="b1"}}}},
+                {label="Two",   contents = Widget_Group()}, --{children={}}},
+                {label="Three", contents = Widget_Group()}, ----{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
+                --{label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
+                --{label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
+                --{label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ffff"}}}},
             }
         }
 
