@@ -10,7 +10,7 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
@@ -33,7 +33,8 @@
     end 
 
     bb = function ()
-        _VE_.contentMove(32,9,nil,nil,true,10)
+        _VE_.contentMove(31,9,nil,nil,true,10)
+        --_VE_.contentMove(32,9,nil,nil,true,10)
         --_VE_.contentMove(25,10,0,2,false,nil)
         --_VE_.contentMove(58,9,nil,nil,false,nil)
         --_VE_.contentMove(10,11,nil,nil,false,nil)
