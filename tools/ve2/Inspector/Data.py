@@ -184,9 +184,9 @@ def color(v):
     return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(float(v['a'])/255) + ')'
 
 def toBool(v):
-    if str(v) == "True" : 
+    if str(v) == "True" or str(v) == "true": 
         return "true"
-    elif str(v) == "False" :
+    elif str(v) == "False" or str(v) == "false":
         return "false"
     else :
         return "what?"

@@ -603,7 +603,6 @@ class TrickplayInspector(QWidget):
             def makeBoolHandler(gid, prop_name):
                 def handler(state):
                     if not self.preventChanges:
-                        print("qqqq")
                         self.preventChanges = True
 
                         if state == 2 :
