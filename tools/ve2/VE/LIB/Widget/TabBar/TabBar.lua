@@ -174,6 +174,10 @@ TabBar = setmetatable(
                 widget_type = function(instance,env)
                     return function() return "TabBar" end, nil
                 end,
+                selected_tab = function(instance,env)
+                    return function(oldf) return env.new_selection or env.rbg.selected end,
+                    function(oldf,self,v)        env.new_selection = v  end
+                end,
                 tabs = function(instance,env)
                     return function(oldf)  return   env.tabs_interface      end,
                     function(oldf,self,v)    
@@ -355,6 +359,12 @@ TabBar = setmetatable(
                     end
                     
                     env.old_update()
+                    print("here")
+                    if  env.new_selection then
+                        print("DQDQQQDQDDQ")
+                        env.rbg.selected = env.new_selection
+                        env.new_selection = false
+                    end
                     
                     --env.tabs_lm_env:call_update()
                 end
@@ -366,10 +376,10 @@ TabBar = setmetatable(
             
             local instance,env = ListManager:declare{vertical_alignment = "top",spacing=0}
             env.style_flags = {
-                border = "restyle_tabs",
-                text = "restyle_tabs",
+                border      = "restyle_tabs",
+                text        = "restyle_tabs",
                 fill_colors = "restyle_tabs",
-                arrow = "restyle_arrows",
+                arrow       = "restyle_arrows",
             }
             env.panes = {}
             env.tabs = {}
@@ -399,6 +409,7 @@ TabBar = setmetatable(
             env.tab_style    = nil
             env.tab_location = "top"
             env.resize_tabs = true
+            env.new_selection = 1
             
             local function make_tab_interface(tb)
                 --prevents the user from getting/setting any of the other fields of the ToggleButtons
@@ -464,6 +475,7 @@ TabBar = setmetatable(
                             clones[k] = Clone{source=v}
                         end
                     end
+                    local sel = env.rbg.selected
                     obj = ToggleButton{
                         label  = obj.label,
                         w      = env.tab_w,
@@ -487,8 +499,10 @@ TabBar = setmetatable(
                     --table.insert(tabs,obj)
                     --obj.pane = pane
                     --table.insert(panes,pane)
+                    obj.contents:hide()
                     env.panes_obj:add(obj.contents)
                     
+                    if sel then env.new_selection = sel end
                     return obj
                 end
             }
