@@ -52,7 +52,7 @@ RadioButtonGroup = function(parameters)
 						
 						error("RadioButtonGroup.selected expected positive number. Received "..v,2)
 						
-				  elseif v ~= selected then
+				  else--if v ~= selected then
 						
 						selected = v
 						
