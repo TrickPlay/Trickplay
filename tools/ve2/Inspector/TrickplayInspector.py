@@ -857,8 +857,7 @@ class TrickplayInspector(QWidget):
             if str(data["type"]) in NO_STYLE_WIDGET and p == "style" :
                 pass
 
-            elif data.has_key(p) == True:
-
+            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton"): 
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
@@ -918,13 +917,12 @@ class TrickplayInspector(QWidget):
                     QObject.connect(source_button, SIGNAL('clicked()'), openFileChooser)
 
                 elif p == "items":
-                    
-                    items_n = n
-                    itemList = data[p] 
+                    if data["type"] != "MenuButton": 
+                        items_n = n
+                        itemList = data[p] 
 
-                    self.itemWidget = PickerItemTable(self, data['gid'])
-                    self.itemWidget.populateItemTable(itemList)
-
+                        self.itemWidget = PickerItemTable(self, data['gid'])
+                        self.itemWidget.populateItemTable(itemList)
                 elif p == "anchor_point":
                     anchor_n = n
                     #self.anchor = AnchorPointGraphicSchene(self, data['gid'], data['anchor_point'], data['size'])
@@ -956,6 +954,8 @@ class TrickplayInspector(QWidget):
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
                     elif not str(data["type"]) in NO_STYLE_WIDGET :
+
+                        
                         #find Style name from combo box  
                         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
                         z = self.inspectorModel.styleData[0][self.style_name]
@@ -1014,7 +1014,7 @@ class TrickplayInspector(QWidget):
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
             #self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{margin:-5px;padding:-15;border-width:0px}")
-        if self.itemWidget :
+        if self.itemWidget and data["type"] == "ButtonPicker":
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
         if colorPushButton :
             for n, cb in colorPushButton.iteritems() :
