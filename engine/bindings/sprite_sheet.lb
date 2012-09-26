@@ -198,7 +198,7 @@ class SpriteSheet [[SpriteSheet*]]
                         luaL_error( L , "SpriteSheet initialization error: Unable to parse JSON file '%s' with contents: \n%s" , json_file , contents );
                     }
 
-                    lua_getfield( L , -1 , "image" );
+                    lua_getfield( L , -1 , "img" );
 
                     if ( lua_isnil( L , -1 ) || ! lua_isstring( L , -1 ) )
                     {
