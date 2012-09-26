@@ -8,7 +8,7 @@ if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not PROGRESSSPINNER   then dofile("ProgressSpinner/ProgressSpinner.lua") end
 
-
+--[[
 local test_group = Group()
 
 local img = Image{src="ProgressSpinner/load-sun-spin.png"}
@@ -78,7 +78,7 @@ test_group:unparent()
 
 
 
-
+--]]
 
 
 local style = {
@@ -108,11 +108,11 @@ local style = {
 
 
 
-ps1 = ProgressSpinner()
-
+ps1 = ProgressSpinner{w=100,h=100}
+---[[
 ps2 = ProgressSpinner{x = 200,image = "ProgressSpinner/load-sun-spin.png",animating = true,}
-
-ps3 = ProgressSpinner{x = 400,style = style,animating = true, duration = 4000}
+---[[
+ps3 = ProgressSpinner{w=100,h=100,x = 400,style = style,animating = true, duration = 4000}
 
 ps3.image = "ProgressSpinner/load-sun-spin.png"
 ps3.image = nil
@@ -120,5 +120,6 @@ ps3.image = nil
 print(ps1:to_json())
 print(ps2:to_json())
 print(ps3:to_json())
+--]]
 screen:add(ps1,ps2,ps3)
 
