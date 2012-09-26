@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'UI/focusDestination.ui'
+# Form implementation generated from reading ui file 'focusDestination.ui'
 #
-# Created: Wed Aug 22 16:47:00 2012
+# Created: Wed Sep 26 11:02:08 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_PickerItemTable(object):
     def setupUi(self, PickerItemTable):
         PickerItemTable.setObjectName(_fromUtf8("PickerItemTable"))
-        PickerItemTable.resize(159, 145)
+        PickerItemTable.resize(132, 119)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -37,6 +37,9 @@ class Ui_PickerItemTable(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton_2.sizePolicy().hasHeightForWidth())
         self.toolButton_2.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.toolButton_2.setFont(font)
         self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
         self.gridLayout_2.addWidget(self.toolButton_2, 1, 4, 1, 1)
         self.toolButton_4 = QtGui.QToolButton(PickerItemTable)
@@ -45,6 +48,9 @@ class Ui_PickerItemTable(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton_4.sizePolicy().hasHeightForWidth())
         self.toolButton_4.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.toolButton_4.setFont(font)
         self.toolButton_4.setObjectName(_fromUtf8("toolButton_4"))
         self.gridLayout_2.addWidget(self.toolButton_4, 2, 2, 1, 1)
         self.toolButton_5 = QtGui.QToolButton(PickerItemTable)
@@ -53,24 +59,33 @@ class Ui_PickerItemTable(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton_5.sizePolicy().hasHeightForWidth())
         self.toolButton_5.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.toolButton_5.setFont(font)
         self.toolButton_5.setObjectName(_fromUtf8("toolButton_5"))
         self.gridLayout_2.addWidget(self.toolButton_5, 0, 2, 1, 1)
-        self.toolButton = QtGui.QToolButton(PickerItemTable)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.toolButton.sizePolicy().hasHeightForWidth())
-        self.toolButton.setSizePolicy(sizePolicy)
-        self.toolButton.setObjectName(_fromUtf8("toolButton"))
-        self.gridLayout_2.addWidget(self.toolButton, 1, 1, 1, 1)
         self.toolButton_3 = QtGui.QToolButton(PickerItemTable)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton_3.sizePolicy().hasHeightForWidth())
         self.toolButton_3.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.toolButton_3.setFont(font)
         self.toolButton_3.setObjectName(_fromUtf8("toolButton_3"))
         self.gridLayout_2.addWidget(self.toolButton_3, 1, 2, 1, 1)
+        self.toolButton = QtGui.QToolButton(PickerItemTable)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.toolButton.sizePolicy().hasHeightForWidth())
+        self.toolButton.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.toolButton.setFont(font)
+        self.toolButton.setObjectName(_fromUtf8("toolButton"))
+        self.gridLayout_2.addWidget(self.toolButton, 1, 1, 1, 1)
         self.gridLayout.addLayout(self.gridLayout_2, 0, 0, 1, 1)
 
         self.retranslateUi(PickerItemTable)
@@ -81,6 +96,6 @@ class Ui_PickerItemTable(object):
         self.toolButton_2.setText(QtGui.QApplication.translate("PickerItemTable", "Right", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_4.setText(QtGui.QApplication.translate("PickerItemTable", "Down", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_5.setText(QtGui.QApplication.translate("PickerItemTable", "   Up   ", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton.setText(QtGui.QApplication.translate("PickerItemTable", "Left", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_3.setText(QtGui.QApplication.translate("PickerItemTable", "Enter", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton.setText(QtGui.QApplication.translate("PickerItemTable", "Left", None, QtGui.QApplication.UnicodeUTF8))
 
