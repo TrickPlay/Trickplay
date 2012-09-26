@@ -157,24 +157,42 @@ local function Widgetize(instance)
     
     local neighbors_unsubscribe = {}
     local neighbors = {}
+    local opposite_keys = {
+        Left  = "Right",
+        Right = "Left",
+        Up    = "Down",
+        Down  = "Up",
+    }
     
     local external_neighbors = setmetatable(
         {},
         {
             __newindex = function(t,k,v)
                 
-                if neighbors[k] then
-                    neighbors_unsubscribe[k]()
+                if keys[k] == nil then error("'"..tostring(k).."' is an invalid key",2) end
+                
+                if neighbors[k]  then neighbors_unsubscribe[k]() end
+                
+                if type(v) == "userdata" and v.grab_key_focus then
+                    
+                    neighbors_unsubscribe[k] = instance:add_key_handler(
+                        
+                        keys[k],  function()   v:grab_key_focus()   end
+                    )
+                    
+                    neighbors[k] = v
+                    
+                    if opposite_keys[k] and v.neighbors[ opposite_keys[k] ] == nil then
+                        
+                        v.neighbors[ opposite_keys[k] ] = instance
+                        
+                    end
+                    
+                elseif v == nil then
+                    
+                    neighbors[k] = nil
+                    
                 end
-                
-                neighbors_unsubscribe[k] = instance:add_key_handler(
-                    
-                    k,
-                    
-                    function()   v:grab_key_focus()   end
-                )
-                
-                neighbors[k] = v
                 
             end,
             __index = function(t,k)
@@ -289,6 +307,14 @@ local function Widgetize(instance)
             for _,k in pairs(uielement_properties) do
                 
                 t[k] = self[k]
+                
+            end
+            
+            t.neighbors = {}
+            
+            for k,v in pairs(neighbors) do
+                
+                t.neighbors[k] = v.name
                 
             end
             
