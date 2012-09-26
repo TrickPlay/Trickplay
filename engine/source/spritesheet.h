@@ -10,8 +10,11 @@ class SpriteSheet : public RefCounted
 public:
     inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
 
-    SpriteSheet( CoglHandle texture );
+    SpriteSheet();
+    SpriteSheet ( CoglHandle texture );
     ~SpriteSheet();
+
+    void set_texture( CoglHandle texture );
 
     bool map_subtexture( const gchar * id , int x , int y , int w , int h );
     CoglHandle get_subtexture( const gchar * id );
@@ -23,6 +26,7 @@ private:
     GHashTable *map;
     CoglHandle texture;
 
+    inline void check_initialized() { if ( ! texture ) g_error( "SpriteSheet not initialized" ); }
     SpriteSheet( const SpriteSheet& ){}
 };
 
