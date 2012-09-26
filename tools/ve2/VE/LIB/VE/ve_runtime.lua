@@ -103,8 +103,7 @@ local function load_color_schemes()
     
     for k,v in pairs(input) do
         
-		v.name = k
-		
+v.name = k
         color_schemes[k] = ColorScheme(v)
         
     end
@@ -186,17 +185,17 @@ local function load_styles()
     for k,v in pairs(input.arrow)  do
         --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
         v.name = k
-		arrow_styles[k]  = ArrowStyle(v)
+arrow_styles[k]  = ArrowStyle(v)
     end
     for k,v in pairs(input.border) do
         --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
         v.name = k
-		border_styles[k] = BorderStyle(v)
+border_styles[k] = BorderStyle(v)
     end
     for k,v in pairs(input.text)   do
         --v.colors = type(v.colors) == "string" and color_schemes[v.colors] or v.colors
         v.name = k
-		text_styles[k]   = TextStyle(v)
+text_styles[k]   = TextStyle(v)
     end
     
     for k,v in pairs(input.style) do
@@ -215,14 +214,10 @@ end
 
 --------------------------------------------------------------------------------
 
-local constructors = {
-    Group     = Group,
-    Image     = Image,
-    Rectangle = Rectangle,
-    Clone     = Clone,
-    Text      = Text,
-    Button    = Button,
-}
+local names
+local neigbor_info
+local curr_neighbors
+local obj
 
 local construct
 construct = function(t)
@@ -233,19 +228,42 @@ construct = function(t)
         
     end
     
-    for i,v in ipairs(t.children or {}) do
-        
-        t.children[i] = construct(v)
-        
+    if t.type == "LayoutManager" then
+        for i,row in ipairs(t.cells) do
+            for j,v in ipairs(row) do
+                
+                t.cells[i][j] = construct(v)
+                
+            end
+        end
+    elseif t.type == "ListManager" then
+        for i,v in ipairs(t.cells) do
+            
+            t.cells[i] = construct(v)
+            
+        end
+    elseif t.children then
+        for i,v in ipairs(t.children) do
+            
+            t.children[i] = construct(v)
+            
+        end
     end
-    
-    return _G[t.type] and _G[t.type](t) or
+    curr_neighbors = t.neighbors
+    obj = _G[t.type] and _G[t.type](t) or
         
-        error("Received invalid type "..t.type)
+        error("Received invalid type: "..t.type)
+    
+    names[obj.name] = obj
+    neigbor_info[obj] = curr_neighbors
+    
+    return obj
     
 end
-
 function load_layer(str)
+    
+    names = {}
+    neigbor_info = {}
     
       --load_styles should be called before load_layer
     if type(styles) ~= "table" then
@@ -273,7 +291,19 @@ function load_layer(str)
     
     --the setter for Widget_Group.children calls the appropriate 
     --constructors when it receives an attributes table as an entry
-    return Widget_Group(layer)    
+    layer = construct(layer)
+    
+    for obj,neighbors in pairs(neigbor_info) do
+        
+        for k,v in pairs(neighbors) do
+            
+            obj.neighbors[k] = names[v]
+            
+        end
+        
+    end
+    
+    return layer
 end
 
 --[[
