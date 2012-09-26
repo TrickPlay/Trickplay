@@ -9,7 +9,7 @@ module sprite;
 ]]
 
 [[
-void refresh_texture( GObject * sprite )
+int refresh_texture( GObject * sprite , int check_validity , char ** error_message )
 {
     char * id = (char*) g_object_get_data( sprite , "tp-id" );
     SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( sprite , "tp-sheet" );
@@ -21,6 +21,39 @@ void refresh_texture( GObject * sprite )
         {
             clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , COGL_TEXTURE( sprite_texture ) );
         }
+        else if ( check_validity )
+        {
+            *error_message = (char*) "Invalid sheet/id combination.  If you are trying to change both, change the sheet first.";
+            return 0;
+        }
+    }
+    else if ( check_validity )
+    {
+        *error_message = (char*) "Invalid sheet/id combination.  If you are trying to change both, change the sheet first.";
+        return 0;
+    }
+
+    return 1;
+}
+
+void set_sheet_first( lua_State * L , int table )
+{
+    if ( table )
+    {
+        lua_newtable( L );
+        lua_pushstring( L , "sheet" );
+        lua_getfield( L , table , "sheet" );
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            lua_rawset( L , -3 );
+            ClutterUtil::set_props_from_table( L , lua_gettop( L ) );
+        }
+        else
+        {
+            lua_pop( L , 2 );
+        }
+
+        lua_pop( L , 1 );
     }
 }
 ]]
@@ -31,6 +64,10 @@ class Sprite [[ClutterActor*]] actor
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
             ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
+
+            lua_pushvalue( L , -1 );
+            set_sheet_first( L , props );
+            lua_pop( L , 1 );
 
             ClutterUtil::set_props_from_table( L, props );
             g_object_unref( self );
@@ -55,7 +92,7 @@ class Sprite [[ClutterActor*]] actor
             if ( old_sheet != new_sheet )
             {
                 g_object_set_data_full( g_self , "tp-sheet" , new_sheet , (GDestroyNotify) SpriteSheet::unref );
-                refresh_texture( g_self );
+                refresh_texture( g_self , 0 , 0 );
                 RefCounted::ref( new_sheet );
             }
         ]];
@@ -72,8 +109,32 @@ class Sprite [[ClutterActor*]] actor
 
             if ( ! old_id || strcmp( old_id , new_id ) != 0 )
             {
+                char * error_message;
+                char * old_id_copy = old_id ? strdup( old_id ) : 0;
+
                 g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
-                refresh_texture( g_self );
+
+                if (! refresh_texture( g_self , 1 , &error_message ) )
+                {
+                    if ( old_id_copy ) g_object_set_data_full( g_self , "tp-id" , old_id_copy , g_free );
+                    luaL_error( L , error_message );
+                }
+                else if ( old_id_copy )
+                {
+                    g_free( old_id_copy );
+                }
             }
+        ]];
+
+    UIElement set(table props)
+        [[
+            luaL_checktype(L,-1,LUA_TTABLE);
+
+            lua_pushvalue( L , -2 );
+            set_sheet_first( L , props );
+            lua_pop( L , 1 );
+
+            ClutterUtil::set_props_from_table(L,props);
+            lua_pushvalue(L,1);
         ]];
 }
