@@ -248,9 +248,10 @@ int main (int argc, char ** argv) {
   ExceptionInfo * exception = AcquireExceptionInfo();
   ImageInfo * outputInfo = AcquireImageInfo(),
 			* tempInfo;
-  Image * image = NewMagickImage(outputInfo, best.width, best.height, bg),
-        * tempImage;
-  SetImageOpacity(image, QuantumRange);
+  Image * outputImage = NewMagickImage(outputInfo, best.width, best.height, bg),
+        * tempImage,
+		* excerptImage;
+  SetImageOpacity(outputImage, QuantumRange);
   Item * item;
 	
   GString * str = g_string_new("{\n\t\"sprites\": [");
@@ -267,34 +268,56 @@ int main (int argc, char ** argv) {
 	tempImage = ReadImage(tempInfo, exception);
 	if (exception->severity != UndefinedException)
       CatchException(exception);
+	  
+	CompositeImage(outputImage, ReplaceCompositeOp , tempImage, item->x + 1, item->y + 1);
 	
-	CompositeImage(image, ReplaceCompositeOp , tempImage, item->x + 1, item->y + 1);
+	RectangleInfo rects[8] =
+	  { {1, item->h - 2, 0, 0},
+	    {1, item->h - 2, item->w - 3, 0},
+	    {item->w - 2, 1, 0, 0},
+	    {item->w - 2, 1, 0, item->h - 3},
+	    {1, 1, 0, 0},
+	    {1, 1, item->w - 3, 0},
+	    {1, 1, 0, item->h - 3},
+	    {1, 1, item->w - 3, item->h - 3} };
+	int points[16] =
+	  { 0, 1, item->w - 1, 1, 1, 0, 1, item->h - 1,
+	    0, 0, item->w - 1, 0, 0, item->h - 1, item->w - 1, item->h - 1 };
+	
+	int j;
+	for (j = 0; j < 8; j++) {
+	  excerptImage = ExcerptImage(tempImage, &rects[j], exception);
+	  CompositeImage(outputImage, ReplaceCompositeOp , excerptImage, item->x + points[j*2], item->y + points[j*2+1]);
+	  excerptImage = DestroyImage(excerptImage);
+	}
 	
 	tempImage = DestroyImage(tempImage);
 	tempInfo = DestroyImageInfo(tempInfo);
 	si = g_sequence_iter_next(si);
 	i++;
   }
-  g_string_append(str, g_strjoinv(",", sprites));
-  g_string_append(str, g_strdup_printf("\n\t],\n\t\"img\": \"%s.png\"\n}", basepath));
   
-  GFile *json = g_file_new_for_path(g_strdup_printf("%s.json", basepath));
+  char * pngPath = g_strdup_printf("%s.png", basepath),
+       * jsonPath = g_strdup_printf("%s.json", basepath);
+	   
+  g_string_append(str, g_strjoinv(",", sprites));
+  g_string_append(str, g_strdup_printf("\n\t],\n\t\"img\": \"%s\"\n}", pngPath));
+  
+  GFile *json = g_file_new_for_path(jsonPath);
   g_file_replace_contents  (json, str->str, str->len, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, NULL);
   g_string_free(str, TRUE);
   
-  str = g_string_new(basepath);
-  g_string_append(str, ".png");
-  
-  CopyMagickString(outputInfo->filename, g_string_free(str, FALSE), MaxTextExtent);
+  CopyMagickString(outputInfo->filename, pngPath, MaxTextExtent);
   CopyMagickString(outputInfo->magick, "png", MaxTextExtent);
-  outputInfo->file = fopen(outputInfo->filename, "w+b");
-  WriteImage(outputInfo, image);
+  outputInfo->file = fopen(pngPath, "w+b");
+  WriteImage(outputInfo, outputImage);
   
-  fprintf(stderr, "Output to %s\n", outputInfo->filename);
+  fprintf(stderr, "Output map to %s and image to %s\n", jsonPath, pngPath);
 
   free(bg);
   exception = DestroyExceptionInfo(exception);
   outputInfo = DestroyImageInfo(outputInfo);
+  outputImage = DestroyImage(outputImage);
   MagickCoreTerminus();
   
   return 0;
