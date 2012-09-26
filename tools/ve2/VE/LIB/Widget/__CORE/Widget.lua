@@ -188,9 +188,13 @@ local function Widgetize(instance)
                         
                     end
                     
+                    instance:notify()
+                    
                 elseif v == nil then
                     
                     neighbors[k] = nil
+                    
+                    instance:notify()
                     
                 end
                 
