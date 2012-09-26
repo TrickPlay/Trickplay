@@ -23,10 +23,24 @@ add_verbosity("TABBAR")
 add_verbosity("ArrayManager")
 
 
-dofile("MenuButton/test.lua")
+dofile("OrbittingDots/test.lua")
 screen:show()
 controllers:start_pointer()
+--[[
+b1 = Button{name="b1"}
+b2 = Button{name="b2",x=300}
+b3 = Button{name="b3",y=60}
 
+wg = Widget_Group{name="wg"}
+wg:add(b1,b2,b3)
+
+dofile("load_json.lua")
+print("loading")
+b1.neighbors.Right = b2
+b3.neighbors.Right = b2
+str = wg:to_json()
+screen:add(load_layer(str))
+--]]
 r = Rectangle{w=10,h=10,y = 1070}
 screen:add(r)
 
