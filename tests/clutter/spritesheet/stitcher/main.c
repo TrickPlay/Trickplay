@@ -252,10 +252,16 @@ int main (int argc, char ** argv) {
         * tempImage;
   SetImageOpacity(image, QuantumRange);
   Item * item;
+	
+  GString * str = g_string_new("{\n\t\"sprites\": [");
+  
+  gchar ** sprites = calloc(g_sequence_get_length(items), sizeof(gchar));
+  i = 0;
   
   GSequenceIter * si = g_sequence_get_begin_iter(items);
   while (!g_sequence_iter_is_end(si)) {
 	item = g_sequence_get(si);
+	sprites[i] = g_strdup_printf("\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }", item->x, item->y, item->w, item->h, item->id);
 	tempInfo = AcquireImageInfo();
 	CopyMagickString(tempInfo->filename, item->path, MaxTextExtent);
 	tempImage = ReadImage(tempInfo, exception);
@@ -267,9 +273,16 @@ int main (int argc, char ** argv) {
 	tempImage = DestroyImage(tempImage);
 	tempInfo = DestroyImageInfo(tempInfo);
 	si = g_sequence_iter_next(si);
+	i++;
   }
+  g_string_append(str, g_strjoinv(",", sprites));
+  g_string_append(str, g_strdup_printf("\n\t],\n\t\"img\": \"%s.png\"\n}", basepath));
   
-  GString * str = g_string_new(basepath);
+  GFile *json = g_file_new_for_path(g_strdup_printf("%s.json", basepath));
+  g_file_replace_contents  (json, str->str, str->len, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, NULL);
+  g_string_free(str, TRUE);
+  
+  str = g_string_new(basepath);
   g_string_append(str, ".png");
   
   CopyMagickString(outputInfo->filename, g_string_free(str, FALSE), MaxTextExtent);
