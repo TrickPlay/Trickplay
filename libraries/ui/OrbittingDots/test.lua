@@ -45,8 +45,8 @@ screen:show()
 
 od1 = OrbittingDots()
 
-od2 = OrbittingDots{x = 200,image = "OrbittingDots/x.png",dot_size = 40}
-od3 = OrbittingDots{x = 400}
+od2 = OrbittingDots{x = 200,image = "OrbittingDots/x.png",dot_size = 40,num_dots = 12, w = 100,h=100}
+od3 = OrbittingDots{x = 400, w = 300,h=300,num_dots = 12}
 
 od3.image = "OrbittingDots/x.png"
 
