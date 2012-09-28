@@ -6,15 +6,23 @@
 #include "log.h"
 
 void log_subtexture( gpointer id_ptr , gpointer subtexture_ptr , gpointer none );
+void init_extra( SpriteSheet * sheet );
 
-SpriteSheet::SpriteSheet() : map(g_hash_table_new_full( g_str_hash , g_str_equal , g_free , g_free )) , texture(0) {}
+bool SpriteSheet::class_initialized = false;
 
-SpriteSheet::SpriteSheet ( CoglHandle texture ) : map(g_hash_table_new_full( g_str_hash , g_str_equal , g_free , g_free )) , texture(cogl_handle_ref(texture)) {}
+SpriteSheet::SpriteSheet() : map(g_hash_table_new_full( g_str_hash , g_str_equal , g_free , g_free )) , texture(0) {
+    init_extra( this );
+}
+
+SpriteSheet::SpriteSheet ( CoglHandle texture ) : map(g_hash_table_new_full( g_str_hash , g_str_equal , g_free , g_free )) , texture(cogl_handle_ref(texture)) {
+    init_extra( this );
+}
 
 SpriteSheet::~SpriteSheet()
 {
     g_hash_table_destroy( map );
     cogl_handle_unref( texture );
+    g_free( extra );
 }
 
 void SpriteSheet::set_texture( CoglHandle texture )
@@ -25,6 +33,11 @@ void SpriteSheet::set_texture( CoglHandle texture )
     }
 
     this->texture = texture;
+}
+
+bool SpriteSheet::is_initialized()
+{
+    return this->texture ? true : false;
 }
 
 bool SpriteSheet::map_subtexture( const gchar * id , int x , int y , int w , int h )
@@ -46,6 +59,7 @@ bool SpriteSheet::map_subtexture( const gchar * id , int x , int y , int w , int
 
 CoglHandle SpriteSheet::get_subtexture( const gchar * id )
 {
+    check_initialized();
     return (CoglHandle) g_hash_table_lookup( map , id );
 }
 
@@ -92,4 +106,25 @@ void log_subtexture( gpointer id_ptr , gpointer subtexture_ptr , gpointer none )
     int     h = cogl_texture_get_height( subtexture );
 
     tplog( "\t%15s : %10dx%-10d" , id , w , h );
+}
+
+void init_extra( SpriteSheet * sheet )
+{
+    sheet->extra = G_OBJECT(g_object_new( G_TYPE_OBJECT , NULL ));
+    g_object_set_data( sheet->extra , "tp-sheet" , sheet );
+
+    if ( ! SpriteSheet::class_initialized )
+    {
+        g_signal_new(
+            "load-finished",
+            G_TYPE_OBJECT,
+            G_SIGNAL_RUN_FIRST,
+            0, 0, 0, 0,
+            G_TYPE_NONE,
+            1,
+            G_TYPE_POINTER
+        );
+
+        SpriteSheet::class_initialized = true;
+    }
 }
