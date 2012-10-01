@@ -1,13 +1,4 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("Button/Button.lua")                 end
-
 --[=[
 local button_test_group = Group{}
 
@@ -285,12 +276,12 @@ local style = {
 screen:show()
 
 
---[[
-b1 = Button()
+---[[
+b1 = WL.Button()
 b1.reactive = true
 --]]
 --------------------------------------------------------------------------------
-b2 = Button{x = 100,y = 200, label = "LABEL"}--,style = style}
+b2 = WL.Button{x = 100,y = 200, label = "LABEL"}--,style = style}
 print("b2")
 b2.style = style
 print("b2")
@@ -299,16 +290,16 @@ b2.style.text.y_offset = -50
 b2.label = "lAbel"
 b2.reactive = true
 --------------------------------------------------------------------------------
---[[
-b3 = Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
+---[[
+b3 = WL.Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
 
 b3.w = 400
 b3.reactive = true
 --------------------------------------------------------------------------------
 --]]
---[[
+---[[
 print("b4")
-b4 = Button{
+b4 = WL.Button{
     x = 200,y = 600,
     images = {
         default = "Button/button3.png",
@@ -320,11 +311,11 @@ b4.w = 300
 b4.reactive = true
 print("derrrp")
 --]]
---[[
+---[[
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
 
-b5 = Button{y=900}
+b5 = WL.Button{y=900}
 print("made b5, calling from json")
 b5:from_json(    b3:to_json()   )
 print(b3:to_json())

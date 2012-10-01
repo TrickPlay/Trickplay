@@ -1,5 +1,9 @@
 STYLE = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+
 local default_fill_colors = {
     default    = {  0,  0,  0},
     focus      = {155,155,155},
@@ -482,3 +486,6 @@ Style = setmetatable({},
 --so that the weak table doesn't throw it away (if i use a local, lua is smart
 --enough to realize its never going to be usedand will throw it away anyway)
 getmetatable(all_styles).default = Style("Default")
+
+external.Style          = Style
+external.get_all_styles = get_all_styles
