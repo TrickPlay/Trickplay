@@ -1,3 +1,25 @@
+/*
+ * Usage: stitcher /path/to/directory
+ * Flags:
+ *    -i [filter]   Filter which files to include. Name filters can use the
+ *                  wildcards * (zero or more chars) and ? (one char).
+ *                  Multiple space-seperated name filters can be passed.
+ *       [int]      One integer size filter can be passed, such as 256, to
+ *                  prevent large images from being included in a spritesheet. 
+ *                  
+ *    -o [path]     Set the path of the output files, which will have
+ *                  sequential numbers and a .png or .json extension appended.
+ *       [int]      Pass an integer like 4096 to set the maximum .png size
+ *                  
+ *    -m            Divide sprites among multiple spritesheets if they don't fit
+ *                  within the maximum dimensions
+ *    
+ *    -c            Copy files that fail the size filter over as single-image
+ *                  spritesheets (if they fit within the maximum output size)
+ *
+ * Ex: stitcher assets/ui -i *.png nav/bg-?.jpg 256 -o sprites/ui 1024 -mc
+ */
+
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 #include <glib.h>
 #include <glib-object.h>
@@ -241,8 +263,10 @@ void recalculate_layout(int width, gboolean finalize) {
   
   // save this layout if it's the best so far
   
+	// consider: current.area + current.width + current.height <= best.area + best.width + best.height?
   current.area = current.width * current.height;
-  if (current.height <= outputSize && (best.area == 0 || current.area < best.area))
+  if (current.height <= outputSize && (best.area == 0 || current.area < best.area ||
+     (current.area == best.area && current.width + current.height <= best.width + best.height) ))
     best = current;
   
   // collect garbage
@@ -348,7 +372,7 @@ void export_image(char * jsonPath, char * pngPath) {
 
 enum {
   DEFAULT,
-  SET_FILTER = 'f',
+  SET_INPUT = 'i',
   SET_OUTPUT = 'o',
   SET_OPTIMIZATION = 'p'
 };
@@ -373,14 +397,10 @@ int main (int argc, char ** argv) {
     if ((char) arg[0] == '-') {
       for (j = 1; j < l; j++) {
         switch((char) arg[j]) {
-          case 'f':
-            state = SET_FILTER;
-            break;
+          case 'i':
           case 'o':
-            state = SET_OUTPUT;
-            break;
           case 'p':
-            state = SET_OPTIMIZATION;
+            state = arg[j];
             break;
           case 'b':
             bufferPixels = TRUE;
@@ -405,7 +425,7 @@ int main (int argc, char ** argv) {
       }
     } else {
       switch(state) {
-        case SET_FILTER:
+        case SET_INPUT:
           for (j = 0; j < l; j++)
             if (!g_ascii_isdigit(arg[j]))
               break;
@@ -430,7 +450,7 @@ int main (int argc, char ** argv) {
           if (i == 1)
             basepath = arg;
           else {
-            fprintf(stderr, "Error: ambiguous input path");
+            fprintf(stderr, "Error: ambiguous input path\n");
             exit(1);
           }
         break;
@@ -454,7 +474,7 @@ int main (int argc, char ** argv) {
   recalculate_layout(best.width, TRUE);
   
   fprintf(stderr,"Best match coverage: %i x %i pixels, %f%% match\n",
-		  best.width, best.height, (gfloat) minimum.area / (gfloat) best.area);
+		  best.width, best.height, 100.0 * (gfloat) minimum.area / (gfloat) best.area);
   
   export_image(jsonPath, pngPath);
   
