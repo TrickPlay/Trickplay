@@ -23,13 +23,13 @@ int refresh_texture( GObject * sprite , int check_validity , char ** error_messa
         }
         else if ( check_validity )
         {
-            *error_message = (char*) "Invalid sheet/id combination.  If you are trying to change both, change the sheet first.";
+            *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
             return 0;
         }
     }
     else if ( check_validity )
     {
-        *error_message = (char*) "Invalid sheet/id combination.  If you are trying to change both, change the sheet first.";
+        *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
         return 0;
     }
 
@@ -77,10 +77,21 @@ class Sprite [[ClutterActor*]] actor
         [[
         ]];
 
+    /*
+        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+    */
+
     SpriteSheet sheet
         [[
             SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( G_OBJECT( self ), "tp-sheet" );
-            lua_pushlightuserdata( L , sheet );
+            if ( sheet )
+            {
+                lua_pushlightuserdata( L , sheet );
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
         ]]
         [[
             luaL_checkudata(L,2,"SPRITESHEET_METATABLE");
@@ -91,11 +102,22 @@ class Sprite [[ClutterActor*]] actor
 
             if ( old_sheet != new_sheet )
             {
-                g_object_set_data_full( g_self , "tp-sheet" , new_sheet , (GDestroyNotify) SpriteSheet::unref );
-                refresh_texture( g_self , 0 , 0 );
-                RefCounted::ref( new_sheet );
+                if ( new_sheet->is_initialized() )
+                {
+                    g_object_set_data_full( g_self , "tp-sheet" , new_sheet , (GDestroyNotify) SpriteSheet::unref );
+                    refresh_texture( g_self , 0 , 0 );
+                    RefCounted::ref( new_sheet );
+                }
+                else
+                {
+                    luaL_error( L , "SpriteSheet not initialized." );
+                }
             }
         ]];
+
+    /*
+        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+    */
 
     string id
         [[
@@ -125,6 +147,10 @@ class Sprite [[ClutterActor*]] actor
                 }
             }
         ]];
+
+    /*
+        This makes sure sheet is set first.
+    */
 
     UIElement set(table props)
         [[
