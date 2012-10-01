@@ -1,13 +1,4 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")              end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("__CORE/Style.lua")                    end
-if not WIDGET            then dofile("__CORE/Widget.lua")                   end
-if not PROGRESSSPINNER   then dofile("ProgressSpinner/ProgressSpinner.lua") end
-
 --[[
 local test_group = Group()
 
@@ -108,11 +99,11 @@ local style = {
 
 
 
-ps1 = ProgressSpinner{w=100,h=100}
+ps1 = WL.ProgressSpinner{w=100,h=100}
 ---[[
-ps2 = ProgressSpinner{x = 200,image = "ProgressSpinner/load-sun-spin.png",animating = true,}
+ps2 = WL.ProgressSpinner{x = 200,image = "ProgressSpinner/load-sun-spin.png",animating = true,}
 ---[[
-ps3 = ProgressSpinner{w=100,h=100,x = 400,style = style,animating = true, duration = 4000}
+ps3 = WL.ProgressSpinner{w=100,h=100,x = 400,style = style,animating = true, duration = 4000}
 
 ps3.image = "ProgressSpinner/load-sun-spin.png"
 ps3.image = nil

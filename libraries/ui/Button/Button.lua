@@ -1,5 +1,8 @@
 BUTTON = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 
 local states = {"default","focus","activation"}
 
@@ -532,4 +535,4 @@ Button = setmetatable(
     end
 })
 
-
+external.Button = Button

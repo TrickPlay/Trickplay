@@ -1,5 +1,8 @@
 WIDGET = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 --List of Properties copied from docs
 local uielement_properties = {
     "name",
@@ -475,7 +478,7 @@ end
 --------------------------------------------------------------------------------
 
 Widget = function(parameters)
-    
+    print("widge",_ENV)
     local instance, env = Widgetize(  Group()  )
     
     instance:set( 
@@ -534,7 +537,7 @@ Widget_Group = function(parameters)
                 
                 if type(obj) == "table" and obj.type then 
                     
-                    v[i] = _G[obj.type](obj)
+                    v[i] = _ENV[obj.type](obj)
                     
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                 
@@ -718,7 +721,12 @@ Widget_Clone = function(parameters)
     
 end
 
-
+external.Widget           = Widget
+external.Widget_Group     = Widget_Group
+external.Widget_Clone     = Widget_Clone
+external.Widget_Image     = Widget_Image
+external.Widget_Text      = Widget_Text
+external.Widget_Rectangle = Widget_Rectangle
 
 
 

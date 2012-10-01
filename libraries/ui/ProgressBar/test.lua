@@ -1,16 +1,6 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")              end
-if not MISC              then dofile("__UTILITIES/Misc.lua")                end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("__CORE/Style.lua")                    end
-if not WIDGET            then dofile("__CORE/Widget.lua")                   end
-if not PROGRESSBAR       then dofile("ProgressBar/ProgressBar.lua")         end
-
-local test_group = Group()
 --[[
+local test_group = Group()
 screen:add(test_group)
 local tests = {
     function()
@@ -60,9 +50,9 @@ style =  {
 screen:show()
 
 
-pb1 = ProgressBar{w = 200, h = 50}
-pb2 = ProgressBar{x = 250,progress = 1,w = 200, h = 50}
-pb3 = ProgressBar{x = 500,progress = .5,style = style,w = 200, h = 50}
+pb1 = WL.ProgressBar{w = 200, h = 50}
+pb2 = WL.ProgressBar{x = 250,progress = 1,w = 200, h = 50}
+pb3 = WL.ProgressBar{x = 500,progress = .5,style = style,w = 200, h = 50}
 tl = Timeline{loop = true,on_new_frame = function(self,ms,p) pb1.progress = p end}
 tl:start()
 
