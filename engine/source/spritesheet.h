@@ -8,6 +8,7 @@
 class SpriteSheet : public RefCounted
 {
 public:
+    static bool class_initialized;
     inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
 
     SpriteSheet();
@@ -15,6 +16,7 @@ public:
     ~SpriteSheet();
 
     void set_texture( CoglHandle texture );
+    bool is_initialized();
 
     bool map_subtexture( const gchar * id , int x , int y , int w , int h );
     CoglHandle get_subtexture( const gchar * id );
@@ -22,12 +24,13 @@ public:
     void dump();
     void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
 
+    GObject * extra;
+
 private:
     GHashTable *map;
     CoglHandle texture;
 
     inline void check_initialized() { if ( ! texture ) g_error( "SpriteSheet not initialized" ); }
-    SpriteSheet( const SpriteSheet& ){}
 };
 
 #endif
