@@ -16,25 +16,14 @@
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
-
-    
-    --_VE_.contentMove(11,16,0,2)
-    --[[
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST5/TR.TESTSPAP/screens")
-        _VE_.insertUIElement(9, 'Button')
-        _VE_.insertUIElement(9, 'DialogBox')
-        _VE_.insertUIElement(9, 'ArrowPane')
-        --_VE_.insertUIElement(9, 'ToastAlert')
-        --_VE_.insertUIElement(9, 'LayoutManager')
-        --_VE_.insertUIElement(9, 'TabBar')
-        _VE_.insertUIElement(9, 'ScrollPane')
-        --_VE_.insertUIElement(9, 'MenuButton')
-        _VE_.insertUIElement(9, 'Rectangle')
-    ]]
     end 
 
     bb = function ()
-        _VE_.setUIInfo(10,'focused',true)
+        b1 = devtools:gid(34)
+        b2 = devtools:gid(8)
+        b1.neighbors.Right = b2
+        b1:grab_key_focus()
+        --_VE_.setUIInfo(10,'focused',true)
         --_VE_.contentMove(31,9,nil,nil,true,10)
         --_VE_.contentMove(32,9,nil,nil,true,10)
         --_VE_.contentMove(25,10,0,2,false,nil)
@@ -860,8 +849,16 @@ _VE_.repUIInfo = function(uiInstance)
     print("repUIInfo"..json:stringify(t))
 end
 
-_VE_.openInspector = function(gid)
-    print("openInspc"..gid)
+_VE_.clearInspector = function(gid)
+    print("clearInsp"..gid)
+end
+_VE_.openInspector = function(gid, multi)
+    if shift == true or multi then 
+        print("openInspc".."t"..gid)
+    else
+        print("openInspc".."f"..gid)
+    end
+    --print("openInspc"..gid)
 end 
 
 _VE_.setAppPath = function(path)
@@ -1272,6 +1269,31 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
 end
 
+_VE_.selectUIElement = function(gid, multiSel)
+    local org_shift = shift
+    if multiSel == true then
+        shift = multiSel
+    end
+    if gid ~= 2 then
+        screen_ui.selected(devtools:gid(gid))
+    end 
+    shift = org_shift
+end 
+
+_VE_.deselectAll = function()
+    screen_ui.n_selected_all()
+end 
+
+_VE_.deselectUIElement = function(gid, multiSel)
+    local org_shift = shift
+    if multiSel == true then
+        shift = multiSel
+    end 
+    if gid ~= 2 then
+        screen_ui.n_selected(devtools:gid(gid))
+    end
+    shift = org_shift
+end 
 
     local function styleUpdate()
         if blockReport ~= true then
@@ -1334,7 +1356,7 @@ end
 	      	else
 				screen_ui.multi_select_done(x,y)
 				if move == nil then
-					screen_ui.n_selected_all()
+					--screen_ui.n_selected_all()
 				end
 				move = nil
 	      	end 

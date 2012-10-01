@@ -373,6 +373,8 @@ function screen_ui.multi_select_done(x,y)
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
 			if(v.extra.selected == false and v.parent.visible == true) then 
 		    	screen_ui.selected(v)
+                _VE_.openInspector(v.gid, true)
+
 			end 
 		end 
 		end 

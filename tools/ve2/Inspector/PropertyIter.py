@@ -486,6 +486,7 @@ PROP_LIST = [
 
     # Widget Rectangle
     'border_width',
+    'neighbors',
 
     # Hidden
     #'type',
