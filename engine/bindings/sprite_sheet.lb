@@ -97,7 +97,7 @@ int get_image_src_from_lua_table( lua_State * L , const char ** image_src )
         return 0;
     }
 
-    *image_src = map_obj["img"].as<String>().c_str();
+    *image_src = strdup( map_obj["img"].as<String>().c_str() );
 
     return 1;
 }
@@ -252,6 +252,9 @@ void initialize( SpriteSheet * sheet , JSON::Array sprite_data , Image * image )
     Images::load_texture( image_texture , image );
     sheet->set_texture( clutter_texture_get_cogl_texture( image_texture ) );
 
+    char * img_src = (char*) g_object_get_data( sheet->extra , "tp-src" );
+    g_object_set_data_full( G_OBJECT( image_texture ) , "tp-src" , (gpointer*) strdup( img_src ) , g_free );
+
     map_sprites( sheet , sprite_data );
 }
 
@@ -299,6 +302,7 @@ void download_map_callback( const Network::Response & response , gpointer me )
     }
 
     g_object_set_data_full( self->extra , "tp-sprite-data" , sprite_data , g_free );
+    g_object_set_data_full( self->extra , "tp-src" , (gpointer*) image_src , g_free );
 
     app->load_image_async( image_src , false , load_image_callback , self , 0 );
 }
@@ -348,6 +352,7 @@ void construct_async( SpriteSheet * self , AppResource resource )
         }
 
         g_object_set_data_full( self->extra , "tp-sprite-data" , sprite_data , g_free );
+        g_object_set_data_full( self->extra , "tp-src" , (gpointer*) image_src , g_free );
 
         app->load_image_async( image_src , false , load_image_callback , self , 0 );
     }
@@ -425,6 +430,8 @@ class SpriteSheet [[SpriteSheet*]]
                             luaL_error( L , "SpriteSheet initialization error: Could not load image '%s'" , image_src );
                         }
 
+                        g_object_set_data_full( self->extra , "tp-src" , (gpointer*) image_src , g_free );
+
                         initialize( self , *sprite_data , image );
 
                         delete sprite_data;
@@ -453,6 +460,8 @@ class SpriteSheet [[SpriteSheet*]]
                     {
                         luaL_error( L , "SpriteSheet initialization error: %s" , error_message );
                     }
+
+                    g_object_set_data_full( self->extra , "tp-src" , (gpointer*) "(Bitmap)" , g_free );
 
                     initialize( self , *sprite_data , image );
 

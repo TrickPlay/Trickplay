@@ -51,6 +51,7 @@ bool SpriteSheet::map_subtexture( const gchar * id , int x , int y , int w , int
     if ( subtexture )
     {
         g_hash_table_insert( map , (gpointer) id , (gpointer) subtexture );
+
         return true;
     }
 
