@@ -1321,9 +1321,14 @@ class TrickplayInspector(QWidget):
                     self.curLayerName = self.layerName[int(self.curData['gid'])] 
                     self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                    print("DDDDDDDDDDD", multiSelect)
+                    if multiSelect == "true":
+                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
+                        self.ui.property.clear()
+                    else :
+                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                        self.propertyFill(self.curData)
 
-            self.propertyFill(self.curData)
             
             self.preventChanges = False
     
