@@ -9,10 +9,50 @@ module sprite;
 ]]
 
 [[
-int refresh_texture( GObject * sprite , int check_validity , char ** error_message )
+void push_lua_sheet( lua_State * L , GObject * sprite )
 {
+    LSG;
+
+    int * sheet_ref = (int*) g_object_get_data( sprite , "tp-sheet-ref" );
+
+    if ( sheet_ref )
+    {
+        lb_strong_deref( L , *sheet_ref );
+    }
+    else
+    {
+        lua_pushnil( L );
+    }
+
+    LSG_END( 1 );
+}
+
+SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
+{
+    LSG;
+
+    SpriteSheet * sheet = 0;
+
+    int * sheet_ref = (int*) g_object_get_data( sprite , "tp-sheet-ref" );
+
+    if ( sheet_ref )
+    {
+        lb_strong_deref( L , *sheet_ref );
+        sheet = (SpriteSheet*) UserData::get_client( L , -1 );
+        lua_pop( L , 1 );
+    }
+
+    LSG_END( 0 );
+
+    return sheet;
+}
+
+int refresh_texture( lua_State * L , GObject * sprite , int check_validity , char ** error_message )
+{
+
     char * id = (char*) g_object_get_data( sprite , "tp-id" );
-    SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( sprite , "tp-sheet" );
+
+    SpriteSheet * sheet = get_sheet( L , sprite );
 
     if ( id && sheet )
     {
@@ -83,30 +123,25 @@ class Sprite [[ClutterActor*]] actor
 
     SpriteSheet sheet
         [[
-            SpriteSheet * sheet = (SpriteSheet*) g_object_get_data( G_OBJECT( self ), "tp-sheet" );
-            if ( sheet )
-            {
-                lua_pushlightuserdata( L , sheet );
-            }
-            else
-            {
-                lua_pushnil( L );
-            }
+            push_lua_sheet( L , G_OBJECT( self ) );
         ]]
         [[
             luaL_checkudata(L,2,"SPRITESHEET_METATABLE");
             GObject * g_self = G_OBJECT( self );
 
-            SpriteSheet * old_sheet = (SpriteSheet*) g_object_get_data( g_self , "tp-sheet" );
+            SpriteSheet * old_sheet = get_sheet( L , g_self );
             SpriteSheet * new_sheet = (SpriteSheet*) UserData::get_client( L , -1 );
 
             if ( old_sheet != new_sheet )
             {
                 if ( new_sheet->is_initialized() )
                 {
-                    g_object_set_data_full( g_self , "tp-sheet" , new_sheet , (GDestroyNotify) SpriteSheet::unref );
-                    refresh_texture( g_self , 0 , 0 );
-                    RefCounted::ref( new_sheet );
+                    int * new_sheet_ref = g_new( int , 1 );
+                    *new_sheet_ref = lb_strong_ref( L );
+
+                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , g_free );
+
+                    refresh_texture( L , g_self , 0 , 0 );
                 }
                 else
                 {
@@ -136,7 +171,7 @@ class Sprite [[ClutterActor*]] actor
 
                 g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
 
-                if (! refresh_texture( g_self , 1 , &error_message ) )
+                if (! refresh_texture( L , g_self , 1 , &error_message ) )
                 {
                     if ( old_id_copy ) g_object_set_data_full( g_self , "tp-id" , old_id_copy , g_free );
                     luaL_error( L , error_message );
