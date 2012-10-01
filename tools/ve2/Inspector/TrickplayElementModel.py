@@ -269,14 +269,14 @@ class TrickplayElementModel(QStandardItemModel):
             if self.inspector.main.command == "newLayer" or self.inspector.main.command == "insertUIElement" :
                 result = self.inspector.search(self.theBigestGid , 'gid')
                 if result: 
-                    self.inspector.selectItem(result)
+                    self.inspector.selectItem(result, "f")
                 else:
                     print("UI Element not found")
                 self.inspector.main.command == ""
             else:
                 result = self.inspector.search(gid, 'gid')
                 if result:
-                    self.inspector.selectItem(result)
+                    self.inspector.selectItem(result, "f")
     
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
                 self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                

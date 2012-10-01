@@ -138,9 +138,9 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
 	        if input_mode == hdr.S_SELECT then
 	            if uiInstance.selected == nil or uiInstance.selected == false then 
-		            screen_ui.selected(uiInstance) 
+		            --screen_ui.selected(uiInstance) 
 		        elseif(uiInstance.selected == true) then 
-			        screen_ui.n_select(uiInstance) 
+			        --screen_ui.n_select(uiInstance) 
 	            end
             end
 

@@ -129,6 +129,7 @@ class TrickplayEmulatorManager(QWidget):
 				#pdata = None
 				sdata = None
 				gid = None
+				shift = None
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
@@ -164,8 +165,12 @@ class TrickplayEmulatorManager(QWidget):
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "getStInfo" :
 				        sdata = json.loads(s[9:])
-				    elif luaCmd == "openInspc":
+				    elif luaCmd == "clearInsp":
 				        gid = int(s[9:])
+				    elif luaCmd == "openInspc":
+				        #gid = int(s[9:])
+				        gid = int(s[10:])
+				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
 				        scrData = json.loads(s[9:])
 				        self.inspector.screens = {} 
@@ -193,6 +198,29 @@ class TrickplayEmulatorManager(QWidget):
 				    else:
 				        pass
 
+				    if gid is not None and luaCmd == "clearInsp":
+					try:
+					    try:
+					        gid = int(gid)
+					    except:
+					        print("error :( gid is missing!") 
+
+					    result = self.inspector.search(gid, 'gid')
+					    if result: 
+					        print('Found', result['gid'], result['name'])
+					        self.inspector.clearItem(result)
+					        #self.inspector.selectItem(result, shift)
+                            # open Property Tab 
+					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
+					    else:
+					        print("UI Element not found")
+
+					except:
+					    print("error :(")
+					    #self.getUIInfo()
+					    #self.getStInfo()
+
+
 				    if gid is not None and luaCmd == "openInspc":
 					try:
 					    try:
@@ -203,8 +231,13 @@ class TrickplayEmulatorManager(QWidget):
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
 					        print('Found', result['gid'], result['name'])
-					        self.inspector.selectItem(result)
-					        self.inspector.ui.tabWidget.setCurrentIndex(1)
+
+					        if shift == "f" :
+					            self.inspector.ui.inspector.selectionModel().clear()
+
+					        self.inspector.selectItem(result, shift)
+                            # open Property Tab 
+					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
 					        print("UI Element not found")
 
@@ -228,8 +261,9 @@ class TrickplayEmulatorManager(QWidget):
 				            return 
 				        self.pdata = self.pdata[0]
 				        self.inspector.curData = self.pdata
-				        self.inspector.preventChanges = True
-				        self.inspector.propertyFill(self.inspector.curData)
+				        if self.inspector.curItemGid == self.inspector.curData['gid'] :
+				            self.inspector.preventChanges = True
+				            self.inspector.propertyFill(self.inspector.curData)
 				        self.inspector.preventChanges = False
 				        return
 

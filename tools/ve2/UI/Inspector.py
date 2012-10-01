@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Inspector.ui'
 #
-# Created: Tue Aug 21 15:33:19 2012
+# Created: Thu Sep 27 14:04:51 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,9 +55,10 @@ class Ui_TrickplayInspector(object):
         self.gridLayout_3.setSpacing(0)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.inspector = QtGui.QTreeView(self.ObjectInspector)
-        self.inspector.setDragEnabled(True)
-        self.inspector.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.inspector.setDragEnabled(False)
+        self.inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.inspector.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.inspector.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.inspector.setObjectName(_fromUtf8("inspector"))
         self.gridLayout_3.addWidget(self.inspector, 2, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
@@ -97,10 +98,11 @@ class Ui_TrickplayInspector(object):
         font.setFamily(_fromUtf8("Ubuntu"))
         font.setPointSize(9)
         self.property.setFont(font)
+        self.property.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.property.setObjectName(_fromUtf8("property"))
         self.property.headerItem().setText(0, _fromUtf8("1"))
-        self.property.header().setVisible(False)
-        self.gridLayout_2.addWidget(self.property, 0, 1, 1, 1)
+        self.property.header().setDefaultSectionSize(100)
+        self.gridLayout_2.addWidget(self.property, 0, 0, 1, 1)
         self.tabWidget.addTab(self.PropertyEditor, _fromUtf8(""))
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
