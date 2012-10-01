@@ -1,26 +1,4 @@
-/*
- * Usage: stitcher /path/to/directory
- * Flags:
- *    -i [filter]   Filter which files to include. Name filters can use the
- *                  wildcards * (zero or more chars) and ? (one char).
- *                  Multiple space-seperated name filters can be passed.
- *       [int]      One integer size filter can be passed, such as 256, to
- *                  prevent large images from being included in a spritesheet. 
- *                  
- *    -o [path]     Set the path of the output files, which will have
- *                  sequential numbers and a .png or .json extension appended.
- *       [int]      Pass an integer like 4096 to set the maximum .png size
- *                  
- *    -m            Divide sprites among multiple spritesheets if they don't fit
- *                  within the maximum dimensions
- *    
- *    -c            Copy files that fail the size filter over as single-image
- *                  spritesheets (if they fit within the maximum output size)
- *
- * Ex: stitcher assets/ui -i *.png nav/bg-?.jpg 256 -o sprites/ui 1024 -mc
- */
-
-#define CLUTTER_DISABLE_DEPRECATION_WARNINGS
+//#define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 #include <glib.h>
 #include <glib-object.h>
 #include <gio/gio.h>
@@ -30,7 +8,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-char * basepath;
+void escape() {
+	fprintf(stderr, "Usage: stitcher /path/to/directory [-bcm] [-i *] [-o *] \n"
+	  "Flags:\n"
+	  "   -b            Place buffer pixels around sprite edges. Add this flag if\n"
+	  "                 scaled sprites are having issues around their borders.\n"
+	  "\n"
+	  "   -c            Copy files that fail the size filter over as single-image\n"
+	  "                 spritesheets (if they fit within the maximum output size)\n"
+	  "\n"
+	  "   -i [filter]   Filter which files to include. Name filters can use the\n"
+	  "                 wildcards * (zero or more chars) and ? (one char).\n"
+	  "                 Multiple space-seperated name filters can be passed.\n"
+	  "      [int]      One integer size filter can be passed, such as 256, to\n"
+	  "                 prevent large images from being included in a spritesheet.\n"
+	  "\n"
+	  "   -m            Divide sprites among multiple spritesheets if they don't fit\n"
+	  "                 within the maximum dimensions\n"
+	  "\n"
+	  "   -o [path]     Set the path of the output files, which will have\n"
+	  "                 sequential numbers and a .png or .json extension appended.\n"
+	  "      [int]      Pass an integer like 4096 to set the maximum .png size\n"
+	  "\n"
+	  "Ex: stitcher assets/ui -i *.png nav/bg-?.jpg 256 -o sprites/ui 1024 -mbc\n" );
+	exit(0);
+}
+
+char * basepath = NULL;
 
 typedef struct Page {
   int width,
@@ -225,7 +229,7 @@ void recalculate_layout(int width, gboolean finalize) {
   leavesSortedByArea = g_sequence_new(NULL);
   leavesOfWidth = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
   leavesOfHeight = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_sequence_free);
-  leaf_new(0, 0, MAX(width, minimum.width), 4096);
+  leaf_new(0, 0, MAX(width, minimum.width), outputSize);
   
   GSequenceIter * i = g_sequence_get_begin_iter(items);
   while (!g_sequence_iter_is_end(i)) {
@@ -249,23 +253,26 @@ void recalculate_layout(int width, gboolean finalize) {
       insert_item(item, g_sequence_get(si), finalize);
     else {
       si = g_sequence_search(leavesSortedByArea, item, leaf_compare, AREA);
+			gboolean found = FALSE;
       while (!g_sequence_iter_is_end(si)) {
         leaf = g_sequence_get(si);
         if (leaf->w > item->w && leaf->h > item->h) {
           insert_item(item, leaf, finalize);
+					found = TRUE;
           break;
         }
         si = g_sequence_iter_next(si);
       }
+			if (!found)
+				return;
     }
     i = g_sequence_iter_next(i);
   }
   
   // save this layout if it's the best so far
   
-	// consider: current.area + current.width + current.height <= best.area + best.width + best.height?
   current.area = current.width * current.height;
-  if (current.height <= outputSize && (best.area == 0 || current.area < best.area ||
+  if (current.height <= outputSize && (best.area == 0 || current.area < best.area || 
      (current.area == best.area && current.width + current.height <= best.width + best.height) ))
     best = current;
   
@@ -378,11 +385,7 @@ enum {
 };
 
 int main (int argc, char ** argv) {
-  if (argc == 1)
-    return 1;
-
   g_type_init();
-  MagickCoreGenesis(* argv, MagickTrue);
   
   // handle command-line arguments
   
@@ -419,7 +422,9 @@ int main (int argc, char ** argv) {
             state = DEFAULT;
             break;
           default:
-            state = DEFAULT;
+            fprintf(stderr, "Error: unknown flag '-%s'\n\n", (char *) &arg[j]);
+					case 'h':
+						escape();
             break;
         }
       }
@@ -450,26 +455,42 @@ int main (int argc, char ** argv) {
           if (i == 1)
             basepath = arg;
           else {
-            fprintf(stderr, "Error: ambiguous input path\n");
-            exit(1);
+            fprintf(stderr, "Error: ambiguous input path\n\n");
+            escape();
           }
         break;
       }
     }
   }
-  
+	
+	if (basepath == NULL) {
+		fprintf(stderr, "Error: no input path given\n\n");
+		escape();
+	}
+	
+	char * last_char = &basepath[strlen(basepath) - 1];
+	if (*last_char == '/')
+		*last_char = '\0';
+	
   if (outputPath == NULL)
     outputPath = basepath;
   char * jsonPath = g_strdup_printf("%s.json", outputPath),
        * pngPath  = g_strdup_printf("%s.png", outputPath);
   
   base = g_file_new_for_commandline_arg(basepath);
+	if (g_file_query_file_type(base, G_FILE_QUERY_INFO_NONE, NULL) == G_FILE_TYPE_UNKNOWN) {
+		fprintf(stderr, "Error: input file does not exist\n\n");
+		escape();
+	}
+	
+  MagickCoreGenesis(* argv, MagickTrue);
+	
   items = g_sequence_new((GDestroyNotify) free);
   gather(base);
   
   // iterate to find the best layout
   
-  for (i = minimum.width; i <= outputSize; i++)
+	for (i = minimum.width; i <= outputSize; i++)
     recalculate_layout(i, FALSE);
   recalculate_layout(best.width, TRUE);
   
