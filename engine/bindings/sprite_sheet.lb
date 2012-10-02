@@ -63,7 +63,20 @@ int get_sprite_data_from_lua_table( lua_State * L , JSON::Array ** sprite_data )
 
     if ( ! map_obj["sprites"].is<JSON::Array>() )
     {
-        return 0;
+        // An empty table is converted to JSON::Object so this handles an empty array
+
+        if ( map_obj["sprites"].is<JSON::Object>() )
+        {
+            JSON::Object sprite_data_obj = map_obj["sprites"].as<JSON::Object>();
+            if ( sprite_data_obj.begin() != sprite_data_obj.end() )
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     *sprite_data = new JSON::Array( map_obj["sprites"].as<JSON::Array>() );
