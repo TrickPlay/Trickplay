@@ -267,6 +267,7 @@ NineSlice = setmetatable(
             local instance, _ENV = LayoutManager:declare{
                 number_of_rows = 3,
                 number_of_cols = 3,
+                placeholder    = Widget_Clone(),
                 vertical_spacing   = 0,
                 horizontal_spacing = 0,
             }
@@ -279,7 +280,7 @@ NineSlice = setmetatable(
             
             lm_update = update
             print("declared")
-            instance.on_entries_changed = function(self)
+            on_entries_changed = function(self)
                 --print(instance.gid,"on_entries_changed1")
                 --if setting_size then return end
                 --print("on_entries_changed2")
