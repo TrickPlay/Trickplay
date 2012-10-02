@@ -122,6 +122,23 @@ function screen_ui.container_selected(obj, x, y)
     end
 end  
 
+function screen_ui.getSelectedName()
+	for i, j in pairs (screen.children) do 
+		if j.name then 
+			if string.find(j.name, "border") then 
+				local a, b = string.find(j.name,"border")
+		    	local selObj = screen:find_child(string.sub(j.name, 1, a-1))
+                if selObj then 
+		    	    return string.sub(j.name, 1, a-1), selObj.gid
+                else 
+		    	    return string.sub(j.name, 1, a-1), nil
+                end 
+            end 
+        end 
+    end
+    return nil
+end 
+
 function screen_ui.selected(obj)
 
     if input_mode == hdr.S_FOCUS then
@@ -142,8 +159,6 @@ function screen_ui.selected(obj)
         return 
     end
 
-
-        
 	if obj.name == nil then return end 
 
 	if screen:find_child("multi_select_border") == nil and shift == false then 

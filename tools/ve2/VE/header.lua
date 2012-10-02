@@ -105,6 +105,15 @@ hdr.uiElementCreate_map =
     }
 
 
+hdr.neighberKey_map = 
+    {
+        [ keys.Return ] = function(selObj, focObj) selObj.neighbors.Return = focObj end ,
+        [ keys.Left  ] = function(selObj, focObj) selObj.neighbors.Left = focObj end ,
+        [ keys.Right ] = function(selObj, focObj) selObj.neighbors.Right = focObj end ,
+        [ keys.Down  ] = function(selObj, focObj) selObj.neighbors.Down = focObj end,
+        [ keys.Up    ] = function(selObj, focObj) selObj.neighbors.Up = focObj end,
+    }
+
 ---------------------
 -- Global Variables
 ---------------------
@@ -123,6 +132,7 @@ selected_content   = nil
 input_mode         = hdr.S_SELECT
 --menu_hide          = false
 
+focusKey = nil
 
 -- table for mouse dragging information 
 --dragging          = nil

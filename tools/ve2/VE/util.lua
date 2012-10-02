@@ -75,8 +75,10 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
     uiInstance:add_mouse_handler("on_button_down",function(self, x , y , button, num_clicks, m)
 
         if input_mode == hdr.S_FOCUS then 
-		    screen_ui.selected(uiInstance) 
-            --print("focusSet2"..uiInstance.name)
+            local selObjName, selGid = screen_ui.getSelectedName()
+            if selObjName ~= uiInstance.name then 
+		        screen_ui.selected(uiInstance) 
+            end 
             return true 
         end
 
@@ -182,9 +184,17 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
     uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)
         
         if input_mode == hdr.S_FOCUS then 
-		    screen_ui.n_selected(uiInstance) 
-            print("focusSet2"..uiInstance.name)
-            input_mode = hdr.S_SELECT
+            local selObjName, selObjGid = screen_ui.getSelectedName()
+            if selObjName ~= uiInstance.name then 
+		        screen_ui.n_selected(uiInstance) 
+                if devtools:gid(selObjGid) then 
+                    blockReport = true 
+                    hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), uiInstance) 
+                    blockReport = false 
+                end 
+                print("focusSet2"..uiInstance.name)
+                input_mode = hdr.S_SELECT
+            end 
             return true 
         end
 		if m  and m.control then control = true else control = false end 
