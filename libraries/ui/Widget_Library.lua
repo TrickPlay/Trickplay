@@ -1,13 +1,21 @@
 
+--pwd equals the path to "Widget_Library.lua"
 local pwd = (where_am_i()).file
 
+--i equals the index of the last '\', counting from the back
 local i = string.find(string.reverse(pwd),'/')
 
+--if there were no '\', then the relative path is the empty string
+--otherwise the pwd equals the path with "Widget_Library.lua" removed
 pwd = i == nil and "" or string.sub( pwd ,1,pwd:len() - i+1)
 
-local WL_ENV = setmetatable({},{__index = _G})
+--------------------------------------------------------------------------
 
-local WL = {}
+--This table captures all of the globals created by the widget
+--so that all of those variables remain internal and so that
+--the global table doesn't become polluted with it
+local WL_ENV = setmetatable({},{__index = _G})
+--This table will hold everything that will be exposed to users
 local WL_EXT = {}
 
 local core_dependencies = {
@@ -24,18 +32,21 @@ local core_dependencies = {
     "__CORE/Widget.lua",
 }
 
+local load = function(file)
+    
+    local f, err = loadfile(file)
+    
+    --this prints out any syntax errors in the file
+    if err then error(err) end
+    
+    --call the loaded file
+    f(WL_EXT,WL_ENV)
+    
+end
 
---print("going")
-for i,dep in ipairs(core_dependencies) do    loadfile(pwd..dep)(WL_EXT,WL_ENV)    end
+for i,dep in ipairs(core_dependencies) do    load(pwd..dep)    end
 
---_ENV = _G
-print(WL_ENV.Widget)
-_G.Widget = WL_ENV.Widget
-print(_G.Widget)
---dumptable(WL_ENV)
 --------------------------------------------------------------------------
-
-local loaded = { }
 
 local widget_dependencies = {
     ArrowPane        = {"Button","ClippingRegion","LayoutManager","ArrowPane"},
@@ -62,26 +73,21 @@ local widget_dependencies = {
 local    load_dependencies
 function load_dependencies(w)
     
-    if loaded[w] then return end
-    loaded[w] = true
+    if WL_EXT[w] then return end
+    
+    -- setting true is just a placeholder to prevent redundant calls
+    -- to load_dependencies() which results in stack overflow
+    WL_EXT[w] = true 
+    
+    --recursively load all dependencies
     for i,dep in ipairs(widget_dependencies[w]) do
         
         if dep ~= w then   load_dependencies(dep)   end
         
     end
     
-    --[[ TODO: get working
-    for k,v in pairs(dofile(pwd..w.."/"..w..".lua")) do
-        loaded[k] = v
-    end
-    --]]
-    print("dofile('"..pwd..w.."/"..w..".lua')")
-    local f, err = loadfile(pwd..w.."/"..w..".lua")
-    print(f,err)
-    f(WL_EXT,WL_ENV)
-    --loaded[w] = WL[w]
+    load(pwd..w.."/"..w..".lua")
     
-    --return loaded[w]
 end
 
 local launch_recursive_load = function(w)
@@ -92,22 +98,25 @@ local launch_recursive_load = function(w)
         
     end
     
-    return  WL[w] -- TODO change to loaded
+    --returns the requested widget
+    return  WL_EXT[w] 
 end
 
 --------------------------------------------------------------------------
 
-setmetatable(WL,{
+--Interface
+return setmetatable({},{
     __index = function(t,k)
-        
+        --WL_EXT[k]                = something that is already loaded
+        --widget_dependencies[k]   = something that can be loaded
+        --launch_recursive_load(k) = load that 'something'
         return WL_EXT[k] or widget_dependencies[k] ~= nil and launch_recursive_load(k) or nil
         
     end,
     __newindex =  function(t,k,v)
         
-        print("attempted to set index '",k,"' to '",v,"'")
+        error("attempted to set the Widget_Library's index '"..
+            tostring(k).."' to '"..tostring(v).."'",2)
         
     end,
 })
-
-return WL
