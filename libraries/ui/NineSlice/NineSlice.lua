@@ -194,7 +194,16 @@ NineSlice = setmetatable(
                             --update can redirect to here, might be problematic
                             --need to pull out old cells setter...
                             env.state = v
-                            oldf(self,make_canvas(instance,env,"default"))
+                            local mid_w, mid_h
+                            if instance.cells[2][2] then
+                                mid_w = instance.cells[2][2].w
+                                mid_h = instance.cells[2][2].h
+                            end
+                            local new_cells = make_canvas(instance,env,"default")
+                            if mid_w then
+                                env.set_inner_size( new_cells,mid_w,mid_h)
+                            end
+                            oldf(self,new_cells)
                         else
                             error("Expected table or string. Received "..type(v),2)
                         end
@@ -217,20 +226,20 @@ NineSlice = setmetatable(
                 return function()
                 
                     
-                    print("start singleNS update", instance.gid,"sz",instance.w,instance.h)
+                    --print("start singleNS update", instance.gid,"sz",instance.w,instance.h)
                     if env.flag_for_redraw then
-                        print("\t redraw",env.state)
+                        --print("\t redraw",env.state)
                         env.flag_for_redraw = false
-                        instance.cells = env.state
                         
+                        instance.cells = env.state
                     end
                     ---[[
                     if  not env.setting_size and env.new_sz then
-                        print("\t resize, mis:",instance.min_w,instance.min_h)
+                        --print("\t resize, mis:",instance.min_w,instance.min_h)
                         env.new_sz = false
                         
                         env.setting_size = true
-                        --print(instance.w , instance.min_w)
+                        print(instance.w , instance.min_w)
                         env.set_inner_size( instance.cells,
                              instance.w >= instance.min_w and 
                             (instance.w  - instance.min_w) or 0,
@@ -242,7 +251,7 @@ NineSlice = setmetatable(
                         env.setting_size = false
                     end
                     env.lm_update()
-                    print("end singleNS update", instance.gid,"sz",instance.w,instance.h)
+                    --print("end singleNS update", instance.gid,"sz",instance.w,instance.h)
                     --dumptable(instance.attributes)
                     --]]
                 end
@@ -268,9 +277,9 @@ NineSlice = setmetatable(
             env.lm_update = env.update
             print("declared")
             instance.on_entries_changed = function(self)
-                print(instance.gid,"on_entries_changed1")
+                --print(instance.gid,"on_entries_changed1")
                 --if env.setting_size then return end
-                print("on_entries_changed2")
+                --print("on_entries_changed2")
                 --env.setting_size = true
                 env.left_col_w  = 0
                 env.right_col_w = 0
