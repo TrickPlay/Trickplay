@@ -75,8 +75,9 @@ function load_dependencies(w)
     end
     --]]
     print("dofile('"..pwd..w.."/"..w..".lua')")
-    loadfile(pwd..w.."/"..w..".lua")(WL_EXT,WL_ENV)
-    
+    local f, err = loadfile(pwd..w.."/"..w..".lua")
+    print(f,err)
+    f(WL_EXT,WL_ENV)
     --loaded[w] = WL[w]
     
     --return loaded[w]

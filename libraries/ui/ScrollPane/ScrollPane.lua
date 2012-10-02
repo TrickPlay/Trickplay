@@ -37,139 +37,139 @@ ScrollPane = setmetatable(
         end,
         subscriptions = {
             --[[
-            ["style"] = function(instance,env)
+            ["style"] = function(instance,_ENV)
                 return function()
                     
-                    instance.style.arrow:subscribe_to(         nil, env.arrow_on_changed )
-                    instance.style.arrow.colors:subscribe_to(  nil, env.arrow_colors_on_changed )
-                    instance.style.border:subscribe_to(        nil, env.pane_on_changed )
-                    instance.style.fill_colors:subscribe_to(   nil, env.pane_on_changed )
+                    instance.style.arrow:subscribe_to(         nil, arrow_on_changed )
+                    instance.style.arrow.colors:subscribe_to(  nil, arrow_colors_on_changed )
+                    instance.style.border:subscribe_to(        nil, pane_on_changed )
+                    instance.style.fill_colors:subscribe_to(   nil, pane_on_changed )
                     
-                    env.arrow_on_changed()
-                    env.arrow_colors_on_changed()
+                    arrow_on_changed()
+                    arrow_colors_on_changed()
                 end
             end,
             --]]
         },
         public = {
             properties = {
-                enabled = function(instance,env)
+                enabled = function(instance,_ENV)
                     return function(oldf,...) return oldf(...) end,
                     function(oldf,self,v)
                         oldf(self,v)
                         
-                        env.horizontal.enabled = v
-                        env.vertical.enabled   = v
+                        horizontal.enabled = v
+                        vertical.enabled   = v
                     end
                 end,
-                w = function(instance,env)
-                    return function(oldf,self) return env.w     end,
+                w = function(instance,_ENV)
+                    return function(oldf,self) return w     end,
                     function(oldf,self,v) 
-                        env.w = v
-                        env.reclip = true
-                        env.new_w  = true
+                        w = v
+                        reclip = true
+                        new_w  = true
                     end
                 end,
-                width = function(instance,env)
-                    return function(oldf,self) return env.w     end,
+                width = function(instance,_ENV)
+                    return function(oldf,self) return w     end,
                     function(oldf,self,v) 
-                        env.w = v
-                        env.reclip = true
-                        env.new_w  = true
+                        w = v
+                        reclip = true
+                        new_w  = true
                     end
                 end,
-                h = function(instance,env)
-                    return function(oldf,self) return env.h     end,
+                h = function(instance,_ENV)
+                    return function(oldf,self) return h     end,
                     function(oldf,self,v) 
-                        env.h = v
-                        env.reclip = true
-                        env.new_h  = true
+                        h = v
+                        reclip = true
+                        new_h  = true
                     end
                 end,
-                height = function(instance,env)
-                    return function(oldf,self) return env.h     end,
+                height = function(instance,_ENV)
+                    return function(oldf,self) return h     end,
                     function(oldf,self,v) 
-                        env.h = v
-                        env.reclip = true
-                        env.new_h  = true
+                        h = v
+                        reclip = true
+                        new_h  = true
                     end
                 end,
-                size = function(instance,env)
-                    return function(oldf,self) return {env.w,env.h} end,
+                size = function(instance,_ENV)
+                    return function(oldf,self) return {w,h} end,
                     function(oldf,self,v) 
-                        env.w = v[1]
-                        env.h = v[2]
-                        env.reclip = true
-                        env.new_w  = true
-                        env.new_h  = true
+                        w = v[1]
+                        h = v[2]
+                        reclip = true
+                        new_w  = true
+                        new_h  = true
                     end
                 end,
-                virtual_w = function(instance,env)
-                    return function(oldf) return env.pane.virtual_w     end,
-                    function(oldf,self,v)        env.pane.virtual_w = v env.new_w = true end
+                virtual_w = function(instance,_ENV)
+                    return function(oldf) return pane.virtual_w     end,
+                    function(oldf,self,v)        pane.virtual_w = v new_w = true end
                 end,
-                virtual_h = function(instance,env)
-                    return function(oldf) return env.pane.virtual_h     end,
-                    function(oldf,self,v)        env.pane.virtual_h = v env.new_h = true end
+                virtual_h = function(instance,_ENV)
+                    return function(oldf) return pane.virtual_h     end,
+                    function(oldf,self,v)        pane.virtual_h = v new_h = true end
                 end,
-                virtual_x = function(instance,env)
-                    return function(oldf) return env.pane.virtual_x     end,
-                    function(oldf,self,v) env.pane.virtual_x = v end
+                virtual_x = function(instance,_ENV)
+                    return function(oldf) return pane.virtual_x     end,
+                    function(oldf,self,v) pane.virtual_x = v end
                 end,
-                virtual_y = function(instance,env)
-                    return function(oldf) return env.pane.virtual_y     end,
-                    function(oldf,self,v) env.pane.virtual_y = v end
+                virtual_y = function(instance,_ENV)
+                    return function(oldf) return pane.virtual_y     end,
+                    function(oldf,self,v) pane.virtual_y = v end
                 end,
-                pane_w = function(instance,env)
-                    return function(oldf) return env.pane.w     end,
+                pane_w = function(instance,_ENV)
+                    return function(oldf) return pane.w     end,
                     function(oldf,self,v) 
-                        env.horizontal.track_w = v
-                        env.horizontal.grip_w  = v/10
-                        env.pane.w = v 
-                        env.new_w = true 
+                        horizontal.track_w = v
+                        horizontal.grip_w  = v/10
+                        pane.w = v 
+                        new_w = true 
                     end
                 end,
-                pane_h = function(instance,env)
-                    return function(oldf) return env.pane.h     end,
+                pane_h = function(instance,_ENV)
+                    return function(oldf) return pane.h     end,
                     function(oldf,self,v) 
-                        env.vertical.track_h   = v
-                        env.vertical.grip_h    = v/10
-                        env.pane.h = v  
-                        env.new_h = true 
+                        vertical.track_h   = v
+                        vertical.grip_h    = v/10
+                        pane.h = v  
+                        new_h = true 
                     end
                 end,
-                slider_thickness = function(instance,env)
-                    return function(oldf) return env.slider_thickness     end,
+                slider_thickness = function(instance,_ENV)
+                    return function(oldf) return slider_thickness     end,
                     function(oldf,self,v) 
             
-                        env.horizontal.track_h = v
-                        env.horizontal.grip_h  = v
-                        env.vertical.track_w   = v
-                        env.vertical.grip_w    = v
-                        env.slider_thickness   = v 
-                        --TODO - set a flag like this: env.new_h = true 
+                        horizontal.track_h = v
+                        horizontal.grip_h  = v
+                        vertical.track_w   = v
+                        vertical.grip_w    = v
+                        slider_thickness   = v 
+                        --TODO - set a flag like this: new_h = true 
                     end
                 end,
-                arrow_move_by = function(instance,env)
-                    return function(oldf) return env.move_by     end,
-                    function(oldf,self,v) env.move_by = v end
+                arrow_move_by = function(instance,_ENV)
+                    return function(oldf) return move_by     end,
+                    function(oldf,self,v) move_by = v end
                 end,
-                sets_x_to = function(instance,env)
-                    return function(oldf) return env.pane.x_offset end,
+                sets_x_to = function(instance,_ENV)
+                    return function(oldf) return pane.x_offset end,
                     function(oldf,self,v) 
-                        env.pane.x_offset = v
+                        pane.x_offset = v
                     end
                 end,
-                sets_y_to = function(instance,env)
-                    return function(oldf) return env.pane.y_offset     end,
+                sets_y_to = function(instance,_ENV)
+                    return function(oldf) return pane.y_offset     end,
                     function(oldf,self,v) 
-                        env.pane.y_offset = v
+                        pane.y_offset = v
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function(oldf) return "ScrollPane" end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self)
                     
                         local t = oldf(self)
@@ -199,7 +199,7 @@ ScrollPane = setmetatable(
                         
                         t.children = {}
                         
-                        for i, child in ipairs(env.pane.children) do
+                        for i, child in ipairs(pane.children) do
                             t.children[i] = child.attributes
                         end
                         
@@ -209,43 +209,43 @@ ScrollPane = setmetatable(
                         
                     end
                 end,
-                children = function(instance,env)
-                    return function(oldf) return env.pane.children     end,
-                    function(oldf,self,v)        env.pane.children = v end
+                children = function(instance,_ENV)
+                    return function(oldf) return pane.children     end,
+                    function(oldf,self,v)        pane.children = v end
                 end,
             },
             functions = {
-                add    = function(instance,env) return function(oldf,self,...) env.pane:add(   ...) end end,
-                remove = function(instance,env) return function(oldf,self,...) env.pane:remove(...) end end,
+                add    = function(instance,_ENV) return function(oldf,self,...) pane:add(   ...) end end,
+                remove = function(instance,_ENV) return function(oldf,self,...) pane:remove(...) end end,
             },
         },
         private = {
-            pane_on_changed = function(instance,env)
+            pane_on_changed = function(instance,_ENV)
                 return function() 
-                    env.pane.style:set(instance.style.attributes)
+                    pane.style:set(instance.style.attributes)
                 end
             end,
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
-                    env.lm_update()
+                    lm_update()
                     
-                    if  env.new_w then
-                        env.new_w = false
+                    if  new_w then
+                        new_w = false
                         
                         if instance.virtual_w <= instance.pane_w then
-                            env.horizontal:hide()
+                            horizontal:hide()
                         else
-                            env.horizontal:show()
+                            horizontal:show()
                         end
                     end
                     
-                    if  env.new_h then
-                        env.new_h = false
+                    if  new_h then
+                        new_h = false
                         
                         if instance.virtual_h <= instance.pane_h then
-                            env.vertical:hide()
+                            vertical:hide()
                         else
-                            env.vertical:show()
+                            vertical:show()
                         end
                     end
                     
@@ -254,27 +254,27 @@ ScrollPane = setmetatable(
         },
         declare = function(self,parameters)
             
-            --local instance, env = LayoutManager:declare()
+            --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
-            local pane  = ClippingRegion{style = false}
-            local horizontal = Slider()
-            local vertical   = Slider{direction="vertical"}
+            local l_pane  = ClippingRegion{style = false}
+            local l_horizontal = Slider()
+            local l_vertical   = Slider{direction="vertical"}
             
-            local instance, env = LayoutManager:declare{
+            local instance, _ENV = LayoutManager:declare{
                 number_of_rows = 2,
                 number_of_cols = 2,
                 placeholder = Widget_Clone(),
                 cells = {
-                    {       pane, vertical },
-                    { horizontal,      nil },
+                    {       l_pane, l_vertical },
+                    { l_horizontal,        nil },
                 },
             }
             local getter, setter
             
-            env.pane = pane
-            env.horizontal = horizontal
-            env.vertical = vertical
+            pane       = l_pane
+            horizontal = l_horizontal
+            vertical   = l_vertical
             
             
             vertical:subscribe_to("progress",function()
@@ -284,40 +284,40 @@ ScrollPane = setmetatable(
                 pane.virtual_x = horizontal.progress * (pane.virtual_w - pane.w)
             end)
             --[[
-            instance:add_key_handler(keys.Up,       env.up.click)
-            instance:add_key_handler(keys.Down,   env.down.click)
-            instance:add_key_handler(keys.Left,   env.left.click)
-            instance:add_key_handler(keys.Right, env.right.click)
-    		env.up:add_mouse_handler("on_button_up", function()
-    		    env.pane.virtual_y = env.pane.virtual_y - env.move_by
+            instance:add_key_handler(keys.Up,       up.click)
+            instance:add_key_handler(keys.Down,   down.click)
+            instance:add_key_handler(keys.Left,   left.click)
+            instance:add_key_handler(keys.Right, right.click)
+    		up:add_mouse_handler("on_button_up", function()
+    		    pane.virtual_y = pane.virtual_y - move_by
     		end)
     		
-    		env.down:add_mouse_handler("on_button_up", function()
-    		    env.pane.virtual_y = env.pane.virtual_y + env.move_by
+    		down:add_mouse_handler("on_button_up", function()
+    		    pane.virtual_y = pane.virtual_y + move_by
     		end)
 			
-    		env.left:add_mouse_handler("on_button_up", function()
-    		    env.pane.virtual_x = env.pane.virtual_x - env.move_by
+    		left:add_mouse_handler("on_button_up", function()
+    		    pane.virtual_x = pane.virtual_x - move_by
     		end)
 			
-		    env.right:add_mouse_handler("on_button_up", function()
-    	    	env.pane.virtual_x = env.pane.virtual_x + env.move_by
+		    right:add_mouse_handler("on_button_up", function()
+    	    	pane.virtual_x = pane.virtual_x + move_by
     		end)
             --]]
             
-            env.lm_update = env.update
-            env.new_w = true
-            env.new_h = true
-            env.move_by = 10
-            env.slider_thickness = 30
+            lm_update = update
+            new_w = true
+            new_h = true
+            move_by = 10
+            slider_thickness = 30
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -326,25 +326,25 @@ ScrollPane = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            env.updating = true
-            instance.pane_w           = env.pane.w
-            instance.pane_h           = env.pane.h
-            instance.slider_thickness = env.slider_thickness
-            env.updating = false
-            return instance, env
+            updating = true
+            instance.pane_w           = pane.w
+            instance.pane_h           = pane.h
+            instance.slider_thickness = slider_thickness
+            updating = false
+            return instance, _ENV
             
         end
     }

@@ -42,30 +42,30 @@ OrbittingDots = setmetatable(
         },
         public = {
             properties = {
-                image = function(instance,env)
-                    return function(oldf) return env.image     end,
+                image = function(instance,_ENV)
+                    return function(oldf) return image     end,
                     function(oldf,self,v) 
                         if type(v) == "string" then
                             
-                            if env.image == nil or env.image == false or env.image.src ~= v then
+                            if image == nil or image == false or image.src ~= v then
                                 
-                                env.setup_image(Image{ src = v })
+                                setup_image(Image{ src = v })
                                 
                             end
                             
                         elseif type(v) == "userdata" and v.__types__.actor then
                             
-                            if v ~= env.image then
+                            if v ~= image then
                                 
-                                env.setup_image(v)
+                                setup_image(v)
                                 
                             end
                             
                         elseif v == nil then
                             
-                            if not env.canvas then
+                            if not canvas then
                                 
-                                env.flag_for_redraw = true
+                                flag_for_redraw = true
                                 
                                 return
                                 
@@ -79,116 +79,116 @@ OrbittingDots = setmetatable(
                         
                     end
                 end,
-                animating = function(instance,env)
-                    return function(oldf) return env.animating     end,
+                animating = function(instance,_ENV)
+                    return function(oldf) return animating     end,
                     function(oldf,self,v) 
                         
                         if type(v) ~= "boolean" then
                             
                             error("OrbittingDots.animating expects type boolean. Received "..type(v),2)
                             
-                        elseif env.animating == v then
+                        elseif animating == v then
                             
                             return
                             
                         end
                         
-                        env.animating = v
+                        animating = v
                         
-                        if env.animating then
-                            env.start_animation = true
+                        if animating then
+                            start_animation = true
                         else
-                            env.stop_animation = true
+                            stop_animation = true
                         end
                     end
                 end,
-                w = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.reposition = true env.w = v end
+                w = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) reposition = true w = v end
                 end,
-                width = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.reposition = true env.w = v end
+                width = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) reposition = true w = v end
                 end,
-                h = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.reposition = true env.h = v end
+                h = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) reposition = true h = v end
                 end,
-                height = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.reposition = true env.h = v end
+                height = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) reposition = true h = v end
                 end,
-                size = function(instance,env)
-                    return function(oldf) return {env.w,env.h}     end,
+                size = function(instance,_ENV)
+                    return function(oldf) return {w,h}     end,
                     function(oldf,self,v) 
-                        env.reposition = true 
-                        env.w = v[1]
-                        env.h = v[2]
+                        reposition = true 
+                        w = v[1]
+                        h = v[2]
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "OrbittingDots" end
                 end,
-                dot_size = function(instance,env)
-                    return function(oldf) return env.dot_size     end,
+                dot_size = function(instance,_ENV)
+                    return function(oldf) return dot_size     end,
                     function(oldf,self,v) 
                         
                         size_is_set = true
                         
-                        env.dot_size = v
+                        dot_size = v
                         
-                        env.reanchor_clones()
+                        reanchor_clones()
                     end
                 end,
-                num_dots = function(instance,env)
-                    return function(oldf) return env.num     end,
+                num_dots = function(instance,_ENV)
+                    return function(oldf) return num     end,
                     function(oldf,self,v) 
-                        if v == env.num then return end
+                        if v == num then return end
                         
                         --if new number is smaller than the previous number
-                        if env.num > v then
+                        if num > v then
                             
                             --toss the excess
-                            for i = env.num,v+1,-1 do
-                                env.clones[i]:unparent()
-                                env.clones[i] = nil
+                            for i = num,v+1,-1 do
+                                clones[i]:unparent()
+                                clones[i] = nil
                             end
                             
                         --if new number is larger than the previous number
                         else
                             
                             --add more
-                            for i = env.num+1,v do
-                                env.clones[i] = Clone{
-                                    source       = env.image,
-                                    anchor_point = {env.dot_size/2,env.dot_size/2},
-                                    w            = env.dot_size,
-                                    h            = env.dot_size,
+                            for i = num+1,v do
+                                clones[i] = Clone{
+                                    source       = image,
+                                    anchor_point = {dot_size/2,dot_size/2},
+                                    w            = dot_size,
+                                    h            = dot_size,
                                 }
-                                env.add( instance, env.clones[i])
+                                add( instance, clones[i])
                             end
                             
                         end
                         
-                        env.num = v
+                        num = v
                         
-                        env.reposition_clones()
+                        reposition_clones()
                         
                     end
                 end,
-                duration = function(instance,env)
-                    return function(oldf) return env.load_timeline.duration     end,
+                duration = function(instance,_ENV)
+                    return function(oldf) return load_timeline.duration     end,
                     function(oldf,self,v) 
                         load_timeline.duration = v
                     end
                 end,
-                duration = function(instance,env)
-                    return function(oldf) return env.load_timeline.duration     end,
+                duration = function(instance,_ENV)
+                    return function(oldf) return load_timeline.duration     end,
                     function(oldf,self,v) 
                         load_timeline.duration = v
                     end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                         
@@ -197,9 +197,9 @@ OrbittingDots = setmetatable(
                         t.num_dots = instance.num_dots
                         t.dot_size = instance.dot_size
                         
-                        if (not env.canvas) and env.image.src and env.image.src ~= "[canvas]" then 
+                        if (not canvas) and image.src and image.src ~= "[canvas]" then 
                             
-                            t.image = env.image.src
+                            t.image = image.src
                             
                         end
                         t.type = "OrbittingDots"
@@ -213,78 +213,78 @@ OrbittingDots = setmetatable(
             },
         },
         private = {
-            reanchor_clones = function(instance,env)
+            reanchor_clones = function(instance,_ENV)
                 local rad
                 return function() 
-                    for i,d in ipairs(env.clones) do
+                    for i,d in ipairs(clones) do
                         d:set{
-                            anchor_point = {env.dot_size/2,env.dot_size/2},
-                            w            =  env.dot_size,
-                            h            =  env.dot_size,
+                            anchor_point = {dot_size/2,dot_size/2},
+                            w            =  dot_size,
+                            h            =  dot_size,
                         }
                     end
                     
                 end
             end,
-            reposition_clones = function(instance,env)
+            reposition_clones = function(instance,_ENV)
                 local rad
                 return function() 
-                    for i,d in ipairs(env.clones) do
+                    for i,d in ipairs(clones) do
                         --they're radial position
-                        rad = (2*math.pi)/(env.num) * i
+                        rad = (2*math.pi)/(num) * i
                         
-                        env.clones[i].position = {
-                            math.floor( instance.w/2 * math.cos(rad) )+instance.w/2+env.dot_size/2,
-                            math.floor( instance.h/2 * math.sin(rad) )+instance.h/2+env.dot_size/2
+                        clones[i].position = {
+                            math.floor( instance.w/2 * math.cos(rad) )+instance.w/2+dot_size/2,
+                            math.floor( instance.h/2 * math.sin(rad) )+instance.h/2+dot_size/2
                         }
                         
                     end
                 end
             end,
-            make_canvas = function(instance,env)
+            make_canvas = function(instance,_ENV)
                 return function() 
 		
-                    env.canvas = true
+                    canvas = true
                     
-                    if env.image then env.image:unparent() end
+                    if image then image:unparent() end
                     
-                    env.image = canvas_dot(instance)
+                    image = canvas_dot(instance)
                     
-                    env.add( instance, env.image )
+                    add( instance, image )
                     
-                    env.image:hide()
+                    image:hide()
                     
-                    for i,d in ipairs(env.clones) do d.source = env.image end
+                    for i,d in ipairs(clones) do d.source = image end
                     
                     return true
                 end
             end,
-            resize_images = function(instance,env)
+            resize_images = function(instance,_ENV)
                 return function() 
                     if not size_is_set then return end
                     
-                    env.image.w = instance.w
-                    env.image.h = instance.h
+                    image.w = instance.w
+                    image.h = instance.h
                 end
             end,
-            setup_image = function(instance,env)
+            setup_image = function(instance,_ENV)
                 return function(v) 
 		
-                    env.canvas = false
+                    canvas = false
                     
-                    if env.image then env.image:unparent() end
+                    if image then image:unparent() end
                     
-                    env.image = v
+                    image = v
                     
-                    env.add( instance, v )
+                    add( instance, v )
                     
                     v:hide()
                     
-                    for i,d in ipairs(env.clones) do d.source = env.image end
+                    for i,d in ipairs(clones) do d.source = image end
                     
                     if not instance.is_size_set() then
                         
-                        instance.dot_size = env.image.w
+                        instance.dot_size = image.w
                         
                         instance:reset_size_flag()
                         
@@ -293,34 +293,34 @@ OrbittingDots = setmetatable(
                     return true
                 end
             end,
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
-                    if env.flag_for_redraw then
-                        env.flag_for_redraw = false
-                        if env.canvas then
-                            env.make_canvas()
+                    if flag_for_redraw then
+                        flag_for_redraw = false
+                        if canvas then
+                            make_canvas()
                         else
-                            env.resize_images()
+                            resize_images()
                         end
                     end
-                    if env.reposition then
-                        env.reposition = false
-                        env.reposition_clones()
+                    if reposition then
+                        reposition = false
+                        reposition_clones()
                     end
-                    if env.reanimate then
-                        env.reanimate = false
+                    if reanimate then
+                        reanimate = false
                         
-                        env.stop_animation = true
-                        env.start_animation = true
+                        stop_animation = true
+                        start_animation = true
                         
                     end
-                    if  env.stop_animation then
-                        env.stop_animation = false
-                        env.load_timeline:stop()
+                    if  stop_animation then
+                        stop_animation = false
+                        load_timeline:stop()
                     end
-                    if env.start_animation then
-                        env.start_animation = false
-                        env.load_timeline:start()
+                    if start_animation then
+                        start_animation = false
+                        load_timeline:start()
                         
                     end
                 end
@@ -330,40 +330,40 @@ OrbittingDots = setmetatable(
             
             parameters = parameters or {}
             
-            local instance, env = Widget()
+            local instance, _ENV = Widget()
             
-            env.duration  = 1000
-            env.image     = false
-            env.animating = false
+            duration  = 1000
+            image     = false
+            animating = false
             
-            env.dot_size = 20
-            env.num = 0
-            env.clones = {}
-            env.canvas = true
-            env.flag_for_redraw = true
-            env.load_timeline = Timeline{
+            dot_size = 20
+            num = 0
+            clones = {}
+            canvas = true
+            flag_for_redraw = true
+            load_timeline = Timeline{
                 loop =  true,
                 on_new_frame = function(tl,ms,p)
                     
-                    for i,d in ipairs(env.clones) do
-                        d.opacity = 255*((1-p)-i/env.num)
+                    for i,d in ipairs(clones) do
+                        d.opacity = 255*((1-p)-i/num)
                     end
                 end
             }
-            env.reposition = true
-            env.w = 1
-            env.h = 1
-            env.style_flags = {
+            reposition = true
+            w = 1
+            h = 1
+            style_flags = {
                 border      = "flag_for_redraw",
                 fill_colors = "flag_for_redraw",
             }
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -372,27 +372,27 @@ OrbittingDots = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            --env.subscribe_to_sub_styles()
+            --subscribe_to_sub_styles()
             
             --instance.images = nil
-            env.updating = true
+            updating = true
             instance:set(parameters)
-            env.updating = false
+            updating = false
             
-            return instance, env
+            return instance, _ENV
             
         end
     }
@@ -413,7 +413,7 @@ ggOrbittingDots = function(parameters)
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
-	local instance, env = Widget( parameters )
+	local instance, _ENV = Widget( parameters )
 	
 	
 	local image
@@ -474,7 +474,7 @@ ggOrbittingDots = function(parameters)
 		
 		image = canvas_dot(instance)
 		
-		env.add( instance, image )
+		add( instance, image )
 		
 		image:hide()
 		
@@ -490,7 +490,7 @@ ggOrbittingDots = function(parameters)
 		
 		image = v
 		
-		env.add( instance, image )
+		add( instance, image )
 		
 		image:hide()
 		
@@ -610,7 +610,7 @@ ggOrbittingDots = function(parameters)
 						w            = dot_size,
 						h            = dot_size,
 					}
-					env.add( instance, clones[i])
+					add( instance, clones[i])
 				end
 				
 			end
