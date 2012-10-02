@@ -461,56 +461,30 @@ Button = setmetatable(
         --create_canvas = create_canvas
         states = {"default","focus","activation"}
 
---default create_canvas function
-create_canvas = function(self,state)
-	print("cc",self.w,self.h)
-	local c = Canvas(self.w,self.h)
-	
-	c.line_width = self.style.border.width
-	
-	round_rectangle(c,self.style.border.corner_radius)
-	
-	c:set_source_color( self.style.fill_colors[state] or self.style.fill_colors.default )     c:fill(true)
-	
-	c:set_source_color( self.style.border.colors[state] or self.style.border.colors.default )   c:stroke(true)
-	
-	return c:Image()
-	
-end
+        --default create_canvas function
+        create_canvas = function(self,state)
+            print("cc",self.w,self.h)
+            local c = Canvas(self.w,self.h)
+            
+            c.line_width = self.style.border.width
+            
+            round_rectangle(c,self.style.border.corner_radius)
+            
+            c:set_source_color( self.style.fill_colors[state] or self.style.fill_colors.default )     c:fill(true)
+            
+            c:set_source_color( self.style.border.colors[state] or self.style.border.colors.default )   c:stroke(true)
+            
+            return c:Image()
+            
+        end
+        
         image_states = {}
         for _,state in pairs(states) do
             if state ~= "default" then image_states[state] = {state = "OFF"} end
         end
-        for name,f in pairs(self.private) do
-            _ENV[name] = f(instance,_ENV)
-        end
         
-        for name,f in pairs(self.public.properties) do
-            getter, setter = f(instance,_ENV)
-            override_property( instance, name,
-                getter, setter
-            )
-            
-        end
+        setup_object(self,instance,_ENV)
         
-        for name,f in pairs(self.public.functions) do
-            
-            override_function( instance, name, f(instance,_ENV) )
-            
-        end
-        
-        for t,f in pairs(self.subscriptions) do
-            instance:subscribe_to(t,f(instance,_ENV))
-        end
-        --[[
-        for _,f in pairs(self.subscriptions_all) do
-            instance:subscribe_to(nil,f(instance,env))
-        end
-        --]]
-        
-        --env.subscribe_to_sub_styles()
-        
-        --instance.images = nil
         updating = true
         instance:set(parameters)
         updating = false

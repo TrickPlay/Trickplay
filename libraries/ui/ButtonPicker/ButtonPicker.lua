@@ -446,27 +446,9 @@ ButtonPicker = setmetatable(
             undo_prev_function = false
             undo_next_function = false
             
-            for name,f in pairs(self.private) do
-                _ENV[name] = f(instance,_ENV)
-            end
             
-            for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,_ENV)
-                override_property( instance, name,
-                    getter, setter
-                )
-                
-            end
+            setup_object(self,instance,_ENV)
             
-            for name,f in pairs(self.public.functions) do
-                
-                override_function( instance, name, f(instance,_ENV) )
-                
-            end
-            
-            for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,_ENV))
-            end
             prev_arrow:add_mouse_handler("on_button_up",prev_i)
             next_arrow:add_mouse_handler("on_button_up",next_i)
             --[[

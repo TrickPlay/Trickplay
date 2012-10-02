@@ -223,79 +223,54 @@ ToggleButton = setmetatable(
         --overwrite existing
         states             = {"default","focus","selection","activation"}
         create_canvas      = function(self,state)
-	print("ccc")
-	local c = Canvas(self.w,self.h)
-	
-	c.op = "SOURCE"
-	
-	c.line_width = self.style.border.width
-	
-	round_rectangle(c,self.style.border.corner_radius)
-	
-	c:set_source_color( self.style.fill_colors[state] or "00000000" )
-	
-	c:fill(true)
-    
-	c:set_source_color( self.style.border.colors[state] or "ffffff" )
-	
-	c:stroke()
-	
-	--the X box
-	c:rectangle(
-		c.h/2-10,
-		c.h/2-10,
-		20,
-		20
-	)
-	
-	--the X
-	if state == "selection" then
-		
-		c:move_to(c.h/2-10,c.h/2-10)
-		c:line_to(c.h/2+10,c.h/2+10)
-		
-		c:move_to(c.h/2-10,c.h/2+10)
-		c:line_to(c.h/2+10,c.h/2-10)
-		
-	end
-	
-	c:stroke(true)
-	
-	return c:Image()
-	
-end
+            print("ccc")
+            local c = Canvas(self.w,self.h)
+            
+            c.op = "SOURCE"
+            
+            c.line_width = self.style.border.width
+            
+            round_rectangle(c,self.style.border.corner_radius)
+            
+            c:set_source_color( self.style.fill_colors[state] or "00000000" )
+            
+            c:fill(true)
+            
+            c:set_source_color( self.style.border.colors[state] or "ffffff" )
+            
+            c:stroke()
+            
+            --the X box
+            c:rectangle(
+                c.h/2-10,
+                c.h/2-10,
+                20,
+                20
+            )
+            
+            --the X
+            if state == "selection" then
+                
+                c:move_to(c.h/2-10,c.h/2-10)
+                c:line_to(c.h/2+10,c.h/2+10)
+                
+                c:move_to(c.h/2-10,c.h/2+10)
+                c:line_to(c.h/2+10,c.h/2-10)
+                
+            end
+            
+            c:stroke(true)
+            
+            return c:Image()
+            
+        end
         
         for _,state in pairs(states) do
             if state ~= "default" then image_states[state] = {state = "OFF"} end
         end
         
-        --[[
-        for name,f in pairs(self.private) do
-            _ENV[name] = f(instance,_ENV)
-        end
-        --]]
+        setup_object(self,instance,_ENV)
         
-        local getter, setter
-        for name,f in pairs(self.public.properties) do
-            getter, setter = f(instance,_ENV)
-            override_property( instance, name, getter, setter )
-            
-        end
-        
-        for name,f in pairs(self.public.functions) do
-            
-            override_function( instance, name, f(instance,_ENV) )
-            
-        end
-        --[[
-        for t,f in pairs(self.subscriptions) do
-            instance:subscribe_to(t,f(instance,_ENV))
-        end
-        for _,f in pairs(self.subscriptions_all) do
-            instance:subscribe_to(nil,f(instance,_ENV))
-        end
-        --]]
-        --instance.images = nil
         return instance, _ENV
         
     end
