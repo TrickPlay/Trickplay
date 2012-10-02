@@ -298,7 +298,7 @@ class Neighbors(QWidget):
         QWidget.__init__(self,parent)
         
         if parent :
-            self.insp = parent
+            self.trickplay = parent.main._emulatorManager.trickplay
 
         self.gid = gid
         self.ui = Ui_Neighbors()
@@ -307,7 +307,45 @@ class Neighbors(QWidget):
         self.resize(200,100)
         self.setMinimumSize(200,100)
 
-        
+        QObject.connect(self.ui.upButton, SIGNAL("toggled(bool)"),  self.toggled)
+        QObject.connect(self.ui.downButton, SIGNAL("toggled(bool)"),  self.toggled)
+        QObject.connect(self.ui.enterButton, SIGNAL("toggled(bool)"),  self.toggled)
+        QObject.connect(self.ui.rightButton, SIGNAL("toggled(bool)"),  self.toggled)
+        QObject.connect(self.ui.leftButton, SIGNAL("toggled(bool)"),  self.toggled)
+        #QObject.connect(self.neighbors.ui.upButton, SIGNAL("toggled(bool)"),  self.neighbors.up)
+        #QObject.connect(self, SIGNAL("pressed()"),  self.up2)
+        #QObject.connect(self, SIGNAL("released()"),  self.up3)
+    def findCheckedButton(self):
+        if self.ui.upButton.isChecked() == True :
+            return self.ui.upButton
+        elif self.ui.downButton.isChecked() == True :
+            return self.ui.downButton
+        elif self.ui.leftButton.isChecked() == True :
+            return self.ui.leftButton
+        elif self.ui.rightButton.isChecked() == True :
+            return self.ui.rightButton
+        elif self.ui.enterButton.isChecked() == True :
+            return self.ui.enterButton
+
+    def toggled(self, checked):
+        print ("toggled", checked)
+        if checked == True:
+            print self.findCheckedButton().whatsThis()
+            self.findCheckedButton().setEnabled(False)
+            #_VE_.focusSettingMode()
+            #TODO : change mouse mode to set focus 
+            inputCmd = str("_VE_.focusSettingMode()")
+            print inputCmd
+            self.trickplay.write(inputCmd+"\n")
+            self.trickplay.waitForBytesWritten()
+        else :
+            #TODO : set key focus or reset key focus 
+            if self.findCheckedButton():
+                self.findCheckedButton().setEnabled(True)
+                self.findCheckedButton().setChecked(False)
+            #self.findCheckedButton().setIcon(red)
+            pass
+
 class PickerItemTable(QWidget):
     def __init__(self, parent, gid) :
         QWidget.__init__(self,parent)
@@ -964,11 +1002,54 @@ class TrickplayInspector(QWidget):
                     #icon 
                     icon_up = QIcon()
                     icon_up.addPixmap(QPixmap(self.main.apath+"/Assets/up-gray.png"), QIcon.Normal, QIcon.Off)
-                    icon_up.addPixmap(QPixmap(self.main.apath+"/Assets/up-red.png"), QIcon.Disabled, QIcon.Off)
+                    icon_up.addPixmap(QPixmap(self.main.apath+"/Assets/up-red.png"), QIcon.Active, QIcon.Off)
+                    icon_up.addPixmap(QPixmap(self.main.apath+"/Assets/up-blue.png"), QIcon.Disabled, QIcon.Off)
+
+                    icon_down = QIcon()
+                    icon_down.addPixmap(QPixmap(self.main.apath+"/Assets/down-gray.png"), QIcon.Normal, QIcon.Off)
+                    icon_down.addPixmap(QPixmap(self.main.apath+"/Assets/down-red.png"), QIcon.Active, QIcon.Off)
+                    icon_down.addPixmap(QPixmap(self.main.apath+"/Assets/down-blue.png"), QIcon.Selected, QIcon.Off)
+
+                    icon_enter = QIcon()
+                    icon_enter.addPixmap(QPixmap(self.main.apath+"/Assets/enter-gray.png"), QIcon.Normal, QIcon.Off)
+                    icon_enter.addPixmap(QPixmap(self.main.apath+"/Assets/enter-red.png"), QIcon.Active, QIcon.Off)
+                    icon_enter.addPixmap(QPixmap(self.main.apath+"/Assets/enter-blue.png"), QIcon.Selected, QIcon.Off)
+
+                    icon_left = QIcon()
+                    icon_left.addPixmap(QPixmap(self.main.apath+"/Assets/left-gray.png"), QIcon.Normal, QIcon.Off)
+                    icon_left.addPixmap(QPixmap(self.main.apath+"/Assets/left-red.png"), QIcon.Active, QIcon.Off)
+                    icon_left.addPixmap(QPixmap(self.main.apath+"/Assets/left-blue.png"), QIcon.Selected, QIcon.Off)
+
+                    icon_right = QIcon()
+                    icon_right.addPixmap(QPixmap(self.main.apath+"/Assets/right-gray.png"), QIcon.Normal, QIcon.Off)
+                    icon_right.addPixmap(QPixmap(self.main.apath+"/Assets/right-red.png"), QIcon.Active, QIcon.Off)
+                    icon_right.addPixmap(QPixmap(self.main.apath+"/Assets/right-blue.png"), QIcon.Selected, QIcon.Off)
 
                     self.neighbors = Neighbors(self, data['gid'])
+                    
+                    self.neighbors.ui.upButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                    #self.neighbors.ui.upButton.setText("Up")
+                    #self.neighbors.ui.upButton.setFont(font)
+                    #self.neighbors.ui.upButton.setEnabled(False)
                     self.neighbors.ui.upButton.setIcon(icon_up)
 
+                    self.neighbors.ui.downButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                    #self.neighbors.ui.downButton.setText("Down")
+                    self.neighbors.ui.downButton.setIcon(icon_down)
+
+                    self.neighbors.ui.enterButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                    #self.neighbors.ui.enterButton.setText("Enter")
+                    self.neighbors.ui.enterButton.setIcon(icon_enter)
+
+                    self.neighbors.ui.rightButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                    #self.neighbors.ui.rightButton.setText("Right")
+                    self.neighbors.ui.rightButton.setIcon(icon_right)
+
+                    self.neighbors.ui.leftButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                    #self.neighbors.ui.leftButton.setText("Left")
+                    self.neighbors.ui.leftButton.setIcon(icon_left)
+
+                    #QObject.connect(self.neighbors.ui.upButton, SIGNAL("toggled(bool)"),  self.neighbors.up)
 
                 elif p == "anchor_point":
                     anchor_n = n
@@ -1321,7 +1402,6 @@ class TrickplayInspector(QWidget):
                     self.curLayerName = self.layerName[int(self.curData['gid'])] 
                     self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
-                    print("DDDDDDDDDDD", multiSelect)
                     if multiSelect == "true":
                         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                         self.ui.property.clear()

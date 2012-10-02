@@ -124,6 +124,26 @@ end
 
 function screen_ui.selected(obj)
 
+    if input_mode == hdr.S_FOCUS then
+        local obj_border = Rectangle{
+   			name = obj.name.."border",
+   			color = {0,0,0,0},
+	    	border_color = {3,176,203,255},
+ 	  		border_width = 2,
+	    }
+	    obj_border.anchor_point = obj.anchor_point
+        obj_border.x_rotation = obj.x_rotation
+        obj_border.y_rotation = obj.y_rotation
+        obj_border.z_rotation = obj.z_rotation
+        obj_border.size = obj.size
+        obj_border.position = obj.position
+
+        screen:add(obj_border)
+        return 
+    end
+
+
+        
 	if obj.name == nil then return end 
 
 	if screen:find_child("multi_select_border") == nil and shift == false then 
@@ -230,6 +250,10 @@ function screen_ui.selected(obj)
 end  
 
 function screen_ui.n_selected(obj)
+     if input_mode == hdr.S_FOCUS then
+        screen:remove(screen:find_child(obj.name.."border"))
+        return    
+     end
 
      if(obj.name == nil) then 
 		return 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Neighbors.ui'
 #
-# Created: Wed Sep 26 11:22:12 2012
+# Created: Mon Oct  1 23:18:24 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,6 +31,18 @@ class Ui_Neighbors(object):
         self.neighborsLayout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
         self.neighborsLayout.setSpacing(0)
         self.neighborsLayout.setObjectName(_fromUtf8("neighborsLayout"))
+        self.upButton = QtGui.QToolButton(Neighbors)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.upButton.sizePolicy().hasHeightForWidth())
+        self.upButton.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.upButton.setFont(font)
+        self.upButton.setCheckable(True)
+        self.upButton.setObjectName(_fromUtf8("upButton"))
+        self.neighborsLayout.addWidget(self.upButton, 0, 2, 1, 1)
         self.rightButton = QtGui.QToolButton(Neighbors)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -40,6 +52,7 @@ class Ui_Neighbors(object):
         font = QtGui.QFont()
         font.setPointSize(8)
         self.rightButton.setFont(font)
+        self.rightButton.setCheckable(True)
         self.rightButton.setObjectName(_fromUtf8("rightButton"))
         self.neighborsLayout.addWidget(self.rightButton, 1, 4, 1, 1)
         self.downButton = QtGui.QToolButton(Neighbors)
@@ -51,19 +64,9 @@ class Ui_Neighbors(object):
         font = QtGui.QFont()
         font.setPointSize(8)
         self.downButton.setFont(font)
+        self.downButton.setCheckable(True)
         self.downButton.setObjectName(_fromUtf8("downButton"))
         self.neighborsLayout.addWidget(self.downButton, 2, 2, 1, 1)
-        self.upButton = QtGui.QToolButton(Neighbors)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.upButton.sizePolicy().hasHeightForWidth())
-        self.upButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(8)
-        self.upButton.setFont(font)
-        self.upButton.setObjectName(_fromUtf8("upButton"))
-        self.neighborsLayout.addWidget(self.upButton, 0, 2, 1, 1)
         self.enterButton = QtGui.QToolButton(Neighbors)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -73,6 +76,7 @@ class Ui_Neighbors(object):
         font = QtGui.QFont()
         font.setPointSize(8)
         self.enterButton.setFont(font)
+        self.enterButton.setCheckable(True)
         self.enterButton.setObjectName(_fromUtf8("enterButton"))
         self.neighborsLayout.addWidget(self.enterButton, 1, 2, 1, 1)
         self.leftButton = QtGui.QToolButton(Neighbors)
@@ -84,6 +88,7 @@ class Ui_Neighbors(object):
         font = QtGui.QFont()
         font.setPointSize(8)
         self.leftButton.setFont(font)
+        self.leftButton.setCheckable(True)
         self.leftButton.setObjectName(_fromUtf8("leftButton"))
         self.neighborsLayout.addWidget(self.leftButton, 1, 1, 1, 1)
         self.gridLayout.addLayout(self.neighborsLayout, 0, 0, 1, 1)
@@ -93,9 +98,14 @@ class Ui_Neighbors(object):
 
     def retranslateUi(self, Neighbors):
         Neighbors.setWindowTitle(QtGui.QApplication.translate("Neighbors", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.rightButton.setText(QtGui.QApplication.translate("Neighbors", "Right", None, QtGui.QApplication.UnicodeUTF8))
-        self.downButton.setText(QtGui.QApplication.translate("Neighbors", "Down", None, QtGui.QApplication.UnicodeUTF8))
-        self.upButton.setText(QtGui.QApplication.translate("Neighbors", "   Up   ", None, QtGui.QApplication.UnicodeUTF8))
-        self.enterButton.setText(QtGui.QApplication.translate("Neighbors", "Enter", None, QtGui.QApplication.UnicodeUTF8))
-        self.leftButton.setText(QtGui.QApplication.translate("Neighbors", "Left", None, QtGui.QApplication.UnicodeUTF8))
+        self.upButton.setWhatsThis(QtGui.QApplication.translate("Neighbors", "up", None, QtGui.QApplication.UnicodeUTF8))
+        self.upButton.setText(QtGui.QApplication.translate("Neighbors", "  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.rightButton.setWhatsThis(QtGui.QApplication.translate("Neighbors", "right", None, QtGui.QApplication.UnicodeUTF8))
+        self.rightButton.setText(QtGui.QApplication.translate("Neighbors", "  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.downButton.setWhatsThis(QtGui.QApplication.translate("Neighbors", "down", None, QtGui.QApplication.UnicodeUTF8))
+        self.downButton.setText(QtGui.QApplication.translate("Neighbors", "  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.enterButton.setWhatsThis(QtGui.QApplication.translate("Neighbors", "enter", None, QtGui.QApplication.UnicodeUTF8))
+        self.enterButton.setText(QtGui.QApplication.translate("Neighbors", "  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.leftButton.setWhatsThis(QtGui.QApplication.translate("Neighbors", "left", None, QtGui.QApplication.UnicodeUTF8))
+        self.leftButton.setText(QtGui.QApplication.translate("Neighbors", "  ", None, QtGui.QApplication.UnicodeUTF8))
 
