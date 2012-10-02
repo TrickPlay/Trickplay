@@ -18,6 +18,7 @@ local core_dependencies = {
     "__UTILITIES/Canvas.lua",
     "__UTILITIES/Misc.lua",
     "__UTILITIES/ListManagement.lua",
+    "__UTILITIES/Object.lua",
     "__CORE/ColorScheme.lua",
     "__CORE/Style.lua",
     "__CORE/Widget.lua",

@@ -336,32 +336,8 @@ DialogBox = setmetatable(
             
             add( instance, content_group, border, title )
             
-            for name,f in pairs(self.private) do
-                _ENV[name] = f(instance,_ENV)
-            end
+            setup_object(self,instance,_ENV)
             
-            for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,_ENV)
-                override_property( instance, name,
-                    getter, setter
-                )
-                
-            end
-            
-            for name,f in pairs(self.public.functions) do
-                
-                override_function( instance, name, f(instance,_ENV) )
-                
-            end
-            
-            for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,_ENV))
-            end
-            --[[
-            for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
-            end
-            --]]
             dumptable(get_children(instance))
             return instance, _ENV
             
