@@ -115,43 +115,43 @@ ProgressBar = setmetatable(
         },
         public = {
             properties = {
-                w = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.resize = true env.w = v end
+                w = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) resize = true w = v end
                 end,
-                width = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.resize = true env.w = v end
+                width = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) resize = true w = v end
                 end,
-                h = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.resize = true env.h = v end
+                h = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) resize = true h = v end
                 end,
-                height = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.resize = true env.h = v end
+                height = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) resize = true h = v end
                 end,
-                size = function(instance,env)
-                    return function(oldf) return {env.w,env.h}     end,
+                size = function(instance,_ENV)
+                    return function(oldf) return {w,h}     end,
                     function(oldf,self,v) 
-                        env.resize = true 
-                        env.w = v[1]
-                        env.h = v[2]
+                        resize = true 
+                        w = v[1]
+                        h = v[2]
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "ProgressBar" end
                 end,
-                progress = function(instance,env)
+                progress = function(instance,_ENV)
                     return function(oldf) return progress end,
                     function(oldf,self,v)
                         
-                        env.progress = v
+                        progress = v
                         
-                        if env.fill then env.expand_fill() end
+                        if fill then expand_fill() end
                     end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf) 
                         local t = oldf(self)
                         
@@ -168,39 +168,39 @@ ProgressBar = setmetatable(
             },
         },
         private = {
-            expand_fill = function(instance,env)
+            expand_fill = function(instance,_ENV)
                 return function() 
-                    env.scale_t[1] = env.progress
-                    env.fill.scale = env.scale_t
+                    scale_t[1] = progress
+                    fill.scale = scale_t
                 end
             end,
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
-                    if env.resize then
-                        env.resize = false
-                        env.redraw_shell = true
-                        env.redraw_fill = true
+                    if resize then
+                        resize = false
+                        redraw_shell = true
+                        redraw_fill = true
                     end
-                    if env.redraw_shell then
-                        env.redraw_shell = false
-                        if env.shell then env.shell:unparent() end
-                        env.shell = create_shell(instance)
-                        env.add(instance,env.shell)
-                        env.shell:lower_to_bottom()
+                    if redraw_shell then
+                        redraw_shell = false
+                        if shell then shell:unparent() end
+                        shell = create_shell(instance)
+                        add(instance,shell)
+                        shell:lower_to_bottom()
                     end
-                    if env.redraw_fill then
-                        env.redraw_fill = false
-                        if env.fill then env.fill:unparent() end
-                        env.fill = create_fill(instance)
-                        print(env.fill)
-                        env.fill.w = env.shell.w-2*instance.style.border.width
-                        env.fill.scale = env.scale_t
-                        env.add(instance,env.fill)
+                    if redraw_fill then
+                        redraw_fill = false
+                        if fill then fill:unparent() end
+                        fill = create_fill(instance)
+                        print(fill)
+                        fill.w = shell.w-2*instance.style.border.width
+                        fill.scale = scale_t
+                        add(instance,fill)
                         
-                        env.fill.x = instance.style.border.width
-                        env.fill.y = instance.style.border.width
+                        fill.x = instance.style.border.width
+                        fill.y = instance.style.border.width
                         
-                        env.expand_fill()
+                        expand_fill()
                     end
                 end
             end,
@@ -209,19 +209,19 @@ ProgressBar = setmetatable(
             
             parameters = parameters or {}
             
-            local instance, env = Widget()
+            local instance, _ENV = Widget()
             
             
-            env.redraw_shell = false
-            env.redraw_fill  = false
-            env.fill  = false
-            env.shell = false
-            env.progress = 0
-            env.scale_t = {0,1}
+            redraw_shell = false
+            redraw_fill  = false
+            fill  = false
+            shell = false
+            progress = 0
+            scale_t = {0,1}
             
-            env.w = 1
-            env.h = 1
-            env.style_flags = {
+            w = 1
+            h = 1
+            style_flags = {
                 border = {
                     "redraw_fill",
                     "redraw_shell",
@@ -233,11 +233,11 @@ ProgressBar = setmetatable(
             }
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -246,27 +246,27 @@ ProgressBar = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            --env.subscribe_to_sub_styles()
+            --subscribe_to_sub_styles()
             
             --instance.images = nil
-            env.updating = true
+            updating = true
             instance:set(parameters)
-            env.updating = false
+            updating = false
             
-            return instance, env
+            return instance, _ENV
             
         end
     }

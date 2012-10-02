@@ -38,24 +38,24 @@ ToastAlert = setmetatable(
         public = {
             properties = {
             
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "ToastAlert" end, nil
                 end,
-                icon = function(instance,env)
-                    return function(oldf,...) return env.icon     end,
+                icon = function(instance,_ENV)
+                    return function(oldf,...) return icon     end,
                     function(oldf,self,v) 
                         
-                        if env.icon then env.icon:unparent() end
+                        if icon then icon:unparent() end
                         
                         if v == nil then
                             
-                            env.icon = Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
+                            icon = Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
                             
                         elseif type(v) == "string" then
                             
-                            env.icon = Image{ src = v }
+                            icon = Image{ src = v }
                             
-                            if env.icon == nil then
+                            if icon == nil then
                                 
                                 error("ToastAlert.icon recieved string but it was not a valid image uri",2)
                                 
@@ -63,7 +63,7 @@ ToastAlert = setmetatable(
                             
                         elseif type(v) == "userdata" and v.__types__.actor then
                             
-                            env.icon = v
+                            icon = v
                             
                         else
                             
@@ -71,57 +71,57 @@ ToastAlert = setmetatable(
                             
                         end
                         
-                        instance:add(env.icon)
+                        instance:add(icon)
                     end
                 end,
-                message = function(instance,env)
-                    return function(oldf,...) return env.message.text     end,
-                    function(oldf,self,v)            env.message.text = v end
+                message = function(instance,_ENV)
+                    return function(oldf,...) return message.text     end,
+                    function(oldf,self,v)            message.text = v end
                 end,
-                message_color = function(instance,env)
-                    return function(oldf,...) return env.message.color     end,
-                    function(oldf,self,v) print(v)   env.message.color = v end
+                message_color = function(instance,_ENV)
+                    return function(oldf,...) return message.color     end,
+                    function(oldf,self,v) print(v)   message.color = v end
                 end,
-                message_font = function(instance,env)
-                    return function(oldf,...) return env.message.font     end,
-                    function(oldf,self,v)            env.message.font = v end
+                message_font = function(instance,_ENV)
+                    return function(oldf,...) return message.font     end,
+                    function(oldf,self,v)            message.font = v end
                 end,
-                horizontal_message_padding = function(instance,env)
-                    return function(oldf,...) return env.horizontal_message_padding     end,
-                    function(oldf,self,v)            env.horizontal_message_padding = v end
+                horizontal_message_padding = function(instance,_ENV)
+                    return function(oldf,...) return horizontal_message_padding     end,
+                    function(oldf,self,v)            horizontal_message_padding = v end
                 end,
-                vertical_message_padding = function(instance,env)
-                    return function(oldf,...) return env.vertical_message_padding     end,
-                    function(oldf,self,v)            env.vertical_message_padding = v end
+                vertical_message_padding = function(instance,_ENV)
+                    return function(oldf,...) return vertical_message_padding     end,
+                    function(oldf,self,v)            vertical_message_padding = v end
                 end,
-                horizontal_icon_padding = function(instance,env)
-                    return function(oldf,...) return env.horizontal_icon_padding     end,
-                    function(oldf,self,v)            env.horizontal_icon_padding = v end
+                horizontal_icon_padding = function(instance,_ENV)
+                    return function(oldf,...) return horizontal_icon_padding     end,
+                    function(oldf,self,v)            horizontal_icon_padding = v end
                 end,
-                vertical_icon_padding = function(instance,env)
-                    return function(oldf,...) return env.vertical_icon_padding     end,
-                    function(oldf,self,v)            env.vertical_icon_padding = v end
+                vertical_icon_padding = function(instance,_ENV)
+                    return function(oldf,...) return vertical_icon_padding     end,
+                    function(oldf,self,v)            vertical_icon_padding = v end
                 end,
-                on_completed = function(instance,env)
-                    return function(oldf,...) return env.on_completed     end,
-                    function(oldf,self,v)            env.on_completed = v end
+                on_completed = function(instance,_ENV)
+                    return function(oldf,...) return on_completed     end,
+                    function(oldf,self,v)            on_completed = v end
                 end,
-                on_screen_duration = function(instance,env)
-                    return function(oldf,...) return env.on_screen_duration     end,
-                    function(oldf,self,v)            env.on_screen_duration = v end
+                on_screen_duration = function(instance,_ENV)
+                    return function(oldf,...) return on_screen_duration     end,
+                    function(oldf,self,v)            on_screen_duration = v end
                 end,
-                animate_in_duration = function(instance,env)
-                    return function(oldf,...) return env.animate_in_duration     end,
-                    function(oldf,self,v)            env.animate_in_duration = v end
+                animate_in_duration = function(instance,_ENV)
+                    return function(oldf,...) return animate_in_duration     end,
+                    function(oldf,self,v)            animate_in_duration = v end
                 end,
-                animate_out_duration = function(instance,env)
-                    return function(oldf,...) return env.animate_out_duration     end,
-                    function(oldf,self,v)            env.animate_out_duration = v end
+                animate_out_duration = function(instance,_ENV)
+                    return function(oldf,...) return animate_out_duration     end,
+                    function(oldf,self,v)            animate_out_duration = v end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "ToastAlert" end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                         
@@ -139,7 +139,7 @@ ToastAlert = setmetatable(
                         t.animate_out_duration       = instance.animate_out_duration
                         
                         
-                        t.icon = env.icon and env.icon.src
+                        t.icon = icon and icon.src
                         t.type = "ToastAlert"
                         
                         return t
@@ -149,10 +149,10 @@ ToastAlert = setmetatable(
     
             },
             functions = {
-                popup    = function(instance,env) 
+                popup    = function(instance,_ENV) 
                     return function(oldf,self,...) 
                         
-                        if env.animating then return end
+                        if animating then return end
                         
                         if instance.parent then instance:unparent() end
                         
@@ -163,23 +163,23 @@ ToastAlert = setmetatable(
                         instance.y = screen.h + instance.anchor_point[2]
                         
                         instance:animate{
-                            duration = env.animate_in_duration,
+                            duration = animate_in_duration,
                             y        = 50 + instance.anchor_point[2],
                             opacity  = 255,
                             on_completed = function()
                                 
                                 dolater(
-                                    env.on_screen_duration,
+                                    on_screen_duration,
                                     function()
                                         
                                         instance:animate{
-                                            duration = env.animate_out_duration,
+                                            duration = animate_out_duration,
                                             opacity  = 0,
                                             on_completed = function()
                                                 
-                                                env.animating = false
+                                                animating = false
                                                 
-                                                if env.on_completed then env.on_completed(instance) end
+                                                if on_completed then on_completed(instance) end
                                                 
                                             end
                                         }
@@ -199,65 +199,65 @@ ToastAlert = setmetatable(
         
         private = {
         
-            subscribe_to_sub_styles = function(instance,env)
+            subscribe_to_sub_styles = function(instance,_ENV)
                 return function()
                     instance.style.border:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            env.call_update()
+                        if canvas then 
+                            flag_for_redraw = true 
+                            call_update()
                         end
                     end )
                     instance.style.fill_colors:subscribe_to( nil, function()
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
-                            env.call_update()
+                        if canvas then 
+                            flag_for_redraw = true 
+                            call_update()
                         end
                     end )
                     instance.style.text.colors:subscribe_to( nil, function()
-                        env.redraw_title = true
-                        env.call_update()
+                        redraw_title = true
+                        call_update()
                     end )
                     instance.style.text:subscribe_to( nil, function()
-                        env.redraw_title = true
-                        env.call_update()
+                        redraw_title = true
+                        call_update()
                     end )
                     instance.style:subscribe_to( nil, function()
                             
-                        if env.canvas then 
-                            env.flag_for_redraw = true 
+                        if canvas then 
+                            flag_for_redraw = true 
                         end
-                        env.redraw_title = true
-                        env.call_update()
+                        redraw_title = true
+                        call_update()
                         
                     end )
                     
                 end
             end,
             ---[[
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
                     
-                    env.old_update()
+                    old_update()
                     
                     --reposition icon
-                    env.icon.x = env.horizontal_icon_padding 
-                    env.icon.y = env.vertical_icon_padding
+                    icon.x = horizontal_icon_padding 
+                    icon.y = vertical_icon_padding
             
                     --resize icon
-                    if (env.icon.y + env.icon.h + env.vertical_icon_padding) > 
+                    if (icon.y + icon.h + vertical_icon_padding) > 
                         (instance.h  - instance.separator_y)  then
 				
-                        env.icon.scale = (env.icon.h - (env.icon.y + env.icon.h + 
-                            env.vertical_icon_padding - (instance.h  - instance.separator_y) )) / env.icon.h
+                        icon.scale = (icon.h - (icon.y + icon.h + 
+                            vertical_icon_padding - (instance.h  - instance.separator_y) )) / icon.h
 				
                     end
                     --reposition message
-                    env.message.x = env.icon.x + env.icon.w + env.horizontal_icon_padding + env.horizontal_message_padding
-                    env.message.y = env.vertical_message_padding
+                    message.x = icon.x + icon.w + horizontal_icon_padding + horizontal_message_padding
+                    message.y = vertical_message_padding
 			
                     --resize message
-                    env.message.w = instance.w - env.message.x - env.horizontal_message_padding
-                    env.message.h = instance.h - instance.separator_y - env.vertical_message_padding*2
+                    message.w = instance.w - message.x - horizontal_message_padding
+                    message.h = instance.h - instance.separator_y - vertical_message_padding*2
                 end
             end,
             --]]
@@ -266,37 +266,37 @@ ToastAlert = setmetatable(
             
             parameters = parameters or {}
             
-            local instance, env = DialogBox:declare()
+            local instance, _ENV = DialogBox:declare()
             local getter, setter
             
-            env.old_update = env.update
-            env.vertical_message_padding   = 10
-            env.horizontal_message_padding = 5
-            env.horizontal_icon_padding = 20
-            env.vertical_icon_padding = 10
-            env.message = Text{
+            old_update = update
+            vertical_message_padding   = 10
+            horizontal_message_padding = 5
+            horizontal_icon_padding = 20
+            vertical_icon_padding = 10
+            message = Text{
                 wrap=true,
             }
-            instance:add(env.message)
-            env.icon = nil
-            env.on_completed = function() end
-            env.on_screen_duration = 5000
-            env.animate_in_duration = 500
-            env.animate_out_duration = 500
-            env.message_color = "ffffff"
-            env.message_font="Sans 40px"
-            env.animating = false
+            instance:add(message)
+            icon = nil
+            on_completed = function() end
+            on_screen_duration = 5000
+            animate_in_duration = 500
+            animate_out_duration = 500
+            message_color = "ffffff"
+            message_font="Sans 40px"
+            animating = false
             
             
             
             
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -305,28 +305,28 @@ ToastAlert = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            env.updating = true
+            updating = true
             instance.icon          = parameters.icon
             print("DURP")
-            instance.message_color = env.message_color
-            instance.message_font  = env.message_font
-            env.updating = false
+            instance.message_color = message_color
+            instance.message_font  = message_font
+            updating = false
             
-            dumptable(env.get_children(instance))
-            return instance, env
+            dumptable(get_children(instance))
+            return instance, _ENV
             
         end
     }

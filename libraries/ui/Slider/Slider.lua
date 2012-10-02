@@ -30,66 +30,66 @@ Slider = setmetatable(
             
         end,
         subscriptions = {
-            ["style"] = function(instance,env)
+            ["style"] = function(instance,_ENV)
                 return function()
                 end
             end,
         },
         public = {
             properties = {
-                enabled = function(instance,env)
+                enabled = function(instance,_ENV)
                     return function(oldf,...) return oldf(...) end,
                     function(oldf,self,v)
                         oldf(self,v)
-                        env.grip.enabled  = v
-                        env.track.enabled = v
+                        grip.enabled  = v
+                        track.enabled = v
                     end
                 end,
-                grip_w = function(instance,env)
-                    return function(oldf) return env.grip.w     end,
-                    function(oldf,self,v)        env.grip.w = v 
-                        env.resized = true
+                grip_w = function(instance,_ENV)
+                    return function(oldf) return grip.w     end,
+                    function(oldf,self,v)        grip.w = v 
+                        resized = true
                     end
                 end,
-                grip_h = function(instance,env)
-                    return function(oldf) return env.grip.h     end,
-                    function(oldf,self,v)        env.grip.h = v 
-                        env.resized = true
+                grip_h = function(instance,_ENV)
+                    return function(oldf) return grip.h     end,
+                    function(oldf,self,v)        grip.h = v 
+                        resized = true
                     end
                 end,
-                track_w = function(instance,env)
-                    return function(oldf) return env.track.w     end,
-                    function(oldf,self,v)        env.track.w = v 
-                        env.resized = true
+                track_w = function(instance,_ENV)
+                    return function(oldf) return track.w     end,
+                    function(oldf,self,v)        track.w = v 
+                        resized = true
                     end
                 end,
-                track_h = function(instance,env)
-                    return function(oldf) return env.track.h     end,
-                    function(oldf,self,v)        env.track.h = v 
-                        env.resized = true
+                track_h = function(instance,_ENV)
+                    return function(oldf) return track.h     end,
+                    function(oldf,self,v)        track.h = v 
+                        resized = true
                     end
                 end,
-                direction = function(instance,env)
-                    return function(oldf) return env.direction     end,
+                direction = function(instance,_ENV)
+                    return function(oldf) return direction     end,
                     function(oldf,self,v) 
                         
                         if v == "horizontal" then
-                            env.direction_pos = "x"
-                            env.direction_num =  1 
-                            env.direction_dim = "w"
+                            direction_pos = "x"
+                            direction_num =  1 
+                            direction_dim = "w"
                         elseif v == "vertical" then
-                            env.direction_pos = "y"
-                            env.direction_num =  2 
-                            env.direction_dim = "h"
+                            direction_pos = "y"
+                            direction_num =  2 
+                            direction_dim = "h"
                         else
                             error("Expected 'horizontal' or 'vertical'. Received "..v,2)
                         end
-                        env.direction = v 
-                        env.resized = true
+                        direction = v 
+                        resized = true
                     end
                 end,
-                progress = function(instance,env)
-                    return function(oldf) return env.progress     end,
+                progress = function(instance,_ENV)
+                    return function(oldf) return progress     end,
                     function(oldf,self,v) 
                         print(v)
                         if type(v) ~= "number" then
@@ -97,19 +97,19 @@ Slider = setmetatable(
                         elseif v > 1 or v < 0 then 
                             error("Must be between [0,1]. Received ".. v,2)
                         end
-                        env.grip[env.direction_pos] = 
-                            v*(env.track[env.direction_dim]-env.grip[env.direction_dim]) + 
-                            env.grip[env.direction_dim]/2
+                        grip[direction_pos] = 
+                            v*(track[direction_dim]-grip[direction_dim]) + 
+                            grip[direction_dim]/2
                         
-                        print(env.direction_pos,env.grip.gid,env.grip[env.direction_pos])
+                        print(direction_pos,grip.gid,grip[direction_pos])
                         
-                        env.progress = v 
+                        progress = v 
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function(oldf) return "Slider" end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                         t.direction = instance.direction
@@ -129,46 +129,46 @@ Slider = setmetatable(
             },
         },
         private = {
-            drag_horizontal= function(instance,env)
+            drag_horizontal= function(instance,_ENV)
                 return function(x,_)
-                    env.p = env.p + ( x - env.prev_pos )*env.pixels_to_progress_ratio
+                    p = p + ( x - prev_pos )*pixels_to_progress_ratio
                     
-                    env.prev_pos = x
+                    prev_pos = x
                     
-                    instance.progress = env.p > 1 and 1 or env.p > 0 and env.p or 0
+                    instance.progress = p > 1 and 1 or p > 0 and p or 0
                 end
             end,
-            drag_vertical =  function(instance,env)
+            drag_vertical =  function(instance,_ENV)
                 return function(_,y)
-                    env.p = env.p + ( y - env.prev_pos )*env.pixels_to_progress_ratio
+                    p = p + ( y - prev_pos )*pixels_to_progress_ratio
                     
-                    env.prev_pos = y
+                    prev_pos = y
                     
-                    instance.progress = env.p > 1 and 1 or env.p > 0 and env.p or 0
+                    instance.progress = p > 1 and 1 or p > 0 and p or 0
                 end
             end,
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
                     print("\n\nupdate\n\n")
-                    if env.resized then
-                        env.resized = false
-                        print("grip sz1",env.grip.w,env.grip.h)
-                        env.grip.x = env.grip.x
-                        print("grip sz1.5",env.grip.w,env.grip.h)
-                        env.grip.anchor_point = {
-                            env.grip.w/2,
-                            env.grip.h/2
+                    if resized then
+                        resized = false
+                        print("grip sz1",grip.w,grip.h)
+                        grip.x = grip.x
+                        print("grip sz1.5",grip.w,grip.h)
+                        grip.anchor_point = {
+                            grip.w/2,
+                            grip.h/2
                         }
-                        print("grip ap",env.grip.w,env.grip.h)
-                        if env.direction == "horizontal" then
-                            local w = env.grip.w/2
-                            print("settin x",w*2,env.grip.h)
-                            env.grip.x = w
-                            print("set x",env.grip.w,env.grip.h)
-                            env.grip.y = env.track.h/2
-                        elseif env.direction == "vertical" then
-                            env.grip.x = env.track.w/2
-                            env.grip.y = env.grip.h/2
+                        print("grip ap",grip.w,grip.h)
+                        if direction == "horizontal" then
+                            local w = grip.w/2
+                            print("settin x",w*2,grip.h)
+                            grip.x = w
+                            print("set x",grip.w,grip.h)
+                            grip.y = track.h/2
+                        elseif direction == "vertical" then
+                            grip.x = track.w/2
+                            grip.y = grip.h/2
                         else
                             error("invalid direction",2)
                         end
@@ -179,71 +179,71 @@ Slider = setmetatable(
         
         
         declare = function(self,parameters)
-            local instance, env = Widget(parameters)
+            local instance, _ENV = Widget(parameters)
             
-            env.grip  = NineSlice{
+            grip  = NineSlice{
                 name = "grip",
                 reactive = true,
                 on_button_down = function(self,...)
-                    print("here",env.direction_dim)
-                    env.pixels_to_progress_ratio = 1/(env.track[env.direction_dim]-env.grip[env.direction_dim])
+                    print("here",direction_dim)
+                    pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
                     
                     --position_grabbed_from = ({...})[direction_num]
-                    env.prev_pos = ({...})[env.direction_num]
+                    prev_pos = ({...})[direction_num]
                     
                     --this function is called by screen_on_motion
-                    env.g_dragging = env["drag_"..env.direction]
-                    env.grip:grab_pointer()
+                    g_dragging = _ENV["drag_"..direction]
+                    grip:grab_pointer()
                     
                     return true
                 end,
                 on_motion = function(self,...)
-                    return env.g_dragging and env.g_dragging(...)
+                    return g_dragging and g_dragging(...)
                 end,
                 on_button_up = function(self,...)
-                    env.grip:ungrab_pointer()
-                    env.g_dragging = nil
-                    env.p = instance.progress
+                    grip:ungrab_pointer()
+                    g_dragging = nil
+                    p = instance.progress
                 end,
             }
-            env.track = NineSlice{
+            track = NineSlice{
                 name =  "track", 
                 reactive = true,
                 on_button_down = function(self,...)
                     
-                    env.pixels_to_progress_ratio = 1/(env.track[env.direction_dim]-env.grip[env.direction_dim])
+                    pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
                     
-                    env.prev_pos =
+                    prev_pos =
                         --the transformed position of the grip
-                        env.grip.transformed_position[env.direction_num]*
+                        grip.transformed_position[direction_num]*
                         --transformed position value has to be converted to the 1920x1080 scale
-                        screen[env.direction_dim]/screen.transformed_size[env.direction_num]+
+                        screen[direction_dim]/screen.transformed_size[direction_num]+
                         -- transformed position doesn't take anchor point into account
-                        env.grip[env.direction_dim]/2 
+                        grip[direction_dim]/2 
                     
-                    env["drag_"..env.direction](...)
+                    _ENV["drag_"..direction](...)
                 end,
             }
             
-            env.p = 0
-            env.progress = 0
+            p = 0
+            progress = 0
             
-            env.direction = "horizontal"
-            env.direction_pos = "x"
-            env.direction_num =  1
-            env.direction_dim = "w"
-            env.pixels_to_progress_ratio = 1
-            env.prev_pos = 0
+            direction = "horizontal"
+            direction_pos = "x"
+            direction_num =  1
+            direction_dim = "w"
+            pixels_to_progress_ratio = 1
+            prev_pos = 0
             
-            env.add( instance, env.track, env.grip )
+            add( instance, track, grip )
             
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -252,15 +252,15 @@ Slider = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             
-            return instance, env
+            return instance, _ENV
             
             
         end,

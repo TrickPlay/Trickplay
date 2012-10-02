@@ -6,7 +6,7 @@ WL = dofile("Widget_Library.lua")
 --add_verbosity("ArrayManager")
 
 
-dofile("ArrowPane/test.lua")
+dofile("TabBar/test.lua")
 
 screen:show()
 controllers:start_pointer()

@@ -55,79 +55,79 @@ ProgressSpinner = setmetatable(
         },
         public = {
             properties = {
-                image = function(instance,env)
-                    return function(oldf) return env.image     end,
+                image = function(instance,_ENV)
+                    return function(oldf) return image     end,
                     function(oldf,self,v) 
-                        return v == nil and env.make_canvas() or
+                        return v == nil and make_canvas() or
                             
-                            type(v) == "string" and env.setup_image( Image{ src = v } ) or
+                            type(v) == "string" and setup_image( Image{ src = v } ) or
                             
-                            type(v) == "userdata" and v.__types__.actor and env.setup_image(v) or
+                            type(v) == "userdata" and v.__types__.actor and setup_image(v) or
                             
                             error("ProgressSpinner.image expected type 'table'. Received "..type(v),2) 
                     end
                 end,
-                duration = function(instance,env)
-                    return function(oldf) return env.duration     end,
-                    function(oldf,self,v) env.duration = v end
+                duration = function(instance,_ENV)
+                    return function(oldf) return duration     end,
+                    function(oldf,self,v) duration = v end
                 end,
-                animating = function(instance,env)
-                    return function(oldf) return env.animating     end,
+                animating = function(instance,_ENV)
+                    return function(oldf) return animating     end,
                     function(oldf,self,v) 
                         
                         if type(v) ~= "boolean" then
-                        elseif env.animating == v then
+                        elseif animating == v then
                             
                             return
                             
                         end
                         
-                        env.animating = v
+                        animating = v
                         
-                        if env.animating then
-                            env.start_animation = true
+                        if animating then
+                            start_animation = true
                         else
-                            env.stop_animation = true
+                            stop_animation = true
                         end
                     end
                 end,
-                w = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.w = v end
+                w = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) flag_for_redraw = true w = v end
                 end,
-                width = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.w = v end
+                width = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) flag_for_redraw = true w = v end
                 end,
-                h = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.h = v end
+                h = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) flag_for_redraw = true h = v end
                 end,
-                height = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.h = v end
+                height = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) flag_for_redraw = true h = v end
                 end,
-                size = function(instance,env)
-                    return function(oldf) return {env.w,env.h}     end,
+                size = function(instance,_ENV)
+                    return function(oldf) return {w,h}     end,
                     function(oldf,self,v) 
-                        env.flag_for_redraw = true 
-                        env.w = v[1]
-                        env.h = v[2]
+                        flag_for_redraw = true 
+                        w = v[1]
+                        h = v[2]
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "ProgressSpinner" end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                         
                         t.animating = self.animating
                         t.duration = self.duration
                         
-                        if (not canvas) and env.image.src and env.image.src ~= "[canvas]" then 
+                        if (not canvas) and image.src and image.src ~= "[canvas]" then 
                             
-                            t.image = env.image.src
+                            t.image = image.src
                             
                         end
                         t.type = "ProgressSpinner"
@@ -141,46 +141,46 @@ ProgressSpinner = setmetatable(
             },
         },
         private = {
-            make_canvas = function(instance,env)
+            make_canvas = function(instance,_ENV)
                 return function() 
-                    env.canvas = true
+                    canvas = true
                     
-                    if env.image then env.image:unparent() end
+                    if image then image:unparent() end
                     
-                    env.image = canvas_dot(instance)
+                    image = canvas_dot(instance)
                     
-                    env.add( instance, env.image )
+                    add( instance, image )
                     
-                    env.image:move_anchor_point(env.image.w/2,env.image.h/2)
-                    env.image:move_by(env.image.w/2,env.image.h/2)
+                    image:move_anchor_point(image.w/2,image.h/2)
+                    image:move_by(image.w/2,image.h/2)
                     
                     return true
                 end
             end,
-            resize_images = function(instance,env)
+            resize_images = function(instance,_ENV)
                 return function() 
                     if not size_is_set then return end
                     
-                    env.image.w = instance.w
-                    env.image.h = instance.h
+                    image.w = instance.w
+                    image.h = instance.h
                 end
             end,
-            setup_image = function(instance,env)
+            setup_image = function(instance,_ENV)
                 return function(v) 
-                    env.canvas = false
+                    canvas = false
                     
-                    if env.image then env.image:unparent() end
+                    if image then image:unparent() end
                     
-                    env.image = v
+                    image = v
                     
-                    env.add( instance, v )
+                    add( instance, v )
                     
                     v:move_anchor_point(v.w/2,v.h/2)
                     v:move_by(v.w/2,v.h/2)
                     
                     if instance.is_size_set() then
                         
-                        env.resize_images()
+                        resize_images()
                         
                     else
                         
@@ -194,33 +194,33 @@ ProgressSpinner = setmetatable(
                     return true
                 end
             end,
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
-                    if env.flag_for_redraw then
-                        env.flag_for_redraw = false
-                        if env.canvas then
-                            env.make_canvas()
+                    if flag_for_redraw then
+                        flag_for_redraw = false
+                        if canvas then
+                            make_canvas()
                         else
-                            env.resize_images()
+                            resize_images()
                         end
                     end
-                    if env.reanimate then
-                        env.reanimate = false
+                    if reanimate then
+                        reanimate = false
                         
-                        env.stop_animation = true
-                        env.start_animation = true
+                        stop_animation = true
+                        start_animation = true
                         
                     end
-                    if  env.stop_animation then
-                        env.stop_animation = false
-                        env.image:stop_animation()
-                        env.image.z_rotation = {0,0,0}
+                    if  stop_animation then
+                        stop_animation = false
+                        image:stop_animation()
+                        image.z_rotation = {0,0,0}
                     end
-                    if env.start_animation then
-                        env.start_animation = false
+                    if start_animation then
+                        start_animation = false
                         
-                        env.image:animate{
-                            duration   = env.duration,
+                        image:animate{
+                            duration   = duration,
                             z_rotation = 360,
                             loop       = true,
                         }
@@ -233,28 +233,28 @@ ProgressSpinner = setmetatable(
             
             parameters = parameters or {}
             
-            local instance, env = Widget()
+            local instance, _ENV = Widget()
             
-            env.duration  = 1000
-            env.image     = false
-            env.animating = false
+            duration  = 1000
+            image     = false
+            animating = false
             
-            env.canvas = true
-            env.flag_for_redraw = true
+            canvas = true
+            flag_for_redraw = true
             
-            env.w = 1
-            env.h = 1
-            env.style_flags = {
+            w = 1
+            h = 1
+            style_flags = {
                 border = "flag_for_redraw",
                 fill_colors = "flag_for_redraw",
             }
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -263,27 +263,27 @@ ProgressSpinner = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            --env.subscribe_to_sub_styles()
+            --subscribe_to_sub_styles()
             
             --instance.images = nil
-            env.updating = true
+            updating = true
             instance:set(parameters)
-            env.updating = false
+            updating = false
             
-            return instance, env
+            return instance, _ENV
             
         end
     }

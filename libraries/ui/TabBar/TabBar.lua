@@ -103,55 +103,55 @@ TabBar = setmetatable(
         },
         public = {
             properties = {
-                enabled = function(instance,env)
+                enabled = function(instance,_ENV)
                     return nil,
                     function(oldf,self,v)  
                         oldf(self,v)
-                        for i = 1,env.tabs_lm.length do
-                            env.tabs_lm.cells[i].enabled = v
+                        for i = 1,tabs_lm.length do
+                            tabs_lm.cells[i].enabled = v
                         end
-                        env.tab_pane.enabled = v
+                        tab_pane.enabled = v
                     end
                 end,
-                pane_w = function(instance,env) -- TODO check need for these upvals
-                    return function(oldf) return   env.pane_w     end,
+                pane_w = function(instance,_ENV) -- TODO check need for these upvals
+                    return function(oldf) return   pane_w     end,
                     function(oldf,self,v)  
-                        env.pane_w = v 
-                        env.panes_obj.w = v
-                        if env.tab_location == "top" then
-                            env.tab_pane.pane_w    = env.pane_w
+                        pane_w = v 
+                        panes_obj.w = v
+                        if tab_location == "top" then
+                            tab_pane.pane_w    = pane_w
                         end
                     end
                 end,
-                pane_h = function(instance,env)
-                    return function(oldf) return   env.pane_h     end,
+                pane_h = function(instance,_ENV)
+                    return function(oldf) return   pane_h     end,
                     function(oldf,self,v)   
-                        env.pane_h = v 
-                        env.panes_obj.h = v
-                        if env.tab_location == "left" then
-                            env.tab_pane.pane_h    = env.pane_h
+                        pane_h = v 
+                        panes_obj.h = v
+                        if tab_location == "left" then
+                            tab_pane.pane_h    = pane_h
                         end
                     end
                 end,
-                tab_w = function(instance,env)
-                    return function(oldf) return   env.tab_w     end,
+                tab_w = function(instance,_ENV)
+                    return function(oldf) return   tab_w     end,
                     function(oldf,self,v)          
-                        env.tab_w = v 
-                        env.resize_tabs = true
+                        tab_w = v 
+                        resize_tabs = true
                     end
                 end,
-                tab_images = function(instance,env)
-                    return function(oldf) return   env.tab_images     end, -- TODO either return clone, or metatable for changes
+                tab_images = function(instance,_ENV)
+                    return function(oldf) return   tab_images     end, -- TODO either return clone, or metatable for changes
                     function(oldf,self,v)          
-                        local old_images = env.tab_images or {}
-                        env.tab_images = v
+                        local old_images = tab_images or {}
+                        tab_images = v
                         
                         for k,v in pairs(v) do
-                            env.add(instance,v)
+                            add(instance,v)
                             v:hide()
                         end
                         
-                        for i = 1,env.tabs_lm.length do
+                        for i = 1,tabs_lm.length do
                             
                             local clones = {}
                             
@@ -159,7 +159,7 @@ TabBar = setmetatable(
                                 clones[k] = Clone{source=v}
                             end
                             
-                            env.tabs_lm.cells[i].images = clones
+                            tabs_lm.cells[i].images = clones
                             
                         end
                         
@@ -168,75 +168,75 @@ TabBar = setmetatable(
                         end
                     end
                 end,
-                tab_h = function(instance,env)
-                    return function(oldf) return   env.tab_h     end,
+                tab_h = function(instance,_ENV)
+                    return function(oldf) return   tab_h     end,
                     function(oldf,self,v)          
-                        env.tab_h = v 
-                        env.resize_tabs = true
+                        tab_h = v 
+                        resize_tabs = true
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "TabBar" end, nil
                 end,
-                selected_tab = function(instance,env)
-                    return function(oldf) return env.new_selection or env.rbg.selected end,
-                    function(oldf,self,v)        env.new_selection = v  end
+                selected_tab = function(instance,_ENV)
+                    return function(oldf) return new_selection or rbg.selected end,
+                    function(oldf,self,v)        new_selection = v  end
                 end,
-                tabs = function(instance,env)
-                    return function(oldf)  return   env.tabs_interface      end,
+                tabs = function(instance,_ENV)
+                    return function(oldf)  return   tabs_interface      end,
                     function(oldf,self,v)    
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
-                        env.new_tabs = v  
-                        env.resize_tabs = true
+                        new_tabs = v  
+                        resize_tabs = true
                     end
                 end,
-                tab_location = function(instance,env)
-                    return function(oldf) return   env.tab_location     end,
+                tab_location = function(instance,_ENV)
+                    return function(oldf) return   tab_location     end,
                     function(oldf,self,v)  
                         mesg("TABBAR",0,"TabBar.tab_location =",v)
                         if tab_location == v then return end
-                        env.new_tab_location = true
+                        new_tab_location = true
                         --[[
                         if v == "top" then
-                            env.updating = true --TODO need a better way to do a non-updating set of this
+                            updating = true --TODO need a better way to do a non-updating set of this
                             instance.direction  = "vertical"
-                            env.updating = false
-                            env.tabs_lm.direction  = "horizontal"
+                            updating = false
+                            tabs_lm.direction  = "horizontal"
                             --TODO set??
-                            print("oreo\n\n\n\n",env.pane_w,env.tabs_lm.w)
-                            env.tab_pane.pane_w    = env.pane_w
-                            env.tab_pane.pane_h    = env.tab_h
-                            env.tab_pane.virtual_w = env.tabs_lm.w
-                            env.tab_pane.virtual_h = env.tab_h
-                            env.tab_pane.arrow_move_by   = env.tab_w + env.tabs_lm.spacing
-                            for _,tab in env.tabs_lm.cells.pairs() do
+                            print("oreo\n\n\n\n",pane_w,tabs_lm.w)
+                            tab_pane.pane_w    = pane_w
+                            tab_pane.pane_h    = tab_h
+                            tab_pane.virtual_w = tabs_lm.w
+                            tab_pane.virtual_h = tab_h
+                            tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
                                 tab.create_canvas = top_tabs
                                 tab.w = 200
                             end
                         elseif v == "left" then
-                            env.updating = true --TODO need a better way to do a non-updating set of this
+                            updating = true --TODO need a better way to do a non-updating set of this
                             instance.direction  = "horizontal"
-                            env.updating = false
-                            env.tabs_lm.direction  = "vertical"
+                            updating = false
+                            tabs_lm.direction  = "vertical"
                             --TODO set??
-                            print("env.pane_h = "..env.pane_h)
-                            env.tab_pane.pane_w    = env.tab_w
-                            env.tab_pane.pane_h    = env.pane_h
-                            env.tab_pane.virtual_w = env.tab_w
-                            env.tab_pane.virtual_h = env.tabs_lm.h
-                            env.tab_pane.arrow_move_by   = env.tab_h + env.tabs_lm.spacing
-                            for _,tab in env.tabs_lm.cells.pairs() do
+                            print("pane_h = "..pane_h)
+                            tab_pane.pane_w    = tab_w
+                            tab_pane.pane_h    = pane_h
+                            tab_pane.virtual_w = tab_w
+                            tab_pane.virtual_h = tabs_lm.h
+                            tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
                                 tab.create_canvas = side_tabs
                             end
                         else
                             error("Expected 'top' or 'left'. Received "..v,2)
                         end
                         --]]
-                        env.tab_location = v
+                        tab_location = v
                     end
                 end,
     
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                         
@@ -262,10 +262,10 @@ TabBar = setmetatable(
                         
                         t.tabs = {}
                         
-                        for i = 1,env.tabs_lm.length do
+                        for i = 1,tabs_lm.length do
                             t.tabs[i]    = {
-                                label    = env.tabs_lm.cells[i].label,
-                                contents = env.tabs_lm.cells[i].contents.attributes
+                                label    = tabs_lm.cells[i].label,
+                                contents = tabs_lm.cells[i].contents.attributes
                             }
                         end
                         
@@ -283,77 +283,77 @@ TabBar = setmetatable(
         
         private = {
         
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
                     mesg("TABBAR",{0,5},"TabBar update called")
-                    if env.restyle_tabs then
-                        env.restyle_tabs = false
-                        for i = 1,env.tabs_lm.length do
+                    if restyle_tabs then
+                        restyle_tabs = false
+                        for i = 1,tabs_lm.length do
                                 
-                            env.tabs_lm.cells[i].style:set(instance.style.attributes)
+                            tabs_lm.cells[i].style:set(instance.style.attributes)
                             
                         end
                     end
-                    if env.restyle_arrows then
-                        env.restyle_arrows = false
+                    if restyle_arrows then
+                        restyle_arrows = false
                         
-                        env.tab_pane.style.arrow:set(instance.style.arrow.attributes)
+                        tab_pane.style.arrow:set(instance.style.arrow.attributes)
                     end
-                    if env.resize_tabs then
-                        env.resize_tabs = false
-                        if not env.new_tabs then
-                            for i = 1,env.tabs_lm.length do
+                    if resize_tabs then
+                        resize_tabs = false
+                        if not new_tabs then
+                            for i = 1,tabs_lm.length do
                                 
-                                env.tabs_lm.cells[i].size = {env.tab_w,env.tab_h}
+                                tabs_lm.cells[i].size = {tab_w,tab_h}
                                 
                             end
                         end
-                        if env.tab_location == "top" then
+                        if tab_location == "top" then
                             
-                            env.tab_pane.pane_h        = env.tab_h
-                            env.tab_pane.virtual_h     = env.tab_h
-                            env.tab_pane.arrow_move_by = env.tab_w + env.tabs_lm.spacing
-                        elseif env.tab_location == "left" then
-                            env.tab_pane.pane_w        = env.tab_w
-                            env.tab_pane.virtual_w     = env.tab_w
-                            env.tab_pane.arrow_move_by = env.tab_h + env.tabs_lm.spacing
+                            tab_pane.pane_h        = tab_h
+                            tab_pane.virtual_h     = tab_h
+                            tab_pane.arrow_move_by = tab_w + tabs_lm.spacing
+                        elseif tab_location == "left" then
+                            tab_pane.pane_w        = tab_w
+                            tab_pane.virtual_w     = tab_w
+                            tab_pane.arrow_move_by = tab_h + tabs_lm.spacing
                         end
                     end
-                    if env.new_tabs then
+                    if new_tabs then
                         mesg("TABBAR",0,"TabBar:update() setting new_tabs")
-                        env.tabs_lm.cells = env.new_tabs
-                        if env.tab_location == "top" then
-                            env.tab_pane.virtual_w = env.tabs_lm.w
+                        tabs_lm.cells = new_tabs
+                        if tab_location == "top" then
+                            tab_pane.virtual_w = tabs_lm.w
                         else
-                            env.tab_pane.virtual_h = env.tabs_lm.h
+                            tab_pane.virtual_h = tabs_lm.h
                         end
-                        env.new_tabs = false
+                        new_tabs = false
                     end
-                    if env.new_tab_location then
-                        env.new_tab_location = false
-                        if env.tab_location == "top" then
+                    if new_tab_location then
+                        new_tab_location = false
+                        if tab_location == "top" then
                             instance.direction  = "vertical"
-                            env.tabs_lm.direction  = "horizontal"
+                            tabs_lm.direction  = "horizontal"
                             --TODO set??
-                            env.tab_pane.pane_w    = env.pane_w
-                            env.tab_pane.pane_h    = env.tab_h
-                            env.tab_pane.virtual_w = env.tabs_lm.w
-                            env.tab_pane.virtual_h = env.tab_h
-                            env.tab_pane.arrow_move_by   = env.tab_w + env.tabs_lm.spacing
-                            for _,tab in env.tabs_lm.cells.pairs() do
+                            tab_pane.pane_w    = pane_w
+                            tab_pane.pane_h    = tab_h
+                            tab_pane.virtual_w = tabs_lm.w
+                            tab_pane.virtual_h = tab_h
+                            tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
                                 tab.create_canvas = top_tabs
                                 tab.w = 200
                             end
-                        elseif env.tab_location == "left" then
+                        elseif tab_location == "left" then
                             instance.direction  = "horizontal"
-                            env.tabs_lm.direction  = "vertical"
+                            tabs_lm.direction  = "vertical"
                             --TODO set??
-                            env.tab_pane.pane_w    = env.tab_w
-                            env.tab_pane.pane_h    = env.pane_h
-                            env.tab_pane.virtual_w = env.tab_w
-                            env.tab_pane.virtual_h = env.tabs_lm.h
-                            env.tab_pane.arrow_move_by   = env.tab_h + env.tabs_lm.spacing
-                            for _,tab in env.tabs_lm.cells.pairs() do
+                            tab_pane.pane_w    = tab_w
+                            tab_pane.pane_h    = pane_h
+                            tab_pane.virtual_w = tab_w
+                            tab_pane.virtual_h = tabs_lm.h
+                            tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
                                 tab.create_canvas = side_tabs
                             end
                         else
@@ -362,15 +362,15 @@ TabBar = setmetatable(
                         
                     end
                     
-                    env.old_update()
+                    old_update()
                     print("here")
-                    if  env.new_selection then
+                    if  new_selection then
                         print("DQDQQQDQDDQ")
-                        env.rbg.selected = env.new_selection
-                        env.new_selection = false
+                        rbg.selected = new_selection
+                        new_selection = false
                     end
                     
-                    --env.tabs_lm_env:call_update()
+                    --tabs_lm__ENV:call_update()
                 end
             end,
         },
@@ -378,20 +378,20 @@ TabBar = setmetatable(
             
             parameters = parameters or {}
             
-            local instance,env = ListManager:declare{vertical_alignment = "top",spacing=0}
-            env.style_flags = {
+            local instance,_ENV = ListManager:declare{vertical_alignment = "top",spacing=0}
+            style_flags = {
                 border      = "restyle_tabs",
                 text        = "restyle_tabs",
                 fill_colors = "restyle_tabs",
                 arrow       = "restyle_arrows",
             }
-            env.panes = {}
-            env.tabs = {}
-            env.rbg= RadioButtonGroup{name = "TabBar",
+            panes = {}
+            tabs = {}
+            rbg= RadioButtonGroup{name = "TabBar",
                 on_selection_change = function()
                     mesg("TABBAR",0,"TabBar.rbg.on_selection_change")
-                    for i = 1,env.tabs_lm.length do
-                        local t = env.tabs_lm.cells[i]
+                    for i = 1,tabs_lm.length do
+                        local t = tabs_lm.cells[i]
                         if t.selected then
                             t.contents:show()
                             t:grab_key_focus()
@@ -402,18 +402,18 @@ TabBar = setmetatable(
                 end
             }
             
-            env.old_update = env.update
+            old_update = update
             
-            env.panes_obj = Widget_Group{name = "Panes",clip_to_size = true}
-            env.pane_w = 400
-            env.pane_h = 300
-            env.tab_w = 200
-            env.tab_h = 50
-            env.tab_images   = nil 
-            env.tab_style    = nil
-            env.tab_location = "top"
-            env.resize_tabs = true
-            env.new_selection = 1
+            panes_obj = Widget_Group{name = "Panes",clip_to_size = true}
+            pane_w = 400
+            pane_h = 300
+            tab_w = 200
+            tab_h = 50
+            tab_images   = nil 
+            tab_style    = nil
+            tab_location = "top"
+            resize_tabs = true
+            new_selection = 1
             
             local function make_tab_interface(tb)
                 --prevents the user from getting/setting any of the other fields of the ToggleButtons
@@ -422,7 +422,7 @@ TabBar = setmetatable(
                     contents = function(v) 
                         tb.contents:unparent()
                         tb.contents = v
-                        env.panes_obj:add(v)
+                        panes_obj:add(v)
                         if not tb.selected then v:hide() end
                     end,
                 }
@@ -439,9 +439,9 @@ TabBar = setmetatable(
                     end,
                 })
             end
-            env.tab_to_interface_map = {}
+            tab_to_interface_map = {}
             
-            env.tabs_lm = ListManager:declare{
+            tabs_lm = ListManager:declare{
                 name = "Tabs ListManager",
                 spacing = 0,
                 vertical_alignment = "top",
@@ -472,77 +472,77 @@ TabBar = setmetatable(
                     style.name = style
                     style.border.colors.selection = style.border.colors.selection or "ffffff"
                     local clones
-                    if env.tab_images then
+                    if tab_images then
                         clones = {}
                         
-                        for k,v in pairs(env.tab_images) do
+                        for k,v in pairs(tab_images) do
                             clones[k] = Clone{source=v}
                         end
                     end
-                    local sel = env.rbg.selected
+                    local sel = rbg.selected
                     obj = ToggleButton{
                         label  = obj.label,
-                        w      = env.tab_w,
-                        h      = env.tab_h,
+                        w      = tab_w,
+                        h      = tab_h,
                         style  = style,
-                        group  = env.rbg,
+                        group  = rbg,
                         images = clones,
                         reactive = true,
-                        create_canvas = env.tab_location == "top" and top_tabs or side_tabs,
+                        create_canvas = tab_location == "top" and top_tabs or side_tabs,
                         --images = tab_images,
                     }
                     obj.contents = pane
                     mesg("TABBAR",0,"button made")
                     ---[[
-                    if env.tab_style then
-                        obj.style:set(env.tab_style.attributes) -- causes extra redraw
+                    if tab_style then
+                        obj.style:set(tab_style.attributes) -- causes extra redraw
                     end
                     --]]
                     
-                    env.tab_to_interface_map[obj] = make_tab_interface(obj)
+                    tab_to_interface_map[obj] = make_tab_interface(obj)
                     --table.insert(tabs,obj)
                     --obj.pane = pane
                     --table.insert(panes,pane)
                     obj.contents:hide()
-                    env.panes_obj:add(obj.contents)
-                    obj.contents.w = env.pane_w
-                    obj.contents.h = env.pane_h
+                    panes_obj:add(obj.contents)
+                    obj.contents.w = pane_w
+                    obj.contents.h = pane_h
                     
-                    if sel then env.new_selection = sel end
+                    if sel then new_selection = sel end
                     return obj
                 end
             }
             
-            env.tabs_interface = setmetatable({},{
+            tabs_interface = setmetatable({},{
                 __index = function(_,k)
-                    local v = env.tabs_lm.cells[k]
+                    local v = tabs_lm.cells[k]
                     return type(k) == "number" and v and 
-                        env.tab_to_interface_map[v] or 
+                        tab_to_interface_map[v] or 
                         v
                 end,
                 --pass through to the ListManager
                 __newindex = function(_,k,v)
-                    env.tabs_lm = v
+                    tabs_lm = v
                 end,
             })
             
-            env.tabs_lm_env = get_env(env.tabs_lm)
+            tabs_lm__ENV = get_env(tabs_lm)
             
             --TODO roll into a single set
-            env.tab_pane = ArrowPane{name = "ArrowPane",style = false,arrow_move_by = tab_w}
-            env.tab_pane.style.arrow.offset = -env.tab_pane.style.arrow.size
-            env.tab_pane.style.border.colors.default = "00000000"
-            env.tab_pane.style.fill_colors.default   = "00000000"
-            env.tab_pane:add(env.tabs_lm)
+            tab_pane = ArrowPane{name = "ArrowPane",style = false,arrow_move_by = tab_w}
+            tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
+            tab_pane.style.border.colors.default = "00000000"
+            tab_pane.style.fill_colors.default   = "00000000"
+            tab_pane:add(tabs_lm)
             
-            instance.cells = {env.tab_pane,env.panes_obj}
+            instance.cells = {tab_pane,panes_obj}
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -551,21 +551,21 @@ TabBar = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            dumptable(env.get_children(instance))
-            return instance, env
+            dumptable(get_children(instance))
+            return instance, _ENV
             
         end
     }

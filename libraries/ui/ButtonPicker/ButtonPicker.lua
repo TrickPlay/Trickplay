@@ -63,7 +63,7 @@ ButtonPicker = setmetatable(
         },
         public = {
             properties = {
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self)
                         local t = oldf(self)
                         
@@ -84,8 +84,8 @@ ButtonPicker = setmetatable(
                         t.orientation = instance.orientation
                         t.items = {}
                         
-                        for i = 1,env.list_entries.length do
-                            t.items[i] = env.list_entries[i].text
+                        for i = 1,list_entries.length do
+                            t.items[i] = list_entries[i].text
                         end
                         
                         t.type = "ButtonPicker"
@@ -93,53 +93,53 @@ ButtonPicker = setmetatable(
                         return t
                     end
                 end,
-                enabled = function(instance,env)
+                enabled = function(instance,_ENV)
                     return nil,
                     function(oldf,self,v)
-                        env.next_arrow.enabled = instance.enabled
-                        env.prev_arrow.enabled = instance.enabled
+                        next_arrow.enabled = instance.enabled
+                        prev_arrow.enabled = instance.enabled
                     end
                 end,
-                animate_duration = function(instance,env)
-                    return function(oldf) return env.update_tl.duration     end,
-                    function(oldf,self,v)        env.update_tl.duration = v end
+                animate_duration = function(instance,_ENV)
+                    return function(oldf) return update_tl.duration     end,
+                    function(oldf,self,v)        update_tl.duration = v end
                 end,
-                window_w = function(instance,env)
-                    return function(oldf) return env.window_w end,
+                window_w = function(instance,_ENV)
+                    return function(oldf) return window_w end,
                     function(oldf,self,v) 
-                        env.window_w = v 
-                        env.new_window_sz = true
+                        window_w = v 
+                        new_window_sz = true
                     end
                 end,
-                window_h = function(instance,env)
-                    return function(oldf) return env.window_h end,
+                window_h = function(instance,_ENV)
+                    return function(oldf) return window_h end,
                     function(oldf,self,v) 
-                        env.window_h = v 
-                        env.new_window_sz = true
+                        window_h = v 
+                        new_window_sz = true
                     end
                 end,
-                items = function(instance,env)
-                    return function(oldf) return env.list_entries end,
+                items = function(instance,_ENV)
+                    return function(oldf) return list_entries end,
                     function(oldf,self,v) 
                         
                         if type(v) ~= "table" then error("Expected table. Received :"..type(v),2) end
                         
                         if #v == 0 then error("Table is empty.",2) end
                         
-                        env.list_entries:set(v)
+                        list_entries:set(v)
                         
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function(oldf) return "ButtonPicker" end
                 end,
-                orientation = function(instance,env)
-                    return function(oldf) return env.orientation end,
+                orientation = function(instance,_ENV)
+                    return function(oldf) return orientation end,
                     function(oldf,self,v) 
             
-                        if env.orientation == v then return end
+                        if orientation == v then return end
                         
-                        env.orientation = v
+                        orientation = v
                         
                     end
                 end,
@@ -149,24 +149,24 @@ ButtonPicker = setmetatable(
             },
         },
         private = {
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
                     
-                    if env.restyle_label then
-                        env.restyle_label = false
-                        for i,item in env.list_entries.pairs() do
+                    if restyle_label then
+                        restyle_label = false
+                        for i,item in list_entries.pairs() do
                             item:set(   instance.style.text:get_table()   )
                             item.color = instance.style.text.colors.default
                         end
                     end
-                    if env.recolor_arrows then
-                        env.recolor_arrows = false
-                        env.prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
-                        env.next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+                    if recolor_arrows then
+                        recolor_arrows = false
+                        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+                        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
                     end
-                    if env.restyle_arrows then
-                        env.restyle_arrows = false
-                        env.prev_arrow:set{
+                    if restyle_arrows then
+                        restyle_arrows = false
+                        prev_arrow:set{
                             w = instance.style.arrow.size,
                             h = instance.style.arrow.size,
                             anchor_point = {
@@ -174,7 +174,7 @@ ButtonPicker = setmetatable(
                                 instance.style.arrow.size/2
                             },
                         }
-                        env.next_arrow:set{
+                        next_arrow:set{
                             w = instance.style.arrow.size,
                             h = instance.style.arrow.size,
                             anchor_point = {
@@ -184,94 +184,94 @@ ButtonPicker = setmetatable(
                         }
                         instance.spacing = instance.style.arrow.offset
                     end
-                    if env.flag_for_redraw then
-                        env.flag_for_redraw = false
-                        env.redo_fg()
-                        env.redo_bg()
+                    if flag_for_redraw then
+                        flag_for_redraw = false
+                        redo_fg()
+                        redo_bg()
                     end
-                    if env.new_window_sz then
-                        env.new_window_sz = false
-                        env.redo_bg()
-                        env.redo_fg()
-                        env.window.w = env.window_w
-                        env.window.h = env.window_h
-                        env.window.clip = {
+                    if new_window_sz then
+                        new_window_sz = false
+                        redo_bg()
+                        redo_fg()
+                        window.w = window_w
+                        window.h = window_h
+                        window.clip = {
                             0,-- -window_w/2,
                             0,-- -window_h/2,
-                            env.window_w,
-                            env.window_h,
+                            window_w,
+                            window_h,
                         }
-                        if env.next_item then
-                            env.next_item.x = env.window_w/2
-                            env.next_item.y = env.window_h/2
+                        if next_item then
+                            next_item.x = window_w/2
+                            next_item.y = window_h/2
                         end
                         --print("s
                     end
-                    if env.new_orientation then
-                        env.new_orientation = false
-                        if env.undo_prev_function then env.undo_prev_function() end
-                        if env.undo_next_function then env.undo_next_function() end
+                    if new_orientation then
+                        new_orientation = false
+                        if undo_prev_function then undo_prev_function() end
+                        if undo_next_function then undo_next_function() end
                         
-                        if env.orientation == "horizontal" then
-                            env.prev_arrow:set{z_rotation={  0,0,0}}
-                            env.next_arrow:set{z_rotation={180,0,0}}
-                            env.undo_prev_function = instance:add_key_handler(keys.Left, env.prev_i)
-                            env.undo_next_function = instance:add_key_handler(keys.Right,env.next_i)
-                        elseif env.orientation == "vertical" then
-                            env.prev_arrow:set{z_rotation={ 90,0,0}}
-                            env.next_arrow:set{z_rotation={270,0,0}}
-                            env.undo_prev_function = instance:add_key_handler(keys.Up,  env.prev_i)
-                            env.undo_next_function = instance:add_key_handler(keys.Down,env.next_i)
+                        if orientation == "horizontal" then
+                            prev_arrow:set{z_rotation={  0,0,0}}
+                            next_arrow:set{z_rotation={180,0,0}}
+                            undo_prev_function = instance:add_key_handler(keys.Left, prev_i)
+                            undo_next_function = instance:add_key_handler(keys.Right,next_i)
+                        elseif orientation == "vertical" then
+                            prev_arrow:set{z_rotation={ 90,0,0}}
+                            next_arrow:set{z_rotation={270,0,0}}
+                            undo_prev_function = instance:add_key_handler(keys.Up,  prev_i)
+                            undo_next_function = instance:add_key_handler(keys.Down,next_i)
                         else
                             
-                            error("ButtonPicker.orientation expects 'horizontal' or 'vertical as its value. Received: "..env.orientation,2)
+                            error("ButtonPicker.orientation expects 'horizontal' or 'vertical as its value. Received: "..orientation,2)
                             
                         end
-                        instance.direction = env.orientation
+                        instance.direction = orientation
                     end
-                    env.lm_update()
+                    lm_update()
                 end
             end,
-            prev_i = function(instance,env)
+            prev_i = function(instance,_ENV)
                 return function() 
-                    if env.list_entries.length <= 1 then return end
-                    if not env.animating then
-                        env.animating  = "BACK"
-                        env.index_direction = -1
+                    if list_entries.length <= 1 then return end
+                    if not animating then
+                        animating  = "BACK"
+                        index_direction = -1
                         
-                        env.update_tl:start()
+                        update_tl:start()
                         
                     else
-                        env.again = "BACK"
+                        again = "BACK"
                     end
                 end
             end,
-            next_i = function(instance,env)
+            next_i = function(instance,_ENV)
                 return function() 
-                    if env.list_entries.length <= 1 then return end
-                    if not env.animating then
-                        env.animating = "FORWARD"
-                        env.index_direction = 1
+                    if list_entries.length <= 1 then return end
+                    if not animating then
+                        animating = "FORWARD"
+                        index_direction = 1
                         
-                        env.update_tl:start()
+                        update_tl:start()
                     else
-                        env.again = "FORWARD"
+                        again = "FORWARD"
                     end
                 end
             end,
-            redo_bg = function(instance,env)
+            redo_bg = function(instance,_ENV)
                 return function() 
-                    if env.bg and env.bg.parent then env.bg:unparent() end
-                    env.bg = create_bg(instance)
-                    env.window:add(env.bg)
-                    env.bg:lower_to_bottom()
+                    if bg and bg.parent then bg:unparent() end
+                    bg = create_bg(instance)
+                    window:add(bg)
+                    bg:lower_to_bottom()
                 end
             end,
-            redo_fg = function(instance,env)
+            redo_fg = function(instance,_ENV)
                 return function() 
-                    if env.fg and env.fg.parent then env.fg:unparent() end
-                    env.fg = create_fg(instance)
-                    env.window:add(env.fg)
+                    if fg and fg.parent then fg:unparent() end
+                    fg = create_fg(instance)
+                    window:add(fg)
                 end
             end,
         },
@@ -296,22 +296,22 @@ ButtonPicker = setmetatable(
                 create_canvas = create_arrow,
                 reactive = true,
             }
-            local instance, env  = ListManager:declare{
+            local instance, _ENV  = ListManager:declare{
                 cells = {
                     prev_arrow,
                     window,
                     next_arrow
                 },
             }
-            env.orientation = "horizontal"
-            env.lm_update = env.update
-            env.flag_for_redraw = true
-            env.restyle_arrows  = true
-            env.recolor_arrows  = true
-            env.restyle_label   = true
-            env.new_orientation = true
-            env.new_window_sz   = true
-            env.style_flags = {
+            orientation = "horizontal"
+            lm_update = update
+            flag_for_redraw = true
+            restyle_arrows  = true
+            recolor_arrows  = true
+            restyle_label   = true
+            new_orientation = true
+            new_window_sz   = true
+            style_flags = {
                 border = "flag_for_redraw",
                 arrow = {
                     "restyle_arrows",
@@ -320,25 +320,26 @@ ButtonPicker = setmetatable(
                 text = "restyle_label",
                 fill_colors = "flag_for_redraw"
             }
-            env.next_arrow = next_arrow
-            env.prev_arrow = prev_arrow
-            env.text       = text
-            env.window     = window
-            env.window_w   = 200
-            env.window_h   = 70
+            --need these to be global
+            _ENV.next_arrow = next_arrow
+            _ENV.prev_arrow = prev_arrow
+            _ENV.text       = text
+            _ENV.window     = window
+            window_w   = 200
+            window_h   = 70
             
-            env.bg = false
-            env.fg = false
+            bg = false
+            fg = false
             
-            env.list_entries = false
-            env.animating = false
-            env.again = false
-            env.next_item = false
-            env.prev_item = false
-            env.index_direction = false
-            env.curr_index = 1
+            list_entries = false
+            animating = false
+            again = false
+            next_item = false
+            prev_item = false
+            index_direction = false
+            curr_index = 1
             print("creating array")
-            env.list_entries = ArrayManager{
+            list_entries = ArrayManager{
                 
                 node_constructor=function(obj,i)
                     --TODO: fix this to accept any UIElement
@@ -368,89 +369,89 @@ ButtonPicker = setmetatable(
                 end,
                 on_entries_changed = function(self)
                     
-                    if env.animating then
+                    if animating then
                         
-                        self[env.wrap_i(env.curr_index+env.index_direction)] = env.prev_item.position
-                        self[env.curr_index].position  = env.next_item.position
+                        self[wrap_i(curr_index+index_direction)] = prev_item.position
+                        self[curr_index].position  = next_item.position
                         
-                    elseif self[env.curr_index] ~= nil and env.next_item ~= self[env.curr_index] then
+                    elseif self[curr_index] ~= nil and next_item ~= self[curr_index] then
                         print("got it")
-                        if env.next_item then env.next_item:unparent() end
-                        env.next_item = self[env.curr_index]
-                        text:add(env.next_item)
-                        env.next_item.anchor_point = {env.next_item.w/2,env.next_item.h/2}
-                        env.next_item.x = env.window_w/2
-                        env.next_item.y = env.window_h/2
+                        if next_item then next_item:unparent() end
+                        next_item = self[curr_index]
+                        text:add(next_item)
+                        next_item.anchor_point = {next_item.w/2,next_item.h/2}
+                        next_item.x = window_w/2
+                        next_item.y = window_h/2
                         
                     end
                     
                 end
             }
             print("done")
-            env.next_i = false
-            env.prev_i = false
+            next_i = false
+            prev_i = false
             
-            env.path = Interval(0,0)
+            path = Interval(0,0)
             
-            env.animate_x = function(tl,ms,p) env.text.x = env.path:get_value(p) end
-            env.animate_y = function(tl,ms,p) env.text.y = env.path:get_value(p) end
-            env.wrap_i    = function(i) return (i - 1) % (env.list_entries.length) + 1    end
+            animate_x = function(tl,ms,p) text.x = path:get_value(p) end
+            animate_y = function(tl,ms,p) text.y = path:get_value(p) end
+            wrap_i    = function(i) return (i - 1) % (list_entries.length) + 1    end
             
-            env.update_tl = Timeline{
+            update_tl = Timeline{
                 on_started = function(tl)
-                    env.prev_item  = env.list_entries[env.curr_index]
-                    env.curr_index = env.wrap_i(env.curr_index + env.index_direction)
-                    env.next_item  = env.list_entries[env.curr_index]
+                    prev_item  = list_entries[curr_index]
+                    curr_index = wrap_i(curr_index + index_direction)
+                    next_item  = list_entries[curr_index]
                     
-                    env.text:add(env.next_item)
-                    env.next_item.anchor_point = {env.next_item.w/2,env.next_item.h/2}
-                    if env.orientation == "horizontal" then
+                    text:add(next_item)
+                    next_item.anchor_point = {next_item.w/2,next_item.h/2}
+                    if orientation == "horizontal" then
                         
-                        env.next_item.x = env.window_w/2-env.window_w*env.index_direction
-                        env.next_item.y = env.window_h/2
-                        env.path.to = env.window_w*env.index_direction
+                        next_item.x = window_w/2-window_w*index_direction
+                        next_item.y = window_h/2
+                        path.to = window_w*index_direction
                         
-                        tl.on_new_frame = env.animate_x
+                        tl.on_new_frame = animate_x
                         
-                    elseif env.orientation == "vertical" then
+                    elseif orientation == "vertical" then
                         
-                        env.next_item.x = env.window_w/2
-                        env.next_item.y = env.window_h/2-env.window_h*env.index_direction
+                        next_item.x = window_w/2
+                        next_item.y = window_h/2-window_h*index_direction
                         
-                        env.path.to = env.window_h*env.index_direction
+                        path.to = window_h*index_direction
                         
-                        tl.on_new_frame = env.animate_y
+                        tl.on_new_frame = animate_y
                         
                     else
                     end
                     
                 end,
                 on_completed = function()
-                    env.prev_item:unparent()
-                    env.text.x=0
-                    env.text.y=0
-                    env.next_item.x = env.window_w/2
-                    env.next_item.y = env.window_h/2
+                    prev_item:unparent()
+                    text.x=0
+                    text.y=0
+                    next_item.x = window_w/2
+                    next_item.y = window_h/2
                     
-                    env.animating = nil
+                    animating = nil
                     
-                    if env.again == "BACK" then
-                        env.prev_i()
+                    if again == "BACK" then
+                        prev_i()
                     elseif again == "FORWARD" then
-                        env.next_i()
+                        next_i()
                     end
-                    env.again = nil
+                    again = nil
                 end
             }
-            env.undo_prev_function = false
-            env.undo_next_function = false
+            undo_prev_function = false
+            undo_next_function = false
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
@@ -459,15 +460,15 @@ ButtonPicker = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
-            env.prev_arrow:add_mouse_handler("on_button_up",env.prev_i)
-            env.next_arrow:add_mouse_handler("on_button_up",env.next_i)
+            prev_arrow:add_mouse_handler("on_button_up",prev_i)
+            next_arrow:add_mouse_handler("on_button_up",next_i)
             --[[
             for _,f in pairs(self.subscriptions_all) do
                 instance:subscribe_to(nil,f(instance,env))
@@ -477,11 +478,11 @@ ButtonPicker = setmetatable(
             --env.subscribe_to_sub_styles()
             
             --instance.images = nil
-            env.updating = true
+            updating = true
             instance:set(parameters)
-            env.updating = false
+            updating = false
             
-            return instance, env
+            return instance, _ENV
             
         end
     }

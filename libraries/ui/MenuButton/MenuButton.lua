@@ -46,20 +46,20 @@ MenuButton = setmetatable(
         },
         public = {
             properties = {
-                popup_offset = function(instance,env)
+                popup_offset = function(instance,_ENV)
                     return function(oldf)  return   instance.vertical_spacing      end,
                     function(oldf,self,v)    instance.vertical_spacing = v end
                 end,
-                item_spacing = function(instance,env)
-                    return function(oldf)  return   env.popup.spacing      end,
-                    function(oldf,self,v)    env.popup.spacing = v end
+                item_spacing = function(instance,_ENV)
+                    return function(oldf)  return   popup.spacing      end,
+                    function(oldf,self,v)    popup.spacing = v end
                 end,
-                horizontal_alignment = function(instance,env)
+                horizontal_alignment = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v)  oldf(self,v)  env.popup.horizontal_alignment = v end
+                    function(oldf,self,v)  oldf(self,v)  popup.horizontal_alignment = v end
                 end,
-                items = function(instance,env)
-                    return function(oldf)  return   env.popup.cells      end,
+                items = function(instance,_ENV)
+                    return function(oldf)  return   popup.cells      end,
                     function(oldf,self,v) 
                         
                         if type(v) ~= "table" then error("Expected table. Received: ",2) end
@@ -81,29 +81,29 @@ MenuButton = setmetatable(
                             --items[i] = {item}
                         end
                         
-                        env.popup.cells = v
+                        popup.cells = v
                     end
                 end,
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function(oldf)  return   "MenuButton"      end
                 end,
-                direction = function(instance,env)
-                    return function(oldf)  return   env.direction      end,
+                direction = function(instance,_ENV)
+                    return function(oldf)  return   direction      end,
                     function(oldf,self,v)
                         if direction == v then return end
-                        env.new_direction = v
+                        new_direction = v
                     end
                 end,
-                focused = function(instance,env)
+                focused = function(instance,_ENV)
                     return nil,
                     function(oldf,self,v)
                         if not instance.enabled then return end
                         
-                        env.button.focused = instance.focused
+                        button.focused = instance.focused
                         
                     end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self)
                         local t = oldf(self)
                         
@@ -121,8 +121,8 @@ MenuButton = setmetatable(
                         
                         t.items = {}
                         
-                        for i = 1,env.popup.length do
-                            t.items[i] = env.popup.cells[i].attributes
+                        for i = 1,popup.length do
+                            t.items[i] = popup.cells[i].attributes
                         end
                         
                         t.direction = instance.direction
@@ -140,41 +140,41 @@ MenuButton = setmetatable(
             },
         },
         private = {
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 local possible_directions = {
-                    up    = { {env.popup},{env.button}},
-                    down  = {{env.button}, {env.popup}},
-                    left  = {{ env.popup,  env.button}},
-                    right = {{env.button,   env.popup}},
+                    up    = { {popup},{button}},
+                    down  = {{button}, {popup}},
+                    left  = {{ popup,  button}},
+                    right = {{button,   popup}},
                 }
                 return function()
                     
-                    if env.new_direction then
-                        env.direction = env.new_direction
-                        env.new_direction = false
+                    if new_direction then
+                        direction = new_direction
+                        new_direction = false
                         
                         instance.number_of_rows = 
-                                ((env.direction == "up"   or env.direction == "down")  and 2) or
-                                ((env.direction == "left" or env.direction == "right") and 1)
+                                ((direction == "up"   or direction == "down")  and 2) or
+                                ((direction == "left" or direction == "right") and 1)
                         instance.number_of_cols = 
-                                ((env.direction == "up"   or env.direction == "down")  and 1) or
-                                ((env.direction == "left" or env.direction == "right") and 2)
-                        instance.cells = possible_directions[env.direction]
+                                ((direction == "up"   or direction == "down")  and 1) or
+                                ((direction == "left" or direction == "right") and 2)
+                        instance.cells = possible_directions[direction]
                         
                         instance.focus_to_index = {
-                            env.direction == "up"   and 2 or 1,
-                            env.direction == "left" and 2 or 1
+                            direction == "up"   and 2 or 1,
+                            direction == "left" and 2 or 1
                         }
                         
                         print("here")
                     end
-                    if env.restyle_button then
-                        env.restyle_button = false
+                    if restyle_button then
+                        restyle_button = false
                         local t = instance.style.attributes
                         t.name = nil
-                        env.button.style:set(t)
+                        button.style:set(t)
                     end
-                    env.old_update()
+                    old_update()
                 end
             end
         },
@@ -183,8 +183,8 @@ MenuButton = setmetatable(
             parameters = parameters or {}
             
             
-            local instance, env = LayoutManager:declare()
-            env.button = ToggleButton{
+            local instance, _ENV = LayoutManager:declare()
+            button = ToggleButton{
                 create_canvas=create_canvas,
                 style = false,
                 w=300,
@@ -192,32 +192,32 @@ MenuButton = setmetatable(
                 selected = true
             }
             
-            env.popup = ListManager{focus_to_index=1}
-            env.style_flags = "restyle_button"
-            env.old_update = env.update
-            env.new_direction  = "down"
-            env.button:add_key_handler(   keys.OK, function() env.button:click()   end)
+            popup = ListManager{focus_to_index=1}
+            style_flags = "restyle_button"
+            old_update = update
+            new_direction  = "down"
+            button:add_key_handler(   keys.OK, function() button:click()   end)
             
-            env.old_on_pressed = env.button.on_pressed
+            old_on_pressed = button.on_pressed
             ---[[
-            function env.button:on_pressed()
+            function button:on_pressed()
                 
-                env.old_on_pressed(self)
+                old_on_pressed(self)
                 
-                env.popup[ env.popup.is_visible and "hide" or "show" ](env.popup)
+                popup[ popup.is_visible and "hide" or "show" ](popup)
                 
-                env.popup.enabled = env.popup.is_visible
+                popup.enabled = popup.is_visible
                 
             end
             --]]
             
             for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
+                _ENV[name] = f(instance,_ENV)
             end
             
             for name,f in pairs(self.public.properties) do
                 
-                getter, setter = f(instance,env)
+                getter, setter = f(instance,_ENV)
                 
                 override_property( instance, name, getter, setter )
                 
@@ -225,25 +225,25 @@ MenuButton = setmetatable(
             
             for name,f in pairs(self.public.functions) do
                 
-                override_function( instance, name, f(instance,env) )
+                override_function( instance, name, f(instance,_ENV) )
                 
             end
             
             for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
+                instance:subscribe_to(t,f(instance,_ENV))
             end
             --[[
             for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
+                instance:subscribe_to(nil,f(instance,_ENV))
             end
             --]]
             
-            env.updating = true
+            updating = true
             instance:set(parameters)
-            env.updating = false
+            updating = false
             
-            dumptable(env.get_children(instance))
-            return instance, env
+            dumptable(get_children(instance))
+            return instance, _ENV
             
         end
     }
