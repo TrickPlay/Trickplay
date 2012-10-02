@@ -187,7 +187,7 @@ class TrickplayEmulatorManager(QWidget):
 				                    self.inspector.screens[str(i)].append(str(j))
 				            else:
 				                self.inspector.currentScreenName = scrData[0][i] 
-				                self.inspector.old_screen_name = ""
+				                self.inspector.old_screen_name = "  "
 
 				        while self.inspector.ui.screenCombo.count() > 0 :
 				            curIdx = self.inspector.ui.screenCombo.currentIndex()

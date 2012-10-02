@@ -20,7 +20,7 @@
 
     bb = function ()
         _VE_.selectUIElement(13,false)
-        _VE_.focusSettingMode()
+        _VE_.focusSettingMode(keys.Up)
         --b1 = devtools:gid(34)
         --b2 = devtools:gid(8)
         --b1.neighbors.Right = b2
@@ -1297,17 +1297,9 @@ _VE_.deselectUIElement = function(gid, multiSel)
     shift = org_shift
 end 
 
---_VE_.focusSettingMode = function(bType)
-_VE_.focusSettingMode = function()
+_VE_.focusSettingMode = function(key)
     input_mode = hdr.S_FOCUS
-end 
-
-_VE_.focusSet = function()
-    screen_ui.n_selected_all()
-end 
-
-_VE_.focusReset = function()
-    screen_ui.n_selected_all()
+    focusKey = key
 end 
 
 local function styleUpdate()
@@ -1339,6 +1331,18 @@ end
     end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
+
+        if input_mode == hdr.S_FOCUS then 
+            local selObjName, selObjGid = screen_ui.getSelectedName()
+
+            blockReport = true
+            hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), nil) 
+            blockReport = false
+
+            print("focusSet2".."empty")
+            input_mode = hdr.S_SELECT
+            return true 
+        end
 
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
 
