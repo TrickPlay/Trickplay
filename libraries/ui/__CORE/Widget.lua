@@ -141,9 +141,14 @@ local function Widgetize(instance)
         if not instance.enabled then return end
         
         if key_functions[key] then
+            
+            local retval = false
+            
             for f,_ in pairs(key_functions[key]) do
-                f()
+                retval = f() or retval
             end
+            
+            return retval
         end
         
     end
@@ -152,24 +157,46 @@ local function Widgetize(instance)
     
     local neighbors_unsubscribe = {}
     local neighbors = {}
+    local opposite_keys = {
+        Left  = "Right",
+        Right = "Left",
+        Up    = "Down",
+        Down  = "Up",
+    }
     
     local external_neighbors = setmetatable(
         {},
         {
             __newindex = function(t,k,v)
                 
-                if neighbors[k] then
-                    neighbors_unsubscribe[k]()
+                if keys[k] == nil then error("'"..tostring(k).."' is an invalid key",2) end
+                
+                if neighbors[k]  then neighbors_unsubscribe[k]() end
+                
+                if type(v) == "userdata" and v.grab_key_focus then
+                    
+                    neighbors_unsubscribe[k] = instance:add_key_handler(
+                        
+                        keys[k],  function()   v:grab_key_focus()   end
+                    )
+                    
+                    neighbors[k] = v
+                    
+                    if opposite_keys[k] and v.neighbors[ opposite_keys[k] ] == nil then
+                        
+                        v.neighbors[ opposite_keys[k] ] = instance
+                        
+                    end
+                    
+                    instance:notify()
+                    
+                elseif v == nil then
+                    
+                    neighbors[k] = nil
+                    
+                    instance:notify()
+                    
                 end
-                
-                neighbors_unsubscribe[k] = instance:add_key_handler(
-                    
-                    k,
-                    
-                    function()   v:grab_key_focus()   end
-                )
-                
-                neighbors[k] = v
                 
             end,
             __index = function(t,k)
@@ -284,6 +311,14 @@ local function Widgetize(instance)
             for _,k in pairs(uielement_properties) do
                 
                 t[k] = self[k]
+                
+            end
+            
+            t.neighbors = {}
+            
+            for k,v in pairs(neighbors) do
+                
+                t.neighbors[k] = v.name
                 
             end
             
@@ -459,13 +494,13 @@ Widget = function(parameters)
     env.set_children  = getmetatable(instance).__setters__.children
     env.get_children  = getmetatable(instance).__getters__.children
     
-    override_function( instance, "add",           function() print(          "'add' method is removed") end )
-    override_function( instance, "remove",        function() print(       "'remove' method is removed") end )
-    override_function( instance, "clear",         function() print(        "'clear' method is removed") end )
-    override_function( instance, "foreach_child", function() print("'foreach_child' method is removed") end )
-    override_function( instance, "find_child",    function() print(   "'find_child' method is removed") end )
-    override_function( instance, "raise_child",   function() print(  "'raise_child' method is removed") end )
-    override_function( instance, "lower_child",   function() print(  "'lower_child' method is removed") end )
+    override_function( instance, "add",           function() print(pcall(error,          "'add' method is removed",3)) end )
+    override_function( instance, "remove",        function() print(pcall(error,       "'remove' method is removed",3)) end )
+    override_function( instance, "clear",         function() print(pcall(error,        "'clear' method is removed",3)) end )
+    override_function( instance, "foreach_child", function() print(pcall(error,"'foreach_child' method is removed",3)) end )
+    override_function( instance, "find_child",    function() print(pcall(error,   "'find_child' method is removed",3)) end )
+    override_function( instance, "raise_child",   function() print(pcall(error,  "'raise_child' method is removed",3)) end )
+    override_function( instance, "lower_child",   function() print(pcall(error,  "'lower_child' method is removed",3)) end )
     
 	override_property(
         instance,"children", 
@@ -480,6 +515,9 @@ Widget_Group = function(parameters)
     
     local instance =  Widgetize(  Group()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Group" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"children",
@@ -552,6 +590,9 @@ Widget_Rectangle = function(parameters)
     
     local instance = Widgetize(  Rectangle()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Rectangle" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -586,6 +627,9 @@ Widget_Text = function(parameters)
     
     local instance = Widgetize(  Text()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Text" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -617,6 +661,9 @@ Widget_Image = function(parameters)
     
     local instance = Widgetize(  Image()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Image" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -648,6 +695,9 @@ Widget_Clone = function(parameters)
     
     local instance = Widgetize(  Clone()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Clone" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",

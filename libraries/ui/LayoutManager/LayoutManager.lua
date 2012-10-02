@@ -448,6 +448,17 @@ end
 
 
 
+local next_neighbor
+
+next_neighbor = function(items,obj,dir)
+    --if the obj has a neighbor in the direction
+    return items[obj].neighbors[dir] and 
+        --if that neighbor is enabled, return it
+        (items[obj].neighbors[dir].enabled and items[obj].neighbors[dir] or 
+            --else return that neighbors neighbor
+            next_neighbor(items,items[obj].neighbors[dir],dir)
+        )
+end
 
 
 
@@ -592,13 +603,19 @@ ListManager = setmetatable(
                         dumptable(v)
                     end
                 end,
+                focus_to_index = function(instance,env)
+                    return function(oldf) return env.focus_to_index     end,
+                    function(oldf,self,v)   
+                        if type(v) ~= "number" then error("expected number. received "..type(v),2) end
+                        env.focus_to_index = v
+                    end
+                end,
                 widget_type = function(instance,env)
                     return function(oldf) return "ListManager" end
                 end,
-
                 attributes = function(instance,env)
                     return function(oldf,self)
-                    
+                        
                         local t = oldf(self)
             
                         t.style = nil
@@ -703,7 +720,7 @@ ListManager = setmetatable(
                             self[i].y =  (i-1) > 0 and (self[i-1].y + self[i-1].h + env.spacing) or 0
                         end
                     else
-                        error("Invalid direction: "..env.direction,2)
+                        error("Invalid direction: "..tostring(env.direction),2)
                     end
                     
                     local ap = {}
@@ -835,11 +852,22 @@ ListManager = setmetatable(
             
             local instance, env = Widget()
             
-            function instance:on_key_focus_in()    
-                if env.children_want_focus and env.focused_child then 
-                    dolater(function()
-                        env.focused_child:grab_key_focus() 
-                    end)
+            function instance:on_key_focus_in()   
+                if env.children_want_focus then
+                    if env.focus_to_index then
+                        
+                        local obj = env.cells[ env.focus_to_index ]
+                        
+                        dolater(
+                            obj.grab_key_focus,
+                            obj
+                        )
+                    elseif env.focused_child then 
+                        dolater(
+                            env.focused_child.grab_key_focus,
+                            env.focused_child
+                        )
+                    end
                 end
                 
             end 
@@ -879,33 +907,40 @@ ListManager = setmetatable(
                     
                     
                     env.add(instance,obj)
-                    
-                    
+                    local n
                     env.items[obj] = {
                         neighbors = { },
                         key_functions = {
                             up    = obj:add_key_handler(keys.Up,   function() 
-                                if  env.items[obj].neighbors.up then 
-                                    env.items[obj].neighbors.up:grab_key_focus()
-                                    env.focused_child = env.items[obj].neighbors.up 
+                                n = next_neighbor(env.items,obj,"up")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
                                 end 
                             end),
                             down  = obj:add_key_handler(keys.Down, function() 
-                                if  env.items[obj].neighbors.down then 
-                                    env.items[obj].neighbors.down:grab_key_focus() 
-                                    env.focused_child = env.items[obj].neighbors.down
+                                n = next_neighbor(env.items,obj,"down")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
                                 end 
                             end),
                             left  = obj:add_key_handler(keys.Left, function() 
-                                if  env.items[obj].neighbors.left then 
-                                    env.items[obj].neighbors.left:grab_key_focus() 
-                                    env.focused_child = env.items[obj].neighbors.left
+                                n = next_neighbor(env.items,obj,"left")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
                                 end 
                             end),
                             right = obj:add_key_handler(keys.Right,function() 
-                                if  env.items[obj].neighbors.right then 
-                                    env.items[obj].neighbors.right:grab_key_focus() 
-                                    env.focused_child = env.items[obj].neighbors.right
+                                n = next_neighbor(env.items,obj,"right")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
                                 end 
                             end),
                         }
@@ -1112,7 +1147,7 @@ LayoutManager = setmetatable(
                     return function(oldf) return env.cell_h     end,
                     function(oldf,self,v) 
                         env.cell_h = v 
-                        env.for_each(env.cells,function(cell) cell.h = v print(cell.h) end)
+                        env.for_each(env.cells,function(cell) cell.h = v end)
                         env.find_col_widths    = true
                         env.find_col_heights   = true
                         env.reposition         = true
@@ -1157,11 +1192,18 @@ LayoutManager = setmetatable(
                         end
                     end
                 end,
+                focus_to_index = function(instance,env)
+                    return function(oldf) return env.focus_to_index     end,
+                    function(oldf,self,v)   
+                        if type(v) ~= "table" then error("expected table. received "..type(v),2) end
+                        env.focus_to_index = {v[1],v[2]}
+                    end
+                end,
                 cells = function(instance,env)
                     return function(oldf) return env.cells     end,
                     function(oldf,self,v)   
                         env.new_cells = v  
-                        print("LayoutManager.cells set")
+                        mesg("LayoutManager",0,"LayoutManager.cells = ",v)
                         dumptable(v)
                         --print("dim",env.cells.number_of_rows,env.cells.number_of_cols)
                     end
@@ -1219,7 +1261,7 @@ LayoutManager = setmetatable(
                                 break
                             end
                         end
-                        return r,c
+                        return (r < 1 and 1 or r),(c < 1 and 1 or c)
                     end
                 end,
                 r_c_from_abs_x_y = function(instance,env)
@@ -1288,7 +1330,7 @@ LayoutManager = setmetatable(
             end,
             position_cells = function(instance,env)
                 return function(...)
-                    print(env.cells)
+                    mesg("LayoutManager",0,"LayoutManager:position_cells()")
                     if env.cell_w then
                         for i = 1, env.cells.number_of_rows do
                             for j = 1, env.cells.number_of_cols do
@@ -1377,6 +1419,11 @@ LayoutManager = setmetatable(
                         end
                         
                         if env.placeholder then env.placeholder:unparent() end
+                        env.find_col_widths = true
+                        env.find_col_heights = true
+                        env.reposition = true
+                        env.find_width = true
+                        env.find_height = true
                         
                         env.placeholder = v 
                     end
@@ -1385,8 +1432,8 @@ LayoutManager = setmetatable(
                         --print(instance.number_of_cols)
                         --dumptable(env.new_cells)
                         env.cells:set(env.new_cells)
-                        focused_child = env.cells[1][1] 
-                        focused_child:grab_key_focus()
+                        env.focused_child = env.cells[1][1] 
+                        --env.focused_child:grab_key_focus()
                         env.find_col_widths = true
                         env.find_col_heights = true
                         env.reposition = true
@@ -1416,13 +1463,11 @@ LayoutManager = setmetatable(
                         instance.w = env.w
                     end
                     if  env.find_height then
-                        print("here")
                         env.find_height = false
                         env.h = 0
                         env.for_each(env.cells,env.find_h) 
                         instance.h = env.h
                     end
-                    print("SZ",instance.w,instance.h)
                     if  env.reassign_neighbors then
                         env.reassign_neighbors = false
                         env.for_each(env.cells,env.assign_neighbors) 
@@ -1447,10 +1492,23 @@ LayoutManager = setmetatable(
             instance.h = 0
             
             function instance:on_key_focus_in()    
-                if children_want_focus and env.focused_child then 
-                    dolater(function()
-                        env.focused_child:grab_key_focus() 
-                    end)
+                if env.children_want_focus then
+                    if env.focus_to_index then
+                        
+                        local obj = env.cells[
+                            env.focus_to_index[1] ][
+                            env.focus_to_index[2] ]
+                        
+                        dolater(
+                            obj.grab_key_focus,
+                            obj
+                        )
+                    elseif env.focused_child then 
+                        dolater(
+                            env.focused_child.grab_key_focus,
+                            env.focused_child
+                        )
+                    end
                 end
                 
             end 
@@ -1461,17 +1519,21 @@ LayoutManager = setmetatable(
             env.cells = GridManager{  
                 
                 node_constructor=function(obj)
-                    print("NEW NODE", obj)
+                    mesg("LayoutManager",0,"LayoutManager new cell ",obj)
                     if env.node_constructor then
                         
                         obj = env.node_constructor(obj)
                         
                     else -- default node_constructor
                         
-                        if obj == nil then  
+                        if obj == nil or obj == false then  
                             
                             obj = Widget_Clone{source=env.placeholder}
                             env.placeholders[obj] = true
+                            
+                        elseif type(obj) == "table" and obj.type then 
+                            
+                            obj = _G[obj.type](obj)
                             
                         elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                             
@@ -1482,11 +1544,46 @@ LayoutManager = setmetatable(
                     
                     if env.cell_w then obj.w = env.cell_w end
                     if env.cell_h then obj.h = env.cell_h end
-                    
+                    local n
                     env.add(instance,obj)
-                    print(#env.get_children(instance))
+                    
                     env.items[obj] = {
                         neighbors = { },
+                        key_functions = {
+                            up    = obj:add_key_handler(keys.Up,   function() 
+                                n = next_neighbor(env.items,obj,"up")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
+                                end 
+                            end),
+                            down  = obj:add_key_handler(keys.Down, function() 
+                                n = next_neighbor(env.items,obj,"down")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
+                                end 
+                            end),
+                            left  = obj:add_key_handler(keys.Left, function() 
+                                n = next_neighbor(env.items,obj,"left")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
+                                end 
+                            end),
+                            right = obj:add_key_handler(keys.Right,function() 
+                                n = next_neighbor(env.items,obj,"right")
+                                if  n then 
+                                    n:grab_key_focus()
+                                    env.focused_child = n 
+                                    return true
+                                end 
+                            end),
+                        }
+                        --[[
                         key_functions = {
                             up    = obj:add_key_handler(keys.Up,   function() 
                                 if  env.items[obj].neighbors.up then 
@@ -1513,6 +1610,7 @@ LayoutManager = setmetatable(
                                 end 
                             end),
                         }
+                        --]]
                     }
                     if obj.subscribe_to then
                         obj:subscribe_to(
@@ -1557,7 +1655,7 @@ LayoutManager = setmetatable(
                     env.find_height = true
                     env.reassign_neighbors = true
                     if not env.is_setting then
-                        print("call")
+                        
                         env.on_entries_changed(self)
                         env.call_update()
                         
@@ -1593,7 +1691,6 @@ LayoutManager = setmetatable(
                     --]=]
                 end
             }
-            print("wut")
             env.new_cells = false
             env.w = 0
             env.h = 0

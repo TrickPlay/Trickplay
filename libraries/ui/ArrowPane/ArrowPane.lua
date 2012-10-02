@@ -1,13 +1,13 @@
 ARROWPANE = true
 
 local create_arrow = function(self,state)
+    mesg("ArrowPane",0,"ArrowPane:create_arrow()",self.gid,state)
 	local c = Canvas(self.w,self.h)
 	
     c:move_to(0,   c.h/2)
     c:line_to(c.w,     0)
     c:line_to(c.w,   c.h)
     c:line_to(0,   c.h/2)
-    print("sssss")
 	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
 	
 	return c:Image()
@@ -75,7 +75,6 @@ ArrowPane = setmetatable(
                 w = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        print("w",v)
                         env.new_w  = true
                         oldf(self,v)
                     end
@@ -83,7 +82,6 @@ ArrowPane = setmetatable(
                 width = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        print("width",v)
                         env.new_w  = true
                         oldf(self,v)
                     end
@@ -91,9 +89,6 @@ ArrowPane = setmetatable(
                 h = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        if v == 20 then
-                            print("h",v)
-                        end
                         env.new_h  = true
                         oldf(self,v)
                     end
@@ -101,7 +96,6 @@ ArrowPane = setmetatable(
                 height = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        print("height",v)
                         env.new_h  = true
                         oldf(self,v)
                     end
@@ -109,7 +103,6 @@ ArrowPane = setmetatable(
                 size = function(instance,env)
                     return nil,
                     function(oldf,self,v) 
-                        print("size",v[1],v[2])
                         env.new_w  = true
                         env.new_h  = true
                         oldf(self,v)
@@ -161,7 +154,6 @@ ArrowPane = setmetatable(
                 attributes = function(instance,env)
                     return function(oldf,self)
                         if self == nil then error("no",3) end
-                        print(self)
                         local t = oldf(self)
 						
                         t.number_of_cols       = nil
@@ -280,7 +272,6 @@ ArrowPane = setmetatable(
                         create_canvas = create_arrow,
                         on_released = function() env.pane.virtual_x = env.pane.virtual_x - env.move_by end,
                     }
-                    print(env.left.w,instance.style.arrow.size)
                     env.right:set{ 
                         name = "Right Button",
                         w = instance.style.arrow.size,
@@ -299,7 +290,7 @@ ArrowPane = setmetatable(
                     
                     --redefine function
                     env.style_buttons = function()
-                        print("\n\n\nRESTYLE BUTTONS\n\n\n")
+                        mesg("ArrowPane",0,"ArrowPane Restyling Buttons")
                         for _,arrow in pairs(env.arrows) do
                             arrow:set{
                                 w = instance.style.arrow.size,
@@ -316,6 +307,7 @@ ArrowPane = setmetatable(
             end,
             update = function(instance,env)
                 return function()
+                    mesg("ArrowPane",0,"ArrowPane:update() called")
                     if env.redraw_buttons then
                         env.redraw_buttons = false
                         env.style_buttons()
@@ -337,7 +329,6 @@ ArrowPane = setmetatable(
                     end
                     env.lm_update()
                     
-                    print("before instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
                     if  env.new_w then
                         env.new_w = false
                         
@@ -379,7 +370,6 @@ ArrowPane = setmetatable(
                             end
                         end
                     end
-                    print("after instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
                     
                 end
             end,
@@ -414,7 +404,6 @@ ArrowPane = setmetatable(
                 },
                 fill_colors = "redraw_pane"
             }
-            print("way before instance.sz",instance.w,instance.h,"env.sz",env.w,env.h)
             local getter, setter
             
             env.pane = pane

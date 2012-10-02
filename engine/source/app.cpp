@@ -1714,7 +1714,7 @@ void App::animate_in()
 
 //-----------------------------------------------------------------------------
 
-static void animate_out_completed( ClutterAnimation * , ClutterActor * actor )
+static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor )
 {
     ClutterActor * parent = clutter_actor_get_parent( actor );
 
@@ -1722,6 +1722,12 @@ static void animate_out_completed( ClutterAnimation * , ClutterActor * actor )
     {
         clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
     }
+   // Something is holding an extra ref.  We'll release it here, but this is wrong
+   // We cannot find where the extra ref is being taken; our hope is de-reffing it
+   // will one day cause a crash that we can then track down!
+   g_object_unref( G_OBJECT ( actor ) );
+   g_object_unref( G_OBJECT ( actor ) );
+   if(anim) g_object_unref( G_OBJECT ( anim ) );
 }
 
 void App::animate_out()
@@ -1738,16 +1744,15 @@ void App::animate_out()
         return;
     }
 
+    // So we can hold on to it until we are done
+    g_object_ref( G_OBJECT( screen ) );
+
     if ( ! context->get_bool( TP_APP_ANIMATIONS_ENABLED , true ) )
     {
         animate_out_completed( 0 , screen );
     }
     else
     {
-        // So we can hold on to it until we are done
-
-        g_object_ref( G_OBJECT( screen ) );
-
         g_idle_add_full( G_PRIORITY_HIGH, animate_out_callback, screen, NULL );
     }
 }
@@ -1796,9 +1801,9 @@ gboolean App::animate_out_callback( gpointer s )
         ClutterTimeline *timeline = clutter_animator_start(animator);
 
         g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
+    } else {
+	g_object_unref( G_OBJECT( screen ) );
     }
-
-    g_object_unref( G_OBJECT( screen ) );
 
     return FALSE;
 }
