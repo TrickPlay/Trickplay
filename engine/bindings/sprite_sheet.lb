@@ -289,7 +289,8 @@ void download_map_callback( const Network::Response & response , gpointer me )
     }
 
     char * contents;
-    contents = strdup( (char*) g_byte_array_append( response.body, '\0' , 1 )->data );
+    const unsigned char null = '\0';
+    contents = strdup( (char*) g_byte_array_append( response.body, &null , 1 )->data );
 
     JSON::Array * sprite_data;
     const char * image_src;
