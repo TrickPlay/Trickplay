@@ -74,10 +74,15 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_button_down",function(self, x , y , button, num_clicks, m)
 
+        if input_mode == hdr.S_FOCUS then 
+		    screen_ui.selected(uiInstance) 
+            --print("focusSet2"..uiInstance.name)
+            return true 
+        end
+
 		if m and m.control then control = true else control = false end 
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
-        --kkk
         --uiInstance:grab_pointer()
 
         
@@ -176,6 +181,12 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)
         
+        if input_mode == hdr.S_FOCUS then 
+		    screen_ui.n_selected(uiInstance) 
+            print("focusSet2"..uiInstance.name)
+            input_mode = hdr.S_SELECT
+            return true 
+        end
 		if m  and m.control then control = true else control = false end 
 
 		if screen:find_child("multi_select_border") then
@@ -439,6 +450,7 @@ end
 function util.create_on_line_down_f(v)
 
         function v:on_button_down(x,y,button,num_clicks)
+
             if selected_guideline ~= nil or guideline_inspector_on == true then 
                 return true 
             end 

@@ -10,7 +10,7 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Widget_LIB_TEST/screens")
+        _VE_.openFile("/home/hjkim/HJ/ve2-friday/TEST_DIR/TR.DD/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
@@ -19,10 +19,12 @@
     end 
 
     bb = function ()
-        b1 = devtools:gid(34)
-        b2 = devtools:gid(8)
-        b1.neighbors.Right = b2
-        b1:grab_key_focus()
+        _VE_.selectUIElement(13,false)
+        _VE_.focusSettingMode()
+        --b1 = devtools:gid(34)
+        --b2 = devtools:gid(8)
+        --b1.neighbors.Right = b2
+        --b1:grab_key_focus()
         --_VE_.setUIInfo(10,'focused',true)
         --_VE_.contentMove(31,9,nil,nil,true,10)
         --_VE_.contentMove(32,9,nil,nil,true,10)
@@ -1295,11 +1297,24 @@ _VE_.deselectUIElement = function(gid, multiSel)
     shift = org_shift
 end 
 
-    local function styleUpdate()
-        if blockReport ~= true then
-            _VE_.refresh()
-        end 
+--_VE_.focusSettingMode = function(bType)
+_VE_.focusSettingMode = function()
+    input_mode = hdr.S_FOCUS
+end 
+
+_VE_.focusSet = function()
+    screen_ui.n_selected_all()
+end 
+
+_VE_.focusReset = function()
+    screen_ui.n_selected_all()
+end 
+
+local function styleUpdate()
+    if blockReport ~= true then
+        _VE_.refresh()
     end 
+end 
 
 
 ---------------------------------------------------------------------------

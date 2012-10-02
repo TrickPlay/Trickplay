@@ -167,6 +167,10 @@ class TrickplayEmulatorManager(QWidget):
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
 				        gid = int(s[9:])
+				    elif luaCmd == "focusSet2":
+				        focusObj = str(s[9:])
+				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
+				        self.inspector.neighbors.toggled(False)
 				    elif luaCmd == "openInspc":
 				        #gid = int(s[9:])
 				        gid = int(s[10:])
