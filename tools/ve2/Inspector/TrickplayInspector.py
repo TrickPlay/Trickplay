@@ -710,14 +710,19 @@ class TrickplayInspector(QWidget):
         boolHandlers = {}
 
 
-        if data['type'] == "Tab" : #IIII
+        if data['type'] == "Tab" :
+            #for p in ['gid', 'name', 'type', 'index', 'label', 'neighbors']:
             for p in ['gid', 'name', 'type', 'index', 'label']:
-                i = QTreeWidgetItem() 
-                i.setText (0, p)  # first col : property name
-                i.setText (1, str(data[p])) # second col : property value (text input field) 
-                if p == 'label':
-                    i.setFlags(i.flags() ^Qt.ItemIsEditable)
-                items.append(i)
+                if p != 'neighbors':
+                    i = QTreeWidgetItem() 
+                    i.setText (0, p)  # first col : property name
+                    i.setText (1, str(data[p])) # second col : property value (text input field) 
+                    if p == 'label':
+                        i.setFlags(i.flags() ^Qt.ItemIsEditable)
+                    items.append(i)
+                else:
+                    break
+
             self.ui.property.addTopLevelItems(items)
             return 
             
@@ -1046,7 +1051,6 @@ class TrickplayInspector(QWidget):
                         self.itemWidget.populateItemTable(itemList)
                 elif p == "neighbors":
                     neighbors_n = n 
-                        
 
                     self.neighbors = Neighbors(self, data['gid'])
                     
@@ -1405,6 +1409,7 @@ class TrickplayInspector(QWidget):
                         tempdata['label'] = item.text() 
                         tempdata['type'] = "Tab"
                         tempdata['index'] = item.tabIndex
+                        #tempdata['neighbors'] = item.tabdata['tabs'][item.tabIndex]['contents']['neighbors']
                         self.propertyFill(tempdata)
                         self.curLayerName = self.layerName[int(item.tabdata['gid'])] 
                         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
