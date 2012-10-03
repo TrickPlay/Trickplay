@@ -22,6 +22,7 @@ void error( char * msg ) {
         "   -i [filter]   Filter which files to include. Name filters can use the\n"
         "                 wildcards * (zero or more chars) and ? (one char).\n"
         "                 Multiple space-seperated name filters can be passed.\n"
+        "                 Files will be included if they match at least one filter.\n"
         "      [int]      One integer size filter can be passed, such as 256, to\n"
         "                 prevent large images from being included in a spritesheet.\n"
         "\n"
@@ -44,7 +45,8 @@ char * input_path  = NULL,
      * output_path = NULL;
 
 int input_size_limit  = 4096,
-    output_size_limit = 4096;
+    output_size_limit = 4096,
+    output_size_step  = 0;
 	
 gboolean allow_multiple_sheets = FALSE,
          copy_large_images     = FALSE,
@@ -53,8 +55,9 @@ gboolean allow_multiple_sheets = FALSE,
 
 // globals
 
-GSequence    * items,
-             * leaves_sorted_by_area;
+GPtrArray * large_images;
+GSequence * items,
+          * leaves_sorted_by_area;
 
 typedef struct Page {
     int width,
@@ -175,7 +178,7 @@ int recalculate_layout ( int width, gboolean finalize )
 	if ( current.height <= output_size_limit ) {
 		if ( allow_multiple_sheets )
         {
-            if ( best.coverage == 0 || current.coverage > best.coverage )
+            if ( best.coverage == 0 || pow(current.coverage, 4.0) * current.area > pow(best.coverage, 4.0) * best.area )
                 best = current;
 		}
         else if ( best.area == 0 || current.area < best.area || 
@@ -192,7 +195,57 @@ int recalculate_layout ( int width, gboolean finalize )
 	return f > 0 ? ( nf == 0 ? FOUND_ALL: FOUND_SOME ) : FOUND_NONE;
 }
 
-void export_image( char * json_path, char * png_path )
+char * json_item ( Item * item )
+{
+    int a = add_buffer_pixels ? 1 : 0;
+    return g_strdup_printf(
+        "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
+        item->x + a, item->y + a, item->w - 2*a, item->h - 2*a, item->id );
+}
+
+void composite_item( Image * dest, Item * item, ExceptionInfo * exception )
+{
+    ImageInfo * temp_info = AcquireImageInfo();
+    CopyMagickString( temp_info->filename, item->path, MaxTextExtent );
+    Image * temp_image = ReadImage( temp_info, exception );
+        
+    CompositeImage( dest, ReplaceCompositeOp , temp_image,
+                   item->x + ( add_buffer_pixels ? 1 : 0 ),
+                   item->y + ( add_buffer_pixels ? 1 : 0 ) );
+    
+    // composite the sprite's buffer pixels onto image
+    
+    if ( add_buffer_pixels )
+    {
+        RectangleInfo rects[8] =
+            { { 1, item->h - 2,  0, 0 },
+              { 1, item->h - 2,  item->w - 3, 0 },
+              { item->w - 2, 1,  0, 0 },
+              { item->w - 2, 1,  0, item->h - 3 },
+              { 1, 1,  0, 0 },
+              { 1, 1,  item->w - 3, 0 },
+              { 1, 1,  0, item->h - 3 },
+              { 1, 1,  item->w - 3, item->h - 3 } };
+        int points[16] =
+            { 0, 1,  item->w - 1, 1,  1, 0,            1, item->h - 1,
+              0, 0,  item->w - 1, 0,  0, item->h - 1,  item->w - 1, item->h - 1 };
+        
+        int j;
+        for (j = 0; j < 8; j++)
+        {
+            Image * excerpt_image = ExcerptImage( temp_image, &rects[j], exception );
+            CompositeImage( dest, ReplaceCompositeOp , excerpt_image,
+                            item->x + points[j * 2],
+                            item->y + points[j * 2 + 1] );
+            DestroyImage( excerpt_image );
+        }
+    }
+    
+    DestroyImage( temp_image );
+    DestroyImageInfo( temp_info );
+}
+
+GString * export_image( char * png_path )
 {
     ExceptionInfo * exception   = AcquireExceptionInfo();
     ImageInfo     * output_info  = AcquireImageInfo();
@@ -203,7 +256,7 @@ void export_image( char * json_path, char * png_path )
     GString * str = g_string_new( "{\n\t\"sprites\": [" );
     gchar ** sprites = calloc( g_sequence_get_length( items ) + 1, sizeof( gchar * ) );
       
-    int i = 0, j;
+    int i = 0;
     GSequenceIter *sj, * si = g_sequence_get_begin_iter( items );
     while ( !g_sequence_iter_is_end( si ) )
     {
@@ -215,69 +268,18 @@ void export_image( char * json_path, char * png_path )
             continue;
         }
         
-        // write json
-        int a = ( add_buffer_pixels ? 1 : 0 );
-        sprites[i++] = g_strdup_printf( "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i,"
-                                        " \"h\": %i, \"id\": \"%s\" }",
-                                        item->x + a, item->y + a, item->w - 2*a,
-                                        item->h - 2*a, item->id );
-        
-          // composite sprite onto output image
-        
-        ImageInfo * temp_info = AcquireImageInfo();
-        CopyMagickString( temp_info->filename, item->path, MaxTextExtent );
-        Image * temp_image = ReadImage( temp_info, exception );
-            
-        CompositeImage( output_image, ReplaceCompositeOp , temp_image,
-                       item->x + ( add_buffer_pixels ? 1 : 0 ),
-                       item->y + ( add_buffer_pixels ? 1 : 0 ) );
-        
-          // composite the sprite's buffer pixels onto image
-        
-        if ( add_buffer_pixels )
-        {
-            RectangleInfo rects[8] =
-                { { 1, item->h - 2,  0, 0 },
-                  { 1, item->h - 2,  item->w - 3, 0 },
-                  { item->w - 2, 1,  0, 0 },
-                  { item->w - 2, 1,  0, item->h - 3 },
-                  { 1, 1,  0, 0 },
-                  { 1, 1,  item->w - 3, 0 },
-                  { 1, 1,  0, item->h - 3 },
-                  { 1, 1,  item->w - 3, item->h - 3 } };
-            int points[16] =
-                { 0, 1,  item->w - 1, 1,  1, 0,            1, item->h - 1,
-                  0, 0,  item->w - 1, 0,  0, item->h - 1,  item->w - 1, item->h - 1 };
-            
-            for (j = 0; j < 8; j++)
-            {
-                Image * excerpt_image = ExcerptImage( temp_image, &rects[j], exception );
-                CompositeImage( output_image, ReplaceCompositeOp , excerpt_image,
-                                item->x + points[j * 2],
-                                item->y + points[j * 2 + 1] );
-                DestroyImage( excerpt_image );
-            }
-        }
-        
-        DestroyImage( temp_image );
-        DestroyImageInfo( temp_info );
-        
-        // drop this sprite so other sheets don't worry about it
+        sprites[i++] = json_item( item );
+        composite_item( output_image, item, exception );
         
         sj = g_sequence_iter_next( si );
         g_sequence_remove( si );
         si = sj;
     }
     
-    // collect and write out the json
+    // aggregate json
     
     g_string_append( str, g_strjoinv( ",", sprites ) );
     g_string_append( str, g_strdup_printf( "\n\t],\n\t\"img\": \"%s\"\n}", png_path ) );
-    
-    GFile *json = g_file_new_for_path( json_path );
-    g_file_replace_contents  ( json, str->str, str->len, NULL, FALSE,
-                               G_FILE_CREATE_NONE, NULL, NULL, NULL );
-    g_string_free( str, TRUE );
     
     // write out the png
       
@@ -286,13 +288,25 @@ void export_image( char * json_path, char * png_path )
     CopyMagickString( output_image->filename, png_path, MaxTextExtent );
     WriteImage( output_info, output_image );
     
-    fprintf( stderr, "Output map to %s and image to %s\n", json_path, png_path );
+    fprintf( stderr, "%s\n", png_path );
     
     // collect garbage
     
     DestroyExceptionInfo( exception );
     DestroyImageInfo( output_info );
     DestroyImage( output_image );
+    
+    return str;
+}
+
+void export_json ( char * json_path, GString * str )
+{
+    GFile *json = g_file_new_for_path( json_path );
+    g_file_replace_contents  ( json, str->str, str->len, NULL, FALSE,
+                               G_FILE_CREATE_NONE, NULL, NULL, NULL );
+    g_string_free( str, TRUE );
+    
+    fprintf( stderr, "Output map to %s\n", json_path );
 }
 
 enum {
@@ -382,6 +396,7 @@ int main ( int argc, char ** argv )
 {
     g_type_init();
     GPtrArray * input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
+    large_images   = g_ptr_array_new_with_free_func( (GDestroyNotify) free );
     
     handle_arguments( argc, argv, input_patterns );
     
@@ -408,7 +423,7 @@ int main ( int argc, char ** argv )
     
     items = g_sequence_new( (GDestroyNotify) free );
     smallest = (Page) { output_size_limit, output_size_limit, 0, 0 };
-    load( base, base, input_patterns, input_size_limit, recursive );
+    load( base, base, input_patterns, recursive );
           
     if ( minimum.width > output_size_limit || minimum.height > output_size_limit )
     {
@@ -418,12 +433,13 @@ int main ( int argc, char ** argv )
         exit( 0 );
     }
     
-    int i, j;
+    char * json_path = g_strdup_printf( "%s.json", output_path );
+    GString * json = g_string_new("");
+    int status, i, j = 1;
     
     if ( allow_multiple_sheets )
     {
-        int status;
-        j = 1;
+        g_string_append( json, "[" );
         
         // fit sprites into sheets in the densest way possible, until we run out of sprites
         
@@ -433,7 +449,7 @@ int main ( int argc, char ** argv )
     
             // iterate to find a good layout
             
-            for ( i = minimum.width; i <= output_size_limit; i++ )
+            for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
                 recalculate_layout( i, FALSE );
             status = recalculate_layout( best.width, TRUE );
             
@@ -443,16 +459,42 @@ int main ( int argc, char ** argv )
                 exit( 1 );
             }
             
-            fprintf( stderr, "Page selected: (%i x %i), %f coverage.\n",
-                     best.width, best.height, best.coverage );
+            fprintf( stderr, "Page %i match (%i x %i pixels, %.4g%% coverage): ",
+                     j, best.width, best.height, 100 * best.coverage );
             
-            export_image( g_strdup_printf( "%s-%i.json", output_path, j ),
-                          g_strdup_printf( "%s-%i.png",  output_path, j ) );
+            if ( j > 1 )
+                g_string_append( json, ",\n" );
+                
+            GString * str = export_image( g_strdup_printf( "%s-%i.png",  output_path, j ) );
+            g_string_append( json, g_string_free( str, FALSE ) );
             
+            j++;
             if ( status == FOUND_ALL )
                 break;
-            j++;
         }
+        
+        for ( i = 0; i < large_images->len; i++ )
+        {
+            Item  * item = g_ptr_array_index( large_images, i );
+            char  * name = g_strrstr( item->id, "/" );
+            if ( name == NULL )
+                name = item->id;
+            else
+                name += 1; //g_strdup_printf( ".%s", name );
+            GFile * dest = g_file_new_for_path( name );
+
+            g_file_copy( item->file, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL );
+            g_object_unref( dest );
+            
+            if ( i > 0 || j > 1 )
+                g_string_append( json, ",\n" );
+            int a = add_buffer_pixels ? 2 : 0;
+            g_string_append( json, g_strdup_printf( "{\n\t\"sprites\": ["
+                "\n\t\t{ \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }"
+                "\n\t],\n\t\"img\": \"%s\"\n}", item->w - a, item->h - a, item->id, name ) );
+        }
+        
+        g_string_append( json, "]");
     }
     else
     {
@@ -466,7 +508,8 @@ int main ( int argc, char ** argv )
   
         // iterate to find the best layout
         
-        for ( i = minimum.width; i <= output_size_limit; i++ )
+        int i;
+        for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
             recalculate_layout( i, FALSE );
             
         if ( !allow_multiple_sheets && best.area == 0 )
@@ -479,12 +522,13 @@ int main ( int argc, char ** argv )
         
         recalculate_layout( best.width, TRUE );
         
-        fprintf( stderr,"Best match coverage: %i x %i pixels, %.4g%% match\n",
+        fprintf( stderr,"Page match (%i x %i pixels, %.4g%% coverage): ",
                  best.width, best.height, 100.0 * (gfloat) minimum.area / (gfloat) best.area );
         
-        export_image( g_strdup_printf( "%s.json", output_path ),
-                      g_strdup_printf( "%s.png",  output_path ) );
+        json = export_image( g_strdup_printf( "%s.png", output_path ) );
     }
+    
+    export_json( json_path, json );
     
     g_ptr_array_free( input_patterns, TRUE );
     g_sequence_free( items );

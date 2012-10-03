@@ -1,11 +1,30 @@
+int gcf( int a, int b )
+{
+    int t;
+    if ( b > a )
+    {
+        t = b;
+        b = a;
+        a = t;
+    }
+    while ( b != 0 )
+    {
+        t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
 typedef struct Item {
   int x, y, w, h, area;
   char * id,
        * path;
   gboolean placed;
+  GFile * file;
 } Item;
 
-Item * item_new ( char * path )
+Item * item_new ( char * path, GFile * file )
 {
     Item * item = malloc( sizeof( Item ) );
     item->id = path;
@@ -14,6 +33,7 @@ Item * item_new ( char * path )
     g_string_append( str, path );
     item->path = g_string_free( str, FALSE );
     item->placed = FALSE;
+    item->file = file;
     
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo * input_info = AcquireImageInfo();
@@ -35,20 +55,25 @@ Item * item_new ( char * path )
     smallest.width  = MIN( smallest.width,  item->w );
     smallest.height = MIN( smallest.height, item->w );
     
+    if ( output_size_step == 0 )
+      output_size_step = item->w;
+    else
+      output_size_step = gcf( item->w, output_size_step );
+    
     DestroyImage( temp_image );
     DestroyExceptionInfo( exception );
     
     return item;
 }
 
-gint item_compare_area ( gconstpointer a, gconstpointer b, gpointer user_data )
+gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
     int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
     return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 }
 
-void load ( GFile * file, GFile * base, GPtrArray * input_patterns, int size_limit, gboolean recursive )
+void load ( GFile * file, GFile * base, GPtrArray * input_patterns, gboolean recursive )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
     GFileType type = g_file_info_get_file_type( info );
@@ -65,8 +90,7 @@ void load ( GFile * file, GFile * base, GPtrArray * input_patterns, int size_lim
         while ( ( child_info = g_file_enumerator_next_file( children, NULL, NULL ) ) != NULL )
         {
             child = g_file_get_child( file, g_file_info_get_name( child_info ) );
-            load( child, base, input_patterns, size_limit, recursive );
-            g_object_unref( child );
+            load( child, base, input_patterns, recursive );
             g_object_unref( child_info );
         }
         
@@ -83,10 +107,16 @@ void load ( GFile * file, GFile * base, GPtrArray * input_patterns, int size_lim
                 break;
         
         if ( i == 0 || i < input_patterns->len ) {
-            Item * item = item_new( path );
-            if ( item != NULL )
-                if ( item->w < input_size_limit && item->h < size_limit )
-                    g_sequence_insert_sorted( items, item, item_compare_area, NULL );
+            Item * item = item_new( path, file );
+            if ( item != NULL ) {
+                if ( item->w <= input_size_limit && item->h <= input_size_limit )
+                    g_sequence_insert_sorted( items, item, item_compare, NULL );
+                else if ( copy_large_images && allow_multiple_sheets &&
+                          item->w <= output_size_limit && item->h <= output_size_limit )
+                    g_ptr_array_add( large_images, item );
+            }
         }
     }
+    
+    g_object_unref( info );
 }
