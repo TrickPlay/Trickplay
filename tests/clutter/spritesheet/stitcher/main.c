@@ -17,7 +17,8 @@ void error( char * msg ) {
         "                 scaled sprites are having issues around their borders.\n"
         "\n"
         "   -c            Copy files that fail the size filter over as single-image\n"
-        "                 spritesheets (if they fit within the maximum output size)\n"
+        "                 spritesheets (if they fit within the maximum output size).\n"
+        "                 This option must be used in conjunction with -m.\n"
         "\n"
         "   -i [filter]   Filter which files to include. Name filters can use the\n"
         "                 wildcards * (zero or more chars) and ? (one char).\n"
@@ -28,14 +29,13 @@ void error( char * msg ) {
         "\n"
         "   -m            Divide sprites among multiple spritesheets if they don't fit\n"
         "                 within the maximum dimensions\n"
+        "                 (NOTE: -m is not yet supported on the TrickPlay side.)\n"
         "\n"
         "   -o [path]     Set the path of the output files, which will have\n"
         "                 sequential numbers and a .png or .json extension appended.\n"
-        "      [int]      Pass an integer like 4096 to set the maximum .png size\n"
+        "      [int]      Pass an integer like 4096 to set the maximum .png size.\n"
         "\n"
-        "   -r            Recursively include subdirectories.\n"
-        "\n"
-        "Ex: stitcher assets/ui -i *.png nav/bg-?.jpg 256 -o sprites/ui 1024 -bcr\n", msg );
+        "   -r            Recursively include subdirectories.\n", msg );
 	exit( 0 );
 }
 
@@ -353,10 +353,36 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
                         state = DEFAULT;
                         break;
                     
-                    default:
-                        fprintf(stderr, "Error: unknown flag '-%s'\n\n", (char *) &arg[j] );
                     case 'h':
-                        error("");
+                        error("Help & Examples:\n\n"
+        "stitcher assets/ui\n"
+        "       Will pick up all of the images in the directory assets/ui and create two\n"
+        "       files, assets/ui.png (one PNG of all the input images packed together) and\n"
+        "       assets/ui.json, a JSON map to each of the packed images. Load this map into\n"
+        "       TrickPlay as:\n"
+        "           ui = SpriteSheet { map = 'assets/ui.json' }\n"
+        "       Then create sprites from it:\n"
+        "           sprite = Sprite { sheet = ui, id = 'button-press.png' }\n"
+        "       Sprites behave just as if they were loaded from the original image.\n"
+        "\n"
+        "stitcher assets/ui -i *.png nav/bg-?.jpg 256\n"
+        "       Load all PNGs, but only JPGs whose filenames match nav/bg-?.jpg, and filter\n"
+        "       out images bigger than 256 pixels on a side.\n"
+        "\n"
+        "stitcher assets/ui -o sprites/ui 512 -m\n"
+        "       Output the JSON map as sprites/ui.json. In addition, spritesheets created\n"
+        "       will not be larger than 512 x 512 pixels; instead, extra images will flow\n"
+        "       to second and third spritesheets. \n"
+        "       (NOTE: -m is not yet supported on the TrickPlay side.)\n"
+        "\n"
+        "stitcher assets/ui -i 256 -o 512 -bcm\n"
+        "       -b creates a 1-pixel buffer around each sprite to prevent scaling problems,\n"
+        "       while -c copies over all images that fail the input size filter, 256, as\n"
+        "       stand-alone single-image spritesheets.\n");
+                        break;
+                    
+                    default:
+                        error( g_strdup_printf( "Error: unknown flag '-%s'\n", (char *) &arg[j] ) );
                         break;
                 }
         else
@@ -480,7 +506,8 @@ int main ( int argc, char ** argv )
             if ( name == NULL )
                 name = item->id;
             else
-                name += 1; //g_strdup_printf( ".%s", name );
+                name += 1; //g_strdup_printf( ".%s", name ); //
+            fprintf( stderr, "Name is %s\n", name ); 
             GFile * dest = g_file_new_for_path( name );
 
             g_file_copy( item->file, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL );
