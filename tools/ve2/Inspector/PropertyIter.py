@@ -31,9 +31,7 @@ class PropertyIter:
             self.current = 0
             raise StopIteration
 
-
- 
-NO_STYLE_WIDGET = ["Tab", "Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group", "LayoutManager", "ProgressBar", "ProgressSpinner", "OrbitingDots"] 
+NO_STYLE_WIDGET = ["Tab", "Widget_Text", "Widget_Rectangle", "Widget_Image", "Widget_Clone", "Widget_Group", "LayoutManager"] 
 
 READ_ONLY= ["gid", "baseline", "selected_text", "base_size", "loaded", "tags"]
 
