@@ -1120,7 +1120,7 @@ class TrickplayInspector(QWidget):
                             if not p in READ_ONLY :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
-                    elif not str(data["type"]) in NO_STYLE_WIDGET :
+                    elif not str(data["type"]) in NO_STYLE_WIDGET and self.cbStyle is not None:
 
                         
                         #find Style name from combo box  
