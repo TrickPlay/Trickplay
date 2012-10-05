@@ -4,6 +4,13 @@ local m_init_x = 0
 local m_init_y = 0 
 local multi_select_border
 
+local screen_pos_of_child = function(actor)
+    return actor.transformed_position[1]/screen.scale[1], 
+           actor.transformed_position[2]/screen.scale[2]
+    --return  child.x + child.parent.x + bumo.x + p.box_border_width,
+            --child.y + child.parent.y + bumo.y + p.box_border_width
+end
+
 
 function screen_ui.n_selected_all() 
 	for i, j in pairs (screen.children) do 
@@ -209,7 +216,8 @@ function screen_ui.selected(obj)
 		group_pos = util.get_group_position(obj)
 		--group_pos = obj.position
 		if bumo then 
-			obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
+			--obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
+			obj_border.x, obj_border.y = screen_pos_of_child(obj) 	
 		elseif group_pos then 
      		obj_border.x = obj.x + group_pos[1]
      	   	obj_border.y = obj.y + group_pos[2]
@@ -261,7 +269,6 @@ function screen_ui.selected(obj)
     screen:add(obj_border)
     obj.extra.selected = true
     table.insert(selected_objs, obj_border.name)
-
 end  
 
 function screen_ui.n_selected(obj)
@@ -557,8 +564,12 @@ function screen_ui.dragging(x,y)
 					end
     			 end -- for 
 
+
 				 if bumo then 
-					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+					--local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+					local cur_x, cur_y = screen_pos_of_child(actor) 
+                    --cur_x = actor.transformed_position[1]/screen.scale[1]
+                    --cur_y = actor.transformed_position[2]/screen.scale[2]
 	             	border.position = {cur_x, cur_y}
 				 else 
 				 	local group_pos = util.get_group_position(actor)
@@ -591,7 +602,8 @@ function screen_ui.dragging(x,y)
 
 		    if (actor.extra.is_in_group == true) then
 				if bumo then 
-					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+					--local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+					local cur_x, cur_y = screen_pos_of_child(actor) 
 	                anchor_mark.position = {cur_x, cur_y}
 				else 
 			 		local group_pos = util.get_group_position(actor)

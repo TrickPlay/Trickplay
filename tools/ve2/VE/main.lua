@@ -10,7 +10,8 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/HJ/ve2-friday/TEST_DIR/TR.DD/screens")
+        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.textinput/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TEST-select/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
@@ -19,8 +20,20 @@
     end 
 
     bb = function ()
-        _VE_.selectUIElement(13,false)
-        _VE_.focusSettingMode(keys.Up)
+
+        _VE_.insertUIElement(8, 'Button')
+        _VE_.insertUIElement(8, 'ButtonPicker')
+        _VE_.insertUIElement(8, 'DialogBox')
+        _VE_.insertUIElement(8, 'LayoutManager')
+        _VE_.insertUIElement(8, 'MenuButton')
+        _VE_.insertUIElement(8, 'ProgressBar')
+        _VE_.insertUIElement(8, 'ProgressSpinner')
+        _VE_.insertUIElement(8, 'OrbittingDots')
+        _VE_.insertUIElement(8, 'ScrollPane')
+        _VE_.insertUIElement(8, 'TabBar')
+        _VE_.insertUIElement(8, 'TextInput')
+        --_VE_.selectUIElement(13,false)
+        --_VE_.focusSettingMode(keys.Up)
         --b1 = devtools:gid(34)
         --b2 = devtools:gid(8)
         --b1.neighbors.Right = b2
@@ -211,7 +224,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
     else
     
-        newChild.reactive = false
+        --newChild.reactive = true
         newChild.position = {0,0,0}
         newChild.is_in_group = true
 		newChild.group_position = newParent.position
@@ -924,6 +937,18 @@ _VE_.openFile = function(path)
                 end 
                 util.create_mouse_event_handler(m, uiTypeStr)
 
+                if uiTypeStr == "ArrowPane" then
+                    for o, p in ipairs(m.children) do
+                        util.create_mouse_event_handler(p, p.widget_type)
+                        p.reactive = true 
+                        p.is_in_group = true
+                    end 
+                    --m.reactive = true 
+                    --m.lock = false
+                    --m.selected = false
+                    --m.is_in_group = true
+                end 
+
                 m.reactive = true 
                 m.lock = false
                 m.selected = false
@@ -1228,7 +1253,12 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         }
     ]]
     elseif uiTypeStr == "Slider" then 
+
        uiInstance:set{x=500, y = 300, grip_w = 50, grip_h = 20, track_w = 500, track_h = 50}
+
+    elseif uiTypeStr == "TextInput" then 
+
+       uiInstance:set{enabled = false}
 
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
@@ -1387,6 +1417,7 @@ end
 
     function screen:on_motion(x,y)
 
+	  	--if control == true and mouse_state == hdr.BUTTON_DOWN then 
 	  	if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
@@ -1403,7 +1434,6 @@ end
 				move = true
 			end
         end
-
 	end
 
 -------------------------------------------------------------------------------
