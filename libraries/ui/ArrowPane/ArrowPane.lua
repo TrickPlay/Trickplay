@@ -389,6 +389,7 @@ ArrowPane = setmetatable(
             local l_right = Button:declare()
             
             local instance, _ENV = LayoutManager:declare{
+                children_want_focus = false,
                 number_of_rows = 3,
                 number_of_cols = 3,
                 placeholder = Widget_Clone(),
