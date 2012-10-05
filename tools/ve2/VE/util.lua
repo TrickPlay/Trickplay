@@ -52,6 +52,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
         
+        --if control == true and mouse_state == hdr.BUTTON_DOWN then 
         if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
@@ -86,9 +87,55 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
         --uiInstance:grab_pointer()
-
         
-        if control == true then 
+        --print ("control:", control)
+        --print ("name", uiInstance.name)
+        --print ("is_in_group", uiInstance.extra.is_in_group)
+
+--[[
+        if control == false and uiInstance.extra.is_in_group == true then 
+            --print(" do nothing ")
+            return true
+        elseif control == true and uiInstance.extra.is_in_group == true or 
+ --]]
+        if uiInstance.extra.is_in_group == true or 
+           control == false and uiInstance.extra.is_in_group == false then 
+
+            _VE_.openInspector(uiInstance.gid)
+
+            if input_mode == hdr.S_SELECT then
+	            if uiInstance.selected == nil or uiInstance.selected == false then 
+		            screen_ui.selected(uiInstance) 
+		        elseif(uiInstance.selected == true) then 
+			        screen_ui.n_select(uiInstance) 
+	            end
+            end
+
+            if uiTypeStr == "Text" then 
+                uiInstance.cursor_visible = true
+                uiInstance.editable= true
+                uiInstance.wants_enter= true
+                uiInstance:grab_key_focus()
+    
+                if(num_clicks == 2) then
+                    uiInstance.cursor_position = 0
+                    uiInstance.selection_end = -1
+                else
+                    for i=1,string.len(uiInstance.text) do
+                        local offset = uiInstance:position_to_coordinates(i-1)[1] + uiInstance.anchor_point[1] + uiInstance.x
+                        if(offset >= x ) then
+                            uiInstance.cursor_position = i-1
+                            uiInstance.selection_end = i-1
+                        return true
+                        end
+                    end
+                    uiInstance.cursor_position = -1
+                    uiInstance.selection_end = -1
+                    return true
+                end
+            end 
+            return true
+        elseif control == true and uiInstance.extra.is_in_group == false then 
 
             ----[[	SHOW POSSIBLE CONTAINERS
 
@@ -141,44 +188,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			end
             --]] 
         end 
-            _VE_.openInspector(uiInstance.gid)
-
-            --[[
-	        if input_mode == hdr.S_SELECT then
-	            if uiInstance.selected == nil or uiInstance.selected == false then 
-		            screen_ui.selected(uiInstance) 
-		        elseif(uiInstance.selected == true) then 
-			        screen_ui.n_select(uiInstance) 
-	            end
-            end
-            ]]
-
-            if uiTypeStr == "Text" then 
-                uiInstance.cursor_visible = true
-                uiInstance.editable= true
-                uiInstance.wants_enter= true
-                uiInstance:grab_key_focus()
-    
-                if(num_clicks == 2) then
-                    uiInstance.cursor_position = 0
-                    uiInstance.selection_end = -1
-                else
-                    for i=1,string.len(uiInstance.text) do
-                        local offset = uiInstance:position_to_coordinates(i-1)[1] + uiInstance.anchor_point[1] + uiInstance.x
-                        if(offset >= x ) then
-                            uiInstance.cursor_position = i-1
-                            uiInstance.selection_end = i-1
-                        return true
-                        end
-                    end
-                    uiInstance.cursor_position = -1
-                    uiInstance.selection_end = -1
-                    return true
-                end
-            end 
-            return true
-        --end 
-
+        return true
     end,true)
 
     uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button)
@@ -924,7 +934,6 @@ end
 
 function util.get_group_position(child_obj)
 
-     print ("get_group_position")
      if child_obj == nil then
         print("fail, child_obj is nil")
         return 
@@ -934,7 +943,6 @@ function util.get_group_position(child_obj)
         print("fail, parent_obj is nil")
         return 
      end 
-     print (parent_obj.name, parent_obj.type, parent_obj.widget_type)
      if parent_obj.widget_type ~= nil then
         for i, v in pairs(parent_obj.children) do
 	        if (v.type == "Group") then 
