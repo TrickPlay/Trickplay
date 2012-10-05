@@ -385,6 +385,12 @@ TabBar = setmetatable(
                 fill_colors = "restyle_tabs",
                 arrow       = "restyle_arrows",
             }
+            
+            function instance:on_key_focus_in()
+                if tabs_lm.length > 0 then
+                    rbg.items[rbg.selected]:grab_key_focus()
+                end
+            end
             panes = {}
             tabs = {}
             rbg= RadioButtonGroup{name = "TabBar",
@@ -394,7 +400,7 @@ TabBar = setmetatable(
                         local t = tabs_lm.cells[i]
                         if t.selected then
                             t.contents:show()
-                            t:grab_key_focus()
+                            --t:grab_key_focus()
                         else
                             t.contents:hide()
                         end
@@ -402,9 +408,19 @@ TabBar = setmetatable(
                 end
             }
             
+            
+            
             old_update = update
             
-            panes_obj = Widget_Group{name = "Panes",clip_to_size = true}
+            panes_obj = Widget_Group{
+                name = "Panes",
+                clip_to_size = true,
+                on_key_focus_in = function()
+                    if tabs_lm.length > 0 then
+                        rbg.items[rbg.selected].contents:grab_key_focus()
+                    end
+                end
+            }
             pane_w = 400
             pane_h = 300
             tab_w = 200
@@ -491,6 +507,15 @@ TabBar = setmetatable(
                         create_canvas = tab_location == "top" and top_tabs or side_tabs,
                         --images = tab_images,
                     }
+                    local old_okfi = obj.on_key_focus_in
+                    ---[[
+                    function obj:on_key_focus_in()
+                        old_okfi()
+                        obj.selected = true
+                        tab_pane.virtual_x = obj.x - tab_pane.pane_w/2
+                        tab_pane.virtual_y = obj.y - tab_pane.pane_h/2
+                    end
+                    --]]
                     obj.contents = pane
                     mesg("TABBAR",0,"button made")
                     ---[[
@@ -529,7 +554,16 @@ TabBar = setmetatable(
             tabs_lm__ENV = get_env(tabs_lm)
             
             --TODO roll into a single set
-            tab_pane = ArrowPane{name = "ArrowPane",style = false,arrow_move_by = tab_w}
+            tab_pane = ArrowPane{
+                name = "ArrowPane",
+                style = false,
+                arrow_move_by = tab_w,
+                on_key_focus_in = function()
+                    if tabs_lm.length > 0 then
+                        rbg.items[rbg.selected]:grab_key_focus()
+                    end
+                end
+            }
             tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
             tab_pane.style.border.colors.default = "00000000"
             tab_pane.style.fill_colors.default   = "00000000"
