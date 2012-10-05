@@ -50,8 +50,9 @@ TextInput = setmetatable(
                 enabled = function(instance,_ENV)
                     return nil,
                     function(oldf,self,v)
-                        text.editable = instance.enabled
-                        text.reactive = instance.enabled
+                        oldf(self,v)
+                        text.editable = v
+                        text.reactive = v
                     end
                 end,
                 text = function(instance,_ENV)
