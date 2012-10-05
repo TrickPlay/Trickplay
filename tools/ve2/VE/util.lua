@@ -141,7 +141,11 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
             for i, j in ipairs (screen.children) do 
 	            if j.name then 
-                if string.find(j.name, "Layer") and j.visible == true then 
+                --if string.find(j.name, "Layer") and j.visible == true then 
+                if string.find(j.name, "Layer") ~= nil and 
+                   string.find(j.name, "a_m") == nil and 
+                   string.find(j.name, "border") == nil 
+                   and j.visible == true  then 
                     for k,l in ipairs (j.children) do 
 			            if util.is_this_container(l) == true then 
 				            l:lower_to_bottom()
@@ -157,7 +161,13 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             local odr 
             for i, j in ipairs (screen.children) do 
 	            if j.name then 
-                if string.find(j.name, "Layer") and j.visible == true then 
+                --if string.find(j.name, "Layer") and j.visible == true then 
+                if string.find(j.name, "Layer") ~= nil and 
+                   string.find(j.name, "a_m") == nil and 
+                   string.find(j.name, "border") == nil 
+                   and j.visible == true  then 
+
+
                     for k,l in ipairs (j.children) do 
 			            if l.name == uiInstance.name then 
 				            odr = k
@@ -170,7 +180,11 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			if odr then 
                 for i, j in ipairs (screen.children) do 
 	                if j.name then 
-                    if string.find(j.name, "Layer") and j.visible == true then 
+                    --if string.find(j.name, "Layer") and j.visible == true then 
+                    if string.find(j.name, "Layer") ~= nil and 
+                    string.find(j.name, "a_m") == nil and 
+                    string.find(j.name, "border") == nil 
+                    and j.visible == true  then 
                         for k,l in ipairs (j.children) do 
 			                if util.is_this_container(l) == true then 
 					            if k > odr then 
@@ -320,7 +334,11 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
         for i, j in ipairs (screen.children) do 
 	        if j.name then 
-                if string.find(j.name, "Layer") and j.visible == true then 
+                --if string.find(j.name, "Layer") and j.visible == true then 
+                if string.find(j.name, "Layer") ~= nil and 
+                   string.find(j.name, "a_m") == nil and 
+                   string.find(j.name, "border") == nil 
+                   and j.visible == true  then 
                     for k,l in ipairs (j.children) do 
 			            if l.extra.org_opacity then 
 				            l.opacity = l.extra.org_opacity
@@ -408,7 +426,11 @@ function util.assign_right_name (uiInstance, uiTypeStr)
 
     for m,n in ipairs (screen.children) do
         if n.name then 
-        if string.find(n.name, "Layer") then  
+        print (n.name)
+        if string.find(n.name, "Layer") ~= nil and 
+         string.find(n.name, "a_m") == nil and 
+         string.find(n.name, "border") == nil 
+        then  
             for k,l in ipairs (n.children) do 
                 if l.name == uiTypeStr:lower()..uiNum then 
                     uiNum = uiNum + 1
@@ -655,7 +677,11 @@ end
 function util.is_this_container(v)
 
     if v.extra then 
-        if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") then
+        --if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") then
+        if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") ~= nil and 
+                   string.find(v.name, "a_m") == nil and 
+                   string.find(v.name, "border") == nil then 
+
 	        return false
         end 
         if util.is_in_list(v.widget_type, hdr.uiContainers) == true then 
@@ -675,7 +701,12 @@ function util.find_container(x_pos, y_pos)
 
 	for i, j in ipairs (screen.children) do 
 	    if j.name then 
-        if string.find(j.name, "Layer") and j.visible == true then 
+        --if string.find(j.name, "Layer") and j.visible == true then 
+        if string.find(j.name, "Layer") ~= nil and 
+                   string.find(j.name, "a_m") == nil and 
+                   string.find(j.name, "border") == nil 
+                   and j.visible == true  then 
+
             for k,l in ipairs (j.children) do 
 		        if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
 				    if util.is_this_container(l) then
@@ -700,7 +731,12 @@ function util.is_in_container_group(x_pos, y_pos)
 
 	for i, j in ipairs (screen.children) do 
 	    if j.name then 
-        if string.find(j.name, "Layer") and j.visible == true then 
+        --if string.find(j.name, "Layer") and j.visible == true then 
+        if string.find(j.name, "Layer") ~= nil and 
+                   string.find(j.name, "a_m") == nil and 
+                   string.find(j.name, "border") == nil 
+                   and j.visible == true  then 
+
             for k,l in ipairs (j.children) do 
 	            if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
 		            if util.is_this_container(l) then
