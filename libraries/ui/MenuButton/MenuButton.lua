@@ -94,12 +94,20 @@ MenuButton = setmetatable(
                         new_direction = v
                     end
                 end,
+                enabled = function(instance,_ENV)
+                    return function(oldf)  return   button.enabled      end,
+                    function(oldf,self,v)
+                        
+                        button.enabled = v
+                        
+                    end
+                end,
                 focused = function(instance,_ENV)
-                    return nil,
+                    return function(oldf)  return   button.focused      end,
                     function(oldf,self,v)
                         if not instance.enabled then return end
                         
-                        button.focused = instance.focused
+                        button.focused = v
                         
                     end
                 end,
