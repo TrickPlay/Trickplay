@@ -64,6 +64,10 @@ void lb_strong_deref( lua_State * L , int ref );
 
 #define lb_invoke_callback(L,self,metatable,name,nargs,nresults)    ( UserData::invoke_callback(self,name,nargs,nresults,L) )
 
+#define lb_invoke_callbacks(L,self,metatable,name,nargs,nresults)   ( UserData::invoke_callbacks(self,name,nargs,nresults,L) )
+
+#define lb_invoke_callbacks_r(L,self,metatable,name,nargs,nresults,default_ret) ( UserData::invoke_callbacks(self,name,nargs,nresults,L,default_ret) )
+
 #define lb_callback_attached(L,self,name,index)                     ( UserData::is_callback_attached(name,L,index))
 
 #define lb_clear_callbacks(L,index)                                 ( UserData::clear_callbacks( L , index ) )
@@ -127,4 +131,3 @@ void lb_setglobal( lua_State * L , const char * name );
 void lb_dump_table( lua_State * L );
 
 #endif // _TRICKPLAY_LB_H
-

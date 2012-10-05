@@ -6,11 +6,12 @@ timer.interval=400
 function timer.on_timer(timer)
   timerCalls = timerCalls + 1
   if timerCalls == 1 then
-  	timer:stop() 
+  	timer:stop()
   end
 end
+collectgarbage()
 timer:start()
-  
+
 
 -- Tests --
 
@@ -23,15 +24,6 @@ end
 
 
 -- Test Tear down --
-
-
-
-
-
-
-
-
-
 
 
 

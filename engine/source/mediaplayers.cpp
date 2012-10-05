@@ -884,10 +884,13 @@ void MediaPlayer::process_events()
 
             case Event::ERROR:
 
-                if ( state == TP_MEDIAPLAYER_LOADING )
+                if ( state == TP_MEDIAPLAYER_LOADING || state == TP_MEDIAPLAYER_IDLE )
                 {
                     // Take it back to IDLE
-                    reset();
+                    if ( state != TP_MEDIAPLAYER_IDLE )
+                    {
+                        reset();
+                    }
 
                     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
                     {
@@ -1011,4 +1014,3 @@ void tp_media_player_tag_found( TPMediaPlayer * mp, const char * name, const cha
         MediaPlayer::get( mp )->tag_found( name, value );
     }
 }
-
