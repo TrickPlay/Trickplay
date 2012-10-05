@@ -52,8 +52,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
         
-        --if control == true and mouse_state == hdr.BUTTON_DOWN then 
-        if control == true then 
+        if control == true and mouse_state == hdr.BUTTON_DOWN then 
+        --if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
 
