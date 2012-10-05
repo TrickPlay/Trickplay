@@ -46,6 +46,8 @@ tb1.tabs[3].contents = WL.Widget_Group{children={Rectangle{w=40,h=40,color="30f0
 dumptable(tb1.attributes)
 --]]
 ---[[
+
+b = WL.Button()
 tb2 = WL.TabBar()
 tb2:set{
     pane_w = 500,
@@ -56,7 +58,7 @@ tb2:set{
     style = style,
     position = {100,600},
     tabs = {
-        {label="One",   contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="ff0000"},WL.Button()}}},
+        {label="One",   contents = WL.Widget_Group{on_key_focus_in =function() b:grab_key_focus() end,children={WL.Widget_Rectangle{w=500,h=400,color="ff0000"},b}}},
         {label="Two",   contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="00ff00"}}}},
         {label="Three", contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="0000ff"}}}},
         {label="Four",  contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="ffff00"}}}},
@@ -64,10 +66,13 @@ tb2:set{
         {label="Six",   contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="00ffff"}}}},
     }
 }
----[[
+--[[
 s = tb2:to_json()
 tb2 = WL.TabBar()
 tb2:from_json(s)
+--]]
+
+dolater(tb2.grab_key_focus,tb2)
 --tb2.style = style
 --]]
 --[[
