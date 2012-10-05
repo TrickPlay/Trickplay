@@ -21,17 +21,22 @@
 
     bb = function ()
 
-        _VE_.insertUIElement(8, 'Button')
-        _VE_.insertUIElement(8, 'ButtonPicker')
-        _VE_.insertUIElement(8, 'DialogBox')
-        _VE_.insertUIElement(8, 'LayoutManager')
-        _VE_.insertUIElement(8, 'MenuButton')
-        _VE_.insertUIElement(8, 'ProgressBar')
-        _VE_.insertUIElement(8, 'ProgressSpinner')
-        _VE_.insertUIElement(8, 'OrbittingDots')
-        _VE_.insertUIElement(8, 'ScrollPane')
-        _VE_.insertUIElement(8, 'TabBar')
-        _VE_.insertUIElement(8, 'TextInput')
+        _VE_.selectUIElement(65,false)
+
+        _VE_.insertUIElement(65, 'Button')
+
+
+        --_VE_.insertUIElement(8, 'Button')
+        --_VE_.insertUIElement(8, 'ButtonPicker')
+        --_VE_.insertUIElement(8, 'DialogBox')
+        --_VE_.insertUIElement(8, 'LayoutManager')
+        --_VE_.insertUIElement(8, 'MenuButton')
+        --_VE_.insertUIElement(8, 'ProgressBar')
+        --_VE_.insertUIElement(8, 'ProgressSpinner')
+        --_VE_.insertUIElement(8, 'OrbittingDots')
+        --_VE_.insertUIElement(8, 'ScrollPane')
+        --_VE_.insertUIElement(8, 'TabBar')
+        --_VE_.insertUIElement(8, 'TextInput')
         --_VE_.selectUIElement(13,false)
         --_VE_.focusSettingMode(keys.Up)
         --b1 = devtools:gid(34)
@@ -158,7 +163,11 @@ _VE_.printInstanceName = function(layernames)
 
     for m,n in ipairs (screen.children) do
         if n.name then
-        if string.find(n.name, "Layer") then  
+        --if string.find(n.name, "Layer") then  
+        if string.find(n.name, "Layer") ~= nil and 
+         string.find(n.name, "a_m") == nil and 
+         string.find(n.name, "border") == nil 
+        then 
             print(n.name)
             for q,w in ipairs (layernames) do 
                 if n.name == w then
@@ -923,7 +932,11 @@ _VE_.openFile = function(path)
     s = load_layer(layer)
 
     for i,j in ipairs(s.children) do
-        if string.find(j.name, "Layer") ~= nil then 
+        --if string.find(j.name, "Layer") ~= nil then 
+        if string.find(j.name, "Layer") ~= nil and 
+         string.find(j.name, "a_m") == nil and 
+         string.find(j.name, "border") == nil 
+        then 
             for l,m in ipairs(j.children) do 
                 m.created = false
                 if m.subscribe_to then  
