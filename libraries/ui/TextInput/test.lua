@@ -7,7 +7,7 @@ screen:show()
 t1 = WL.TextInput{style = false,}
 ---[[
 print("t2 t2 t2 t2 t2 t2 t2 t2 t2 t2 t2 ")
-t2 = WL.TextInput{style = false,h=400,w=200,x = 200,text = "default"}
+t2 = WL.TextInput{style = false,h=400,w=200,x = 200,text = "default",enabled=false}
 
 t2.style.text.colors.default = "00d000"
 --t2.style.text.single_line = false
