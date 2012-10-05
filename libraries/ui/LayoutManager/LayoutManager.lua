@@ -12,14 +12,17 @@ local LIST_default_parameters = {spacing = 20, direction = "vertical"}
 
 local next_neighbor
 
-next_neighbor = function(items,obj,dir)
-    --if the obj has a neighbor in the direction
-    return items[obj].neighbors[dir] and 
-        --if that neighbor is enabled, return it
-        (items[obj].neighbors[dir].enabled and items[obj].neighbors[dir] or 
-            --else return that neighbors neighbor
-            next_neighbor(items,items[obj].neighbors[dir],dir)
-        )
+next_neighbor = function(instance,items,obj,dir)
+    
+    return instance.children_want_focus and (
+            --if the obj has a neighbor in the direction
+            items[obj].neighbors[dir] and 
+            --if that neighbor is enabled, return it
+            (items[obj].neighbors[dir].enabled and items[obj].neighbors[dir] or 
+                --else return that neighbors neighbor
+                next_neighbor(instance,items,items[obj].neighbors[dir],dir)
+            )
+        ) or nil
 end
 
 ListManager = setmetatable(
@@ -164,6 +167,10 @@ ListManager = setmetatable(
                         if type(v) ~= "number" then error("expected number. received "..type(v),2) end
                         focus_to_index = v
                     end
+                end,
+                children_want_focus = function(instance,_ENV)
+                    return function(oldf) return children_want_focus     end,
+                    function(oldf,self,v)        children_want_focus = v end
                 end,
                 widget_type = function(instance,_ENV)
                     return function(oldf) return "ListManager" end
@@ -467,7 +474,7 @@ ListManager = setmetatable(
                         neighbors = { },
                         key_functions = {
                             up    = obj:add_key_handler(keys.Up,   function() 
-                                n = next_neighbor(items,obj,"up")
+                                n = next_neighbor(instance,items,obj,"up")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -475,7 +482,7 @@ ListManager = setmetatable(
                                 end 
                             end),
                             down  = obj:add_key_handler(keys.Down, function() 
-                                n = next_neighbor(items,obj,"down")
+                                n = next_neighbor(instance,items,obj,"down")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -483,7 +490,7 @@ ListManager = setmetatable(
                                 end 
                             end),
                             left  = obj:add_key_handler(keys.Left, function() 
-                                n = next_neighbor(items,obj,"left")
+                                n = next_neighbor(instance,items,obj,"left")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -491,7 +498,7 @@ ListManager = setmetatable(
                                 end 
                             end),
                             right = obj:add_key_handler(keys.Right,function() 
-                                n = next_neighbor(items,obj,"right")
+                                n = next_neighbor(instance,items,obj,"right")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -660,6 +667,10 @@ LayoutManager = setmetatable(
                         find_height        = true
                         reassign_neighbors = true
                     end
+                end,
+                children_want_focus = function(instance,_ENV)
+                    return function(oldf) return children_want_focus     end,
+                    function(oldf,self,v)        children_want_focus = v end
                 end,
                 cell_w = function(instance,_ENV)
                     return function(oldf) return cell_w     end,
@@ -1081,7 +1092,7 @@ LayoutManager = setmetatable(
                         neighbors = { },
                         key_functions = {
                             up    = obj:add_key_handler(keys.Up,   function() 
-                                n = next_neighbor(items,obj,"up")
+                                n = next_neighbor(instance,items,obj,"up")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -1089,7 +1100,7 @@ LayoutManager = setmetatable(
                                 end 
                             end),
                             down  = obj:add_key_handler(keys.Down, function() 
-                                n = next_neighbor(items,obj,"down")
+                                n = next_neighbor(instance,items,obj,"down")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -1097,7 +1108,7 @@ LayoutManager = setmetatable(
                                 end 
                             end),
                             left  = obj:add_key_handler(keys.Left, function() 
-                                n = next_neighbor(items,obj,"left")
+                                n = next_neighbor(instance,items,obj,"left")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
@@ -1105,7 +1116,7 @@ LayoutManager = setmetatable(
                                 end 
                             end),
                             right = obj:add_key_handler(keys.Right,function() 
-                                n = next_neighbor(items,obj,"right")
+                                n = next_neighbor(instance,items,obj,"right")
                                 if  n then 
                                     n:grab_key_focus()
                                     focused_child = n 
