@@ -182,7 +182,7 @@ void World::idle()
             lua_pushnumber( L , seconds );
             lua_pushinteger( L , i );
 
-            ud->invoke_callback( "on_step" , 2 , 0 );
+            ud->invoke_callbacks( "on_step" , 2 , 0 );
         }
     }
 }
@@ -731,7 +731,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
         {
             lua_pushvalue( L , c );
 
-            UserData::invoke_callback( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
+            UserData::invoke_callbacks( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
 
             if ( callback == PRE_SOLVE_CONTACT )
             {
@@ -747,7 +747,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
     if ( global_callbacks & callback )
     {
         lua_pushvalue( L , c );
-        UserData::invoke_callback( this , name , 1 , 0 , L );
+        UserData::invoke_callbacks( this , name , 1 , 0 , L );
 
         if ( callback == PRE_SOLVE_CONTACT )
         {

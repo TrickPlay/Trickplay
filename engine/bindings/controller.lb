@@ -1192,7 +1192,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <controllers.connected> table of connected devices
     */
 
-    callback on_disconnected;
+    function on_disconnected
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_disconnected" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_disconnected" , L );
+        ]];
+
+    int add_ondisconnected_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_disconnected" , L );
+        ]];
+
+    remove_ondisconnected_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_disconnected" , L );
+        ]];
 
     /*
         Event Handler: on_key_down
@@ -1219,7 +1235,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <on_key_up> and <UIElement.on_key_down> event handlers
     */
 
-    callback on_key_down;
+    function on_key_down
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_key_down" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_key_down" , L );
+        ]];
+
+    int add_onkeydown_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_key_down" , L );
+        ]];
+
+    remove_onkeydown_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_key_down" , L );
+        ]];
 
     /*
         Event Handler: on_key_up
@@ -1246,7 +1278,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <on_key_down> and <UIElement.on_key_up> event handlers
     */
 
-    callback on_key_up;
+    function on_key_up
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_key_up" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_key_up" , L );
+        ]];
+
+    int add_onkeyup_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_key_up" , L );
+        ]];
+
+    remove_onkeyup_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_key_up" , L );
+        ]];
 
     /*
         Event Handler: on_accelerometer
@@ -1270,7 +1318,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_accelerometer> and <stop_accelerometer> functions
     */
 
-    callback on_accelerometer;
+    function on_accelerometer
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_accelerometer" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_accelerometer" , L );
+        ]];
+
+    int add_onaccelerometer_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_accelerometer" , L );
+        ]];
+
+    remove_onaccelerometer_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_accelerometer" , L );
+        ]];
 
     /*
         Event Handler: on_gyroscope
@@ -1297,7 +1361,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_gyroscope> and <stop_gyroscope> functions
     */
 
-    callback on_gyroscope;
+    function on_gyroscope
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_gyroscope" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_gyroscope" , L );
+        ]];
+
+    int add_ongyroscope_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_gyroscope" , L );
+        ]];
+
+    remove_ongyroscope_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_gyroscope" , L );
+        ]];
 
     /*
         Event Handler: on_magnetometer
@@ -1321,7 +1401,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_magnetometer> and <stop_magnetometer> functions
     */
 
-    callback on_magnetometer;
+    function on_magnetometer
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_magnetometer" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_magnetometer" , L );
+        ]];
+
+    int add_onmagnetometer_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_magnetometer" , L );
+        ]];
+
+    remove_onmagnetometer_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_magnetometer" , L );
+        ]];
 
     /*
         Event Handler: on_attitude
@@ -1352,7 +1448,24 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_attitude> and <stop_attitude> functions
     */
 
-    callback on_attitude;
+    function on_attitude
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_attitude" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_attitude" , L );
+        ]];
+
+    int add_onattitude_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_attitude" , L );
+        ]];
+
+    remove_onattitude_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_attitude" , L );
+        ]];
+
 
     /*
         Event Handler: on_pointer_button_down
@@ -1379,7 +1492,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_pointer> and <stop_pointer> functions, the <on_pointer_button_up> and <UIElement.on_button_down> event handlers
     */
 
-    callback on_pointer_button_down;
+    function on_pointer_button_down
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pointer_button_down" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pointer_button_down" , L );
+        ]];
+
+    int add_onpointerbuttondown_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pointer_button_down" , L );
+        ]];
+
+    remove_onpointerbuttondown_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pointer_button_down" , L );
+        ]];
 
     /*
         Event Handler: on_pointer_move
@@ -1405,7 +1534,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_pointer> and <stop_pointer> functions and the <UIElement.on_motion> event handler
     */
 
-    callback on_pointer_move;
+    function on_pointer_move
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pointer_move" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pointer_move" , L );
+        ]];
+
+    int add_onpointermove_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pointer_move" , L );
+        ]];
+
+    remove_onpointermove_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pointer_move" , L );
+        ]];
 
     /*
         Event Handler: on_pointer_button_up
@@ -1432,7 +1577,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_pointer> and <stop_pointer> functions, the <on_pointer_button_down> and <UIElement.on_button_up> event handlers
     */
 
-    callback on_pointer_button_up;
+    function on_pointer_button_up
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pointer_button_up" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pointer_button_up" , L );
+        ]];
+
+    int add_onpointerbuttonup_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pointer_button_up" , L );
+        ]];
+
+    remove_onpointerbuttonup_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pointer_button_up" , L );
+        ]];
 
     /*
         Event Handler: on_pointer_active
@@ -1454,7 +1615,23 @@ interface Controller [[ControllerDelegate*]]
 		*See Also:* the <on_pointer_inactive> event handler
     */
 
-    callback on_pointer_active;
+    function on_pointer_active
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pointer_active" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pointer_active" , L );
+        ]];
+
+    int add_onpointeractive_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pointer_active" , L );
+        ]];
+
+    remove_onpointeractive_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pointer_active" , L );
+        ]];
 
     /*
         Event Handler: on_pointer_inactive
@@ -1476,7 +1653,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <on_pointer_active> event handler
     */
 
-    callback on_pointer_inactive;
+    function on_pointer_inactive
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pointer_inactive" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pointer_inactive" , L );
+        ]];
+
+    int add_onpointerinactive_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pointer_inactive" , L );
+        ]];
+
+    remove_onpointerinactive_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pointer_inactive" , L );
+        ]];
 
     /*
         Event Handler: on_touch_down
@@ -1501,7 +1694,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_touches> and <stop_touches> functions and the <on_touch_up> and <on_touch_move> event handlers
     */
 
-    callback on_touch_down;
+    function on_touch_down
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_touch_down" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_touch_down" , L );
+        ]];
+
+    int add_ontouchdown_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_touch_down" , L );
+        ]];
+
+    remove_ontouchdown_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_touch_down" , L );
+        ]];
 
     /*
         Event Handler: on_touch_move
@@ -1526,7 +1735,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_touches> and <stop_touches> functions and the <on_touch_up> and <on_touch_down> event handlers
     */
 
-    callback on_touch_move;
+    function on_touch_move
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_touch_move" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_touch_move" , L );
+        ]];
+
+    int add_ontouchmove_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_touch_move" , L );
+        ]];
+
+    remove_ontouchmove_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_touch_move" , L );
+        ]];
 
     /*
         Event Handler: on_touch_up
@@ -1551,7 +1776,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <start_touches> and <stop_touches> functions and the <on_touch_down> and <on_touch_move> event handlers
     */
 
-    callback on_touch_up;
+    function on_touch_up
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_touch_up" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_touch_up" , L );
+        ]];
+
+    int add_ontouchup_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_touch_up" , L );
+        ]];
+
+    remove_ontouchup_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_touch_up" , L );
+        ]];
 
     /*
         Event Handler: on_scroll
@@ -1577,7 +1818,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <UIElement.on_scroll> event handler
     */
 
-    callback on_scroll;
+    function on_scroll
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_scroll" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_scroll" , L );
+        ]];
+
+    int add_onscroll_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_scroll" , L );
+        ]];
+
+    remove_onscroll_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_scroll" , L );
+        ]];
 
     /*
         Event Handler: on_ui_event
@@ -1600,7 +1857,24 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <show_multiple_choice> and <enter_text> functions
     */
 
-    callback on_ui_event;
+    function on_ui_event
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_ui_event" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_ui_event" , L );
+        ]];
+
+    int add_onuievent_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_ui_event" , L );
+        ]];
+
+    remove_onuievent_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_ui_event" , L );
+        ]];
+
 
 
     /*
@@ -1624,7 +1898,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <request_image> function
     */
 
-    callback on_image;
+    function on_image
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_image" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_image" , L );
+        ]];
+
+    int add_onimage_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_image" , L );
+        ]];
+
+    remove_onimage_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_image" , L );
+        ]];
 
     /*
         Event Handler: on_image_cancelled
@@ -1646,7 +1936,23 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <request_image> function
     */
 
-    callback on_image_cancelled;
+    function on_image_cancelled
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_image_cancelled" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_image_cancelled" , L );
+        ]];
+
+    int add_onimagecancelled_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_image_cancelled" , L );
+        ]];
+
+    remove_onimagecancelled_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_image_cancelled" , L );
+        ]];
 
     /*
         UndocumentedEvent Handler: on_audio_clip_cancelled
@@ -1659,7 +1965,23 @@ interface Controller [[ControllerDelegate*]]
             controller - The controller that generated the event
     */
 
-    callback on_audio_clip_cancelled;
+    function on_audio_clip_cancelled
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_audio_clip_cancelled" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_audio_clip_cancelled" , L );
+        ]];
+
+    int add_onaudioclipcancelled_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_audio_clip_cancelled" , L );
+        ]];
+
+    remove_onaudioclipcancelled_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_audio_clip_cancelled" , L );
+        ]];
 
     /*
         Event Handler: on_advanced_ui_ready
@@ -1681,7 +2003,23 @@ interface Controller [[ControllerDelegate*]]
 		*See Also:* the <has_advanced_ui> property
     */
 
-    callback on_advanced_ui_ready;
+    function on_advanced_ui_ready
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_advanced_ui_ready" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_advanced_ui_ready" , L );
+        ]];
+
+    int add_onadvanceduiready_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_advanced_ui_ready" , L );
+        ]];
+
+    remove_onadvanceduiready_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_advanced_ui_ready" , L );
+        ]];
 
 
     /*
@@ -1707,7 +2045,24 @@ interface Controller [[ControllerDelegate*]]
         *See Also:* the <advanced_ui> function
     */
 
-    callback on_advanced_ui_event;
+    function on_advanced_ui_event
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_advanced_ui_event" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_advanced_ui_event" , L );
+        ]];
+
+    int add_onadvanceduievent_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_advanced_ui_event" , L );
+        ]];
+
+    remove_onadvanceduievent_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_advanced_ui_event" , L );
+        ]];
+
 
     /*
         Event Handler: on_streaming_video_connected
@@ -1717,7 +2072,23 @@ interface Controller [[ControllerDelegate*]]
             address - the address that was connected to
     */
 
-    callback on_streaming_video_connected;
+    function on_streaming_video_connected
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_streaming_video_connected" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_streaming_video_connected" , L );
+        ]];
+
+    int add_onstreamingvideoconnected_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_streaming_video_connected" , L );
+        ]];
+
+    remove_onstreamingvideoconnected_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_streaming_video_connected" , L );
+        ]];
 
     /*
         Event Handler: on_streaming_video_failed
@@ -1728,7 +2099,23 @@ interface Controller [[ControllerDelegate*]]
             reason - the reason for the failure
     */
 
-    callback on_streaming_video_failed;
+    function on_streaming_video_failed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_streaming_video_failed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_streaming_video_failed" , L );
+        ]];
+
+    int add_onstreamingvideofailed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_streaming_video_failed" , L );
+        ]];
+
+    remove_onstreamingvideofailed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_streaming_video_failed" , L );
+        ]];
 
     /*
         Event Handler: on_streaming_video_dropped
@@ -1739,7 +2126,23 @@ interface Controller [[ControllerDelegate*]]
             reason - the reason the call was dropped
     */
 
-    callback on_streaming_video_dropped;
+    function on_streaming_video_dropped
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_streaming_video_dropped" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_streaming_video_dropped" , L );
+        ]];
+
+    int add_onstreamingvideodropped_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_streaming_video_dropped" , L );
+        ]];
+
+    remove_onstreamingvideodropped_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_streaming_video_dropped" , L );
+        ]];
 
     /*
         Event Handler: on_streaming_video_ended
@@ -1750,7 +2153,23 @@ interface Controller [[ControllerDelegate*]]
             who - who terminated the call
     */
 
-    callback on_streaming_video_ended;
+    function on_streaming_video_ended
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_streaming_video_ended" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_streaming_video_ended" , L );
+        ]];
+
+    int add_onstreamingvideoended_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_streaming_video_ended" , L );
+        ]];
+
+    remove_onstreamingvideoended_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_streaming_video_ended" , L );
+        ]];
 
     /*
         Event Handler: on_streaming_video_status
@@ -1761,7 +2180,23 @@ interface Controller [[ControllerDelegate*]]
             arg - possible argument, depending on status
     */
 
-    callback on_streaming_video_status;
+    function on_streaming_video_status
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_streaming_video_status" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_streaming_video_status" , L );
+        ]];
+
+    int add_onstreamingvideostatus_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_streaming_video_status" , L );
+        ]];
+
+    remove_onstreamingvideostatus_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_streaming_video_status" , L );
+        ]];
 
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
 
@@ -1791,5 +2226,3 @@ interface Controller [[ControllerDelegate*]]
 
         ]];
 }
-
-

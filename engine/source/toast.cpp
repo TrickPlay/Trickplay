@@ -106,8 +106,10 @@ private:
 
     static gboolean captured_event( ClutterActor * actor , ClutterEvent * event ,  ToastUpAction * me )
     {
+        printf("1\n");
         if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TOAST_ACTION_KEY )
         {
+            printf("2\n");
             return me->selected() ? TRUE : FALSE;
         }
 
@@ -118,7 +120,7 @@ private:
     {
         if ( lua_State * L = lsp->get_lua_state() )
         {
-            if ( UserData::invoke_global_callback( L , "screen" , "on_toast" , 0 , 1 ) )
+            if ( UserData::invoke_global_callbacks( L , "screen" , "on_toast" , 0 , 1 ) )
             {
                 // If the callback returns true, we hide the toast and disconnect
                 // the key handler.
@@ -421,7 +423,6 @@ bool Toast::show_internal( lua_State * L , const char * _title , const char * _p
             NULL );
 
     // Create the action that will deal with it while the toast is up
-
     hide_source = Action::post( new ToastUpAction( L , this ) , TOAST_ANIMATE_UP_TIME + TOAST_UP_TIME );
 
     return true;

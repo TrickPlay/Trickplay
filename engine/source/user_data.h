@@ -307,6 +307,7 @@ struct UserData
     //.........................................................................
 
     static int invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults );
+    static int invoke_global_callbacks( lua_State * L , const char * global , const char * name , int nargs , int nresults , int default_ret = 0 );
 
     //.........................................................................
     // Connect a signal handler to the master. We do this so that we can

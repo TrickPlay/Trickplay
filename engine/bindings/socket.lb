@@ -13,11 +13,11 @@ public:
 	{
 		socket.set_delegate( this );
 	}
-	
+
 	TrickPlay::Socket socket;
-	
+
     virtual void on_connected();
-    
+
     virtual void on_connect_failed();
 
     virtual void on_disconnected();
@@ -25,14 +25,14 @@ public:
     virtual void on_write_failed();
 
     virtual void on_data_read( const guint8 * data, gsize count );
-    
+
     virtual void on_read_failed();
-    
+
 private:
 
 	lua_State * L;
 };
-	
+
 ]]
 
 class Socket [[ SocketDelegate * ]]
@@ -41,75 +41,171 @@ class Socket [[ SocketDelegate * ]]
 		[[
 			self = lb_construct( SocketDelegate , new SocketDelegate( L ) );
 		]];
-		
+
 	~Socket()
 		[[
 			delete self;
 		]];
-		
+
 	readonly bool is_connected
 		[[
 			is_connected = self->socket.is_connected();
 		]];
-		
+
 	connect( string host_and_port, int default_port = 80 )
 		[[
 			self->socket.connect( host_and_port, default_port );
 		]];
-		
+
 	disconnect()
 		[[
 			self->socket.disconnect();
 		]];
-		
+
 	write( lstring data )
 		[[
 			self->socket.write( ( const guint8 * ) data, data_len );
 		]];
-		
-	callback on_connected;
-	
-	callback on_connect_failed;
-	
-	callback on_disconnected;
-	
-	callback on_write_failed;
-	
-	callback on_data_read;
-	
-	callback on_read_failed;
+
+    function on_connected
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_connected" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_connected" , L );
+        ]];
+
+    int add_onconnected_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_connected" , L );
+        ]];
+
+    remove_onconnected_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_connected" , L );
+        ]];
+
+    function on_connect_failed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_connect_failed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_connect_failed" , L );
+        ]];
+
+    int add_onconnectfailed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_connect_failed" , L );
+        ]];
+
+    remove_onconnectfailed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_connect_failed" , L );
+        ]];
+
+    function on_disconnected
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_disconnected" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_disconnected" , L );
+        ]];
+
+    int add_ondisconnected_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_disconnected" , L );
+        ]];
+
+    remove_ondisconnected_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_disconnected" , L );
+        ]];
+
+    function on_write_failed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_write_failed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_write_failed" , L );
+        ]];
+
+    int add_onwritefailed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_write_failed" , L );
+        ]];
+
+    remove_onwritefailed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_write_failed" , L );
+        ]];
+
+    function on_data_read
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_data_read" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_data_read" , L );
+        ]];
+
+    int add_ondataread_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_data_read" , L );
+        ]];
+
+    remove_ondataread_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_data_read" , L );
+        ]];
+
+    function on_read_failed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_read_failed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_read_failed" , L );
+        ]];
+
+    int add_onreadfailed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_read_failed" , L );
+        ]];
+
+    remove_onreadfailed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_read_failed" , L );
+        ]];
 }
 
 [[
 void SocketDelegate::on_connected()
 {
-	invoke_Socket_on_connected( L, this, 0, 0 );
+        lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_connected",0,0);
 }
 
 void SocketDelegate::on_connect_failed()
 {
-	invoke_Socket_on_connect_failed( L, this, 0, 0 );
+	lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_connect_failed",0,0);
 }
 
 void SocketDelegate::on_disconnected()
 {
-	invoke_Socket_on_disconnected( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_disconnected",0,0);
 }
 
 void SocketDelegate::on_write_failed()
 {
-	invoke_Socket_on_write_failed( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_write_failed",0,0);
 }
 
 void SocketDelegate::on_data_read( const guint8 * data, gsize count )
 {
 	lua_pushlstring( L, ( const char * ) data, count );
-	invoke_Socket_on_data_read( L, this, 1, 0 );
+	lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_data_read",1,0);
 }
 
 void SocketDelegate::on_read_failed()
 {
-	invoke_Socket_on_read_failed( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_read_failed",0,0);
 }
-	
+
 ]]
