@@ -412,7 +412,10 @@ TabBar = setmetatable(
             
             old_update = update
             
+            pane_w = 400
+            pane_h = 300
             panes_obj = Widget_Group{
+                size = {pane_w,pane_h},
                 name = "Panes",
                 clip_to_size = true,
                 on_key_focus_in = function()
@@ -421,8 +424,6 @@ TabBar = setmetatable(
                     end
                 end
             }
-            pane_w = 400
-            pane_h = 300
             tab_w = 200
             tab_h = 50
             tab_images   = nil 
