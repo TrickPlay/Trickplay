@@ -1722,12 +1722,29 @@ interface Body [[ ClutterActor * ]]
 		*See Also:* the <physics.contacts> property and <on_end_contact> event handler
 */
 
-    callback on_begin_contact( table contact )
+    function on_begin_contact
         [[
+            return UserData::get( L )->get_last_callback( (char*) "on_begin_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_begin_contact" , L );
             Physics::Body * me = Physics::Body::get( self );
-
-            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , on_begin_contact );
+            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , 1 );
         ]];
+
+    int add_onbegincontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , 1 );
+        ]];
+
+    remove_onbegincontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
+        ]];
+
+
 
 	/*
 		Event Handler: on_end_contact
@@ -1736,11 +1753,26 @@ interface Body [[ ClutterActor * ]]
 		in <on_begin_contact>.
 	*/
 
-    callback on_end_contact( table contact )
+    function on_end_contact
         [[
+            return UserData::get( L )->get_last_callback( (char*) "on_end_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_end_contact" , L );
             Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::END_CONTACT , 1 );
+        ]];
 
-            me->world->attach_body_callback( me , Physics::END_CONTACT , on_end_contact );
+    int add_onendcontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::END_CONTACT , 1 );
+        ]];
+
+    remove_onendcontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
         ]];
 
 	/*
@@ -1752,11 +1784,26 @@ interface Body [[ ClutterActor * ]]
 		The contact details are the same as in <on_begin_contact>.
 	*/
 
-    callback on_pre_solve_contact( table contact )
+    function on_pre_solve_contact
         [[
+            return UserData::get( L )->get_last_callback( (char*) "on_pre_solve_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pre_solve_contact" , L );
             Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
 
-            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
+    int add_onpresolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
+
+    remove_onpresolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
         ]];
 
 	/*
@@ -1768,11 +1815,26 @@ interface Body [[ ClutterActor * ]]
 	    The contact details are the same as in <on_begin_contact>.
 	*/
 
-    callback on_post_solve_contact( table contact )
+    function on_post_solve_contact
         [[
+            return UserData::get( L )->get_last_callback( (char*) "on_post_solve_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_post_solve_contact" , L );
             Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
 
-            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
+    int add_onpostsolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
+
+    remove_onpostsolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
         ]];
 }
 
@@ -2229,7 +2291,23 @@ global physics [[ Physics::World * ]]
 		seconds - The fractional number of seconds since on_step was last called.
 	*/
 
-    callback on_step( double seconds );
+    function on_step
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_step" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_step" , L );
+        ]];
+
+    int add_onstep_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_step" , L );
+        ]];
+
+    remove_onstep_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_step" , L );
+        ]];
 
 	/*
 		Event Handler: on_begin_contact
@@ -2237,9 +2315,24 @@ global physics [[ Physics::World * ]]
 		Same as the the callback for each Body, but for the entire world.
 	*/
 
-	callback on_begin_contact( table contact )
+    function on_begin_contact
         [[
-            self->attach_global_callback( Physics::BEGIN_CONTACT , on_begin_contact );
+            return UserData::get( L )->get_last_callback( (char*) "on_begin_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_begin_contact" , L );
+            self->attach_global_callback( Physics::BEGIN_CONTACT , 1 );
+        ]];
+
+    int add_onbegincontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
+            self->attach_global_callback( Physics::BEGIN_CONTACT , 1 );
+        ]];
+
+    remove_onbegincontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
         ]];
 
 	/*
@@ -2248,9 +2341,24 @@ global physics [[ Physics::World * ]]
         Same as the the callback for each Body, but for the entire world.
 	*/
 
-    callback on_end_contact( table contact )
+    function on_end_contact
         [[
-            self->attach_global_callback( Physics::END_CONTACT , on_end_contact );
+            return UserData::get( L )->get_last_callback( (char*) "on_end_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_end_contact" , L );
+            self->attach_global_callback( Physics::END_CONTACT , 1 );
+        ]];
+
+    int add_onendcontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
+            self->attach_global_callback( Physics::END_CONTACT , 1 );
+        ]];
+
+    remove_onendcontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
         ]];
 
 	/*
@@ -2259,9 +2367,24 @@ global physics [[ Physics::World * ]]
         Same as the the callback for each Body, but for the entire world.
 	*/
 
-    callback on_pre_solve_contact( table contact )
+    function on_pre_solve_contact
         [[
-            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
+            return UserData::get( L )->get_last_callback( (char*) "on_pre_solve_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_pre_solve_contact" , L );
+            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
+
+    int add_onpresolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
+            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
+
+    remove_onpresolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
         ]];
 
 	/*
@@ -2270,9 +2393,24 @@ global physics [[ Physics::World * ]]
         Same as the the callback for each Body, but for the entire world.
 	*/
 
-    callback on_post_solve_contact( table contact )
+    function on_post_solve_contact
         [[
-            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
+            return UserData::get( L )->get_last_callback( (char*) "on_post_solve_contact" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_post_solve_contact" , L );
+            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
+
+    int add_onpostsolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
+            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
+
+    remove_onpostsolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
         ]];
 
 /***************************************

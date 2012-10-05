@@ -26,423 +26,471 @@ class Client
 
 public:
 
-	Client( )
-	:
-		handle( 0 ),
-		next_search_id( 1 ),
-		next_action_id( 1 )
-	{
-		static bool init = false;
-		
-		if ( ! init )
-		{
-			UpnpInit( 0 , 0 );
-			init = true;
-		}
-		
-		// The UPnP SDK has a limit of one client and one device per
-		// process, so creating a second client will fail with 
-		// UPNP_E_ALREADY_REGISTERED.
-		
-		UpnpRegisterClient( client_callback , this , & handle );
-	}
-	
-	~Client()
-	{
-		UpnpUnRegisterClient( handle );
-	}
-	
-	struct Search
-	{
-		int 				id;
-	};
-	
-	struct Action
-	{
-		int 				id;
-	};
-	
-	int search( lua_State * L , const char * target , int timeout )
-	{
-		Search * search = g_new( Search , 1 );
-				
-		search->id = next_search_id;
+    Client( )
+    :
+        handle( 0 ),
+        next_search_id( 1 ),
+        next_action_id( 1 )
+    {
+        static bool init = false;
 
-		UserData::Handle * udata = UserData::Handle::make( L , 1 , search , g_free );		
-		
-		if ( UPNP_E_SUCCESS != UpnpSearchAsync( handle , timeout , target , udata ) )
-		{
-			tplog2( "UPNP SEARCH FOR '%s' FAILED" , target );
-			
-			UserData::Handle::destroy( udata );
-			
-			return 0;
-		}  
-		
-		tplog2( "STARTED UPNP SEARCH %d FOR '%s'" , next_search_id , target );
-		
-		return next_search_id++;
-	}
-	
-	int send_action( lua_State * L , const char * control_url , const char * service_type , const char * action, int arguments )
-	{
-		IXML_Document * xml = 0;
-		
-		lua_pushnil( L );
-		
-		while ( lua_next( L , arguments ) )
-		{
-			if ( lua_really_isstring( L , -2 ) )
-			{
-				const char * k = lua_tostring( L , -2 );
-				const char * v = lua_tostring( L , -1 );
-				
-				if ( k && v )
-				{
-					UpnpAddToAction( & xml , action , service_type , k , v );
-				}
-			}
-			
-			lua_pop( L , 1 );
-		}
+        if ( ! init )
+        {
+            UpnpInit( 0 , 0 );
+            init = true;
+        }
 
-		if ( ! xml )
-		{
-			xml = UpnpMakeAction( action , service_type , 0 , 0 , 0 );
-		}
-		
-		Action * a = g_new( Action , 1 );
-				
-		a->id = next_action_id;
+        // The UPnP SDK has a limit of one client and one device per
+        // process, so creating a second client will fail with
+        // UPNP_E_ALREADY_REGISTERED.
 
-		UserData::Handle * udata = UserData::Handle::make( L , 1 , a , g_free );		
-		
-		if ( UPNP_E_SUCCESS != UpnpSendActionAsync( handle , control_url , service_type , 0 , xml , action_callback , udata ) )
-		{
-			tplog2( "UPNP ACTION '%s' FAILED" , action );
-			
-			UserData::Handle::destroy( udata );
-			
-			return 0;
-		}  
-		
-		tplog2( "STARTED UPNP ACTION %d FOR '%s'" , next_action_id , action );
-		
-		return next_action_id++;
-	}
+        UpnpRegisterClient( client_callback , this , & handle );
+    }
+
+    ~Client()
+    {
+        UpnpUnRegisterClient( handle );
+    }
+
+    struct Search
+    {
+        int                 id;
+    };
+
+    struct Action
+    {
+        int                 id;
+    };
+
+    int search( lua_State * L , const char * target , int timeout )
+    {
+        Search * search = g_new( Search , 1 );
+
+        search->id = next_search_id;
+
+        UserData::Handle * udata = UserData::Handle::make( L , 1 , search , g_free );
+
+        if ( UPNP_E_SUCCESS != UpnpSearchAsync( handle , timeout , target , udata ) )
+        {
+            tplog2( "UPNP SEARCH FOR '%s' FAILED" , target );
+
+            UserData::Handle::destroy( udata );
+
+            return 0;
+        }
+
+        tplog2( "STARTED UPNP SEARCH %d FOR '%s'" , next_search_id , target );
+
+        return next_search_id++;
+    }
+
+    int send_action( lua_State * L , const char * control_url , const char * service_type , const char * action, int arguments )
+    {
+        IXML_Document * xml = 0;
+
+        lua_pushnil( L );
+
+        while ( lua_next( L , arguments ) )
+        {
+            if ( lua_really_isstring( L , -2 ) )
+            {
+                const char * k = lua_tostring( L , -2 );
+                const char * v = lua_tostring( L , -1 );
+
+                if ( k && v )
+                {
+                    UpnpAddToAction( & xml , action , service_type , k , v );
+                }
+            }
+
+            lua_pop( L , 1 );
+        }
+
+        if ( ! xml )
+        {
+            xml = UpnpMakeAction( action , service_type , 0 , 0 , 0 );
+        }
+
+        Action * a = g_new( Action , 1 );
+
+        a->id = next_action_id;
+
+        UserData::Handle * udata = UserData::Handle::make( L , 1 , a , g_free );
+
+        if ( UPNP_E_SUCCESS != UpnpSendActionAsync( handle , control_url , service_type , 0 , xml , action_callback , udata ) )
+        {
+            tplog2( "UPNP ACTION '%s' FAILED" , action );
+
+            UserData::Handle::destroy( udata );
+
+            return 0;
+        }
+
+        tplog2( "STARTED UPNP ACTION %d FOR '%s'" , next_action_id , action );
+
+        return next_action_id++;
+    }
 
 private:
-	
-	static gboolean do_nothing_idle( gpointer data )
-	{
-		return FALSE;
-	}
-	
-	class ActionResult
-	{
-	public:
-	
-		static void post( UserData::Handle * udata , Upnp_Action_Complete * action )
-		{
-			g_assert( udata );
-			g_assert( action );
-			
-			MIGHT_BE_UNUSED Action * a = ( Action * ) udata->get_user();
-			
-			tplog2( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
-			
-    		g_idle_add_full( 
-    		    TRICKPLAY_PRIORITY ,
-    			ActionResult::process, 
-    			new ActionResult(  udata , action ),
-    			ActionResult::destroy ); 
-		}	
-			
-	private:
-	
-		ActionResult()
-		{}
-		
-		ActionResult( UserData::Handle * _udata , Upnp_Action_Complete * action )
-		:
-			udata( _udata ),
-			error_code( action->ErrCode )
-		{
-			if ( IXML_Document * doc = action->ActionResult )
-			{
-				if ( DOMString ds = ixmlDocumenttoString( doc ) )
-				{
-					xml = ds;
-					
-					ixmlFreeDOMString( ds );
-				}  
-			}
-		}
-		
-		~ActionResult()
-		{
-			UserData::Handle::destroy( udata );
-		}
-		
-		void process()
-		{
-			// We are now in the main thread with an action result
-			
-			lua_State * L = udata->get_lua_state();
-			
-			// If the Lua state is gone, we don't do a callback
-			
-			if ( ! L )
-			{
-				return;
-			}
-			
-			// The Action struct is in the handle's user data 
-			
-			Action * action = ( Action * ) udata->get_user();
-			
-			UserData * ud = udata->get_user_data();
-			
-			g_assert( ud );
-			
-			lua_pushnumber( L , action->id );
-			
-			lua_newtable(L);
-			int t=lua_gettop(L);
-			
-			lua_pushinteger(L,error_code);
-			lua_setfield(L,t,"error");
-			
-			lua_pushstring(L,xml.c_str());
-			lua_setfield(L,t,"xml");
-			
-			ud->invoke_callback( "on_action_completed" , 2 , 0 );
-		}
-		
-		static gboolean process( gpointer self )
-		{
-			( ( ActionResult * ) self )->process();
-			
-			return FALSE;
-		}
-		
-		static void destroy( gpointer self )
-		{
-			delete ( ActionResult * ) self;
-		}
-		
-		UserData::Handle * 	udata;
-		int 				error_code;
-		String				xml;
-	};
-	
-	class SearchResult
-	{
-	public:
-	
-		static void post( UserData::Handle * udata , Upnp_Discovery * discovery )
-		{
-			g_assert( udata );
-			g_assert( discovery );
-			
-    		g_idle_add_full( 
-    		    TRICKPLAY_PRIORITY ,
-    			SearchResult::process, 
-    			new SearchResult(  udata , discovery ),
-    			SearchResult::destroy ); 
-		}
-		
-		static void finished( UserData::Handle * udata )
-		{
-	    	g_idle_add_full( TRICKPLAY_PRIORITY , SearchResult::completed , udata , UserData::Handle::destroy );
-		}
-		
-	private:
-		
-		SearchResult()
-		{
-		}
-	
-		SearchResult( UserData::Handle * _udata , Upnp_Discovery * discovery )
-		:
-			udata( _udata ),
-			error_code( discovery->ErrCode ),
-			device_id( discovery->DeviceId ),
-			device_type( discovery->DeviceType ),
-			service_type( discovery->ServiceType ),
-			service_version( discovery->ServiceVer ),
-			location( discovery->Location )
-		{
-		}
-	
-		UserData::Handle * 	udata;
-		int					error_code;
-		String 				device_id;
-		String				device_type;
-		String	 			service_type;
-		String				service_version;
-		String	 			location;
-		
-		static void destroy( gpointer self )
-		{
-			delete ( SearchResult * ) self;
-		}
-		
-		void process()
-		{
-			// We are now in the main thread with a search result
-			
-			lua_State * L = udata->get_lua_state();
-			
-			// If the Lua state is gone, we don't do a callback
-			
-			if ( ! L )
-			{
-				return;
-			}
-			
-			// The Search struct is in the handle's user data 
-			
-			Search * search = ( Search * ) udata->get_user();
-			
-			UserData * ud = udata->get_user_data();
-			
-			g_assert( ud );
-			
-			lua_pushnumber( L , search->id );
-			
-			lua_newtable(L);
-			int t = lua_gettop(L);
-			
-			lua_pushinteger(L,error_code);
-			lua_setfield(L,t,"error");
-			
-			lua_pushstring(L,device_id.c_str());
-			lua_setfield(L,t,"device_id");
-			
-			lua_pushstring(L,device_type.c_str());
-			lua_setfield(L,t,"device_type");
-			
-			lua_pushstring(L,service_type.c_str());
-			lua_setfield(L,t,"service_type");
-			
-			lua_pushstring(L,service_version.c_str());
-			lua_setfield(L,t,"service_version");
-			
-			lua_pushstring(L,location.c_str());
-			lua_setfield(L,t,"location");
-						
-			ud->invoke_callback( "on_search_result" , 2 , 0 );
-		}
-		
-		static gboolean process( gpointer self )
-		{
-			( ( SearchResult * ) self )->process();
-			
-			return FALSE;
-		}
-		
-		
-		static gboolean completed( gpointer _udata )
-		{
-			UserData::Handle * udata = ( UserData::Handle * ) _udata;
 
-			if ( lua_State * L = udata->get_lua_state() )
-			{
-				Search * search = ( Search * ) udata->get_user();
-				
-				UserData * ud = udata->get_user_data();
-				
-				g_assert( ud );
-				
-				lua_pushnumber( L , search->id );
-				
-				ud->invoke_callback( "on_search_completed" , 1 , 0 );				
-			}
-			
-			return FALSE;
-		}
-	};
-	
-	static int action_callback( Upnp_EventType type , void * event , void * user )
-	{
-		switch( type )
-		{
-			case UPNP_CONTROL_ACTION_COMPLETE:
-				ActionResult::post( ( UserData::Handle * ) user , ( Upnp_Action_Complete * ) event );
-				break;
-				
-			default:
-				break;
-		}
-		
-		return 0;
-	}
-	
-	static int client_callback( Upnp_EventType type , void * event , void * user )
-	{
-		switch( type )
-		{
-        	case UPNP_DISCOVERY_SEARCH_RESULT:
-	        	{
-	        		tplog2( "SEARCH RESULT" );
-	        		// This gathers the results of the search into a search result structure
-	        		// and puts that in the main thread - to callback
-	        		
-	        		SearchResult::post( ( UserData::Handle * ) user , ( Upnp_Discovery * ) event );
-	        	}
-	        	break;
-        	
-        	case UPNP_DISCOVERY_SEARCH_TIMEOUT:
-	        	{
-	        		tplog2( "SEARCH FINISHED" );
-	        		
-	        		// This will issue a completed callback and then destroy the user data handle
-	        			        		
-	        		SearchResult::finished( ( UserData::Handle * ) user );	        	
-	        	}
-	        	break;
-        	
-        	default:
-        	
-        		break;
-		}
-		
-		return 0;
-	}
+    static gboolean do_nothing_idle( gpointer data )
+    {
+        return FALSE;
+    }
 
-	UpnpClient_Handle 	handle;
-	int					next_search_id;
-	int					next_action_id;
+    class ActionResult
+    {
+    public:
+
+        static void post( UserData::Handle * udata , Upnp_Action_Complete * action )
+        {
+            g_assert( udata );
+            g_assert( action );
+
+            MIGHT_BE_UNUSED Action * a = ( Action * ) udata->get_user();
+
+            tplog2( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
+
+            g_idle_add_full(
+                TRICKPLAY_PRIORITY ,
+                ActionResult::process,
+                new ActionResult(  udata , action ),
+                ActionResult::destroy );
+        }
+
+    private:
+
+        ActionResult()
+        {}
+
+        ActionResult( UserData::Handle * _udata , Upnp_Action_Complete * action )
+        :
+            udata( _udata ),
+            error_code( action->ErrCode )
+        {
+            if ( IXML_Document * doc = action->ActionResult )
+            {
+                if ( DOMString ds = ixmlDocumenttoString( doc ) )
+                {
+                    xml = ds;
+
+                    ixmlFreeDOMString( ds );
+                }
+            }
+        }
+
+        ~ActionResult()
+        {
+            UserData::Handle::destroy( udata );
+        }
+
+        void process()
+        {
+            // We are now in the main thread with an action result
+
+            lua_State * L = udata->get_lua_state();
+
+            // If the Lua state is gone, we don't do a callback
+
+            if ( ! L )
+            {
+                return;
+            }
+
+            // The Action struct is in the handle's user data
+
+            Action * action = ( Action * ) udata->get_user();
+
+            UserData * ud = udata->get_user_data();
+
+            g_assert( ud );
+
+            lua_pushnumber( L , action->id );
+
+            lua_newtable(L);
+            int t=lua_gettop(L);
+
+            lua_pushinteger(L,error_code);
+            lua_setfield(L,t,"error");
+
+            lua_pushstring(L,xml.c_str());
+            lua_setfield(L,t,"xml");
+
+            ud->invoke_callbacks( "on_action_completed" , 2 , 0 );
+        }
+
+        static gboolean process( gpointer self )
+        {
+            ( ( ActionResult * ) self )->process();
+
+            return FALSE;
+        }
+
+        static void destroy( gpointer self )
+        {
+            delete ( ActionResult * ) self;
+        }
+
+        UserData::Handle *     udata;
+        int                 error_code;
+        String                xml;
+    };
+
+    class SearchResult
+    {
+    public:
+
+        static void post( UserData::Handle * udata , Upnp_Discovery * discovery )
+        {
+            g_assert( udata );
+            g_assert( discovery );
+
+            g_idle_add_full(
+                TRICKPLAY_PRIORITY ,
+                SearchResult::process,
+                new SearchResult(  udata , discovery ),
+                SearchResult::destroy );
+        }
+
+        static void finished( UserData::Handle * udata )
+        {
+            g_idle_add_full( TRICKPLAY_PRIORITY , SearchResult::completed , udata , UserData::Handle::destroy );
+        }
+
+    private:
+
+        SearchResult()
+        {
+        }
+
+        SearchResult( UserData::Handle * _udata , Upnp_Discovery * discovery )
+        :
+            udata( _udata ),
+            error_code( discovery->ErrCode ),
+            device_id( discovery->DeviceId ),
+            device_type( discovery->DeviceType ),
+            service_type( discovery->ServiceType ),
+            service_version( discovery->ServiceVer ),
+            location( discovery->Location )
+        {
+        }
+
+        UserData::Handle *     udata;
+        int                    error_code;
+        String                 device_id;
+        String                device_type;
+        String                 service_type;
+        String                service_version;
+        String                 location;
+
+        static void destroy( gpointer self )
+        {
+            delete ( SearchResult * ) self;
+        }
+
+        void process()
+        {
+            // We are now in the main thread with a search result
+
+            lua_State * L = udata->get_lua_state();
+
+            // If the Lua state is gone, we don't do a callback
+
+            if ( ! L )
+            {
+                return;
+            }
+
+            // The Search struct is in the handle's user data
+
+            Search * search = ( Search * ) udata->get_user();
+
+            UserData * ud = udata->get_user_data();
+
+            g_assert( ud );
+
+            lua_pushnumber( L , search->id );
+
+            lua_newtable(L);
+            int t = lua_gettop(L);
+
+            lua_pushinteger(L,error_code);
+            lua_setfield(L,t,"error");
+
+            lua_pushstring(L,device_id.c_str());
+            lua_setfield(L,t,"device_id");
+
+            lua_pushstring(L,device_type.c_str());
+            lua_setfield(L,t,"device_type");
+
+            lua_pushstring(L,service_type.c_str());
+            lua_setfield(L,t,"service_type");
+
+            lua_pushstring(L,service_version.c_str());
+            lua_setfield(L,t,"service_version");
+
+            lua_pushstring(L,location.c_str());
+            lua_setfield(L,t,"location");
+
+            ud->invoke_callbacks( "on_search_result" , 2 , 0 );
+        }
+
+        static gboolean process( gpointer self )
+        {
+            ( ( SearchResult * ) self )->process();
+
+            return FALSE;
+        }
+
+
+        static gboolean completed( gpointer _udata )
+        {
+            UserData::Handle * udata = ( UserData::Handle * ) _udata;
+
+            if ( lua_State * L = udata->get_lua_state() )
+            {
+                Search * search = ( Search * ) udata->get_user();
+
+                UserData * ud = udata->get_user_data();
+
+                g_assert( ud );
+
+                lua_pushnumber( L , search->id );
+
+                ud->invoke_callbacks( "on_search_completed" , 1 , 0 );
+            }
+
+            return FALSE;
+        }
+    };
+
+    static int action_callback( Upnp_EventType type , void * event , void * user )
+    {
+        switch( type )
+        {
+            case UPNP_CONTROL_ACTION_COMPLETE:
+                ActionResult::post( ( UserData::Handle * ) user , ( Upnp_Action_Complete * ) event );
+                break;
+
+            default:
+                break;
+        }
+
+        return 0;
+    }
+
+    static int client_callback( Upnp_EventType type , void * event , void * user )
+    {
+        switch( type )
+        {
+            case UPNP_DISCOVERY_SEARCH_RESULT:
+                {
+                    tplog2( "SEARCH RESULT" );
+                    // This gathers the results of the search into a search result structure
+                    // and puts that in the main thread - to callback
+
+                    SearchResult::post( ( UserData::Handle * ) user , ( Upnp_Discovery * ) event );
+                }
+                break;
+
+            case UPNP_DISCOVERY_SEARCH_TIMEOUT:
+                {
+                    tplog2( "SEARCH FINISHED" );
+
+                    // This will issue a completed callback and then destroy the user data handle
+
+                    SearchResult::finished( ( UserData::Handle * ) user );
+                }
+                break;
+
+            default:
+
+                break;
+        }
+
+        return 0;
+    }
+
+    UpnpClient_Handle     handle;
+    int                    next_search_id;
+    int                    next_action_id;
 };
 
 ]]
 
 class UPnPClient [[ Client * ]]
 {
-	UPnPClient()
-		[[
-			self = lb_construct( Client , new Client );			
-		]];
-		
-	~UPnPClient()
-		[[
-			delete self;
-		]];		
-		
-	int search( string target , int timeout_seconds = 0 )
-		[[
-			result = self->search( L , target , timeout_seconds );
-		]];
-		
-	int send_action( string control_url , string service_type , string action , table arguments )
-		[[
-			result = self->send_action( L , control_url , service_type , action , arguments );
-		]];
-		
-	callback on_search_result;
-	
-	callback on_search_completed;
-	
-	callback on_action_completed;		
+    UPnPClient()
+        [[
+            self = lb_construct( Client , new Client );
+        ]];
+
+    ~UPnPClient()
+        [[
+            delete self;
+        ]];
+
+    int search( string target , int timeout_seconds = 0 )
+        [[
+            result = self->search( L , target , timeout_seconds );
+        ]];
+
+    int send_action( string control_url , string service_type , string action , table arguments )
+        [[
+            result = self->send_action( L , control_url , service_type , action , arguments );
+        ]];
+
+    function on_search_result
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_search_result" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_search_result" , L );
+        ]];
+
+    int add_onsearchresult_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_search_result" , L );
+        ]];
+
+    remove_onsearchresult_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_search_result" , L );
+        ]];
+
+    function on_search_completed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_search_completed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_search_completed" , L );
+        ]];
+
+    int add_onsearchcompleted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_search_completed" , L );
+        ]];
+
+    remove_onsearchcompleted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_search_completed" , L );
+        ]];
+
+    function on_action_completed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_action_completed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_action_completed" , L );
+        ]];
+
+    int add_onactioncompleted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_action_completed" , L );
+        ]];
+
+    remove_onactioncompleted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_action_completed" , L );
+        ]];
 }
