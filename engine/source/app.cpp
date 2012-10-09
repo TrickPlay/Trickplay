@@ -2002,7 +2002,7 @@ void App::audio_match( const String & json )
         }
         else
         {
-            ud->invoke_callback( "on_audio_match" , 1 , 0 );
+            ud->invoke_callbacks( "on_audio_match" , 1 , 0 );
         }
     }
 

@@ -4,6 +4,7 @@
 #include "context.h"
 #include "bitmap.h"
 #include "clutter_util.h"
+#include "lb.h"
 
 //=============================================================================
 
@@ -69,7 +70,7 @@ ControllerDelegate::~ControllerDelegate()
 
 void ControllerDelegate::disconnected()
 {
-    invoke_Controller_on_disconnected(L,this,0,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_disconnected",0,0);
 
     list->proxy_disconnected(this);
 }
@@ -84,7 +85,7 @@ bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicod
 
     bool result = true;
 
-    if ( invoke_Controller_on_key_down(L,this,3,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_key_down",3,1,1) )
     {
 	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
 	    {
@@ -107,7 +108,7 @@ bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode,
 
     bool result = true;
 
-    if ( invoke_Controller_on_key_up(L,this,3,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_key_up",3,1,1) )
     {
 
     	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
@@ -129,7 +130,7 @@ void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long 
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_accelerometer(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_accelerometer",4,0);
 }
 
 //.........................................................................
@@ -140,7 +141,7 @@ void ControllerDelegate::gyroscope(double x,double y,double z,unsigned long int 
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_gyroscope(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_gyroscope",4,0);
 }
 
 //.........................................................................
@@ -151,7 +152,7 @@ void ControllerDelegate::magnetometer(double x,double y,double z,unsigned long i
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_magnetometer(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_magnetometer",4,0);
 }
 
 //.........................................................................
@@ -162,7 +163,7 @@ void ControllerDelegate::attitude(double roll,double pitch,double yaw,unsigned l
     lua_pushnumber(L,pitch);
     lua_pushnumber(L,yaw);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_attitude(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_attitude",4,0);
 }
 
 //.........................................................................
@@ -175,7 +176,7 @@ bool ControllerDelegate::pointer_move(int x,int y,unsigned long int modifiers)
 
     bool result = true;
 
-    if ( invoke_Controller_on_pointer_move(L,this,3,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_pointer_move",3,1,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -198,7 +199,7 @@ bool ControllerDelegate::pointer_button_down(int button,int x,int y,unsigned lon
 
     bool result = true;
 
-    if ( invoke_Controller_on_pointer_button_down(L,this,4,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_pointer_button_down",4,1,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -221,7 +222,7 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
 
     bool result = true;
 
-    if ( invoke_Controller_on_pointer_button_up(L,this,4,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_pointer_button_up",4,1,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -237,14 +238,14 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
 
 void ControllerDelegate::pointer_active()
 {
-    invoke_Controller_on_pointer_active(L,this,0,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_pointer_active",0,0);
 }
 
 //.........................................................................
 
 void ControllerDelegate::pointer_inactive()
 {
-    invoke_Controller_on_pointer_inactive(L,this,0,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_pointer_inactive",0,0);
 }
 
 //.........................................................................
@@ -255,7 +256,7 @@ void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int mod
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_touch_down(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_touch_down",4,0);
 }
 
 //.........................................................................
@@ -266,7 +267,7 @@ void ControllerDelegate::touch_move(int finger, int x,int y,unsigned long int mo
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_touch_move(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_touch_move",4,0);
 }
 
 //.........................................................................
@@ -277,7 +278,7 @@ void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modi
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_Controller_on_touch_up(L,this,4,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_touch_up",4,0);
 }
 
 //.........................................................................
@@ -289,7 +290,7 @@ bool ControllerDelegate::scroll( int direction , unsigned long int modifiers )
 
     bool result = true;
 
-    if ( invoke_Controller_on_scroll(L,this,2,1) )
+    if ( lb_invoke_callbacks_r(L,this,"CONTROLLER_METATABLE","on_scroll",2,1,1) )
     {
     	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
     	{
@@ -307,7 +308,7 @@ bool ControllerDelegate::scroll( int direction , unsigned long int modifiers )
 void ControllerDelegate::ui_event(const String & parameters)
 {
     lua_pushstring(L,parameters.c_str());
-    invoke_Controller_on_ui_event(L,this,1,0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_ui_event",1,0);
 }
 
 //.........................................................................
@@ -329,7 +330,7 @@ void ControllerDelegate::submit_image( void * data, unsigned int size, const cha
     {
         bitmap->set_image( image );
 
-        invoke_Controller_on_image( L , this , 1 , 0 );
+        lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_image",1,0);
     }
     else
     {
@@ -343,14 +344,14 @@ void ControllerDelegate::submit_image( void * data, unsigned int size, const cha
 
 void ControllerDelegate::cancel_image( void )
 {
-	invoke_Controller_on_image_cancelled( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_image_cancelled",0,0);
 }
 
 //.........................................................................
 
 void ControllerDelegate::cancel_audio_clip( void )
 {
-	invoke_Controller_on_audio_clip_cancelled( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_audio_clip_cancelled",0,0);
 }
 
 //.........................................................................
@@ -375,7 +376,7 @@ bool ControllerDelegate::declare_resource( const String & name , const String & 
 
 void ControllerDelegate::advanced_ui_ready( void )
 {
-    invoke_Controller_on_advanced_ui_ready( L, this, 0, 0 );
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_advanced_ui_ready",0,0);
 }
 
 //.........................................................................
@@ -384,7 +385,7 @@ void ControllerDelegate::advanced_ui_event( const char * json )
 {
     JSON::parse( L , json );
 
-    invoke_Controller_on_advanced_ui_event( L , this , 1 , 0 );
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_advanced_ui_event",1,0);
 }
 
 //.........................................................................
@@ -392,7 +393,7 @@ void ControllerDelegate::advanced_ui_event( const char * json )
 void ControllerDelegate::streaming_video_connected(const char *address)
 {
     lua_pushstring(L, address);
-    invoke_Controller_on_streaming_video_connected(L, this, 1, 0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_streaming_video_connected",1,0);
 }
 
 //.........................................................................
@@ -401,7 +402,7 @@ void ControllerDelegate::streaming_video_failed(const char *address, const char 
 {
     lua_pushstring(L, address);
     lua_pushstring(L, reason);
-    invoke_Controller_on_streaming_video_failed(L, this, 2, 0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_streaming_video_failed",2,0);
 }
 
 //.........................................................................
@@ -410,7 +411,7 @@ void ControllerDelegate::streaming_video_dropped(const char *address, const char
 {
     lua_pushstring(L, address);
     lua_pushstring(L, reason);
-    invoke_Controller_on_streaming_video_dropped(L, this, 2, 0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_streaming_video_dropped",2,0);
 }
 
 //.........................................................................
@@ -419,7 +420,7 @@ void ControllerDelegate::streaming_video_ended(const char *address, const char *
 {
     lua_pushstring(L, address);
     lua_pushstring(L, who);
-    invoke_Controller_on_streaming_video_ended(L, this, 2, 0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_streaming_video_ended",2,0);
 }
 
 //.........................................................................
@@ -428,7 +429,7 @@ void ControllerDelegate::streaming_video_status(const char *status, const char *
 {
     lua_pushstring(L, status);
     lua_pushstring(L, arg);
-    invoke_Controller_on_streaming_video_status(L, this, 2, 0);
+    lb_invoke_callbacks(L,this,"CONTROLLER_METATABLE","on_streaming_video_status",2,0);
 }
 
 
@@ -472,7 +473,7 @@ void ControllerListDelegate::connected(Controller * controller)
 
 	proxies[ d ] = UserData::Handle::make( L , -1 );
 
-    invoke_controllers_on_controller_connected(L,this,1,0);
+    lb_invoke_callbacks(L,this,"CONTROLLERS_METATABLE","on_controller_connected",1,0);
 }
 
 //.........................................................................
@@ -556,4 +557,3 @@ void ControllerListDelegate::start_pointer()
         (*it)->start_pointer();
     }
 }
-

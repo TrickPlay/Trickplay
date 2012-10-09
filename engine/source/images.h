@@ -142,7 +142,7 @@ public:
 
     //.........................................................................
 
-    static void add_to_image_list( ClutterTexture * texture );
+    static void add_to_image_list( ClutterTexture * texture , bool cached = false );
 
     //.........................................................................
     // Prints out a list of all loaded Clutter textures along with their
@@ -367,7 +367,7 @@ private:
         		case COGL_PIXEL_FORMAT_YUV: // not supported by cogl
         			bpp = 0;
         			break;
-        			
+
 #ifdef CLUTTER_VERSION_1_10
 
                 case COGL_PIXEL_FORMAT_RGBA_1010102:
@@ -381,7 +381,7 @@ private:
                     bpp = 0;
                     break;
 #endif
-                    
+
         		}
 
         		width = w;
