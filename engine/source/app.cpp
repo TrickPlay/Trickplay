@@ -52,6 +52,9 @@ extern int luaopen_clutter_clone( lua_State * L );
 extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
 
+extern int luaopen_sprite_sheet( lua_State * L );
+extern int luaopen_sprite( lua_State * L );
+
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_animator( lua_State * L );
 extern int luaopen_clutter_state( lua_State * L );
@@ -1123,6 +1126,9 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_clutter_interval( L );
     luaopen_clutter_path( L );
     luaopen_clutter_constraint( L );
+
+    luaopen_sprite_sheet( L );
+    luaopen_sprite( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
