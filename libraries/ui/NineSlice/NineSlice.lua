@@ -192,7 +192,7 @@ NineSlice = setmetatable(
                         if type(v) == "table" then
                             state = nil
                             flag_for_redraw = false
-                            oldf(self,v)
+                            ns_cells = v
                         elseif type(v) == "nil" then
                             --update can redirect to here, might be problematic
                             --need to pull out old cells setter...
@@ -202,14 +202,16 @@ NineSlice = setmetatable(
                                 mid_w = instance.cells[2][2].w
                                 mid_h = instance.cells[2][2].h
                             end
-                            local new_cells = make_canvas(instance,_ENV,"default")
+                            ns_cells = make_canvas(instance,_ENV,"default")
                             if mid_w then
-                                set_inner_size( new_cells,mid_w,mid_h)
+                                set_inner_size( ns_cells,mid_w,mid_h)
                             end
-                            oldf(self,new_cells)
                         else
                             error("Expected table or string. Received "..type(v),2)
                         end
+                        oldf(self,ns_cells)
+                        find_mins(ns_cells)
+                        
                         new_sz = true
                     end
                 end,
@@ -218,11 +220,27 @@ NineSlice = setmetatable(
             },
         },
         private = {
+            find_mins = function(instance,_ENV)
+                return function(self)
+                    left_col_w  = 0
+                    right_col_w = 0
+                    top_row_h   = 0
+                    btm_row_h   = 0
+                    
+                    for i = 1, 3 do
+                        if left_col_w  < ns_cells[i][1].w then left_col_w  = ns_cells[i][1].w end
+                        if right_col_w < ns_cells[i][3].w then right_col_w = ns_cells[i][3].w end
+                        if top_row_h   < ns_cells[1][i].h then top_row_h   = ns_cells[1][i].h end
+                        if btm_row_h   < ns_cells[3][i].h then btm_row_h   = ns_cells[3][i].h end
+                    end
+                    print("find_mins",left_col_w,right_col_w)
+                end
+            end,
             set_inner_size = function(instance,_ENV)
                 return function(self,w,h)
                     print("set_inner_size",w,h)
-                    for i = 1, 3 do  self[i][2].w = w  end
-                    for i = 1, 3 do  self[2][i].h = h  end
+                    for i = 1, 3 do  ns_cells[i][2].w = w  end
+                    for i = 1, 3 do  ns_cells[2][i].h = h  end
                 end
             end,
             update = function(instance,_ENV)
@@ -238,7 +256,7 @@ NineSlice = setmetatable(
                     end
                     ---[[
                     if  not setting_size and new_sz then
-                        --print("\t resize, mis:",instance.min_w,instance.min_h)
+                        print("\t resize, mis:",instance.min_w,instance.min_h)
                         new_sz = false
                         
                         setting_size = true
@@ -250,6 +268,7 @@ NineSlice = setmetatable(
                              instance.h >= instance.min_h and 
                             (instance.h  - instance.min_h) or 0
                         )
+                        print(instance.w , instance.min_w)
                         
                         setting_size = false
                     end
@@ -285,24 +304,15 @@ NineSlice = setmetatable(
                 --if setting_size then return end
                 --print("on_entries_changed2")
                 --setting_size = true
-                left_col_w  = 0
-                right_col_w = 0
-                top_row_h   = 0
-                btm_row_h   = 0
-                
-                for i = 1, 3 do
-                    if left_col_w  < self[i][1].w then left_col_w  = self[i][1].w end
-                    if right_col_w < self[i][3].w then right_col_w = self[i][3].w end
-                    if top_row_h   < self[1][i].h then top_row_h   = self[1][i].h end
-                    if btm_row_h   < self[3][i].h then btm_row_h   = self[3][i].h end
-                end
-                
+                find_mins(self)
+                print("eoc",left_col_w,right_col_w)
                 --Call the user's on_entries_changed function
                 --on_entries_changed(self)
                 --setting_size = false
                 new_sz=  true
                 --call_update()
             end
+            print("NS eoc",on_entries_changed)
             --[[
             do
                 local mt = getmetatable(instance.cells)
