@@ -116,7 +116,11 @@ DialogBox = setmetatable(
                 end,
                 title = function(instance,_ENV)
                     return function(oldf,self) return title.text     end,
-                    function(oldf,self,v)             title.text = v end
+                    function(oldf,self,v)             
+                        title.text = v 
+                        print("text h",title.h)
+                        redraw_title = true
+                    end
                 end,
                 separator_y = function(instance,_ENV)
                     return function(oldf,self) return separator_y     end,
@@ -124,6 +128,8 @@ DialogBox = setmetatable(
                         separator_y = v
                         content_group.y = v
                         flag_for_redraw = true
+                        redraw_title = true
+                        separator_y_set = true
                     end
                 end,
                 children = function(instance,_ENV)
@@ -212,7 +218,6 @@ DialogBox = setmetatable(
                     title.x            = text_style.x_offset
                     title.color        = text_style.colors.default
                     
-                    center_title()
                 end
             end,
             center_title = function(instance,_ENV)
@@ -287,6 +292,16 @@ DialogBox = setmetatable(
             update = function(instance,_ENV)
                 return function()
                     
+                    if redraw_title then
+                        redraw_title = false
+                        update_title()
+                        if not separator_y_set then
+                            separator_y = title.h
+                            content_group.y = separator_y
+                            print(separator_y)
+                        end
+                        resize = true
+                    end
                     if flag_for_redraw then
                         flag_for_redraw = false
                         if canvas then
@@ -294,10 +309,6 @@ DialogBox = setmetatable(
                         else
                             resize_images()
                         end
-                    end
-                    if redraw_title then
-                        redraw_title = false
-                        update_title()
                     end
                     if resize then
                         resize = false
@@ -324,7 +335,8 @@ DialogBox = setmetatable(
             title = Text{text="DialogBox"}
             content_group = Widget_Group()
             bg = nil
-            separator_y = parameters.separator_y or 100
+            separator_y_set = false
+            separator_y = 50
             content_group.y = separator_y
             
             w = 400
