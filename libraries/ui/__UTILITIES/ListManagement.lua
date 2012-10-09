@@ -1,5 +1,9 @@
 LISTMANAGER = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+
 ArrayManager = function(p)
     local instance
     -- Metatables

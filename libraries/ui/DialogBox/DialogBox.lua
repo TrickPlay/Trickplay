@@ -1,5 +1,8 @@
 DIALOGBOX = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 local function default_bg(self,w,h)
 	
 	
@@ -45,59 +48,59 @@ DialogBox = setmetatable(
         public = {
             properties = {
             
-                widget_type = function(instance,env)
+                widget_type = function(instance,_ENV)
                     return function() return "DialogBox" end, nil
                 end,
-                w = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.size_is_set = true env.w = v end
+                w = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) flag_for_redraw = true size_is_set = true w = v end
                 end,
-                width = function(instance,env)
-                    return function(oldf) return env.w     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.size_is_set = true env.w = v end
+                width = function(instance,_ENV)
+                    return function(oldf) return w     end,
+                    function(oldf,self,v) flag_for_redraw = true size_is_set = true w = v end
                 end,
-                h = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.size_is_set = true env.h = v end
+                h = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) flag_for_redraw = true size_is_set = true h = v end
                 end,
-                height = function(instance,env)
-                    return function(oldf) return env.h     end,
-                    function(oldf,self,v) env.flag_for_redraw = true env.size_is_set = true env.h = v end
+                height = function(instance,_ENV)
+                    return function(oldf) return h     end,
+                    function(oldf,self,v) flag_for_redraw = true size_is_set = true h = v end
                 end,
-                size = function(instance,env)
-                    return function(oldf) return {env.w,env.h}     end,
+                size = function(instance,_ENV)
+                    return function(oldf) return {w,h}     end,
                     function(oldf,self,v) 
-                        env.flag_for_redraw = true 
-                        env.size_is_set = true 
-                        env.w = v[1]
-                        env.h = v[2]
+                        flag_for_redraw = true 
+                        size_is_set = true 
+                        w = v[1]
+                        h = v[2]
                     end
                 end,
-                image = function(instance,env)
-                    return function(oldf,self) return env.image     end,
+                image = function(instance,_ENV)
+                    return function(oldf,self) return image     end,
                     function(oldf,self,v) 
                         
                         if type(v) == "string" then
                             
-                            if env.image == nil or env.image.src ~= v then
+                            if image == nil or image.src ~= v then
                                 
-                                env.setup_image(Image{ src = v })
+                                setup_image(Image{ src = v })
                                 
                             end
                             
                         elseif type(v) == "userdata" and v.__types__.actor then
                             
-                            if v ~= env.image then
+                            if v ~= image then
                                 
-                                env.setup_image(v)
+                                setup_image(v)
                                 
                             end
                             
                         elseif v == nil then
                             
-                            if not env.canvas then
+                            if not canvas then
                                 
-                                env.flag_for_redraw = true
+                                flag_for_redraw = true
                                 
                                 return
                                 
@@ -111,23 +114,23 @@ DialogBox = setmetatable(
                         
                     end
                 end,
-                title = function(instance,env)
-                    return function(oldf,self) return env.title.text     end,
-                    function(oldf,self,v)             env.title.text = v end
+                title = function(instance,_ENV)
+                    return function(oldf,self) return title.text     end,
+                    function(oldf,self,v)             title.text = v end
                 end,
-                separator_y = function(instance,env)
-                    return function(oldf,self) return env.separator_y     end,
+                separator_y = function(instance,_ENV)
+                    return function(oldf,self) return separator_y     end,
                     function(oldf,self,v) 
-                        env.separator_y = v
-                        env.content_group.y = v
-                        env.flag_for_redraw = true
+                        separator_y = v
+                        content_group.y = v
+                        flag_for_redraw = true
                     end
                 end,
-                children = function(instance,env)
-                    return function(oldf) return env.content_group.children     end,
+                children = function(instance,_ENV)
+                    return function(oldf) return content_group.children     end,
                     function(oldf,self,v) 
                         if type(v) ~= "table" then error("Expected table. Received "..type(v), 2) end
-                        env.content_group:clear()
+                        content_group:clear()
                         
                         if type(v) == "table" then
                             
@@ -135,7 +138,7 @@ DialogBox = setmetatable(
                                 
                                 if type(obj) == "table" and obj.type then 
                                     
-                                    v[i] = _G[obj.type](obj)
+                                    v[i] = _ENV[obj.type](obj)
                                     
                                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                                 
@@ -144,31 +147,31 @@ DialogBox = setmetatable(
                                 end
                                 
                             end
-                            env.content_group:add(unpack(v))
+                            content_group:add(unpack(v))
                             
                         elseif type(v) == "userdata" then
                             
-                            env.content_group:add(v)
+                            content_group:add(v)
                             
                         end
                     end
                 end,
-                attributes = function(instance,env)
+                attributes = function(instance,_ENV)
                     return function(oldf,self) 
                         local t = oldf(self)
                             
                         t.separator_y = instance.separator_y
                         t.title       = instance.title
                         
-                        if (not env.canvas) and env.bg.src and env.bg.src ~= "[canvas]" then 
+                        if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
                             
-                            t.image = env.bg.src
+                            t.image = bg.src
                             
                         end
                         
                         t.children = {}
                         
-                        for i, child in ipairs(env.content_group.children) do
+                        for i, child in ipairs(content_group.children) do
                             t.children[i] = child.attributes
                         end
                         --[[
@@ -188,8 +191,8 @@ DialogBox = setmetatable(
     
             },
             functions = {
-                add    = function(instance,env) return function(oldf,self,...) env.content_group:add(   ...) end end,
-                remove = function(instance,env) return function(oldf,self,...) env.content_group:remove(...) end end,
+                add    = function(instance,_ENV) return function(oldf,self,...) content_group:add(   ...) end end,
+                remove = function(instance,_ENV) return function(oldf,self,...) content_group:remove(...) end end,
                 
                 
             },
@@ -198,81 +201,81 @@ DialogBox = setmetatable(
         
         private = {
         
-            update_title = function(instance,env)
+            update_title = function(instance,_ENV)
                 return function()
                     
                     local text_style = instance.style.text
                     
-                    env.title:set(   text_style:get_table()   )
+                    title:set(   text_style:get_table()   )
                     
-                    env.title.anchor_point = {0,env.title.h/2}
-                    env.title.x            = text_style.x_offset
-                    env.title.color        = text_style.colors.default
+                    title.anchor_point = {0,title.h/2}
+                    title.x            = text_style.x_offset
+                    title.color        = text_style.colors.default
                     
-                    env.center_title()
+                    center_title()
                 end
             end,
-            center_title = function(instance,env)
+            center_title = function(instance,_ENV)
                 return function()
                     
-                    env.title.w = instance.w
-                    env.title.y = instance.style.text.y_offset + env.separator_y/2
+                    title.w = instance.w
+                    title.y = instance.style.text.y_offset + separator_y/2
                     
                 end
             end,
-            resize_images = function(instance,env)
+            resize_images = function(instance,_ENV)
                 return function()
                     
-                    if not env.size_is_set then return end
+                    if not size_is_set then return end
                     
-                    env.bg.w = instance.w
-                    env.bg.h = instance.h
+                    bg.w = instance.w
+                    bg.h = instance.h
                     
                 end
             end,
-            make_canvas = function(instance,env)
+            make_canvas = function(instance,_ENV)
                 return function()
                     
                     --env.flag_for_redraw = false
                     
-                    env.canvas = true
+                    canvas = true
                     
-                    if env.bg then env.bg:unparent() end
+                    if bg then bg:unparent() end
                     
-                    env.bg = default_bg(instance,env.w,env.h)
+                    bg = default_bg(instance,w,h)
                     
-                    env.add(instance, env.bg )
+                    add(instance, bg )
                     
-                    env.bg:lower_to_bottom()
+                    bg:lower_to_bottom()
                     
                     return true
                     
                 end
             end,
-            setup_image = function(instance,env)
+            setup_image = function(instance,_ENV)
                 return function(v)
                     
-                    env.canvas = false
+                    canvas = false
                     
-                    env.bg = v
+                    bg = v
                     
-                    if env.bg then env.bg:unparent() end
+                    if bg then bg:unparent() end
                     
-                    env.add(instance, env.bg )
+                    add(instance, bg )
                     
-                    env.bg:lower_to_bottom()
+                    bg:lower_to_bottom()
                     
                     if instance.is_size_set() then
                         
-                        env.resize_images()
+                        resize_images()
                         
                     else
                         --so that the label centers properly
-                        instance.size = env.bg.size
+                        instance.size = bg.size
                         
                         --instance:reset_size_flag()
                         
-                        env.center_title()
+                        center_title()
                         
                     end
                     
@@ -281,24 +284,24 @@ DialogBox = setmetatable(
                 end
             end,
 		
-            update = function(instance,env)
+            update = function(instance,_ENV)
                 return function()
                     
-                    if env.flag_for_redraw then
-                        env.flag_for_redraw = false
-                        if env.canvas then
-                            env.make_canvas()
+                    if flag_for_redraw then
+                        flag_for_redraw = false
+                        if canvas then
+                            make_canvas()
                         else
-                            env.resize_images()
+                            resize_images()
                         end
                     end
-                    if env.redraw_title then
-                        env.redraw_title = false
-                        env.update_title()
+                    if redraw_title then
+                        redraw_title = false
+                        update_title()
                     end
-                    if env.resize then
-                        env.resize = false
-                        env.center_title()
+                    if resize then
+                        resize = false
+                        center_title()
                     end
                 end
             end,
@@ -307,376 +310,38 @@ DialogBox = setmetatable(
             
             parameters = parameters or {}
             
-            local instance, env = Widget()
+            local instance, _ENV = Widget()
             local getter, setter
             
           
-            env.style_flags = {
+            style_flags = {
                 border = "flag_for_redraw",
                 text = {
                     "redraw_title",
                 },
                 fill_colors = "flag_for_redraw"
             }
-            env.title = Text{text="DialogBox"}
-            env.content_group = Widget_Group()
-            env.bg = nil
-            env.separator_y = parameters.separator_y or 100
-            env.content_group.y = env.separator_y
+            title = Text{text="DialogBox"}
+            content_group = Widget_Group()
+            bg = nil
+            separator_y = parameters.separator_y or 100
+            content_group.y = separator_y
             
-            env.w = 400
-            env.h = 300
-            env.canvas = true
-            env.redraw_title = true
-            env.flag_for_redraw = true
-            env.resize = true
+            w = 400
+            h = 300
+            canvas = true
+            redraw_title = true
+            flag_for_redraw = true
+            resize = true
             
-            env.add( instance, env.content_group, env.border, env.title )
+            add( instance, content_group, border, title )
             
-            for name,f in pairs(self.private) do
-                env[name] = f(instance,env)
-            end
+            setup_object(self,instance,_ENV)
             
-            for name,f in pairs(self.public.properties) do
-                getter, setter = f(instance,env)
-                override_property( instance, name,
-                    getter, setter
-                )
-                
-            end
-            
-            for name,f in pairs(self.public.functions) do
-                
-                override_function( instance, name, f(instance,env) )
-                
-            end
-            
-            for t,f in pairs(self.subscriptions) do
-                instance:subscribe_to(t,f(instance,env))
-            end
-            --[[
-            for _,f in pairs(self.subscriptions_all) do
-                instance:subscribe_to(nil,f(instance,env))
-            end
-            --]]
-            dumptable(env.get_children(instance))
-            return instance, env
+            dumptable(get_children(instance))
+            return instance, _ENV
             
         end
     }
 )
-
-
---[=[
-                    
-DialogBox = function(parameters)
-	
-	-- input is either nil or a table
-	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-	parameters = is_table_or_nil("DialogBox",parameters)
-	
-	--flags
-	local canvas          = type(parameters.images) == "nil"
-	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
-	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
-		parameters.h or
-		parameters.w or
-		parameters.height or
-		parameters.width or
-		parameters.size
-	
-	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-	parameters = recursive_overwrite(parameters,default_parameters) 
-    
-	----------------------------------------------------------------------------
-	--The DialogBox Object inherits from Widget
-	
-	local instance, env = Widget( parameters )
-	
-	--the default w and h does not count as setting the size
-	if not size_is_set then instance:reset_size_flag() end
-	
-	local title = Text()
-	
-    local content_group = Widget_Group()
-    
-	local bg
-	
-	local separator_y = parameters.separator_y
-	----------------------------------------------------------------------------
-	-- private helper functions for common actions
-	
-	local function resize_images()
-		
-		if not size_is_set then return end
-		
-		bg.w = instance.w
-		bg.h = instance.h
-		
-	end
-	
-	local center_title = function()
-		
-		title.w = instance.w
-		title.y = instance.style.text.y_offset +separator_y/2
-		
-	end
-	
-	----------------------------------------------------------------------------
-	
-	local function make_canvas()
-		
-		flag_for_redraw = false
-		
-		canvas = true
-		
-		if bg then bg:unparent() end
-		
-		bg = default_bg(instance)
-		
-		env.add(instance, bg )
-		
-		bg:lower_to_bottom()
-		
-		return true
-		
-	end
-	
-	local function setup_image(v)
-		
-		canvas = false
-		
-		bg = v
-		
-		if bg then bg:unparent() end
-		
-		env.add(instance, bg )
-		
-		bg:lower_to_bottom()
-		
-		if instance.is_size_set() then
-			
-			resize_images()
-			
-		else
-			--so that the label centers properly
-			instance.size = bg.size
-			
-			instance:reset_size_flag()
-			
-			center_title()
-			
-		end
-		
-		return true
-		
-	end
-	
-	----------------------------------------------------------------------------
-	--functions pertaining to getting and setting of attributes
-	
-    
-	override_property(instance,"widget_type",
-		function() return "DialogBox" end, nil
-	)
-    
-	override_property(instance,"image",
-		
-		function(oldf)    return image   end,
-		
-		function(oldf,self,v)
-			
-			if type(v) == "string" then
-				
-				if image == nil or image.src ~= v then
-					
-					setup_image(Image{ src = v })
-					
-				end
-				
-			elseif type(v) == "userdata" and v.__types__.actor then
-				
-				if v ~= image then
-					
-					setup_image(v)
-					
-				end
-				
-			elseif v == nil then
-				
-				if not canvas then
-					
-					flag_for_redraw = true
-					
-					return
-					
-				end
-				
-			else
-				
-				error("DialogBox.image expected type 'table'. Received "..type(v),2)
-				
-			end
-			
-		end
-	)
-	override_property(instance,"title",
-		function(oldf) return title.text     end,
-		function(oldf,self,v) title.text = v end
-	)
-	
-	
-	override_property(instance,"separator_y",
-		function(oldf) return separator_y     end,
-		function(oldf,self,v)
-			
-			separator_y = v
-			
-			if canvas then flag_for_redraw = true end
-			
-            content_group.y = v
-		end
-	)
-	
-	override_property(instance,"content",
-		function(oldf)
-            
-            return content_group.children     
-            
-        end,
-		function(oldf,self,v)
-			
-			content_group:clear()
-			
-			if type(v) == "table" then
-				
-                for i,obj in ipairs(v) do
-                    
-                    if type(obj) == "table" and obj.type then 
-                        
-                        v[i] = _G[obj.type](obj)
-                        
-                    elseif type(obj) ~= "userdata" and obj.__types__.actor then 
-                    
-                        error("Must be a UIElement or nil. Received "..obj,2) 
-                        
-                    end
-                    
-                end
-				content_group:add(unpack(v))
-				
-			elseif type(v) == "userdata" then
-				
-				content_group:add(v)
-				
-			end
-			
-		end
-	)
-	override_function(instance,"add",
-		function(oldf,self,...) content_group:add(...) end
-	)
-	
-	----------------------------------------------------------------------------
-    
-	override_property(instance,"attributes",
-        function(oldf,self)
-            local t = oldf(self)
-                
-            t.separator_y = self.separator_y
-            t.title = self.title
-            
-            if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
-                
-                t.image = bg.src
-                
-            end
-            
-            t.content = {}
-            
-            for i, child in ipairs(self.content) do
-                t.content[i] = child.attributes
-            end
-            
-            --[[
-            if content and content.to_json then
-                
-                t.children = 
-                
-            end
-            --]]
-            
-            t.type = "DialogBox"
-            
-            return t
-        end
-    )
-    
-    ----------------------------------------------------------------------------
-	
-	instance:subscribe_to(
-		{"h","w","width","height","size","separator_y"},
-		function()
-			
-			flag_for_redraw = true
-			
-			center_title()
-			
-		end
-	)
-	instance:subscribe_to(
-		nil,
-		function()
-			
-			if flag_for_redraw then
-				flag_for_redraw = false
-				if canvas then
-					make_canvas()
-				else
-					resize_images()
-				end
-			end
-			
-		end
-	)
-	local text_style
-	local update_title  = function()
-		
-		text_style = instance.style.text
-		
-		title:set(   text_style:get_table()   )
-		
-		title.anchor_point = {0,title.h/2}
-		title.x            = text_style.x_offset
-		title.color        = text_style.colors.default
-        
-		center_title()
-		
-	end
-	
-	local canvas_callback = function() if canvas then make_canvas() end end
-	
-	local instance_on_style_changed
-    function instance_on_style_changed()
-        
-        instance.style.border:subscribe_to(      nil, canvas_callback )
-        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
-        instance.style.text:subscribe_to( nil, update_title )
-        
-		update_title()
-		flag_for_redraw = true
-	end
-	
-	instance:subscribe_to( "style", instance_on_style_changed )
-	
-	instance_on_style_changed()
-	
-	
-	env.add(instance,content_group,title)
-	
-	instance:set(parameters)
-	
-	return instance
-end
-
---]=]
+external.DialogBox = DialogBox
