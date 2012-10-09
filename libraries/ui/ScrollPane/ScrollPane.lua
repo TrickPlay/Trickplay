@@ -114,11 +114,17 @@ ScrollPane = setmetatable(
                 end,
                 virtual_x = function(instance,_ENV)
                     return function(oldf) return pane.virtual_x     end,
-                    function(oldf,self,v) pane.virtual_x = v end
+                    function(oldf,self,v) 
+                        pane.virtual_x = v 
+                        horizontal.progress = v/(pane.virtual_w - pane.w)
+                    end
                 end,
                 virtual_y = function(instance,_ENV)
                     return function(oldf) return pane.virtual_y     end,
-                    function(oldf,self,v) pane.virtual_y = v end
+                    function(oldf,self,v) 
+                        pane.virtual_y = v 
+                        vertical.progress = v/(pane.virtual_h - pane.h)
+                    end
                 end,
                 pane_w = function(instance,_ENV)
                     return function(oldf) return pane.w     end,
