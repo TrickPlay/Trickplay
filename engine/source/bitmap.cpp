@@ -113,7 +113,7 @@ void Bitmap::callback( Image * image , gpointer me )
     if ( lua_State * L = self->lsp->get_lua_state() )
     {
         lua_pushboolean( L , image ? false : true );
-        UserData::invoke_callback( self , "on_loaded" , 1 , 0 , L );
+        UserData::invoke_callbacks( self , "on_loaded" , 1 , 0 , L );
     }
 }
 
