@@ -1,16 +1,5 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("Button/Button.lua")                 end
-if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")     end
-
-
-
+--[[
 local button_test_group = Group{}
 
 screen:add( button_test_group )
@@ -116,15 +105,16 @@ for i,test in ipairs(toggle_tests) do
     if not test() then print("toggle_test "..i.." failed") end
     
 end
+--]]
 --[[
 for i,test in ipairs(button_tests) do
     
     if not test() then print("button_test "..i.." failed") end
     
 end
---]]
 
 button_test_group:unparent()
+--]]
 
 
 
@@ -152,15 +142,15 @@ local style = {
 screen:show()
 print("ssssssssssssssssssssssssssssssssss")
 ---[[
-b0 = ToggleButton()
+b0 = WL.ToggleButton()
 b0.x = 400
 
-b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text",reactive=true}
+b1 = WL.ToggleButton{x=400,y=100,style = style,selected = false, label = "text",reactive=true}
 
-b2 = ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,reactive=true}
+b2 = WL.ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,reactive=true}
 
 --]]
-b3 = ToggleButton{
+b3 = WL.ToggleButton{
     name = "B2",
     x = 600,y = 0,
     images = {

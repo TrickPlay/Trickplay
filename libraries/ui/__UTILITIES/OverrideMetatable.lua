@@ -1,5 +1,8 @@
 OVERRIDEMETATABLE = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 function override_property( object , name , getter , setter )
     assert( type( object ) == "userdata" )
     assert( type( name )   == "string"   )
