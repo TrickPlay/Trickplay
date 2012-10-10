@@ -1,5 +1,8 @@
 TYPECHECKING = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 function expects(type_wanted, received)
     return type(received) == type_wanted or error(
         "Expected "..type_wanted..". Received "..type(received)..
