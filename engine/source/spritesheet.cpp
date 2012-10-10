@@ -5,6 +5,16 @@
 
 #include "log.h"
 
+
+#ifdef CLUTTER_VERSION_1_10
+#define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
+#define TP_CoglTexture CoglTexture *
+#else
+#define TP_COGL_TEXTURE(t) (t)
+#define TP_CoglTexture CoglHandle
+#endif
+
+
 void log_subtexture( gpointer id_ptr , gpointer subtexture_ptr , gpointer none );
 void init_extra( SpriteSheet * sheet );
 
@@ -43,7 +53,7 @@ bool SpriteSheet::is_initialized()
 bool SpriteSheet::map_subtexture( const gchar * id , int x , int y , int w , int h )
 {
     check_initialized();
-    CoglHandle subtexture = cogl_texture_new_from_sub_texture( COGL_TEXTURE( texture ) , x , y , w , h );
+    CoglHandle subtexture = cogl_texture_new_from_sub_texture( TP_COGL_TEXTURE( texture ) , x , y , w , h );
 
     // We don't need the extra reference taken by cogl_texture_new_from_sub_texture
     cogl_handle_unref( texture );
@@ -88,7 +98,7 @@ void SpriteSheet::make_material_from_subtexture( const gchar * id , CoglMaterial
         return;
     }
 
-    CoglTexture * subtexture = COGL_TEXTURE( subtexture_handle );
+    TP_CoglTexture subtexture = TP_COGL_TEXTURE( subtexture_handle );
 
     CoglMaterial * new_material = cogl_material_new();
     cogl_material_set_layer( new_material , 0 , subtexture );
@@ -100,7 +110,7 @@ void SpriteSheet::make_material_from_subtexture( const gchar * id , CoglMaterial
 
 void log_subtexture( gpointer id_ptr , gpointer subtexture_ptr , gpointer none )
 {
-    CoglTexture * subtexture = COGL_TEXTURE( (CoglHandle) subtexture_ptr );
+    TP_CoglTexture subtexture = TP_COGL_TEXTURE( (CoglHandle) subtexture_ptr );
 
     gchar * id = (gchar*) id_ptr;
     int     w = cogl_texture_get_width( subtexture );
