@@ -1,5 +1,9 @@
 MISC = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+
 function bound_to(lower,value,upper)
     
     if lower > value then return lower
