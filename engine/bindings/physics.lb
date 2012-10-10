@@ -22,7 +22,7 @@ Objects added to the physics variable are based on the UIElement interface, such
 
 When the physics world has been configured and the desired objects added to it, the physics simulation can begin by calling the variable's start() function.
 
-The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, the Rectangle falls until it eventually lands on the static ground object.
+The simple program listing below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, the Rectangle falls until it lands on the static ground object.
 
 	(code)
 	-- Basic 2D Physics Application
@@ -218,7 +218,7 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Property: position
 
-	The position property is a table that contains the current X,Y screen coordinates of the center of the Body/UIElement object.
+	The position property is a table that contains the current X,Y screen coordinates of the center of the Body/UIElement object. The coordinates are of data type double.
 
 	*Default Setting:* { X, Y } coordinates of the object's center at the time the Body is created
 
@@ -470,7 +470,7 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Property: world_center
 
-	The world_center property is a table containing the { X, Y } coordinates of the center position in the physics environment of the object's mass. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from its screen position, which is based on the center of its Body.
+	The world_center property is a table containing the { X, Y } coordinates of the center position of the object's mass in the physics environment. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from its screen position, which is based on the center of its Body.
 
 	*Format:* { center-of-mass X coordinate, center-of-mass Y coordinate } where each coordinate is relative to the physics environment
 
@@ -516,7 +516,7 @@ interface Body [[ ClutterActor * ]]
 
 	Negative X values push the object to the left; positive X values push it to the right. Negative Y values push the object up; positive Y values push it down.
 
-	To apply a temporary force upon an object, call the <apply_force>() function.
+	To apply a temporary force upon an object, call the <apply_force> function.
 
 	*Format:* { X-axis velocity, Y-axis velocity }
 
@@ -643,7 +643,7 @@ interface Body [[ ClutterActor * ]]
 
 	The bullet property is a boolean flag indicating whether or not the object should be processed as a fast-moving bullet (true=is bullet).
 
-	A fast-moving object can move a long distance between steps of the physics simulation. Because of this speed, it's possible for the object to pass through other objects without a collision being detected. This event is called "tunneling." To prevent tunneling, the fast-moving object should be flagged as a "bullet" to enable "continuous collision detection" (CCD). With CCD enabled, collisions are detected for even fast-moving objects. For performance reasons, CCD is disabled by default.
+	A fast-moving object can move a long distance between steps of the physics simulation. Because of this speed, it's possible for the object to pass through other objects between physics simulation steps without a collision being detected. This passing-through is called "tunneling." To prevent tunneling, the fast-moving object should be flagged as a "bullet" to enable "continuous collision detection" (CCD). With CCD enabled, collisions are detected for even fast-moving objects. Increasing collision checking requires additional processing, so it should be enabled for fast-moving objects only. For performance reasons, CCD is disabled by default.
 
 	The bullet property affects Body objects of type "dynamic" only.
 
@@ -827,7 +827,7 @@ interface Body [[ ClutterActor * ]]
 
 	The apply_linear_impulse() function applies a temporary, directional force to the object.
 
-	Applying a linear impulse on an object is similar to applying a force using the <apply_force>() function, but a linear impulse is a sharp and sudden force, like a hammer hitting an object, while a force is a steady pressure, like a person pushing an automobile.
+	Applying a linear impulse on an object is similar to applying a force using the <apply_force> function, but a linear impulse is a sharp and sudden force, like a hammer hitting an object, while the force used in apply_force() is a steady pressure, like a person pushing an automobile.
 
 	If a linear impulse is applied anywhere other than the center of the object's mass, a torque is created which may cause the object to rotate.
 
@@ -998,7 +998,7 @@ interface Body [[ ClutterActor * ]]
 
 		fixture_handle - handle of the fixture to remove. The fixture handle is returned by the <add_fixture> function that created the fixture.
 
-	*Return Value:* boolean flag indicating the operation's success or failure (true=fixture was removed)
+	*Return Value:* Boolean flag indicating the operation's success or failure (true=fixture was removed)
 
 	*See Also:* the <fixtures> property and <add_fixture> and <remove_all_fixtures> functions
 */
@@ -1069,7 +1069,7 @@ interface Body [[ ClutterActor * ]]
 		sensor - boolean flag indicating whether or not the fixture is a sensor (true=sensor). A sensor can share space with another object without colliding into it, such as in a top-down view of a bird flying over a tree. Although collisions do not occur, the sensor still generates on_contact()-type events when interacting with other objects. Default: false
 		filter - collision filtering. For details, refer to the explanation below.
 
-	*Return Value:* unique integer fixture handle
+	*Return Value:* Unique integer fixture handle
 
 	*Collision Filtering:*
 
@@ -1078,23 +1078,23 @@ interface Body [[ ClutterActor * ]]
 		The filter property is a table with the following keys.
 
 			group - signed integer specifying the fixture's group. Default: 0
-			category - 16-bit integer specifying the fixture's category ID or table of integers specifying the fixture's category IDs. Each bit in the integer identifies a single category; therefore, an application may have a maximum of 16 category IDs. Valid Range: 0-15 where the value specifies the bit position; 0 is the right-most bit, 15 is the left-most bit. To clear all bits and set to zero, specify an empty table. Default Category ID: 0. Default Category Value: 0x0001. Note: The default Category ID 0 is represented by bit 0 in the category integer. Thus, ID 0 sets bit 0, which results in a category value of 1. Category ID 1 sets bit 1, which results in a category value of 2. ID 2 sets bit 2, which results in a category value of 4. And so on. Got it?
-			mask - 16-bit integer specifying the categories the fixture will collide with. Each bit in the integer identifies a collidable category. Valid Range: 0-15 where the value specifies the bit position; 0 is the right-most bit, 15 is the left-most bit. To clear all bits so that the object will not collide with any object, specify an empty table. Default: 0xFFFF (i.e., will collide with all other fixtures)
+			category - integer or table of integers specifying the fixture's category ID(s). Valid Range: 0-15. Normally, a fixture belongs to only a single category, but it's possible to place the fixture in multiple categories by specifying the category IDs in the table of integers. Default: 0.
+			mask - integer or table of integers specifying the categories the fixture will collide with. A category is specified by its ID. Valid Range: 0-15. To indicate that the fixture should not collide with any fixture, specify an empty table (not a value of 0). Default: 0xFFFF (i.e., fixture will collide with all other fixtures).
 
-		The category and mask keys contain 16-bit bit-flag values. The two keys work together to determine whether or not two touching objects are colliding. The category setting identifies the fixture's category. Normally, a fixture belongs to only a single category, but it's possible to place the fixture in multiple categories. The mask setting specifies the categories that the fixture will collide with. An example setting is shown below.
+		The category and mask keys work together to determine whether or not two touching objects are colliding. The category setting identifies the fixture's category (or categories). The mask setting specifies the categories that the fixture will collide with. An example setting is shown below.
 
 		(code)
 		-- Create a fixture in category 3 that will collide with fixtures in categories 3 and 5
 		gObj01:add_fixture( { filter = { category = 3, mask = { 3, 5 } } } )
 
 		-- Add a Body to a UIElement object. This will automatically attach a fixture to the Body.
-		-- The fixture can be initialized at this point, as well
+		-- The fixture can be initialized at this point, as well.
 		gObj02:Body( gObj02, { filter = { category = 3, mask = { 3, 5 } } } )
 		(end)
 
-		In order for two touching objects to collide, the category and mask collision determination must be true *for both objects.* For example, assume there are two objects, where one is in category 1 and the other is in category 2. The first is initialized to collide with objects in categories 1 and 2 (i.e., its mask is set to { 1, 2 }), so it will collide with the second object. The second object is initialized to collide with objects in category 2 only (its mask is set to 2), so it will not collide with the first object. If the two objects touch, a collision does *not* occur because both objects do not arrive at a positive collision determination (the first can collide, but the second cannot).
+		In order for two touching objects to collide, the category and mask collision determination must be true *for both objects.* For example, assume two objects exist, where one is in category 1 and the other is in category 2. The first is initialized to collide with objects in categories 1 and 2 (i.e., its mask is set to { 1, 2 }), so it will collide with the second object. The second object is initialized to collide with objects in category 2 only (its mask is set to 2), so it will not collide with the first object. If the two objects touch, a collision does *not* occur because both objects do not arrive at a positive collision determination (the first can collide, but the second cannot).
 
-		The group key can be used to organize objects that should either always collide or never collide. If the group key conditions are met, then the group overrides any category and mask settings. The group key is a signed integer and not a bit-flag integer like the category and mask keys. The rules for determining collisions between two objects when using the group key are shown below.
+		The group key is a signed integer value that can be used to organize objects that should either always collide or never collide. If the group key conditions are met, then the group overrides any category and mask settings. The rules for determining collisions between two objects when using the group key are shown below.
 
 		- If the group key for either object is 0 then the category/mask settings are used to determine the collision
 		- If the group keys for both objects are different, the category/mask settings determine collision
@@ -1113,6 +1113,8 @@ interface Body [[ ClutterActor * ]]
 		A Body/UIElement object may have multiple fixtures, and these fixtures can overlap each other. Collisions between fixtures are determined on an individual basis. For example, assume a Body object with multiple fixtures that do not overlap. One of the object's fixtures makes contact with another object's fixture. The collision determination is dependent upon the two touching fixtures only; the other fixtures are irrelevant.
 
 		Now assume a Body object with two fixtures that completely overlap each other, i.e., two fixtures having the same size and location. Each fixture, however, may have different collision-filtering settings. When this object makes contact with another, it always touches the other object with both fixtures, simultaneously. Collision determinations occur separately for each fixture. If collision conditions are positively met for the first fixture, a collision occurs, regardless of the collision determination for the second overlapping fixture. If collision conditions are positively met for both fixtures, two collisions occur.
+
+		When a collision is ignored because of filtering, the on_contact()-type event handlers are not invoked. To ignore collisions, but still receive event notifications when the object overlaps another, set the fixture's sensor property (described earlier) to true.
 
 	*See Also:* the <fixtures> property and the <remove_fixture> function
 */
@@ -1151,7 +1153,7 @@ interface Body [[ ClutterActor * ]]
 
 		joint_handle - unique integer handle ID that identifies the joint to remove and destroy. The joint handle is returned by the function that created the joint, such as the <RevoluteJoint> function, among others.
 
-	*Return Value:* boolean flag indicating the success or failure of the operation (true=joint was removed)
+	*Return Value:* Boolean flag indicating the success or failure of the operation (true=joint was removed)
 
 	*See Also:* the <DistanceJoint>, <RevoluteJoint> and <PrismaticJoint> functions
 */
@@ -1180,7 +1182,9 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Function: DistanceJoint
 
-	The DistanceJoint() function connects two Body objects and maintains a constant distance between them. The two attached objects should already be positioned at the desired distance at the time the joint is created. An anchor point is defined for each object. This type of joint is considered a "rigid" joint because the distance between the anchor points remains unchanged. The joint can be removed by calling the <remove_joint> function.
+	The DistanceJoint() function connects two Body objects and maintains a constant distance between them. The two attached objects should already be positioned at the desired distance at the time the joint is created. An anchor point is defined for each object. The two anchor points must be neither at the same screen location nor  extremely close to each other.
+
+	This type of joint is considered a "rigid" joint because the distance between the anchor points remains unchanged. The joint can be removed by calling the <remove_joint> function.
 
 (see physics2dDistanceJoint.png)
 
@@ -1189,16 +1193,16 @@ interface Body [[ ClutterActor * ]]
 	*Arguments:*
 
 		anchor - table of { X, Y } screen coordinates at which to connect this Body. This is Anchor1 in the diagram above.
-		other_body - attached Body object. This is Body2 in the diagram.
-		other_anchor - table of { X, Y } screen coordinates at which to connect the Body reference by the other_body argument. This is Anchor2 in the diagram.
+		other_body - attached Body object. This is Body2 in the diagram. (Note: Body1 is the object that invoked the DistanceJoint() function.)
+		other_anchor - table of { X, Y } screen coordinates at which to connect the Body referenced by the other_body argument. This is Anchor2 in the diagram.
 		properties - optional table of key/value settings that configure a "soft" distance joint. If using a rigid joint, these properties should not be changed. Supported keys are described below.
 
-	*Joint Properties:* The function's properties argument can contain the following keys.
+	*Soft Distance Joint Properties:* The properties argument can contain the following keys.
 
-		frequency - double value specifying the soft joint's frequency in Hertz. The joint's frequency can be considered to be that of a harmonic oscillator or a vibrating guitar string. Typically, the frequency should be less than half the frequency of the physics simulation's time step.
-		damping_ratio - double value specifying the damping ratio. Range: 0.0-infinity, but typically 0.0-1.0 where 0.0 is no damping and 1.0 is critical damping where all oscillations should disappear. Default: 1.0
+		frequency - double value specifying the soft joint's frequency in Hertz. The joint's frequency can be compared to a harmonic oscillator or vibrating guitar string. The appropriate frequency value depends heavily upon the density of the object, the physics simulation's gravity setting, and the desired level of joint flexibility. Experimentation is required. Start with a value of 1.0 and adjust as necessary; higher values will increase rigidity and lower values increase flexibility. Default: 0.0, which disables softness and creates a rigid joint.
+		damping_ratio - double value specifying the damping ratio. Range: 0.0-infinity, but typically 0.0-1.0 where 0.0 is no damping and 1.0 is critical damping where all oscillations should disappear. Default: 0.0 (no damping).
 
-	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+	*Return Value:* Unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
 
 	*Code Example:* Connect two objects with a DistanceJoint
 
@@ -1305,7 +1309,7 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Function: RevoluteJoint
 
-	The RevoluteJoint() function attaches two Body objects together at a single point to create a revolving, hinge-type joint.
+	The RevoluteJoint() function attaches two Body objects together at a single point to create a revolving, hinge-type joint. The two Body objects should be positioned at their desired starting locations before creating a RevoluteJoint.
 
 	*Arguments:*
 
@@ -1313,16 +1317,16 @@ interface Body [[ ClutterActor * ]]
 		anchor - table of { X, Y } screen coordinates at which to attach Body. The attached Body object will revolve around the Z axis at this anchor point.
 		properties - optional table of key/value settings that configure the joint. Supported keys are described below.
 
-	*Joint Properties:* The function's properties argument can contain the following keys.
+	*Revolute Joint Properties:* The properties argument can contain the following keys.
 
-		enable_limit - boolean flag indicating whether or not the joint has an angular limit (true=has limit). If the enable_limit key is true, the limits are specified in the lower_angle and upper_angle keys. Note: The enable_limit key activates both the lower_limit and upper_limit keys. If you want only a single limit, the other limit should be set to something extremely high or low so that it will never realistically be reached.  Default: false, i.e., no limit.
+		enable_limit - boolean flag indicating whether or not the joint has an angular limit (true=has limit). If the enable_limit key is true, the limits are specified in the lower_angle and upper_angle keys. Notes: The enable_limit key activates both the lower_limit and upper_limit keys. If you need only a single limit, the other limit should be set to something extremely high or low so that it can never realistically be reached. Also, the limit range should include 0, otherwise the joint will lurch when the physics simulation begins. Default: false=no angular limits.
 		upper_angle - signed double value specifying the highest angle limit in degrees. Default: 0.0
 		lower_angle - signed double value specifying the lowest angle limit in degrees. Default: 0.0
-		enable_motor - boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the level of force and torque to apply are specified in the motor_speed and max_motor_torque keys. Default: false, i.e., no force.
-		motor_speed - signed double value specifying the desired motor speed. Positive values revolve the attached object clockwise; negative values revolve counter-clockwise. Setting the motor_speed to 0.0 will act as a brake, causing the joint to attempt to stand still; this braking effect can be accentuated by also setting a low max_motor_torque value. Combining a motor_speed of 0.0 with a high max_motor_torque value will act to cause the joint to stop quickly and will also require a larger force to move the joint. Default: 0.0
-		max_motor_torque - signed double value specifying the maximum motor torque to apply to achieve the desired motor speed. Positive values apply a non-fluctuating torque; negative values apply an indefinitely-increasing torque. Setting a low torque value, the joint may require more time to get up to maximum speed. Default: 0.0
+		enable_motor - boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the level of force and torque to apply are specified in the motor_speed and max_motor_torque keys. Default: false=no continuous force.
+		motor_speed - signed double value specifying the desired motor speed. Positive values revolve the attached object clockwise; negative values revolve counter-clockwise. Default: 0.0
+		max_motor_torque - signed double value specifying the maximum motor torque to apply to achieve the desired motor speed. Positive values apply a non-fluctuating torque; negative values apply an constantly increasing torque. Setting a low torque value, the joint may require more time to get up to maximum speed. Default: 0.0
 
-	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+	*Return Value:* Unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
 
 	*Code Example:* Create a revolving propeller using a RevoluteJoint
 
@@ -1457,16 +1461,16 @@ interface Body [[ ClutterActor * ]]
 	*Arguments:*
 
 		other_body - Body object to connect with.
-		axis - table of { X, Y } coordinates that define the axis along which the two Body objects will move. The axis coordinates combine with the base coordinates { 0, 0 } to specify the axis vector. The axis coordinates must be normalized, i.e., converted to unit vectors. Normalizing the axis is discussed further below. The {1,0} axis in the illustration above defines a horizontal axis pointing to the right. The same horizontal axis pointing to the left would use coordinate {-1,0}. A vertical axis pointing down would use coordinate {0,1}. The direction of the axis is relevant when joint limits or a joint motor is used. Limits and a motor are enabled in the properties argument.
+		axis - table of {X,Y} coordinates that define the axis along which the two Body objects will move. The axis coordinates combine with the base coordinates {0,0} to specify the axis vector. The axis coordinates must be normalized, i.e., converted to unit vectors. Normalizing the axis is discussed further below. The {1,0} axis in the illustration above defines a horizontal axis pointing to the right. The same horizontal axis pointing to the left would use coordinate {-1,0}. A vertical axis pointing down would use coordinate {0,1}. The direction of the axis is relevant when joint limits or a joint motor is used. Limits and a motor are enabled in the properties argument.
 		properties - optional table of key/value settings that configure the joint. Supported keys are described below. Default: Empty table.
-		anchor - table of { X, Y } coordinates reserved for future expansion. Function invocations should never specify this argument.
+		anchor - table of {X,Y} coordinates reserved for future expansion. Function invocations should never specify this argument.
 
-	*Joint Properties:* The function's properties argument can contain the following keys.
+	*Prismatic Joint Properties:* The properties argument can contain the following keys.
 
-		enable_limit - boolean flag indicating whether or not the joint has a movement limit (true=has limit). If the enable_limit key is true, the limits are specified in the upper_translation and lower_translation keys. Note: The enable_limit key activates both the upper_translation and lower_translation keys. If you want only a single limit, the other limit should be set to something extremely high or low so that it will never realistically be reached. If enable_limit is true and the upper_translation and lower_translation properties contain the same value, the other_body will be locked in position and will not move. Default: false, i.e., no limit.
+		enable_limit - boolean flag indicating whether or not the joint has a movement limit (true=has limit). If the enable_limit key is true, the limits are specified in the upper_translation and lower_translation keys. Notes: The enable_limit key activates both the upper_translation and lower_translation keys. If you want only a single limit, the other limit should be set to something extremely high or low so that it can never realistically be reached. If enable_limit is true and the upper_translation and lower_translation properties contain the same value, the other_body will be locked in position and will not move. Finally, the limit range should include 0, otherwise the joint will lurch when the physics simulation begins. Default: false, i.e., no limit.
 		upper_translation - signed double value specifying the highest movement limit in the direction of the axis. The limit is specified in vector units. Default: 0.0
 		lower_translation - signed double value specifying the lowest movement limit in the opposite direction of the axis. The limit is specified in vector units. Default: 0.0
-		enable_motor - boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the level of force to apply are specified in the motor_speed and max_motor_force keys. Default: false, i.e., no force; objects can slide along the joint without any resistance.
+		enable_motor - boolean flag indicating whether or not a constant force should be applied upon the joint (true=apply force). If the enable_motor property is true, the levels of force to apply are specified in the motor_speed and max_motor_force keys. Default: false, i.e., no force; objects can slide along the joint without any resistance.
 		motor_speed - signed double value specifying the desired motor speed. Depending upon other conditions in the physics simulation, such as gravity and density, the objects may never actually reach this maximum speed. Positive motor_speed values apply a force upon the other_body object in the direction of the axis; negative values apply force in the opposite direction. This is depicted in the PrismaticJoint illustration shown above. The current Body object (depicted as Body1 in the illustration) has the force applied in reverse, i.e., positive motor_speed applies force in the opposite axis direction. Default: 0.0
 		max_motor_force - double value specifying the maximum motor force to apply to achieve the desired motor speed. Setting a low force value, the joint may require more time to get up to maximum speed. Default: 0.0
 
@@ -1474,7 +1478,7 @@ interface Body [[ ClutterActor * ]]
 
 	The table of axis coordinates passed to the PrismaticJoint() function must be normalized. The resulting unit vectors are used as screen units by the movement limitation properties upper_translation and lower_translation.
 
-	To normalize any screen coordinates, add together the square of each coordinate, then calculate the square root of the resulting sum. The final result specifies the length of the vector. To normalize the coordinates, divide each coordinate by the vector's length. The normalized values should be used to define the joint's axis. The normalize_vector() function listed below accepts X and Y coordinates, calculates their normalized values, and returns the normalized units in a table in the format { X, Y }.
+	To normalize any screen coordinates, add together the square of each coordinate, then calculate the square root of the resulting sum. The final result specifies the length of the vector when using {0,0} as the vector's base. To normalize the coordinates, divide each coordinate by the vector's length. The normalized values should be used to define the joint's axis. The normalize_vector() Lua function listed below accepts X and Y coordinates, calculates their normalized values, and returns the normalized units in a table in the format {X,Y}.
 
 	(code)
 		function
@@ -1499,7 +1503,7 @@ interface Body [[ ClutterActor * ]]
 		end
 	(end)
 
-	*Return Value:* unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
+	*Return Value:* Unique integer joint handle. This handle can be passed to the <remove_joint> function to detach the two Body objects.
 
 	*Code Example:* Demonstrate a simple use of a PrismaticJoint
 
@@ -1700,9 +1704,7 @@ interface Body [[ ClutterActor * ]]
 	/*
 		Event Handler: on_begin_contact
 
-		The on_begin_contact() event handler is invoked when the edges of two Fixture objects first touch. Initial contact also causes the on_pre_solve_contact and on_post_solve_contact event handlers to be invoked. The on_pre_solve_contact and on_post_solve_contact handlers will continue to be invoked for each step through the physics simulation as long as the two objects continue touching. When the two objects no longer touch, the on_end_contact event handler is invoked.
-
-		The Body object's properties should not be modified when processing the on_begin_contact() event handler. All Body property changes should be postponed until the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler.
+		The on_begin_contact() event handler is invoked when the edges of two Fixture objects first touch. Note: Contact occurs between two Fixture objects, not Body objects. Also, on_begin_contact() is invoked when the Fixture edges touch or overlap, not when the Fixture AABBs (axis-aligned bounding boxes) touch. For a description of a Fixture's AABB, refer to the discussion in the <physics.contacts> property.
 
 		*Prototype:*
 
@@ -1712,12 +1714,33 @@ interface Body [[ ClutterActor * ]]
 
 		*Arguments:*
 
-			self - Body object on which contact occurred
-			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property.
+			self - Body object containing the Fixture on which the contact occurred.
+			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_begin_contact() is invoked only when the Fixtures edges touch, the table's touching key will always be true in this handler.
 
-		Contact occurs between two Fixture objects, not Body objects. The event handler does, however, receive information that identifies both the Fixture and the associated Body objects that are touching.
+		When the on_begin_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made to any physics-enabled object that alters its location, appearance or physics-related settings. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of the contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
 
-		The on_begin_contact event is invoked only when two Fixture edges touch; the other type of contact, i.e., when the AABB (axis-aligned bounding box) of two Fixtures overlaps, the event handler is not called. As a result of this, the touching key in the handler's contact table is always true.
+		The on_begin_contact() handler marks the first in a series of collision detection-related events. As part of the same physics simulation step, the on_pre_solve_contact() and on_post_solve_contact() event handlers will be invoked. The simulation step will then complete and invoke the physics.on_step() handler. As long as contact continues, each subsequent simulation step will repeat this series of on_pre_solve_contact/on_post_solve_contact/on_step invocations. Finally, when contact no longer occurs, the on_end_contact() event handler is invoked. The sequence of collision-detection events is shown below. For further details concerning an individual event handler, refer to its documentation.
+
+		(code)
+		...
+		on_step()
+		on_step()						-- end of simulation step
+		on_begin_contact()				-- two Fixtures touch or overlap
+			on_pre_solve_contact()		-- enables app to ignore this step's collision
+			on_post_solve_contact()		-- if not ignored, response has been calculated and performed
+			on_step()					-- end of simulation step
+										-- if contact continues in next simulation step...
+			on_pre_solve_contact()		-- repeat block of events
+			on_post_solve_contact()
+			on_step()
+
+			... Repeat for each step that contact continues
+
+		on_end_contact()				-- Fixtures no longer touch or overlap
+		on_step()						-- end of simulation step
+		on_step()
+		...
+		(end)
 
 		*See Also:* the <physics.contacts> property and <on_end_contact> event handler
 */
@@ -1749,8 +1772,24 @@ interface Body [[ ClutterActor * ]]
 	/*
 		Event Handler: on_end_contact
 
-		When two fixtures are no longer in contact. The contact details are the same as
-		in <on_begin_contact>.
+		The on_end_contact() event handler is invoked when the edges of two Fixture objects no longer touch or overlap. Note: Contact occurs between two Fixture objects, not Body objects. Also, on_end_contact() is invoked when the Fixture edges no longer touch, but the Fixture AABBs (axis-aligned bounding boxes) may still overlap. For a description of a Fixture's AABB, refer to the discussion in the <physics.contacts> property.
+
+		*Prototype:*
+
+			(code)
+			on_end_contact( self, contact )
+			(end)
+
+		*Arguments:*
+
+			self - Body object containing the Fixture on which the contact occurred.
+			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_end_contact() is invoked only when the Fixtures edges no longer touch, the table's touching key will always be false in this handler.
+
+		When the on_end_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made to any physics-enabled object that alters its location, appearance or physics-related settings. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact ending, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
+
+		*See Also:* the <on_begin_contact> event handler
 	*/
 
     function on_end_contact
@@ -1778,10 +1817,31 @@ interface Body [[ ClutterActor * ]]
 	/*
 		Event Handler: on_pre_solve_contact
 
-		This callback is called after collision detection but before collision resolution. It
-		lets you change the "enabled" property on the contact to affect behavior.
+		The on_pre_solve_contact() event handler is invoked when the edges of two Fixture objects touch or overlap during a simulation step, but the calculation and response to the contact has not been performed. Note: Contact occurs between two Fixture objects, not Body objects.
 
-		The contact details are the same as in <on_begin_contact>.
+		*Prototype:*
+
+			(code)
+			on_pre_solve_contact( self, contact )
+			(end)
+
+		*Arguments:*
+
+			self - Body object containing the Fixture on which the contact occurred.
+			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_pre_solve_contact() is invoked only when the Fixtures edges touch, the table's touching key will always be true in this handler.
+
+		When the on_pre_solve_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made to any physics-enabled object that alters its location, appearance or physics-related settings, except for those described later in this section. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+		A TrickPlay application can instruct the physics simulation to ignore the contact by setting the enabled key contained in the contact argument to false, as shown below. If the enabled key is set to false, the current simulation step will not calculated or perform any reaction to the contact. This can enable objects to pass through each other, perhaps only under certain conditions, such as allowing objects to pass throught a one-way wall. Note: The enabled flag pertains only to the current simulation step. If contact continues in the next step and you wish to ignore it, the enabled flag must be set to false again.
+
+		(code)
+		-- Instruct the physics simulation to ignore this contact for this step
+		contact.enabled = false
+		(end)
+
+		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
+
+		*See Also:* the <on_begin_contact> and <on_post_solve_contact> event handlers
 	*/
 
     function on_pre_solve_contact
@@ -1809,10 +1869,24 @@ interface Body [[ ClutterActor * ]]
 	/*
 		Event Handler: on_post_solve_contact
 
-	    This callback is called after collision resolution and gives you a chance to look at
-	    the impulses generated by a collision.
+		The on_post_solve_contact() event handler is invoked when the edges of two Fixture objects touch or overlap during a simulation step, immediately after the calculation and response to the contact has been performed. Note: Contact occurs between two Fixture objects, not Body objects.
 
-	    The contact details are the same as in <on_begin_contact>.
+		*Prototype:*
+
+			(code)
+			on_post_solve_contact( self, contact )
+			(end)
+
+		*Arguments:*
+
+			self - Body object containing the Fixture on which the contact occurred.
+			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property.
+
+		When the on_post_solve_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made to any physics-enabled object that alters its location, appearance or physics-related settings, except for those described later in this section. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
+
+		*See Also:* the <on_begin_contact> and <on_pre_solve_contact> event handlers
 	*/
 
     function on_post_solve_contact
@@ -1921,7 +1995,7 @@ global physics [[ Physics::World * ]]
 
 	The contacts property is a read-only table containing an entry for each contact that currently exists in the physics simulation. If no contacts exist, the contacts property is nil. Note: Contact occurs between Fixture objects, not Body objects.
 
-	The contacts for a particular Body object can be accessed using the object's <contacts> property. The code segment below illustrates the difference between the contacts in the physics simulation vs. the contacts for a particular Body object. The discussion in this section pertains to both contacts properties.
+	The contacts for a particular Body object can be accessed using the object's contacts property. The code segment below illustrates the difference between the contacts in the physics simulation vs. the contacts for a particular Body object. The discussion in this section pertains to both contacts properties.
 
 	(code)
 	-- Are there any contacts in the entire physics simulation, which includes all Body objects?
