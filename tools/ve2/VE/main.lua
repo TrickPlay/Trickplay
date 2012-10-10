@@ -11,7 +11,7 @@
     --TEST Function 
     aa = function ()
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.textinput/screens")
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TEST-select/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TEST-select")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
         --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
@@ -121,13 +121,13 @@ _VE_.getStInfo = function()
 
     local t = {}
     --table.insert(t, json:parse(fake_style_json))
-    table.insert(t, json:parse(get_all_styles()))
+    table.insert(t, json:parse(WL.get_all_styles()))
     print("getStInfo"..json:stringify(t))
 end 
 
 _VE_.repStInfo = function()
     local t = {}
-    table.insert(t, json:parse(get_all_styles()))
+    table.insert(t, json:parse(WL.get_all_styles()))
     print("repStInfo"..json:stringify(t))
 end 
 
@@ -259,7 +259,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 			    newParent.tabs[lmRow].contents:add(newChild) 
             else 
                 newIndex = newParent.tabs.length + 1
-                newParent.tabs:insert(newIndex, {label="Tab"..newIndex, contents = Widget_Group{}})
+                newParent.tabs:insert(newIndex, {label="Tab"..newIndex, contents = WL.Widget_Group{}})
 			    newParent.tabs[newIndex].contents:add(newChild) 
             end 
         elseif newParent.widget_type == "MenuButton" then 
@@ -886,18 +886,25 @@ _VE_.openInspector = function(gid, multi)
 end 
 
 _VE_.setAppPath = function(path)
+    print (path)
     editor_lb:change_app_path(path)
+    WL = dofile("LIB/Widget/Widget_Library.lua")
 end 
 
 _VE_.openFile = function(path)
+
     blockReport = true
     screen:clear()
-    util.setBGImages(path)
-    editor_lb:change_app_path(path)
 
-    layers_file = "layers.json"
-    styles_file = "styles.json"
-    screens_file = "screens.json"
+    -- Set current app path 
+
+    editor_lb:change_app_path(path)
+    util.setBGImages(path)
+
+    local layers_file = "screens/layers.json"
+    local styles_file = "screens/styles.json"
+    local screens_file = "screens/screens.json"
+    local image_path = "assets/images/"
 
     print("scrJSInfo"..readfile(screens_file))
 
@@ -921,16 +928,10 @@ _VE_.openFile = function(path)
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
-    -- Image !!! 
-
-    q,w = string.find(path, "/screens")
-    path = string.sub(path, 1, q - 1)
-    path = path.."/assets/images/"
-    print (path)
-    editor_lb:change_app_path(path)
+    -- Library 
+    WL = dofile("LIB/Widget/Widget_Library.lua")
 
     s = load_layer(layer)
-
     for i,j in ipairs(s.children) do
         --if string.find(j.name, "Layer") ~= nil then 
         if string.find(j.name, "Layer") ~= nil and 
@@ -946,7 +947,7 @@ _VE_.openFile = function(path)
                 local uiTypeStr = util.getTypeStr(m) 
 
                 if uiTypeStr == "LayoutManager" then 
-                    m.placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+                    m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
                 util.create_mouse_event_handler(m, uiTypeStr)
 
@@ -962,6 +963,9 @@ _VE_.openFile = function(path)
                     --m.is_in_group = true
                 end 
 
+                if uiTypeStr == "Widget_Image" then 
+                    m.src = image_path..m.src
+                end 
                 m.reactive = true 
                 m.lock = false
                 m.selected = false
@@ -973,7 +977,6 @@ _VE_.openFile = function(path)
     end
     
     _VE_.refresh()
-    
     --[[
     for i,j in ipairs(s.children) do
         if string.find(j.name, "Layer") ~= nil then 
@@ -1024,7 +1027,7 @@ _VE_.newLayer = function()
             layerNum = layerNum + 1
         end
     end 
-    screen:add(Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    screen:add(WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
 
     _VE_.refresh()
@@ -1040,11 +1043,11 @@ _VE_.saveFile = function(scrJson)
             end
     end
 
-    table.insert(style_t, json:parse(get_all_styles()))
+    table.insert(style_t, json:parse(WL.get_all_styles()))
 
-    editor_lb:writefile("layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
-    editor_lb:writefile("styles.json", json:stringify(style_t), true) 
-    editor_lb:writefile("screens.json", scrJson, true) 
+    editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
+    editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
+    editor_lb:writefile("/screens/screens.json", scrJson, true) 
 
 end 
 
@@ -1229,6 +1232,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         return
 
     elseif hdr.uiElementCreate_map[uiTypeStr] then
+        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
+        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
+        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
+        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
         uiInstance = hdr.uiElementCreate_map[uiTypeStr]()
     end 
     
@@ -1244,10 +1251,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{
             number_of_rows = 2,
             number_of_cols = 3,
-            placeholder = Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
+            placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
             cells = {
-                {Widget_Rectangle{name = "star", w=30,h=30},Widget_Rectangle{name = "moon", w=100,h=100}},
-                {Widget_Rectangle{name = "rainbow", w=100,h=100},nil,Widget_Rectangle{name="sun",w=100,h=100}},
+                {WL.Widget_Rectangle{name = "star", w=30,h=30},WL.Widget_Rectangle{name = "moon", w=100,h=100}},
+                {WL.Widget_Rectangle{name = "rainbow", w=100,h=100},nil,WL.Widget_Rectangle{name="sun",w=100,h=100}},
             }
         }
     
@@ -1277,9 +1284,9 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One" , contents = Widget_Group()},   --contents = Widget_Group{children={Button{name="b1"}}}},
-                {label="Two",   contents = Widget_Group()}, --{children={}}},
-                {label="Three", contents = Widget_Group()}, ----{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
+                {label="One" , contents = WL.Widget_Group()},   --contents = Widget_Group{children={Button{name="b1"}}}},
+                {label="Two",   contents = WL.Widget_Group()}, --{children={}}},
+                {label="Three", contents = WL.Widget_Group()}, ----{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
                 --{label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
                 --{label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
                 --{label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ffff"}}}},
@@ -1293,10 +1300,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         --b = Button{name="pretty_button"}
         --uiInstance:add(b)
     elseif uiTypeStr == "DialogBox" then 
-        local b = Button{name="pretty_button"}
+        local b = WL.Button{name="pretty_button"}
         uiInstance:add(b)
     elseif uiTypeStr == "MenuButton" then 
-        uiInstance.items = {Button{name="pretty_button"}}
+        uiInstance.items = {WL.Button{name="pretty_button"}}
     end 
         
     util.assign_right_name(uiInstance, uiTypeStr)
@@ -1460,7 +1467,7 @@ end
   			controllers:start_pointer()
     	end
 
-        Style:subscribe_to(styleUpdate)
+        WL.Style:subscribe_to(styleUpdate)
 
         screen.reactive = true
 

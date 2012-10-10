@@ -37,7 +37,7 @@ function editor.rectangle(x, y)
     rect_init_x = x 
     rect_init_y = y 
     
-    uiRectangle = Widget_Rectangle()
+    uiRectangle = WL.Widget_Rectangle()
 
     util.assign_right_name(uiRectangle, "Rectangle")
 
@@ -145,7 +145,7 @@ function editor.clone()
             print (v.name)
             print (v.name)
 		    screen_ui.n_selected(v)
-		    uiClone = Widget_Clone {
+		    uiClone = WL.Widget_Clone {
 		        source = v,
                 position = {v.x + 20, v.y +20}
         	}
@@ -187,7 +187,7 @@ function editor.group()
 
     local min_x, max_x, min_y, max_y = util.get_min_max () 
        
-    uiGroup = Widget_Group{
+    uiGroup = WL.Widget_Group{
         position = {min_x, min_y}
     }
 

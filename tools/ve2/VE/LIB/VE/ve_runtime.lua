@@ -139,7 +139,7 @@ function load_styles(str)
     
     for name,attributes in pairs(styles) do
         
-        styles[name] = Style(name):set(attributes)
+        styles[name] = WL.Style(name):set(attributes)
         
     end
     
@@ -250,7 +250,7 @@ construct = function(t)
         end
     end
     curr_neighbors = t.neighbors
-    obj = _G[t.type] and _G[t.type](t) or
+    obj = _G[t.type] and _G[t.type](t) or WL[t.type] and WL[t.type](t) or
         
         error("Received invalid type: "..t.type)
     

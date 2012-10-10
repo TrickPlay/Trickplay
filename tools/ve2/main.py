@@ -136,11 +136,13 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
-        self.sendLuaCommand("openFile", '_VE_.openFile("'+str(os.path.join(self.path, 'screens'))+'")')
+        #self.sendLuaCommand("openFile", '_VE_.openFile("'+str(os.path.join(self.path, 'screens'))+'")')
+        self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         return True
     
     def setAppPath(self):
-        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'screens'))+'")')
+        #self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'screens'))+'")')
+        self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(self.path)+'")')
         return True
 
     def newLayer(self):

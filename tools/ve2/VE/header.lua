@@ -1,5 +1,7 @@
 local hdr = {}
 
+WL = dofile("LIB/Widget/Widget_Library.lua")
+--[[
 if not APPVERBOSITY then dofile("LIB/Widget/__UTILITIES/AppVerbosity.lua") end
 
 if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
@@ -30,7 +32,7 @@ if not ARROWPANE         then dofile("LIB/Widget/ArrowPane/ArrowPane.lua")      
 if not BUTTONPICKER      then dofile("LIB/Widget/ButtonPicker/ButtonPicker.lua")    end
 if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")        end
 if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
-
+]]
 dofile("LIB/VE/ve_runtime")
 
 hdr.test = 0
@@ -81,27 +83,27 @@ hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", 
 
 hdr.uiElementCreate_map = 
     {
-        ['Clone'] = function(p)  return Widget_Clone(p) end, 
-        ['Group'] = function(p)  return Widget_Group(p) end, 
-        ['Rectangle'] = function(p)  return Widget_Rectangle(p) end, 
-        ['Text'] = function(p)  return Widget_Text(p) end, 
-        ['Image'] = function(p)  return Widget_Image(p) end, 
+        ['Clone'] = function(p)  return WL.Widget_Clone(p) end, 
+        ['Group'] = function(p)  return WL.Widget_Group(p) end, 
+        ['Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
+        ['Text'] = function(p)  return WL.Widget_Text(p) end, 
+        ['Image'] = function(p)  return WL.Widget_Image(p) end, 
     
-        ['Button'] = function(p)  return Button(p) end, 
-        ['DialogBox'] = function(p) return DialogBox(p) end,
-        ['ToastAlert'] = function(p) return ToastAlert(p) end,
-        ['ProgressSpinner'] = function(p) return ProgressSpinner(p) end,
-        ['ProgressBar'] = function(p) return ProgressBar(p) end,
-        ['OrbittingDots'] = function(p) return OrbittingDots(p) end,
-        ['TextInput'] = function(p) return TextInput(p) end,
-        ['ToggleButton'] = function(p) return ToggleButton(p) end,
-        ['LayoutManager'] = function(p)  return LayoutManager(p) end, 
-        ['Slider'] = function(p)  return Slider(p) end, 
-        ['ArrowPane'] = function(p)  return ArrowPane(p) end, 
-        ['ScrollPane'] = function(p)  return ScrollPane(p) end, 
-        ['TabBar'] = function(p)  return TabBar(p) end, 
-        ['ButtonPicker'] = function(p)  return ButtonPicker(p) end, 
-        ['MenuButton'] = function(p)  return MenuButton(p) end, 
+        ['Button'] = function(p)  return WL.Button(p) end, 
+        ['DialogBox'] = function(p) return WL.DialogBox(p) end,
+        ['ToastAlert'] = function(p) return WL.ToastAlert(p) end,
+        ['ProgressSpinner'] = function(p) return WL.ProgressSpinner(p) end,
+        ['ProgressBar'] = function(p) return WL.ProgressBar(p) end,
+        ['OrbittingDots'] = function(p) return WL.OrbittingDots(p) end,
+        ['TextInput'] = function(p) return WL.TextInput(p) end,
+        ['ToggleButton'] = function(p) return WL.ToggleButton(p) end,
+        ['LayoutManager'] = function(p)  return WL.LayoutManager(p) end, 
+        ['Slider'] = function(p)  return WL.Slider(p) end, 
+        ['ArrowPane'] = function(p)  return WL.ArrowPane(p) end, 
+        ['ScrollPane'] = function(p)  return WL.ScrollPane(p) end, 
+        ['TabBar'] = function(p)  return WL.TabBar(p) end, 
+        ['ButtonPicker'] = function(p)  return WL.ButtonPicker(p) end, 
+        ['MenuButton'] = function(p)  return WL.MenuButton(p) end, 
     }
 
 
