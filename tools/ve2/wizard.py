@@ -85,7 +85,6 @@ class Wizard():
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
                 if len(files) <= 0:
-                    #self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file and a "main.lua" file.')
                     self.warningMsg("Error", 'Directory "' + dir + '" is not valid. it does not contain an "app" file and a "main.lua" file.')
                     return 
                 else:
@@ -352,9 +351,9 @@ class Wizard():
 
                 os.mkdir(str(os.path.join(str(path), 'screens')))
 
-                lib_path = str(os.path.join(str(path), 'lib'))
+                lib_path = str(os.path.join(str(path), 'LIB'))
                 os.mkdir(lib_path)
-                shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/Widget')) ,str(os.path.join(lib_path, 'widget')))
+                shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/Widget')) ,str(os.path.join(lib_path, 'Widget')))
                 shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/assets')) ,str(os.path.join(lib_path, 'assets')))
                 os.mkdir(str(os.path.join(lib_path, 've2')))
                 shutil.copyfile(str(os.path.join(self.mainWindow.apath, 'VE/LIB/VE/ve_runtime.lua')) ,str(os.path.join(lib_path, 've2/ve_runtile.lua')))
