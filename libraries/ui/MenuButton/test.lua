@@ -1,19 +1,4 @@
 
-
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")              end
-if not MISC              then dofile("__UTILITIES/Misc.lua")                end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("__CORE/Style.lua")                    end
-if not WIDGET            then dofile("__CORE/Widget.lua")                   end
-if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
-if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
-if not BUTTON            then dofile("Button/Button.lua")                   end
-if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")     end
-if not MENUBUTTON        then dofile("MenuButton/MenuButton.lua")           end
-
 local test_group = Group()
 
 screen:add(test_group)
@@ -60,30 +45,30 @@ local style = {
 
 screen:show()
 
-mb0 = MenuButton()
+mb0 = WL.MenuButton()
 ---[[
-mb1 = MenuButton{
+mb1 = WL.MenuButton{
     x = 300,
     items = {
-        Button(),Button(),Button{enabled = false},Button()
+        WL.Button(),WL.Button(),WL.Button{enabled = false},WL.Button()
     }
 }
 --]]
 ---[[
-mb2 = MenuButton{
+mb2 = WL.MenuButton{
     x = 600,
     direction = "up",
     items = {
-        Button(),Button()
+        WL.Button(),WL.Button()
     }
 }
 --]]
 ---[[
-mb3 = MenuButton{
+mb3 = WL.MenuButton{
     x = 300, y = 350,
     direction = "right",
     items = {
-        Button(),Button()
+        WL.Button(),WL.Button()
     }
 }
 dolater(function()
@@ -91,15 +76,15 @@ dolater(function()
 end)
 --]]
 ---[[
-mb4 = MenuButton{
+mb4 = WL.MenuButton{
     x = 300, y = 500,
     style = style,
     direction = "left",
     items = {
-        Button(),Button()
+        WL.Button(),WL.Button()
     }
 }
-mb4.items:insert(2,Button())
+mb4.items:insert(2,WL.Button())
 --]]
 ---[[
 
@@ -107,11 +92,11 @@ mb4.neighbors[keys.Up] = mb3
 mb3.neighbors[keys.Down] = mb4
 
 --]]
-wg = Widget_Group()
+wg = WL.Widget_Group()
 screen:add(wg)
 wg:add(
-    Widget_Rectangle{x=300,size = {20,1000}},
-    Widget_Rectangle{x=600,size = {20,1000}},
+    WL.Widget_Rectangle{x=300,size = {20,1000}},
+    WL.Widget_Rectangle{x=600,size = {20,1000}},
     mb0,mb1,mb2,mb3,mb4
 )
 

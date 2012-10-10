@@ -1,5 +1,8 @@
 APPVERBOSITY = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 
 local usage = [[
         
@@ -127,3 +130,12 @@ function mute_verbosity()
     app_verbosity = {}
     
 end
+
+external.remove_verbosity = remove_verbosity
+external.mute_verbosity   = mute_verbosity
+external.add_verbosities  = add_verbosities
+external.add_verbosity    = add_verbosity
+
+
+
+
