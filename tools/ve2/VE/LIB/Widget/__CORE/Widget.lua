@@ -1,5 +1,8 @@
 WIDGET = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 --List of Properties copied from docs
 local uielement_properties = {
     "name",
@@ -54,11 +57,11 @@ function get_env(w) return table_of_envs[w] end
 
 local function Widgetize(instance)
     
-    local env = {}
+    local _ENV = setmetatable({},{__index=_ENV})
     
-    table_of_envs[instance] = env
+    table_of_envs[instance] = _ENV
     
-    env.update = function() end
+    update = function() end
     ----------------------------------------------------------------------------
     
     --Pablo's function to duplicate the metatable of UIElements
@@ -71,18 +74,18 @@ local function Widgetize(instance)
     local old__newindex = mt.__newindex
     local old_set       = mt.set
     
-    env.is_setting = false
+    is_setting = false
     
-    env.updating = false
+    updating = false
     
-    env.call_update = function()
-        if not env.updating then
+    call_update = function()
+        if not updating then
             
-            env.updating = true
+            updating = true
             
-            env.update(instance,env)
+            update(instance)
             
-            env.updating = false
+            updating = false
             
         end
     end
@@ -96,24 +99,24 @@ local function Widgetize(instance)
             old__newindex(...)
             --print("w2",instance.w)
             
-            env.call_update()
+            call_update()
             
         end,
         function(self,v)
             
             if type(v) ~= "table" then error("Expected table. Received ".. type(v), 3 ) end
             
-            if env.is_setting then error("already setting",2) end
+            if is_setting then error("already setting",2) end
             
-            env.is_setting = true
+            is_setting = true
             
             old_set(self,v)
             
-            env.call_update()
+            call_update()
             
-            if not env.is_setting then error("no",2) end
+            if not is_setting then error("no",2) end
             
-            env.is_setting = false
+            is_setting = false
         end
     )
     ----------------------------------------------------------------------------
@@ -391,8 +394,8 @@ local function Widgetize(instance)
     local function recursive_flag_setter(style_t,style_flags)
         
         if type(style_flags) == "string" then
-            mesg("STYLE_SUBSCRIPTIONS",0,"0 env[",style_flags,"] = true")
-            env[style_flags] = true
+            mesg("STYLE_SUBSCRIPTIONS",0,"0 _ENV[",style_flags,"] = true")
+            _ENV[style_flags] = true
             return
         end
         for k,v in pairs(style_t) do
@@ -400,23 +403,23 @@ local function Widgetize(instance)
             --if there is string for this substyle, then set the flag and move on
             if type(style_flags[k]) == "string" then
                 
-                env[  style_flags[k]  ] = true
-                mesg("STYLE_SUBSCRIPTIONS",0,"1 env[",style_flags[k],"] = true")
+                _ENV[  style_flags[k]  ] = true
+                mesg("STYLE_SUBSCRIPTIONS",0,"1 _ENV[",style_flags[k],"] = true")
             --if there is a table of flags then
             elseif type(style_flags[k]) == "table" then
                 
                 if type(v) ~= "table" then
                     --set the list of flags, ignore further specifics
                     for _,v in ipairs(style_flags[k]) do
-                        env[v] = true
-                        mesg("STYLE_SUBSCRIPTIONS",0,"2 env[",v,"] = true")
+                        _ENV[v] = true
+                        mesg("STYLE_SUBSCRIPTIONS",0,"2 _ENV[",v,"] = true")
                     end
                 --traverse the table
                 else
                     for kk,vv in pairs(style_flags[k]) do
                         if type(kk) == "number" then
-                            env[vv] = true
-                            mesg("STYLE_SUBSCRIPTIONS",0,"3 env[",vv,"] = true")
+                            _ENV[vv] = true
+                            mesg("STYLE_SUBSCRIPTIONS",0,"3 _ENV[",vv,"] = true")
                         elseif type(v) == "table" then
                             recursive_flag_setter(v,style_flags[k])
                         end
@@ -430,11 +433,11 @@ local function Widgetize(instance)
         --print("herefdffds")
         mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
         --dumptable(style_t)
-        if not env.style_flags then return end
+        if not style_flags then return end
         
-        recursive_flag_setter(style_t,env.style_flags)
+        recursive_flag_setter(style_t,style_flags)
         
-        env.call_update()
+        call_update()
         
     end
     
@@ -454,11 +457,11 @@ local function Widgetize(instance)
             --print("\n\nSET UP SUBS",instance.gid)
             unsubscribe = style:subscribe_to( nil, subscription )
             
-            if env.style_flags then 
+            if style_flags then 
                 mesg("STYLE_SUBSCRIPTIONS",0,"Widget.style was set, initiating the flag setter")
                 --print("style recursive set\n\n\n")
                 --dumptable(style.attributes)
-                recursive_flag_setter(style.attributes,env.style_flags) 
+                recursive_flag_setter(style.attributes,style_flags) 
             end
         end
 	)
@@ -468,7 +471,7 @@ local function Widgetize(instance)
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-    return instance, env
+    return instance, _ENV
 end
 
 --------------------------------------------------------------------------------
@@ -476,7 +479,7 @@ end
 
 Widget = function(parameters)
     
-    local instance, env = Widgetize(  Group()  )
+    local instance, _ENV = Widgetize(  Group()  )
     
     instance:set( 
         
@@ -484,15 +487,15 @@ Widget = function(parameters)
         
     )
     
-    env.add           = instance.add
-    env.remove        = instance.remove
-    env.clear         = instance.clear
-    env.foreach_child = instance.foreach_child
-    env.find_child    = instance.find_child
-    env.raise_child   = instance.raise_child
-    env.lower_child   = instance.lower_child
-    env.set_children  = getmetatable(instance).__setters__.children
-    env.get_children  = getmetatable(instance).__getters__.children
+    add           = instance.add
+    remove        = instance.remove
+    clear         = instance.clear
+    foreach_child = instance.foreach_child
+    find_child    = instance.find_child
+    raise_child   = instance.raise_child
+    lower_child   = instance.lower_child
+    set_children  = getmetatable(instance).__setters__.children
+    get_children  = getmetatable(instance).__getters__.children
     
     override_function( instance, "add",           function() print(pcall(error,          "'add' method is removed",3)) end )
     override_function( instance, "remove",        function() print(pcall(error,       "'remove' method is removed",3)) end )
@@ -509,7 +512,7 @@ Widget = function(parameters)
     )
     
     
-    return instance, env
+    return instance, _ENV
 end
 Widget_Group = function(parameters)
     
@@ -534,7 +537,7 @@ Widget_Group = function(parameters)
                 
                 if type(obj) == "table" and obj.type then 
                     
-                    v[i] = _G[obj.type](obj)
+                    v[i] = _ENV[obj.type](obj)
                     
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                 
@@ -718,7 +721,12 @@ Widget_Clone = function(parameters)
     
 end
 
-
+external.Widget           = Widget
+external.Widget_Group     = Widget_Group
+external.Widget_Clone     = Widget_Clone
+external.Widget_Image     = Widget_Image
+external.Widget_Text      = Widget_Text
+external.Widget_Rectangle = Widget_Rectangle
 
 
 

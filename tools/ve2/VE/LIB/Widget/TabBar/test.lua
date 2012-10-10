@@ -1,21 +1,4 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")   end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")        end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")   end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")              end
-if not MISC              then dofile("__UTILITIES/Misc.lua")                end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
-if not STYLE             then dofile("__CORE/Style.lua")                    end
-if not WIDGET            then dofile("__CORE/Widget.lua")                   end
-if not BUTTON            then dofile("Button/Button.lua")                   end
-if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")       end
-if not RADIOBUTTONGROUP  then dofile("RadioButtonGroup/RadioButtonGroup.lua") end
-if not CLIPPINGREGION    then dofile("ClippingRegion/ClippingRegion.lua")   end
-if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
-if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
-if not ARROWPANE         then dofile("ArrowPane/ArrowPane.lua")             end
-if not TABBAR            then dofile("TabBar/TabBar.lua")                   end
-
 local style = {
     border = {
         width = 10,
@@ -40,30 +23,32 @@ local style = {
     }
 }
 ---[[
-tb1 = TabBar{
+tb1 = WL.TabBar{
     position = {100,100},
     tabs = {
-        {label="One",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff0000"},Button()}}},
-        {label="Two",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ff00"}}}},
-        {label="Three", contents = Widget_Group{children={Rectangle{w=400,h=400,color="0000ff"}}}},
-        {label="Four",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ffff00"}}}},
-        {label="Five",  contents = Widget_Group{children={Rectangle{w=400,h=400,color="ff00ff"}}}},
-        {label="Six",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="00ffff"}}}},
+        {label="One",   contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="ff0000"},WL.Button()}}},
+        {label="Two",   contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="00ff00"}}}},
+        {label="Three", contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="0000ff"}}}},
+        {label="Four",  contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="ffff00"}}}},
+        {label="Five",  contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="00ffff"}}}},
     },
     tab_images = {
-        default = Widget_Image{src="Button/button3.png"},
-        focus   = Widget_Image{src="Button/button-focus.png"},
+        default = WL.Widget_Image{src="Button/button3.png"},
+        focus   = WL.Widget_Image{src="Button/button-focus.png"},
     }
 }
 print("\n\n\n inject new tab")
-tb1.tabs:insert(2,{label="New",   contents = Widget_Group{children={Rectangle{w=400,h=400,color="30f0f0"}}}})
+tb1.tabs:insert(2,{label="New",   contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="30f0f0"}}}})
 
 tb1.tabs[3].label = "3333"
-tb1.tabs[3].contents = Widget_Group{children={Rectangle{w=40,h=40,color="30f0f0"}}}
+tb1.tabs[3].contents = WL.Widget_Group{children={Rectangle{w=40,h=40,color="30f0f0"}}}
 dumptable(tb1.attributes)
 --]]
 ---[[
-tb2 = TabBar()
+
+b = WL.Button()
+tb2 = WL.TabBar()
 tb2:set{
     pane_w = 500,
     --tab_w  = 200,
@@ -73,18 +58,21 @@ tb2:set{
     style = style,
     position = {100,600},
     tabs = {
-        {label="One",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ff0000"},Button()}}},
-        {label="Two",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="00ff00"}}}},
-        {label="Three", contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="0000ff"}}}},
-        {label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ffff00"}}}},
-        {label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="ff00ff"}}}},
-        {label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=500,h=400,color="00ffff"}}}},
+        {label="One",   contents = WL.Widget_Group{on_key_focus_in =function() b:grab_key_focus() end,children={WL.Widget_Rectangle{w=500,h=400,color="ff0000"},b}}},
+        {label="Two",   contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="00ff00"}}}},
+        {label="Three", contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="0000ff"}}}},
+        {label="Four",  contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="ffff00"}}}},
+        {label="Five",  contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="ff00ff"}}}},
+        {label="Six",   contents = WL.Widget_Group{children={WL.Widget_Rectangle{w=500,h=400,color="00ffff"}}}},
     }
 }
----[[
+--[[
 s = tb2:to_json()
-tb2 = TabBar()
+tb2 = WL.TabBar()
 tb2:from_json(s)
+--]]
+
+dolater(tb2.grab_key_focus,tb2)
 --tb2.style = style
 --]]
 --[[

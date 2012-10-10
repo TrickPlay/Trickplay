@@ -1,5 +1,9 @@
 CANVAS = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+
 --draws a rounded rectangle canvas path
 round_rectangle = function(c,r)
     

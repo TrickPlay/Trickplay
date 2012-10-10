@@ -1,5 +1,8 @@
 TABLEMANIPULATION = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 function recursive_overwrite(target, source)
     
     if target == nil then target = {} end
