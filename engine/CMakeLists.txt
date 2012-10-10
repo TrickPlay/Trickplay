@@ -456,6 +456,9 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_path.lb
     ${BINDINGS_SRC}/clutter_constraint.lb
 
+    ${BINDINGS_SRC}/sprite_sheet.lb
+    ${BINDINGS_SRC}/sprite.lb
+
     ${BINDINGS_SRC}/socket.lb
 
     ${BINDINGS_SRC}/uri.lb
@@ -538,6 +541,8 @@ list( APPEND
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp
     ${ENGINE_SRC}/source/clutter_util.cpp
+
+    ${ENGINE_SRC}/source/spritesheet.cpp
 
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp
