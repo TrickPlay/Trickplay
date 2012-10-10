@@ -1,16 +1,4 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")     end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")          end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")     end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")                end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")                end
-if not STYLE             then dofile("__CORE/Style.lua")                      end
-if not WIDGET            then dofile("__CORE/Widget.lua")                     end
-if not BUTTON            then dofile("Button/Button.lua")                     end
-if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")         end
-if not RADIOBUTTONGROUP  then dofile("RadioButtonGroup/RadioButtonGroup.lua") end
-
-
 --[[
 local button_test_group = Group{}
 
@@ -39,7 +27,7 @@ b = ToggleButton()
 b2 = ToggleButton(parameters)
 button_test_group:add(b,b2)
 --]]
-
+--[[
 local rbg_group = Group()
 
 local rbg_tests = {
@@ -316,15 +304,15 @@ local style = {
 
 screen:show()
 
-b0 = ToggleButton{ label="b0", x = 1400,         group = "Radio"}
-b1 = ToggleButton{ label="b1", x = 1400, y= 100, group = "Radio"}
+b0 = WL.ToggleButton{ label="b0", x = 1400,         group = "Radio"}
+b1 = WL.ToggleButton{ label="b1", x = 1400, y= 100, group = "Radio"}
 
 
-b2 = ToggleButton{ label="b2",  x = 1600,         }
-b3 = ToggleButton{ label="b3",  x = 1600, y= 100, }
-b4 = ToggleButton{ label="b4",  x = 1600, y= 200, }
+b2 = WL.ToggleButton{ label="b2",  x = 1600,         }
+b3 = WL.ToggleButton{ label="b3",  x = 1600, y= 100, }
+b4 = WL.ToggleButton{ label="b4",  x = 1600, y= 200, }
 
-rbg = RadioButtonGroup{items={b2,b3,b4}, name = "Radio"} -- should get renamed to Radio (1)
+rbg = WL.RadioButtonGroup{items={b2,b3,b4}, name = "Radio"} -- should get renamed to Radio (1)
 --rbg:remove(b3)
 rbg.on_selection_change = print
 b3.group = "Radio"

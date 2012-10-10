@@ -1,6 +1,9 @@
 
 COLORSCHEME = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
 local function is_color(v)
     
     if type(v) ~= "string" and type(v) ~= "table" then
@@ -168,7 +171,7 @@ ColorScheme = function(parameters)
     
 end
 
-
+external.ColorScheme = ColorScheme
 
 
 
