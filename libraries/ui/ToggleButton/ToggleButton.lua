@@ -96,7 +96,6 @@ ToggleButton = setmetatable(
                 return function(oldf,self)
                     local t = oldf(self)
                     
-                    t.group    = instance.group and instance.group.name
                     t.selected = instance.selected
                     
                     t.type = "ToggleButton"
@@ -104,58 +103,10 @@ ToggleButton = setmetatable(
                     return t
                 end
             end,
-            group = function(instance,_ENV)
-                return function() return radio_button_group end,
-                function(oldf,self,v)
-                    
-                    if radio_button_group then
-                        if radio_button_group == v or radio_button_group.name == v then
-                            
-                            return
-                            
-                        else
-                            
-                            radio_button_group:remove(self)
-                            
-                        end
-                    end
-                    
-                    
-                    if type(v) == "nil" then
-                        
-                        radio_button_group = nil
-                        
-                        return
-                        
-                    elseif type(v) == "string" then
-                        
-                        radio_button_group = RadioButtonGroup(v)
-                        
-                    elseif type(v) == "table" and v.type == "RadioButtonGroup" then
-                        
-                        radio_button_group = v
-                        
-                    else
-                        
-                        error("ToggleButton.group must receive string or RadioButtonGroup",2)
-                        
-                    end
-                    
-                    radio_button_group:insert(self)
-                    
-                    if selected then
-                        
-                        selected = false
-                        self.selected = true
-                        
-                    end
-                    
-                end
-            end,
             selected = function(instance,_ENV)
                 return function() return selected end,
                     function(oldf,self,v)
-                        print("v",v)
+                        
                         if type(v) ~= "boolean" then
                             error("Widget.selected expected type 'boolean', received "..type(v),2)
                         end
@@ -165,30 +116,6 @@ ToggleButton = setmetatable(
                         selected = v
                         ---[[
                         if selected then
-                            
-                            if radio_button_group then
-                                
-                                for i, b in ipairs(radio_button_group.items) do
-                                    
-                                    if b ~= self then
-                                        
-                                        b.selected = false
-                                        
-                                    else
-                                        
-                                        radio_button_group.selected = i
-                                        
-                                    end
-                                    
-                                end 
-                                
-                                if radio_button_group.on_selection_change then
-                                    
-                                    radio_button_group:on_selection_change()
-                                    
-                                end 
-                                
-                            end 
                             
                             if image_states.selection then image_states.selection.state = "ON"   end
                             
@@ -232,7 +159,7 @@ ToggleButton = setmetatable(
             
             round_rectangle(c,self.style.border.corner_radius)
             
-            c:set_source_color( self.style.fill_colors[state] or "00000000" )
+            c:set_source_color( self.style.fill_colors[state] or "0000aa" )
             
             c:fill(true)
             
