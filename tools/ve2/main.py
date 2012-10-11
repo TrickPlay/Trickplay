@@ -172,7 +172,7 @@ class MainWindow(QMainWindow):
             return True
 
     def openProject(self):
-        wizard = Wizard()
+        wizard = Wizard(self)
         path = -1
         while path == -1 :
             if self.path is None:
