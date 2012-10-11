@@ -140,7 +140,6 @@ class Wizard():
                     if 'app' in files and 'main.lua' in files:
                         return path
                     else:
-                        #print('[VDBG] Error - ' + path + ' does not contain an app file and a main.lua file.')
                         self.warningMsg("Error", 'Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
                         return 
 
