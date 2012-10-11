@@ -119,13 +119,13 @@ ToggleButton = setmetatable(
                             
                             if image_states.selection then image_states.selection.state = "ON"   end
                             
-                            if on_selection then on_selection() end
+                            if on_selection then on_selection(self) end
                             
                         else
                             
                             if image_states.selection then image_states.selection.state = "OFF"  end
                             
-                            if on_deselection then on_deselection() end
+                            if on_deselection then on_deselection(self) end
                             
                         end 
                         --]]
