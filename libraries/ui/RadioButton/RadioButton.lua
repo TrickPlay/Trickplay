@@ -47,7 +47,15 @@ RadioButtonGroup = function(parameters)
 			end,
 			selected = function(v)
 				  print("RBG.set_selected")
-				  if type(v) ~= "number" then
+				  if v == nil then
+						
+						if selected then 
+                            local tb =  items[selected] 
+                            get_env( tb ).tb_set_selected(tb,false)
+                            selected = nil
+                        end
+						
+				  elseif type(v) ~= "number" then
 						
 						error("RadioButtonGroup.selected expected type 'number'. Received "..type(v),2)
 						
@@ -59,11 +67,12 @@ RadioButtonGroup = function(parameters)
 						selected = v
 						
                        for i,tb in ipairs(items) do
-                            print("fff")
                            get_env(tb).tb_set_selected(tb,i == v)
                        end
 						
 				  end
+                  
+                  if on_selection_change then on_selection_change() end
 				  
 			end,
 			name = function(v)
@@ -151,7 +160,16 @@ RadioButtonGroup = function(parameters)
 						end
 						
 						removing = false
-						
+						--[[
+                        
+                        if rbg.selected == nil then
+                            rbg.selected = 1
+                        elseif rbg.selected > tabs_lm.length then
+                            rbg.selected = tabs_lm.length
+                        else
+                            tabs_lm.cells[rbg.selected].selected = true
+                        end
+                        --]]
 				end,
                 set = function(self,t)
                     if type(t) ~= "table" then
@@ -219,6 +237,7 @@ RadioButton = setmetatable(
                 return function() return group end,
                 function(oldf,self,v)
                     
+                    --if the RadioButton is already part of a group
                     if group then
                         if group == v or group.name == v then
                             
@@ -231,17 +250,19 @@ RadioButton = setmetatable(
                         end
                     end
                     
-                    
+                    --if setting this RadioButton's group to nil
                     if v == nil then
                         
                         group = nil
                         
                         return
                         
+                    --if setting this RadioButton's group to the name of its new group
                     elseif type(v) == "string" then
                         
                         group = RadioButtonGroup(v)
                         
+                    --if setting this RadioButton's group to the handle of the new group
                     elseif type(v) == "table" and v.type == "RadioButtonGroup" then
                         
                         group = v
