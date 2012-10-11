@@ -87,18 +87,19 @@
      <addaction name="actionArrowPane"/>
      <addaction name="action_Button"/>
      <addaction name="actionButtonPicker"/>
+     <addaction name="actionCheckBox"/>
      <addaction name="actionDialog_Box"/>
      <addaction name="actionLayoutManager"/>
      <addaction name="actionMenuButton"/>
+     <addaction name="actionOrbitting_Dots"/>
      <addaction name="actionProgressBar"/>
      <addaction name="actionProgressSpinner"/>
-     <addaction name="actionOrbitting_Dots"/>
+     <addaction name="actionRadioButton"/>
      <addaction name="actionScrollPane"/>
      <addaction name="actionSlider"/>
      <addaction name="actionTabBar"/>
      <addaction name="actionTextInput"/>
      <addaction name="actionToastAlert"/>
-     <addaction name="actionToggleButton"/>
      <addaction name="actionWidgetText"/>
      <addaction name="actionWidgetImage"/>
      <addaction name="actionWidgetRectangle"/>
@@ -864,6 +865,16 @@
   <action name="actionProgressBar">
    <property name="text">
     <string>ProgressBar</string>
+   </property>
+  </action>
+  <action name="actionRadioButton">
+   <property name="text">
+    <string>RadioButton</string>
+   </property>
+  </action>
+  <action name="actionCheckBox">
+   <property name="text">
+    <string>CheckBox</string>
    </property>
   </action>
  </widget>
