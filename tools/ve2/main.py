@@ -1,15 +1,12 @@
-import os, signal,time, sys,threading
+import os
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 from wizard import Wizard
 from UI.MainWindow import Ui_MainWindow
-#from UI.NewProjectDialog import Ui_newProjectDialog
 from Inspector.TrickplayInspector import TrickplayInspector
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
-
-
-signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 class MainWindow(QMainWindow):
     
@@ -109,14 +106,14 @@ class MainWindow(QMainWindow):
 		
         # Restore sizes/positions of docks
         #self.restoreState(settings.value("mainWindowState").toByteArray());
-        self.path =  None#os.path.join(self.apath, 'VE')
+
+        self.path =  None #os.path.join(self.apath, 'VE')
         self.app = app
         self.command = None
         self.currentProject = None
 
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
 
-    
     @property
     def emulatorManager(self):
         return self._emulatorManager
@@ -136,40 +133,42 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
-        #self.sendLuaCommand("openFile", '_VE_.openFile("'+str(os.path.join(self.path, 'screens'))+'")')
         self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         return True
     
     def setAppPath(self):
-        #self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'screens'))+'")')
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(self.path)+'")')
         return True
 
     def newLayer(self):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
-        print ("PreventChanges : ", self.inspector.preventChanges)
         return True
 
     def newProject(self):
         orgPath = self.path
         wizard = Wizard(self)
-        path = wizard.start("", False, True)
-        if path is not None:
-            if path and path != orgPath :
-                settings = QSettings()
-                if settings.value('path') is not None:
-                    settings.setValue('path', path)
-                    pass
-            
+        path = None 
+
+        while path == None :
+            path = wizard.start("", False, True)
+
+        if path is not None and path != -1 :
+            settings = QSettings()
+            if settings.value('path') is not None:
+                settings.setValue('path', path)
+
             self.setCurrentProject(path)
             self.setAppPath()
             self.run()
             self.command = "newProject"
+
             while self.inspector.ui.screenCombo.count() > 0 :
                 curIdx = self.inspector.ui.screenCombo.currentIndex()
                 self.inspector.ui.screenCombo.removeItem(curIdx)
+
             self.inspector.ui.screenCombo.addItem("Default")
             self.inspector.screens = {"_AllScreens":[],"Default":[]}
+
             return True
 
     def openProject(self):
@@ -212,21 +211,27 @@ class MainWindow(QMainWindow):
     def slider(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Slider')")
         return True
+
     def layoutmanager(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'LayoutManager')")
         return True
+
     def scrollpane(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ScrollPane')")
         return True
+
     def tabbar(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TabBar')")
         return True
+
     def arrowpane(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ArrowPane')")
         return True
+
     def buttonpicker(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ButtonPicker')")
         return True
+
     def menubutton(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'MenuButton')")
         return True
@@ -296,10 +301,6 @@ class MainWindow(QMainWindow):
 
     def rectangle(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Rectangle')")
-        return True
-
-    def button(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
         return True
 
     def left(self):
