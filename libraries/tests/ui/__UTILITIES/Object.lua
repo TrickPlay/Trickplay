@@ -2,17 +2,6 @@
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
-object_shell = function()
-    return {
-        __index = function(self,k) return getmetatable(self)[k] end,
-        __call  = function(self,p) return self:declare():set(p or {}) end,
-    
-        public = { properties = {}, functions = {}, },
-        
-        private = {},
-        declare = function() end,
-    }
-end
 setup_object = function(self,instance,env)
     
     for name,f in pairs(self.private or {}) do
