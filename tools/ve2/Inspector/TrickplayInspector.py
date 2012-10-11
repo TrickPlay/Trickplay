@@ -1542,7 +1542,10 @@ class TrickplayInspector(QWidget):
 
     def getType (self):
         g_item = self.ui.property.findItems("type", Qt.MatchExactly, 0)
-        return g_item[0].text(1)
+        try :
+            return g_item[0].text(1)
+        except:
+            return 
 
     def getIndex (self):
         g_item = self.ui.property.findItems("index", Qt.MatchExactly, 0)
@@ -1598,7 +1601,6 @@ class TrickplayInspector(QWidget):
             self.sendData(self.getGid(), str(pItem.text(0)), tValue)
         else :
             if str(item.text(0)) == "label" and self.getType() == "Tab":
-                # YYY
                 self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), self.getIndex()) 
             else:
                 self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))

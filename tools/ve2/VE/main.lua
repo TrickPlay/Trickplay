@@ -10,17 +10,15 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t1")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t12")
     end 
 
     bb = function ()
-        _VE_.selectUIElement(25,false)
-        _VE_.focusSettingMode(keys.Left)
+        _VE_.insertUIElement(8, 'RadioButton')
     end 
 
     cc = function ()
-        _VE_.setUIInfo(10,'enabled',false)
-        --_VE_.contentMove(24,10,0,3,false,nil)
+        _VE_.insertUIElement(8, 'CheckBox')
     end 
     dd = function ()
         tb = devtools:gid(16)
@@ -1197,10 +1195,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         return
 
     elseif hdr.uiElementCreate_map[uiTypeStr] then
-        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
-        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
-        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
-        print(uiTypeStr, "&&&&&&&&&&&&&&&&&")
         uiInstance = hdr.uiElementCreate_map[uiTypeStr]()
     end 
     

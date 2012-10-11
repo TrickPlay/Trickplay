@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Jul 27 15:11:27 2012
+# Created: Thu Oct 11 14:44:22 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -331,6 +331,10 @@ class Ui_MainWindow(object):
         self.actionBlack.setObjectName(_fromUtf8("actionBlack"))
         self.actionProgressBar = QtGui.QAction(MainWindow)
         self.actionProgressBar.setObjectName(_fromUtf8("actionProgressBar"))
+        self.actionRadioButton = QtGui.QAction(MainWindow)
+        self.actionRadioButton.setObjectName(_fromUtf8("actionRadioButton"))
+        self.actionCheckBox = QtGui.QAction(MainWindow)
+        self.actionCheckBox.setObjectName(_fromUtf8("actionCheckBox"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -343,18 +347,19 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionArrowPane)
         self.menuInsert_UI_Element.addAction(self.action_Button)
         self.menuInsert_UI_Element.addAction(self.actionButtonPicker)
+        self.menuInsert_UI_Element.addAction(self.actionCheckBox)
         self.menuInsert_UI_Element.addAction(self.actionDialog_Box)
         self.menuInsert_UI_Element.addAction(self.actionLayoutManager)
         self.menuInsert_UI_Element.addAction(self.actionMenuButton)
+        self.menuInsert_UI_Element.addAction(self.actionOrbitting_Dots)
         self.menuInsert_UI_Element.addAction(self.actionProgressBar)
         self.menuInsert_UI_Element.addAction(self.actionProgressSpinner)
-        self.menuInsert_UI_Element.addAction(self.actionOrbitting_Dots)
+        self.menuInsert_UI_Element.addAction(self.actionRadioButton)
         self.menuInsert_UI_Element.addAction(self.actionScrollPane)
         self.menuInsert_UI_Element.addAction(self.actionSlider)
         self.menuInsert_UI_Element.addAction(self.actionTabBar)
         self.menuInsert_UI_Element.addAction(self.actionTextInput)
         self.menuInsert_UI_Element.addAction(self.actionToastAlert)
-        self.menuInsert_UI_Element.addAction(self.actionToggleButton)
         self.menuInsert_UI_Element.addAction(self.actionWidgetText)
         self.menuInsert_UI_Element.addAction(self.actionWidgetImage)
         self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
@@ -535,4 +540,6 @@ class Ui_MainWindow(object):
         self.actionWhite.setText(QtGui.QApplication.translate("MainWindow", "White", None, QtGui.QApplication.UnicodeUTF8))
         self.actionBlack.setText(QtGui.QApplication.translate("MainWindow", "Black", None, QtGui.QApplication.UnicodeUTF8))
         self.actionProgressBar.setText(QtGui.QApplication.translate("MainWindow", "ProgressBar", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRadioButton.setText(QtGui.QApplication.translate("MainWindow", "RadioButton", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCheckBox.setText(QtGui.QApplication.translate("MainWindow", "CheckBox", None, QtGui.QApplication.UnicodeUTF8))
 
