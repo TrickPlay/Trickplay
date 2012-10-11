@@ -497,7 +497,7 @@ TabBar = setmetatable(
                         end
                     end
                     local sel = rbg.selected
-                    obj = ToggleButton{
+                    obj = RadioButton{
                         label  = obj.label,
                         w      = tab_w,
                         h      = tab_h,
