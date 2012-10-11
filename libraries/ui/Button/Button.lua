@@ -38,8 +38,6 @@ Button = setmetatable(
                         if image_states.focus then   image_states.focus.state = "ON"   end
                         --text
                         label_state.state = "FOCUS"
-                        --event callback
-                        if on_focus_in then on_focus_in() end
                     end
                 end
             end,
@@ -53,15 +51,11 @@ Button = setmetatable(
                         if image_states.focus then   image_states.focus.state = "ON"   end
                         --text
                         if label and label_state then   label_state.state = "FOCUS" end
-                        --event callback
-                        if on_focus_in then on_focus_in() end
                     else
                         --image
                         if image_states.focus then   image_states.focus.state = "OFF"   end
                         --text
                         if label and label_state then   label_state.state = "DEFAULT" end
-                        --event callback
-                        if on_focus_out then on_focus_out() end
                     end
                 end
             end,
