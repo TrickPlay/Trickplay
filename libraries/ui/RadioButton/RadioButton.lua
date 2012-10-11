@@ -72,7 +72,7 @@ RadioButtonGroup = function(parameters)
 						
 				  end
                   
-                  if on_selection_change then on_selection_change() end
+                  if on_selection_change then on_selection_change(self,selected) end
 				  
 			end,
 			name = function(v)
