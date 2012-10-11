@@ -10,47 +10,12 @@
 
     --TEST Function 
     aa = function ()
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.textinput/screens")
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TEST-select")
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.MenuButton/screens")
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.TabBar/screens")
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.LayoutManager/screens")
-        --_VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/TR.Dialog/screens")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t1")
     end 
 
     bb = function ()
-
-        _VE_.selectUIElement(65,false)
-
-        _VE_.insertUIElement(65, 'Button')
-
-
-        --_VE_.insertUIElement(8, 'Button')
-        --_VE_.insertUIElement(8, 'ButtonPicker')
-        --_VE_.insertUIElement(8, 'DialogBox')
-        --_VE_.insertUIElement(8, 'LayoutManager')
-        --_VE_.insertUIElement(8, 'MenuButton')
-        --_VE_.insertUIElement(8, 'ProgressBar')
-        --_VE_.insertUIElement(8, 'ProgressSpinner')
-        --_VE_.insertUIElement(8, 'OrbittingDots')
-        --_VE_.insertUIElement(8, 'ScrollPane')
-        --_VE_.insertUIElement(8, 'TabBar')
-        --_VE_.insertUIElement(8, 'TextInput')
-        --_VE_.selectUIElement(13,false)
-        --_VE_.focusSettingMode(keys.Up)
-        --b1 = devtools:gid(34)
-        --b2 = devtools:gid(8)
-        --b1.neighbors.Right = b2
-        --b1:grab_key_focus()
-        --_VE_.setUIInfo(10,'focused',true)
-        --_VE_.contentMove(31,9,nil,nil,true,10)
-        --_VE_.contentMove(32,9,nil,nil,true,10)
-        --_VE_.contentMove(25,10,0,2,false,nil)
-        --_VE_.contentMove(58,9,nil,nil,false,nil)
-        --_VE_.contentMove(10,11,nil,nil,false,nil)
-        --_VE_.contentMove(32,9,nil,nil,true,11)
-        --_VE_.contentMove(149,10,1,nil,false,nil)
+        _VE_.selectUIElement(25,false)
+        _VE_.focusSettingMode(keys.Left)
     end 
 
     cc = function ()

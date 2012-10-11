@@ -106,7 +106,7 @@ class TrickplayEmulatorManager(QWidget):
 			if s.startswith( "<<VE_READY>>:" ):
 				try:
 					#self.main.open() # load setting path !! 
-					print "Currnet Project:%s"%self.main.currentProject
+					print "[VE] Current Project : %s"%self.main.currentProject
                     
 					if self.main and self.main.currentProject is None: 
 					     return
@@ -116,7 +116,6 @@ class TrickplayEmulatorManager(QWidget):
 					        self.main.inspector.screens["Default"].append("Layer0")
 					        self.main.save() 
 					     else:
-					        print "Loading .... %s"%self.main.currentProject
 					        self.main.open() 
 
 					self.inspector.refresh() 
@@ -126,10 +125,10 @@ class TrickplayEmulatorManager(QWidget):
 					self.trickplay.close()
 			else:
 				# Output the log line
-				#pdata = None
 				sdata = None
 				gid = None
 				shift = None
+
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
@@ -221,8 +220,6 @@ class TrickplayEmulatorManager(QWidget):
 
 					except:
 					    print("error :(")
-					    #self.getUIInfo()
-					    #self.getStInfo()
 
 
 				    if gid is not None and luaCmd == "openInspc":

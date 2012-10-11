@@ -572,7 +572,6 @@ class TrickplayInspector(QWidget):
         """
         Fill the inspector with Trickplay UI element data
         """
-        print ("refresh....")
         self.preventChanges = True
         # Reselect gid of last item selected
         gid = None

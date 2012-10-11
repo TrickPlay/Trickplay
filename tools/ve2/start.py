@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 # Allow keyboard interrupt with ^C
-import os
-import sys
-import signal
+import os, sys, signal
 
 from wizard import Wizard
 from main import MainWindow
