@@ -52,8 +52,6 @@ local widget_dependencies = {
     ArrowPane        = {"Button","ClippingRegion","LayoutManager","ArrowPane"},
     Button           = {"Button"},
     ButtonPicker     = {"Button","LayoutManager","ButtonPicker"},
-    CheckBox         = {"Button","ToggleButton","CheckBox"},
-    CheckBoxGroup    = {"ToggleButton","CheckBox"},
     ClippingRegion   = {"ClippingRegion"},
     DialogBox        = {"DialogBox"},
     ListManager      = {"LayoutManager"},
@@ -63,14 +61,13 @@ local widget_dependencies = {
     OrbittingDots    = {"OrbittingDots"},
     ProgressBar      = {"ProgressBar"},
     ProgressSpinner  = {"ProgressSpinner"},
-    RadioButton      = {"Button","ToggleButton","RadioButton"},
-    RadioButtonGroup = {"ToggleButton","RadioButton"},
+    RadioButtonGroup = {"ToggleButton","RadioButtonGroup"},
     ScrollPane       = {"Slider","ClippingRegion","LayoutManager","ScrollPane"},
     Slider           = {"NineSlice","Slider"},
     TabBar           = {"RadioButtonGroup","ArrowPane","TabBar"},
     TextInput        = {"NineSlice","TextInput"},
     ToastAlert       = {"DialogBox","ToastAlert"},
-    ToggleButton     = {"Button","ToggleButton","RadioButton"},
+    ToggleButton     = {"Button","ToggleButton","RadioButtonGroup"},
 }
 
 local    load_dependencies

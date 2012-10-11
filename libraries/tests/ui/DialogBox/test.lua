@@ -12,7 +12,7 @@ d2.style.border.corner_radius = 40
 d3 = WL.DialogBox{style = false,x = 1000,separator_y = 200}
 d3.style.border.width = 10
 
-d4 = WL.DialogBox{style = false,y = 400, image = "DialogBox/panel.png",children = {WL.Button{reactive=true}}}
+d4 = WL.DialogBox{style = false,y = 400, image = "DialogBox/panel.png",children = {WL.Button()}}
 d4.style.text.font = "Sans 80px"
 print("da")
 d4.style.text.colors.default = "red"

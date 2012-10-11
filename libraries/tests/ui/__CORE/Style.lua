@@ -6,7 +6,7 @@ local _ENV     = ({...})[2] or _ENV
 
 local default_fill_colors = {
     default    = {  0,  0,  0},
-    focus      = {  0,  0,  0,0},
+    focus      = {155,155,155},
     activation = {155,155,155}
 } 
 local default_arrow_colors = {
@@ -16,12 +16,12 @@ local default_arrow_colors = {
 } 
 local default_border_colors = {
     default    = {255,255,255},
-    focus      = {255,  0,  0},
+    focus      = {255,255,255},
     activation = {255,  0,  0}
 } 
 local default_text_colors = {
     default    = {255,255,255},
-    focus      = {255,  0,  0},
+    focus      = {255,255,255},
     activation = {255,  0,  0}
 }
 
