@@ -44,7 +44,7 @@ Button = setmetatable(
                 end
             end,
             focused = function(instance,_ENV)
-                return function(oldf,...) return oldf(...) end,
+                return nil,
                 function(oldf,self,v)
                     oldf(self,v)
                     if not instance.enabled then return end
@@ -195,7 +195,7 @@ Button = setmetatable(
                         image_states.activation.state = "OFF"  
                     end
                     --text
-                    label_state.state = focused and "FOCUS" or "DEFAULT"
+                    label_state.state = instance.focused and "FOCUS" or "DEFAULT"
                     --event callback
                     if on_released then on_released(instance) end
                     
