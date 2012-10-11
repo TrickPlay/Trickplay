@@ -93,9 +93,9 @@ enum {
     FOUND_ALL
 };
 
-int recalculate_layout ( int width, gboolean finalize )
+int recalculate_layout ( int width, int height, gboolean finalize )
 {
-    current = (Page) { 0, 0, 0, 0 };
+    current = (Page) { finalize ? 0 : width, 0, 0, 0 };
     int f = 0, nf = 0;
     
     leaves_sorted_by_area = g_sequence_new( NULL );
@@ -178,7 +178,8 @@ int recalculate_layout ( int width, gboolean finalize )
 	if ( current.height <= output_size_limit ) {
 		if ( allow_multiple_sheets )
         {
-            if ( best.coverage == 0 || pow(current.coverage, 4.0) * current.area > pow(best.coverage, 4.0) * best.area )
+            if ( best.coverage == 0 || pow( current.coverage, 4.0 ) * current.area
+                    > pow( best.coverage, 4.0 ) * best.area )
                 best = current;
 		}
         else if ( best.area == 0 || current.area < best.area || 
@@ -476,8 +477,8 @@ int main ( int argc, char ** argv )
             // iterate to find a good layout
             
             for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
-                recalculate_layout( i, FALSE );
-            status = recalculate_layout( best.width, TRUE );
+                recalculate_layout( i, 0, FALSE );
+            status = recalculate_layout( best.width, best.height, TRUE );
             
             if ( status == FOUND_NONE )
             {
@@ -537,7 +538,7 @@ int main ( int argc, char ** argv )
         
         int i;
         for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
-            recalculate_layout( i, FALSE );
+            recalculate_layout( i, 0, FALSE );
             
         if ( !allow_multiple_sheets && best.area == 0 )
         {
@@ -547,7 +548,7 @@ int main ( int argc, char ** argv )
             exit( 0 );
         }
         
-        recalculate_layout( best.width, TRUE );
+        recalculate_layout( best.width, best.height, TRUE );
         
         fprintf( stderr,"Page match (%i x %i pixels, %.4g%% coverage): ",
                  best.width, best.height, 100.0 * (gfloat) minimum.area / (gfloat) best.area );
