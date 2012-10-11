@@ -101,12 +101,17 @@ class Wizard():
         if openApp == False and newApp == True:
             
             userPath = self.createAppDialog()
-            if userPath:
-                print('Path chosen: ' + str(userPath))
-            else:    
+
+            if userPath and userPath is not -1:
+                print('[VE] App path chosen : ' + str(userPath))
+            elif userPath == -1:    
+                return -1
+            else:
+                print('[VE] App path error')
                 return
                 
             if os.path.exists(userPath):
+
                 if os.path.isdir(userPath):
                     
                     files = os.listdir(userPath)
@@ -124,6 +129,7 @@ class Wizard():
         
         # Path was given on command line
         else:
+
             if os.path.exists(path) and os.path.isdir(path):
                 files = os.listdir(path)
                 if len(files) <= 0:
@@ -317,7 +323,7 @@ class Wizard():
 
         if id is not None:
             self.ui.id.setText(id)
-        elif name is not None:
+        if name is not None:
             self.ui.name.setText(name)
         
         if self.dialog.exec_():            
@@ -325,7 +331,7 @@ class Wizard():
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
 
-            if '' == id or '' == name or '' == path:
+            if '' == id or '' == name or path == "Project Directory" :
                 return self.createAppDialog(path, id, name)
             
             # set the path to path+project dir name 
@@ -333,13 +339,33 @@ class Wizard():
             
             if self.new:
                 # create project directory id.name and create app and main.lua there 
-                os.mkdir(path)
+                try :
+                    if not os.path.exists(path):
+                        os.mkdir(path)
+                    else :
+                        msg = QMessageBox()
+                        msg.setText('Path "' + path + '" is aleady exist. Please select other id or name for the project.')
+                        msg.setWindowTitle("Error")
+                        msg.exec_()
+                        return None
+                except:
+                    msg = QMessageBox()
+                    msg.setText('Path "' + path + '" is not valid. Please select other id or name for the project.')
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
+                    return None
+
                 appPath = os.path.join(path, 'app')
                 appFile = open(appPath, 'w')
                 appFile.write('app = {' + APP.format(id, name) + '}')
                 appFile.close()
+
                 mainPath = os.path.join(path, 'main.lua')
                 mainFile = open(mainPath, 'w')
+
+                mainContents = """WL=dofile('LIB/Widget/Widget_Library.lua')\ndofile('LIB/ve2/ve_runtime')\n\nfunction main()\n\n\tlocal layers_file = 'screens/layers.json'\n\tlocal styles_file = 'screens/styles.json'\n\tlocal screens_file = 'screens/screens.json'\n\tlocal image_path = 'assets/images/'\n\n\tlocal style = readfile(styles_file)\n\tstyle = string.sub(style, 2, string.len(style)-1)\n\tload_styles(style)\n\n\tlocal layer = readfile(layers_file)\n\tlayer = string.sub(layer, 2, string.len(layer)-1)\n\n\tscreen:add(load_layer(layer))\n\nend\n\ncontrollers:start_pointer()\nscreen:show()\ndolater(main)"""
+
+                mainFile.write(mainContents)
                 mainFile.close()
                 self.openList = [appPath, mainPath]
                 # create subdirectories (lib, assets, screens ...) and copy lib files into it. 
@@ -362,9 +388,9 @@ class Wizard():
                 self.name = ""
                 return path
             else:
-                return path
+                return -1
         else:
-            return 
+            return -1
 
     def exit_ii(self):
 		pass
