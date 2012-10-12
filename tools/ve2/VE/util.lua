@@ -6,12 +6,16 @@ local util = {}
 
 local uiElementCreate_map = 
 {
+    ['Widget_Clone'] = function(p)  return WL.Widget_Clone(p) end, 
     ['Clone'] = function(p)  return WL.Widget_Clone(p) end, 
     ['Group'] = function(p)  return WL.Widget_Group(p) end, 
+    ['Widget_Group'] = function(p)  return WL.Widget_Group(p) end, 
     ['Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
-
+    ['Widget_Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
     ['Text'] = function(p)  return WL.Widget_Text(p) end, 
+    ['Widget_Text'] = function(p)  return WL.Widget_Text(p) end, 
     ['Image'] = function(p)  return WL.Widget_Image(p) end, 
+    ['Widget_Image'] = function(p)  return WL.Widget_Image(p) end, 
     ['Button'] = function(p)  return WL.Button(p) end, 
     ['DialogBox'] = function(p) return WL.DialogBox(p) end,
     ['ToastAlert'] = function(p) return WL.ToastAlert(p) end,
@@ -25,6 +29,15 @@ local uiElementCreate_map =
     ['TabBar'] = function(p)  return WL.TabBar(p) end, 
     ['ButtonPicker'] = function(p)  return WL.ButtonPicker(p) end, 
     ['MenuButton'] = function(p)  return WL.MenuButton(p) end, 
+}
+
+local uiElementName_map = 
+{
+    ['Widget_Clone'] = function()  return "clone" end,
+    ['Widget_Group'] = function()  return "group" end,
+    ['Widget_Rectangle'] = function()  return "rectangle" end,
+    ['Widget_Text'] = function()  return "text" end,
+    ['Widget_Image'] = function()  return "image" end,
 }
 
 function util.addIntoLayer (uiInstance, group)
@@ -105,13 +118,13 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
             if input_mode == hdr.S_SELECT then
 	            if uiInstance.selected == nil or uiInstance.selected == false then 
-		            screen_ui.selected(uiInstance) 
+		            --screen_ui.selected(uiInstance) 
 		        elseif(uiInstance.selected == true) then 
-			        screen_ui.n_select(uiInstance) 
+			        --screen_ui.n_select(uiInstance) 
 	            end
             end
 
-            if uiTypeStr == "Text" then 
+            if uiTypeStr == "Text" or uiTypeStr == "Widget_Text"then 
                 uiInstance.cursor_visible = true
                 uiInstance.editable= true
                 uiInstance.wants_enter= true
@@ -249,7 +262,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 							if screen:find_child(uiInstance.name.."a_m") then 
 			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
 			        		end 
-			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
+			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" or t == "Widget_Group" then 
 
                                 if t == "DialogBox" then 
 								    uiInstance.y = uiInstance.y - c.separator_y
@@ -571,6 +584,14 @@ function util.ang_cord()
     end 
 end  
 
+function util.getTypeNameStr(m) 
+    if string.find(m.widget_type, "Widget" ) then 
+        return uiElementName_map[m.widget_type]()
+    else 
+        return m.widget_type
+    end
+end
+
 function util.getTypeStr(m) 
     if m.widget_type == "Widget" then 
         return m.type
@@ -589,7 +610,7 @@ end
 function util.copy_obj (v)
 
       local new_object 
-      uiTypeStr = getTypeStr(v) 
+      uiTypeStr = util.getTypeStr(v) 
       if uiElementCreate_map[uiTypeStr] then
         new_object = uiElementCreate_map[uiTypeStr](v.attributes)
       end 
@@ -776,7 +797,7 @@ function util.copy_obj (v)
 
       local new_object 
 
-      uiTypeStr = getTypeStr(v) 
+      uiTypeStr = util.getTypeStr(v) 
 
       if uiElementCreate_map[uiTypeStr] then
         new_object = uiElementCreate_map[uiTypeStr](v.attributes)
@@ -801,7 +822,7 @@ end
 function util.is_this_group(v)
 
 	if v.extra then 
-		if v.widget_type and v.widget_type == "Widget" and v.type == "Group" then 
+		if v.widget_type and v.widget_type == "Widget_Group" then 
 			return true 
 		end 
 	end 
