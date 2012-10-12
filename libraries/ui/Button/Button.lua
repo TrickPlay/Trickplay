@@ -306,7 +306,18 @@ Button = setmetatable(
             
             make_canvases = function(instance,_ENV)
                 return function()
-                    
+                    images = {}
+                    clear(instance)
+                    for _,state in pairs(states) do
+                        images[state] = create_canvas(instance,state)
+                        add(instance,images[state])
+                        if state ~= "default" then
+                            image_states[state] = define_image_animation(images[state],state)
+                        end
+                    end
+                    add(instance, label )
+                    return true
+                    --[[
                     flag_for_redraw = false
                     
                     canvas = true
@@ -327,6 +338,7 @@ Button = setmetatable(
                     add(instance, label )
                     
                     return true
+                    --]]
                 end
             end,
             
@@ -457,18 +469,28 @@ Button = setmetatable(
 
         --default create_canvas function
         create_canvas = function(self,state)
-            print("cc",self.w,self.h)
-            local c = Canvas(self.w,self.h)
             
-            c.line_width = self.style.border.width
-            
-            round_rectangle(c,self.style.border.corner_radius)
-            
-            c:set_source_color( self.style.fill_colors[state] or self.style.fill_colors.default )     c:fill(true)
-            
-            c:set_source_color( self.style.border.colors[state] or self.style.border.colors.default )   c:stroke(true)
-            
-            return c:Image()
+            return NineSlice{
+                w = self.w,
+                h = self.h,
+                cells={
+                    {
+                        Widget_Clone{source = self.style.rounded_corner[state]},
+                        Widget_Clone{source = self.style.top_edge[state]},
+                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
+                    },
+                    {
+                        Widget_Clone{source =   self.style.side_edge[state]},
+                        Widget_Rectangle{color = self.style.fill_colors[state] },
+                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
+                    },
+                    {
+                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
+                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
+                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {180,0,0}},
+                    },
+                }
+            }
             
         end
         
