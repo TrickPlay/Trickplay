@@ -4,8 +4,8 @@ local style = {
         width = 10,
         colors = {
             default    = {255,255,155},
-            focus      = {255,255,155},
-            activation = {155,255,255}
+            focus      = {255,  0,  0},
+            activation = {155,255,255},
         }
     },
     text = {
@@ -13,14 +13,14 @@ local style = {
         colors = {
             default    = {255,255,155},
             focus      = {255,255,155},
-            activation = {155,255,255}
+            activation = {155,255,255},
         }
     },
     fill_colors    = {
-        default    = {80,0,0},
+        default    = { 80,  0,  0},
         focus      = {155,155,155},
-        activation = {155,155,155}
-    }
+        activation = {155,155,155},
+    },
 }
 ---[[
 tb1 = WL.TabBar{
