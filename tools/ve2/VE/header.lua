@@ -84,10 +84,15 @@ hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", 
 hdr.uiElementCreate_map = 
     {
         ['Clone'] = function(p)  return WL.Widget_Clone(p) end, 
+        ['Widget_Clone'] = function(p)  return WL.Widget_Clone(p) end, 
         ['Group'] = function(p)  return WL.Widget_Group(p) end, 
+        ['Widget_Group'] = function(p)  return WL.Widget_Group(p) end, 
         ['Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
+        ['Widget_Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
         ['Text'] = function(p)  return WL.Widget_Text(p) end, 
+        ['Widget_Text'] = function(p)  return WL.Widget_Text(p) end, 
         ['Image'] = function(p)  return WL.Widget_Image(p) end, 
+        ['Widget_Image'] = function(p)  return WL.Widget_Image(p) end, 
     
         ['Button'] = function(p)  return WL.Button(p) end, 
         ['DialogBox'] = function(p) return WL.DialogBox(p) end,

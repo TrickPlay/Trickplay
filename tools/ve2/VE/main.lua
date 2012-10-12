@@ -10,19 +10,19 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t12")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t2")
     end 
 
     bb = function ()
-        _VE_.insertUIElement(8, 'RadioButton')
+        _VE_.selectUIElement(11,false)
     end 
 
     cc = function ()
-        _VE_.insertUIElement(8, 'CheckBox')
+        _VE_.duplicate(12)
     end 
     dd = function ()
-        tb = devtools:gid(16)
-        for i, j in ipairs (tb.tabs[1].contents.children) do print (i, j.name, j.type) end 
+        _VE_.selectUIElement(18,false)
+        _VE_.duplicate(12)
     end 
     ----------------------------------------------------------------------------
     -- Key Map
@@ -160,6 +160,9 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
     blockReport = true 
 
+    screen_ui.n_selected(devtools:gid(newChildGid))
+    screen_ui.n_selected(devtools:gid(newParentGid))
+
     -- Drop into Layer 
 
     if util.is_this_container(newParent) == false then  
@@ -195,7 +198,6 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     -- Drop into Container 
 
     else
-    
         --newChild.reactive = true
         newChild.position = {0,0,0}
         newChild.is_in_group = true
@@ -719,7 +721,7 @@ _VE_.delete = function(gid)
 				end 
 			end 
 
-			if v.type == "Clone" then 
+			if v.type == "Clone" or v.widget_type == "Widget_Clone" then 
 				util.table_remove_val(v.source.extra.clone, v.name)
 			end 
 			
@@ -913,8 +915,7 @@ _VE_.openFile = function(path)
                     m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
                 util.create_mouse_event_handler(m, uiTypeStr)
-
-                if uiTypeStr == "ArrowPane" then
+                if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" then
                     for o, p in ipairs(m.children) do
                         util.create_mouse_event_handler(p, p.widget_type)
                         p.reactive = true 
@@ -926,7 +927,7 @@ _VE_.openFile = function(path)
                     --m.is_in_group = true
                 end 
 
-                if uiTypeStr == "Widget_Image" then 
+                if uiTypeStr == "Widget_Image" or uiTypeStr == "Image" then 
                     m.src = image_path..m.src
                 end 
                 m.reactive = true 
@@ -1176,20 +1177,20 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = true
 
-    if uiTypeStr == "Rectangle" then 
+    if uiTypeStr == "Rectangle" or uiTypeStr == "Widget_Rectangle"  then 
 
         input_mode = hdr.S_RECTANGLE 
         screen:grab_key_focus()
         return
 
-    elseif uiTypeStr == "Group" then 
+    elseif uiTypeStr == "Group" or uiTypeStr == "Widget_Group" then 
         
         uiInstance = editor.group()
         if uiInstance == nil then 
             return
         end 
 
-    elseif uiTypeStr == "Clone" then 
+    elseif uiTypeStr == "Clone" or uiTypeStr == "Widget_Clone" then 
         
         editor.clone()
         return
@@ -1200,76 +1201,46 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     
     -- Default Settings
     if uiTypeStr == "ButtonPicker" then 
-        uiInstance.items = {"item1","item2","item3", "item4", "item5", "item6", "item7", "item8", "item9", "item10", "item11", "item12", "item13", "item14"}
-    ---[[ for arrow_move_by test
-        --elseif uiTypeStr == "ArrowPane" then 
-        --uiInstance:add(Widget_Rectangle{w=1000,h=1000,color="ffff00"},Widget_Rectangle{w=100,h=100,color="ff0000"},Widget_Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
-    --]]--
+        uiInstance.items = {"item1","item2","item3"}
     elseif uiTypeStr == "LayoutManager" then 
-        
         uiInstance:set{
             number_of_rows = 2,
             number_of_cols = 3,
             placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
             cells = {
-                {WL.Widget_Rectangle{name = "star", w=30,h=30},WL.Widget_Rectangle{name = "moon", w=100,h=100}},
-                {WL.Widget_Rectangle{name = "rainbow", w=100,h=100},nil,WL.Widget_Rectangle{name="sun",w=100,h=100}},
+                --{WL.Widget_Rectangle{name = "star", w=30,h=30},WL.Widget_Rectangle{name = "moon", w=100,h=100}},
+                --{WL.Widget_Rectangle{name = "rainbow", w=100,h=100},nil,WL.Widget_Rectangle{name="sun",w=100,h=100}},
             }
         }
-    
-    --[[
-        uiInstance:set{ number_of_rows = 2, number_of_cols = 2}
-        uiInstance.set{
-                cells = {
-                {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-                {Widget_Rectangle{w=100,h=100}},
-                {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-                }
-
-                --{Widget_Rectangle{w=100,h=100, color = {255,0,0,255}},Widget_Rectangle{w=100,h=100, color = {255,100,0,255}}},
-                --{Widget_Rectangle{w=100,h=100, color = {255,0,100,255}}},
-                --{Widget_Rectangle{w=100,h=100, color = {255,100,100,255}},Widget_Rectangle{w=100,h=100, color = {20,220,0,255}}},
-        }
-    ]]
     elseif uiTypeStr == "Slider" then 
-
        uiInstance:set{x=500, y = 300, grip_w = 50, grip_h = 20, track_w = 500, track_h = 50}
-
+    elseif uiTypeStr == "ProgressBar" or uiTypeStr == "ProgressSpinner" or uiTypeStr == "OrbittingDots" then 
+        uiInstance:set{x=500, y = 300, size = {300,200} }
+        if uiTypeStr == "ProgressBar" then 
+            uiInstance.progress = 0.25
+        end 
     elseif uiTypeStr == "TextInput" then 
-
-       uiInstance:set{enabled = false}
-
+       uiInstance:set{enabled = false, size = {300,200}}
     elseif uiTypeStr == "TabBar" then 
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One" , contents = WL.Widget_Group()},   --contents = Widget_Group{children={Button{name="b1"}}}},
-                {label="Two",   contents = WL.Widget_Group()}, --{children={}}},
-                {label="Three", contents = WL.Widget_Group()}, ----{children={Widget_Rectangle{w=400,h=400,color="0000ff"}}}},
-                --{label="Four",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ffff00"}}}},
-                --{label="Five",  contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="ff00ff"}}}},
-                --{label="Six",   contents = Widget_Group{children={Widget_Rectangle{w=400,h=400,color="00ffff"}}}},
+                {label="One" , contents = WL.Widget_Group()}, 
+                {label="Two",   contents = WL.Widget_Group()},
+                {label="Three", contents = WL.Widget_Group()},
             }
         }
-
-        --uiInstance.tabs[1]:add()
-    elseif uiTypeStr == "ProgressBar" then 
-        uiInstance.progress = 0.25
-    --elseif uiTypeStr == "ScrollPane" then 
-        --b = Button{name="pretty_button"}
-        --uiInstance:add(b)
-    elseif uiTypeStr == "DialogBox" then 
-        local b = WL.Button{name="pretty_button"}
-        uiInstance:add(b)
-    elseif uiTypeStr == "MenuButton" then 
-        uiInstance.items = {WL.Button{name="pretty_button"}}
+    --elseif uiTypeStr == "DialogBox" then 
+        --local b = WL.Button{name="pretty_button"} uiInstance:add(b)
+    --elseif uiTypeStr == "MenuButton" then 
+        --uiInstance.items = {WL.Button{name="pretty_button"}}
     end 
         
     util.assign_right_name(uiInstance, uiTypeStr)
 
-    if uiTypeStr == "Image" then 
+    if uiTypeStr == "Image" or uiTypeStr == "Widget_Image" then 
         uiInstance.src = path
-    elseif uiTypeStr == "Text" then 
+    elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
         editor.text(uiInstance)
     end
 

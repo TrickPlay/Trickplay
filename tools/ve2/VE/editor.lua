@@ -7,22 +7,6 @@ local next_position
 
 local menuButtonView 
 
-local allUiElements     = {
-							"ArrowPane", "Button", "ButtonPicker", "CheckBoxGroup","DialogBox","Image", "LayoutManager",
-							"MenuButton", "ProgressBar","ProgressSpinner", "RadioButtonGroup", "Rectangle", "ScrollPane", 
-							"TabBar",  "Text",  "TextInput", "ToastAlert", "Video"
-						  }
-
-local engineUiElements  = { 
-							"Rectangle", "Text", "Image", "Video" 
-						  }
-
-local editorUiElements 	= {
-							"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
-							"ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", 
-							"ScrollPane", "ArrowPane" 
-						  }
-
 ---------------------------------------------
 -- Rectangle --------------------------------
 ---------------------------------------------
@@ -47,7 +31,7 @@ function editor.rectangle(x, y)
     uiRectangle.org_x = x
     uiRectangle.org_y = y
 
-    util.create_mouse_event_handler(uiRectangle,"Rectangle")
+    util.create_mouse_event_handler(uiRectangle,"Widget_Rectangle")
 
     util.addIntoLayer(uiRectangle)
 
@@ -288,7 +272,7 @@ local function duplicate_child(new, org)
             n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
         end 
 
-        if uiTypeStr == "Group" then  
+        if uiTypeStr == "Widget_Group" then  
             duplicate_child(n, m)
         end
 
@@ -314,7 +298,7 @@ function editor.duplicate(gid)
 		if util.is_this_selected(v) == true then 
 		    if uiDuplicate then
 		    	if uiDuplicate.name == v.name then 
-					next_position = {2 * v.x - uiDuplicate.extra.position[1], 2 * v.y - uiDuplicate.extra.position[2]}
+					next_position = {2 * v.x - uiDuplicate.position[1], 2 * v.y - uiDuplicate.position[2]}
 				else 
 					uiDuplicate = nil 
 					next_position = nil 
@@ -322,16 +306,19 @@ function editor.duplicate(gid)
 		    end 
 
 			uiTypeStr = util.getTypeStr(v) 
+
             if hdr.uiElementCreate_map[uiTypeStr] then
                 uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
             end 
 
             uiDuplicate.position = {v.x + 20, v.y +20}
 
+			uiTypeStr = util.getTypeNameStr(v) 
+
             util.assign_right_name(uiDuplicate, uiTypeStr)
             util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
 
-            if uiTypeStr == "Group" then 
+            if uiTypeStr == "Widget_Group" then 
                 duplicate_child(uiDuplicate, v)
             end 
 
