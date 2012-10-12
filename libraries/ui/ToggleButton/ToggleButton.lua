@@ -92,6 +92,52 @@ ToggleButton = setmetatable(
             widget_type = function(instance,_ENV)
                 return function() return "ToggleButton" end
             end,
+            filled_icon = function(instance,_ENV)
+                return function(oldf)
+                    
+                    return filled_icon
+                    
+                end,
+                function(oldf,self,v)
+                    
+                    if filled_icon and filled_icon.parent then filled_icon:unparent() end
+                    
+                    new_filled_icon = true
+                    filled_icon = v
+                end
+            end,
+            empty_icon = function(instance,_ENV)
+                return function(oldf)
+                    
+                    return empty_icon
+                    
+                end,
+                function(oldf,self,v)
+                    
+                    if empty_icon and empty_icon.parent then empty_icon:unparent() end
+                    new_empty_icon = true
+                    empty_icon = v
+                end
+            end,
+            hide_icon = function(instance,_ENV)
+                return function(oldf)
+                    
+                    return hide_icon
+                    
+                end,
+                function(oldf,self,v)
+                    
+                    if not v and hide_icon then 
+                        if  empty_icon then add(instance, empty_icon) end
+                        if filled_icon then add(instance,filled_icon) end
+                    elseif v and not hide_icon then 
+                        if  empty_icon and  empty_icon.parent then  empty_icon:unparent() end
+                        if filled_icon and filled_icon.parent then filled_icon:unparent() end
+                    end
+                    hide_icon = v
+                    
+                end
+            end,
             attributes = function(instance,_ENV)
                 return function(oldf,self)
                     local t = oldf(self)
@@ -116,12 +162,14 @@ ToggleButton = setmetatable(
                         selected = v
                         ---[[
                         if selected then
+                            if filled_icon then filled_icon:show() end
                             
                             if image_states.selection then image_states.selection.state = "ON"   end
                             
                             if on_selection then on_selection(self) end
                             
                         else
+                            if filled_icon then filled_icon:hide() end
                             
                             if image_states.selection then image_states.selection.state = "OFF"  end
                             
@@ -136,19 +184,85 @@ ToggleButton = setmetatable(
         functions = {
         }
     },
+    private = {
+            default_empty_icon = function(instance,_ENV)
+                return function()
+                    return Clone()--{source=instance.style.empty_toggle_icon.default}
+                end
+            end,
+            default_filled_icon = function(instance,_ENV)
+                return function()
+                    return Clone()--{source=instance.style.filled_toggle_icon.default}
+                end
+            end,
+            update = function(instance,_ENV)
+                return function()
+                    button_update()
+                    --[[
+                    if empty_icon_group.parent then
+                        empty_icon_group:raise_to_top()
+                    else
+                        add(instance,empty_icon_group)
+                    end
+                    if filled_icon_group.parent then
+                        filled_icon_group:raise_to_top()
+                    else
+                        add(instance,filled_icon_group)
+                    end
+                    --]]
+                    if  new_empty_icon then
+                        new_empty_icon = false
+                        empty_icon = empty_icon or default_empty_icon()
+                        
+                        if empty_icon.parent then empty_icon:unparent() end
+                        if not hide_icon then add(instance,empty_icon) end
+                        empty_icon.anchor_point = {0,empty_icon.h/2}
+                        empty_icon.position     = {0,instance.h/2}
+                    elseif empty_icon and not hide_icon then
+                        empty_icon:raise_to_top()
+                    end
+                    if  new_filled_icon then
+                        new_filled_icon = false
+                        print("filled_icon",instance.style.empty_toggle_icon.default)
+                        filled_icon = filled_icon or default_filled_icon()
+                        
+                        if filled_icon.parent then filled_icon:unparent() end
+                        if not hide_icon then add(instance,filled_icon) end
+                        filled_icon[selected and"show"or"hide"](filled_icon)
+                        filled_icon.anchor_point = {0,empty_icon.h/2}
+                        filled_icon.position     = {0,instance.h/2}
+                    elseif filled_icon and not hide_icon then
+                        filled_icon:raise_to_top()
+                    end
+                    
+                end
+            end
+    },
     declare = function(self,parameters)
         local instance, _ENV = Button:declare{
             on_pressed = function(self) 
                 self.selected = not self.selected
             end
         }
-        
+        hide_icon = false
+        new_empty_icon  = true
+        new_filled_icon = true
+        button_update = update
+        --[[
+        new_filled_icons = true
+        filled_icons = false
+        filled_icon_group = Widget_Group{name="filled_icon"}
+        new_empty_icons = true
+        empty_icons = false
+        empty_icon_group = Widget_Group{name="empty_icon"}
+        --]]
         radio_button_group = false
         on_deselection     = false
         on_selection       = false
         selected           = false
         --overwrite existing
         states             = {"default","focus","selection","activation"}
+        --[[
         create_canvas      = function(self,state)
             print("ccc")
             local c = Canvas(self.w,self.h)
@@ -191,7 +305,7 @@ ToggleButton = setmetatable(
             return c:Image()
             
         end
-        
+        --]]
         for _,state in pairs(states) do
             if state ~= "default" then image_states[state] = {state = "OFF"} end
         end
