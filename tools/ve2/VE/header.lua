@@ -83,8 +83,8 @@ hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", 
 
 hdr.uiElementCreate_map = 
     {
-        ['Clone'] = function(p)  return WL.Widget_Clone(p) end, 
-        ['Widget_Clone'] = function(p)  return WL.Widget_Clone(p) end, 
+        ['Clone'] = function(p) local obj = WL.Widget_Clone(p) if p.source then obj.source = screen:find_child(p.source) end return obj end, 
+        ['Widget_Clone'] = function(p) local obj = WL.Widget_Clone(p) if p.source then obj.source = screen:find_child(p.source) end return obj end, 
         ['Group'] = function(p)  return WL.Widget_Group(p) end, 
         ['Widget_Group'] = function(p)  return WL.Widget_Group(p) end, 
         ['Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
