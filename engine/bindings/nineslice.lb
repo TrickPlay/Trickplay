@@ -68,15 +68,15 @@ module nine_slice_effect;
 		
 		-- create an image inside of a group with enough padding for the borders of the effect to nicely enclose the image
 		
-		left, right, top, bottom = table.unpack(buttonEffect.borders)
+		left, right, top, bottom = table.unpack( buttonEffect.borders )
 		image = Image { src = "assets/image.png", x = left, y = top }
 		
 		imgButton = Group {
 			children = {
 				image,
 				Rectangle {
-					w = image.x + image.w + right,
-					h = image.y + image.h + bottom,
+					w = left + image.w + right,
+					h = top  + image.h + bottom,
 					opacity = 0
 				}
 			},
@@ -92,7 +92,7 @@ class NineSliceEffect [[nineslice*]] effect
 	/*
 		Constructor: NineSliceEffect
 		
-		The NineSliceEffect() constructor create a new NineSliceEffect object.
+		The NineSliceEffect() constructor creates a new NineSliceEffect object.
 		
 		*Arguments:*
 		
