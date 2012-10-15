@@ -1,0 +1,166 @@
+module nine_slice_effect;
+
+	/*
+		Class: NineSliceEffect
+		
+		The NineSliceEffect class will draw a grid of up to nine sprites from a spritesheet behind an object. The effect will adapt to fit the object's bounding box by stretching or tiling the center images on both axes.
+		
+		An example constructor is shown below.
+		
+		(code)
+		buttonEffect = NineSliceEffect {
+			sheet = SpriteSheet { map = "button.json" },
+			opacity = 255,
+			tile = true,
+			ids = { "button-nw.png", "button-n.png",  "button-ne.png",
+					"button-w.png",  "button-c.png",  "button-e.png",
+					"button-sw.png", "button-s.png",  "button-se.png" }
+		}
+		(end)
+		
+		Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table, { NW, N, NE, W, C, E, SW, S, SE }, is shown below.
+		
+		(see NineSliceCompass.png)
+		
+		The sheet, tile, and opacity properties may be changed after construction.
+		
+		(code)
+		-- change the spritesheet from which the sprites are pulled
+		
+		buttonEffect.sheet = SpriteSheet { map = "button-focus.json" }
+		buttonEffect.tile = false
+		
+		-- animate the opacity of an effect
+		
+		aState = AnimationState {
+			transitions = {
+				{
+					source = "*", target = "hide",
+					keys = { { buttonEffect, "opacity", 0 } }
+				},
+			}
+		}
+		(end)
+		
+		*Code Example:* The effect is applied by adding it to a UIElement.
+		
+		(code)
+		uiSheet = SpriteSheet { map = "ui.json" }
+		
+		-- simple 3-slice text bounding box effect
+		-- the ids table only contains the NW, N, and NE ids, which means the box can expand horizontally but not vertically.
+		
+		textBox = Text { text = "  Text Button!  " }
+		textBox:add(NineSliceEffect {
+			sheet = uiSheet,
+			ids = { "box-left-edge.png", "box-middle.png",  "box-right-edge.png" }
+		})
+		
+		-- more complex 9-slice button effect
+		
+		buttonEffect = NineSliceEffect {
+			sheet = uiSheet,
+			opacity = 255,
+			ids = { "button-nw.png", "button-n.png",  "button-ne.png",
+					"button-w.png",  "button-c.png",  "button-e.png",
+					"button-sw.png", "button-s.png",  "button-se.png" }
+		}
+		
+		-- create an image inside of a group with enough padding for the borders of the effect to nicely enclose the image
+		
+		left, right, top, bottom = table.unpack(buttonEffect.borders)
+		image = Image { src = "assets/image.png", x = left, y = top }
+		
+		imgButton = Group {
+			children = {
+				image,
+				Rectangle {
+					w = image.x + image.w + right,
+					h = image.y + image.h + bottom,
+					opacity = 0
+				}
+			},
+			effects = {
+				buttonEffect
+			}
+		}
+		(end)
+	*/
+
+class NineSliceEffect [[nineslice*]] effect
+{
+	/*
+		Constructor: NineSliceEffect
+		
+		The NineSliceEffect() constructor create a new NineSliceEffect object.
+		
+		*Arguments:*
+		
+		props - table defining the effect's properties
+		
+		*Return Value:* new NineSliceEffect object
+		
+		*See Also:* the <UIElment.effects> property
+	*/
+	
+	NineSliceEffect( table props = 0 );
+	
+	~NineSliceEffect();
+	
+	/*
+		Property: sheet
+		
+		The sheet property is a SpriteSheet object specifying where to pull sprites from, based on the ids provided at construction.
+		
+		If the spritesheet is changed, the ids will be reevaluated. If the new sheet lacks some or all of the ids, those ids will not be drawn.
+		
+		*See Also:* the <ids> property, <SpriteSheet> object
+	*/
+	
+	SpriteSheet sheet;
+	
+	/*
+		Property: ids
+		
+		The ids property is a table containing the string ids of the nine sprites used by the effect, in the order { NW, N, NE, W, C, E, SW, S, SE }.
+		
+		Ids must be specified at construction. Some of them may be nil or not applicable to the current spritesheet, in which case they will not be drawn.
+		
+		If the spritesheet is changed, the ids will be reevaluated.
+		
+		*See Also:* the <sheet> property
+	*/
+	
+	readonly table ids;
+	
+	/*
+		Property: tile
+		
+		The tile property is a boolean value specificying whether to tile the center sprites instead of stretching them.
+		
+		In order to matche the dimensions of the target object's bounding box, the center sprites (N, C, S vertically and W, C, E horizontally) must be either stretched or tiled.
+	*/
+	
+	boolean tile;
+	
+	/*
+		Property: opacity
+		
+		The opacity property is an integer value specificy what opacity/trasparency to give the grid of sprites, independent of the opacity of the object the effect is applied to.
+	*/
+	
+	int opacity;
+	
+	/*
+		Property: borders
+		
+		The borders property is a table reflecting the maximum sizes of the sprites making up the left, right, top, and bottom borders of the NineSliceEffect, in that order.
+		
+		borders[1] - reflects the left border (maximum width of NW, W, and SW sprites)
+		borders[2] - reflects the right border (maximum width of NE, E, and SE sprites)
+		borders[3] - reflects the top border (maximum height of SW, S, and SE sprites)
+		borders[4] - reflects the bottom border, (maximum height of NW, N, and NE sprites)
+	*/
+	
+	readonly table borders;
+}

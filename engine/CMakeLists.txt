@@ -458,6 +458,7 @@ list( APPEND LB_FILES
 
     ${BINDINGS_SRC}/sprite_sheet.lb
     ${BINDINGS_SRC}/sprite.lb
+    ${BINDINGS_SRC}/nineslice.lb
 
     ${BINDINGS_SRC}/socket.lb
 
