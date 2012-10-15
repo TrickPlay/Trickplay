@@ -50,8 +50,10 @@ for i,dep in ipairs(core_dependencies) do    load(pwd..dep)    end
 
 local widget_dependencies = {
     ArrowPane        = {"Button","ClippingRegion","LayoutManager","ArrowPane"},
-    Button           = {"Button"},
+    Button           = {"NineSlice","Button"},
     ButtonPicker     = {"Button","LayoutManager","ButtonPicker"},
+    CheckBox         = {"Button","ToggleButton","CheckBox"},
+    CheckBoxGroup    = {"ToggleButton","CheckBox"},
     ClippingRegion   = {"ClippingRegion"},
     DialogBox        = {"DialogBox"},
     ListManager      = {"LayoutManager"},
@@ -61,13 +63,14 @@ local widget_dependencies = {
     OrbittingDots    = {"OrbittingDots"},
     ProgressBar      = {"ProgressBar"},
     ProgressSpinner  = {"ProgressSpinner"},
-    RadioButtonGroup = {"ToggleButton","RadioButtonGroup"},
+    RadioButton      = {"Button","ToggleButton","RadioButton"},
+    RadioButtonGroup = {"ToggleButton","RadioButton"},
     ScrollPane       = {"Slider","ClippingRegion","LayoutManager","ScrollPane"},
     Slider           = {"NineSlice","Slider"},
-    TabBar           = {"RadioButtonGroup","ArrowPane","TabBar"},
+    TabBar           = {"RadioButton","ArrowPane","TabBar"},
     TextInput        = {"NineSlice","TextInput"},
     ToastAlert       = {"DialogBox","ToastAlert"},
-    ToggleButton     = {"Button","ToggleButton","RadioButtonGroup"},
+    ToggleButton     = {"Button","ToggleButton","RadioButton"},
 }
 
 local    load_dependencies
