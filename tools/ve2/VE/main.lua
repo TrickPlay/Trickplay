@@ -10,16 +10,15 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd2")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd3")
     end 
 
     bb = function ()
-        _VE_.insertUIElement(73, 'Button')
-        _VE_.setUIInfo(83,'label','danchu')
+        _VE_.insertUIElement(8, 'LayoutManager')
+        _VE_.insertUIElement(8, 'Button')
     end 
 
     cc = function ()
-        _VE_.insertUIElement(75, "Button")
         
     end 
     dd = function ()
@@ -193,6 +192,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
         end 
 		newChild.group_position = {0,0,0}
         newChild.is_in_group = false
+        newChild.parent_group = nil
         newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
         newParent:add(newChild)
@@ -207,6 +207,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
         newChild.position = {0,0,0}
         newChild.is_in_group = true
+        newChild.parent_group = newParent
 		newChild.group_position = newParent.position
 
         if newParent.widget_type == "LayoutManager" then 
