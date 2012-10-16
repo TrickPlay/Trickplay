@@ -1019,6 +1019,8 @@ function util.get_group_position(child_obj)
         elseif parent_obj.widget_type == "MenuButton" then 
             return {parent_obj.x + parent_obj.item_spacing  + parent_obj.popup_offset, parent_obj.y +
             parent_obj.item_spacing + parent_obj.popup_offset}
+        elseif parent_obj.widget_type == "DialogBox" then 
+            return {parent_obj.x, parent_obj.y + parent_obj.separator_y}
         elseif parent_obj.widget_type == "Widget_Group" then 
             return parent_obj.position
         else
