@@ -10,19 +10,19 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.t2")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd2")
     end 
 
     bb = function ()
-        _VE_.selectUIElement(11,false)
+        _VE_.insertUIElement(73, 'Button')
+        _VE_.setUIInfo(83,'label','danchu')
     end 
 
     cc = function ()
-        _VE_.duplicate(12)
+        _VE_.insertUIElement(75, "Button")
+        
     end 
     dd = function ()
-        _VE_.selectUIElement(18,false)
-        _VE_.duplicate(12)
     end 
     ----------------------------------------------------------------------------
     -- Key Map
@@ -79,7 +79,7 @@
 
 _VE_ = {}
 
--- GET 
+-- Get Style 
 _VE_.getStInfo = function()
 
     local t = {}
@@ -88,12 +88,14 @@ _VE_.getStInfo = function()
     print("getStInfo"..json:stringify(t))
 end 
 
+-- Ret Style
 _VE_.repStInfo = function()
     local t = {}
     table.insert(t, json:parse(WL.get_all_styles()))
     print("repStInfo"..json:stringify(t))
 end 
 
+-- Get UI
 _VE_.getUIInfo = function()
     local t = {}
     for m,n in ipairs (screen.children) do
@@ -120,6 +122,7 @@ _VE_.getUIInfo = function()
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 
+-- Print Object Name
 _VE_.printInstanceName = function(layernames)
 
     theNames =""
@@ -166,7 +169,6 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     -- Drop into Layer 
 
     if util.is_this_container(newParent) == false then  
-        --if lmChild == true then 
         if lmParentGid then
             lmParent = devtools:gid(lmParentGid)
             if lmParent.widget_type  == "LayoutManager" then 
@@ -198,7 +200,11 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     -- Drop into Container 
 
     else
-        --newChild.reactive = true
+
+        if newParent.widget_type ~= "MenuButton" then 
+            newChild.reactive = true
+        end 
+
         newChild.position = {0,0,0}
         newChild.is_in_group = true
 		newChild.group_position = newParent.position
@@ -348,16 +354,6 @@ end
 _VE_.distributeHorizontal = function(gid)
 
     editor.arrange_prep(gid)
-    --[[
-    util.getCurLayer(gid)
-    blockReport = true
-
-    if #selected_objs == 0 then 
-	    print("there are  no selected objects") 
-	    input_mode = hdr.S_SELECT
-	    return 
-    end 
-    ]]
     
     local x_table = {}
     local temp_w = 0
@@ -412,27 +408,11 @@ _VE_.distributeHorizontal = function(gid)
     end 
 
     editor.arrange_end(gid)
-    --[[
-    screen.grab_key_focus(screen)
-    input_mode = hdr.S_SELECT
-    _VE_.refresh() 
-    blockReport = false
-    ]]
 end 
 
 _VE_.distributeVertical = function(gid)
 
     editor.arrange_prep(gid)
-    --[[
-    util.getCurLayer(gid)
-    blockReport = true
-
-    if #selected_objs == 0 then 
-	    print("there are  no selected objects") 
-	    input_mode = hdr.S_SELECT
-	    return 
-    end 
-    ]]
     
     local y_table = {}
     local temp_h = 0
@@ -487,27 +467,11 @@ _VE_.distributeVertical = function(gid)
     end 
 
     editor.arrange_end(gid)
-    --[[
-    screen.grab_key_focus(screen)
-    input_mode = hdr.S_SELECT
-    _VE_.refresh() 
-    blockReport = false
-    ]]
 end 
 
 _VE_.bringToFront = function(gid)
 
     editor.arrange_prep(gid)
-    --[[
-    util.getCurLayer(gid)
-    blockReport = true
-
-    if #selected_objs == 0 then 
-	    print("there are  no selected objects") 
-	    input_mode = hdr.S_SELECT
-	    return 
-    end 
-    --]]
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true) then
@@ -518,13 +482,6 @@ _VE_.bringToFront = function(gid)
     end
 
     editor.arrange_end(gid)
-
-    --[[
-    screen.grab_key_focus(screen)
-    input_mode = hdr.S_SELECT
-    _VE_.refresh() 
-    blockReport = false
-    ]]
 end 
 
 
@@ -822,6 +779,9 @@ _VE_.setUIInfo = function(gid, property, value, n)
     else
         uiInstance[property] = value 
     end 
+    if property == "label" then 
+        _VE_.refresh()
+    end 
 	screen_ui.selected(uiInstance) 
 end 
 
@@ -914,17 +874,16 @@ _VE_.openFile = function(path)
                 if uiTypeStr == "LayoutManager" then 
                     m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
+                m.extra.mouse_handler = false
                 util.create_mouse_event_handler(m, uiTypeStr)
                 if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" then
                     for o, p in ipairs(m.children) do
+                        p.extra.mouse_handler = false
                         util.create_mouse_event_handler(p, p.widget_type)
                         p.reactive = true 
                         p.is_in_group = true
+                        p.parent_group = m 
                     end 
-                    --m.reactive = true 
-                    --m.lock = false
-                    --m.selected = false
-                    --m.is_in_group = true
                 end 
 
                 if uiTypeStr == "Widget_Image" or uiTypeStr == "Image" then 
@@ -1225,7 +1184,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One" , contents = WL.Widget_Group()}, 
+                {label="One" , contents = WL.Widget_Group{}}}}, 
                 {label="Two",   contents = WL.Widget_Group()},
                 {label="Three", contents = WL.Widget_Group()},
             }
@@ -1244,6 +1203,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         editor.text(uiInstance)
     end
 
+    uiInstance.extra.mouse_handler = false 
     util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     util.addIntoLayer(uiInstance)
@@ -1324,9 +1284,9 @@ end
             return true 
         end
 
-      	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
+      	mouse_state = hdr.BUTTON_DOWN 		
 
-		if current_focus and input_mode ~=  hdr.S_RECTANGLE then -- for closing menu button or escaping from text editting 
+		if current_focus and input_mode ~=  hdr.S_RECTANGLE then 
 			current_focus.clear_focus()
 			screen:grab_key_focus()
 			return
@@ -1340,10 +1300,8 @@ end
 		screen_ui.multi_select(x,y)
     end
 
-	local move 
 	function screen:on_button_up(x,y,button,clicks_count, m)
 
-		-- for dragging timepoint 
 		screen_ui.dragging_up(x,y)
 
 	  	dragging = nil
@@ -1354,10 +1312,6 @@ end
 	           input_mode = hdr.S_SELECT 
 	      	else
 				screen_ui.multi_select_done(x,y)
-				if move == nil then
-					--screen_ui.n_selected_all()
-				end
-				move = nil
 	      	end 
        	end
 
@@ -1368,7 +1322,6 @@ end
     function screen:on_motion(x,y)
 
 	  	if control == true and mouse_state == hdr.BUTTON_DOWN then 
-	  	--if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
 	 
@@ -1381,7 +1334,6 @@ end
 			end
             if (input_mode == hdr.S_SELECT) then 
 		    	screen_ui.multi_select_move(x, y) 
-				move = true
 			end
         end
 	end
@@ -1398,9 +1350,7 @@ end
     	end
 
         WL.Style:subscribe_to(styleUpdate)
-
         screen.reactive = true
-
         util.setBGImages()
 
         print("<<VE_READY>>:")
