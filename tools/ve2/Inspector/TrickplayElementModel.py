@@ -37,8 +37,8 @@ class TrickplayElementModel(QStandardItemModel):
                 try:
                     self.newParentGid = the_item['gid']
                     print ("newParentGid", self.newParentGid)
-                    if self.newParentGid == None and the_item.parent()['type'] == "LayoutManager" :
-                        #print ("LayoutManager")
+                    if self.newParentGid == None and the_item.parent() and the_item.parent().parent()['type'] == "LayoutManager" :
+                        print ("LayoutManager")
                         if the_item.text()[:3] == "Row" : #Drop into Row 
                             self.lmRow = int(the_item.text()[3:])
                             for x in range(0, the_item.rowCount()):
