@@ -1184,7 +1184,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         uiInstance:set{ 
              position = {100,100},
              tabs = {
-                {label="One" , contents = WL.Widget_Group{}}}}, 
+                {label="One" , contents = WL.Widget_Group()}, 
                 {label="Two",   contents = WL.Widget_Group()},
                 {label="Three", contents = WL.Widget_Group()},
             }
