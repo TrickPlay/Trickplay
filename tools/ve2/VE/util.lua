@@ -1,4 +1,4 @@
-----------
+------------
 -- Utils 
 -----------
 local util = {}
@@ -63,6 +63,10 @@ end
 
 function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
+    if uiInstance.extra.mouse_handler == true then 
+        return 
+    end 
+
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
         
         --if control == true and mouse_state == hdr.BUTTON_DOWN then 
@@ -116,13 +120,15 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
             _VE_.openInspector(uiInstance.gid)
 
+            --[[
             if input_mode == hdr.S_SELECT then
 	            if uiInstance.selected == nil or uiInstance.selected == false then 
-		            --screen_ui.selected(uiInstance) 
+		            screen_ui.selected(uiInstance) 
 		        elseif(uiInstance.selected == true) then 
-			        --screen_ui.n_select(uiInstance) 
+			        screen_ui.n_select(uiInstance) 
 	            end
             end
+            --]]
 
             if uiTypeStr == "Text" or uiTypeStr == "Widget_Text"then 
                 uiInstance.cursor_visible = true
@@ -149,6 +155,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             end 
             return true
         elseif control == true and uiInstance.extra.is_in_group == false then 
+
+            _VE_.openInspector(uiInstance.gid)
 
             ----[[	SHOW POSSIBLE CONTAINERS
 
@@ -274,9 +282,12 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                     uiInstance.y = uiInstance.y + c.virtual_y
                                 end 
 
-                                uiInstance.reactive = false
+                                uiInstance.reactive = true
                                 uiInstance.is_in_group = true
-		                        uiInstance.group_position = c.position
+                                uiInstance.parent_group = c
+		                        --uiInstance.group_position = {}
+		                        --uiInstance.group_position[1] = c.x + c.style.arrow.size + 2*c.style.arrow.offset
+		                        --uiInstance.group_position[2] = c.y + c.style.arrow.size + 2*c.style.arrow.offset
 
                                 c:add(uiInstance)
 
@@ -286,9 +297,10 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
 			        	    elseif t == "MenuButton" then 
 
-                                uiInstance.reactive = false
+                                uiInstance.reactive = true
                                 uiInstance.is_in_group = true
-		                        uiInstance.group_position = c.position
+		                        --uiInstance.group_position = c.position 
+                                uiInstance.parent_group = c
                                 c.items:insert(c.items.length+1, uiInstance)
                                 if blockReport ~= true then
                                     _VE_.refresh()
@@ -298,7 +310,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
 				     		    local row , col=  c:r_c_from_abs_x_y(x,y)
                                 if col and row then 
-                                    uiInstance.reactive = false
+                                    uiInstance.reactive = true
                                     uiInstance.is_in_group = true
 		                            uiInstance.group_position = c.position
                                     c.cells[row][col] = uiInstance
@@ -316,7 +328,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 							    if t_index then 
                                     uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
 								    uiInstance.y = uiInstance.y - c.y - c.tab_h
-                                    uiInstance.reactive = false
+                                    uiInstance.reactive = true
                                     uiInstance.is_in_group = true
 		                            uiInstance.group_position = c.position
 			            			c.tabs[t_index].contents:add(uiInstance) 
@@ -433,6 +445,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         uiInstance:set{}
         return true 
 	end,true) 
+    uiInstance.extra.mouse_handler = true 
 end 
 
 function util.assign_right_name (uiInstance, uiTypeStr)
@@ -988,14 +1001,33 @@ end
 function util.get_group_position(child_obj)
 
      if child_obj == nil then
-        print("fail, child_obj is nil")
+        print("get_group_position() fail, child_obj is nil")
         return 
      end 
-     parent_obj = child_obj.parent
+     --parent_obj = child_obj.parent
+     parent_obj = child_obj.parent_group 
+
      if parent_obj == nil then 
-        print("fail, parent_obj is nil")
+        print("get_group_position() fail, parent_obj is nil")
         return 
+     else 
+        print("child gid", child_obj.gid)
+        print("parent gid", parent_obj.gid)
+        if parent_obj.widget_type == "ArrowPane" then
+            return {parent_obj.x + parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset, parent_obj.y +
+            parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset }
+        elseif parent_obj.widget_type == "MenuButton" then 
+            return {parent_obj.x + parent_obj.item_spacing  + parent_obj.popup_offset, parent_obj.y +
+            parent_obj.item_spacing + parent_obj.popup_offset}
+        elseif parent_obj.widget_type == "Widget_Group" then 
+            return parent_obj.position
+        else
+            return parent_obj.position
+
+        end 
      end 
+
+     --[[
      if parent_obj.widget_type ~= nil then
         for i, v in pairs(parent_obj.children) do
 	        if (v.type == "Group") then 
@@ -1005,6 +1037,7 @@ function util.get_group_position(child_obj)
 	        end 
         end
     end 
+    ]]
 end 
 	
 return util
