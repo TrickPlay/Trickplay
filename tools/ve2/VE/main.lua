@@ -876,7 +876,7 @@ _VE_.openFile = function(path)
                 end 
                 m.extra.mouse_handler = false
                 util.create_mouse_event_handler(m, uiTypeStr)
-                if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" then
+                if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" or uiTypeStr == "DialogBox" then
                     for o, p in ipairs(m.children) do
                         p.extra.mouse_handler = false
                         util.create_mouse_event_handler(p, p.widget_type)
