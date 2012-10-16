@@ -214,14 +214,15 @@ function screen_ui.selected(obj)
 			end
     	end
 		group_pos = util.get_group_position(obj)
-		--group_pos = obj.position
 		if bumo then 
 			--obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
 			obj_border.x, obj_border.y = screen_pos_of_child(obj) 	
 		elseif group_pos then 
-     		obj_border.x = obj.x + group_pos[1]
-     	   	obj_border.y = obj.y + group_pos[2]
+            
+     		obj_border.x = obj.x + group_pos[1] 
+            obj_border.y = obj.y + group_pos[2] 
 		end
+
 		obj_border.extra.group_postion = obj.extra.group_position
    	else 
     	obj_border.position = obj.position
