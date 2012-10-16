@@ -1,38 +1,7 @@
 local hdr = {}
 
 WL = dofile("LIB/Widget/Widget_Library.lua")
---[[
-if not APPVERBOSITY then dofile("LIB/Widget/__UTILITIES/AppVerbosity.lua") end
 
-if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("LIB/Widget/__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("LIB/Widget/__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("LIB/Widget/__UTILITIES/Canvas.lua")            end
-if not MISC              then dofile("LIB/Widget/__UTILITIES/Misc.lua")            end
-if not COLORSCHEME       then dofile("LIB/Widget/__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("LIB/Widget/__CORE/Style.lua")                  end
-if not WIDGET            then dofile("LIB/Widget/__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("LIB/Widget/Button/Button.lua")                 end
-if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")           end
-if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
-if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
-if not PROGRESSBAR       then dofile("LIB/Widget/ProgressBar/ProgressBar.lua") end
-if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
-if not TOGGLEBUTTON      then dofile("LIB/Widget/ToggleButton/ToggleButton.lua")     end
-if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
-
-if not RADIOBUTTONGROUP  then dofile("LIB/Widget/RadioButtonGroup/RadioButtonGroup.lua") end
-if not GRIDMANAGER       then dofile("LIB/Widget/__UTILITIES/ListManagement.lua")   end
-if not NINESLICE         then dofile("LIB/Widget/NineSlice/NineSlice.lua")          end
-if not CLIPPINGREGION    then dofile("LIB/Widget/ClippingRegion/ClippingRegion.lua")end
-if not SLIDER            then dofile("LIB/Widget/Slider/Slider.lua")                end
-if not LAYOUTMANAGER     then dofile("LIB/Widget/LayoutManager/LayoutManager.lua")  end
-if not SCROLLPANE        then dofile("LIB/Widget/ScrollPane/ScrollPane.lua")        end
-if not ARROWPANE         then dofile("LIB/Widget/ArrowPane/ArrowPane.lua")          end
-if not BUTTONPICKER      then dofile("LIB/Widget/ButtonPicker/ButtonPicker.lua")    end
-if not MENUBUTTON        then dofile("LIB/Widget/MenuButton/MenuButton.lua")        end
-if not TABBAR            then dofile("LIB/Widget/TabBar/TabBar.lua")                end
-]]
 dofile("LIB/VE/ve_runtime")
 
 hdr.test = 0
@@ -70,16 +39,9 @@ hdr.uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGro
 
 hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", "ArrowPane", "TabBar", "MenuButton"} 
 
---hdr.attr_name_list = {"lock", "visible_width", "visible_height", "virtual_height", "virtual_width", "arror_color", "arrow_visible", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness","frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width", "color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress", "arrow_size", "skin", "reactive", "focus_color", "focus_border_color", "focus_button_color", "focus_box_color", "focus_fill_color", "cursor_color","text_color", "justify", "single_line", "alignment", "wrap_mode", "direction", "selected_item", "focus_text_color", "menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location", "show_ring", "box_size","check_size","line_space", "box_position", "item_position", "selected_items", "items", "select_color", "button_radius","select_radius", "label_color", "button_width", "button_height", "display_border_color","display_fill_color","display_border_width", "tab_position", "tab_spacing", "display_width", "display_height",  "tab_labels", "arrow_dist_to_frame","icon","label","title","title_font", "title_color", "message", "message_font", "message_color", "on_screen_duration","fade_duration","title_separator_color","title_separator_thickness","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", "empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","rows","columns","variable_cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","arrows_visible", "arrow_color","focus_arrow_color" }
-
-
---hdr.AUTO_SAVE_DURATION = 60000  
---hdr.AUTO_SAVE = true
---hdr.LeftTab = 65056
-
-    -------------------------------
-    -- UI Element Creation Function Map 
-    -------------------------------
+-------------------------------
+-- UI Element Creation Function Map 
+-------------------------------
 
 hdr.uiElementCreate_map = 
     {
