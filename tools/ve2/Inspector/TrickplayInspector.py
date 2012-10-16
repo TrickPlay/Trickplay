@@ -11,6 +11,8 @@ from UI.Inspector import Ui_TrickplayInspector
 from UI.PickerItems import Ui_PickerItemTable
 from UI.Neighbors import Ui_Neighbors
 
+multiSelect = 'false'
+
 class MyDelegate(QItemDelegate):
     def __init__(self):
         QItemDelegate.__init__(self)
@@ -644,7 +646,7 @@ class TrickplayInspector(QWidget):
         if result:
             self.selectItem(result, "f")
         else:
-            print('UI Element not found')
+            print('[TrickplayInspector] UI Element not found')
             
     
     def search(self, value, property, start = None):
@@ -1350,6 +1352,7 @@ class TrickplayInspector(QWidget):
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
+                str(selItem.TPJSON()['name'])
                 self.selectedItemCount += 1
             except:
                 pass
@@ -1357,11 +1360,10 @@ class TrickplayInspector(QWidget):
         for deselIdx in deselectedList : 
             deselItem = self.inspectorModel.itemFromIndex(deselIdx)
             try :
+                str(deselItem.TPJSON()['name'])
                 self.selectedItemCount -= 1
             except:
                 pass
-
-        #print self.selectedItemCount / 2
 
         if self.selectedItemCount / 2 > 1 :
             multiSelect = 'true'
@@ -1442,6 +1444,7 @@ class TrickplayInspector(QWidget):
                     self.curLayerName = self.layerName[int(self.curData['gid'])] 
                     self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
+
                     if multiSelect == "true":
                         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                         self.ui.property.clear()
