@@ -271,7 +271,7 @@ class TrickplayElementModel(QStandardItemModel):
                 if result: 
                     self.inspector.selectItem(result, "f")
                 else:
-                    print("UI Element not found")
+                    print("[TrickplayElementModel] UI Element not found.")
                 self.inspector.main.command == ""
             else:
                 result = self.inspector.search(gid, 'gid')
@@ -473,9 +473,6 @@ class TrickplayElementModel(QStandardItemModel):
             return None
        
     def recSearch(self, property, value, item):
-        
-        if item[property] == None:
-            return 
 
         if item[property] == value:
             return item
