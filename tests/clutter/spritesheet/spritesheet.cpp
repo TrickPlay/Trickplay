@@ -9,10 +9,6 @@ SpriteSheet::SpriteSheet(CoglHandle btex, const gchar **names, gint *data, gint 
   height = (gint*) calloc(n, sizeof(gint));
   num_sprites = n;
   
-  //ClutterActor *ctex = clutter_texture_new();
-  //clutter_texture_set_from_rgb_data(CLUTTER_TEXTURE(ctex), pixels, true, w, h, 0, 4, CLUTTER_TEXTURE_NONE, NULL);
-  //CoglHandle *btex = clutter_texture_get_cogl_texture(CLUTTER_TEXTURE(ctex));
-  
   gint i;
   for (i = 0; i < n; i++) {
     if (names[i] != NULL) {
@@ -22,7 +18,7 @@ SpriteSheet::SpriteSheet(CoglHandle btex, const gchar **names, gint *data, gint 
       
       g_hash_table_insert(map, (void*) names[i], GINT_TO_POINTER(i+1));
       // don't know why routing through an actor fixes tiling
-      texture[i] = cogl_texture_new_from_sub_texture(btex, data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]);
+      texture[i] = cogl_texture_new_from_sub_texture((CoglTexture *) btex, data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]);
       ClutterActor *tex = clutter_texture_new();
       clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(tex), texture[i]);
       clutter_texture_set_repeat(CLUTTER_TEXTURE(tex), TRUE, TRUE);
@@ -39,6 +35,15 @@ SpriteSheet::SpriteSheet(CoglHandle btex, const gchar **names, gint *data, gint 
       height[i] = 0;
     }
   }
+}
+
+CoglHandle SpriteSheet::get_subtexture( const gchar * id )
+{
+  gpointer p = g_hash_table_lookup( map, id );
+  if ( p != NULL )
+    return texture[ GPOINTER_TO_INT(p) - 1 ];
+  else
+		return NULL;
 }
 
 SpriteSheet::~SpriteSheet() {
