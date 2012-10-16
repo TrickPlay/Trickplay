@@ -331,6 +331,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 								    uiInstance.y = uiInstance.y - c.y - c.tab_h
                                     uiInstance.reactive = true
                                     uiInstance.is_in_group = true
+                                    uiInstance.parent_group = c
 		                            uiInstance.group_position = c.position
 			            			c.tabs[t_index].contents:add(uiInstance) 
 								end
@@ -1014,7 +1015,7 @@ function util.get_group_position(child_obj)
      else 
         print("child gid", child_obj.gid)
         print("parent gid", parent_obj.gid)
-        if parent_obj.widget_type == "ArrowPane" then
+        if parent_obj.widget_type == "ArrowPane" or parent_obj.widget_type == "TabBar" then
             return {parent_obj.x + parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset, parent_obj.y +
             parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset }
         elseif parent_obj.widget_type == "MenuButton" then 
@@ -1023,14 +1024,6 @@ function util.get_group_position(child_obj)
         elseif parent_obj.widget_type == "DialogBox" then 
             return {parent_obj.x, parent_obj.y + parent_obj.separator_y}
         elseif parent_obj.widget_type == "LayoutManager" then 
-        --[[
-            for r = 1, parent_obj.number_of_rows, 1 do 
-                for c = 1, parent_obj.number_of_cols, 1 do 
-                    if parent_obj.cells[r][c].gid == child_obj.gid then 
-                    end 
-                end 
-            end 
-        ]]
             return parent_obj.position
         elseif parent_obj.widget_type == "Widget_Group" then 
             return parent_obj.position
