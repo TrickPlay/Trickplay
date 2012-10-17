@@ -968,7 +968,7 @@ void App::stage_allocation_notify( gpointer , gpointer , gpointer screen )
 
         clutter_actor_get_size( stage , & width , & height );
 
-        clutter_actor_set_scale( screen, width / 1920, height / 1080 );
+        clutter_actor_set_scale( CLUTTER_ACTOR( screen ), width / 1920, height / 1080 );
 
         g_debug( "DISPLAY SIZE CHANGED TO %1.0fx%1.0f" , width , height );
     }
