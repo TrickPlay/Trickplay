@@ -225,10 +225,6 @@ private:
 			return;
 	    }
 
-		ClutterGeometry g;
-
-	    clutter_actor_get_geometry( actor, & g );
-
 	    object["name"] = safe_string( clutter_actor_get_name( actor ) );
 
 	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
@@ -388,6 +384,17 @@ private:
 	    {
 			Array & children( object[ "children" ].as<Array>() );
 
+#ifdef CLUTTER_VERSION_1_10
+            ClutterActorIter iter;
+            ClutterActor *child;
+            clutter_actor_iter_init( &iter, actor );
+            while(clutter_actor_iter_next( &iter, &child ))
+            {
+ 				Object & child_object( children.append().as<Object>() );
+
+				dump_ui_actors( child , child_object );
+           }
+#else
 			GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ) );
 
 			for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
@@ -398,6 +405,7 @@ private:
 			}
 
 			g_list_free( list );
+#endif
 	    }
 	}
 };

@@ -588,7 +588,17 @@ protected:
 
 	    ClutterGeometry g;
 
+#ifdef CLUTTER_VERSION_1_10
+        gfloat x, y, width, height;
+        clutter_actor_get_position( actor, &x, &y );
+        clutter_actor_get_size( actor, &width, &height );
+        g.x = x;
+        g.y = y;
+        g.width = width;
+        g.height = height;
+#else
 	    clutter_actor_get_geometry( actor, & g );
+#endif
 
 	    const gchar * name = clutter_actor_get_name( actor );
 	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
@@ -725,7 +735,17 @@ protected:
 	    if ( CLUTTER_IS_CONTAINER( actor ) )
 	    {
 	        info->indent += 2;
+#ifdef CLUTTER_VERSION_1_10
+            ClutterActorIter iter;
+            ClutterActor *child;
+            clutter_actor_iter_init( &iter, actor );
+            while(clutter_actor_iter_next( &iter, &child ))
+            {
+                dump_actors(child, info);
+            }
+#else
 	        clutter_container_foreach( CLUTTER_CONTAINER( actor ), dump_actors, info );
+#endif
 	        info->indent -= 2;
 	    }
 	}

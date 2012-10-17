@@ -709,7 +709,11 @@ int TPContext::run()
     color.blue = 0;
     color.alpha = 0;
 
+#ifdef CLUTTER_VERSION_1_10
+	clutter_actor_set_background_color( stage, &color );
+#else
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+#endif
 
     clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , true );
 
@@ -888,7 +892,11 @@ int TPContext::run()
     //.....................................................................
     // Clean up the stage
 
+#ifdef CLUTTER_VERSION_1_10
+	clutter_actor_remove_all_children( clutter_stage_get_default() );
+#else
     clutter_group_remove_all( CLUTTER_GROUP( clutter_stage_get_default() ) );
+#endif
 
     //.....................................................................
     // Shutdown the app
@@ -2468,7 +2476,11 @@ void TPContext::load_background()
 
 	        clutter_actor_set_scale( bg , width / iw , height / ih );
 
+#ifdef CLUTTER_VERSION_1_10
+			clutter_actor_add_child( stage, bg );
+#else
 	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
+#endif
 
 	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
 		}
@@ -2523,12 +2535,14 @@ String TPContext::get_control_message( App * app ) const
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
+#ifndef CLUTTER_VERSION_1_10
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
     }
 
 	clutter_threads_init ();
+#endif
 
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
