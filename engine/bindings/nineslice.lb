@@ -87,13 +87,9 @@ module nineslice;
 
 [[
 
-void sheet_reference_destroy( lua_State * L, int * sheet_ref )
-{
-    lb_strong_unref( L , *sheet_ref );
-    g_free( sheet_ref );
-}
+static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
-NineSliceEffect * get_effect( ClutterActor * self )
+static NineSliceEffect * get_effect( ClutterActor * self )
 {
     return NINESLICE_EFFECT( clutter_actor_get_effect( self, "tp-nineslice-effect" ) );
 }
@@ -116,13 +112,14 @@ class NineSlice [[ClutterActor*]] actor
     
     NineSlice( table props = 0 )
         [[
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
             
-            g_object_set_data_full( G_OBJECT( self ), "tp-ids", calloc( 10, sizeof( char * ) ), g_strfreev );
+            g_object_set_data_full( G_OBJECT( self ), "tp-ids", calloc( 10, sizeof( char * ) ), (GDestroyNotify) g_strfreev );
+            g_object_set_data_full( G_OBJECT( self ), "tp-tile", calloc( 6, sizeof( gboolean ) ), g_free );
             
             ClutterEffect * effect = nineslice_effect_new();
-            clutter_actor_add_effect( self, effect );
+            clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
             
             ClutterUtil::set_props_from_table( L, props );
             g_object_unref( self );
@@ -130,7 +127,7 @@ class NineSlice [[ClutterActor*]] actor
     
     ~NineSlice()
         [[
-            int * sheet_ref = g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
+            int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
             lb_strong_unref( L, * sheet_ref );
             g_object_unref( G_OBJECT( get_effect( self ) ) );
         ]];
@@ -155,6 +152,7 @@ class NineSlice [[ClutterActor*]] actor
                 lua_pushnil( L );
         ]]
         [[
+            g_debug("sheet");
             luaL_checkudata( L, 2, "SPRITESHEET_METATABLE" );
             
             SpriteSheet * old_sheet,
@@ -179,7 +177,9 @@ class NineSlice [[ClutterActor*]] actor
                     
                     g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
                     
+                    g_debug("Setting effect sheet");
                     nineslice_effect_set_sheet( get_effect( self ), new_sheet );
+                    clutter_actor_queue_redraw( self );
                 }
                 else
                 {
@@ -202,61 +202,114 @@ class NineSlice [[ClutterActor*]] actor
     
     table ids
         [[
+            g_debug( "get ids" );
             char ** list = (char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
+            g_assert( list != NULL );
             
             int i;
             lua_newtable( L );
             
             for ( i = 0; i < 9; i++ )
             {
+                lua_pushstring( L, keys[i] );
                 lua_pushstring( L, list[i] );
-                lua_rawseti( L, -2, i + 1 );
+                lua_rawset( L, -3 );
             }
         ]]
         [[
-            luaL_checktype( L, 2, LUA_TTABLE );
-            const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
-            
-            int i;
-            for ( i = 0; i < 9; i++ )
+            g_debug( "set ids" );
+            if ( lua_istable( L, 2 ) )
             {
-                free( (char *) list[i] );
-                lua_rawgeti( L, 2, i + 1 );
-                list[i] = strdup( lua_tostring( L, -1 ) );
+                const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
+                g_assert( list != NULL );
+                
+                int i;
+                for ( i = 0; i < 9; i++ )
+                {
+                    if( list[i] != NULL )
+                        free( (char *) list[i] );
+                    
+                    lua_getfield( L, 2, keys[i] );
+                    const char * id = lua_tostring(L, -1);
+                    list[i] = id != NULL ? strdup( id ) : NULL;
+                    g_debug("set id: %s ~ %i = %s", keys[i], i, list[i] );
+                    lua_pop(L, 1);
+                }
+            
+                nineslice_effect_set_ids( get_effect( self ), list );
+                clutter_actor_queue_redraw( self );
             }
-            
-            lua_pop( L, 9 );
-            
-            nineslice_effect_set_ids( get_effect( self ), list );
+            else
+            {
+                g_warning( "Trying to set IDs on a nineslice with a thing that wasn't a table. Bad." );
+            }
         ]];
     
     /*
         Property: tile
         
-        The tile property is a table containing two boolean values specifying whether sprites should tile horizontally and/or vertically instead of stretching.
+        The tile property is a table containing six boolean values specifying whether sprites should tile horizontally and/or vertically instead of stretching.
         
-        In order to matche the dimensions of the target object's bounding box, the center sprites (N, C, S vertically and W, C, E horizontally) must be either stretched or tiled.
+        In order to matche the dimensions of the target object's bounding box, the center sprites (N, S, W, E, and C) must be either stretched or tiled.
         
-        *Default Setting:* tile = { false, false }
+        tile[1] - C tile horizontally
+        tile[2] - C tile vertically
+        tile[3] - N tile horizontally
+        tile[4] - S tile horizontally
+        tile[5] - W tile vertically
+        tile[6] - E tile vertically
+        
+        The tile property can also be set more compactly using a two-boolean table, { horizontal, vertical }, or a single boolean; however, it can only be retrieved as a table of six.
+        
+        *Default Setting:* tile = { false, false, false, false, false, false }
     */
     
     table tile
         [[
-            gboolean tile_x, tile_y;
-            nineslice_effect_get_tile( get_effect( self ), &tile_x, &tile_y );
+            g_debug( "get tile" );
+            gboolean * tile = (gboolean *) g_object_get_data( G_OBJECT( self ), "tp-tile" );
             
+            int i;
             lua_newtable( L );
-            lua_pushboolean( L, tile_x );
-            lua_rawseti( L, -2, 1 );
-            lua_pushboolean( L, tile_y );
-            lua_rawseti( L, -2, 2 );
+            
+            for ( i = 0; i < 6; i++ )
+            {
+                lua_pushboolean( L, tile[i] );
+                lua_rawseti( L, -2, i + 1 );
+            }
         ]]
         [[
-            luaL_checktype( L, 2, LUA_TTABLE );
-            lua_rawgeti( L, 2, 1 );
-            lua_rawgeti( L, 2, 2 );
-            nineslice_effect_set_tile( get_effect( self ), lua_toboolean( L, -2 ), lua_toboolean( L, -1 ) );
-            lua_pop( L, 2 );
+            g_debug( "set tile" );
+            gboolean * tile = (gboolean *) g_object_get_data( G_OBJECT( self ), "tp-tile" );
+            int i;
+            
+            if ( lua_istable( L, 2 ) )
+            {
+                for ( i = 0; i < 6; i++ )
+                {
+                    lua_rawgeti( L, 2, i + 1 );
+                    
+                    if ( i > 0 && lua_isnil( L, -1 ) )
+                        tile[i] = tile[ MAX( i / 2 - 1, 0 ) ];
+                    else
+                        tile[i] = lua_toboolean( L, -1 );
+                        
+                    lua_pop( L, 1 );
+                }
+            }
+            else if lua_isboolean( L, 2 )
+            {
+                gboolean t = lua_toboolean( L, 2 );
+                for ( i = 0; i < 6; i++ )
+                    tile[i] = t;
+            }
+            else
+            {
+                g_warning( "Trying to set tile on a nineslice with a thing that wasn't a table or a boolean. Bad." );
+            }
+            
+            nineslice_effect_set_tile( get_effect( self ), tile );
+            clutter_actor_queue_redraw( self );
         ]];
     
     /*
