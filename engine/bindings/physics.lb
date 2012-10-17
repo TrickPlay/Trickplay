@@ -2000,7 +2000,9 @@ global physics [[ Physics::World * ]]
 /***************************************
         Property: z_for_y
 
-        The z_for_y property is a boolean flag specifying whether the physics simulation should use the X-Y plane or the X-Z plane (true=X-Z plane). When using the X-Y plane, gravity pulls objects toward the bottom of the display. When using the X-Z plane, gravity pulls objects away from the screen, into depth.
+        The z_for_y property is a boolean flag specifying whether the physics simulation should use the X-Y plane or the X-Z plane (true=X-Z plane). When using the X-Y plane, gravity pulls objects toward the bottom of the display. When using the X-Z plane, gravity pulls objects away from the screen, into depth. The following illustration  demonstrates the effect of setting the z_for_y property to true; it is as if the X-Y plane had fallen toward the viewer by 90 degrees.
+
+(see physics2dPlanesXYZ.png)
 
         *Default Setting:* false, i.e., use X-Y plane
 */
