@@ -63,7 +63,11 @@ private:
 
         g_free( t );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, texture );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
+#endif
 
         clutter_actor_set_name( texture , "graph" );
 
@@ -83,7 +87,11 @@ private:
 
         g_object_ref_sink( text );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
 
         time = 0;
         frames = 0;
@@ -95,9 +103,14 @@ private:
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
         {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, texture );
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
 
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
         }
 
         g_object_unref( texture );
@@ -153,7 +166,11 @@ private:
 
         clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , white_bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( clutter_stage_get_default(), texture, NULL );
+#else
         clutter_actor_raise_top( texture );
+#endif
 
         time += t;
         ++frames;
@@ -168,7 +185,11 @@ private:
 
             clutter_text_set_text( text , buffer );
 
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_child_above_sibling( clutter_stage_get_default(), CLUTTER_ACTOR( text ), NULL );
+#else
             clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
 
             time = 0;
             frames = 0;

@@ -277,7 +277,7 @@ global screen [[ClutterActor*]] actor , container
         [[]];
 
     int add_onparentchanged_listener( function f )
-        [[]];
+        [[ result = 0; ]];
 
     remove_onparentchanged_listener( int ref )
         [[]];
