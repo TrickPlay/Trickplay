@@ -825,9 +825,9 @@ class Animator [[ClutterAnimator*]]
 	    	  
 	    	  gchar * vs = g_strdup_value_contents( & v );
 	    	  
-	    	  g_debug( "\t'%s' (%d) : '%s' : mode %lu : progress %f : value %s (%s)" ,
+	    	  g_debug( "\t'%s' (%p) : '%s' : mode %lu : progress %f : value %s (%s)" ,
 	    	      clutter_actor_get_name( a ), 
-	    	      clutter_actor_get_gid( a ),
+	    	      a,
 	    	      clutter_animator_key_get_property_name( k ),
 	    	      clutter_animator_key_get_mode( k ),
 	    	      clutter_animator_key_get_progress( k ),

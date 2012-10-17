@@ -659,7 +659,7 @@ protected:
 
 	        if ( other )
 	        {
-	            gchar * c = g_strdup_printf( "[source=%u]" , clutter_actor_get_gid( other ) );
+	            gchar * c = g_strdup_printf( "[source=%p]" , other );
 
 	            extra = c;
 
@@ -716,13 +716,12 @@ protected:
 			details += " HIDDEN";
 		}
 
-	    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s%s",
+	    g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s%s",
 	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
 	            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
 	            String( info->indent, ' ' ).c_str(),
 	            type,
 	            name ? String( String(" ") + SAFE_ANSI_COLOR_FG_YELLOW + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
-	            clutter_actor_get_gid( actor ),
 	            actor,
 	            g.x,
 	            g.y,
@@ -750,6 +749,56 @@ protected:
 	    }
 	}
 
+    static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
+    {
+#ifdef CLUTTER_VERSION_1_10
+        ClutterActorIter iter;
+        ClutterActor *check;
+        clutter_actor_iter_init( &iter, parent );
+        while(clutter_actor_iter_next( &iter, &check ))
+        {
+            // Check if this one matches, or it contains child
+            if( check == child || check_children( check, child ) == child )
+            {
+                return child;
+            }
+        }
+#else
+        GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
+
+        for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
+        {
+            ClutterActor *check = CLUTTER_ACTOR( item->data );
+
+            // Check if this one matches, or it contains child
+            if( check == child || check_children( check, child ) == child )
+            {
+                return child;
+            }
+        }
+
+        g_list_free( list );
+#endif
+
+        // If nothing matched above, then return NULL
+        return NULL;
+    }
+
+    static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
+    {
+        // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+        ClutterActor * actor = check_children( clutter_stage_get_default(), (ClutterActor *) strtoul( pointer_str, NULL, 16 ));
+
+        // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
+        // attempt to de-ref actor, which could explode.  We have to walk the list manually.
+        if( actor )
+        {
+            return actor;
+        }
+
+        return NULL;
+    }
+
 	virtual void operator() ( TPContext * context , const String & command , const String & parameters )
 	{
         DumpInfo info;
@@ -762,7 +811,7 @@ protected:
 
         	if ( ! first )
         	{
-            	first = clutter_get_actor_by_gid( atoi( parameters.c_str() ) );
+            	first = validate_pointer( CLUTTER_ACTOR( clutter_stage_get_default() ), parameters.c_str() );
         	}
         }
 

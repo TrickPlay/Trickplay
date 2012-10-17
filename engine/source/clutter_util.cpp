@@ -820,11 +820,7 @@ bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* a
 	{
         if ( ClutterActor * parent = clutter_actor_get_parent( actor ) )
         {
-            guint32 container_gid = clutter_actor_get_gid( container );
-            guint32 actor_gid = clutter_actor_get_gid( actor );
-            guint32 parent_gid = clutter_actor_get_gid( parent );
-
-            g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT ALREADY HAS PARENT %" G_GUINT32_FORMAT "" , actor_gid , container_gid , parent_gid );
+            g_warning( "TRYING TO ADD ELEMENT %p TO CONTAINER %p BUT IT ALREADY HAS PARENT %p" , actor , container , parent );
             return false;
         }
         else
@@ -839,10 +835,8 @@ bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* a
                 }
                 if ( ancestor != NULL )
                 {
-                    guint32 container_gid = clutter_actor_get_gid( container );
-                    guint32 actor_gid = clutter_actor_get_gid( actor );
-                    g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT IS ALREADY A PARENT OR ANCESTOR OF %" G_GUINT32_FORMAT ". IGNORING %" G_GUINT32_FORMAT "" ,
-								actor_gid , container_gid , container_gid , actor_gid );
+                    g_warning( "TRYING TO ADD ELEMENT %p TO CONTAINER %p BUT IT IS ALREADY A PARENT OR ANCESTOR OF %p. IGNORING %p" ,
+								actor , container , container , actor );
                     return false;
                 }
             }
