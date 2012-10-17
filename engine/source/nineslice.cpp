@@ -1,5 +1,5 @@
 #include <math.h>
-#include "nineslice.cpp.h"
+#include "nineslice.h"
 
 G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
 
