@@ -32,7 +32,7 @@ void push_lua_sheet( lua_State * L , GObject * sprite )
         lua_pushnil( L );
     }
 
-    LSG_END( 1 );
+    LSG_CHECK( 1 );
 }
 
 SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
