@@ -114,11 +114,6 @@ void set_sheet_first( lua_State * L , int table )
     }
 }
 
-void sheet_reference_destroy( lua_State * L , int * sheet_ref )
-{
-    lb_strong_unref( L , *sheet_ref );
-    g_free( sheet_ref );
-}
 ]]
 
 class Sprite [[ClutterActor*]] actor
@@ -138,6 +133,8 @@ class Sprite [[ClutterActor*]] actor
 
     ~Sprite()
         [[
+            int *sheet_ref = (int *)g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
+            lb_strong_unref( L , *sheet_ref );
         ]];
 
     /*
@@ -162,7 +159,7 @@ class Sprite [[ClutterActor*]] actor
                     int * new_sheet_ref = g_new( int , 1 );
                     *new_sheet_ref = lb_strong_ref( L );
 
-                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , GDestroyNotify( sheet_reference_destroy ) );
+                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
 
                     refresh_texture( L , g_self , 0 , 0 );
                 }
