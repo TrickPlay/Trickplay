@@ -121,7 +121,7 @@ class NineSlice [[ClutterActor*]] actor
 			
 			g_object_set_data_full( G_OBJECT( self ), "tp-ids", calloc( 10, sizeof( char * ) ), g_strfreev );
 			
-			effect = nineslice_effect_new();
+			ClutterEffect * effect = nineslice_effect_new();
 			clutter_actor_add_effect( self, effect );
 			
             ClutterUtil::set_props_from_table( L, props );
@@ -130,7 +130,7 @@ class NineSlice [[ClutterActor*]] actor
     
     ~NineSlice()
         [[
-			clutter_effect_destroy( CLUTTER_EFFECT( get_effect( self ) ) );
+			g_object_unref( G_OBJECT( get_effect( self ) ) );
         ]];
     
     /*
@@ -175,7 +175,7 @@ class NineSlice [[ClutterActor*]] actor
                     int * new_sheet_ref = g_new( int, 1 );
                     * new_sheet_ref = lb_strong_ref( L );
 
-                    g_object_set_data_full( g_self, "tp-sheet-ref", new_sheet_ref, GDestroyNotify( sheet_reference_destroy ) );
+                    g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, GDestroyNotify( sheet_reference_destroy ) );
 
                     nineslice_effect_set_sheet( get_effect( self ), new_sheet );
                 }
@@ -212,12 +212,14 @@ class NineSlice [[ClutterActor*]] actor
 			}
         ]]
         [[
-            char ** list = (char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
+            luaL_checktype( L, 2, LUA_TTABLE );
+			const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
 			
+			int i;
 			for ( i = 0; i < 9; i++ )
 			{
-				free( list[i] );
-				lua_getfield( L, ids, i + 1 );
+				free( (char *) list[i] );
+				lua_rawgeti( L, 2, i + 1 );
 				list[i] = strdup( lua_tostring( L, -1 ) );
 			}
 			
@@ -248,8 +250,9 @@ class NineSlice [[ClutterActor*]] actor
 			lua_rawseti( L, -2, 2 );
 		]]
 		[[
-			lua_getfield( L, ids, 1 );
-			lua_getfield( L, ids, 2 );
+            luaL_checktype( L, 2, LUA_TTABLE );
+			lua_rawgeti( L, 2, 1 );
+			lua_rawgeti( L, 2, 2 );
 			nineslice_effect_set_tile( get_effect( self ), lua_toboolean( L, -2 ), lua_toboolean( L, -1 ) );
 			lua_pop( L, 2 );
 		]];
@@ -268,7 +271,7 @@ class NineSlice [[ClutterActor*]] actor
     readonly table borders
 		[[
 			int list[4] = { 0, 0, 0, 0 };
-			nineslice_effect_get_borders( get_effect( self ), &list );
+			nineslice_effect_get_borders( get_effect( self ), list );
 			
 			int i;
 			lua_newtable( L );
