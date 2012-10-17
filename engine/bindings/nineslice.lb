@@ -1,166 +1,282 @@
-module nine_slice_effect;
+module nineslice;
 
-	/*
-		Class: NineSliceEffect
-		
-		The NineSliceEffect class will draw a grid of up to nine sprites from a spritesheet behind an object. The effect will adapt to fit the object's bounding box by stretching or tiling the center images on both axes.
-		
-		An example constructor is shown below.
-		
-		(code)
-		buttonEffect = NineSliceEffect {
-			sheet = SpriteSheet { map = "button.json" },
-			opacity = 255,
-			tile = true,
-			ids = { "button-nw.png", "button-n.png",  "button-ne.png",
-					"button-w.png",  "button-c.png",  "button-e.png",
-					"button-sw.png", "button-s.png",  "button-se.png" }
-		}
-		(end)
-		
-		Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table, { NW, N, NE, W, C, E, SW, S, SE }, is shown below.
-		
-		(see NineSliceCompass.png)
-		
-		The sheet, tile, and opacity properties may be changed after construction.
-		
-		(code)
-		-- change the spritesheet from which the sprites are pulled
-		
-		buttonEffect.sheet = SpriteSheet { map = "button-focus.json" }
-		buttonEffect.tile = false
-		
-		-- animate the opacity of an effect
-		
-		aState = AnimationState {
-			transitions = {
-				{
-					source = "*", target = "hide",
-					keys = { { buttonEffect, "opacity", 0 } }
-				},
-			}
-		}
-		(end)
-		
-		*Code Example:* The effect is applied by adding it to a UIElement.
-		
-		(code)
-		uiSheet = SpriteSheet { map = "ui.json" }
-		
-		-- simple 3-slice text bounding box effect
-		-- the ids table only contains the NW, N, and NE ids, which means the box can expand horizontally but not vertically.
-		
-		textBox = Text { text = "  Text Button!  " }
-		textBox:add(NineSliceEffect {
-			sheet = uiSheet,
-			ids = { "box-left-edge.png", "box-middle.png",  "box-right-edge.png" }
-		})
-		
-		-- more complex 9-slice button effect
-		
-		buttonEffect = NineSliceEffect {
-			sheet = uiSheet,
-			opacity = 255,
-			ids = { "button-nw.png", "button-n.png",  "button-ne.png",
-					"button-w.png",  "button-c.png",  "button-e.png",
-					"button-sw.png", "button-s.png",  "button-se.png" }
-		}
-		
-		-- create an image inside of a group with enough padding for the borders of the effect to nicely enclose the image
-		
-		left, right, top, bottom = table.unpack( buttonEffect.borders )
-		image = Image { src = "assets/image.png", x = left, y = top }
-		
-		imgButton = Group {
-			children = {
-				image,
-				Rectangle {
-					w = left + image.w + right,
-					h = top  + image.h + bottom,
-					opacity = 0
-				}
-			},
-			effects = {
-				buttonEffect
-			}
-		}
-		(end)
-	*/
+[[
+#include "clutter/clutter.h"
+#include "clutter_util.h"
+#include "util.h"
+#include "nineslice.h"
+]]
 
-class NineSliceEffect [[nineslice*]] effect
+    /*
+        Class: NineSlice
+        
+        The NineSlice class will draw a grid of up to nine sprites from a spritesheet behind an object. The effect will adapt to fit the object's bounding box by stretching or tiling the center images on both axes.
+        
+        An example constructor is shown below.
+        
+        (code)
+        buttonEffect = NineSlice {
+            sheet = SpriteSheet { map = "button.json" },
+            tile = true,
+            ids = { "button-nw.png", "button-n.png",  "button-ne.png",
+                    "button-w.png",  "button-c.png",  "button-e.png",
+                    "button-sw.png", "button-s.png",  "button-se.png" }
+        }
+        (end)
+        
+        Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table, { NW, N, NE, W, C, E, SW, S, SE }, is shown below.
+        
+        (see NineSliceCompass.png)
+        
+        The sheet, tile, and opacity properties may be changed after construction.
+        
+        (code)
+        -- change the spritesheet from which the sprites are pulled
+        
+        buttonEffect.sheet = SpriteSheet { map = "button-focus.json" }
+        buttonEffect.tile = false
+        
+        -- animate the opacity of an effect
+        
+        aState = AnimationState {
+            transitions = {
+                {
+                    source = "*", target = "hide",
+                    keys = { { buttonEffect, "opacity", 0 } }
+                },
+            }
+        }
+        (end)
+        
+        *Code Example:* The effect is applied by adding it to a UIElement.
+        
+        (code)
+        uiSheet = SpriteSheet { map = "ui.json" }
+        
+        -- simple 3-slice text bounding box effect
+        -- the ids table only contains the NW, N, and NE ids, which means the box can expand horizontally but not vertically.
+        
+        box = NineSlice {
+            sheet = uiSheet,
+            ids = { "box-left-edge.png", "box-middle.png",  "box-right-edge.png" }
+        }
+        left, right = table.unpack( box.borders )
+        text = Text { x = left, text = "Text Button!" }
+        box.size = { left + text.w + right, 1 }
+        textBox = Group { children = { box, text } }
+        
+        -- more complex 9-slice button effect
+        
+        button = NineSlice {
+            sheet = uiSheet,
+            opacity = 255,
+            ids = { "button-nw.png", "button-n.png",  "button-ne.png",
+                    "button-w.png",  "button-c.png",  "button-e.png",
+                    "button-sw.png", "button-s.png",  "button-se.png" }
+        }
+        
+        -- create an image inside of a group with enough padding for the borders of the effect to nicely enclose the image
+        
+        left, right, top, bottom = table.unpack( buttonEffect.borders )
+        image = Image { src = "assets/image.png", x = left, y = top }
+        button.size = { left + image.w + right, top + image.h + bottom }
+        
+        imgButton = Group { children = { button, image } }
+        (end)
+    */
+
+[[
+
+void sheet_reference_destroy( lua_State * L, int * sheet_ref )
 {
-	/*
-		Constructor: NineSliceEffect
-		
-		The NineSliceEffect() constructor creates a new NineSliceEffect object.
-		
-		*Arguments:*
-		
-		props - table defining the effect's properties
-		
-		*Return Value:* new NineSliceEffect object
-		
-		*See Also:* the <UIElment.effects> property
-	*/
-	
-	NineSliceEffect( table props = 0 );
-	
-	~NineSliceEffect();
-	
-	/*
-		Property: sheet
-		
-		The sheet property is a SpriteSheet object specifying where to pull sprites from, based on the ids provided at construction.
-		
-		If the spritesheet is changed, the ids will be reevaluated. If the new sheet lacks some or all of the ids, those ids will not be drawn.
-		
-		*See Also:* the <ids> property, <SpriteSheet> object
-	*/
-	
-	SpriteSheet sheet;
-	
-	/*
-		Property: ids
-		
-		The ids property is a table containing the string ids of the nine sprites used by the effect, in the order { NW, N, NE, W, C, E, SW, S, SE }.
-		
-		Ids must be specified at construction. Some of them may be nil or not applicable to the current spritesheet, in which case they will not be drawn.
-		
-		If the spritesheet is changed, the ids will be reevaluated.
-		
-		*See Also:* the <sheet> property
-	*/
-	
-	readonly table ids;
-	
-	/*
-		Property: tile
-		
-		The tile property is a boolean value specificying whether to tile the center sprites instead of stretching them.
-		
-		In order to matche the dimensions of the target object's bounding box, the center sprites (N, C, S vertically and W, C, E horizontally) must be either stretched or tiled.
-	*/
-	
-	boolean tile;
-	
-	/*
-		Property: opacity
-		
-		The opacity property is an integer value specificy what opacity/trasparency to give the grid of sprites, independent of the opacity of the object the effect is applied to.
-	*/
-	
-	int opacity;
-	
-	/*
-		Property: borders
-		
-		The borders property is a table reflecting the maximum sizes of the sprites making up the left, right, top, and bottom borders of the NineSliceEffect, in that order.
-		
-		borders[1] - reflects the left border (maximum width of NW, W, and SW sprites)
-		borders[2] - reflects the right border (maximum width of NE, E, and SE sprites)
-		borders[3] - reflects the top border (maximum height of SW, S, and SE sprites)
-		borders[4] - reflects the bottom border, (maximum height of NW, N, and NE sprites)
-	*/
-	
-	readonly table borders;
+    lb_strong_unref( L , *sheet_ref );
+    g_free( sheet_ref );
+}
+
+NineSliceEffect * get_effect( ClutterActor * self )
+{
+	return NINESLICE_EFFECT( clutter_actor_get_effect( self, "tp-nineslice-effect" ) );
+}
+
+]]
+
+class NineSlice [[ClutterActor*]] actor
+{
+    /*
+        Constructor: NineSlice
+        
+        The NineSlice() constructor creates a new NineSlice object.
+        
+        *Arguments:*
+        
+        props - table defining the effect's properties
+        
+        *Return Value:* new NineSlice object
+    */
+    
+    NineSlice( table props = 0 )
+        [[
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
+            ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
+			
+			g_object_set_data_full( G_OBJECT( self ), "tp-ids", calloc( 10, sizeof( char * ) ), g_strfreev );
+			
+			effect = nineslice_effect_new();
+			clutter_actor_add_effect( self, effect );
+			
+            ClutterUtil::set_props_from_table( L, props );
+            g_object_unref( self );
+        ]];
+    
+    ~NineSlice()
+        [[
+			clutter_effect_destroy( CLUTTER_EFFECT( get_effect( self ) ) );
+        ]];
+    
+    /*
+        Property: sheet
+        
+        The sheet property is a <SpriteSheet> object specifying where to pull sprites from, based on the ids provided at construction.
+        
+        If the spritesheet is changed, the ids will be reevaluated. If a sheet lacks some or all of the ids, those ids will not be drawn.
+        
+        *See Also:* the <ids> property
+    */
+    
+    SpriteSheet sheet
+        [[
+            int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
+			
+			if ( sheet_ref )
+				lb_strong_deref( L, * sheet_ref );
+			else
+				lua_pushnil( L );
+        ]]
+        [[
+            luaL_checkudata( L, 2, "SPRITESHEET_METATABLE" );
+			
+			SpriteSheet * old_sheet,
+						* new_sheet;
+			int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ) , "tp-sheet-ref" );
+			
+			if ( sheet_ref )
+			{
+				lb_strong_deref( L, * sheet_ref );
+				old_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+				lua_pop( L, 1 );
+			}
+			
+			new_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+			
+			if ( old_sheet != new_sheet )
+            {
+                if ( new_sheet->is_initialized() )
+                {
+                    int * new_sheet_ref = g_new( int, 1 );
+                    * new_sheet_ref = lb_strong_ref( L );
+
+                    g_object_set_data_full( g_self, "tp-sheet-ref", new_sheet_ref, GDestroyNotify( sheet_reference_destroy ) );
+
+                    nineslice_effect_set_sheet( get_effect( self ), new_sheet );
+                }
+                else
+                {
+                    luaL_error( L, "SpriteSheet not initialized." );
+                }
+            }
+        ]];
+    
+    /*
+        Property: ids
+        
+        The ids property is a table containing the string ids of the nine sprites used by the effect, in the order { NW, N, NE, W, C, E, SW, S, SE }.
+        
+        Some of the ids may be nil or not applicable to the current spritesheet, in which case they will not be drawn.
+        
+        If the spritesheet is changed, the ids will be reevaluated.
+        
+        *See Also:* the <sheet> property
+    */
+    
+    table ids
+        [[
+            char ** list = (char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
+			
+			int i;
+			lua_newtable( L );
+			
+			for ( i = 0; i < 9; i++ )
+			{
+				lua_pushstring( L, list[i] );
+				lua_rawseti( L, -2, i + 1 );
+			}
+        ]]
+        [[
+            char ** list = (char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
+			
+			for ( i = 0; i < 9; i++ )
+			{
+				free( list[i] );
+				lua_getfield( L, ids, i + 1 );
+				list[i] = strdup( lua_tostring( L, -1 ) );
+			}
+			
+			lua_pop( L, 9 );
+			
+			nineslice_effect_set_ids( get_effect( self ), list );
+        ]];
+    
+    /*
+        Property: tile
+        
+        The tile property is a table containing two boolean values specifying whether sprites should tile horizontally and/or vertically instead of stretching.
+        
+        In order to matche the dimensions of the target object's bounding box, the center sprites (N, C, S vertically and W, C, E horizontally) must be either stretched or tiled.
+        
+        *Default Setting:* tile = { false, false }
+    */
+    
+    table tile
+		[[
+			gboolean tile_x, tile_y;
+			nineslice_effect_get_tile( get_effect( self ), &tile_x, &tile_y );
+			
+			lua_newtable( L );
+			lua_pushboolean( L, tile_x );
+			lua_rawseti( L, -2, 1 );
+			lua_pushboolean( L, tile_y );
+			lua_rawseti( L, -2, 2 );
+		]]
+		[[
+			lua_getfield( L, ids, 1 );
+			lua_getfield( L, ids, 2 );
+			nineslice_effect_set_tile( get_effect( self ), lua_toboolean( L, -2 ), lua_toboolean( L, -1 ) );
+			lua_pop( L, 2 );
+		]];
+    
+    /*
+        Property: borders
+        
+        The borders property is a table reflecting the maximum sizes of the sprites making up the left, right, top, and bottom borders of the NineSlice, in that order.
+        
+        borders[1] - reflects the left border (maximum width of NW, W, and SW sprites)
+        borders[2] - reflects the right border (maximum width of NE, E, and SE sprites)
+        borders[3] - reflects the top border (maximum height of SW, S, and SE sprites)
+        borders[4] - reflects the bottom border, (maximum height of NW, N, and NE sprites)
+    */
+    
+    readonly table borders
+		[[
+			int list[4] = { 0, 0, 0, 0 };
+			nineslice_effect_get_borders( get_effect( self ), &list );
+			
+			int i;
+			lua_newtable( L );
+			
+			for ( i = 0; i < 4; i++ )
+			{
+				lua_pushnumber( L, list[i] );
+				lua_rawseti( L, -2, i + 1 );
+			}
+		]];
 }
