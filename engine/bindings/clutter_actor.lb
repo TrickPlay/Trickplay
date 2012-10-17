@@ -266,7 +266,10 @@ interface actor [[ClutterActor*]]
     */
 
     readonly long gid
-        [[gid=clutter_actor_get_gid(self);]];
+        [[
+#warning THIS IS PROBABLY UNSAFE; POINTER NOT GUARANTEED TO FIT IN A SIGNED LONG; THIS SHOULD BE DEPRECATED AND REMOVED
+            gid=(long)self;
+        ]];
 
     /*
     Property: x

@@ -213,6 +213,57 @@ private:
     gfloat          max_fps;
     char            buffer[256];
 };
+
+static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
+{
+#ifdef CLUTTER_VERSION_1_10
+    ClutterActorIter iter;
+    ClutterActor *check;
+    clutter_actor_iter_init( &iter, parent );
+    while(clutter_actor_iter_next( &iter, &check ))
+    {
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+#else
+    GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
+
+    for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
+    {
+        ClutterActor *check = CLUTTER_ACTOR( item->data );
+
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+
+    g_list_free( list );
+#endif
+
+    // If nothing matched above, then return NULL
+    return NULL;
+}
+
+static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
+{
+    // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+    ClutterActor * actor = (ClutterActor *) strtoul( pointer_str, NULL, 16 );
+
+    // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
+    // attempt to de-ref actor, which could explode.  We have to walk the list manually.
+    if( clutter_actor_contains( first, actor ) )
+    {
+        return actor;
+    }
+
+    return NULL;
+}
+
 ]]
 
 /*
@@ -448,15 +499,15 @@ global devtools [[ void * ]]
 			(end)
 	*/
 
-    udata gid( int gid )
+    udata gid( string gid )
         [[
-            ClutterActor * actor = clutter_get_actor_by_gid( gid );
+            // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+            // but we can't trust the pointer, so we have to walk the list to find it
+            ClutterActor * actor = (ClutterActor *) validate_pointer( clutter_stage_get_default(), gid );
 
-            // There is a bug in clutter 1.6.14 where free gids are
-            // set to this value but not checked later.
-
-            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            if( !actor )
             {
+                g_warning("Actor not found");
                 lua_pushnil( L );
             }
             else

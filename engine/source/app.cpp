@@ -876,7 +876,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     network( NULL ),
     event_group( new EventGroup() ),
     cookie_jar( NULL ),
-    screen_gid( 0 ),
+    screen( NULL ),
     launch( _launch ),
     stage_allocation_handler( 0 )
 
@@ -957,10 +957,8 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-void App::stage_allocation_notify( gpointer , gpointer , gpointer screen_gid )
+void App::stage_allocation_notify( gpointer , gpointer , gpointer screen )
 {
-    ClutterActor * screen = clutter_get_actor_by_gid( GPOINTER_TO_INT( screen_gid ) );
-
     if ( screen )
     {
         ClutterActor * stage = clutter_stage_get_default();
@@ -1090,9 +1088,9 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     g_assert( stage );
 
 #ifdef CLUTTER_VERSION_1_10
-    ClutterActor * screen = clutter_actor_new();
+    screen = clutter_actor_new();
 #else
-    ClutterActor * screen = clutter_group_new();
+    screen = clutter_group_new();
 #endif
 
     g_assert( screen );
@@ -1102,13 +1100,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     clutter_actor_set_name( screen , "screen" );
 
-    screen_gid = clutter_actor_get_gid( screen );
-
-    stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
+    stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify ,  screen );
 
     // Call it now to set the screen's initial scale
 
-    stage_allocation_notify( 0 , 0 , GINT_TO_POINTER( screen_gid ) );
+    stage_allocation_notify( 0 , 0 , screen );
 
     secure_lua_state( allowed_names );
 
@@ -1662,9 +1658,9 @@ bool App::change_app_path( const char * path )
 
 //-----------------------------------------------------------------------------
 
-guint32 App::get_screen_gid() const
+ClutterActor * App::get_screen() const
 {
-    return screen_gid;
+    return screen;
 }
 
 //-----------------------------------------------------------------------------
@@ -1702,13 +1698,6 @@ guint16 App::get_debugger_port()
 
 void App::animate_in()
 {
-    if ( !screen_gid )
-    {
-        return;
-    }
-
-    ClutterActor * screen = clutter_get_actor_by_gid( screen_gid );
-
     if ( !screen )
     {
         return;
@@ -1721,14 +1710,13 @@ void App::animate_in()
 
     clutter_actor_get_size( stage, &width , &height );
 
-
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
     // screen and unref it when the timeline completes.
     // unless TP_APP_ANIMATIONS_ENABLED is false
 
 #ifdef CLUTTER_VERSION_1_10
-    clutter_actor_set_child_above_sibling( clutter_actor_get_parent( screen ), screen, NULL );
+    clutter_actor_set_child_above_sibling( stage, screen, NULL );
 #else
     clutter_actor_raise_top( screen );
 #endif
@@ -1762,13 +1750,6 @@ static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor
 
 void App::animate_out()
 {
-    if ( !screen_gid )
-    {
-        return;
-    }
-
-    ClutterActor * screen = clutter_get_actor_by_gid( screen_gid );
-
     if ( !screen )
     {
         return;

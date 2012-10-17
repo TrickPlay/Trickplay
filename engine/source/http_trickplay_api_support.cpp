@@ -89,9 +89,7 @@ public:
 
 		Object & o( v.as<Object>() );
 
-		guint32 gid = o[ "gid" ].as<long long>();
-
-		ClutterActor * actor = clutter_get_actor_by_gid( gid );
+		ClutterActor * actor = (ClutterActor *)o[ "gid" ].as<long long>();
 
 		// Bug in Clutter 1.6.14 where free ids are set to this value
 
@@ -278,7 +276,7 @@ private:
 		object[ "anchor_point"] = anchor_point;
 
 		// GID
-		object[ "gid" ] = int( clutter_actor_get_gid( actor ) );
+		object[ "gid" ] = (long long)actor;
 
 		// Opacity
 	    object[ "opacity" ] = clutter_actor_get_opacity( actor );
