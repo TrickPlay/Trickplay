@@ -5,6 +5,7 @@
 
 #include "trickplay/audio-sampler.h"
 
+#include "clutter_util.h"
 #include "console_commands.h"
 #include "common.h"
 #include "context.h"
@@ -601,12 +602,7 @@ protected:
 #endif
 
 	    const gchar * name = clutter_actor_get_name( actor );
-	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
-
-	    if ( g_str_has_prefix( type, "Clutter" ) )
-	    {
-	        type += 7;
-	    }
+	    const gchar * type = ClutterUtil::get_actor_type( actor );
 
 	    info->actors_by_type[type].push_back(actor);
 

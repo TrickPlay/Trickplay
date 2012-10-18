@@ -226,16 +226,8 @@ private:
 
 	    object["name"] = safe_string( clutter_actor_get_name( actor ) );
 
-	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+	    const gchar * type = ClutterUtil::get_actor_type( actor );
 
-	    if ( g_str_has_prefix( type, "Clutter" ) )
-	    {
-	        type += 7;
-	    }
-	    else if ( g_str_has_prefix( type , "Trickplay" ) )
-	    {
-	    	type += 9;
-	    }
 	    object[ "type" ] = type;
 
 		// x, y, z

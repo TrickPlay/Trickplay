@@ -310,6 +310,38 @@ void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
 {
 }
 
+const gchar * ClutterUtil::get_actor_type( ClutterActor * actor )
+{
+    const gchar *metatable = get_actor_metatable( actor );
+    static gchar the_type[64];
+    if( metatable )
+    {
+        const gchar *end = g_strstr_len( metatable, -1, "_METATABLE" );
+        g_assert( end );
+
+        const gchar *cursor = metatable;
+        gsize len = 0;
+        // First letter caps, rest lower case
+        the_type[len++] = g_ascii_toupper(*(cursor++));
+        while(cursor < end && len < sizeof(the_type))
+        {
+            the_type[len++] = g_ascii_tolower(*(cursor++));
+        }
+        the_type[len] = '\0';
+
+        return the_type;
+    }
+    else
+    {
+        const gchar *type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+	    if ( g_str_has_prefix( type, "Clutter" ) )
+	    {
+	        type += 7;
+	    }
+
+	    return type;
+    }
+}
 
 void ClutterUtil::initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable )
 {
