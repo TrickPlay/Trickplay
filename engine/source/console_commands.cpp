@@ -787,7 +787,7 @@ protected:
     static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
     {
         // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
-        ClutterActor * actor = check_children( clutter_stage_get_default(), (ClutterActor *) strtoul( pointer_str, NULL, 16 ));
+        ClutterActor * actor = check_children( clutter_stage_get_default(), (ClutterActor *) g_ascii_strtoull( pointer_str, NULL, 16 ));
 
         // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
         // attempt to de-ref actor, which could explode.  We have to walk the list manually.
