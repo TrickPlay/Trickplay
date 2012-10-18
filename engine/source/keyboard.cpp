@@ -1518,7 +1518,7 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
             load_static_images( child, assets_path );
         }
 #else
-        clutter_container_foreach( CLUTTER_CONTAINER( actor ) , CLUTTER_CALLBACK( load_static_images ) , assets_path );
+        clutter_container_foreach( CLUTTER_CONTAINER( actor ) , CLUTTER_CALLBACK( load_static_images ) , (gpointer)assets_path );
 #endif
     }
     else if ( CLUTTER_IS_TEXTURE( actor ) )
