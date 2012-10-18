@@ -265,10 +265,11 @@ interface actor [[ClutterActor*]]
 
     */
 
-    readonly long gid
+    readonly string gid
         [[
-#warning THIS IS PROBABLY UNSAFE; POINTER NOT GUARANTEED TO FIT IN A SIGNED LONG; THIS SHOULD BE DEPRECATED AND REMOVED
-            gid=(long)self;
+            char gid_str[32];
+            snprintf( gid_str, 32, "%p", self );
+            gid=gid_str;
         ]];
 
     /*

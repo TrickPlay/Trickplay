@@ -43,13 +43,13 @@ public:
 
 	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
 	{
-	    
+
 	    using namespace JSON;
 
 	    Object object;
 
 	    dump_ui_actors( clutter_stage_get_default(), object );
-	    
+
 	    response.set_status( HttpServer::HTTP_STATUS_OK );
 
 	    String result( object.stringify() );
@@ -89,7 +89,8 @@ public:
 
 		Object & o( v.as<Object>() );
 
-		ClutterActor * actor = (ClutterActor *)o[ "gid" ].as<long long>();
+        String gid_str = o["gid"].as<String>();
+		ClutterActor * actor = (ClutterActor *)strtoul(gid_str.c_str(), NULL, 16);
 
 		// Bug in Clutter 1.6.14 where free ids are set to this value
 
@@ -124,11 +125,11 @@ public:
 			case G_TYPE_FLOAT:
 				g_value_set_float( & value , it->second.as_number() );
 				break;
-            
+
 			case G_TYPE_DOUBLE:
 				g_value_set_double( & value , it->second.as_number() );
 				break;
-            
+
 			case G_TYPE_BOOLEAN:
 				g_value_set_boolean( & value , it->second.as<bool>() );
 				break;
@@ -276,7 +277,9 @@ private:
 		object[ "anchor_point"] = anchor_point;
 
 		// GID
-		object[ "gid" ] = (long long)actor;
+		char gid_str[32];
+		snprintf(gid_str, 32, "%p", actor);
+		object[ "gid" ] = gid_str;
 
 		// Opacity
 	    object[ "opacity" ] = clutter_actor_get_opacity( actor );
