@@ -886,6 +886,38 @@ _VE_.openFile = function(path)
                         p.is_in_group = true
                         p.parent_group = m 
                     end 
+                elseif uiTypeStr == "TabBar" then
+                    local idx = 0
+                    while m.tabs.length > idx do 
+                        idx = idx + 1 
+                        for o, p in ipairs(m.tabs[idx].contents.children) do 
+                            p.extra.mouse_handler = false
+                            util.create_mouse_event_handler(p, p.widget_type)
+                            p.reactive = true 
+                            p.is_in_group = true
+                            p.parent_group = m 
+                        end 
+                    end 
+                elseif uiTypeStr == "LayoutManager" then
+                    for r = 1, m.number_of_rows, 1 do 
+                        for c = 1, m.number_of_cols, 1 do 
+                            m.cells[r][c].extra.mouse_handler = false
+                            util.create_mouse_event_handler( m.cells[r][c], m.cells[r][c].widget_type)
+                            m.cells[r][c].reactive = true 
+                            m.cells[r][c].is_in_group = true
+                            m.cells[r][c].parent_group = m 
+                        end 
+                    end 
+                elseif uiTypeStr == "MenuButton" then
+                    local idx = 0
+                    while m.items.length > idx  do
+                        idx = idx + 1
+                        m.items[idx].extra.mouse_handler = false
+                        util.create_mouse_event_handler(m.items[idx], m.items[idx].widget_type)
+                        m.items[idx].reactive = true 
+                        m.items[idx].is_in_group = true
+                        m.items[idx].parent_group = m 
+                    end 
                 end 
 
                 if uiTypeStr == "Widget_Image" or uiTypeStr == "Image" then 
