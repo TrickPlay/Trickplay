@@ -3,6 +3,7 @@
 #include "util.h"
 #include "sysdb.h"
 #include "json.h"
+#include "clutter_util.h"
 
 //-----------------------------------------------------------------------------
 
