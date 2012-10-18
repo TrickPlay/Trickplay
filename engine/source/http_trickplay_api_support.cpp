@@ -90,7 +90,7 @@ public:
 		Object & o( v.as<Object>() );
 
         String gid_str = o["gid"].as<String>();
-		ClutterActor * actor = (ClutterActor *)strtoul(gid_str.c_str(), NULL, 16);
+		ClutterActor * actor = (ClutterActor *) g_ascii_strtoull(gid_str.c_str(), NULL, 16);
 
 		// Bug in Clutter 1.6.14 where free ids are set to this value
 
