@@ -48,7 +48,7 @@ public:
 
 	    Object object;
 
-	    dump_ui_actors( clutter_stage_get_default(), object );
+	    dump_ui_actors( context->get_stage(), object );
 
 	    response.set_status( HttpServer::HTTP_STATUS_OK );
 

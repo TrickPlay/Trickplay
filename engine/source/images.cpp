@@ -258,11 +258,9 @@ Image * Image::decode( const gchar * filename , bool read_tags )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::screenshot()
+Image * Image::screenshot( ClutterActor *stage )
 {
     TPImage image;
-
-    ClutterActor * stage = clutter_stage_get_default();
 
     if ( ! stage )
     {

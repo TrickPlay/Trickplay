@@ -170,6 +170,7 @@ private:
 
     typedef std::set<Delegate *> DelegateSet;
 
+    TPContext *     context;
     Wrapper    *    wrapper;
     int             state;
     GStaticRecMutex mutex;

@@ -22,7 +22,7 @@ public:
 
     static Image * decode( const gchar * filename , bool read_tags );
 
-    static Image * screenshot();
+    static Image * screenshot( ClutterActor *stage );
 
     typedef void ( * DecodeAsyncCallback )( Image * image , gpointer user );
 

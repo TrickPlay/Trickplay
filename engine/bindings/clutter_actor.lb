@@ -5,6 +5,7 @@ module clutter_actor;
 
 #include "util.h"
 #include "clutter_util.h"
+#include "context.h"
 ]]
 
 [[
@@ -83,7 +84,7 @@ static gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event
     int result = FALSE;
 
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates( App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
@@ -107,7 +108,7 @@ static gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,l
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates(App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
@@ -131,7 +132,7 @@ static gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates(App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
@@ -153,7 +154,7 @@ static gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates(App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
@@ -176,7 +177,7 @@ static gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates(App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
@@ -197,7 +198,7 @@ static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
-    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+    ClutterUtil::stage_coordinates_to_screen_coordinates(App::get(L)->get_context()->get_stage(), &x, &y);
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
