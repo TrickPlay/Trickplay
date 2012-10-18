@@ -780,9 +780,10 @@ _VE_.setUIInfo = function(gid, property, value, n)
     else
         uiInstance[property] = value 
     end 
-    if property == "label" then 
-        _VE_.refresh()
-    end 
+    --if property == "label" then 
+    _VE_.refresh()
+    _VE_.openInspector(uiInstance.gid, false)
+    --end 
 	screen_ui.selected(uiInstance) 
 end 
 
@@ -1204,10 +1205,12 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         editor.text(uiInstance)
     end
 
-    uiInstance.extra.mouse_handler = false 
-    util.create_mouse_event_handler(uiInstance, uiTypeStr)
+    if uiInstance ~= nil then 
+        uiInstance.extra.mouse_handler = false 
+        util.create_mouse_event_handler(uiInstance, uiTypeStr)
+        util.addIntoLayer(uiInstance)
+    end
 
-    util.addIntoLayer(uiInstance)
     blockReport = false
 
 end

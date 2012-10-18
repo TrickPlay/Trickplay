@@ -1013,11 +1013,9 @@ function util.get_group_position(child_obj)
         print("get_group_position() fail, parent_obj is nil")
         return 
      else 
-        print("child gid", child_obj.gid)
-        print("parent gid", parent_obj.gid)
         if parent_obj.widget_type == "ArrowPane" or parent_obj.widget_type == "TabBar" then
-            return {parent_obj.x + parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset, parent_obj.y +
-            parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset }
+            return {parent_obj.x + parent_obj.style.arrow.size - parent_obj.virtual_x + 2*parent_obj.style.arrow.offset, parent_obj.y +
+            parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset - parent_obj.virtual_y }
         elseif parent_obj.widget_type == "MenuButton" then 
             return {parent_obj.x + parent_obj.item_spacing  + parent_obj.popup_offset, parent_obj.y +
             parent_obj.item_spacing + parent_obj.popup_offset}

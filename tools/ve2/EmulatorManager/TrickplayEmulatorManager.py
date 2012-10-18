@@ -266,7 +266,6 @@ class TrickplayEmulatorManager(QWidget):
 				            self.inspector.preventChanges = True
 				            self.inspector.propertyFill(self.inspector.curData)
 				        self.inspector.preventChanges = False
-				        return
 
 				    if sdata is not None and self.pdata is not None:
 				        self.contentMoveBlock = True 
