@@ -64,6 +64,9 @@ namespace ClutterUtil
 
     void set_props_from_table( lua_State * L, int table );
 
+    // Figure out what kind of actor this is, from its metatable if possible
+     const gchar * get_actor_type( ClutterActor * actor );
+
     // Adds metatable to an actor
 
     void initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable );
