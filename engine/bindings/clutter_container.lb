@@ -46,9 +46,13 @@ interface container [[ClutterActor*]]
 
     readonly int count
 	[[
+#ifdef CLUTTER_VERSION_1_10
+        count = clutter_actor_get_n_children( self );
+#else
         GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
 	    count = g_list_length(list);
 	    g_list_free(list);
+#endif
 	]];
 	
     /*
@@ -93,27 +97,46 @@ interface container [[ClutterActor*]]
     
     table children
         [[
-            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
-	    
 		    lua_newtable(L);
 		    int n = 1;
+#ifdef CLUTTER_VERSION_1_10
+            ClutterActorIter iter;
+            ClutterActor *child;
+            clutter_actor_iter_init( &iter, self );
+            while(clutter_actor_iter_next( &iter, &child ))
+            {
+                ClutterUtil::wrap_concrete_actor(L,child);
+                lua_rawseti(L,-2,n++);
+            }
+#else
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+
 		    for(GList*item=g_list_first(list);item;item=g_list_next(item),++n)
 		    {
 				ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
 				lua_rawseti(L,-2,n);
 		    }
 		    g_list_free(list);
+#endif
         ]]
         [[
             luaL_checktype(L,2,LUA_TTABLE);
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_all_children( self );
+#else
             clutter_group_remove_all(CLUTTER_GROUP(self));
+#endif
             lua_pushnil(L);
             while(lua_next(L,2))
             {
                 ClutterActor* source=ClutterUtil::user_data_to_actor(L,-1);
                 if ( ClutterUtil::is_qualified_child( self , source ) )
                 {
+#ifdef CLUTTER_VERSION_1_10
+                    clutter_actor_add_child( self, source );
+#else
                     clutter_container_add_actor( CLUTTER_CONTAINER( self ), source );
+#endif
                 }
                 else
                 {
@@ -154,7 +177,11 @@ interface container [[ClutterActor*]]
 
                     if ( ClutterUtil::is_qualified_child( self, source ) )
                     {                   
+#ifdef CLUTTER_VERSION_1_10
+                        clutter_actor_add_child( self, source );
+#else
                         clutter_container_add_actor( CLUTTER_CONTAINER( self ),source );
+#endif
                     }
                     else
                     {
@@ -195,7 +222,11 @@ interface container [[ClutterActor*]]
                 {
                     if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
                     {
+#ifdef CLUTTER_VERSION_1_10
+                        clutter_actor_remove_child( self, actor );
+#else
                         clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
+#endif
                     }
                 }
             }	    
@@ -214,7 +245,11 @@ interface container [[ClutterActor*]]
     
     clear()
 	[[
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_all_children( self );
+#else
             clutter_group_remove_all(CLUTTER_GROUP(self));	    
+#endif
 	]];
 	
     /*
@@ -253,7 +288,17 @@ interface container [[ClutterActor*]]
     
     foreach_child( function f )
 	[[
+#ifdef CLUTTER_VERSION_1_10
+        ClutterActorIter iter;
+        ClutterActor *child;
+        clutter_actor_iter_init( &iter, self );
+        while(clutter_actor_iter_next( &iter, &child ))
+        {
+            container_foreach_callback( child, L );
+        }
+#else
 	    clutter_container_foreach(CLUTTER_CONTAINER(self),(ClutterCallback)container_foreach_callback,L);    
+#endif
 	]];
 	
     /*
@@ -299,7 +344,11 @@ interface container [[ClutterActor*]]
 	    
 	    if (c)
 	    {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( self, c, s );
+#else
 		clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+#endif
 	    }
 	]];
 	
@@ -325,7 +374,11 @@ interface container [[ClutterActor*]]
 
 	    if (c)
 	    {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_below_sibling( self, c, s );
+#else
 		clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+#endif
 	    }
 	]];	
 }

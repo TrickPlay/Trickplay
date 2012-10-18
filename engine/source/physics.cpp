@@ -960,7 +960,11 @@ void World::draw_debug( int opacity )
 
         ClutterActor * parent = clutter_actor_get_parent( screen );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( parent, debug_draw );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , debug_draw );
+#endif
 
         g_object_ref( G_OBJECT( debug_draw ) );
     }
@@ -969,7 +973,11 @@ void World::draw_debug( int opacity )
         clutter_cairo_texture_clear( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
     }
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_set_child_above_sibling( clutter_actor_get_parent(screen), debug_draw, NULL );
+#else
     clutter_actor_raise_top( debug_draw );
+#endif
 
     clutter_actor_set_opacity( debug_draw , opacity );
 
@@ -1009,7 +1017,11 @@ void World::clear_debug()
 
     if ( parent )
     {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_remove_child( parent, debug_draw );
+#else
         clutter_container_remove( CLUTTER_CONTAINER( parent ) , debug_draw , NULL );
+#endif
     }
 
     g_object_unref( G_OBJECT( debug_draw ) );

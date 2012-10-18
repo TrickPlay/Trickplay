@@ -242,9 +242,9 @@ public:
     bool change_app_path( const char * path );
 
     //.........................................................................
-    // This returns the clutter actor GID for this app's screen
+    // This returns the clutter actor for this app's screen
 
-    guint32 get_screen_gid() const;
+    ClutterActor * get_screen() const;
 
     //.........................................................................
     // This shows the app
@@ -344,7 +344,7 @@ private:
     Network        *        network;
     EventGroup       *      event_group;
     Network::CookieJar   *  cookie_jar;
-    guint32                 screen_gid;
+    ClutterActor *          screen;
     LaunchInfo              launch;
     gulong                  stage_allocation_handler;
     StringMap				globals;
