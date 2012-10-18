@@ -369,7 +369,11 @@ protected:
         {
             if ( ClutterActor * parent = clutter_actor_get_parent( splash ) )
             {
+#ifdef CLUTTER_VERSION_1_10
+                clutter_actor_remove_child( parent, splash );
+#else
                 clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , splash );
+#endif
             }
         }
 
@@ -872,7 +876,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     network( NULL ),
     event_group( new EventGroup() ),
     cookie_jar( NULL ),
-    screen_gid( 0 ),
+    screen( NULL ),
     launch( _launch ),
     stage_allocation_handler( 0 )
 
@@ -953,10 +957,8 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-void App::stage_allocation_notify( gpointer , gpointer , gpointer screen_gid )
+void App::stage_allocation_notify( gpointer , gpointer , gpointer screen )
 {
-    ClutterActor * screen = clutter_get_actor_by_gid( GPOINTER_TO_INT( screen_gid ) );
-
     if ( screen )
     {
         ClutterActor * stage = clutter_stage_get_default();
@@ -966,7 +968,7 @@ void App::stage_allocation_notify( gpointer , gpointer , gpointer screen_gid )
 
         clutter_actor_get_size( stage , & width , & height );
 
-        clutter_actor_set_scale( screen, width / 1920, height / 1080 );
+        clutter_actor_set_scale( CLUTTER_ACTOR( screen ), width / 1920, height / 1080 );
 
         g_debug( "DISPLAY SIZE CHANGED TO %1.0fx%1.0f" , width , height );
     }
@@ -1017,7 +1019,11 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
         clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, splash );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
+#endif
 
         clutter_actor_show( stage );
 
@@ -1081,7 +1087,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     g_assert( stage );
 
-    ClutterActor * screen = clutter_group_new();
+#ifdef CLUTTER_VERSION_1_10
+    screen = clutter_actor_new();
+#else
+    screen = clutter_group_new();
+#endif
 
     g_assert( screen );
 
@@ -1090,13 +1100,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     clutter_actor_set_name( screen , "screen" );
 
-    screen_gid = clutter_actor_get_gid( screen );
-
-    stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
+    stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify ,  screen );
 
     // Call it now to set the screen's initial scale
 
-    stage_allocation_notify( 0 , 0 , GINT_TO_POINTER( screen_gid ) );
+    stage_allocation_notify( 0 , 0 , screen );
 
     secure_lua_state( allowed_names );
 
@@ -1261,7 +1269,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
         // By adding it to the stage, the ref is sunk, so we don't need
         // to unref it here.
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, screen );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
+#endif
 
         g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
@@ -1646,9 +1658,9 @@ bool App::change_app_path( const char * path )
 
 //-----------------------------------------------------------------------------
 
-guint32 App::get_screen_gid() const
+ClutterActor * App::get_screen() const
 {
-    return screen_gid;
+    return screen;
 }
 
 //-----------------------------------------------------------------------------
@@ -1686,13 +1698,6 @@ guint16 App::get_debugger_port()
 
 void App::animate_in()
 {
-    if ( !screen_gid )
-    {
-        return;
-    }
-
-    ClutterActor * screen = clutter_get_actor_by_gid( screen_gid );
-
     if ( !screen )
     {
         return;
@@ -1705,13 +1710,16 @@ void App::animate_in()
 
     clutter_actor_get_size( stage, &width , &height );
 
-
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
     // screen and unref it when the timeline completes.
     // unless TP_APP_ANIMATIONS_ENABLED is false
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_set_child_above_sibling( stage, screen, NULL );
+#else
     clutter_actor_raise_top( screen );
+#endif
 
     clutter_actor_set_scale( screen, width / 1920, height / 1080 );
 
@@ -1726,7 +1734,11 @@ static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor
 
     if ( parent )
     {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_remove_child( parent, actor );
+#else
         clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
+#endif
     }
    // Something is holding an extra ref.  We'll release it here, but this is wrong
    // We cannot find where the extra ref is being taken; our hope is de-reffing it
@@ -1738,13 +1750,6 @@ static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor
 
 void App::animate_out()
 {
-    if ( !screen_gid )
-    {
-        return;
-    }
-
-    ClutterActor * screen = clutter_get_actor_by_gid( screen_gid );
-
     if ( !screen )
     {
         return;

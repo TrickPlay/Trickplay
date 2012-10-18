@@ -265,8 +265,12 @@ interface actor [[ClutterActor*]]
 
     */
 
-    readonly long gid
-        [[gid=clutter_actor_get_gid(self);]];
+    readonly string gid
+        [[
+            char gid_str[32];
+            snprintf( gid_str, 32, "%p", self );
+            gid=gid_str;
+        ]];
 
     /*
     Property: x
@@ -312,8 +316,20 @@ interface actor [[ClutterActor*]]
     */
 
     double z
-        [[ z = clutter_actor_get_depth( self ); ]]
-        [[ clutter_actor_set_depth( self , z ); ]];
+        [[
+#ifdef CLUTTER_VERSION_1_12
+            z = clutter_actor_get_z_position( self );
+#else
+            z = clutter_actor_get_depth( self );
+#endif
+        ]]
+        [[
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_set_z_position( self, z );
+#else
+            clutter_actor_set_depth( self, z );
+#endif
+        ]];
 
     /*
     Property: depth
@@ -325,8 +341,20 @@ interface actor [[ClutterActor*]]
     */
 
     double depth
-        [[depth=clutter_actor_get_depth(self);]]
-        [[clutter_actor_set_depth(self,depth);]];
+        [[
+#ifdef CLUTTER_VERSION_1_12
+            depth = clutter_actor_get_z_position( self );
+#else
+            depth = clutter_actor_get_depth(self);
+#endif
+        ]]
+        [[
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_set_z_position( self, depth );
+#else
+            clutter_actor_set_depth( self, depth );
+#endif
+        ]];
 
     /*
     Property: position
@@ -348,7 +376,11 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,1);
             lua_pushnumber(L,clutter_actor_get_y(self));
             lua_rawseti(L,-2,2);
+#ifdef CLUTTER_VERSION_1_12
+            lua_pushnumber(L,clutter_actor_get_z_position(self));
+#else
             lua_pushnumber(L,clutter_actor_get_depth(self));
+#endif
         lua_rawseti(L,-2,3);
         ]]
         [[
@@ -359,7 +391,11 @@ interface actor [[ClutterActor*]]
             clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
             if ( lua_isnumber( L , -1 ) )
             {
+#ifdef CLUTTER_VERSION_1_12
+               clutter_actor_set_z_position(self, lua_tonumber(L, -1));
+#else
                clutter_actor_set_depth(self,lua_tonumber(L,-1));
+#endif
             }
 
             lua_pop(L,3);
@@ -1280,7 +1316,11 @@ interface actor [[ClutterActor*]]
     [[
         if(ClutterActor * parent=clutter_actor_get_parent(self))
         {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_remove_child( parent, self );
+#else
         clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
+#endif
         }
     ]];
 
@@ -1321,10 +1361,21 @@ interface actor [[ClutterActor*]]
 
     raise( UIElement above )
     [[
-        ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
-        if(source)
+        if(ClutterActor * parent=clutter_actor_get_parent(self))
         {
-        clutter_actor_raise(self,source);
+            ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
+            if(source)
+            {
+#ifdef CLUTTER_VERSION_1_10
+                clutter_actor_set_child_above_sibling( parent, self, source );
+#else
+                clutter_actor_raise(self,source);
+#endif
+            }
+        }
+        else
+        {
+            g_warning( "Trying to raise() an actor that is not in a group" );
         }
     ]];
 
@@ -1349,10 +1400,21 @@ interface actor [[ClutterActor*]]
 
     lower( UIElement below )
     [[
-        ClutterActor* source=ClutterUtil::user_data_to_actor(L,below);
-        if (source)
+        if(ClutterActor * parent=clutter_actor_get_parent(self))
         {
-        clutter_actor_lower(self,source);
+            ClutterActor* source =ClutterUtil::user_data_to_actor(L,below);
+            if(source)
+            {
+#ifdef CLUTTER_VERSION_1_10
+                clutter_actor_set_child_below_sibling( parent, self, source );
+#else
+                clutter_actor_lower(self,source);
+#endif
+            }
+        }
+        else
+        {
+            g_warning( "Trying to lower() an actor that is not in a group" );
         }
     ]];
 
@@ -1371,7 +1433,18 @@ interface actor [[ClutterActor*]]
 
     raise_to_top()
     [[
-        clutter_actor_raise_top(self);
+        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        {
+#ifdef CLUTTER_VERSION_1_10
+                clutter_actor_set_child_above_sibling( parent, self, NULL );
+#else
+                clutter_actor_raise_top(self);
+#endif
+        }
+        else
+        {
+            g_warning( "Trying to raise_to_top() an actor that is not in a group" );
+        }
     ]];
 
     /*
@@ -1389,7 +1462,18 @@ interface actor [[ClutterActor*]]
 
     lower_to_bottom()
     [[
-        clutter_actor_lower_bottom(self);
+        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        {
+#ifdef CLUTTER_VERSION_1_10
+                clutter_actor_set_child_below_sibling( parent, self, NULL );
+#else
+                clutter_actor_lower_bottom(self);
+#endif
+        }
+        else
+        {
+            g_warning( "Trying to lower_to_bottom() an actor that is not in a group" );
+        }
     ]];
 
     /*

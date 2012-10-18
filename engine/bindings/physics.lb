@@ -1939,7 +1939,7 @@ global physics [[ Physics::World * ]]
 {
 	physics()
 		[[
-            ClutterActor * screen = clutter_get_actor_by_gid( App::get( L )->get_screen_gid() );
+            ClutterActor * screen = App::get( L )->get_screen();
 
 			self = lb_construct( Physics::World , new Physics::World( L , screen , 64 ) );
 		]];
