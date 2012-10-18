@@ -50,6 +50,7 @@ static char ** g_argv = 0;
 TPContext::TPContext()
     :
     is_running( false ),
+    stage( NULL ),
     sysdb( NULL ),
     controller_server( NULL ),
     controller_lirc( NULL ),
@@ -679,7 +680,9 @@ int TPContext::run()
 
     g_info( "INITIALIZING STAGE..." );
 
-    ClutterActor * stage = clutter_stage_get_default();
+    stage = clutter_stage_new();
+
+    g_assert(stage != NULL);
 
     int display_width = get_int( TP_SCREEN_WIDTH );
     int display_height = get_int( TP_SCREEN_HEIGHT );
@@ -842,9 +845,6 @@ int TPContext::run()
 
     }
 
-	g_debug("RELEASING CLUTTER LOCK...");
-	clutter_threads_leave ();
-
     //.....................................................................
 
     notify( this , TP_NOTIFICATION_EXITING );
@@ -893,11 +893,10 @@ int TPContext::run()
     // Clean up the stage
 
 #ifdef CLUTTER_VERSION_1_10
-	clutter_actor_remove_all_children( clutter_stage_get_default() );
+	clutter_actor_remove_all_children( stage );
 #else
-    clutter_group_remove_all( CLUTTER_GROUP( clutter_stage_get_default() ) );
+    clutter_group_remove_all( CLUTTER_GROUP( stage ) );
 #endif
-
     //.....................................................................
     // Shutdown the app
 
@@ -979,6 +978,14 @@ int TPContext::run()
 
     //.........................................................................
     // Not running any more
+
+
+	g_debug("DESTROYING STAGE...");
+	clutter_actor_destroy( stage );
+
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     is_running = false;
 
@@ -2073,6 +2080,14 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
 
 //-----------------------------------------------------------------------------
 
+ClutterActor * TPContext::get_stage() const
+{
+    g_assert( stage );
+    return stage;
+}
+
+//-----------------------------------------------------------------------------
+
 SystemDatabase * TPContext::get_db() const
 {
     g_assert( sysdb );
@@ -2466,8 +2481,6 @@ void TPContext::load_background()
 			gint ih;
 
 			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
-
-			ClutterActor * stage = clutter_stage_get_default();
 
 	        gfloat width;
 	        gfloat height;

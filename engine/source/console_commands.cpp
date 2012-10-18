@@ -347,7 +347,7 @@ protected:
         }
         else
         {
-            Image * image = Image::screenshot();
+            Image * image = Image::screenshot(context->get_stage());
 
             if ( ! image )
             {
@@ -718,7 +718,7 @@ protected:
 
 	    g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s%s",
 	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
-	            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
+	            clutter_actor_has_key_focus( actor ) ? "> " : "  ",
 	            String( info->indent, ' ' ).c_str(),
 	            type,
 	            name ? String( String(" ") + SAFE_ANSI_COLOR_FG_YELLOW + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
@@ -787,7 +787,7 @@ protected:
     static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
     {
         // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
-        ClutterActor * actor = check_children( clutter_stage_get_default(), (ClutterActor *) g_ascii_strtoull( pointer_str, NULL, 16 ));
+        ClutterActor * actor = check_children( first, (ClutterActor *) g_ascii_strtoull( pointer_str, NULL, 16 ));
 
         // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
         // attempt to de-ref actor, which could explode.  We have to walk the list manually.
@@ -803,15 +803,15 @@ protected:
 	{
         DumpInfo info;
 
-        ClutterActor * first = clutter_stage_get_default();
+        ClutterActor * first = context->get_stage();
 
         if ( ! parameters.empty() )
         {
-    		first = clutter_container_find_child_by_name( CLUTTER_CONTAINER( clutter_stage_get_default() ) , parameters.c_str() );
+    		first = clutter_container_find_child_by_name( CLUTTER_CONTAINER( first ) , parameters.c_str() );
 
         	if ( ! first )
         	{
-            	first = validate_pointer( CLUTTER_ACTOR( clutter_stage_get_default() ), parameters.c_str() );
+            	first = validate_pointer( context->get_stage(), parameters.c_str() );
         	}
         }
 

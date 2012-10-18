@@ -159,7 +159,7 @@ restricted global editor [[ void * ]]
 
             Display * display = clutter_x11_get_default_display();
 
-            Window window = clutter_x11_get_stage_window( CLUTTER_STAGE( clutter_stage_get_default() ) );
+            Window window = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
 
             if ( shape >= 0 )
             {

@@ -1567,8 +1567,9 @@ bool Keyboard::find_actor( ClutterScript * script , const gchar * id , GType typ
 
 //-----------------------------------------------------------------------------
 
-Keyboard::Keyboard( TPContext * context )
+Keyboard::Keyboard( TPContext * c )
 :
+    context( c ),
     keyboard( 0 ),
     field_list_container( 0 ),
     bottom_container( 0 ),
@@ -1686,7 +1687,7 @@ Keyboard::Keyboard( TPContext * context )
 
     // Get the stage and its dimensions
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     gfloat stage_width;
     gfloat stage_height;
@@ -1955,7 +1956,7 @@ void Keyboard::connect_event_handler()
 {
     disconnect_event_handler();
 
-    if ( ClutterActor * stage = clutter_stage_get_default() )
+    if ( ClutterActor * stage = context->get_stage() )
     {
         event_handler = g_signal_connect( G_OBJECT( stage  ) , "captured-event" , ( GCallback ) captured_event , this );
     }
@@ -1965,7 +1966,7 @@ void Keyboard::connect_event_handler()
 
 void Keyboard::disconnect_event_handler()
 {
-    if ( ClutterActor * stage = clutter_stage_get_default() )
+    if ( ClutterActor * stage = context->get_stage() )
     {
         if ( event_handler && g_signal_handler_is_connected( G_OBJECT( stage ) , event_handler ) )
         {

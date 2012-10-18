@@ -475,12 +475,12 @@ static ClutterModifierType to_clutter_modifier( unsigned long int modifiers )
 	return ClutterModifierType( result );
 }
 
-void ClutterUtil::inject_key_down( guint key_code, gunichar unicode , unsigned long int modifiers )
+void ClutterUtil::inject_key_down( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_PRESS );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
@@ -503,12 +503,12 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode , unsigned l
 #endif
 }
 
-void ClutterUtil::inject_key_up( guint key_code, gunichar unicode , unsigned long int modifiers )
+void ClutterUtil::inject_key_up( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_RELEASE );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
@@ -531,12 +531,12 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode , unsigned lon
 #endif
 }
 
-void ClutterUtil::inject_motion( gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_motion( ClutterActor *stage, gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_MOTION );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->motion.x = x;
@@ -559,12 +559,12 @@ void ClutterUtil::inject_motion( gfloat x , gfloat y , unsigned long int modifie
 #endif
 }
 
-void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_button_press( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_PRESS );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->button.button = button;
@@ -588,12 +588,12 @@ void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y , un
 #endif
 }
 
-void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_button_release( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->button.button = button;
@@ -617,12 +617,12 @@ void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y , 
 #endif
 }
 
-void ClutterUtil::inject_scroll( int direction , unsigned long int modifiers )
+void ClutterUtil::inject_scroll( ClutterActor *stage, int direction , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
     ClutterEvent * event = clutter_event_new( CLUTTER_SCROLL );
-    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->scroll.modifier_state = to_clutter_modifier( modifiers );
@@ -655,11 +655,10 @@ void ClutterUtil::inject_scroll( int direction , unsigned long int modifiers )
 #endif
 }
 
-void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y )
+void ClutterUtil::stage_coordinates_to_screen_coordinates( ClutterActor *stage, gdouble *x, gdouble *y )
 {
-    ClutterContainer *stage = (ClutterContainer*)clutter_stage_get_default();
 
-    if ( ClutterActor * screen = clutter_container_find_child_by_name(stage, "screen") )
+    if ( ClutterActor * screen = clutter_container_find_child_by_name( CLUTTER_CONTAINER( stage ), "screen") )
     {
         gdouble scale_x, scale_y;
 

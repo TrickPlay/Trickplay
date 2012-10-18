@@ -84,20 +84,20 @@ namespace ClutterUtil
 
     // Inject key_down event
 
-    void inject_key_down( guint key_code, gunichar unicode , unsigned long int modifiers );
+    void inject_key_down( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_key_up( guint key_code, gunichar unicode , unsigned long int modifiers );
+    void inject_key_up( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_motion( gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_motion( ClutterActor *stage, gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_press( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_button_press( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_button_release( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_scroll( int direction , unsigned long int modifiers );
+    void inject_scroll( ClutterActor *stage, int direction , unsigned long int modifiers );
 
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
-    void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );
+    void stage_coordinates_to_screen_coordinates( ClutterActor *stage, gdouble *x, gdouble *y );
 
     unsigned long int get_tp_modifiers( ClutterEvent * event );
 

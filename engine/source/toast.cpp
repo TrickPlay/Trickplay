@@ -43,7 +43,7 @@ public:
         dismissed( false ),
         key_handler( 0 )
     {
-        if ( ClutterActor * stage = clutter_stage_get_default() )
+        if ( ClutterActor * stage = toast->context->get_stage() )
         {
             key_handler = g_signal_connect( G_OBJECT( stage  ) ,
                     "captured-event" ,
@@ -75,7 +75,7 @@ private:
 
     void disconnect_key_handler()
     {
-        if ( ClutterActor * stage = clutter_stage_get_default() )
+        if ( ClutterActor * stage = toast->context->get_stage() )
         {
             if ( key_handler && g_signal_handler_is_connected( G_OBJECT( stage ) , key_handler ) )
             {
@@ -197,8 +197,9 @@ void Toast::destroy( Toast * me )
 
 //-----------------------------------------------------------------------------
 
-Toast::Toast( TPContext * context )
+Toast::Toast( TPContext * c )
 :
+    context( c ),
     group( 0 ),
     background( 0 ),
     title( 0 ),
@@ -314,7 +315,7 @@ Toast::Toast( TPContext * context )
 
     // Get the stage and its dimensions
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     gfloat stage_width;
     gfloat stage_height;
