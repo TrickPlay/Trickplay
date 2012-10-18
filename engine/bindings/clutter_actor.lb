@@ -1361,7 +1361,7 @@ interface actor [[ClutterActor*]]
 
     raise( UIElement above )
     [[
-        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
             ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
             if(source)
@@ -1400,7 +1400,7 @@ interface actor [[ClutterActor*]]
 
     lower( UIElement below )
     [[
-        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
             ClutterActor* source =ClutterUtil::user_data_to_actor(L,below);
             if(source)
@@ -1433,7 +1433,7 @@ interface actor [[ClutterActor*]]
 
     raise_to_top()
     [[
-        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
 #ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_above_sibling( parent, self, NULL );
@@ -1462,7 +1462,7 @@ interface actor [[ClutterActor*]]
 
     lower_to_bottom()
     [[
-        if(ClutterActor * parent=clutter_actor_get_parent(self))
+        if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
 #ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_below_sibling( parent, self, NULL );
