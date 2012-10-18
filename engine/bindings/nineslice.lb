@@ -120,6 +120,7 @@ class NineSlice [[ClutterActor*]] actor
             
             ClutterEffect * effect = nineslice_effect_new();
             clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
+            clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
             
             ClutterUtil::set_props_from_table( L, props );
             g_object_unref( self );
@@ -152,39 +153,58 @@ class NineSlice [[ClutterActor*]] actor
                 lua_pushnil( L );
         ]]
         [[
-            g_debug("sheet");
-            luaL_checkudata( L, 2, "SPRITESHEET_METATABLE" );
-            
-            SpriteSheet * old_sheet,
-                        * new_sheet;
-            int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ) , "tp-sheet-ref" );
-            
-            if ( sheet_ref )
-            {
-                lb_strong_deref( L, * sheet_ref );
-                old_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+            lua_getfield( L, LUA_REGISTRYINDEX, "SPRITESHEET_METATABLE" );
+            gboolean is_spritesheet = lua_getmetatable( L, 2 );
+            if ( !is_spritesheet )
                 lua_pop( L, 1 );
+            else
+            {
+                is_spritesheet = lua_rawequal( L, -1, -2 );
+                lua_pop( L, 2 );
             }
             
-            new_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
-            
-            if ( old_sheet != new_sheet )
+            if ( is_spritesheet )
             {
-                if ( new_sheet->is_initialized() )
+                
+                SpriteSheet * old_sheet,
+                            * new_sheet;
+                int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ) , "tp-sheet-ref" );
+                
+                if ( sheet_ref )
                 {
-                    int * new_sheet_ref = g_new( int, 1 );
-                    * new_sheet_ref = lb_strong_ref( L );
-                    
-                    g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
-                    
-                    g_debug("Setting effect sheet");
-                    nineslice_effect_set_sheet( get_effect( self ), new_sheet );
-                    clutter_actor_queue_redraw( self );
+                    lb_strong_deref( L, * sheet_ref );
+                    old_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+                    lua_pop( L, 1 );
                 }
-                else
+                
+                new_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+                
+                if ( old_sheet != new_sheet )
                 {
-                    luaL_error( L, "SpriteSheet not initialized." );
+                    if ( new_sheet->is_initialized() )
+                    {
+                        int * new_sheet_ref = g_new( int, 1 );
+                        * new_sheet_ref = lb_strong_ref( L );
+                        
+                        g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
+                        
+                        nineslice_effect_set_sheet( get_effect( self ), new_sheet );
+                        clutter_actor_queue_redraw( self );
+                    }
+                    else
+                    {
+                        luaL_error( L, "Failed to set 'sheet': SpriteSheet not initialized." );
+                    }
                 }
+            }
+            else
+            {
+                g_warning( "Failed to set 'sheet': not a SpriteSheet." );
+                
+                g_object_set_data( G_OBJECT( self ), "tp-sheet-ref", NULL );
+                
+                nineslice_effect_set_sheet( get_effect( self ), NULL );
+                clutter_actor_queue_redraw( self );
             }
         ]];
     
@@ -202,7 +222,6 @@ class NineSlice [[ClutterActor*]] actor
     
     table ids
         [[
-            g_debug( "get ids" );
             char ** list = (char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
             g_assert( list != NULL );
             
@@ -217,7 +236,6 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]]
         [[
-            g_debug( "set ids" );
             if ( lua_istable( L, 2 ) )
             {
                 const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
@@ -232,7 +250,6 @@ class NineSlice [[ClutterActor*]] actor
                     lua_getfield( L, 2, keys[i] );
                     const char * id = lua_tostring(L, -1);
                     list[i] = id != NULL ? strdup( id ) : NULL;
-                    g_debug("set id: %s ~ %i = %s", keys[i], i, list[i] );
                     lua_pop(L, 1);
                 }
             
@@ -266,7 +283,6 @@ class NineSlice [[ClutterActor*]] actor
     
     table tile
         [[
-            g_debug( "get tile" );
             gboolean * tile = (gboolean *) g_object_get_data( G_OBJECT( self ), "tp-tile" );
             
             int i;
@@ -279,7 +295,6 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]]
         [[
-            g_debug( "set tile" );
             gboolean * tile = (gboolean *) g_object_get_data( G_OBJECT( self ), "tp-tile" );
             int i;
             
