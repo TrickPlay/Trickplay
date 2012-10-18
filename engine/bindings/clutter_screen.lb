@@ -205,13 +205,21 @@ global screen [[ClutterActor*]] actor , container
     table color
         [[
             ClutterColor color;
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_get_background_color( self, &color );
+#else
             clutter_stage_get_color(CLUTTER_STAGE(self),&color);
+#endif
             push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             to_clutter_color(L,2,&color);
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_background_color( self, &color );
+#else
             clutter_stage_set_color(CLUTTER_STAGE(self),&color);
+#endif
         ]];
 */
     table perspective
