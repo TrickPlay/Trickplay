@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Oct 11 14:44:22 2012
+# Created: Thu Oct 18 16:19:28 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,6 +67,9 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.InspectorDock.sizePolicy().hasHeightForWidth())
         self.InspectorDock.setSizePolicy(sizePolicy)
         self.InspectorDock.setMinimumSize(QtCore.QSize(325, 81))
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        self.InspectorDock.setFont(font)
         self.InspectorDock.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.InspectorDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)
         self.InspectorDock.setObjectName(_fromUtf8("InspectorDock"))
