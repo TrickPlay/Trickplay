@@ -94,6 +94,8 @@ private:
 
     void cancel();
 
+    TPContext * context;
+
     //-------------------------------------------------------------------------
     // Path to <resources>/keyboard
 
