@@ -957,11 +957,11 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-void App::stage_allocation_notify( gpointer , gpointer , gpointer screen )
+void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer screen )
 {
     if ( screen )
     {
-        ClutterActor * stage = clutter_stage_get_default();
+        ClutterActor * stage = CLUTTER_ACTOR( the_stage );
 
         gfloat width;
         gfloat height;
@@ -984,7 +984,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     // Get the screen ready for the app
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     g_assert( stage );
 
@@ -1083,7 +1083,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     Util::GTimer t;
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     g_assert( stage );
 
@@ -1104,7 +1104,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     // Call it now to set the screen's initial scale
 
-    stage_allocation_notify( 0 , 0 , screen );
+    stage_allocation_notify( stage , 0 , screen );
 
     secure_lua_state( allowed_names );
 
@@ -1334,7 +1334,7 @@ App::~App()
 
     if ( stage_allocation_handler )
     {
-        g_signal_handler_disconnect( clutter_stage_get_default() , stage_allocation_handler );
+        g_signal_handler_disconnect( context->get_stage() , stage_allocation_handler );
     }
 }
 
@@ -1703,7 +1703,7 @@ void App::animate_in()
         return;
     }
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = get_context()->get_stage();
 
     gfloat width;
     gfloat height;

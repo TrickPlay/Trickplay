@@ -66,8 +66,9 @@ MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor 
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer::MediaPlayer( TPContext * context , Wrapper * w, Delegate * d )
+MediaPlayer::MediaPlayer( TPContext * c , Wrapper * w, Delegate * d )
     :
+    context( c ),
     wrapper( w ),
     state( TP_MEDIAPLAYER_IDLE ),
     queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
@@ -593,7 +594,7 @@ int MediaPlayer::reset_viewport_geometry( )
     gfloat width;
     gfloat height;
 
-    clutter_actor_get_size( clutter_stage_get_default() , & width , & height );
+    clutter_actor_get_size( context->get_stage() , & width , & height );
 
     return set_viewport_geometry( 0 , 0 , width , height );
 }
