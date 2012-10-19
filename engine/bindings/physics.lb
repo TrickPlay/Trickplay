@@ -96,11 +96,11 @@ interface Body [[ ClutterActor * ]]
 /***************************************
 	Property: handle
 
-	The handle property contains an integer value that uniquely identifies the Body/UIElement object. The handle identifier is assigned automatically to the object when the Body is created by the Body() function of the physics global variable. It is referenced in the various collision-detection event handlers, including on_begin_contact() and on_end_contact().
+	The handle property contains an integer value that uniquely identifies the Body/UIElement object. The handle identifier is assigned automatically to the object when the Body is created by the Body() function of the physics global variable. It is referenced in the various collision-detection event handlers, including those for the on_begin_contact and on_end_contact events.
 
 	*Default Setting:* a unique integer value
 
-	*See Also:* the <physics.Body> function and <on_begin_contact> event handler
+	*See Also:* the <physics.Body> function and <on_begin_contact> event
 */
 
 	readonly int handle
@@ -730,7 +730,7 @@ interface Body [[ ClutterActor * ]]
 		end
 		(end)
 
-	*See Also:* the <physics.contacts> and <handle> properties, the <add_fixture> function, and the <on_pre_solve_contact> event handler
+	*See Also:* the <physics.contacts> and <handle> properties, the <add_fixture> function, and the <on_pre_solve_contact> event
 */
 
 	readonly table contacts
@@ -1583,7 +1583,7 @@ interface Body [[ ClutterActor * ]]
 			physics:start( )
 
 			-- Any keypress will push the box down
-			screen.on_key_down = pushBoxDown
+			screen:add_onkeydown_listener( pushBoxDown )
 	(end)
 
 	*See Also:* the <remove_joint> function
@@ -2208,22 +2208,22 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
-		Function: start
+	Function: start
 
-		The start() function begins the physics simulation.
+	The start() function begins the physics simulation.
 
-		*Arguments:*
+	*Arguments:*
 
-			velocity_iterations - optional numeric value specifying the number of iterations to perform to handle a velocity-related collision response. Refer to the discussion below for details. Range: Any positive integer value. Default: 10.
-			position_iterations - optional numeric value specifying the number of iterations to perform to handle a position-related collision response. Refer to the discussion below for details. Range: Any positive integer value. Default: 10;
+		velocity_iterations - optional numeric value specifying the number of iterations to perform to handle a velocity-related collision response. Refer to the discussion below for details. Range: Any positive integer value. Default: 10.
+		position_iterations - optional numeric value specifying the number of iterations to perform to handle a position-related collision response. Refer to the discussion below for details. Range: Any positive integer value. Default: 10;
 
-		The optional velocity_iterations and position_iterations arguments affect the way objects will react when they collide. When object contact is detected, they have usually advanced enough beyond their initial contact so that they overlap. The physics simulation must calculate the most appropriate movement and/or rotation in response to the contact so that the objects no longer overlap. By performing more interations of calculations, a more accurate physics simulation can occur, at the expense, however, of execution performance.
+	The optional velocity_iterations and position_iterations arguments affect the way objects will react when they collide. When object contact is detected, they have usually advanced enough beyond their initial contact so that they overlap. The physics simulation must calculate the most appropriate movement and/or rotation in response to the contact so that the objects no longer overlap. By performing more iterations of calculations, a more accurate physics simulation can occur, at the expense, however, of execution performance.
 
-		*Return Value:* None
+	*Return Value:* None
 
-		At the completion of each time-step, the physics:on_step() event handler is invoked. When contact occurs between Fixture objects, other event handlers will be invoked, such as on_begin_contact() and on_end_contact(). These collision detection events occur while the time-step is in-progress. Changes to objects in the physics simulation can occur only after a time-step has completed, i.e., in the on_step() handler; no changes to physics-enabled objects, including creating or destroying objects, can be performed in the other event handlers which occur while the time-step is in-progress.
+	When contact between Fixture objects occurs, collision-related events fire, such as <on_begin_contact> and <on_end_contact>. The collision events happen while a physics simulation step is in-progress. Modifications to the physics environment are very restricted during a simulation step. Changes to objects in the physics environment, such as creating or destroying objects or modifying their appearance or location, cannot be performed while the simulation step is in-progress; they may occur only "outside" of the step, i.e., after the step has completed. To mark the completion of each simulation step, an <on_step> event occurs. The on_step event is the only physics-related event that takes place outside of the simulation step. Thus, all changes to objects in the physics environment must be performed in a handler hooked into the on_step event. Refer to the <add_onstep_listener> function for additional details.
 
-		*See Also:* the <stop> function and <on_step> and <Body.on_begin_contact> event handlers
+	*See Also:* the <stop> function and <on_step> and <Body.on_begin_contact> events
 */
 
     start( int velocity_iterations = 10, int position_iterations = 10 )
@@ -2283,7 +2283,7 @@ global physics [[ Physics::World * ]]
 
 		The draw_debug() function displays a screen overlay that shows all physical aspects of existing Body, Fixture and Joint objects, including their boundaries. Among other uses, this information can be used to visually determine when the AABB bounding boxes of two Fixtures overlap.
 
-		The draw_debug() function should be invoked in the physics:on_step() event handler.
+		The draw_debug() function should be invoked within an <on_step> event handler.
 
 		*Arguments:*
 
@@ -2291,7 +2291,7 @@ global physics [[ Physics::World * ]]
 
 		*Return Value:* None
 
-		*See Also:* the <on_step> event handler
+		*See Also:* the <on_step> event and <add_onstep_listener> function
 */
 
 	draw_debug( int opacity = 127 )
@@ -3023,4 +3023,5 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
+*/
 }
