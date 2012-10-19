@@ -1707,50 +1707,273 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
-	/*
-		Event Handler: on_begin_contact
+# ------------------------------------------------------------------------------
+#	Event Listeners
 
-		The on_begin_contact() event handler is invoked when the edges of two Fixture objects first touch. Note: Contact occurs between Fixture objects, not Body objects. Also, on_begin_contact() is invoked when the Fixture edges touch or overlap, not when the Fixture AABBs (axis-aligned bounding boxes) touch. For a description of a Fixture's AABB, refer to the discussion in the <physics.contacts> property.
+/***************************************
+	Function: add_onbegincontact_listener
 
-		*Prototype:*
+	The add_onbegincontact_listener() function registers a handler function for <on_begin_contact> events.
 
-			(code)
-			on_begin_contact( self, contact )
-			(end)
+	*Arguments:*
 
-		*Arguments:*
+		f - reference to handler function. The function prototype is described below.
 
-			self - Body object containing the Fixture on which the contact occurred.
-			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_begin_contact() is invoked only when the Fixtures edges touch, the table's touching key will always be true in this handler.
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onbegincontact_listener() function to unregister the handler.
 
-		*Return Value:* None
-
-		When the on_begin_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of the contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
-
-		The on_begin_contact() handler marks the first in a series of collision detection-related events. As part of the same physics simulation step, the on_pre_solve_contact() and on_post_solve_contact() event handlers will be invoked. The simulation step will then complete and invoke the physics.on_step() handler. As long as contact continues, each subsequent simulation step will repeat this series of on_pre_solve_contact/on_post_solve_contact/on_step invocations. Finally, when contact no longer occurs, the on_end_contact() event handler is invoked. The sequence of collision-detection events is shown below. For further details concerning an individual event handler, refer to its documentation.
+	*Handler Prototype:*
 
 		(code)
-		...
-		on_step()
-		on_step()						-- end of simulation step
-		on_begin_contact()				-- two Fixtures touch or overlap
-			on_pre_solve_contact()		-- enables app to ignore this step's collision
-			on_post_solve_contact()		-- if not ignored, response has been calculated and performed
-			on_step()					-- end of simulation step
-										-- if contact continues in next simulation step...
-			on_pre_solve_contact()		-- repeat block of events
-			on_post_solve_contact()
-			on_step()
-
-			... Repeat for each step that contact continues
-
-		on_end_contact()				-- Fixtures no longer touch or overlap
-		on_step()						-- end of simulation step
-		on_step()
-		...
+		f( self, contact )
 		(end)
 
-		*See Also:* the <physics.contacts> property and <on_end_contact> event handler
+	*Handler Arguments:*
+
+		self - Body object containing the Fixture on which the contact occurred.
+		contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because this handler is invoked only when the Fixtures edges touch, the table's touching key will always be true within the handler.
+
+	*Handler Return Value:* None
+
+	When the handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of the contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the <physics.on_step> event. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+	The on_begin_contact event marks the first in a series of collision detection-related events. As part of the same physics simulation step, the on_pre_solve_contact and on_post_solve_contact events also occur. The simulation step will then complete, which generates a physics.on_step event. As long as contact continues, each subsequent simulation step will repeat this series of on_pre_solve_contact/on_post_solve_contact/on_step events. Finally, when contact no longer occurs, the on_end_contact event occurs. The sequence of collision-detection events is shown below. For further details concerning an individual event, refer to its documentation.
+
+	(code)
+	...
+	on_step
+	on_step							-- end of simulation step
+	on_begin_contact				-- two Fixtures touch or overlap
+		on_pre_solve_contact		-- enables app to ignore this step's collision
+		on_post_solve_contact		-- if not ignored, response has been calculated and performed
+		on_step						-- end of simulation step
+									-- if contact continues in next simulation step...
+		on_pre_solve_contact		-- repeat block of events
+		on_post_solve_contact
+		on_step
+
+		... Repeat for each step that contact continues
+
+	on_end_contact					-- Fixtures no longer touch or overlap
+	on_step							-- end of simulation step
+	on_step
+	...
+	(end)
+
+	*See Also:* the <on_begin_contact> event, the <remove_onbegincontact_listener> function and the <physics.contacts> property
+*/
+
+    int add_onbegincontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onbegincontact_listener
+
+	The remove_onbegincontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onbegincontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onbegincontact_listener> function and the <on_begin_contact> event
+*/
+
+    remove_onbegincontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onendcontact_listener
+
+	The add_onendcontact_listener() function registers a handler function for <on_end_contact> events.
+
+	The on_end_contact event occurs when the edges of two Fixture objects no longer touch or overlap. Note: Although the Fixture edges no longer touch, the Fixture AABBs (axis-aligned bounding boxes) may still overlap. For a description of a Fixture's AABB, refer to the discussion in the <physics.contacts> property.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onendcontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( self, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		self - Body object containing the Fixture on which the contact occurred.
+		contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because this handler is invoked only when the Fixtures edges no longer touch, the table's touching key will always be false within the handler.
+
+	*Handler Return Value:* None
+
+		When the handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact ending, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the <physics.on_step> event. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+		For additional details about the collision-detection events, refer to the <add_onbegincontact_listener> function.
+
+		*See Also:* the <on_end_contact> event and <remove_onendcontact_listener> function
+*/
+
+    int add_onendcontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::END_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onendcontact_listener
+
+	The remove_onendcontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onendcontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onendcontact_listener> function and the <on_end_contact> event
+*/
+
+    remove_onendcontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onpresolvecontact_listener
+
+	The add_onpresolvecontact_listener() function registers a handler function for <on_pre_solve_contact> events. The event occurs when the edges of two Fixture objects touch or overlap during a simulation step, but prior to the calculation and response to the contact.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onpresolvecontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( self, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		self - Body object containing the Fixture on which the contact occurred.
+		contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because this handler is invoked only when the Fixtures edges touch, the table's touching key will always be true within the handler.
+
+	*Handler Return Value:* None
+
+	When the handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting, except for those described later in this section. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the <physics.on_step> event. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+	A TrickPlay application can instruct the physics simulation to ignore the contact by setting the enabled key contained in the contact argument to false, as shown below. If the enabled key is set to false, the current simulation step will not calculate or perform any reaction to the contact. This can enable objects to pass through each other, perhaps only under certain conditions, such as allowing objects to pass through a one-way wall. Note: The enabled flag pertains only to the current simulation step. If contact continues in the next step and you wish to ignore it, the enabled flag must be set to false again.
+
+	(code)
+	-- Instruct the physics simulation to ignore this contact for this step
+	contact.enabled = false
+	(end)
+
+	For additional details about the collision-detection events, refer to the <add_onbegincontact_listener> function.
+
+	*See Also:* the <on_pre_solve_contact> event and <remove_onpresolvecontact_listener> function
+	*/
+
+    int add_onpresolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onpresolvecontact_listener
+
+	The remove_onpresolvecontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onpresolvecontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onpresolvecontact_listener> function and the <on_pre_solve_contact> event
+*/
+
+    remove_onpresolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onpostsolvecontact_listener
+
+	The add_onpostsolvecontact_listener function registers a handler function for <on_post_solve_contact> events. The event occurs after calculating and responding to two touching or overlapping Fixture objects.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onpostsolvecontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( self, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		self - Body object containing the Fixture on which the contact occurred.
+		contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property.
+
+	*Handler Return Value:* None
+
+	When the handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the <physics.on_step> event. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
+
+	For additional details about the collision-detection events, refer to the <add_onbegincontact_listener> function.
+
+	*See Also:* the <on_post_solve_contact> event and <remove_onpostsolvecontact_listener> function
+*/
+
+    int add_onpostsolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
+            Physics::Body * me = Physics::Body::get( self );
+            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onpostsolvecontact_listener
+
+	The remove_onpostsolvecontact_listener function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onpostsolvecontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onpostsolvecontact_listener> function and the <on_post_solve_contact> event
+*/
+
+    remove_onpostsolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
+        ]];
+
+/***************************************
+	Event: on_begin_contact
+
+	The on_begin_contact event occurs when the edges of two Fixture objects first touch. Note: Contact occurs between Fixture objects, not Body objects.
+
+	*See Also:* the <add_onbegincontact_listener> function
 */
 
     function on_begin_contact
@@ -1763,44 +1986,13 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , 1 );
         ]];
 
-    int add_onbegincontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
-            Physics::Body * me = Physics::Body::get( self );
-            me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , 1 );
-        ]];
+/***************************************
+	Event: on_end_contact
 
-    remove_onbegincontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
-        ]];
+	The on_end_contact event occurs when the edges of two Fixture objects no longer touch or overlap.
 
-
-
-	/*
-		Event Handler: on_end_contact
-
-		The on_end_contact() event handler is invoked when the edges of two Fixture objects no longer touch or overlap. Note: Contact occurs between Fixture objects, not Body objects. Also, on_end_contact() is invoked when the Fixture edges no longer touch, but the Fixture AABBs (axis-aligned bounding boxes) may still overlap. For a description of a Fixture's AABB, refer to the discussion in the <physics.contacts> property.
-
-		*Prototype:*
-
-			(code)
-			on_end_contact( self, contact )
-			(end)
-
-		*Arguments:*
-
-			self - Body object containing the Fixture on which the contact occurred.
-			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_end_contact() is invoked only when the Fixtures edges no longer touch, the table's touching key will always be false in this handler.
-
-		*Return Value:* None
-
-		When the on_end_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact ending, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
-
-		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
-
-		*See Also:* the <on_begin_contact> event handler
-	*/
+	*See Also:* the <add_onendcontact_listener> function
+*/
 
     function on_end_contact
         [[
@@ -1812,49 +2004,13 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::END_CONTACT , 1 );
         ]];
 
-    int add_onendcontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
-            Physics::Body * me = Physics::Body::get( self );
-            me->world->attach_body_callback( me , Physics::END_CONTACT , 1 );
-        ]];
+/***************************************
+	Event: on_pre_solve_contact
 
-    remove_onendcontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
-        ]];
+	The on_pre_solve_contact event occurs when the edges of two Fixture objects touch or overlap during a simulation step, but prior to performing the calculation and response to the contact.
 
-	/*
-		Event Handler: on_pre_solve_contact
-
-		The on_pre_solve_contact() event handler is invoked when the edges of two Fixture objects touch or overlap during a simulation step, but the calculation and response to the contact has not been performed. Note: Contact occurs between Fixture objects, not Body objects.
-
-		*Prototype:*
-
-			(code)
-			on_pre_solve_contact( self, contact )
-			(end)
-
-		*Arguments:*
-
-			self - Body object containing the Fixture on which the contact occurred.
-			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property. Note: Because on_pre_solve_contact() is invoked only when the Fixtures edges touch, the table's touching key will always be true in this handler.
-
-		*Return Value:* None
-
-		When the on_pre_solve_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting, except for those described later in this section. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
-
-		A TrickPlay application can instruct the physics simulation to ignore the contact by setting the enabled key contained in the contact argument to false, as shown below. If the enabled key is set to false, the current simulation step will not calculate or perform any reaction to the contact. This can enable objects to pass through each other, perhaps only under certain conditions, such as allowing objects to pass through a one-way wall. Note: The enabled flag pertains only to the current simulation step. If contact continues in the next step and you wish to ignore it, the enabled flag must be set to false again.
-
-		(code)
-		-- Instruct the physics simulation to ignore this contact for this step
-		contact.enabled = false
-		(end)
-
-		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
-
-		*See Also:* the <on_begin_contact> and <on_post_solve_contact> event handlers
-	*/
+	*See Also:* the <add_onpresolvecontact_listener> function
+*/
 
     function on_pre_solve_contact
         [[
@@ -1866,42 +2022,13 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , 1 );
         ]];
 
-    int add_onpresolvecontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
-            Physics::Body * me = Physics::Body::get( self );
-            me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , 1 );
-        ]];
+/***************************************
+	Event: on_post_solve_contact
 
-    remove_onpresolvecontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
-        ]];
+	The on_post_solve_contact event occurs after calculating and responding to two touching or overlapping Fixture objects.
 
-	/*
-		Event Handler: on_post_solve_contact
-
-		The on_post_solve_contact() event handler is invoked following the calculation and response to two Fixture objects touching or overlapping during a simulation step. Note: Contact occurs between Fixture objects, not Body objects.
-
-		*Prototype:*
-
-			(code)
-			on_post_solve_contact( self, contact )
-			(end)
-
-		*Arguments:*
-
-			self - Body object containing the Fixture on which the contact occurred.
-			contact - table of key/value pairs containing information about the contact. The table's keys are described in the <physics.contacts> property.
-
-		*Return Value:* None
-
-		When the on_post_solve_contact() handler is invoked, the current physics simulation step is still in-progress, and physics-enabled objects are being processed. Because of this, no change should be made that alters any physics-enabled object's location, appearance or physics-related setting. Nor should any physics-enabled object be destroyed or created in this handler. If you wish to alter an object as a result of contact, you should set up the desired operation (for example, by setting a flag) and then perform the operation when the current physics simulation step has completed, which is signaled by the invocation of the <physics.on_step> event handler. Note: The physics engine calculates and performs the necessary physics-related reaction and movement concerning a collision between two objects; it is not necessary for a TrickPlay application to do these tasks itself.
-
-		For additional details about the collision-detection event handlers, refer to the <on_begin_contact> event handler.
-
-		*See Also:* the <on_begin_contact> and <on_pre_solve_contact> event handlers
-	*/
+	*See Also:* the <add_onpostsolvecontact_listener> function
+*/
 
     function on_post_solve_contact
         [[
@@ -1913,17 +2040,6 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , 1 );
         ]];
 
-    int add_onpostsolvecontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
-            Physics::Body * me = Physics::Body::get( self );
-            me->world->attach_body_callback( me , Physics::POST_SOLVE_CONTACT , 1 );
-        ]];
-
-    remove_onpostsolvecontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
-        ]];
 }
 
 /*===========================================================================*/
@@ -2061,14 +2177,14 @@ global physics [[ Physics::World * ]]
 	Each table entry is a key/value pair. The supported keys are described below.
 
 		enabled - boolean flag specifying whether or not the contact is enabled. Default: true, i.e., contact is enabled. The enabled flag can be set only when processing an <on_pre_solve_contact> event.
-		touching - boolean flag specifying whether or not the Fixture object's edges touch. If the touching key is true, the edges touch; if false, the axis-aligned bounding boxes of the objects touch. Note: When edges first touch, the <on_begin_contact> event handler is invoked.
+		touching - boolean flag specifying whether or not the Fixture object's edges touch. If the touching key is true, the edges touch; if false, the axis-aligned bounding boxes of the objects touch. Note: When edges first touch, the <on_begin_contact> event is generated.
 		point - when the touching key is true, the point key contains a table of { X, Y } screen coordinates that reference where the contact occurs. When the touching key is false, the value of the point key is undefined.
 		fixtures - table containing the handles of the two Fixture objects. For example, if Fixture handles 12 and 24 are in contact, the fixtures table would contain {12,24}.
 		other_fixture - additional table containing the handles of the two Fixture objects, indexed by handle value. For example, if Fixture handles 12 and 24 are in contact, referencing contacts.other_fixtures[ 12 ] returns 24, and contacts.other_fixtures[ 24 ] returns 12; all other indices are nil.
 		bodies - table containing the handles of the two Body objects on which the contacting Fixtures are attached. For example, if Body handles 36 and 48 are in contact, the bodies table would contain {36,48}.
 		other_body - additional table containing the handles of the two Body objects, indexed by handle value. For example, if Body handles 36 and 48 are in contact, referencing contacts.other_body[ 36 ] returns 48, and contacts.other_body[ 48 ] returns 36; all other indices are nil.
 
-	*See Also:* the <on_begin_contact> event handler
+	*See Also:* the <on_begin_contact> event
 */
 
     readonly table contacts
@@ -2547,23 +2663,279 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
-		Event Handler: on_step
+	Function: add_onstep_listener
 
-		The on_step() event handler is invoked at the completion of each physics simulation time-step. Any changes to physics-enabled objects, such as modifying their properties, creating new objects or destroying existing objects, can be performed in this handler. In fact, such changes should be performed in this handler only and not in the other physics-related event handlers, such as on_begin_contact() or on_end_contact(). For a complete discussion of physics-related event handlers and the order in which they occur, refer to the <Body.on_begin_contact> handler.
+	The add_onstep_listener() registers a handler function for <on_step> events. The event occurs at the completion of each physics simulation time-step.
 
-		*Prototype:*
+	*Arguments:*
 
-			(code)
-			on_step( double seconds )
-			(end)
+		f - reference to handler function. The function prototype is described below.
 
-		*Arguments:*
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onstep_listener() function to unregister the handler.
 
-			seconds - fractional number of seconds since the last invocation of the on_step() handler. The physics simulation time-step is configured to perform a maximum of 1/60 second (0.016667 second). The seconds argument value will be a minimum of 1/60 (0.016667), but will commonly be larger.
+	*Handler Prototype:*
 
-		*Return Value:* None
+		(code)
+		f( double seconds )
+		(end)
 
-		*See Also:* the <Body.on_begin_contact> event handler
+	*Handler Arguments:*
+
+		seconds - fractional number of seconds since the last on_step event. The physics simulation time-step is configured to perform a maximum of 1/60 second (0.016667 second). The seconds argument value will be a minimum of 1/60 (0.016667), but will commonly be larger.
+
+	*Handler Return Value:* None
+
+	Any changes to physics-enabled objects, such as modifying their properties, creating new objects or destroying existing objects, can be performed in the handler. In fact, such changes should be performed in the handler only and not in the other physics-related handlers, such as those registered for on_begin_contact or on_end_contact events. For a complete discussion of physics-related event handlers and the order in which they occur, refer to the <Body.add_onbegincontact_listener> handler.
+
+	*See Also:* the <Body.add_onbegincontact_listener> function and the <on_step> event
+*/
+
+    int add_onstep_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_step" , L );
+        ]];
+
+/***************************************
+	Function: remove_onstep_listener
+
+	The remove_onstep_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onstep_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onstep_listener> function and the <on_step> event
+*/
+
+    remove_onstep_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_step" , L );
+        ]];
+
+/***************************************
+	Function: add_onbegincontact_listener
+
+	The add_onbegincontact_listener() function registers a handler function for <on_begin_contact> events. The event occurs when the edges of two Fixture objects first touch.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onbegincontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( physics, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		physics - reference to the physics global variable
+		contact - table of key/value pairs containing information about the contact. Refer to the <Body.add_onbegincontact_listener> handler for further details.
+
+	*Handler Return Value:* None
+
+	This handler is related to the <Body.add_onbegincontact_listener> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.add_onbegincontact_listener> description for additional information.
+
+	*See Also:* the <remove_onbegincontact_listener> function and the <on_begin_contact> event
+*/
+
+    int add_onbegincontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
+            self->attach_global_callback( Physics::BEGIN_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onbegincontact_listener
+
+	The remove_onbegincontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onbegincontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onbegincontact_listener> function and the <on_begin_contact> event
+*/
+
+    remove_onbegincontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onendcontact_listener
+
+	The add_onendcontact_listener() function registers a handler function for <on_end_contact> events. The event occurs when the edges of two Fixture objects no longer touch or overlap.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onendcontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( physics, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		physics - reference to the physics global variable
+		contact - table of key/value pairs containing information about the contact. Refer to the <Body.add_onendcontact_listener> function for further details.
+
+	*Handler Return Value:* None
+
+	This handler is related to the <Body.add_onendcontact_listener> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.add_onendcontact_listener> description for additional information.
+
+	*See Also:* the <remove_onendcontact_listener> function and the <on_end_contact> event
+*/
+
+    int add_onendcontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
+            self->attach_global_callback( Physics::END_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onendcontact_listener
+
+	The remove_onendcontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onendcontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onendcontact_listener> function and the <on_end_contact> event
+*/
+
+    remove_onendcontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onpresolvecontact_listener
+
+	The add_onpresolvecontact_listener() function registers a handler function for <on_pre_solve_contact> events. The event occurs when the edges of two Fixture objects touch or overlap during a simulation step, but the calculation and response to the contact has not yet been performed.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onpresolvecontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( physics, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		physics - reference to the physics global variable
+		contact - table of key/value pairs containing information about the contact. Refer to the <Body.add_onpresolvecontact_listener> function for further details.
+
+	*Handler Return Value:* None
+
+	This handler is related to the <Body.add_onpresolvecontact_listener> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.add_onpresolvecontact_listener> description for additional information.
+
+	*See Also:* the <remove_onpresolvecontact_listener> function and the <on_pre_solve_contact> event
+*/
+
+    int add_onpresolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
+            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onpresolvecontact_listener
+
+	The remove_onpresolvecontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onpresolvecontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onpresolvecontact_listener> function and the <on_pre_solve_contact> event
+*/
+
+    remove_onpresolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
+        ]];
+
+/***************************************
+	Function: add_onpostsolvecontact_listener
+
+	The add_onpostsolvecontact_listener() function registers a handler function for <on_post_solve_contact> events. The event occurs after calculating and responding to two touching or overlapping Fixture objects.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the remove_onpostsolvecontact_listener() function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( physics, contact )
+		(end)
+
+	*Handler Arguments:*
+
+		physics - reference to the physics global variable
+		contact - table of key/value pairs containing information about the contact. Refer to the <Body.add_onpostsolvecontact_listener> function for further details.
+
+	*Handler Return Value:* None
+
+	This handler is related to the <Body.add_onpostsolvecontact_listener> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.add_onpostsolvecontact_listener> description for additional information.
+
+	*See Also:* the <remove_onpostsolvecontact_listener> function and the <on_post_solve_contact> event
+*/
+
+    int add_onpostsolvecontact_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
+            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , 1 );
+        ]];
+
+/***************************************
+	Function: remove_onpostsolvecontact_listener
+
+	The remove_onpostsolvecontact_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onpostsolvecontact_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onpostsolvecontact_listener> function and the <on_post_solve_contact> event
+*/
+
+    remove_onpostsolvecontact_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
+        ]];
+
+/***************************************
+	Event: on_step
+
+	The on_step event occurs at the completion of each physics simulation time-step.
+
+	*See Also:* the <add_onstep_listener> function
 */
 
     function on_step
@@ -2575,44 +2947,13 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
+	Event: on_begin_contact
 
-*/
+	The on_begin_contact event occurs when the edges of two Fixture objects first touch. This event is related to the <Body.on_begin_contact> event, but it occurs for every detected collision in the physics environment, not just for a particular Body/Fixture.
 
-    int add_onstep_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_step" , L );
-        ]];
+	Note: Any registered Body.on_begin_contact handlers are invoked prior to the physics.on_begin_contact versions.
 
-/***************************************
-
-*/
-
-    remove_onstep_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_step" , L );
-        ]];
-
-/***************************************
-		Event Handler: on_begin_contact
-
-		The on_begin_contact() event handler is invoked when the edges of two Fixture objects first touch. This event handler is identical to the <Body.on_begin_contact> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.on_begin_contact> description for additional information.
-
-		Note: The Body.on_begin_contact() handler is invoked prior to the physics.on_begin_contact() version.
-
-		*Prototype:*
-
-			(code)
-			on_begin_contact( physics, contact )
-			(end)
-
-		*Arguments:*
-
-			physics - reference to the physics global variable
-			contact - table of key/value pairs containing information about the contact. Refer to the <Body.on_begin_contact> handler for further details.
-
-		*Return Value:* None
-
-		*See Also:* the <Body.on_begin_contact> and <on_end_contact> event handlers
+	*See Also:* the <add_onbegincontact_listener> and <Body.add_onbegincontact_listener> functions
 */
 
     function on_begin_contact
@@ -2625,45 +2966,13 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
+	Event: on_end_contact
 
-*/
+	The on_end_contact event occurs when the edges of two Fixture objects no longer touch or overlap. This event is related to the <Body.on_end_contact> event, but it occurs for every detected collision in the physics environment, not just for a particular Body/Fixture.
 
-    int add_onbegincontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_begin_contact" , L );
-            self->attach_global_callback( Physics::BEGIN_CONTACT , 1 );
-        ]];
+	Note: Any registered Body.on_end_contact handlers are invoked prior to the physics.on_end_contact versions.
 
-/***************************************
-
-*/
-
-    remove_onbegincontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_begin_contact" , L );
-        ]];
-
-/***************************************
-		Event Handler: on_end_contact
-
-		The on_end_contact() event handler is invoked when the edges of two Fixture objects no longer touch or overlap. This event handler is identical to the <Body.on_end_contact> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.on_end_contact> description for additional information.
-
-		Note: The Body.on_end_contact() handler is invoked prior to the physics.on_end_contact() version.
-
-		*Prototype:*
-
-			(code)
-			on_end_contact( physics, contact )
-			(end)
-
-		*Arguments:*
-
-			physics - reference to the physics global variable
-			contact - table of key/value pairs containing information about the contact. Refer to the <Body.on_end_contact> handler for further details.
-
-		*Return Value:* None
-
-		*See Also:* the <Body.on_begin_contact>, <Body.on_end_contact> and <on_begin_contact> event handlers
+	*See Also:* the <add_onendcontact_listener> and <Body.add_onbegincontact_listener> functions
 */
 
     function on_end_contact
@@ -2676,45 +2985,13 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
+	Event: on_pre_solve_contact
 
-*/
+	The on_pre_solve_contact event occurs when the edges of two Fixture objects touch or overlap during a simulation step, but prior to performing the calculation and response to the contact. This event is related to the <Body.on_pre_solve_contact> event, but it occurs for every detected collision in the physics environment, not just for a particular Body/Fixture.
 
-    int add_onendcontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_end_contact" , L );
-            self->attach_global_callback( Physics::END_CONTACT , 1 );
-        ]];
+	Note: Any registered Body.on_pre_solve_contact handlers are invoked prior to the physics.on_pre_solve_contact versions.
 
-/***************************************
-
-*/
-
-    remove_onendcontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_end_contact" , L );
-        ]];
-
-/***************************************
-		Event Handler: on_pre_solve_contact
-
-		The on_pre_solve_contact() event handler is invoked when the edges of two Fixture objects touch or overlap during a simulation step, but the calculation and response to the contact has not yet been performed. This event handler is identical to the <Body.on_pre_solve_contact> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.on_pre_solve_contact> description for additional information.
-
-		Note: The Body.on_pre_solve_contact() handler is invoked prior to the physics.on_pre_solve_contact() version.
-
-		*Prototype:*
-
-			(code)
-			on_pre_solve_contact( physics, contact )
-			(end)
-
-		*Arguments:*
-
-			physics - reference to the physics global variable
-			contact - table of key/value pairs containing information about the contact. Refer to the <Body.on_pre_solve_contact> handler for further details.
-
-		*Return Value:* None
-
-		*See Also:* the <Body.on_begin_contact> and <Body.on_pre_solve_contact> event handlers
+	*See Also:* the <add_onpresolvecontact_listener> and <Body.add_onbegincontact_listener> functions
 */
 
     function on_pre_solve_contact
@@ -2727,45 +3004,13 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
+	Event: on_post_solve_contact
 
-*/
+	The on_post_solve_contact event occurs after calculating and responding to two touching or overlapping Fixture objects. This event is related to the <Body.on_post_solve_contact> event, but it occurs for every detected collision in the physics environment, not just for a particular Body/Fixture.
 
-    int add_onpresolvecontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_pre_solve_contact" , L );
-            self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , 1 );
-        ]];
+	Note: Any registered Body.on_post_solve_contact handlers are invoked prior to the physics.on_post_solve_contact versions.
 
-/***************************************
-
-*/
-
-    remove_onpresolvecontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_pre_solve_contact" , L );
-        ]];
-
-/***************************************
-		Event Handler: on_post_solve_contact
-
-		The on_post_solve_contact() event handler is invoked when the edges of two Fixture objects touch or overlap during a simulation step, and the calculation and response to the contact have been performed. This event handler is identical to the <Body.on_post_solve_contact> handler, except the self argument in this version references the physics global variable, rather than a Body object. Also, this event occurs for every detected collision in the physics environment, not just for a particular Body/Fixture. Refer to the <Body.on_post_solve_contact> description for additional information.
-
-		Note: The Body.on_post_solve_contact() handler is invoked prior to the physics.on_post_solve_contact() version.
-
-		*Prototype:*
-
-			(code)
-			on_post_solve_contact( physics, contact )
-			(end)
-
-		*Arguments:*
-
-			physics - reference to the physics global variable
-			contact - table of key/value pairs containing information about the contact. Refer to the <Body.on_post_solve_contact> handler for further details.
-
-		*Return Value:* None
-
-		*See Also:* the <Body.on_begin_contact> and <Body.on_post_solve_contact> event handlers
+	*See Also:* the <add_onpostsolvecontact_listener> and <Body.add_onbegincontact_listener> functions
 */
 
     function on_post_solve_contact
@@ -2778,22 +3023,4 @@ global physics [[ Physics::World * ]]
         ]];
 
 /***************************************
-
-*/
-
-    int add_onpostsolvecontact_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_post_solve_contact" , L );
-            self->attach_global_callback( Physics::POST_SOLVE_CONTACT , 1 );
-        ]];
-
-/***************************************
-
-*/
-
-    remove_onpostsolvecontact_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_post_solve_contact" , L );
-        ]];
-
 }
