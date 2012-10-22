@@ -495,7 +495,7 @@ class TrickplayInspector(QWidget):
         self.ui.property.setIndentation(10)
         
         self.itemWidget = None
-        self.selectedItemCount = 0
+        self.selectedItemCount = 1
 
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
@@ -669,7 +669,6 @@ class TrickplayInspector(QWidget):
         """
         Select a row of the inspector model (as the result of a search)
         """
-        
         topLeft = item.index()
         bottomRight = item.partner().index()
         
@@ -1352,7 +1351,6 @@ class TrickplayInspector(QWidget):
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
-                str(selItem.TPJSON()['name'])
                 self.selectedItemCount += 1
             except:
                 pass
@@ -1360,10 +1358,11 @@ class TrickplayInspector(QWidget):
         for deselIdx in deselectedList : 
             deselItem = self.inspectorModel.itemFromIndex(deselIdx)
             try :
-                str(deselItem.TPJSON()['name'])
                 self.selectedItemCount -= 1
             except:
                 pass
+
+        #print self.selectedItemCount / 2
 
         if self.selectedItemCount / 2 > 1 :
             multiSelect = 'true'
@@ -1445,12 +1444,12 @@ class TrickplayInspector(QWidget):
                     self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
 
-                    if multiSelect == "true":
-                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
-                        self.ui.property.clear()
-                    else :
-                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
-                        self.propertyFill(self.curData)
+                if multiSelect == "true":
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
+                    self.ui.property.clear()
+                else :
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                    self.propertyFill(self.curData)
 
             
             self.preventChanges = False
