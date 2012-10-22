@@ -5,26 +5,28 @@ module nineslice;
 #include "clutter_util.h"
 #include "util.h"
 #include "nineslice.h"
+
+#include "sprite_sheet.lb.h"
 ]]
 
     /*
         Class: NineSlice
         
-        The NineSlice class will draw a grid of up to nine sprites from a spritesheet behind an object. The effect will adapt to fit the object's bounding box by stretching or tiling the center images on both axes.
+        The NineSlice class will draw a grid of up to nine sprites from a spritesheet as if they were one fluid image. Instead of simply stretching, the object will adapt to different sizes by stretching or tiling the center sprites on both axes, leaving the corners unchanged.
         
         An example constructor is shown below.
         
         (code)
-        buttonEffect = NineSlice {
+        button = NineSlice {
             sheet = SpriteSheet { map = "button.json" },
             tile = { true, true },
-            ids = { "button-nw.png", "button-n.png",  "button-ne.png",
-                    "button-w.png",  "button-c.png",  "button-e.png",
-                    "button-sw.png", "button-s.png",  "button-se.png" }
+            ids = { nw = "button-nw.png", n = "button-n.png", ne = "button-ne.png",
+                    w  = "button-w.png",  c = "button-c.png", e  = "button-e.png",
+                    sw = "button-sw.png", s = "button-s.png", se = "button-se.png" }
         }
         (end)
         
-        Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table, { NW, N, NE, W, C, E, SW, S, SE }, is shown below.
+        Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table is shown below.
         
         (see NineSliceCompass.png)
         
@@ -33,22 +35,22 @@ module nineslice;
         (code)
         -- change the spritesheet from which the sprites are pulled
         
-        buttonEffect.sheet = SpriteSheet { map = "button-focus.json" }
-        buttonEffect.tile = { true, false }
+        button.sheet = SpriteSheet { map = "button-focus.json" }
+        button.tile = { true, false }
         
-        -- animate the opacity of an effect
+        -- animate the opacity of an NineSlice
         
         aState = AnimationState {
             transitions = {
                 {
                     source = "*", target = "hide",
-                    keys = { { buttonEffect, "opacity", 0 } }
+                    keys = { { button, "opacity", 0 } }
                 },
             }
         }
         (end)
         
-        *Code Example:* The effect is applied by adding it to a UIElement.
+        *Code Example:* Creating a NineSlice sized to fit around a UIElement.
         
         (code)
         uiSheet = SpriteSheet { map = "ui.json" }
@@ -58,7 +60,7 @@ module nineslice;
         
         box = NineSlice {
             sheet = uiSheet,
-            ids = { "box-left-edge.png", "box-middle.png",  "box-right-edge.png" }
+            ids = { nw = "box-left-edge.png", n = "box-middle.png", nw = "box-right-edge.png" }
         }
         left, right = table.unpack( box.borders )
         text = Text { x = left, text = "Text Button!" }
@@ -70,9 +72,9 @@ module nineslice;
         button = NineSlice {
             sheet = uiSheet,
             opacity = 255,
-            ids = { "button-nw.png", "button-n.png",  "button-ne.png",
-                    "button-w.png",  "button-c.png",  "button-e.png",
-                    "button-sw.png", "button-s.png",  "button-se.png" }
+            ids = { nw = "button-nw.png", n = "button-n.png", ne = "button-ne.png",
+                    w  = "button-w.png",  c = "button-c.png", e  = "button-e.png",
+                    sw = "button-sw.png", s = "button-s.png", se = "button-se.png" }
         }
         
         -- create an image inside of a group with enough padding for the borders of the effect to nicely enclose the image
@@ -83,6 +85,8 @@ module nineslice;
         
         imgButton = Group { children = { button, image } }
         (end)
+    
+        In addition to the properties and functions described on this page, the Image data type also supports all the properties and functions defined in the <UIElement> interface.
     */
 
 [[
@@ -105,7 +109,7 @@ class NineSlice [[ClutterActor*]] actor
         
         *Arguments:*
         
-        props - table defining the effect's properties
+        props - table defining the object's properties
         
         *Return Value:* new NineSlice object
     */
@@ -138,7 +142,7 @@ class NineSlice [[ClutterActor*]] actor
         
         The sheet property is a <SpriteSheet> object specifying where to pull sprites from, based on the ids provided at construction.
         
-        If the spritesheet is changed, the ids will be reevaluated. If a sheet lacks some or all of the ids, those ids will not be drawn.
+        If the sheet is changed, the ids will be reevaluated. If a sheet lacks some or all of the ids, those ids will not be drawn.
         
         *See Also:* the <ids> property
     */
@@ -153,6 +157,7 @@ class NineSlice [[ClutterActor*]] actor
                 lua_pushnil( L );
         ]]
         [[
+            /*
             lua_getfield( L, LUA_REGISTRYINDEX, "SPRITESHEET_METATABLE" );
             gboolean is_spritesheet = lua_getmetatable( L, 2 );
             if ( !is_spritesheet )
@@ -162,12 +167,12 @@ class NineSlice [[ClutterActor*]] actor
                 is_spritesheet = lua_rawequal( L, -1, -2 );
                 lua_pop( L, 2 );
             }
-            
-            if ( is_spritesheet )
+            */
+            if ( SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 ) ) //is_spritesheet )
             {
                 
-                SpriteSheet * old_sheet,
-                            * new_sheet;
+                SpriteSheet * old_sheet;//,
+                            //* new_sheet;
                 int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ) , "tp-sheet-ref" );
                 
                 if ( sheet_ref )
@@ -177,7 +182,7 @@ class NineSlice [[ClutterActor*]] actor
                     lua_pop( L, 1 );
                 }
                 
-                new_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
+                //new_sheet = (SpriteSheet *) UserData::get_client( L, -1 );
                 
                 if ( old_sheet != new_sheet )
                 {
@@ -211,11 +216,21 @@ class NineSlice [[ClutterActor*]] actor
     /*
         Property: ids
         
-        The ids property is a table containing the string ids of the nine sprites used by the effect, in the order { NW, N, NE, W, C, E, SW, S, SE }.
+        The ids property is a table containing the string ids of the nine sprites used by the NineSlice.
         
-        Some of the ids may be nil or not applicable to the current spritesheet, in which case they will not be drawn.
+        nw - top left
+        n - top center, adjusts horizontally
+        ne - top right
+        w - middle left, adjusts vertically
+        c - center, adjusts both directions
+        e - middle right, adjusts vertically
+        sw - bottom left
+        s - bottom center, adjusts horizontally
+        se - bottom right
         
-        If the spritesheet is changed, the ids will be reevaluated.
+        Some of the ids may be nil or not applicable to the current spritesheet, in which case they will not be drawn. For example, a 3-slice button can be created by providing just the top three positions with left-cap, middle, and right-cap sprites, and leaving the rest blank.
+        
+        If the sheet property is changed, the ids will be reevaluated.
         
         *See Also:* the <sheet> property
     */
@@ -267,7 +282,7 @@ class NineSlice [[ClutterActor*]] actor
         
         The tile property is a table containing six boolean values specifying whether sprites should tile horizontally and/or vertically instead of stretching.
         
-        In order to matche the dimensions of the target object's bounding box, the center sprites (N, S, W, E, and C) must be either stretched or tiled.
+        In order to match the dimensions of the target object's bounding box, the center sprites (N, S, W, E, and C) must be either stretched or tiled.
         
         tile[1] - C tile horizontally
         tile[2] - C tile vertically

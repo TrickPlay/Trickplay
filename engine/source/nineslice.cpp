@@ -95,6 +95,8 @@ static void nineslice_effect_reevaluate( NineSliceEffect * effect )
     {
       cogl_handle_unref( priv->material[i] );
       priv->material[i] = NULL;
+      priv->w[i] = 0;
+      priv->h[i] = 0;
     }
     
     if ( ready && priv->ids[i] )
