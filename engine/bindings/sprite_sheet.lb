@@ -211,7 +211,7 @@ int download_map( App * app , AppResource resource , char ** contents )
         }
 
         guint8 null = '\0';
-        *contents = strdup( (char*) g_byte_array_append( response.body, &null , 1 )->data );
+        *contents = g_strdup( (char*) g_byte_array_append( response.body, &null , 1 )->data );
     }
     else if ( resource.is_native() )
     {
