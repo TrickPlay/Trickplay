@@ -383,12 +383,6 @@ void Sprite_Sheet_on_loaded(GObject * extra , gpointer error , lua_State * L );
     In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in the texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
     
     (code)
-    
-    (end)
-    
-    And the map is .
-    
-    (code)
     // assets.json
     {
         "sprites": [
@@ -406,15 +400,14 @@ void Sprite_Sheet_on_loaded(GObject * extra , gpointer error , lua_State * L );
             { x = 0, y = 0, w = 16, h = 16, id = "sprite-1.png" },
             { x = 16, y = 0, w = 16, h = 16, id = "subfolder/sprite-2.png" },
             ...
-        },
-        imge = "assets.png"
-    }}
+        }
+    }, img = Bitmap{ src = "assets.png" } }
     (end)
     
-    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheet textures are usually generated from seperate source images, using a path name as if the SpriteSheet is actually a folder of images is often clearer. By default, the SpriteSheet will load the image named by the "img" property in the .json file. This can be overridden by passing a different image along with the map to the SpriteSheet constructor, as below.
+    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheet textures are usually generated from seperate source images, using a path name as if the SpriteSheet is actually a folder of images is often clearer. By default, the SpriteSheet will load the image named by the "img" property in the .json file. This can be overridden by passing a different image along with the map to the SpriteSheet constructor, as below. If map is a Lua table, passing a <Bitmap> to img is required.
     
     (code)
-    sheet = SpriteSheet { map = "assets.json", img = "other-assets.png" }
+    sheet = SpriteSheet { map = "assets.json", img = Bitmap{ src = "assets.png" } }
     (end)
     
     What if the app needs to download its assets from a URL? The SpriteSheet can take URI paths as well as local paths, and load its map and texture asynchronously.
@@ -441,7 +434,7 @@ class SpriteSheet [[SpriteSheet*]]
         *Properties:*
         
         map - Lua table or path to a .json file of sprite definitions
-        [img] - override souce image path
+        [img] - Bitmap to load from. This is required if map is a Lua table, or a .json file with no "img" property
         [async] - load remote URIs asynchronously
         
         *Return Value:* new NineSlice object
