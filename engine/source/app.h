@@ -347,6 +347,7 @@ private:
     ClutterActor *          screen;
     LaunchInfo              launch;
     gulong                  stage_allocation_handler;
+    guint                   lua_gc_func;
     StringMap				globals;
 
 #ifndef TP_PRODUCTION
