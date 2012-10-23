@@ -1177,7 +1177,8 @@ class TrickplayInspector(QWidget):
 
         self.ui.property.addTopLevelItems(items)
 
-        if self.neighbors :
+        #if self.neighbors :
+        if neighbors_n > 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(neighbors_n), 1, self.neighbors)
             #self.ui.property.itemWidget(self.ui.property.topLevelItem(neighbors_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
 
@@ -1362,8 +1363,6 @@ class TrickplayInspector(QWidget):
             except:
                 pass
 
-        #print self.selectedItemCount / 2
-
         if self.selectedItemCount / 2 > 1 :
             multiSelect = 'true'
         else :
@@ -1391,6 +1390,7 @@ class TrickplayInspector(QWidget):
                 pass
             
         self.ui.screenCombo.setEditable (False)
+
 
         if not self.preventChanges:
             #print "selectionChanged..................."
