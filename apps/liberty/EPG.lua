@@ -129,7 +129,7 @@ end
 local animating_back_to_prev_menu = false
 local keypresses = {
     [keys.Up] = function()
-        if show_grid.is_animating then return end
+        if #channel_list == 0 or show_grid.is_animating then return end
         show_grid:animate{
             duration = 200,
             y = heading_h+row_h,
@@ -178,7 +178,7 @@ local keypresses = {
         rows[middle_row].icon:animate{ duration = 200, y = row_h/2, }
     end,
     [keys.Down] = function()
-        if show_grid.is_animating then return end
+        if #channel_list == 0 or show_grid.is_animating then return end
         show_grid:animate{
             duration = 200,
             y = heading_h-row_h,
