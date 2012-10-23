@@ -7,11 +7,15 @@ local function load_resources()
     hidden_group:hide()
     local bground = Image { name = "background_img", src = "assets/horizon/top-bg.png" }
     local beam = Image { name = "beam_img", src = "assets/horizon/beam.png" }
-    local horizon1 = Image { name = "horizon1_img", src = "assets/horizon/1.png" }
-    local horizon2 = Image { name = "horizon2_img", src = "assets/horizon/2.png" }
-    local horizon3 = Image { name = "horizon3_img", src = "assets/horizon/3.png" }
-    local horizon4 = Image { name = "horizon4_img", src = "assets/horizon/4.png" }
-    hidden_group:add(bground, beam, horizon1, horizon2, horizon3, horizon4)
+    local horizonbulb = Image { name = "horizonbulb", src = "assets/floor-glow_02.png" }
+    local horizonline = Image { name = "horizonline", src = "assets/floor-horizon_02.png" }
+    local horizonbacking = Image { 
+        name = "horizonbacking", 
+        src  = "assets/floor-horizon-bg_02.png",
+        tile = {true,false},
+        w    = screen_w 
+    }
+    hidden_group:add(bground, beam, horizonbulb, horizonline, horizonbacking)
 end
 
 local function make_light_bubble(size)
@@ -121,7 +125,7 @@ local function make_zoom_zoom(group)
     canvas:arc(36, 54, 9, 0, 360)
     canvas:fill()
 
-    canvas:set_source_color("40408020")
+    canvas:set_source_color("00000000")
     canvas:move_to(0,0)
     canvas:line_to(0,INTERVAL*2)
     canvas:line_to(INTERVAL, INTERVAL*2)
@@ -136,7 +140,7 @@ local function make_zoom_zoom(group)
     c_image:lower_to_bottom()
     
     c_image:animate{
-        duration = 300,
+        duration = 1000,
         loop = true,
         z = INTERVAL*2,
     }
@@ -171,8 +175,10 @@ local function make_backdrop()
     load_resources()
 
     local backdrop_group = Group { name = "backdrop" }
-
-    backdrop_group:add(Clone{ name = "background", source = screen:find_child("background_img")})
+    local bd = Clone{ name = "background"}--, source = screen:find_child("background_img")}
+    backdrop_group:add(bd)
+    local h = bd.h
+    bd.h = 700
     --local bubbles_and_beams = Group { name = "bubbles_and_beams" }
     --bubbles_and_beams.clip = { 0, 0, screen:find_child("background_img").w, screen:find_child("background_img").h }
 
@@ -184,27 +190,38 @@ local function make_backdrop()
 --]]
     --backdrop_group:add(bubbles_and_beams)
 
-    local zoom_group = Group { name = "zoom field" }
-    screen:add(zoom_group)
+    local zoom_group = Group { name = "zoom field",y = 400 }
+    local zoom_clip = Group { name = "zoom clip",clip={0,700,screen_w,screen_h-400} }
+    zoom_clip:add(zoom_group)
+    --screen:add(zoom_clip)
 
     backdrop_group.cycle_left, backdrop_group.cycle_right = 
         make_zoom_zoom(zoom_group)
 
     local horizon = Group { name = "horizon" }
-    local h1 = Clone { name = "horizon1", source = screen:find_child("horizon1_img") }
-    h1.anchor_point = { 0, h1.h/2 }
-    local h2 = Clone { name = "horizon2", source = screen:find_child("horizon2_img") }
-    h2.anchor_point = { 0, h2.h/2 }
-    local h3 = Clone { name = "horizon3", source = screen:find_child("horizon3_img") }
-    h3.anchor_point = { 0, h3.h/2 }
-    local h4 = Clone { name = "horizon4", source = screen:find_child("horizon4_img") }
-    h4.anchor_point = { 0, h4.h/2 }
-    horizon:add(h1,h2,h3,h4)
+    local horizonbacking = Clone { name = "horizonbacking", source = screen:find_child("horizonbacking"), h = screen_h+100*1080/720 }
+    local hb = Clone { name = "horizonbulb", source = screen:find_child("horizonbulb"), x = screen_w/2 }
+    hb.w = hb.w*1080/720
+    hb.h = hb.h*1080/720
+    hb.anchor_point = { hb.w/2, hb.h/2 }
+    local hl = Clone { name = "horizonline", source = screen:find_child("horizonline"), x = screen_w/2, w = screen_w }
+    hl.h = hl.h*2
+    hl.anchor_point = { hl.w/2, hl.h/2 }
+    horizon:add(hl,hb)
 
-    horizon.y = screen:find_child("background_img").h
+    horizon.y = bd.h--screen:find_child("background_img").h
 
-    zoom_group:add(horizon)
-
+    backdrop_group:add(zoom_clip,horizonbacking,horizon)
+    
+    function backdrop_group:set_horizon(y)
+        horizon:animate{duration=300,y=y}
+        bd:animate{duration=300,h=y}
+        zoom_clip:animate{duration=300,y=y-700}
+    end
+    function backdrop_group:set_bulb_x(x)
+        hb:animate{duration=300,x=x}
+    end
+    
     return backdrop_group
 end
 
