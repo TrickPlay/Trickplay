@@ -1,7 +1,7 @@
 
 Title: TrickPlay SDK Engine Reference
 
-The TrickPlay SDK Engine Reference contains complete details of every class, property, function and event handler provided by the TrickPlay SDK libraries.
+The TrickPlay SDK Engine Reference contains complete details of every class, property, function and event provided by the TrickPlay SDK libraries.
 
 If you are unacquainted with the TrickPlay SDK, it is recommended that you begin with the <TrickPlay SDK Tutorial>. Afterward, you will ready to understand and use the information described in the Engine Reference.
 
