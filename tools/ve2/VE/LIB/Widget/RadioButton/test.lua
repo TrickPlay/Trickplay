@@ -60,7 +60,6 @@ local rbg_tests = {
         
         return b1.group == b2.group and b1.group.name == "Radio"and b2.group.name == "Radio"
         
-
     end,
     function() -- checks an RBG performs mutex toggling
         
@@ -313,8 +312,7 @@ b2 = WL.RadioButton{ label="b2",reactive = true,  x = 1600,         }
 b3 = WL.RadioButton{ label="b3",reactive = true,  x = 1600, y= 100, }
 b4 = WL.RadioButton{ label="b4",reactive = true,  x = 1600, y= 200, }
 
-rbg = WL.RadioButtonGroup{items={b2,b3,b4}, position = {0,0,0}, name = "Radio"} -- should get renamed to Radio (1)
-
+rbg = WL.RadioButtonGroup{items={b2,b3,b4}, name = "Radio"} -- should get renamed to Radio (1)
 --rbg:remove(b3)
 rbg.on_selection_change = print
 b3.group = b0.group
