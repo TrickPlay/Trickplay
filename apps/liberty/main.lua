@@ -381,9 +381,23 @@ main = function()
     
     get_channel_list(function(channels)
         
+        if type(channels) ~= "table" or type(channels.Channels) ~= "table" or type(channels.Channels.Channel) ~= "table" then
+            print("get_channel_list got bad data")
+            return
+        end
+        
         for i,channel in ipairs(channels.Channels.Channel) do
             --print("--------------------------------------------------------------------")
             --dumptable(channel)
+            if type(channel) ~= "table" or 
+                type(channel.Name) ~= "string" or 
+                type(channel.Pictures) ~= "table" or 
+                type(channel.Pictures.Picture[1]) ~= "table" or 
+                type(channel.Pictures.Picture[1].Value) ~= "string" then 
+                
+                print("get_channel_list got bad entry")
+                return 
+            end
             make_proxy(
                 
                 channel.Name,

@@ -103,6 +103,8 @@ show_grid:add(unpack(rows))
 function instance:setup_icons(t)
     ---[[
     --TODO setup wrap around stuff here
+    
+    if type(t) ~= "table" or #t == 0 then return end
     for i,channel in ipairs(t) do
         channel_list[i] = clone_proxy(channel.Name)
     end

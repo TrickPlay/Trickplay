@@ -17,7 +17,8 @@ return function(name,src)
         on_loaded = function(self,failed)
             print("on_loaded")
             if failed then 
-                error("loading "..src.." failed",2)
+                --error("loading "..src.." failed",2)
+                return
             end
             
             for i,c in ipairs(channels[name].clones) do
