@@ -13,6 +13,7 @@ class TrickplayEmulatorManager(QWidget):
         QWidget.__init__(self, parent)
                 
         self.main = main
+        self.unsavedChanges = False
         self.contentMoveBlock = False
         self.inspector = main._inspector
         self._path = os.path.join(self.main.apath, 'VE')
@@ -254,6 +255,8 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.preventChanges = True
 				        if self.inspector.cbStyle is not None:
 				            self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+				            self.unsavedChanges = True
+				            #print("---------------------unsavedChanges", self.unsavedChanges)
 				        self.inspector.preventChanges = False
 				        return
 
@@ -265,6 +268,8 @@ class TrickplayEmulatorManager(QWidget):
 				        if self.inspector.curItemGid == self.inspector.curData['gid'] :
 				            self.inspector.preventChanges = True
 				            self.inspector.propertyFill(self.inspector.curData)
+				            self.unsavedChanges = True
+				            #print("---------------unsavedChanges", self.unsavedChanges)
 				        self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
