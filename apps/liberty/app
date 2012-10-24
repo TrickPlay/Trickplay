@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.lgi.dawn-ui",
+    release     = "1",
+    version     = "0.1",
+    name        = "Dawn",
+    author      = "TrickPlay, Inc.",
+}
+
