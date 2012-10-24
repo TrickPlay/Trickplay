@@ -3,6 +3,7 @@
 #include "util.h"
 #include "sysdb.h"
 #include "json.h"
+#include "clutter_util.h"
 
 //-----------------------------------------------------------------------------
 
@@ -43,13 +44,13 @@ public:
 
 	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
 	{
-	    
+
 	    using namespace JSON;
 
 	    Object object;
 
-	    dump_ui_actors( clutter_stage_get_default(), object );
-	    
+	    dump_ui_actors( context->get_stage(), object );
+
 	    response.set_status( HttpServer::HTTP_STATUS_OK );
 
 	    String result( object.stringify() );
@@ -89,9 +90,8 @@ public:
 
 		Object & o( v.as<Object>() );
 
-		guint32 gid = o[ "gid" ].as<long long>();
-
-		ClutterActor * actor = clutter_get_actor_by_gid( gid );
+        String gid_str = o["gid"].as<String>();
+		ClutterActor * actor = (ClutterActor *) g_ascii_strtoull(gid_str.c_str(), NULL, 16);
 
 		// Bug in Clutter 1.6.14 where free ids are set to this value
 
@@ -126,11 +126,11 @@ public:
 			case G_TYPE_FLOAT:
 				g_value_set_float( & value , it->second.as_number() );
 				break;
-            
+
 			case G_TYPE_DOUBLE:
 				g_value_set_double( & value , it->second.as_number() );
 				break;
-            
+
 			case G_TYPE_BOOLEAN:
 				g_value_set_boolean( & value , it->second.as<bool>() );
 				break;
@@ -225,22 +225,10 @@ private:
 			return;
 	    }
 
-		ClutterGeometry g;
-
-	    clutter_actor_get_geometry( actor, & g );
-
 	    object["name"] = safe_string( clutter_actor_get_name( actor ) );
 
-	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+	    const gchar * type = ClutterUtil::get_actor_type( actor );
 
-	    if ( g_str_has_prefix( type, "Clutter" ) )
-	    {
-	        type += 7;
-	    }
-	    else if ( g_str_has_prefix( type , "Trickplay" ) )
-	    {
-	    	type += 9;
-	    }
 	    object[ "type" ] = type;
 
 		// x, y, z
@@ -282,7 +270,9 @@ private:
 		object[ "anchor_point"] = anchor_point;
 
 		// GID
-		object[ "gid" ] = int( clutter_actor_get_gid( actor ) );
+		char gid_str[32];
+		snprintf(gid_str, 32, "%p", actor);
+		object[ "gid" ] = gid_str;
 
 		// Opacity
 	    object[ "opacity" ] = clutter_actor_get_opacity( actor );
@@ -388,6 +378,17 @@ private:
 	    {
 			Array & children( object[ "children" ].as<Array>() );
 
+#ifdef CLUTTER_VERSION_1_10
+            ClutterActorIter iter;
+            ClutterActor *child;
+            clutter_actor_iter_init( &iter, actor );
+            while(clutter_actor_iter_next( &iter, &child ))
+            {
+ 				Object & child_object( children.append().as<Object>() );
+
+				dump_ui_actors( child , child_object );
+           }
+#else
 			GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ) );
 
 			for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
@@ -398,6 +399,7 @@ private:
 			}
 
 			g_list_free( list );
+#endif
 	    }
 	}
 };
