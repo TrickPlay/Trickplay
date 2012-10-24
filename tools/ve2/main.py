@@ -135,6 +135,7 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
+
         self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         return True
     
@@ -146,10 +147,27 @@ class MainWindow(QMainWindow):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
         return True
 
+    def warningMsg(self):
+        msg = QMessageBox()
+        msg.setText('The Project "'+ self.currentProject +'" is changed.')
+        msg.setInformativeText('If you don\'t save it, the changes will be permanently lost.')
+        msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+        msg.addButton("Close without Saving" , QMessageBox.NoRole )
+        msg.setDefaultButton(QMessageBox.Cancel)
+        msg.setWindowTitle("Warning")
+        ret = msg.exec_()
+        if ret == QMessageBox.Save:
+            self.saveProject()
+        elif ret == QMessageBox.Cancel:
+            return 
+
     def newProject(self):
         orgPath = self.path
         wizard = Wizard(self)
         path = None 
+
+        if self._emulatorManager.unsavedChanges == True :
+            self.warningMsg()
 
         while path == None :
             path = wizard.start("", False, True)
@@ -174,6 +192,9 @@ class MainWindow(QMainWindow):
             return True
 
     def openProject(self):
+        if self._emulatorManager.unsavedChanges == True :
+            self.warningMsg()
+
         wizard = Wizard(self)
         path = -1
         while path == -1 :
@@ -201,13 +222,13 @@ class MainWindow(QMainWindow):
     def saveProject(self):
         self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
-        print("_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        self._emulatorManager.unsavedChanges = False
         return True
 
     def save(self):
         self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
-        print("_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        self._emulatorManager.unsavedChanges = False
         return True
 
     def slider(self):
