@@ -123,6 +123,11 @@ public:
     }
 
     //.........................................................................
+    // The clutter stage
+
+    ClutterActor * get_stage() const;
+
+    //.........................................................................
     // The system database
 
     SystemDatabase * get_db() const;
@@ -343,6 +348,8 @@ private:
     TPContext( const TPContext & );
 
     bool                        is_running;
+
+    ClutterActor *              stage;
 
     StringMap                   config;
 
