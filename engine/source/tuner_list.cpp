@@ -94,6 +94,21 @@ int Tuner::tune_channel( const char *new_channel_uri )
 
 //.............................................................................
 
+void Tuner::add_delegate( Delegate * delegate )
+{
+    delegates.insert( delegate );
+}
+
+//.............................................................................
+
+void Tuner::remove_delegate( Delegate * delegate )
+{
+    delegates.erase( delegate );
+}
+
+
+//.............................................................................
+
 void tp_tuner_channel_changed( TPTuner * tuner, const char * new_channel)
 {
     g_debug("SOMEONE TOLD US THE CHANNEL CHANGED ON %p TO %s", tuner, new_channel);
@@ -138,3 +153,34 @@ TunerList::~TunerList()
         ( *it )->tuner->unref();
     }
 }
+
+//.............................................................................
+
+void TunerList::add_delegate( Delegate * delegate )
+{
+    delegates.insert( delegate );
+}
+
+//.............................................................................
+
+void TunerList::remove_delegate( Delegate * delegate )
+{
+    delegates.erase( delegate );
+}
+
+
+
+TunerList::TunerSet TunerList::get_tuners()
+{
+    TunerSet result;
+
+    for ( TPTunerSet::iterator it = tuners.begin(); it != tuners.end(); ++it )
+    {
+        Tuner * tuner = ( *it )->tuner;
+
+        result.insert( tuner );
+    }
+
+    return result;
+}
+
