@@ -10,7 +10,12 @@
 void error( char * msg ) {
 	fprintf( stderr, "%s\n"
         "Usage: stitcher /paths/to/inputs [-bcmr] [-i *] [-j *] [-o *] \n"
-        
+        "\n"
+        "Inputs:\n"
+        "                 stitcher will accept a list of directories ang/or images,\n"
+        "                 and things that might be convertible to images (ie. SVG).\n"
+        "                 Experiment to see what input formats work for your case.\n"
+        "\n"
         "Flags:\n"
         "   -h            Show this help and exit.\n"
         "\n"
@@ -38,7 +43,7 @@ void error( char * msg ) {
         "   -o [path]     Set the path of the output files, which will have\n"
         "                 sequential numbers and a .png or .json extension appended.\n"
         "                 Without this option, the path of the first input will be used.\n"
-        "      [int]      Pass an integer like 4096 to set the maximum .png size."
+        "      [int]      Pass an integer like 4096 to set the maximum .png size.\n"
         "\n"
         "   -r            Recursively include subdirectories.\n", msg );
 	exit( 0 );
@@ -46,8 +51,7 @@ void error( char * msg ) {
 
 // options
 
-char //* input_path  = NULL,
-     * output_path = NULL;
+char * output_path = NULL;
 
 int input_size_limit  = 4096,
     output_size_limit = 4096,
@@ -309,7 +313,6 @@ GString * export_image( char * png_path )
     CopyMagickString( output_info->filename,  png_path, MaxTextExtent );
     CopyMagickString( output_info->magick,    "png",    MaxTextExtent );
     CopyMagickString( output_image->filename, png_path, MaxTextExtent );
-    //WriteImage( output_info, output_image );
     
     g_ptr_array_add( output_images, output_image );
     g_ptr_array_add( output_infos, output_info );
@@ -391,7 +394,7 @@ enum {
     SET_INPUT  = 'i',
     SET_JSON_MERGE = 'j',
     SET_OUTPUT = 'o',
-    UNKNOWN,
+    NO_ARGS,
 };
 
 void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
@@ -415,26 +418,28 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
                     
                     case 'b':
                         add_buffer_pixels = TRUE;
-                        state = UNKNOWN;
+                        state = NO_ARGS;
                         break;
                     
                     case 'c':
                         copy_large_images = TRUE;
-                        state = UNKNOWN;
+                        state = NO_ARGS;
                         break;
                     
                     case 'm':
                         allow_multiple_sheets = TRUE;
-                        state = UNKNOWN;
+                        state = NO_ARGS;
                         break;
                     
                     case 'r':
                         recursive = TRUE;
-                        state = UNKNOWN;
+                        state = NO_ARGS;
                         break;
                     
                     case 'h':
-                        error("Help & Examples:\n\n"
+                        error("\n"
+        "Help & Examples:\n"
+        "\n"
         "stitcher assets/ui\n"
         "       Will pick up all of the images in the directory assets/ui and create two\n"
         "       files, assets/ui.png (one PNG of all the input images packed together) and\n"
@@ -445,9 +450,10 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
         "           sprite = Sprite { sheet = ui, id = 'button-press.png' }\n"
         "       Sprites behave just as if they were loaded from the original image.\n"
         "\n"
-        "stitcher assets/ui -i *.png nav/bg-?.jpg 256\n"
-        "       Load all PNGs, but only JPGs whose filenames match nav/bg-?.jpg, and filter\n"
-        "       out images bigger than 256 pixels on a side.\n"
+        "stitcher assets/ui special-image.jpg -i *.png nav/bg-?.jpg 256\n"
+        "       Load all PNGs plus JPGs whose filenames match 'nav/bg-?.jpg', and filter\n"
+        "       out images bigger than 256 pixels on a side. 'special-image.jpg' doesn't\n"
+        "       match either filter, but will be included since it was named directly.\n"
         "\n"
         "stitcher assets/ui -o sprites/ui 512 -m\n"
         "       Output the JSON map as sprites/ui.json. In addition, spritesheets created\n"
@@ -460,7 +466,7 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
         "       while -c copies over all images that fail the input size filter, 256, as\n"
         "       stand-alone single-image spritesheets.\n"
         "\n"
-        "stitcher assets/ui -j assets/old-ui-1.json assets/old-ui-2.json"
+        "stitcher assets/ui -j assets/old-ui-1.json assets/old-ui-2.json\n"
         "       -j merges existing spritesheets into the output. This can be used when a\n"
         "       previously created spritesheet, for example, needs to be updated.\n");
                         break;
@@ -506,10 +512,7 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
                 }
                 
                 default:
-                    //if ( i == 1 )
-                    //    input_path = arg;
-                    //else
-                        error( g_strdup_printf( "Error: ambiguous argument %s\n", arg ) );
+                    error( g_strdup_printf( "Error: ambiguous argument %s\n", arg ) );
                     break;
             }
     }
