@@ -548,6 +548,7 @@ list( APPEND
     ${ENGINE_SRC}/source/controller_list.cpp
     ${ENGINE_SRC}/source/controller_lirc.cpp
     ${ENGINE_SRC}/source/controller_delegates.cpp
+    ${ENGINE_SRC}/source/tuner_list.cpp
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp

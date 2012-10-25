@@ -2729,6 +2729,25 @@ void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayer
 }
 
 //-----------------------------------------------------------------------------
+// Tuners
+//-----------------------------------------------------------------------------
+
+TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, change_channel_callback cb, void *data )
+{
+	g_assert( context );
+
+	return context->tuner_list.add_tuner( context, name, cb, data );
+}
+
+void tp_context_remove_tuner( TPContext * context, TPTuner * tuner )
+{
+	g_assert( context );
+	g_assert( tuner );
+
+	context->tuner_list.remove_tuner( tuner );
+}
+
+//-----------------------------------------------------------------------------
 // Controllers
 //-----------------------------------------------------------------------------
 
