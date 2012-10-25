@@ -150,7 +150,7 @@ typedef struct TPTuner TPTuner;
 
         TPContext * context,
         const char * name,
-        TPChannelChangeCallback *tune_channel,
+        TPChannelChangeCallback tune_channel,
         void * data);
 
 
