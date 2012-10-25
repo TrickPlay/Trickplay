@@ -39,7 +39,7 @@ struct TPTuner
 
 //.............................................................................
 
-Tuner::Tuner( TunerList * _list, TPContext * _context , const char * _name, change_channel_callback _cb, void * _data )
+Tuner::Tuner( TunerList * _list, TPContext * _context , const char * _name, TPChannelChangeCallback _cb, void * _data )
     :
     tp_tuner( new TPTuner( this, _list ) ),
     name( _name ),
@@ -101,7 +101,7 @@ void tp_tuner_channel_changed( TPTuner * tuner, const char * new_channel)
 }
 
 
-TPTuner * TunerList::add_tuner( TPContext * context , const char * name, change_channel_callback cb, void * data )
+TPTuner * TunerList::add_tuner( TPContext * context , const char * name, TPChannelChangeCallback cb, void * data )
 {
     g_assert( name );
     g_assert( cb );
