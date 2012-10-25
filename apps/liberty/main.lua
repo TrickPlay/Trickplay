@@ -43,6 +43,7 @@ main = function()
     hidden_assets_group:add(Image{name="cursor_line", src="assets/menu-cursor-laser.png"})
     hidden_assets_group:add(Image{name="tp_sprite",   src="assets/trick-play_02.png"    })
     hidden_assets_group:add(Image{name="epg_row_bg",  src="assets/epg/channel-bg.png",tile = {true,true},w = screen_w    })
+    hidden_assets_group:add(Image{name="show_border", src="assets/epg/show-border.png"})
     screen:add(hidden_assets_group)
     --------------------------------------------------------------------
     local backdrop_maker = dofile("backdrop.lua")
@@ -410,7 +411,10 @@ main = function()
         epg_menu:setup_icons(channels.Channels.Channel)
         
     end)
-    
+    ---[[
+    get_scheduling(function(t)
+        epg_menu:load_scheduling(t)
+    end)--]]
     --------------------------------------------------------------------
     menu_layer:add(
         --movies_menu,
