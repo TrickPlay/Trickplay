@@ -15,7 +15,7 @@ class Tuner : public RefCounted
 {
 public:
 
-    Tuner( TunerList * list, TPContext * context , const char * name, change_channel_callback cb, void * data );
+    Tuner( TunerList * list, TPContext * context , const char * name, TPChannelChangeCallback cb, void * data );
 
     TPTuner * get_tp_tuner();
 
@@ -35,7 +35,7 @@ private:
 
     String              name;
 
-    change_channel_callback  cb;
+    TPChannelChangeCallback  cb;
     void *              data;
     TPContext *         context;
 };
@@ -49,7 +49,7 @@ public:
 
     virtual ~TunerList();
 
-    TPTuner * add_tuner( TPContext * context , const char * name, change_channel_callback cb, void * data );
+    TPTuner * add_tuner( TPContext * context , const char * name, TPChannelChangeCallback cb, void * data );
 
     void remove_tuner( TPTuner * tuner );
 

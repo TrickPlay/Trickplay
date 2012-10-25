@@ -74,7 +74,7 @@ typedef struct TPTuner TPTuner;
 */
 
     typedef int
-    (*change_channel_callback)(
+    (*TPChannelChangeCallback)(
 
         TPTuner * tuner,
         const char *new_channel_uri,
@@ -150,7 +150,7 @@ typedef struct TPTuner TPTuner;
 
         TPContext * context,
         const char * name,
-        change_channel_callback *tune_channel,
+        TPChannelChangeCallback *tune_channel,
         void * data);
 
 
