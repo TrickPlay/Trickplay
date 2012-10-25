@@ -347,7 +347,7 @@ local keypresses = {
         rows[1].icon.y = rows[1].y+row_h/2
         show_grid:add(rows[1].icon)
         if not rows[1].icon.schedule_is_loaded then 
-            build_schedule_row(rows[1].icon)
+            --build_schedule_row(rows[1].icon)
         end
         --dolater(function()
         show_grid:animate{
@@ -412,7 +412,7 @@ local keypresses = {
         show_grid:add(rows[#rows].icon)
         
         if not rows[#rows].icon.schedule_is_loaded then 
-            build_schedule_row(rows[#rows].icon)
+            --build_schedule_row(rows[#rows].icon)
         end
         
         --dolater(function()
