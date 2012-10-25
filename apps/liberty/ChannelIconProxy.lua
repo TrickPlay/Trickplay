@@ -15,7 +15,7 @@ return function(name,src)
         src   = src,
         async = true,
         on_loaded = function(self,failed)
-            print("on_loaded")
+            --print("on_loaded")
             if failed then 
                 --error("loading "..src.." failed",2)
                 return
