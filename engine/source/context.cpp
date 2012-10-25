@@ -2189,6 +2189,13 @@ ControllerList * TPContext::get_controller_list()
 
 //-----------------------------------------------------------------------------
 
+TunerList * TPContext::get_tuner_list()
+{
+    return &tuner_list;
+}
+
+//-----------------------------------------------------------------------------
+
 Image * TPContext::load_icon( const gchar * path )
 {
     PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );

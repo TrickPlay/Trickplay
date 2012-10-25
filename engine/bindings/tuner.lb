@@ -1,0 +1,98 @@
+[[
+#include "tuner_delegates.h"
+]]
+
+#==============================================================================
+
+/*
+    Interface: Tuner
+
+    The Tuner interface provides control of tuners on the platform TrickPlay runs on.
+*/
+
+interface Tuner [[TunerDelegate*]]
+{
+    Tuner()
+        [[
+            self=lb_construct( TunerDelegate , lua_touserdata(L,-2) );
+        ]];
+
+    ~Tuner()
+        [[
+            delete self;
+        ]];
+
+    /*
+        Property: name
+
+        The name property is a string the tuner has defined to identify itself. Each tuner is not guaranteed to have a unique name property.
+    */
+
+    readonly string name
+        [[
+            String s(self->get_tuner()->get_name());
+            name=s.c_str();
+        ]];
+
+    /*
+        Function: tune_channel
+
+        The tune_channel() function instructs the tuner to tune to the specified channel.
+
+        *Arguments:*
+
+        new_channel     -   A URI, the structure of which depends on the tuner implementation of the
+                            underlying platform.
+
+        *Return Value:* true if channel change was successful, otherwise false
+
+        *See Also:* the <on_channel_changed> callback
+    */
+
+    bool tune_channel(string new_channel)
+        [[
+            result=self->get_tuner()->tune_channel(new_channel);
+        ]];
+
+
+    /*
+        Event Handler: on_channel_changed
+
+        The on_channel_changed() event handler is invoked when the channel for this tuner is changed externally.
+
+
+        *Prototype:*
+
+        	(code)
+        	void on_channel_changed( Tuner tuner, string new_channel )
+        	(end)
+
+        *Arguments:*
+
+        	tuner - reference to the Tuner device that has been changed
+        	new_channel - The URI of the channel that the tuner was changed to
+
+        *Return Value:* None
+
+        *See Also:* the <tune_channel> function
+    */
+
+    function on_channel_changed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_channel_changed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+    int add_on_channel_changed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+    remove_on_channel_changed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+}

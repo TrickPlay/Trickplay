@@ -25,6 +25,16 @@ public:
 
     static int default_tune_channel( TPTuner * controller, const char *, void * );
 
+    class Delegate
+    {
+    public:
+    	virtual ~Delegate() {}
+    };
+
+    void add_delegate( Delegate * delegate );
+
+    void remove_delegate( Delegate * delegate );
+
 protected:
 
     virtual ~Tuner();
@@ -38,6 +48,12 @@ private:
     TPChannelChangeCallback  cb;
     void *              data;
     TPContext *         context;
+
+    //.........................................................................
+
+    typedef std::set<Delegate *> DelegateSet;
+
+    DelegateSet     delegates;
 };
 
 
@@ -53,6 +69,16 @@ public:
 
     void remove_tuner( TPTuner * tuner );
 
+    class Delegate
+    {
+    public:
+    	virtual ~Delegate() {}
+    };
+
+    void add_delegate( Delegate * delegate );
+
+    void remove_delegate( Delegate * delegate );
+
     typedef std::set<Tuner *> TunerSet;
 
     TunerSet get_tuners();
@@ -64,6 +90,10 @@ private:
     typedef std::set<TPTuner *> TPTunerSet;
 
     TPTunerSet tuners;
+
+    typedef std::set<Delegate *> DelegateSet;
+
+    DelegateSet         delegates;
 
 };
 
