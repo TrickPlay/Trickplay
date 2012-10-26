@@ -19,6 +19,8 @@ return function(p)
     lower.y = lower_y
     lower.z = lower_z
     
+    local y_mode = "EASE_OUT_QUAD"
+    local z_mode = "EASE_IN_QUAD"
     local dosado_1 = p.type == "flat" and Timeline{
         duration = 400,
         on_new_frame = function(tl,ms,p)
@@ -33,33 +35,51 @@ return function(p)
             {
                 source = upper, name = "y",
                 keys = {
-                    {0.0,"LINEAR",upper_y},
-                    {0.6,"LINEAR",lower_y},
-                    {1.0,"LINEAR",lower_y},
+                    {0.0,y_mode,upper_y},
+                    --{0.4,"LINEAR",lower_y+(lower_y-upper_y)*2/3},
+                    --{0.6,"LINEAR",lower_y},
+                    {1.0,y_mode,lower_y},
                 }
             },
             {
                 source = upper, name = "z",
                 keys = {
-                    {0.0,"LINEAR",upper_z},
-                    {0.4,"LINEAR",upper_z},
-                    {1.0,"LINEAR",lower_z},
+                    {0.0,z_mode,upper_z},
+                    --{0.4,"LINEAR",upper_z},
+                    {1.0,z_mode,lower_z},
+                }
+            },
+            {
+                source = upper, name = "opacity",
+                keys = {
+                    {0.0,"EASE_OUT_QUAD",255},
+                    {0.5,"EASE_OUT_QUAD",255*.7},
+                    {1.0,"EASE_IN_QUAD",255},
                 }
             },
             {
                 source = lower, name = "y",
                 keys = {
-                    {0.0,"LINEAR",lower_y},
-                    {0.6,"LINEAR",upper_y},
-                    {1.0,"LINEAR",upper_y},
+                    {0.0,y_mode,lower_y},
+                    --{0.4,"LINEAR",lower_y+(lower_y-upper_y)*1/3},
+                    --{0.6,"LINEAR",upper_y},
+                    {1.0,y_mode,upper_y},
                 }
             },
             {
                 source = lower, name = "z",
                 keys = {
-                    {0.0,"LINEAR",lower_z},
-                    {0.4,"LINEAR",lower_z},
-                    {1.0,"LINEAR",upper_z},
+                    {0.0,z_mode,lower_z},
+                    --{0.4,"LINEAR",lower_z},
+                    {1.0,z_mode,upper_z},
+                }
+            },
+            {
+                source = lower, name = "opacity",
+                keys = {
+                    {0.0,"EASE_OUT_QUAD",255},
+                    {0.5,"EASE_OUT_QUAD",255*.7},
+                    {1.0,"EASE_IN_QUAD",255},
                 }
             },
         }
@@ -93,33 +113,49 @@ return function(p)
             {
                 source = lower, name = "y",
                 keys = {
-                    {0.0,"LINEAR",upper_y},
-                    {0.6,"LINEAR",lower_y},
-                    {1.0,"LINEAR",lower_y},
+                    {0.0,y_mode,upper_y},
+                    --{0.6,"LINEAR",lower_y},
+                    {1.0,y_mode,lower_y},
                 }
             },
             {
                 source = lower, name = "z",
                 keys = {
-                    {0.0,"LINEAR",upper_z},
-                    {0.4,"LINEAR",upper_z},
-                    {1.0,"LINEAR",lower_z},
+                    {0.0,z_mode,upper_z},
+                    --{0.4,"LINEAR",upper_z},
+                    {1.0,z_mode,lower_z},
+                }
+            },
+            {
+                source = lower, name = "opacity",
+                keys = {
+                    {0.0,"EASE_OUT_QUAD",255},
+                    {0.5,"EASE_OUT_QUAD",255*.7},
+                    {1.0,"EASE_IN_QUAD",255},
                 }
             },
             {
                 source = upper, name = "y",
                 keys = {
-                    {0.0,"LINEAR",lower_y},
-                    {0.6,"LINEAR",upper_y},
-                    {1.0,"LINEAR",upper_y},
+                    {0.0,y_mode,lower_y},
+                    --{0.6,"LINEAR",upper_y},
+                    {1.0,y_mode,upper_y},
                 }
             },
             {
                 source = upper, name = "z",
                 keys = {
-                    {0.0,"LINEAR",lower_z},
-                    {0.4,"LINEAR",lower_z},
-                    {1.0,"LINEAR",upper_z},
+                    {0.0,z_mode,lower_z},
+                    --{0.4,"LINEAR",lower_z},
+                    {1.0,z_mode,upper_z},
+                }
+            },
+            {
+                source = upper, name = "opacity",
+                keys = {
+                    {0.0,"EASE_OUT_QUAD",255},
+                    {0.5,"EASE_OUT_QUAD",255*.7},
+                    {1.0,"EASE_IN_QUAD",255},
                 }
             },
         }

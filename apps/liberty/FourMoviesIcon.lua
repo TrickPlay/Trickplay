@@ -22,20 +22,22 @@ local collapsed_w = ws[1] + collapsed_spacing*(#ws-1)
 print("collapsed_w",collapsed_w)
 
 
-return function(items)
+return function(dur)
     local instance = Group{w = tot_w}
+    local items
     if items == nil then
         items = {}
         for i = 1,#ws do
-            items[i] = Rectangle{
+            items[i] = Clone{--Rectangle{
+                source = random_poster(),
                 w = ws[i],
                 h = hs[i],
                 y = hs[1] - hs[i],
-                color = {rand(),rand(),rand(),}
+                --color = {rand(),rand(),rand(),}
             }
         end
     end
-    
+    dur = dur or 200
     local intervals = {}
     
     for i,c in ipairs(items) do
@@ -51,7 +53,7 @@ return function(items)
     end
     
     local expand = Timeline{
-        duration = 200,
+        duration = 200,--dur,
         on_new_frame = function(tl,ms,p)
             for i,c in ipairs(instance.children) do
                 c.x = intervals[#intervals - i+1]:get_value(p)
@@ -59,15 +61,15 @@ return function(items)
         end
     }
     local collapse = Timeline{
-        duration = 200,
+        duration = 200,--dur,
         on_new_frame = function(tl,ms,p)
             for i,c in ipairs(instance.children) do
                 c.x = intervals[#intervals - i+1]:get_value(1-p)
             end
         end
     }
-    instance.on_key_focus_in  = function(self) expand:start()   end
-    instance.on_key_focus_out = function(self) collapse:start() end
+    instance.on_key_focus_in  = function(self) print("expand",self) expand:start()   end
+    instance.on_key_focus_out = function(self) print("collapse",self) collapse:start() end
     
     return instance
 end

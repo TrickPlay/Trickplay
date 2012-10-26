@@ -30,10 +30,12 @@ local create = function(items)
         for _,t in ipairs(items) do
             --print("a",#text)
             table.insert(text,
-                Text{
-                    text  = t.label,
-                    font  = MAIN_MENU_FONT,
-                    color = MAIN_MENU_COLOR,
+                make_bolding_text{
+                    text = t.label,
+                    color="white",
+                    sz=90,
+                    duration = 200,
+                    center = true,
                 }
             )
             total_w   = total_w + text[#text].w+item_spacing
@@ -142,9 +144,9 @@ local create = function(items)
         if animating then return end
         animating = true
         new_i = wrap_i(curr_i + 1,text)
-        text[curr_i].font = MAIN_MENU_FONT
-        text[new_i].font  = MAIN_MENU_FONT_FOCUS
-        text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
+        text[curr_i].contract:start()--font = MAIN_MENU_FONT
+        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[new_i].x - text[curr_i].x
         
         new_icon(text[new_i].icon,screen_w - 100)
@@ -157,19 +159,20 @@ local create = function(items)
             right_i = curr_item
         end
         
-        curr_icon:animate{
-            mode = "EASE_IN_OUT_QUAD",
-            duration = 300,
-            x = screen_w/2,
-            opacity      = 255,
-        }
         prev_icon:animate{
-            mode = "EASE_IN_OUT_QUAD",
+            mode = "EASE_IN_SINE",
             duration = 300,
             x = 100,
             opacity      = 0,
         }
         prev_icon.source:on_key_focus_out()
+        dolater(50,function()
+        curr_icon:animate{
+            mode = "EASE_OUT_QUAD",
+            duration = 300,
+            x = screen_w/2,
+            opacity      = 255,
+        }
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
@@ -186,24 +189,26 @@ local create = function(items)
                         child.x = child.x - dx
                     end
                 end)
-                print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
+                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
                 curr_icon.source:on_key_focus_in()
             end
         }
         
+        dolater(50,function()
         backdrop:cycle_left()
-        
+        end)
+        end)
     end
     
     instance.move_right = function()
         if animating then return end
         animating = true
         new_i = wrap_i(curr_i - 1,text)
-        text[curr_i].font = MAIN_MENU_FONT
-        text[new_i].font  = MAIN_MENU_FONT_FOCUS
-        text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
+        text[curr_i].contract:start()--.font = MAIN_MENU_FONT
+        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[curr_i].x - text[new_i].x
         
         new_icon(text[new_i].icon, 100)
@@ -218,21 +223,20 @@ local create = function(items)
             left_i = curr_item
         end
         
-        curr_icon:animate{
-            mode = "EASE_IN_OUT_QUAD",
-            duration = 300,
-            x = screen_w/2,
-            opacity      = 255,
-        }
         prev_icon:animate{
-            mode = "EASE_IN_OUT_QUAD",
+            mode = "EASE_IN_SINE",
             duration = 300,
             x = screen_w - 100,
             opacity      = 0,
         }
         prev_icon.source:on_key_focus_out()
-        print(curr_icon.source,curr_icon.source.gid)
-        
+        dolater(50,function()
+        curr_icon:animate{
+            mode = "EASE_OUT_QUAD",
+            duration = 300,
+            x = screen_w/2,
+            opacity      = 255,
+        }
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
@@ -256,15 +260,17 @@ local create = function(items)
             end
         }
         
+        dolater(50,function()
         backdrop:cycle_right()
-        
+        end)
+        end)
     end
     
     curr_icon.source = text[i].icon
     curr_icon.anchor_point = {text[i].icon.w/2,text[i].icon.h}
     curr_icon.x = screen_w/2
-    text[1].font  = MAIN_MENU_FONT_FOCUS
-    text[1].anchor_point = { text[1].w/2, text[1].h/2}
+    text[1].expand:on_completed()--.font  = MAIN_MENU_FONT_FOCUS
+    --text[1]--.anchor_point = { text[1].w/2, text[1].h/2}
     text[1].icon:grab_key_focus()
     
     local animating = false
@@ -363,12 +369,12 @@ function library_icon:on_key_down(k)
 end
 -------------------------------------------------------
 local channel_is_animating = false
-local channel_icon = Rectangle{w = 100,h = 150,color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+local channel_icon = random_poster():set{w = 100,h = 150,color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
 function channel_icon:on_key_down(k) 
     if keys.OK == k then
         if channel_is_animating then return end
         channel_is_animating = true
-        
+        print("this")
         menu_layer:add(curr_ch_menu)
         curr_ch_menu:lower_to_bottom()
         curr_ch_menu.z = -300
@@ -404,7 +410,10 @@ function epg_icon:on_key_down(k)
             duration = 300,
             z = 300,
             opacity = 0,
-            on_completed = function() epg_is_animating = false end
+            on_completed = function() 
+                main_menu:unparent()
+                epg_is_animating = false 
+            end
         }
         epg_menu:grab_key_focus()
         end)

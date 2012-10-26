@@ -20,7 +20,7 @@ function rand() return 55+20*math.ceil(10*math.random()) end
 
 
 main = function()
-    screen:add(Rectangle{size = screen.size,color = "606060"})
+    --screen:add(Rectangle{size = screen.size,color = "606060"})
     --------------------------------------------------------------------
     menu_layer = Group()
     make_4movies_icon = dofile("FourMoviesIcon.lua")
@@ -43,8 +43,60 @@ main = function()
     hidden_assets_group:add(Image{name="cursor_line", src="assets/menu-cursor-laser.png"})
     hidden_assets_group:add(Image{name="tp_sprite",   src="assets/trick-play_02.png"    })
     hidden_assets_group:add(Image{name="epg_row_bg",  src="assets/epg/channel-bg.png",tile = {true,true},w = screen_w    })
+    hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/channel-bg-current.png"})
     hidden_assets_group:add(Image{name="show_border", src="assets/epg/show-border.png"})
     screen:add(hidden_assets_group)
+    --------------------------------------------------------------------
+    posters = Group { name = "posters" }
+    posters:add(Image{src="assets/posters-220x320/70336-2.png"})
+    posters:add(Image{src="assets/posters-220x320/70708-2.png"})
+    posters:add(Image{src="assets/posters-220x320/70814-2.png"})
+    posters:add(Image{src="assets/posters-220x320/71256-2.png"})
+    posters:add(Image{src="assets/posters-220x320/71753-1.png"})
+    posters:add(Image{src="assets/posters-220x320/71998-3.png"})
+    posters:add(Image{src="assets/posters-220x320/72480-1.png"})
+    posters:add(Image{src="assets/posters-220x320/73244-7.png"})
+    posters:add(Image{src="assets/posters-220x320/73387-1.png"})
+    posters:add(Image{src="assets/posters-220x320/73532-1.png"})
+    posters:add(Image{src="assets/posters-220x320/74326-1.png"})
+    posters:add(Image{src="assets/posters-220x320/75088-2.png"})
+    posters:add(Image{src="assets/posters-220x320/75864-1.png"})
+    posters:add(Image{src="assets/posters-220x320/76703-9.png"})
+    posters:add(Image{src="assets/posters-220x320/79274-2.png"})
+    posters:add(Image{src="assets/posters-220x320/79488-7.png"})
+    posters:add(Image{src="assets/posters-220x320/79491-2.png"})
+    posters:add(Image{src="assets/posters-220x320/79824-6.png"})
+    posters:add(Image{src="assets/posters-220x320/81391-1.png"})
+    posters:add(Image{src="assets/posters-220x320/81559-1.png"})
+    posters:add(Image{src="assets/posters-220x320/84041-1.png"})
+    posters:add(Image{src="assets/posters-220x320/84489-2.png"})
+    posters:add(Image{src="assets/posters-220x320/84912-2.png"})
+    posters:add(Image{src="assets/posters-220x320/85190-3.png"})
+    posters:add(Image{src="assets/posters-220x320/85355-3.png"})
+    posters:add(Image{src="assets/posters-220x320/110381-2.png"})
+    posters:add(Image{src="assets/posters-220x320/114851-1.png"})
+    posters:add(Image{src="assets/posters-220x320/127351-1.png"})
+    posters:add(Image{src="assets/posters-220x320/138981-1.png"})
+    posters:add(Image{src="assets/posters-220x320/165591-1.png"})
+    posters:add(Image{src="assets/posters-220x320/183231-3.png"})
+    posters:add(Image{src="assets/posters-220x320/193941-1.png"})
+    posters:add(Image{src="assets/posters-220x320/194751-4.png"})
+    posters:add(Image{src="assets/posters-220x320/205731-2.png"})
+    posters:add(Image{src="assets/posters-220x320/219621-1.png"})
+    posters:add(Image{src="assets/posters-220x320/242801-2.png"})
+    posters:add(Image{src="assets/posters-220x320/248735-3.png"})
+    posters:add(Image{src="assets/posters-220x320/248943-2.png"})
+    posters:add(Image{src="assets/posters-220x320/252290-1.png"})
+    posters:add(Image{src="assets/posters-220x320/253682-1.png"})
+    posters:add(Image{src="assets/posters-220x320/253931-1.png"})
+    posters:add(Image{src="assets/posters-220x320/254734-1.png"})
+    posters:add(Image{src="assets/posters-220x320/255573-1.png"})
+    posters:add(Image{src="assets/posters-220x320/256523-1.png"})
+    hidden_assets_group:add(posters)
+    posters = posters.children
+    random_poster = function()
+        return posters[math.ceil(math.random()*(#posters-1))+1]
+    end
     --------------------------------------------------------------------
     local backdrop_maker = dofile("backdrop.lua")
     backdrop = backdrop_maker:make_backdrop()
@@ -72,6 +124,10 @@ main = function()
     end
     
     
+    dofile("Internet.lua")
+    
+    make_proxy, clone_proxy  = dofile("ChannelIconProxy.lua")
+    make_bolding_text        = dofile("BoldingText.lua")
     --------------------------------------------------------------------
     --floor = dofile("Floor.lua")
     main_menu = dofile("MainMenu.lua")
@@ -80,10 +136,6 @@ main = function()
     
     --------------------------------------------------------------------
     
-    dofile("Internet.lua")
-    
-    make_proxy, clone_proxy  = dofile("ChannelIconProxy.lua")
-    make_bolding_text        = dofile("BoldingText.lua")
     local make_curr_ch_menu  = dofile("CurrentChannel.lua")
     local make_category_menu = dofile("CategoryMenu.lua")
     local make_dosado_menu   = dofile("DosadoMenu.lua")
@@ -103,7 +155,7 @@ main = function()
     --------------------------------------------------------------------
     function make_my_library_category()
         local animating = false
-        local icon = make_4movies_icon()
+        local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
                 if animating then return end
@@ -150,7 +202,7 @@ main = function()
     --------------------------------------------------------------------
     function make_recording()
         local animating = false
-        local icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
+        local icon = random_poster():set{w=200,h=300}--Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
         function icon:on_key_down(k) 
             if keys.OK == k then
                 if animating then return end
@@ -229,7 +281,7 @@ main = function()
     --------------------------------------------------------------------
     function make_all_videos_icon()
         local animating = false
-        local icon = make_4movies_icon()
+        local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
                 if animating then return end
@@ -258,22 +310,23 @@ main = function()
     store_menu = make_dosado_menu{
         prev_menu = main_menu,
         upper = make_movie_menu{
-            {label = "Movie A", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie B", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie C", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie D", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie E", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie F", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie G", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie H", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie I", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
-            {label = "Movie J", icon = Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}},
+            --Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}
+            {label = "Movie A", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie B", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie C", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie D", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie E", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie F", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie G", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie H", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie I", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie J", icon = random_poster():set{w=180,h=270}},
         },
         lower = make_category_menu{
             {label = "ALL VIDEOS",            icon = make_all_videos_icon()},
-            {label = "RECOMMENDATIONS",       icon = make_4movies_icon()},
-            {label = "SERVICES & ACCESSORIES",icon = make_4movies_icon()},
-            {label = "APPS & WIDGETS",        icon = make_4movies_icon()},
+            {label = "RECOMMENDATIONS",       icon = make_4movies_icon(350)},
+            {label = "SERVICES & ACCESSORIES",icon = make_4movies_icon(350)},
+            {label = "APPS & WIDGETS",        icon = make_4movies_icon(350)},
         },
         upper_y = 250,
         lower_y = 825,
@@ -285,7 +338,7 @@ main = function()
     --------------------------------------------------------------------
     function make_all_videos_category()
         local animating = false
-        local icon = make_4movies_icon()
+        local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
                 if animating then return end
@@ -333,28 +386,29 @@ main = function()
     movies_menu = make_dosado_menu{
         prev_menu = all_videos_menu,
         upper = make_movie_menu{
-            {label = "Movie A", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie B", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie C", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie D", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie E", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie F", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie G", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie H", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie I", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie J", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
+            --Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
+            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
         },
         lower = make_movie_menu{
-            {label = "Movie A", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie B", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie C", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie D", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie E", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie F", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie G", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie H", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie I", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
-            {label = "Movie J", icon = Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}},
+            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
         },
         upper_y = 500,
         type = "flat",
@@ -382,7 +436,10 @@ main = function()
     
     get_channel_list(function(channels)
         
-        if type(channels) ~= "table" or type(channels.Channels) ~= "table" or type(channels.Channels.Channel) ~= "table" then
+        if  type(channels) ~= "table" or 
+            type(channels.Channels) ~= "table" or 
+            type(channels.Channels.Channel) ~= "table" then
+            
             print("get_channel_list got bad data")
             return
         end
@@ -399,11 +456,19 @@ main = function()
                 print("get_channel_list got bad entry")
                 return 
             end
+            
+            local pic
+            for i,p in ipairs(channel.Pictures.Picture) do
+                if p.type == "Logo" then
+                    pic = p.Value
+                    break;
+                end
+            end
             make_proxy(
                 
                 channel.Name,
                 
-                channel.Pictures.Picture[1].Value
+                pic
                 
             )
         end
@@ -413,6 +478,13 @@ main = function()
     end)
     ---[[
     get_scheduling(function(t)
+        if  type(t) ~= "table" or 
+            type(t.Channels) ~= "table" or 
+            type(t.Channels.Channel) ~= "table" then
+            
+            print("get_scheduling got bad data")
+            return
+        end
         epg_menu:load_scheduling(t)
     end)--]]
     --------------------------------------------------------------------
@@ -433,6 +505,18 @@ main = function()
     screen:add(menu_layer)
     
     main_menu:grab_key_focus()
+    
+    mediaplayer:load("glee-1.mp4")
+    
+    function mediaplayer:on_loaded()
+        
+        mediaplayer:play()
+        mediaplayer.volume = 0
+    end
+    function mediaplayer:on_end_of_stream()
+        mediaplayer:seek(0)
+        mediaplayer:play()
+    end
 end
 
 dolater(main)
