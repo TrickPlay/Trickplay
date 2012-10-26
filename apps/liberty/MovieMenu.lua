@@ -183,7 +183,7 @@ local create = function(items)
         --prev_icon.source:on_key_focus_out()
         --curr_icon.source:on_key_focus_in()
         text_items:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_CUBIC",
             duration = 300,
             x = text_items.x - dx,
             on_completed = function()
@@ -248,7 +248,7 @@ local create = function(items)
         --print(curr_icon.source,curr_icon.source.gid)
         --curr_icon.source:on_key_focus_in()
         text_items:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_CUBIC",
             duration = 300,
             x = text_items.x + dx,
             on_completed = function()

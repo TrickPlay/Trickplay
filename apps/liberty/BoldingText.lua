@@ -17,12 +17,16 @@ local create = function(t)
     
     local ws = {}
     local fonts = {}
+    local anchors = {}
     
     for i,f in ipairs(g_fonts) do
         fonts[i] = f.." "..tostring(t.sz).."px"
         --print(fonts[i])
         instance.font   = fonts[i]
-        ws[i]    = instance.w
+        ws[i]      = instance.w
+        anchors[i] = t.center and
+            {instance.w/2,instance.h/2} or
+            {           0,instance.h/2}
     end
     --------------------------------------------------------------------
     
@@ -46,10 +50,12 @@ local create = function(t)
             instance.scale = scale
             
             instance.font  = fonts[i]
+            instance.anchor_point = anchors[i]
             --print(instance.font,scale[1])
         end,
         on_completed = function(tl)
             instance.font  = fonts[#fonts]
+            instance.anchor_point = anchors[#fonts]
             instance.scale = 1
         end,
     }
@@ -70,14 +76,17 @@ local create = function(t)
             instance.scale = scale
             
             instance.font  = fonts[i]
+            instance.anchor_point = anchors[i]
         end,
         on_completed = function(tl)
             instance.font  = fonts[1]
+            instance.anchor_point = anchors[1]
             instance.scale = 1
         end,
     }
     --------------------------------------------------------------------
-    instance.font = fonts[1]
+    instance.font         = fonts[1]
+    instance.anchor_point = anchors[1]
     return instance
     
 end
