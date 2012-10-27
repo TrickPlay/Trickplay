@@ -48,6 +48,8 @@ end, function(name)
             channels[name].text
     }
     
+    c.anchor_point = channels[name].image.loaded and {c.w/2,c.h/2} or {c.w-50,c.h/2}
+    
     table.insert( channels[name].clones, c )
     
     return c
