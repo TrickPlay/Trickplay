@@ -117,7 +117,7 @@ local function make_beams(backdrop_group,beam_src)
 end
 
 local function make_zoom_zoom(group)
-    local INTERVAL = 108
+    local INTERVAL = 120
     local canvas = Canvas ( INTERVAL, INTERVAL*2 )
     canvas.antialias = "SUBPIXEL"
     canvas:set_source_color( "ffffff80" )
@@ -133,7 +133,7 @@ local function make_zoom_zoom(group)
     canvas:close_path()
     canvas:fill()
 
-    local c_image = canvas:Image( { name = "fly_bground", tile = { true, true }, width = 5760, height = 2200, x_rotation = { 90, 971, -300 }, x = -1280 } )
+    local c_image = --[[canvas:--]]Image( { src= "assets/tronlight.png", name = "fly_bground", tile = { true, true }, width = 5760, height = 2200, x_rotation = { 90, 971, -300 }, x = -1280 } )
     local fake_group = Group{ name = "fake", children = { c_image }, y = -50 }
     group:add(fake_group)
     fake_group:lower_to_bottom()
@@ -156,14 +156,14 @@ local function make_zoom_zoom(group)
     --]]
     return function()
         fake_group:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_QUAD",
             duration = 250,
             x = fake_group.x - INTERVAL*2,
             on_completed = function() fake_group.x = fake_group.x + INTERVAL*2 end
         }
     end,  function()
         fake_group:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_QUAD",
             duration = 250,
             x = fake_group.x + INTERVAL*2,
             on_completed = function() fake_group.x = fake_group.x - INTERVAL*2 end

@@ -36,10 +36,19 @@ local create = function(items)
             )
             t.icon:on_key_focus_out()
             table.insert(text,
+                --[[
                 Text{
                     text  = t.label,
                     font  = STORE_MENU_FONT,
                     color = STORE_MENU_COLOR,
+                }
+                --]]
+                make_bolding_text{
+                    text = t.label,
+                    color="white",
+                    sz=36,
+                    duration = 200,
+                    center = true,
                 }
             )
             text[#text].icon = icons[#icons].icon
@@ -149,9 +158,12 @@ local create = function(items)
         if animating then return end
         animating = true
         new_i = wrap_i(curr_i + 1,text)
-        text[curr_i].font = STORE_MENU_FONT
-        text[new_i].font  = STORE_MENU_FONT_FOCUS
-        text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
+        icons[curr_i].source:on_key_focus_out()
+        dolater(100,function()
+        text[curr_i].contract:start()--font = MAIN_MENU_FONT
+        text[new_i].expand:start()
+        --.font  = MAIN_MENU_FONT_FOCUS
+        --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[new_i].x - text[curr_i].x
         
         --new_icon(text[new_i].icon,screen_w - 100)
@@ -180,7 +192,7 @@ local create = function(items)
         --prev_icon.source:on_key_focus_out()
         --curr_icon.source:on_key_focus_in()
         text_items:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_QUAD",
             duration = 300,
             x = text_items.x - dx,
             on_completed = function()
@@ -199,11 +211,14 @@ local create = function(items)
                 print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
+                icons[new_i].source:on_key_focus_in()
             end
         }
         
+        dolater(50,function()
         backdrop:cycle_left()
-        
+        end)
+        end)
         return true
     end
     
@@ -211,9 +226,12 @@ local create = function(items)
         if animating then return end
         animating = true
         new_i = wrap_i(curr_i - 1,text)
-        text[curr_i].font = STORE_MENU_FONT
-        text[new_i].font  = STORE_MENU_FONT_FOCUS
-        text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
+        icons[curr_i].source:on_key_focus_out()
+        dolater(100,function()
+        text[curr_i].contract:start()--font = MAIN_MENU_FONT
+        text[new_i].expand:start()
+        --icons[new_i].source:on_key_focus_in()--.font  = MAIN_MENU_FONT_FOCUS
+        --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[curr_i].x - text[new_i].x
         
         --new_icon(text[new_i].icon, 100)
@@ -245,7 +263,7 @@ local create = function(items)
         --print(curr_icon.source,curr_icon.source.gid)
         --curr_icon.source:on_key_focus_in()
         text_items:animate{
-            mode = "EASE_IN_QUAD",
+            mode = "EASE_IN_OUT_QUAD",
             duration = 300,
             x = text_items.x + dx,
             on_completed = function()
@@ -264,11 +282,14 @@ local create = function(items)
                 print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
+                icons[new_i].source:on_key_focus_in()
             end
         }
         
+        dolater(50,function()
         backdrop:cycle_right()
-        
+        end)
+        end)
         return true
     end
     
@@ -288,13 +309,15 @@ local create = function(items)
     
     function instance:on_key_focus_in(self)
         print("c menu okfi")
-        text[curr_i].font  = STORE_MENU_FONT_FOCUS
-        text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}
+        text[curr_i].expand:start()--[[.font  = STORE_MENU_FONT_FOCUS
+        text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}--]]
+        icons[curr_i].source:on_key_focus_in()
     end
     function instance:on_key_focus_out(self)
         print("c menu okfo")
-        text[curr_i].font  = STORE_MENU_FONT
-        text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}
+        text[curr_i].contract:start()--[[.font  = STORE_MENU_FONT
+        text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}--]]
+        icons[curr_i].source:on_key_focus_out()
     end
     --[[
     function curr_icon:on_key_down(...) 
