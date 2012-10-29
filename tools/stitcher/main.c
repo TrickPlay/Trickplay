@@ -1,4 +1,4 @@
-#include <gio/gio.h>
+#include <json-glib-1.0/json-glib/json-glib.h>
 #include <magick/MagickCore.h>
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +9,13 @@
 
 void error( char * msg ) {
 	fprintf( stderr, "%s\n"
-        "Usage: stitcher /path/to/directory [-bcmr] [-i *] [-o *] \n"
+        "Usage: stitcher /paths/to/inputs [-bcmr] [-i *] [-j *] [-o *] \n"
+        "\n"
+        "Inputs:\n"
+        "                 stitcher will accept a list of directories ang/or images,\n"
+        "                 and things that might be convertible to images (ie. SVG).\n"
+        "                 Experiment to see what input formats work for your case.\n"
+        "\n"
         "Flags:\n"
         "   -h            Show this help and exit.\n"
         "\n"
@@ -27,12 +33,16 @@ void error( char * msg ) {
         "      [int]      One integer size filter can be passed, such as 256, to\n"
         "                 prevent large images from being included in a spritesheet.\n"
         "\n"
+        "   -j [path]     Name the .json files of existing spritesheets to be merged\n"
+        "       ...       with the new images.\n"
+        "\n"
         "   -m            Divide sprites among multiple spritesheets if they don't fit\n"
         "                 within the maximum dimensions\n"
         "                 (NOTE: -m is not yet supported on the TrickPlay side.)\n"
         "\n"
         "   -o [path]     Set the path of the output files, which will have\n"
         "                 sequential numbers and a .png or .json extension appended.\n"
+        "                 Without this option, the path of the first input will be used.\n"
         "      [int]      Pass an integer like 4096 to set the maximum .png size.\n"
         "\n"
         "   -r            Recursively include subdirectories.\n", msg );
@@ -41,8 +51,7 @@ void error( char * msg ) {
 
 // options
 
-char * input_path  = NULL,
-     * output_path = NULL;
+char * output_path = NULL;
 
 int input_size_limit  = 4096,
     output_size_limit = 4096,
@@ -55,9 +64,14 @@ gboolean allow_multiple_sheets = FALSE,
 
 // globals
 
-GPtrArray * large_images;
-GSequence * items,
-          * leaves_sorted_by_area;
+GPtrArray  * large_images,
+           * input_paths,
+           * json_to_merge,
+           * output_images,
+           * output_infos;
+GSequence  * items,
+           * leaves_sorted_by_area;
+GHashTable * input_ids;
 
 typedef struct Page {
     int width,
@@ -88,86 +102,90 @@ void insert_item ( Item * item, Leaf * leaf, gboolean finalize )
 }
 
 enum {
+    FOUND_ONE,
     FOUND_NONE,
     FOUND_SOME,
     FOUND_ALL
 };
 
-int recalculate_layout ( int width, gboolean finalize )
+Leaf * find_leaf_for_item ( Item * item )
 {
-    current = (Page) { 0, 0, 0, 0 };
+    // searches for a leaf with the best shape-match that expands the height of the page the least
+    
+    int growth, close_growth = 0, fallback_growth = 0;
+    Leaf * leaf     = NULL,
+         * found    = NULL,
+         * best     = NULL,
+         * close    = NULL,
+         * fallback = NULL;
+    
+    GSequenceIter * si = g_sequence_search( leaves_sorted_by_area, item, leaf_compare, AREA );
+    while ( !g_sequence_iter_is_end( si ) )
+    {
+        leaf = g_sequence_get( si );
+        if ( leaf->w >= item->w && leaf->h >= item->h ) {
+            growth = MAX( current.height, leaf->y + item->h ) - current.height;
+            if ( leaf->w == item->w || leaf->h == item->h )
+            {
+                if ( growth == 0 )
+                {
+                    found = leaf;
+                    break;
+                }
+                else if ( growth < close_growth || close_growth == 0 )
+                {
+                    close = leaf;
+                    close_growth = growth;
+                }
+            }
+            else
+            {
+                if ( growth == 0 )
+                {
+                    best = leaf;
+                }
+                else if ( growth < fallback_growth || fallback_growth == 0 )
+                {
+                    fallback = leaf;
+                    fallback_growth = growth;
+                }
+            }
+        }
+        si = g_sequence_iter_next( si );
+    }
+    
+    return found ?: best ?: close ?: fallback ?: NULL;
+}
+
+int recalculate_layout ( int width, int height, gboolean finalize )
+{
+    current = (Page) { finalize ? 0 : width, 0, 0, 0 };
     int f = 0, nf = 0;
     
     leaves_sorted_by_area = g_sequence_new( NULL );
     leaf_new( 0, 0, MAX( width, minimum.width ), output_size_limit * ( allow_multiple_sheets ? 1 : 2 ) );
     
+    // iterate through all items
+    
     GSequenceIter * i = g_sequence_get_begin_iter( items );
     while ( !g_sequence_iter_is_end( i ) )
     {
         Item * item = (Item *) g_sequence_get( i );
-        GSequenceIter * si;
-        
-        if ( item->placed == TRUE )
+        if ( !item->placed )
         {
-            i = g_sequence_iter_next( i );
-            continue;
-        }
-        
-        // searches for a leaf with the best shape-match that expands the height of the page the least
-        
-        int growth, close_growth = 0, fallback_growth = 0;
-        Leaf * leaf     = NULL,
-             * found    = NULL,
-             * best     = NULL,
-             * close    = NULL,
-             * fallback = NULL;
-        
-        si = g_sequence_search( leaves_sorted_by_area, item, leaf_compare, AREA );
-        while ( !g_sequence_iter_is_end( si ) )
-        {
-            leaf = g_sequence_get( si );
-            if ( leaf->w >= item->w && leaf->h >= item->h ) {
-                growth = MAX( current.height, leaf->y + item->h ) - current.height;
-                if ( leaf->w == item->w || leaf->h == item->h )
-                {
-                    if ( growth == 0 )
-                    {
-                        found = leaf;
-                        break;
-                    }
-                    else if ( growth < close_growth || close_growth == 0 )
-                    {
-                        close = leaf;
-                        close_growth = growth;
-                    }
-                }
-                else
-                {
-                    if ( growth == 0 )
-                        best = leaf;
-                    else if ( growth < fallback_growth || fallback_growth == 0 )
-                    {
-                        fallback = leaf;
-                        fallback_growth = growth;
-                    }
-                }
+            Leaf * leaf = find_leaf_for_item( item );
+            if ( leaf )
+            {
+                f++;
+                insert_item( item, leaf, finalize );
             }
-            si = g_sequence_iter_next( si );
-        }
-        
-        if ( found != NULL ||
-           ( found = best ) != NULL ||
-           ( found = close ) != NULL ||
-           ( found = fallback ) != NULL ) {
-            f++;
-            insert_item( item, found, finalize );
-        }
-        else
-        {
-            if ( allow_multiple_sheets )
-                nf++;
             else
-                return FOUND_NONE;
+            {
+                if ( allow_multiple_sheets )
+                    nf++;
+                else
+                    return FOUND_NONE;
+            }
         }
         
         i = g_sequence_iter_next( i );
@@ -178,7 +196,8 @@ int recalculate_layout ( int width, gboolean finalize )
 	if ( current.height <= output_size_limit ) {
 		if ( allow_multiple_sheets )
         {
-            if ( best.coverage == 0 || pow(current.coverage, 4.0) * current.area > pow(best.coverage, 4.0) * best.area )
+            if ( best.coverage == 0 || pow( current.coverage, 4.0 ) * current.area
+                    > pow( best.coverage, 4.0 ) * best.area )
                 best = current;
 		}
         else if ( best.area == 0 || current.area < best.area || 
@@ -186,13 +205,13 @@ int recalculate_layout ( int width, gboolean finalize )
                   current.width + current.height <= best.width + best.height ) )
 			best = current;
 	}
-  
+    
     // collect garbage
     
-    g_sequence_foreach(leaves_sorted_by_area, (GFunc) free, NULL );
+    g_sequence_foreach( leaves_sorted_by_area, (GFunc) free, NULL );
     g_sequence_free( leaves_sorted_by_area );
-		
-	return f > 0 ? ( nf == 0 ? FOUND_ALL: FOUND_SOME ) : FOUND_NONE;
+	
+	return f > 0 ? ( nf == 0 ? FOUND_ALL : FOUND_SOME ) : FOUND_NONE;
 }
 
 char * json_item ( Item * item )
@@ -206,8 +225,22 @@ char * json_item ( Item * item )
 void composite_item( Image * dest, Item * item, ExceptionInfo * exception )
 {
     ImageInfo * temp_info = AcquireImageInfo();
-    CopyMagickString( temp_info->filename, item->path, MaxTextExtent );
-    Image * temp_image = ReadImage( temp_info, exception );
+    Image     * temp_image;
+    
+    if ( item->path )
+    {
+        CopyMagickString( temp_info->filename, item->path, MaxTextExtent );
+        temp_image = ReadImage( temp_info, exception );
+    }
+    else if ( item->source )
+    {
+        temp_image = item->source;
+    }
+    else
+    {
+        DestroyImageInfo( temp_info );
+        return;
+    }
         
     CompositeImage( dest, ReplaceCompositeOp , temp_image,
                    item->x + ( add_buffer_pixels ? 1 : 0 ),
@@ -261,63 +294,119 @@ GString * export_image( char * png_path )
     while ( !g_sequence_iter_is_end( si ) )
     {
         Item * item = g_sequence_get( si );
-        
-        if ( item->placed == FALSE )
+        if ( item->placed )
         {
-            si = g_sequence_iter_next( si );
-            continue;
+            sprites[i++] = json_item( item );
+            composite_item( output_image, item, exception );
+            
+            sj = g_sequence_iter_next( si );
+            g_sequence_remove( si );
+            si = sj;
         }
-        
-        sprites[i++] = json_item( item );
-        composite_item( output_image, item, exception );
-        
-        sj = g_sequence_iter_next( si );
-        g_sequence_remove( si );
-        si = sj;
     }
     
     // aggregate json
     
     g_string_append( str, g_strjoinv( ",", sprites ) );
-    g_string_append( str, g_strdup_printf( "\n\t],\n\t\"img\": \"%s\"\n}", png_path ) );
+    g_string_append( str, g_strdup_printf( "\n\t],\n\t\"img\": \"%s\"\n}", g_path_get_basename( png_path ) ) );
     
-    // write out the png
+    // tell the image where to save
       
     CopyMagickString( output_info->filename,  png_path, MaxTextExtent );
-    CopyMagickString( output_info->magick,    "png",   MaxTextExtent );
+    CopyMagickString( output_info->magick,    "png",    MaxTextExtent );
     CopyMagickString( output_image->filename, png_path, MaxTextExtent );
-    WriteImage( output_info, output_image );
+    
+    g_ptr_array_add( output_images, output_image );
+    g_ptr_array_add( output_infos, output_info );
     
     fprintf( stderr, "%s\n", png_path );
     
     // collect garbage
     
     DestroyExceptionInfo( exception );
-    DestroyImageInfo( output_info );
-    DestroyImage( output_image );
     
     return str;
 }
 
-void export_json ( char * json_path, GString * str )
+void merge_json ( char * path )
+{
+    JsonParser * json = json_parser_new();
+    gboolean loaded = json_parser_load_from_file( json, path, NULL );
+    if ( !loaded )
+    {
+        error( g_strdup_printf( "Error: could not load spritesheet %s as json.\n", path ) );
+        exit(1);
+    }
+    
+    JsonObject * root = json_node_get_object( json_parser_get_root( json ) );
+    
+    char * img = g_build_filename( g_path_get_dirname( path ),
+        json_object_get_string_member( root, "img" ), NULL );
+    
+    ExceptionInfo * exception = AcquireExceptionInfo();
+    ImageInfo * source_info = AcquireImageInfo();
+    CopyMagickString( source_info->filename, img, MaxTextExtent );
+    Image * source_image = ReadImage( source_info, exception );
+
+    if ( exception->severity != UndefinedException )
+    {
+        fprintf( stderr, "Could not load source image of spritesheet %s, %s.\n", path, img );
+        exit( 1 );
+    }
+    
+    JsonArray * sprites = json_object_get_array_member( root, "sprites" );
+    int length = json_array_get_length( sprites );
+    
+    int i;
+    
+    for ( i = 0; i < length; i++ )
+    {
+        JsonObject * sprite = json_array_get_object_element( sprites, i );
+        char * id = (char *) json_object_get_string_member( sprite, "id" );
+        id = strdup( id );
+        Item * item = item_new( id );
+        
+        if ( item != NULL )
+        {
+            RectangleInfo rect = {
+                json_object_get_int_member( sprite, "w" ),
+                json_object_get_int_member( sprite, "h" ),
+                json_object_get_int_member( sprite, "x" ),
+                json_object_get_int_member( sprite, "y" )
+            };
+            
+            item_set_source( item, ExcerptImage( source_image, &rect, exception ) );
+            item_add_to_items( item );
+        }
+    }
+    
+    DestroyImage( source_image );
+    DestroyImageInfo( source_info );
+    DestroyExceptionInfo( exception );
+    g_object_unref( json );
+}
+
+void export_json ( char * json_path, char * contents, int len )
 {
     GFile *json = g_file_new_for_path( json_path );
-    g_file_replace_contents  ( json, str->str, str->len, NULL, FALSE,
+    g_file_replace_contents  ( json, contents, len, NULL, FALSE,
                                G_FILE_CREATE_NONE, NULL, NULL, NULL );
-    g_string_free( str, TRUE );
     
     fprintf( stderr, "Output map to %s\n", json_path );
 }
 
 enum {
-    DEFAULT,
+    INPUT_PATHS,
+    SET_FORGET = 'f',
     SET_INPUT  = 'i',
-    SET_OUTPUT = 'o'
+    SET_JSON_MERGE = 'j',
+    SET_OUTPUT = 'o',
+    NO_ARGS,
 };
 
 void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
 {
-    int i, j, l, state = DEFAULT;
+    int i, j, l, state = INPUT_PATHS;
     char * arg;
     
     for ( i = 1; i < argc; i++ )
@@ -328,33 +417,39 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
             for ( j = 1; j < l; j++ )
                 switch( (char) arg[j] )
                 {
+                    case 'f':
                     case 'i':
+                    case 'j':
                     case 'o':
                         state = arg[j];
                         break;
                     
                     case 'b':
                         add_buffer_pixels = TRUE;
-                        state = DEFAULT;
+                        state = NO_ARGS;
                         break;
                     
                     case 'c':
                         copy_large_images = TRUE;
-                        state = DEFAULT;
+                        state = NO_ARGS;
                         break;
                     
                     case 'm':
                         allow_multiple_sheets = TRUE;
-                        state = DEFAULT;
+                        state = NO_ARGS;
                         break;
                     
                     case 'r':
                         recursive = TRUE;
-                        state = DEFAULT;
+                        state = NO_ARGS;
                         break;
                     
                     case 'h':
-                        error("Help & Examples:\n\n"
+                        system( g_strdup_printf( "man -l %s.man", argv[0] ) );
+                        exit(0);
+                        error("\n"
+        "Help & Examples:\n"
+        "\n"
         "stitcher assets/ui\n"
         "       Will pick up all of the images in the directory assets/ui and create two\n"
         "       files, assets/ui.png (one PNG of all the input images packed together) and\n"
@@ -365,9 +460,10 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
         "           sprite = Sprite { sheet = ui, id = 'button-press.png' }\n"
         "       Sprites behave just as if they were loaded from the original image.\n"
         "\n"
-        "stitcher assets/ui -i *.png nav/bg-?.jpg 256\n"
-        "       Load all PNGs, but only JPGs whose filenames match nav/bg-?.jpg, and filter\n"
-        "       out images bigger than 256 pixels on a side.\n"
+        "stitcher assets/ui special-image.jpg -i *.png nav/bg-?.jpg 256\n"
+        "       Load all PNGs plus JPGs whose filenames match 'nav/bg-?.jpg', and filter\n"
+        "       out images bigger than 256 pixels on a side. 'special-image.jpg' doesn't\n"
+        "       match either filter, but will be included since it was named directly.\n"
         "\n"
         "stitcher assets/ui -o sprites/ui 512 -m\n"
         "       Output the JSON map as sprites/ui.json. In addition, spritesheets created\n"
@@ -378,7 +474,11 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
         "stitcher assets/ui -i 256 -o 512 -bcm\n"
         "       -b creates a 1-pixel buffer around each sprite to prevent scaling problems,\n"
         "       while -c copies over all images that fail the input size filter, 256, as\n"
-        "       stand-alone single-image spritesheets.\n");
+        "       stand-alone single-image spritesheets.\n"
+        "\n"
+        "stitcher assets/ui -j assets/old-ui-1.json assets/old-ui-2.json\n"
+        "       -j merges existing spritesheets into the output. This can be used when a\n"
+        "       previously created spritesheet, for example, needs to be updated.\n");
                         break;
                     
                     default:
@@ -388,6 +488,10 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
         else
             switch( state )
             {
+                case SET_FORGET:
+                    g_hash_table_add( input_ids, arg );
+                    break;
+                
                 case SET_INPUT:
                     for ( j = 0; j < l; j++ )
                         if ( !g_ascii_isdigit( arg[j] ) )
@@ -408,11 +512,21 @@ void handle_arguments ( int argc, char ** argv, GPtrArray * input_patterns )
                         output_path = arg;
                     break;
                 
+                case SET_JSON_MERGE:
+                    g_ptr_array_add( json_to_merge, arg );
+                    break;
+                
+                case INPUT_PATHS:
+                {
+                    char * lc = &arg[ strlen( arg ) - 1 ];
+                    if ( * lc == '/' )
+                         * lc = '\0';
+                    g_ptr_array_add( input_paths, arg );
+                    break;
+                }
+                
                 default:
-                    if ( i == 1 )
-                        input_path = arg;
-                    else
-                        error( "Error: ambiguous input path\n" );
+                    error( g_strdup_printf( "Error: ambiguous argument %s\n", arg ) );
                     break;
             }
     }
@@ -422,35 +536,43 @@ int main ( int argc, char ** argv )
 {
     g_type_init();
     GPtrArray * input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
-    large_images   = g_ptr_array_new_with_free_func( (GDestroyNotify) free );
+    large_images  = g_ptr_array_new_with_free_func( (GDestroyNotify) free );
+    output_images = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
+    output_infos  = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
+    json_to_merge = g_ptr_array_new();
+    input_paths   = g_ptr_array_new();
+    input_ids     = g_hash_table_new( g_str_hash, g_str_equal );
     
     handle_arguments( argc, argv, input_patterns );
     
-    if ( input_path == NULL )
-        error( "Error: no input path given\n" );
-    
-    char * last_char = &input_path[strlen( input_path ) - 1];
-    if ( * last_char == '/' )
-         * last_char = '\0';
+    if ( input_paths->len == 0 )
+        error( "Error: no input paths given\n" );
       
     if ( output_path == NULL )
-         output_path = input_path;
-    
-    GFile * base = g_file_new_for_commandline_arg( input_path );
-    if ( g_file_query_file_type( base, G_FILE_QUERY_INFO_NONE, NULL ) != G_FILE_TYPE_DIRECTORY )
-    {
-        fprintf( stderr, "Error: input path is not a directory\n" );
-        exit( 0 );
-    }
+         output_path = g_ptr_array_index( input_paths, 0 );
       
     MagickCoreGenesis( * argv, MagickTrue );
     
-    // load the files
-    
     items = g_sequence_new( (GDestroyNotify) free );
     smallest = (Page) { output_size_limit, output_size_limit, 0, 0 };
-    load( base, base, input_patterns, recursive );
-          
+    
+    // load the input files
+         
+    int status, i, j = 1;
+    
+    for ( i = 0; i < input_paths->len; i++ )
+    {
+        char * path = (char *) g_ptr_array_index( input_paths, i );
+        GFile * base = g_file_new_for_commandline_arg( path );
+        load( base, base, path, input_patterns, recursive );
+    }
+    
+    // load the json files of spritesheets to merge
+    
+    for ( i = 0; i < json_to_merge->len; i++ )
+        merge_json ( (char *) g_ptr_array_index( json_to_merge, i ) );
+    
+    
     if ( minimum.width > output_size_limit || minimum.height > output_size_limit )
     {
         fprintf( stderr, "Error: largest input file (%i x %i) won't fit within "
@@ -461,7 +583,6 @@ int main ( int argc, char ** argv )
     
     char * json_path = g_strdup_printf( "%s.json", output_path );
     GString * json = g_string_new("");
-    int status, i, j = 1;
     
     if ( allow_multiple_sheets )
     {
@@ -476,8 +597,8 @@ int main ( int argc, char ** argv )
             // iterate to find a good layout
             
             for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
-                recalculate_layout( i, FALSE );
-            status = recalculate_layout( best.width, TRUE );
+                recalculate_layout( i, 0, FALSE );
+            status = recalculate_layout( best.width, best.height, TRUE );
             
             if ( status == FOUND_NONE )
             {
@@ -506,7 +627,7 @@ int main ( int argc, char ** argv )
             if ( name == NULL )
                 name = item->id;
             else
-                name += 1; //g_strdup_printf( ".%s", name ); //
+                name += 1;
             fprintf( stderr, "Name is %s\n", name ); 
             GFile * dest = g_file_new_for_path( name );
 
@@ -537,7 +658,7 @@ int main ( int argc, char ** argv )
         
         int i;
         for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
-            recalculate_layout( i, FALSE );
+            recalculate_layout( i, 0, FALSE );
             
         if ( !allow_multiple_sheets && best.area == 0 )
         {
@@ -547,7 +668,7 @@ int main ( int argc, char ** argv )
             exit( 0 );
         }
         
-        recalculate_layout( best.width, TRUE );
+        recalculate_layout( best.width, best.height, TRUE );
         
         fprintf( stderr,"Page match (%i x %i pixels, %.4g%% coverage): ",
                  best.width, best.height, 100.0 * (gfloat) minimum.area / (gfloat) best.area );
@@ -555,9 +676,25 @@ int main ( int argc, char ** argv )
         json = export_image( g_strdup_printf( "%s.png", output_path ) );
     }
     
-    export_json( json_path, json );
+    // export files
+    
+    export_json( json_path, json->str, json->len );
+    g_string_free( json, TRUE );
+    
+    for ( i = 0; i < output_images->len; i++ )
+        WriteImage( (ImageInfo *) g_ptr_array_index( output_infos, i ),
+                    (Image     *) g_ptr_array_index( output_images, i ) );
+    
+    // collect garbage
     
     g_ptr_array_free( input_patterns, TRUE );
+    g_ptr_array_free( input_paths, TRUE );
+    g_ptr_array_free( output_images, TRUE );
+    g_ptr_array_free( output_infos, TRUE );
+    g_ptr_array_free( json_to_merge, TRUE );
+    g_ptr_array_free( large_images, TRUE );
+    
+    g_hash_table_destroy( input_ids );
     g_sequence_free( items );
     
     MagickCoreTerminus();
