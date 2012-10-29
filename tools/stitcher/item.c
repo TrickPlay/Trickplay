@@ -27,6 +27,7 @@ typedef struct Item {
 
 Item * item_new ( char * id )
 {
+    id = strdup( id );
     if ( g_hash_table_contains( input_ids, id ) )
         return NULL;
     else
@@ -55,7 +56,7 @@ Item * item_new_from_file ( char * id, char * base_path, GFile * file )
     if ( item == NULL )
         return NULL;
     
-    char * path = base_path ? g_build_filename( base_path, id, NULL ) : strdup( id );
+    char * path = base_path ? g_build_filename( base_path, item->id, NULL ) : item->id;
     
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo * input_info = AcquireImageInfo();
@@ -63,7 +64,10 @@ Item * item_new_from_file ( char * id, char * base_path, GFile * file )
     Image * temp_image = PingImage( input_info, exception );
     
     if ( exception->severity != UndefinedException )
+    {
+        free( item );
         return NULL;
+    }
     
     item->path = path;
     item->file = file;
@@ -114,6 +118,18 @@ gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
     return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 }
 
+void item_add_to_items ( Item * item )
+{
+    if ( item != NULL )
+    {
+        if ( item->w <= input_size_limit && item->h <= input_size_limit )
+            g_sequence_insert_sorted( items, item, item_compare, NULL );
+        else if ( copy_large_images && allow_multiple_sheets &&
+                  item->w <= output_size_limit && item->h <= output_size_limit )
+            g_ptr_array_add( large_images, item );
+    }
+}
+
 void load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
@@ -148,17 +164,7 @@ void load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patt
                 break;
         
         if ( i == 0 || i < input_patterns->len || file == base)
-        {
-            Item * item = item_new_from_file( path, ( file == base ) ? NULL : base_path, file );
-            if ( item != NULL )
-            {
-                if ( item->w <= input_size_limit && item->h <= input_size_limit )
-                    g_sequence_insert_sorted( items, item, item_compare, NULL );
-                else if ( copy_large_images && allow_multiple_sheets &&
-                          item->w <= output_size_limit && item->h <= output_size_limit )
-                    g_ptr_array_add( large_images, item );
-            }
-        }
+            item_add_to_items( item_new_from_file( path, ( file == base ) ? NULL : base_path, file ) );
     }
     
     g_object_unref( info );
