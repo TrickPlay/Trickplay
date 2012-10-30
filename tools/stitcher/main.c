@@ -74,22 +74,20 @@ GPtrArray  * large_images,
            * json_to_merge,
            * output_images,
            * output_infos;
-GSequence  * items,
-           * leaves_sorted_by_area;
+GSequence  * items;
 GHashTable * input_ids;
 
-Page current,
-     smallest,
+Page smallest,
      minimum  = { 0, 0, 0, 0 },
      best     = { 0, 0, 0, 0 };
 
-void insert_item ( Item * item, Leaf * leaf, gboolean finalize )
+void insert_item ( Item * item, Leaf * leaf, gboolean finalize, GSequence * leaves_sorted_by_area, Page * current )
 {
-    int covered = (int) ( current.coverage * (float) current.area );
-    current.width  = MAX( current.width,  leaf->x + item->w );
-    current.height = MAX( current.height, leaf->y + item->h );
-    current.area = current.width * current.height;
-    current.coverage = (float) ( covered + item->w * item->h ) / (float) current.area;
+    int covered = (int) ( current->coverage * (float) current->area );
+    current->width  = MAX( current->width,  leaf->x + item->w );
+    current->height = MAX( current->height, leaf->y + item->h );
+    current->area = current->width * current->height;
+    current->coverage = (float) ( covered + item->w * item->h ) / (float) current->area;
 
     item->x = leaf->x;
     item->y = leaf->y;
@@ -104,7 +102,7 @@ enum {
     FOUND_ALL
 };
 
-Leaf * find_leaf_for_item ( Item * item )
+Leaf * find_leaf_for_item ( Item * item, GSequence * leaves_sorted_by_area, Page * current )
 {
     // searches for a leaf with the best shape-match that expands the height of the page the least
 
@@ -119,8 +117,9 @@ Leaf * find_leaf_for_item ( Item * item )
     while ( !g_sequence_iter_is_end( si ) )
     {
         leaf = g_sequence_get( si );
+        //fprintf( stderr, "leaf: %i %i %i\n", leaf->x, leaf->y, leaf->w );
         if ( leaf->w >= item->w && leaf->h >= item->h ) {
-            growth = MAX( current.height, leaf->y + item->h ) - current.height;
+            growth = MAX( current->height, leaf->y + item->h ) - current->height;
             if ( leaf->w == item->w || leaf->h == item->h )
             {
                 if ( growth == 0 )
@@ -155,10 +154,15 @@ Leaf * find_leaf_for_item ( Item * item )
 
 int recalculate_layout ( int width, int height, gboolean finalize )
 {
-    current = (Page) { finalize ? 0 : width, 0, 0, 0 };
+    Page current;
+    if(!finalize)
+    {
+        current.width = width;
+    }
+    
     int f = 0, nf = 0;
 
-    leaves_sorted_by_area = g_sequence_new( NULL );
+    GSequence * leaves_sorted_by_area = g_sequence_new( NULL );
     Leaf *leaf = leaf_new( 0, 0, MAX( width, minimum.width ), output_size_limit * ( allow_multiple_sheets ? 1 : 2 ) );
     g_sequence_insert_sorted( leaves_sorted_by_area, leaf, leaf_compare, LEAF_AREA_COMPARE );
 
@@ -170,14 +174,16 @@ int recalculate_layout ( int width, int height, gboolean finalize )
         Item * item = (Item *) g_sequence_get( i );
         if ( !item->placed )
         {
-            Leaf * leaf = find_leaf_for_item( item );
+            Leaf * leaf = find_leaf_for_item( item, leaves_sorted_by_area, &current );
+            
             if ( leaf )
             {
                 f++;
-                insert_item( item, leaf, finalize );
+                insert_item( item, leaf, finalize, leaves_sorted_by_area, &current );
             }
             else
             {
+                //fprintf( stderr, "failed to find place\n" );
                 if ( allow_multiple_sheets )
                     nf++;
                 else
@@ -190,6 +196,8 @@ int recalculate_layout ( int width, int height, gboolean finalize )
 
     // save this layout if it's the best so far
 
+    //fprintf( stderr, "%i %i current: %i %i %i, best %i %i %i \n", g_sequence_get_length( items ), g_sequence_get_length( leaves_sorted_by_area ), current.width, current.height, current.area, best.width, best.height, best.area );
+
 	if ( current.height <= output_size_limit ) {
 		if ( allow_multiple_sheets )
         {
@@ -200,7 +208,10 @@ int recalculate_layout ( int width, int height, gboolean finalize )
         else if ( best.area == 0 || current.area < best.area ||
 				( current.area == best.area &&
                   current.width + current.height <= best.width + best.height ) )
+        {
+            //fprintf( stderr, "found a new best\n");
 			best = current;
+        }
 	}
 
     // collect garbage
@@ -563,8 +574,8 @@ int main ( int argc, char ** argv )
     {
         char * path = (char *) g_ptr_array_index( input_paths, i );
         GFile * base = g_file_new_for_commandline_arg( path );
-
-        item_load( base, base, path, input_patterns, recursive, add_buffer_pixels, &minimum, &smallest, &output_size_step, items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets );
+        
+        item_load( base, base, path, input_patterns, recursive, add_buffer_pixels, &minimum, &smallest, &output_size_step, items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets, input_ids );
     }
 
     // load the json files of spritesheets to merge
@@ -646,6 +657,10 @@ int main ( int argc, char ** argv )
     }
     else
     {
+        fprintf( stderr, "else" );
+        
+        fprintf( stderr, "%i %i\n", minimum.area, output_size_limit );
+        
         if ( minimum.area > output_size_limit * output_size_limit )
         {
             fprintf( stderr, "Error: total area of input files is larger than "
@@ -659,8 +674,11 @@ int main ( int argc, char ** argv )
         int i;
         for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
             recalculate_layout( i, 0, FALSE );
-
-        if ( !allow_multiple_sheets && best.area == 0 )
+        fprintf( stderr, "%i %i %i %i\n", i, minimum.width, minimum.height, minimum.area );
+        
+        fprintf( stderr, "%i %i %i\n", best.width, best.height, best.area );
+        
+        if ( best.area == 0 )
         {
             fprintf( stderr, "Error: can't fit all files within "
                              "output dimensions (%i x %i).\n",

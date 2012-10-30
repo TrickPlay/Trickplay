@@ -40,8 +40,12 @@ Item * item_new ( char * id )
     return item;
 }
 
-Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step )
+Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step, GHashTable * input_ids )
 {
+    if ( g_hash_table_lookup( input_ids, id ) )
+        return NULL;
+    
+    g_hash_table_insert( input_ids, id, id );
     Item * item = item_new( id );
     if ( item == NULL )
         return NULL;
@@ -65,7 +69,7 @@ Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean 
     item->h = (int) temp_image->rows    + ( add_buffer_pixels ? 2 : 0 );
     item->area = item->w * item->h;
 
-    minimum->area += item->area;
+    minimum->area   += item->area;
     minimum->width   = MAX( minimum->width,   item->w );
     minimum->height  = MAX( minimum->height,  item->h );
     smallest->width  = MIN( smallest->width,  item->w );
@@ -101,7 +105,7 @@ void item_set_source( Item * item, Image * source, gboolean add_buffer_pixels, P
       *output_size_step = gcf( item->w, *output_size_step );
 }
 
-gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
+gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
     int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
@@ -120,7 +124,7 @@ void item_add_to_items ( Item * item, GSequence *items, int input_size_limit, in
     }
 }
 
-void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step, GSequence *items, int input_size_limit, int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets )
+void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step, GSequence *items, int input_size_limit, int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets, GHashTable * input_ids )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
     GFileType type = g_file_info_get_file_type( info );
@@ -137,7 +141,7 @@ void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input
         while ( ( child_info = g_file_enumerator_next_file( children, NULL, NULL ) ) != NULL )
         {
             child = g_file_get_child( file, g_file_info_get_name( child_info ) );
-            item_load( child, base, base_path, input_patterns, recursive, add_buffer_pixels, minimum, smallest, output_size_step, items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets );
+            item_load( child, base, base_path, input_patterns, recursive, add_buffer_pixels, minimum, smallest, output_size_step, items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets, input_ids );
             g_object_unref( child_info );
         }
 
@@ -154,7 +158,7 @@ void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input
                 break;
 
         if ( i == 0 || i < input_patterns->len || file == base)
-            item_add_to_items( item_new_from_file( path, ( file == base ) ? NULL : base_path, file, add_buffer_pixels, minimum, smallest, output_size_step ), items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets );
+            item_add_to_items( item_new_from_file( path, ( file == base ) ? NULL : base_path, file, add_buffer_pixels, minimum, smallest, output_size_step, input_ids ), items, input_size_limit, output_size_limit, copy_large_images, large_images, allow_multiple_sheets );
     }
 
     g_object_unref( info );

@@ -54,6 +54,7 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
 
 Leaf * leaf_new ( int x, int y, int w, int h )
 {
+    //fprintf(stderr, "new leaf: %i %i %i %i\n",x,y,w,h);
     Leaf * leaf = malloc( sizeof( Leaf ) );
     leaf->x = x;
     leaf->y = y;
@@ -68,9 +69,9 @@ void leaf_cut ( Leaf * leaf, int w, int h, GSequence *leaves_sorted_by_area, con
 {
     gboolean b = leaf->w - w > leaf->h - h;
     if ( leaf->w - w > smallest->width )
-        leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h );
+        g_sequence_insert_sorted( leaves_sorted_by_area, leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h ), leaf_compare, LEAF_AREA_COMPARE );
     if ( leaf->h - h > smallest->height )
-        leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h );
+        g_sequence_insert_sorted( leaves_sorted_by_area, leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h ), leaf_compare, LEAF_AREA_COMPARE );
 
     g_sequence_remove_sorted( leaves_sorted_by_area, leaf, leaf_compare, LEAF_AREA_COMPARE );
     free( leaf );
