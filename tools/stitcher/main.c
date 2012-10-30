@@ -58,7 +58,7 @@ void error( char * msg ) {
 
 char * output_path = NULL;
 
-int input_size_limit  = 4096,
+unsigned int input_size_limit  = 4096,
     output_size_limit = 4096,
     output_size_step  = 0;
 
@@ -83,7 +83,7 @@ Page smallest,
 
 void insert_item ( Item * item, Leaf * leaf, gboolean finalize, GSequence * leaves_sorted_by_area, Page * current )
 {
-    int covered = (int) ( current->coverage * (float) current->area );
+    unsigned int covered = (unsigned int) ( current->coverage * (float) current->area );
     current->width  = MAX( current->width,  leaf->x + item->w );
     current->height = MAX( current->height, leaf->y + item->h );
     current->area = current->width * current->height;
@@ -152,10 +152,11 @@ Leaf * find_leaf_for_item ( Item * item, GSequence * leaves_sorted_by_area, Page
     return found ?: best ?: close ?: fallback ?: NULL;
 }
 
-int recalculate_layout ( int width, int height, gboolean finalize )
+int recalculate_layout ( unsigned int width, unsigned int height __attribute__ ((unused)), gboolean finalize )
 {
-    Page current;
-    if(!finalize)
+    Page current = { 0, 0, 0, 0.0f };
+    
+    if( !finalize )
     {
         current.width = width;
     }
@@ -163,8 +164,7 @@ int recalculate_layout ( int width, int height, gboolean finalize )
     int f = 0, nf = 0;
 
     GSequence * leaves_sorted_by_area = g_sequence_new( NULL );
-    Leaf *leaf = leaf_new( 0, 0, MAX( width, minimum.width ), output_size_limit * ( allow_multiple_sheets ? 1 : 2 ) );
-    g_sequence_insert_sorted( leaves_sorted_by_area, leaf, leaf_compare, LEAF_AREA_COMPARE );
+    g_sequence_insert_sorted( leaves_sorted_by_area, leaf_new( 0, 0, MAX( width, minimum.width ), output_size_limit * ( allow_multiple_sheets ? 1 : 2 ) ), leaf_compare, LEAF_AREA_COMPARE );
 
     // iterate through all items
 
@@ -197,6 +197,8 @@ int recalculate_layout ( int width, int height, gboolean finalize )
     // save this layout if it's the best so far
 
     //fprintf( stderr, "%i %i current: %i %i %i, best %i %i %i \n", g_sequence_get_length( items ), g_sequence_get_length( leaves_sorted_by_area ), current.width, current.height, current.area, best.width, best.height, best.area );
+    
+    //fprintf( stderr, "result %u %u %u %f\n", current.width, current.height, current.area, current.coverage);
 
 	if ( current.height <= output_size_limit ) {
 		if ( allow_multiple_sheets )
@@ -209,8 +211,8 @@ int recalculate_layout ( int width, int height, gboolean finalize )
 				( current.area == best.area &&
                   current.width + current.height <= best.width + best.height ) )
         {
-            //fprintf( stderr, "found a new best\n");
 			best = current;
+            //fprintf( stderr, "found a new best %u %u %u %f\n", best.width, best.height, best.area, best.coverage);
         }
 	}
 
@@ -224,7 +226,7 @@ int recalculate_layout ( int width, int height, gboolean finalize )
 
 char * json_item ( Item * item )
 {
-    int a = add_buffer_pixels ? 1 : 0;
+    unsigned int a = add_buffer_pixels ? 1 : 0;
     return g_strdup_printf(
         "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
         item->x + a, item->y + a, item->w - 2*a, item->h - 2*a, item->id );
@@ -568,7 +570,7 @@ int main ( int argc, char ** argv )
 
     // load the input files
 
-    int status, i, j = 1;
+    unsigned int status, i, j = 1;
 
     for ( i = 0; i < input_paths->len; i++ )
     {
@@ -657,9 +659,6 @@ int main ( int argc, char ** argv )
     }
     else
     {
-        fprintf( stderr, "else" );
-        
-        fprintf( stderr, "%i %i\n", minimum.area, output_size_limit );
         
         if ( minimum.area > output_size_limit * output_size_limit )
         {
@@ -671,7 +670,7 @@ int main ( int argc, char ** argv )
 
         // iterate to find the best layout
 
-        int i;
+        unsigned int i;
         for ( i = minimum.width; i <= output_size_limit; i += output_size_step )
             recalculate_layout( i, 0, FALSE );
         fprintf( stderr, "%i %i %i %i\n", i, minimum.width, minimum.height, minimum.area );

@@ -2,7 +2,7 @@
 #define __MAIN_H__
 
 typedef struct Page {
-    int width,
+    unsigned int width,
         height,
         area;
     float coverage;

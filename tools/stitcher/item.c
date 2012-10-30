@@ -40,7 +40,7 @@ Item * item_new ( char * id )
     return item;
 }
 
-Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step, GHashTable * input_ids )
+Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean add_buffer_pixels, Page *minimum, Page *smallest, unsigned int *output_size_step, GHashTable * input_ids )
 {
     if ( g_hash_table_lookup( input_ids, id ) )
         return NULL;
@@ -65,8 +65,8 @@ Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean 
 
     item->path = path;
     item->file = file;
-    item->w = (int) temp_image->columns + ( add_buffer_pixels ? 2 : 0 );
-    item->h = (int) temp_image->rows    + ( add_buffer_pixels ? 2 : 0 );
+    item->w = (unsigned int) temp_image->columns + ( add_buffer_pixels ? 2 : 0 );
+    item->h = (unsigned int) temp_image->rows    + ( add_buffer_pixels ? 2 : 0 );
     item->area = item->w * item->h;
 
     minimum->area   += item->area;
@@ -86,11 +86,11 @@ Item * item_new_from_file ( char * id, char * base_path, GFile * file, gboolean 
     return item;
 }
 
-void item_set_source( Item * item, Image * source, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step )
+void item_set_source( Item * item, Image * source, gboolean add_buffer_pixels, Page *minimum, Page *smallest, unsigned int *output_size_step )
 {
     item->source = source;
-    item->w = (int) source->columns + ( add_buffer_pixels ? 2 : 0 );
-    item->h = (int) source->rows    + ( add_buffer_pixels ? 2 : 0 );
+    item->w = (unsigned int) source->columns + ( add_buffer_pixels ? 2 : 0 );
+    item->h = (unsigned int) source->rows    + ( add_buffer_pixels ? 2 : 0 );
     item->area = item->w * item->h;
 
     minimum->area += item->area;
@@ -108,11 +108,11 @@ void item_set_source( Item * item, Image * source, gboolean add_buffer_pixels, P
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
-    int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
+    unsigned int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
     return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 }
 
-void item_add_to_items ( Item * item, GSequence *items, int input_size_limit, int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets )
+void item_add_to_items ( Item * item, GSequence *items, unsigned int input_size_limit, unsigned int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets )
 {
     if ( item != NULL )
     {
@@ -124,7 +124,7 @@ void item_add_to_items ( Item * item, GSequence *items, int input_size_limit, in
     }
 }
 
-void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive, gboolean add_buffer_pixels, Page *minimum, Page *smallest, int *output_size_step, GSequence *items, int input_size_limit, int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets, GHashTable * input_ids )
+void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive, gboolean add_buffer_pixels, Page *minimum, Page *smallest, unsigned int *output_size_step, GSequence *items, unsigned int input_size_limit, unsigned int output_size_limit, gboolean copy_large_images, GPtrArray  * large_images, gboolean allow_multiple_sheets, GHashTable * input_ids )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
     GFileType type = g_file_info_get_file_type( info );
@@ -152,7 +152,7 @@ void item_load ( GFile * file, GFile * base, char * base_path, GPtrArray * input
     else if ( type == G_FILE_TYPE_REGULAR )
     {
         char * path = ( file == base ) ? base_path : g_file_get_relative_path( base, file );
-        int i;
+        unsigned int i;
         for ( i = 0; i < input_patterns->len; i++ )
             if ( g_pattern_match_string( g_ptr_array_index( input_patterns, i ), path ) )
                 break;
