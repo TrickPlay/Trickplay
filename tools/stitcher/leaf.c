@@ -52,7 +52,7 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
            user_data == LEAF_HEIGHT_COMPARE ? aa->h    - bb->h    : 0;
 }
 
-Leaf * leaf_new ( int x, int y, int w, int h )
+Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
 {
     //fprintf(stderr, "new leaf: %i %i %i %i\n",x,y,w,h);
     Leaf * leaf = malloc( sizeof( Leaf ) );
@@ -65,7 +65,7 @@ Leaf * leaf_new ( int x, int y, int w, int h )
     return leaf;
 }
 
-void leaf_cut ( Leaf * leaf, int w, int h, GSequence *leaves_sorted_by_area, const Page *smallest )
+void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, GSequence *leaves_sorted_by_area, const Page *smallest )
 {
     gboolean b = leaf->w - w > leaf->h - h;
     if ( leaf->w - w > smallest->width )
