@@ -272,7 +272,7 @@ static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointe
 
 	The devtools global variable provides low-level capabilities that are useful during development of a TrickPlay application.
 
-	Note: The devtools variable is available in TrickPlay Engine non-production builds only; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
+	Note: The devtools variable is available only in TrickPlay Engine non-production builds; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
 
 */
 

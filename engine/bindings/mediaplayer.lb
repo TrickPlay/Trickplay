@@ -458,7 +458,7 @@ global mediaplayer [[MP*]]
 
     	The load() function prepares a media resource for playback. The media resource is specified in a string URI. Preparation may include asynchronously loading the entire file or only a portion of the file, or doing nothing at all; the actual preparation performed may vary between mediaplayer implementations.
 
-    	When the preparation is finished, the <on_loaded> event handler is invoked. If a loading error occurs, the <on_error> event handler is called.
+    	When the preparation is finished, the <on_loaded> event is fired. If a loading error occurs, an <on_error> event is fired.
 
     	Note: A "file:"-type URI is not supported for security reasons. A media file stored in the application's app bundle can be prepared by specifying the file's path within the bundle's directory structure.
 
@@ -467,9 +467,9 @@ global mediaplayer [[MP*]]
     		uri - string URI specifying the media resource to prepare
     		extra - reserved for future enhancements
 
-    	*Return Value:* If the load operation began successfully, returns 0. Hook the <on_loaded> and <on_error> event handlers to receive notification when the operation is complete. If the load operation did not begin successfully, a non-zero error value is returned.
+    	*Return Value:* If the load operation began successfully, returns 0. Hook the <on_loaded> and <on_error> events to receive notification when the operation is complete. If the load operation did not begin successfully, a non-zero error value is returned.
 
-    	*See Also:* the <on_loaded> and <on_error> event handlers
+    	*See Also:* the <on_loaded> and <on_error> events
     */
 
     int load(string uri,string extra="")
@@ -496,7 +496,7 @@ global mediaplayer [[MP*]]
 
     	The play() function begins or resumes playing a media resource.
 
-    	A media resource must be properly prepared by the <load> function and the application must receive successful notification from the <on_loaded> event handler before calling the play() function.
+    	A media resource must be properly prepared by the <load> function and the application must receive successful notification from the <on_loaded> event before calling the play() function.
 
 		*Arguments:* None
 
@@ -723,25 +723,165 @@ global mediaplayer [[MP*]]
 
         ]];
 
-    /*
-    	Event Handler: on_loaded
+/***************************************
+	Function: add_onloaded_listener
 
-    	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
+	The add_onloaded_listener() function registers a handler function for <on_loaded> events.
 
-    	*Prototype:*
+	*Arguments:*
 
-    		(code)
-    		on_loaded( mediaplayer )
-    		(end)
+		f - reference to handler function. The function prototype is described below.
 
-    	*Arguments:*
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
 
-    		mediaplayer - reference to the mediaplayer variable that prepared the media resource
+	*Handler Prototype:*
 
-    	*Return Value:* None
+		(code)
+		f( mediaplayer )
+		(end)
 
-    	*See Also:* the <load> function and the <on_error> event handler
-	*/
+	*Handler Arguments:*
+
+    	mediaplayer - reference to the mediaplayer variable that prepared the media resource
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
+
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+	Function: remove_onloaded_listener
+
+	The remove_onloaded_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onloaded_listener> function
+*/
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+	Function: add_onerror_listener
+
+	The add_onerror_listener() function registers a handler function for <on_error> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onerror_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( mediaplayer, code, message )
+		(end)
+
+	*Handler Arguments:*
+
+    	mediaplayer - reference to the mediaplayer variable that prepared the media resource
+   		code - integer error code
+   		message - descriptive error message
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_error> event and the <remove_onerror_listener> function
+*/
+
+    int add_onerror_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_error" , L );
+        ]];
+
+/***************************************
+	Function: remove_onerror_listener
+
+	The remove_onerror_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onerror_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onerror_listener> function
+*/
+
+    remove_onerror_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_error" , L );
+        ]];
+
+/***************************************
+	Function: add_onendofstream_listener
+
+	The add_onendofstream_listener() function registers a handler function for <on_end_of_stream> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendofstream_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( mediaplayer )
+		(end)
+
+	*Handler Arguments:*
+
+    	mediaplayer - reference to the mediaplayer variable that prepared the media resource
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_end_of_stream> event and the <remove_onendofstream_listener> function
+*/
+
+    int add_onendofstream_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+/***************************************
+	Function: remove_onendofstream_listener
+
+	The remove_onendofstream_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onendofstream_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onendofstream_listener> function
+*/
+
+    remove_onendofstream_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+/***************************************
+   	Event: on_loaded
+
+   	The on_loaded event occurs after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event will be fired, instead.
+
+	*See Also:* the <add_onloaded_listener> function
+*/
 
     function on_loaded
         [[
@@ -751,37 +891,13 @@ global mediaplayer [[MP*]]
             UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
         ]];
 
-    int add_onloaded_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
-        ]];
+/***************************************
+   	Event: on_error
 
-    remove_onloaded_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
-        ]];
+    The on_error event occurs after the failure of a media-preparation operation started by the <load> function. If the preparation completed successfully, the <on_loaded> event is fired, instead.
 
-    /*
-    	Event Handler: on_error
-
-    	The on_error() event handler is invoked after the failure of a media-preparation operation started by the <load> function. If the preparation completed successfully, the <on_loaded> event handler will be invoked, instead.
-
-    	*Prototype:*
-
-    		(code)
-    		on_error( mediaplayer, code, message )
-    		(end)
-
-    	*Arguments:*
-
-    		mediaplayer - reference to the mediaplayer variable that attempted to prepare the media resource
-    		code - integer error code
-    		message - descriptive error message
-
-    	*Return Value:* None
-
-    	*See Also:* the <load> function and the <on_loaded> event handler
-    */
+	*See Also:* the <add_onerror_listener> function
+*/
 
     function on_error
         [[
@@ -791,37 +907,15 @@ global mediaplayer [[MP*]]
             UserData::get( L )->set_last_callback( (char*) "on_error" , L );
         ]];
 
-    int add_onerror_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_error" , L );
-        ]];
+/***************************************
+    Event: on_end_of_stream
 
-    remove_onerror_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_error" , L );
-        ]];
+	The on_end_of_stream event occurs when a media resource is playing and the end of the resource is reached. Playback is automatically paused.
 
-    /*
-    	Event Handler: on_end_of_stream
+   	Note: The media resource must be playing to fire the on_end_of_stream event
 
-    	The on_end_of_stream() event handler is invoked when a media resource is playing and the end of the resource is reached. Playback is automatically paused.
-
-    	Note: The media resource must be playing to invoke the on_end_of_stream() event handler.
-
-    	*Prototype:*
-
-    		(code)
-    		on_end_of_stream( mediaplayer )
-    		(end)
-
-    	*Arguments:*
-
-    		mediaplayer - reference to the mediaplayer variable that was playing the resource
-
-    	*Return Value:* None
-
-    	*See Also:* the <play> function
-    */
+   	*See Also:* the <add_onendofstream_listener> function
+*/
 
     function on_end_of_stream
         [[
@@ -831,15 +925,10 @@ global mediaplayer [[MP*]]
             UserData::get( L )->set_last_callback( (char*) "on_end_of_stream" , L );
         ]];
 
-    int add_onendofstream_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_end_of_stream" , L );
-        ]];
+/***************************************
 
-    remove_onendofstream_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_end_of_stream" , L );
-        ]];
+*/
+
 }
 
 [[

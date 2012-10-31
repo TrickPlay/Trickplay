@@ -3,13 +3,13 @@
 	Interface: URLRequestCancel
 
 	The URLRequestCancel interface enables a pending, in-progress HTTP request to be cancelled prior to its completion.
-	
+
 	A URLRequestCancel object is returned by the <URLRequest.send> and <URLRequest.stream> functions. A TrickPlay application cannot create a URLRequestCancel object directly; it must use the object returned by the URLRequest functions.
-	
+
 	Function: cancel
-	
+
 	The cancel() function terminates a pending, in-progress HTTP request started by calling the <URLRequest.send> or <URLRequest.stream> function. When a request is cancelled, the object's <URLRequest.on_complete> event handler is not invoked.
-	
+
 	*Prototype:*
 
 		(code)
@@ -17,27 +17,27 @@
 		(end)
 
 	*Arguments:* None
-	
+
 	*Return Value:* None
-	
+
 	*Code Example:* Create and send an HTTP request and then cancel it
-	
+
 	    (code)
     	-- Define on_complete event handler
     	function handleResponse( httpRequest, httpResponse )
     		print( "Response received, code =", httpResponse.code )
     	end
-    	
+
     	-- Create HTTP Request object and send it, processing it asynchronously
-    	requestCancel = URLRequest( { url = "http://www.trickplay.com",
-    			                      on_complete = handleResponse,
-    			                    } ):send()
+    	requestCancel = URLRequest( { url = "http://www.trickplay.com" } )
+    	requestCancel:add_oncomplete_listener( handleResponse )
+    	requestCancel:send()
     	print( "Sent HTTP Request" )
-    	
+
     	-- Cancel the request
     	requestCancel:cancel()
     	print( "Cancelled HTTP Request" )
     	(end)
-    	
+
     *See Also:* the <URLRequest.send> and <URLRequest.stream> functions
 */
