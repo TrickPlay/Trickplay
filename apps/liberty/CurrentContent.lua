@@ -16,7 +16,7 @@ local launch_trickplay_menu = function()
     trick_play_menu:animate{
         duration = 300,
         z        = 0,
-        opacity  = 0,
+        opacity  = 255,
         on_completed = function() 
             animating = false 
         end

@@ -56,6 +56,7 @@ return function(options)
         }
         --]]
         items[index].contract:start()
+        index = 1
     end
     
     local keypress = {
