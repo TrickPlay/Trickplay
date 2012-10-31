@@ -2,18 +2,15 @@
 local curr_time = os.date('*t')
 
 local make_row = function()
-    --[[
-    local bg = Clone{
-        source = screen:find_child("epg_row_bg"),
-        scale  = 1080/720,
-    }
-    local icon = Rectangle{ w = 50, h=50, x = -120}
-    --]]
+    
     local instance = Clone{
         source = screen:find_child("epg_row_bg"),
         scale  = 1080/720,
     }
-    instance.icon = Clone()
+    instance.icon  = Group{name="icon placeholder"}
+    instance.shows = Group{name="show placeholder"}
+    instance.icon.shows = shows
+    instance.icon.scheduling = {} -- stupid edge case
     
     return instance
 end
@@ -113,6 +110,9 @@ local timeline_bg = Rectangle{
     h = heading_h,
     color = "black",
 }
+local intervals_g = Group{
+    name = "timeline"
+}
 local intervals = Image{
     src = "assets/epg/timeline-interval.png",
     tile = {true,false},
@@ -120,7 +120,8 @@ local intervals = Image{
     scale = 1080/720,
 }
 local half_hour_len = intervals.w*intervals.scale[1]
-intervals.w = (screen_w-margin)*720/1080
+intervals_g.x = -4*half_hour_len
+intervals.w = (screen_w-margin)*720/1080 + 8*half_hour_len
 
 
 local refresh = Timer{
@@ -135,22 +136,73 @@ curr_time.min = start_at_0 and 0 or 30
 curr_time.sec = 0
 local time_slots = {}
 print("start_at_0",start_at_0)
-timeline_header:add(timeline_bg,intervals)
-for i = (start_at_0 and 0 or 1),(start_at_0 and 5 or 6) do
-    timeline_header:add(Text{
+intervals_g:add(intervals)
+timeline_header:add(timeline_bg,intervals_g)
+
+local len = 6 + 4 + 4
+local time_slots = {}
+for i = (start_at_0 and 0 or 1),(start_at_0 and (len-1) or len) do
+    
+    table.insert(time_slots, Text{
         x = (i+(start_at_0 and 1 or 0)-1)*half_hour_len,
         y = 195,
         color = "white",
         font = "InterstateProRegular 50px",
         text = 
-            (curr_time.hour+math.floor((i)/2))..":"..
+            ((curr_time.hour+math.floor((i)/2)-2)%24)..":"..
             ((i%2 == 0) and "00" or "30"),
-    }) 
-    time_slots[i] = curr_time.hour
+    })
+    
+end
+local zone_offset = -4
+            for i,ts in ipairs(time_slots) do
+                i = (start_at_0 and (i-1) or i)+zone_offset
+                ts.text = ((curr_time.hour+math.floor((i)/2))%24)..":"..
+                    ((i%2 == 0) and "00" or "30")
+            end
+intervals_g:add(unpack(time_slots))
+function intervals_g:move_x_by(dx)
+    print("move_x_by",dx,2*half_hour_len)
+    intervals_g:animate{
+        duration = 200,
+        x=intervals_g.x + dx,
+        on_completed = function(self)
+            local num_zones =0
+            if intervals_g.x> -2* half_hour_len then
+                while intervals_g.x >  -half_hour_len do
+                    intervals_g.x = intervals_g.x - half_hour_len
+                    num_zones = num_zones - 1
+                end
+            elseif intervals_g.x< -2*half_hour_len then
+                while intervals_g.x < -4*half_hour_len do
+                    intervals_g.x = intervals_g.x + half_hour_len
+                    num_zones = num_zones + 1
+                end
+            end
+            --[[
+            while 
+            
+            if intervals_g.x> 0 then
+                num_zones= -math.floor(intervals_g.x / (half_hour_len))-4
+            elseif intervals_g.x< 0 then
+                num_zones= -math.ceil(intervals_g.x / (half_hour_len))-4
+            end
+            intervals_g.x = (intervals_g.x % half_hour_len)-4*half_hour_len
+            --]]
+            print("num_zones",num_zones)
+            zone_offset = zone_offset + num_zones
+            for i,ts in ipairs(time_slots) do
+                i = (start_at_0 and (i-1) or i) + zone_offset
+                ts.text = ((curr_time.hour+math.floor((i)/2))%24)..":"..
+                    ((i%2 == 0) and "00" or "30")
+            end
+        end,
+    }
 end
 --------------------------------------------------------------------
 
 local curr_channel = 1
+local row_i = 1
 
 local top_i = curr_channel
 local bottom_i = curr_channel
@@ -160,6 +212,27 @@ local show_grid = Group{
     x = margin,
     y = heading_h,
 }
+local show_grid_text = Group{
+    name = "show_grid_text",
+    --x = margin,
+    --y = heading_h,
+}
+local show_grid_separators = Group{
+    name = "show_grid_separators",
+    --x = margin,
+    --y = heading_h,
+}
+local show_grid_bg = Group{
+    name = "show_grid_bg",
+    --x = margin,
+    --y = heading_h,
+}
+local show_grid_icons = Group{
+    name = "show_grid_icons",
+    --x = margin,
+    --y = heading_h,
+}
+show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},show_grid_icons)
 local row_h = 70*1080/720
 local rows = {}
 -- -1 because its looking at the next one to be added,
@@ -171,7 +244,8 @@ while (#rows-2)*row_h + margin < screen_h do
     if #rows > middle_row then rows[#rows].y = rows[#rows].y + row_h end
     if #rows == middle_row then rows[middle_row].scale = {1,2*(1080)/720} end
     rows[#rows].icon.y = rows[#rows].h/2 * rows[#rows].scale[2]
-    show_grid:add(rows[#rows])
+    rows[#rows].shows.y = rows[#rows].h/2 * rows[#rows].scale[2]
+    show_grid_bg:add(rows[#rows])
 end
 
 local curr_hl = Clone{
@@ -187,7 +261,7 @@ local prev_hl = Clone{
     y       = curr_hl.y,
     opacity = 0
 }
-show_grid:add(prev_hl,curr_hl)
+show_grid_text:add(prev_hl,curr_hl)
 --------------------------------------------------------------------
 --------------------------------------------------------------------
 
@@ -207,77 +281,249 @@ local function reset_show_x_w(s)
    s.show_time.w = s.show_name.w
 end
 
-
-local show_grid__right_edge=0
-local move_right_vis_x = function(new_x)
-    local s
-    --if pushing the right edge out
-    if new_x < show_grid__right_edge then
-        for i,r in ipairs(rows) do
-            s = r.scheduling
-            while r.right_i < #s and new_x > s[r.right_i+1].x+s[r.right_i+1].w do
-                r.right_i = r.right_i+1
-                --add the next show to screen
-                r.icon.show_times:add( s[r.right_i].show_time )
-                r.icon.show_names:add( s[r.right_i].show_name )
-                r.icon.separators:add( s[r.right_i].sep       )
-            end
-        end
-    --if pulling the right edge in
-    elseif new_x > show_grid__right_edge then
-        for i,r in ipairs(rows) do
-            s = r.scheduling
-            while r.right_i >r.left_i and new_x < s[r.right_i-1].x do
-                r.right_i = r.right_i-1
-                s[r.right_i].show_time:unparent()
-                s[r.right_i].show_name:unparent()
-                s[r.right_i].sep:unparent()
-            end
-        end
-    end
-end
-
-
-local show_grid__left_edge=0
-local move_left_vis_x = function(new_x)
-    local s
-    --if pushing the left edge out
-    if new_x < show_grid__left_edge then
-        for i,r in ipairs(rows) do
-            s = r.scheduling
-            reset_show_x_w(s[r.left_i])
-            while r.left_i > 1 and new_x < s[r.left_i-1].x do
-                r.left_i = r.left_i-1
-                --add the next show to screen
-                r.icon.show_times:add( s[r.left_i].show_time )
-                r.icon.show_names:add( s[r.left_i].show_name )
-                r.icon.separators:add( s[r.left_i].sep       )
-            end
-            --truncate the new first show to fit if needed
-            truncate_show_to_x(s[r.left_i],new_x)
-        end
-    --if pulling the left edge in
-    elseif new_x > show_grid__left_edge then
-        for i,r in ipairs(rows) do
-            s = r.scheduling
-            reset_show_x_w(s[r.left_i])
-            while r.left_i < r.right_i and new_x > s[r.left_i+1].x+s[r.left_i+1].w do
-                --add the next show to screen
-                r.left_i = r.left_i+1
-                s[r.left_i].show_time:unparent()
-                s[r.left_i].show_name:unparent()
-                s[r.left_i].sep:unparent()
-            end
-            --truncate the new first show to fit if needed
-            truncate_show_to_x(s[r.left_i],new_x)
-        end
-    end
-end
-
+local show_name_margin = 10
 
 --------------------------------------------------------------------
+--called when a user presses left, the gird will shift to the right, new shows coming in from the left
+
+local show_grid__right_edge=screen_w - margin
+local pull_in_right_to = function(new_x)
+    if new_x >= show_grid__right_edge then return end
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        if #s >= 1 then
+        r_i = r.icon.right_i
+        while r_i >r.icon.left_i and new_x <= s[r_i].x do
+            s[r_i].show_time:unparent()
+            s[r_i].show_name:unparent()
+            s[r_i].sep:unparent()
+            r_i = r_i-1
+        end
+        r.icon.right_i = r_i
+        end
+    end
+    show_grid__right_edge = new_x
+end
+local pre_pull_in_left_to
+local push_out_right_to = function(new_x)
+    if new_x <= show_grid__right_edge then return end
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        if #s >= 1 then
+        --dumptable(s)
+        r_i = r.icon.right_i
+        --print(r.icon.name,r_i, #s)
+        print(r_i,#s)
+        print(s[r_i])
+        while r_i < #s and new_x >= s[r_i].x+s[r_i].w do
+            --print("- show right edge", s[r_i].x+s[r_i].w)
+            r_i = r_i+1
+            --add the next show to screen
+            r.icon.show_times:add( s[r_i].show_time )
+            r.icon.show_names:add( s[r_i].show_name )
+            r.icon.separators:add( s[r_i].sep       )
+        end
+        --if r_i < #s then print("-- show right edge", s[r_i].x+s[r_i].w) end
+        r.icon.right_i = r_i
+        end
+    end
+    show_grid__right_edge = new_x
+    pre_pull_in_left_to(new_x - (screen_w-margin))
+end
+
+local show_grid__left_edge=0
+pre_pull_in_left_to = function(new_x)
+    if new_x <= show_grid__left_edge then return end
+    local ls = {}
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        
+        if #s == 0 then
+            r.icon.show_names.children[1]:animate{
+                duration = 200,
+                x = new_x + show_name_margin,
+            }
+        else
+            --reset_show_x_w(s[r.left_i])
+            l_i = r.icon.left_i
+            while l_i < r.icon.right_i and new_x >= s[l_i].x+s[l_i].w do
+                --add the next show to screen
+                --s[l_i].show_time:unparent()
+                --s[l_i].show_name:unparent()
+                --s[l_i].sep:unparent()
+                l_i = l_i+1
+            end
+            ls[i] = l_i
+            if s[l_i].x < new_x then
+            print(i,"true")
+                dx = new_x - s[l_i].x
+                s[l_i].show_name:animate{
+                    duration = 200,
+                    x = new_x + show_name_margin,
+                    w = s[l_i].w - dx - 2*show_name_margin,
+                }
+                s[l_i].show_time:animate{
+                    duration = 200,
+                    x = new_x + show_name_margin,
+                    w = s[l_i].w - dx - 2*show_name_margin,
+                }
+            end
+        end
+        --truncate the new first show to fit if needed
+        --truncate_show_to_x(s[r.left_i],new_x)
+    end
+end
+pull_in_left_to = function(new_x)
+    if new_x <= show_grid__left_edge then return end
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        if #s >= 1 then
+        --reset_show_x_w(s[r.left_i])
+        l_i = r.icon.left_i
+        while l_i < r.icon.right_i and new_x >= s[l_i].x+s[l_i].w do
+            --add the next show to screen
+            s[l_i].show_time:unparent()
+            s[l_i].show_name:unparent()
+            s[l_i].sep:unparent()
+            l_i = l_i+1
+        end
+        r.icon.left_i = l_i
+        end
+        --truncate the new first show to fit if needed
+        --truncate_show_to_x(s[r.left_i],new_x)
+    end
+    --[[
+    --animate out x's & w's of current left most shows
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        i = r.icon.left_i
+        --if "No Programming information"
+        if #s == 0 then
+            --move the "No Programming information" to the Left
+        --truncate show name
+        elseif s[i].x < new_x then
+            dx = new_x - s[i].x
+            s[i].show_name:animate{
+                duration = 200,
+                x = show_grid__left_edge + show_name_margin,
+                w = s[i].w - dx - 2*show_name_margin,
+            }
+            s[i].show_time:animate{
+                duration = 200,
+                x = show_grid__left_edge + show_name_margin,
+                w = s[i].w - dx - 2*show_name_margin,
+            }
+        end
+    end
+    --]]
+    show_grid__left_edge = new_x
+end
+
+
+local push_out_left_to = function(new_x)
+    if new_x >= show_grid__left_edge then return end
+    ---[[
+    local s,i,dx
+    --animate out x's & w's of current left most shows
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        i = r.icon.left_i
+        --if "No Programming information"
+        if #s == 0 then
+            --move the "No Programming information" to the Left
+            r.icon.show_names.children[1]:animate{
+                duration = 200,
+                x = new_x + show_name_margin,
+            }
+        --re-truncate show name
+        elseif s[i].x < new_x then
+            dx = new_x - s[i].x
+            s[i].show_name:animate{
+                duration = 200,
+                x = new_x + show_name_margin,
+                w = s[i].w - dx - 2*show_name_margin,
+            }
+            s[i].show_time:animate{
+                duration = 200,
+                x = new_x + show_name_margin,
+                w = s[i].w - dx - 2*show_name_margin,
+            }
+        --expand out name
+        elseif s[i].x ~= s[i].show_name.x-show_name_margin then
+            s[i].show_name:animate{
+                duration = 200,
+                x = s[i].x +   show_name_margin,
+                w = s[i].w - 2*show_name_margin,
+            }
+            s[i].show_time:animate{
+                duration = 200,
+                x = s[i].x +   show_name_margin,
+                w = s[i].w - 2*show_name_margin,
+            }
+        end
+    end
+    --]]
+    --add new shows
+    for i,r in ipairs(rows) do
+        s = r.icon.scheduling
+        if #s >= 1 then
+        --reset_show_x_w(s[r.left_i])
+        print(r.icon.name)
+        l_i = r.icon.left_i
+        while l_i > 1 and new_x < s[l_i].x do
+            l_i = l_i-1
+            --add the next show to screen
+            r.icon.show_times:add( s[l_i].show_time )
+            r.icon.show_names:add( s[l_i].show_name )
+            r.icon.separators:add( s[l_i].sep       )
+        end
+        r.icon.left_i = l_i
+        end
+        --truncate the new first show to fit if needed
+        --truncate_show_to_x(s[r.left_i],new_x)
+    end
+    show_grid__left_edge = new_x
+end
+
+local populate_row = function(r)
+    print(r.icon)
+    print(#r.icon.scheduling)
+    local s = r.icon.scheduling
+    if #s == 0 then
+        r.icon.show_names.children[1].x = show_grid__left_edge + show_name_margin
+        return
+    end
+    r.icon.left_i  = #s
+    r.icon.right_i = 1
+    for i,show in ipairs(s) do
+    
+        if not (
+                show_grid__left_edge  >= (show.x+ show.w) or 
+                show_grid__right_edge <=  show.x
+            ) then
+            
+            r.icon.show_times:add( show.show_time )
+            r.icon.show_names:add( show.show_name )
+            r.icon.separators:add( show.sep       )
+            
+            r.icon.left_i  = r.icon.left_i  < i and r.icon.left_i  or i
+            r.icon.right_i = r.icon.right_i > i and r.icon.right_i or i
+        end
+    end
+    dx = show_grid__left_edge - s[r.icon.left_i].x
+    s[r.icon.left_i].show_name:animate{
+        duration = 200,
+        x = show_grid__left_edge + show_name_margin,
+        w = s[r.icon.left_i].w - dx - 2*show_name_margin,
+    }
+    s[r.icon.left_i].show_time:animate{
+        duration = 200,
+        x = show_grid__left_edge + show_name_margin,
+        w = s[r.icon.left_i].w - dx - 2*show_name_margin,
+    }
+end
+--------------------------------------------------------------------
 local scheduling = nil
-local show_name_margin = 10
 local sep_src = hidden_assets_group:find_child("show_border")
 local function build_schedule_row(parent)
     
@@ -285,24 +531,26 @@ local function build_schedule_row(parent)
     local show_names = Group{name = "show_names"}
     local show_times = Group{name = "show_times",opacity = 0}
     
+    parent.shows = Group{name = parent.name}
     parent.separators = separators
     parent.show_names = show_names
     parent.show_times = show_times
     parent.left_i  = 1
     parent.right_i = 1
     
-    parent:add(show_names,separators)
+    parent.shows:add(show_names,separators)
     
     local show_name,show_time, sep
     parent.schedule_is_loaded = true
     for j,show in ipairs(parent.scheduling) do
         
-        if show.x > screen_w - margin then break end
-        
+        --if show.x > screen_w - margin then break end
+        --[[
         if show.x <= 0 and show_name then 
             show_name:unparent() 
             show_time:unparent() 
             sep:unparent()
+            parent.left_i = j
         end
         if show.x > 0 and show_name and show_name.x < 0 then 
             show_name.w = show_name.w + show_name.x
@@ -311,6 +559,7 @@ local function build_schedule_row(parent)
             show_time.x = show_name_margin
             sep.x = 0
         end
+        --]]
         show_name = Text{
             color = "white",
             font = "InterstateProBold 40px",
@@ -344,24 +593,24 @@ local function build_schedule_row(parent)
             --h = row_h,
         }
         
-        show.show_name = show_name
-        show.show_time = show_time
-        show.sep       = sep
-        
+        parent.scheduling[j].show_name = show_name
+        parent.scheduling[j].show_time = show_time
+        parent.scheduling[j].sep       = sep
+        --[[
         if show.x < screen_w - margin then
             show_times:add(show_time)
             show_names:add(show_name)
             separators:add(sep)
-        else
             parent.right_i = j
         end
+        --]]
     end
     if show_name and show_name.x < 0 then 
         show_name.x = show_name_margin
         show_time.x = show_name_margin
         sep.x = 0
     end
-    if show_name == nil then
+    if #parent.scheduling == 0 then
         show_name = Text{
             color = "white",
             font = "InterstateProBold 40px",
@@ -380,8 +629,28 @@ local function integrate_schedule()
         channel_icon.scheduling = scheduling[channel_icon.name] or {}
         build_schedule_row(channel_icon)
     end
-    rows[middle_row].icon:add(rows[middle_row].icon.show_times)
+    local r
+    for i = 1,#rows do
+        rows[i].shows:unparent()
+    end
+    for i = 2,#rows-1 do
+        r = rows[i]
+        r.shows = r.icon.shows
+        r.shows.y=r.y+((i == middle_row) and row_h or row_h/2)
+        show_grid_text:add(r.icon.shows)
+        populate_row(r)
+    end
+    rows[middle_row].shows:add(rows[middle_row].icon.show_times)
+    --rows[middle_row].icon:add(rows[middle_row].icon.show_times)
     rows[middle_row].icon.show_times.opacity = 255
+    row_i = rows[middle_row].icon.left_i
+    print("row_i",row_i)
+    curr_hl:set{
+        x       = rows[middle_row].icon.scheduling[row_i].x,
+        y       = rows[middle_row].y,
+        w       = rows[middle_row].icon.scheduling[row_i].w,
+        opacity = 255
+    }
     --[[
     local prev
     for i = 2,#rows-1 do
@@ -412,8 +681,9 @@ function instance:setup_icons(t)
             wrap_i(curr_channel+i-middle_row,channel_list)
             
         ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
-        show_grid:add(rows[i].icon)
+        show_grid_icons:add(rows[i].icon)
     end
+    print("setup_icons")
     if scheduling ~= nil then
         integrate_schedule()
     end
@@ -503,11 +773,29 @@ end
 --------------------------------------------------------------------
 local animating_back_to_prev_menu = false
 local animating_show_grid = false
-local row_i = 1
 local keypresses = {
---[==[
+---[==[
     [keys.Left] = function()
-        if #channel_list == 0 or animating_show_grid or row_i == 1 then return end
+        if #channel_list == 0 or animating_show_grid or show_grid__left_edge <= -half_hour_len then return end
+        
+        if row_i == 1 then 
+            push_out_left_to(show_grid__left_edge - half_hour_len)
+            --move_left_vis_x(show_grid__left_edge - half_hour_len )
+            show_grid_text:animate{
+                duration = 200,
+                x = show_grid_text.x + half_hour_len,
+            }
+            curr_hl:animate{duration = 200,
+                x = curr_hl.x - half_hour_len,
+                w = (curr_hl.w == (screen_w - margin) and (screen_w - margin) or curr_hl.w + half_hour_len),
+                on_completed = function() 
+                    pull_in_right_to(show_grid__left_edge + (screen_w - margin) )
+                    animating_show_grid = false
+                end
+            }
+            intervals_g:move_x_by(half_hour_len)
+            return 
+        end
         prev_hl:set{
             x       = curr_hl.x,
             y       = curr_hl.y,
@@ -515,7 +803,6 @@ local keypresses = {
             h       = curr_hl.h,
             opacity = 255
         }
-        prev_hl:animate{duration = 200,opacity = 0}
         local channel = rows[middle_row].icon
         local scheduling = rows[middle_row].icon.scheduling
         --[[if  row_i == rows[middle_row].icon.left_i then
@@ -525,22 +812,66 @@ local keypresses = {
             channel.show_times:add(scheduling[row_i].show_time)
             show_grid:animate{duration = 200,x=scheduling[row_i].x }
         else--]]
-            row_i = row_i==1 and 1 or row_i - 1
-            curr_hl:set{
-                x       = rows[middle_row].icon.show_names.children[row_i].x-show_name_margin,
-                y       = rows[middle_row].y,
-                w       = rows[middle_row].icon.show_names.children[row_i].w+show_name_margin*2,
-                opacity = 255
+        next_i = row_i==1 and 1 or row_i - 1
+        local dx = show_grid__left_edge - rows[middle_row].icon.scheduling[next_i].x
+        if dx >= 2*half_hour_len then
+            push_out_left_to(show_grid__left_edge - 2*half_hour_len)
+            --move_left_vis_x(show_grid__left_edge - 2*half_hour_len )
+            next_i = row_i
+            show_grid_text:animate{
+                duration = 200,
+                x = show_grid_text.x + 2*half_hour_len,
             }
-            curr_hl:animate{duration = 200,opacity = 255,
-                on_completed = function() 
-                    animating_show_grid = false
-                end
+            intervals_g:move_x_by(2*half_hour_len)
+        else--if dx >= half_hour_len then
+            push_out_left_to(show_grid__left_edge - dx)
+            --move_left_vis_x(show_grid__left_edge - dx )
+            show_grid_text:animate{
+                duration = 200,
+                x = show_grid_text.x + dx,
             }
+            intervals_g:move_x_by(dx)
+        end
+        curr_hl:set{
+            x       = rows[middle_row].icon.scheduling[next_i].x,
+            y       = rows[middle_row].y,
+            w       = rows[middle_row].icon.scheduling[next_i].w,
+            opacity = 0
+        }
+        prev_hl:animate{duration = 200,opacity = 0}
+        curr_hl:animate{duration = 200,opacity = 255,
+            on_completed = function() 
+                pull_in_right_to(show_grid__left_edge + (screen_w - margin) )
+                animating_show_grid = false
+            end
+        }
+        row_i = next_i
         --end
     end,
     [keys.Right] = function()
-        if #channel_list == 0 or animating_show_grid or row_i == #rows[middle_row].icon.show_names.children then return end
+        if #channel_list == 0 or animating_show_grid or show_grid__left_edge >= 24*half_hour_len then return end
+        --row_i == #rows[middle_row].icon.scheduling then return end
+        
+        local len = #rows[middle_row].icon.scheduling
+        if row_i >= len then
+            
+            push_out_right_to(show_grid__right_edge + 2*half_hour_len )
+            show_grid_text:animate{
+                duration = 200,
+                x = show_grid_text.x - 2*half_hour_len,
+            }
+            curr_hl:animate{duration = 200,x = curr_hl.x + 2*half_hour_len,
+                on_completed = function() 
+                    pull_in_left_to(show_grid__right_edge - (screen_w - margin))
+                    --move_left_vis_x(show_grid__right_edge - (screen_w - margin) )
+                    animating_show_grid = false
+                end
+            }
+            intervals_g:move_x_by(-2*half_hour_len)
+            return
+        end
+        
+        
         prev_hl:set{
             x       = curr_hl.x,
             y       = curr_hl.y,
@@ -549,35 +880,42 @@ local keypresses = {
             opacity = 255
         }
         prev_hl:animate{duration = 200,opacity = 0}
-        local len = #rows[middle_row].icon.show_names.children
         next_i = row_i==len and len or row_i + 1
-        
-        local dx = rows[middle_row].icon.show_names.children[next_i].x - show_grid.x
+        print("===============================")
+        print(next_i,row_i)
+        local dx = rows[middle_row].icon.scheduling[next_i].x - show_grid__left_edge--show_grid.x
         --if trying to jump by 2 hours, then only jump by an hour, staying on the same show
         if dx >= 4*half_hour_len then
+            push_out_right_to(show_grid__right_edge + 2*half_hour_len )
             next_i = row_i
-            show_grid:animate{
+            show_grid_text:animate{
                 duration = 200,
-                x = show_grid.x - 2*half_hour_len,
+                x = show_grid_text.x - 2*half_hour_len,
             }
+            intervals_g:move_x_by(-2*half_hour_len)
         elseif dx >= half_hour_len then
-            show_grid:animate{
+            push_out_right_to(show_grid__right_edge + dx )
+            show_grid_text:animate{
                 duration = 200,
-                x = show_grid.x - 2*dx,
+                x = show_grid_text.x - dx,
             }
+            intervals_g:move_x_by(-dx)
         end
         curr_hl:set{
-            x       = rows[middle_row].icon.show_names.children[next_i].x-show_name_margin,
+            x       = rows[middle_row].icon.scheduling[next_i].x,
             y       = rows[middle_row].y,
-            w       = rows[middle_row].icon.show_names.children[next_i].w+show_name_margin*2,
-            opacity = 255
+            w       = rows[middle_row].icon.scheduling[next_i].w,
+            opacity = 0,
         }
         prev_hl:animate{duration = 200,opacity = 0,h=row_h}
         curr_hl:animate{duration = 200,opacity = 255,
             on_completed = function() 
+                pull_in_left_to(show_grid__right_edge - (screen_w - margin))
+                --move_left_vis_x(show_grid__right_edge - (screen_w - margin) )
                 animating_show_grid = false
             end
         }
+        print(next_i,row_i)
         
         row_i = next_i
         --[=[
@@ -608,12 +946,14 @@ local keypresses = {
     [keys.Up] = function()
         if #channel_list == 0 or animating_show_grid then return end
         animating_show_grid = true
-        local top_x = rows[1].icon.x
-        local top_y = rows[1].icon.y
         rows[1].icon = channel_list[top_i]
+        rows[1].shows = channel_list[top_i].shows
         rows[1].icon.x = 0
         rows[1].icon.y = rows[1].y+row_h/2
-        show_grid:add(rows[1].icon)
+        rows[1].shows.y = rows[1].y+row_h/2
+        show_grid_text:add(rows[1].shows)
+        show_grid_icons:add(rows[1].icon)
+        populate_row(rows[1])
         if not rows[1].icon.schedule_is_loaded then 
             --build_schedule_row(rows[1].icon)
         end
@@ -626,15 +966,25 @@ local keypresses = {
             h       = curr_hl.h,
             opacity = 255
         }
-        local len = #rows[middle_row-1].icon.show_names.children
-        row_i = row_i>len and len or row_i
-        curr_hl:set{
-            x       = rows[middle_row-1].icon.show_names.children[row_i].x-show_name_margin,
-            y       = rows[middle_row-1].y,
-            w       = rows[middle_row-1].icon.show_names.children[row_i].w+show_name_margin*2,
-            h       = row_h,
-            opacity = 255
-        }
+        --local len = #rows[middle_row-1].icon.scheduling
+        row_i = rows[middle_row-1].icon.left_i--row_i>len and len or row_i
+        if #rows[middle_row-1].icon.scheduling == 0 then
+            curr_hl:set{
+                x       = show_grid__left_edge,-- -show_name_margin,
+                y       = rows[middle_row-1].y,
+                w       = screen_w - margin,-- +show_name_margin*2,
+                h       = row_h,
+                opacity = 0
+            }
+        else
+            curr_hl:set{
+                x       = rows[middle_row-1].icon.scheduling[row_i].x,-- -show_name_margin,
+                y       = rows[middle_row-1].y,
+                w       = rows[middle_row-1].icon.scheduling[row_i].w,-- +show_name_margin*2,
+                h       = row_h,
+                opacity = 0
+            }
+        end
         --dolater(function()
         show_grid:animate{
             duration = 200,
@@ -665,7 +1015,9 @@ local keypresses = {
                 curr_hl.y = rows[middle_row].y 
                 for i = #rows,2,-1 do
                     rows[i].icon   = rows[i-1].icon
-                    rows[i].icon.y = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
+                    rows[i].shows   = rows[i-1].shows
+                    rows[i].icon.y  = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
+                    rows[i].shows.y = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
                 end
                 
                 top_i        = wrap_i(top_i-1,        channel_list)
@@ -673,6 +1025,10 @@ local keypresses = {
                 bottom_i     = wrap_i(bottom_i-1,     channel_list)
                 
                 rows[#rows].icon:unparent()
+                rows[#rows].shows:unparent()
+                rows[#rows].icon.show_names:clear()
+                rows[#rows].icon.show_times:clear()
+                rows[#rows].icon.separators:clear()
                 --rows[1].icon:unparent()
                 rows[middle_row+1].icon.show_times:unparent()
             end
@@ -680,7 +1036,7 @@ local keypresses = {
         prev_hl:animate{duration = 200,opacity = 0,h=row_h}
         curr_hl:animate{duration = 200,opacity = 255,h=2*row_h}
         --expand the next column
-        rows[middle_row-1].icon:add(rows[middle_row-1].icon.show_times)
+        rows[middle_row-1].shows:add(rows[middle_row-1].icon.show_times)
         rows[middle_row-1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
         rows[middle_row-1]:animate{   duration = 200, scale = {1,2*1080/720}, }
@@ -698,12 +1054,14 @@ local keypresses = {
         if #channel_list == 0 or animating_show_grid then return end
         animating_show_grid = true
         
-        local last_x = rows[#rows].icon.x
-        local last_y = rows[#rows].icon.y
-        rows[#rows].icon = channel_list[bottom_i]
+        rows[#rows].icon  = channel_list[bottom_i]
+        rows[#rows].shows = channel_list[bottom_i].shows
         rows[#rows].icon.x = 0
-        rows[#rows].icon.y = rows[#rows].y+row_h/2
-        show_grid:add(rows[#rows].icon)
+        rows[#rows].icon.y  = rows[#rows].y+row_h/2
+        rows[#rows].shows.y = rows[#rows].y+row_h/2
+        show_grid_text:add( rows[#rows].shows)
+        show_grid_icons:add(rows[#rows].icon)
+        populate_row(rows[#rows])
         
         if not rows[#rows].icon.schedule_is_loaded then 
             --build_schedule_row(rows[#rows].icon)
@@ -716,15 +1074,27 @@ local keypresses = {
             h       = curr_hl.h,
             opacity = 255
         }
-        local len = #rows[middle_row+1].icon.show_names.children
-        row_i = row_i>len and len or row_i
-        curr_hl:set{
-            x       = rows[middle_row+1].icon.show_names.children[row_i].x-show_name_margin,
-            y       = rows[middle_row+1].y,
-            w       = rows[middle_row+1].icon.show_names.children[row_i].w+show_name_margin*2,
-            h       = row_h,
-            opacity = 255
-        }
+        --local len = #rows[middle_row+1].icon.show_names.children
+        row_i = rows[middle_row+1].icon.left_i--row_i>len and len or row_i
+        
+        if #rows[middle_row+1].icon.scheduling < 1 then
+            curr_hl:set{
+                x       = show_grid__left_edge,-- -show_name_margin,
+                y       = rows[middle_row+1].y,
+                w       = screen_w - margin,-- +show_name_margin*2,
+                h       = row_h,
+                opacity = 0
+            }
+        else
+        if row_i > #rows[middle_row+1].icon.scheduling then error("not possible "..tostring(row_i).." "..tostring(#rows[middle_row-1].icon.scheduling)) end
+            curr_hl:set{
+                x       = rows[middle_row+1].icon.scheduling[row_i].x,-- -show_name_margin,
+                y       = rows[middle_row+1].y,
+                w       = rows[middle_row+1].icon.scheduling[row_i].w,-- +show_name_margin*2,
+                h       = row_h,
+                opacity = 0
+            }
+        end
         --dolater(function()
         show_grid:animate{
             duration = 200,
@@ -768,11 +1138,20 @@ local keypresses = {
                 curr_channel = wrap_i(curr_channel+1, channel_list)
                 bottom_i     = wrap_i(bottom_i+1,     channel_list)
                 for i = 1,#rows-1 do
-                    rows[i].icon   = rows[i+1].icon
+                    rows[i].icon    = rows[i+1].icon
+                    rows[i].shows   = rows[i+1].shows
                     --rows[i].icon.y = rows[i].y+row_h/2
-                    rows[i].icon.y = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
+                    rows[i].icon.y  = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
+                    rows[i].shows.y = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
+                end
+                for i = 1,#rows-1 do
+                    print(i,rows[i].icon.y,rows[i].shows.y,rows[i].icon.name,rows[i].shows.name)
                 end
                 rows[1].icon:unparent()
+                rows[1].shows:unparent()
+                rows[1].icon.show_names:clear()
+                rows[1].icon.show_times:clear()
+                rows[1].icon.separators:clear()
                 
                 rows[middle_row-1].icon.show_times:unparent()
             end
@@ -782,14 +1161,16 @@ local keypresses = {
         prev_hl:animate{duration = 200,opacity = 0,h=row_h}
         curr_hl:animate{duration = 200,opacity = 255,h=2*row_h, y = (middle_row-1)*row_h}
         --expand the next column
-        rows[middle_row+1].icon:add(rows[middle_row+1].icon.show_times)
+        rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row+1]:animate{   duration = 200, scale = {1,2*1080/720}, y = (middle_row-1)*row_h}
         rows[middle_row+1].icon:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
+        rows[middle_row+1].shows:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
         rows[middle_row]:animate{   duration = 200, scale = {1,1080/720}, }
         rows[middle_row].icon:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
+        rows[middle_row].shows:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = 200, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = 200,scale={1,row_h/sep_src.h} }
         --end)
@@ -838,12 +1219,6 @@ instance:add(
         color = "808080",
     },
     Rectangle{
-        name = "left margin",
-        w = margin-5,
-        h = screen_h,
-        color = "black",
-    },
-    Rectangle{
         name = "highlight",
         w = margin-5,
         h = row_h*2,
@@ -852,6 +1227,12 @@ instance:add(
     },
     show_grid,
     timeline_header,
+    Rectangle{
+        name = "top_left bg",
+        w = margin-5,
+        h = heading_h,
+        color = "black",
+    },
     top_left,
     Rectangle{
         name = "rule",

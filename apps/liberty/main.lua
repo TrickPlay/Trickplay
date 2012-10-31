@@ -473,8 +473,8 @@ main = function()
             )
         end
         
-        epg_menu:setup_icons(channels.Channels.Channel)
-        
+        epg_menu:setup_icons(  channels.Channels.Channel )
+        channel_menu:populate( channels.Channels.Channel )
     end)
     ---[[
     get_scheduling(function(t)
@@ -487,6 +487,109 @@ main = function()
         end
         epg_menu:load_scheduling(t)
     end)--]]
+    --[[
+    local titles_callback = function(t,parent)
+        
+        if type(t) ~= "table" then
+            return
+        end
+        t = t.Category
+        if type(t) ~= "table" then
+            return
+        end
+        t = t.Titles
+        if type(t) ~= "table" then
+            return
+        end
+        t = t.Title
+        if type(t) ~= "table" then
+            return
+        end
+        for i,t in pairs(t) do
+            --dumptable(t)
+            if  type(t) == "table" and
+                type(t.Pictures) == "table" and
+                type(t.Pictures.Picture) == "table" and
+                type(t.Pictures.Picture[1]) == "table" and
+                type(t.Pictures.Picture[1].Value) == "table" then
+                
+                parent[t.Name] = t.Pictures.Picture[1].Value
+            else
+                 parent[t.Name] = false
+            end
+        end
+        
+    end
+    local category_response
+    tree = {}
+   category_response = function(response,parent,only_tranverse_this)
+        
+        if type(response) ~= "table" then
+            return
+        end
+        if type(response.Category) ~= "table" then
+            return
+        end
+        response = response.Category
+        
+        print(response.Name)
+        if only_tranverse_this ~= nil and only_tranverse_this ~= response.Name then
+            parent[response.Name] = "Do not traverse"
+            return
+        end
+        parent[response.Name] = {}
+        if response.TitleCount > 1 then
+            get_titles(response.id,titles_callback,parent[response.Name])
+            return
+        end
+        if response.ChildCategoryCount < 1 then
+            return
+        end
+        if type(response.ChildCategories) ~= "table" then
+            return
+        end
+        --dumptable(tree)
+        for i=1,response.ChildCategoryCount do
+            if type(response.ChildCategories.Category[i]) ~= "table" then
+                return
+            end
+            get_category_info(response.ChildCategories.Category[i].id,category_response,parent[response.Name])
+        end
+    end
+    get_root_categories(function(response)
+        
+        if type(response) ~= "table" then
+            return
+        end
+        if type(response.Categories) ~= "table" then
+            return
+        end
+        response = response.Categories
+        if response.resultCount < 1 then
+            return
+        end
+        if response.resultCount > 1 then
+            return
+        end
+        if type(response.Category) ~= "table" then
+            return
+        end
+        response = response.Category[1]
+        
+        if response.ChildCategoryCount < 1 then
+            return
+        end
+        if type(response.ChildCategories) ~= "table" then
+            return
+        end
+        tree[response.Name] = {}
+        for i=1,response.ChildCategoryCount do
+            if type(response.ChildCategories.Category[i]) ~= "table" then
+            end
+            get_category_info(response.ChildCategories.Category[i].id,category_response,tree[response.Name],"Demo")
+        end
+    end,tree)
+    --]]
     --------------------------------------------------------------------
     menu_layer:add(
         --movies_menu,
