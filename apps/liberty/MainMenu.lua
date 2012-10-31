@@ -367,9 +367,10 @@ function library_icon:on_key_down(k)
         end)
     end
 end
+library_icon:on_key_focus_out()
 -------------------------------------------------------
 local channel_is_animating = false
-channel_icon = random_poster():set{w = 100,h = 150,color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+channel_icon = Clone{source=random_poster(),color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
 function channel_icon:on_key_down(k) 
     if keys.OK == k then
         if channel_is_animating then return end

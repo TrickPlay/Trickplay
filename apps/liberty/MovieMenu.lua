@@ -22,7 +22,7 @@ local create = function(items)
     local icons = {}
     local next_x = 0
     
-    for _,t in ipairs(items) do icon_sources:add(t.icon) end
+    --for _,t in ipairs(items) do icon_sources:add(t.icon) end
     
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #text < 4 or (#text-1)*item_spacing < screen_w*3/2 do
