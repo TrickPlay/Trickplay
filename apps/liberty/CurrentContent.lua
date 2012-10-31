@@ -25,7 +25,7 @@ local launch_trickplay_menu = function()
     end)
 end
 local launch_channel_menu = function()
-    if animating then return end
+    if animating or not channel_menu.is_ready then return end
     animating = true
     
     menu_layer:add(channel_menu)

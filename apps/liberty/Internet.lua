@@ -1,6 +1,18 @@
 local get_channels_url =[[http://217.149.130.199/traxis/web/json/Channels/Props/LogicalChannelNumber,Name,Pictures/Sort/LogicalChannelNumber?output=json]]
 
 function get_channel_list(f)
+    
+    if editor then
+        local response = readfile("local_data/get_channel_list")
+        if type(response) == "string" then
+            response = json:parse(response)
+            if response ~= nil then
+                dolater(f,response)
+                return
+            end
+        end
+        
+    end
     local req = URLRequest{
         url = get_channels_url,
         on_complete = function(self,response)
@@ -14,12 +26,14 @@ function get_channel_list(f)
             
             --print( response.body )
             
+            if editor then 
+                editor:writefile("local_data/get_channel_list",response.body)
+            end
             response = json:parse(response.body)
             
             if response == nil then
                 return
             end
-            
             f(response)
         end
     }
@@ -29,9 +43,28 @@ end
 
 local scheduling_url = [[http://217.149.130.199/traxis/web/json/Channels/Sort/Name/props/Events,Name]]
 function get_scheduling(f)
+    
+    local curr_time = os.date('*t')
+    if editor and settings.event_data then
+        local t = tonumber(settings.event_data)
+        curr_time.hour=curr_time.hour - 11
+        --dumptable(os.date('*t',t))
+        if os.time(curr_time) < t then
+            print("local data is less than a 11 hours old")
+            t = readfile("local_data/get_scheduling")
+            if type(t) == "string" then
+                t = json:parse(t)
+                if t ~= nil then
+                    dolater(f,t)
+                    return
+                end
+            end
+        end
+    end
+    
+    curr_time = os.date('*t')
     --expected input
     --"2012-10-23T17:50:00Z"
-    local curr_time = os.date('*t')
     curr_time.hour = curr_time.hour - 1
     local start_time = os.date('*t',os.time(curr_time))
     curr_time.hour = curr_time.hour + 1
@@ -92,6 +125,10 @@ function get_scheduling(f)
             
             --print( response.body )
             
+            if editor then 
+                editor:writefile("local_data/get_scheduling",response.body)
+                settings.event_data = os.time()
+            end
             response = json:parse(response.body)
             
             if response == nil then
@@ -103,5 +140,92 @@ function get_scheduling(f)
         end
     }
     print("sending")
+    req:send()
+end
+
+
+
+--:~~2F~~2Fschange.com~~2F9c4bc73b-48d6-48a1-be61-cd684e482839
+function get_root_categories(f)
+    local req = URLRequest{
+        url = [[http://217.149.130.199/traxis/web/json/RootCategories/Props/Name,IsRoot,ChildCategories,ChildCategoryCount?CpeId=device1]],
+        on_complete = function(self,response)
+            if response.failed then
+                return
+            elseif response.code ~= 200 then
+                return
+            elseif response.body == nil then
+                return
+            end
+            
+            --print( response.body )
+            
+            response = json:parse(response.body)
+            
+            if response == nil then
+                return
+            end
+            
+            f(response)
+        end
+    }
+    
+    req:send()
+end
+--:~~2F~~2Fschange.com~~2F9c4bc73b-48d6-48a1-be61-cd684e482839
+function get_category_info(id,f,parent,only_tranverse_this)
+    local req = URLRequest{
+        url = [[http://217.149.130.199/traxis/web/json/Category/]]..id..[[/Props/Name,ShortSynopsis,IsAdult,ChildCategories,ChildCategoryCount,TitleCount,ProductCount,ApplicationCount?CpeId=device1]],
+        on_complete = function(self,response)
+            if response.failed then
+                return
+            elseif response.code ~= 200 then
+                return
+            elseif response.body == nil then
+                return
+            end
+            
+            --print( response.body )
+            
+            response = json:parse(response.body)
+            
+            if response == nil then
+                return
+            end
+            
+            f(response,parent,only_tranverse_this)
+        end
+    }
+    
+    req:send()
+end
+
+--:~~2F~~2Fschange.com~~2F9c4bc73b-48d6-48a1-be61-cd684e482839
+function get_titles(id,f,parent,only_tranverse_this)
+    local req = URLRequest{
+        url = [[http://217.149.130.199/traxis/web/json/Category/]]..id..[[/Props/Titles?CpeId=device1]],
+        method="PUT",
+        body = [[<?xml version="1.0" encoding="utf-8"?><SubQueryOptions xmlns="urn:eventis:traxisweb:1.0"><QueryOption path="Titles">/props/Contents,Name,Pictures,ShortSynopsis,IsPreview,IsFeature,IsViewableOnCpe</QueryOption><QueryOption path="Titles/Contents">/props/IsHd,Is3d,EntitlementState,Aliases,Products</QueryOption><QueryOption path="Titles/Contents/Products">/props/Type,Currency,IsAvailable,ListPrice,OfferPrice</QueryOption></SubQueryOptions>]],
+        on_complete = function(self,response)
+            if response.failed then
+                return
+            elseif response.code ~= 200 then
+                return
+            elseif response.body == nil then
+                return
+            end
+            
+            --print( response.body )
+            
+            response = json:parse(response.body)
+            
+            if response == nil then
+                return
+            end
+            
+            f(response,parent,only_tranverse_this)
+        end
+    }
+    
     req:send()
 end
