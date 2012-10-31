@@ -45,6 +45,18 @@ main = function()
     hidden_assets_group:add(Image{name="epg_row_bg",  src="assets/epg/channel-bg.png",tile = {true,true},w = screen_w    })
     hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/channel-bg-current.png"})
     hidden_assets_group:add(Image{name="show_border", src="assets/epg/show-border.png"})
+    hidden_assets_group:add(Image{name="tp-bold-beg",   src="assets/control_menu/control-bar-bold-beg.png"})
+    hidden_assets_group:add(Image{name="tp-bold-end",   src="assets/control_menu/control-bar-bold-end.png"})
+    hidden_assets_group:add(Image{name="tp-bold-ff",    src="assets/control_menu/control-bar-bold-ff.png"})
+    hidden_assets_group:add(Image{name="tp-bold-pause", src="assets/control_menu/control-bar-bold-pause.png"})
+    hidden_assets_group:add(Image{name="tp-bold-rew",   src="assets/control_menu/control-bar-bold-rew.png"})
+    hidden_assets_group:add(Image{name="tp-bold-stop",  src="assets/control_menu/control-bar-bold-stop.png"})
+    hidden_assets_group:add(Image{name="tp-thin-beg",   src="assets/control_menu/control-bar-thin-beg.png"})
+    hidden_assets_group:add(Image{name="tp-thin-end",   src="assets/control_menu/control-bar-thin-end.png"})
+    hidden_assets_group:add(Image{name="tp-thin-ff",    src="assets/control_menu/control-bar-thin-ff.png"})
+    hidden_assets_group:add(Image{name="tp-thin-pause", src="assets/control_menu/control-bar-thin-pause.png"})
+    hidden_assets_group:add(Image{name="tp-thin-rew",   src="assets/control_menu/control-bar-thin-rew.png"})
+    hidden_assets_group:add(Image{name="tp-thin-stop",  src="assets/control_menu/control-bar-thin-stop.png"})
     screen:add(hidden_assets_group)
     --------------------------------------------------------------------
     posters = Group { name = "posters" }
@@ -431,6 +443,13 @@ main = function()
     channel_menu.x = 200
     --------------------------------------------------------------------
     
+    trick_play_menu = dofile("TrickPlayMenu.lua")
+    
+    
+    trick_play_menu.x = screen_w/2
+    trick_play_menu.y = 715
+    --------------------------------------------------------------------
+    
     currently_playing_content = dofile("CurrentContent.lua")
     --------------------------------------------------------------------
     
@@ -598,7 +617,7 @@ main = function()
         --recording_menu,
         --my_dvr_menu,
         --my_library_menu,
-        main_menu
+        main_menu--,trick_play_menu
         --channel_menu,
         --curr_ch_menu,
         --epg_menu,
