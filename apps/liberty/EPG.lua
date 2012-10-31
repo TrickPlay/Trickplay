@@ -5,7 +5,7 @@ local make_row = function()
     
     local instance = Clone{
         source = screen:find_child("epg_row_bg"),
-        scale  = 1080/720,
+        scale  = {1,.5},
     }
     instance.icon  = Group{name="icon placeholder"}
     instance.shows = Group{name="show placeholder"}
@@ -242,7 +242,7 @@ local middle_row = 5
 while (#rows-2)*row_h + margin < screen_h do
     table.insert(rows,make_row():set{y=(#rows-1)*row_h})
     if #rows > middle_row then rows[#rows].y = rows[#rows].y + row_h end
-    if #rows == middle_row then rows[middle_row].scale = {1,2*(1080)/720} end
+    if #rows == middle_row then rows[middle_row].scale = 1 end
     rows[#rows].icon.y = rows[#rows].h/2 * rows[#rows].scale[2]
     rows[#rows].shows.y = rows[#rows].h/2 * rows[#rows].scale[2]
     show_grid_bg:add(rows[#rows])
@@ -518,6 +518,7 @@ local push_out_left_to = function(new_x)
     show_grid__left_edge = new_x
 end
 
+local sep_src = hidden_assets_group:find_child("show_border")
 local populate_row = function(r)
     print(r.icon)
     print(#r.icon.scheduling)
@@ -544,6 +545,10 @@ local populate_row = function(r)
             r.icon.right_i = r.icon.right_i > i and r.icon.right_i or i
         end
     end
+    
+    
+    if rows[middle_row] == r then r.icon.separators.scale={1,2*row_h/sep_src.h} end
+    
     dx = show_grid__left_edge - s[r.icon.left_i].x
     s[r.icon.left_i].show_name:animate{
         duration = 200,
@@ -558,7 +563,7 @@ local populate_row = function(r)
 end
 --------------------------------------------------------------------
 local scheduling = nil
-local sep_src = hidden_assets_group:find_child("show_border")
+
 local function build_schedule_row(parent)
     
     local separators = Group{name = "separators",anchor_point = {0,sep_src.h/2},scale={1,row_h/sep_src.h}}
@@ -657,13 +662,35 @@ local function build_schedule_row(parent)
         --show_names:add(show_name)
     end
 end
+local integrating_schedule = false
+local integrating_schedule_i = 1
+local complete_integrate_schedule
+local step_integrate_schedule
+step_integrate_schedule= function()
+    if integrating_schedule_i > #channel_list then
+        complete_integrate_schedule()
+    else
+        local channel_icon = channel_list[integrating_schedule_i]
+        integrating_schedule_i = integrating_schedule_i+1
+        channel_icon.scheduling = scheduling[channel_icon.name] or {}
+        build_schedule_row(channel_icon)
+        dolater(step_integrate_schedule)
+    end
+end
 local function integrate_schedule()
+    if integrating_schedule then return end
     
+    dolater(step_integrate_schedule)
+end
+
+complete_integrate_schedule= function()
+    --[[
     for i,channel_icon in ipairs(channel_list) do
         --print(channel_icon.name,scheduling[channel_icon.name])
         channel_icon.scheduling = scheduling[channel_icon.name] or {}
         build_schedule_row(channel_icon)
     end
+    --]]
     local r
     for i = 1,#rows do
         rows[i].shows:unparent()
@@ -1049,10 +1076,10 @@ local keypresses = {
                     rows[i]:add(rows[i-1].icon)
                 end
                 --]]
-                rows[middle_row-1].scale = {1,1080/720}
+                rows[middle_row-1].scale = {1,.5}--{1,1080/720}
                 --rows[middle_row-1].icon.y   = row_h/2
                 rows[middle_row].y          = (middle_row-2)*row_h
-                rows[middle_row].scale   = {1,2*1080/720}
+                rows[middle_row].scale   = 1--{1,2*1080/720}
                 --rows[middle_row].icon.y     = row_h
                 curr_hl.y = rows[middle_row].y 
                 for i = #rows,2,-1 do
@@ -1081,12 +1108,12 @@ local keypresses = {
         rows[middle_row-1].shows:add(rows[middle_row-1].icon.show_times)
         rows[middle_row-1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
-        rows[middle_row-1]:animate{   duration = 200, scale = {1,2*1080/720}, }
+        rows[middle_row-1]:animate{   duration = 200, scale = {1,1}}--{1,2*1080/720}, }
         rows[middle_row-1].icon:animate{ duration = 200, y = (middle_row-2)*row_h, }
         --rows[middle_row-1].icon:animate{ duration = 200, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
         --rows[middle_row]:animate{      duration = 200, y = (middle_row-1)*row_h, }
-        rows[middle_row]:animate{   duration = 200, scale = {1,1080/720}, y = (middle_row-1)*row_h,}
+        rows[middle_row]:animate{   duration = 200, scale = {1,.5}, y = (middle_row-1)*row_h,}
         rows[middle_row].icon:animate{ duration = 200, y = (middle_row-1)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = 200, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = 200,scale={1,row_h/sep_src.h} }
@@ -1160,9 +1187,9 @@ local keypresses = {
                 end
                 --]]
                 --rows[middle_row].icon.y     = row_h
-                rows[middle_row].scale   = {1,2*1080/720}
+                rows[middle_row].scale   = 1--{1,2*1080/720}
                 rows[middle_row+1].y        = middle_row*row_h
-                rows[middle_row+1].scale = {1,1080/720}
+                rows[middle_row+1].scale = {1,.5}--{1,1080/720}
                 --rows[middle_row+1].icon.y   = row_h/2
                 curr_hl.y = rows[middle_row].y
                 --[[
@@ -1205,12 +1232,12 @@ local keypresses = {
         --expand the next column
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
-        rows[middle_row+1]:animate{   duration = 200, scale = {1,2*1080/720}, y = (middle_row-1)*row_h}
+        rows[middle_row+1]:animate{   duration = 200, scale = {1,1}, y = (middle_row-1)*row_h}
         rows[middle_row+1].icon:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].shows:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
-        rows[middle_row]:animate{   duration = 200, scale = {1,1080/720}, }
+        rows[middle_row]:animate{   duration = 200, scale = {1,.5}}--{1,1080/720}, }
         rows[middle_row].icon:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].shows:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = 200, opacity = 0,mode="EASE_OUT_QUAD" }
