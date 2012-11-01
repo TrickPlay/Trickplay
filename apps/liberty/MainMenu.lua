@@ -26,9 +26,7 @@ local create = function(items)
     for _,t in ipairs(items) do icon_sources:add(t.icon) end
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #text < 4 or total_w - (largest_w+item_spacing)*3 < screen_w do
-        --print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(items) do
-            --print("a",#text)
             table.insert(text,
                 make_bolding_text{
                     text = t.label,
@@ -70,9 +68,7 @@ local create = function(items)
     text[1]:show()
     text[1].x = screen_w/2
     --position from middle to the right
-    print(text[right_i].x + text[right_i].w/2, screen_w)
     while text[right_i].x + text[right_i].w/2 <= screen_w do
-        --print("r")
         curr_item = wrap_i(right_i + 1,text)
         place_on_the_right(right_i,text[curr_item])
         right_i = curr_item
@@ -85,46 +81,6 @@ local create = function(items)
     end
     
     
-    
-    --[[
-    local first_item = true
-    repeat
-        
-        curr_item = text[i]
-        if not first_item then
-            next_x = next_x + curr_item.w/2 
-        else
-            first_item = false
-        end
-        curr_item:show()
-        curr_item.x = next_x
-        next_x = next_x + curr_item.w/2 + item_spacing
-        print("l",i,curr_item.x)
-        i = wrap_i(i + 1,text)
-        if i == 1 then
-            error("this shouldnt be able to happen")
-        end
-    until curr_item.x + curr_item.w/2 > screen_w
-    right_i = i
-    next_x = screen_w/2 - text[1].w/2 - item_spacing
-    i = #text
-    while next_x > 0 do
-        
-        curr_item = text[i]
-        curr_item:show()
-        next_x = next_x - curr_item.w/2
-        curr_item.x = next_x
-        next_x = next_x - curr_item.w/2 - item_spacing
-        print("r",i,curr_item.x)
-        i = wrap_i(i - 1,text)
-        print(i,right_i)
-        if i<right_i then
-            error("this shouldnt be able to happen")
-        end
-    end
-    
-    left_i = i
-    --]]
     
     local new_icon = function(source,x)
         prev_icon:set{
@@ -152,7 +108,6 @@ local create = function(items)
         new_icon(text[new_i].icon,screen_w - 100)
         
         while text[right_i].x + text[right_i].w/2 <= screen_w+dx do
-            --print("adding 1 from the right")
             curr_item = wrap_i(right_i + 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_right(right_i,text[curr_item])
@@ -179,7 +134,6 @@ local create = function(items)
             x = text_items.x - dx,
             on_completed = function()
                 while text[left_i].x + text[left_i].w/2 < dx do
-                    --print("hiding 1 from the left")
                     text[left_i]:hide()
                     left_i = wrap_i(left_i + 1,text)
                 end
@@ -189,7 +143,6 @@ local create = function(items)
                         child.x = child.x - dx
                     end
                 end)
-                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
                 curr_icon.source:on_key_focus_in()
@@ -212,11 +165,9 @@ local create = function(items)
         local dx = text[curr_i].x - text[new_i].x
         
         new_icon(text[new_i].icon, 100)
-        print(text[new_i].icon,text[new_i].icon.gid)
         local item = text[new_i].icon
         
         while text[left_i].x + text[left_i].w/2 >= -dx do
-            --print("adding 1 from the left")
             curr_item = wrap_i(left_i - 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_left(left_i,text[curr_item])
@@ -243,7 +194,6 @@ local create = function(items)
             x = text_items.x + dx,
             on_completed = function()
                 while text[right_i].x - text[right_i].w/2 > screen_w-dx do
-                    --print("hiding 1 from the right")
                     text[right_i]:hide()
                     right_i = wrap_i(right_i - 1,text)
                 end
@@ -253,7 +203,6 @@ local create = function(items)
                         child.x = child.x + dx
                     end
                 end)
-                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
                 curr_icon.source:on_key_focus_in()
@@ -330,7 +279,6 @@ function store_icon:on_key_down(k)
         store_menu.opacity = 0
         
         dolater(function()
-        --print("doit")
         main_menu:animate{
             duration = 300,
             z = 300,
@@ -370,12 +318,11 @@ end
 library_icon:on_key_focus_out()
 -------------------------------------------------------
 local channel_is_animating = false
-channel_icon = Clone{source=random_poster(),color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+channel_icon = Clone{source=random_poster(),color={rand(),rand(),rand(),}, on_key_focus_in = function() end,on_key_focus_out = function() end }
 function channel_icon:on_key_down(k) 
     if keys.OK == k then
         if channel_is_animating then return end
         channel_is_animating = true
-        print("this")
         menu_layer:add(curr_ch_menu)
         curr_ch_menu:lower_to_bottom()
         curr_ch_menu.z = -300
@@ -395,7 +342,7 @@ function channel_icon:on_key_down(k)
 end
 -------------------------------------------------------
 local epg_is_animating = false
-local epg_icon = Image{src = "assets/epg.png", on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+local epg_icon = Image{src = "assets/epg.png", on_key_focus_in = function() end,on_key_focus_out = function() end }
 function epg_icon:on_key_down(k) 
     if keys.OK == k then
         if epg_is_animating then return end
@@ -416,6 +363,7 @@ function epg_icon:on_key_down(k)
                 epg_is_animating = false 
             end
         }
+        backdrop:stop_dots()
         epg_menu:grab_key_focus()
         end)
     end

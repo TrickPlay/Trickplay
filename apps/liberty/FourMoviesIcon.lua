@@ -19,7 +19,6 @@ local hs = {
 local tot_w = 0
 for i,w in ipairs(ws) do tot_w = tot_w + w end
 local collapsed_w = ws[1] + collapsed_spacing*(#ws-1)
-print("collapsed_w",collapsed_w)
 
 
 return function(dur)
@@ -68,8 +67,8 @@ return function(dur)
             end
         end
     }
-    instance.on_key_focus_in  = function(self) print("expand",self) expand:start()   end
-    instance.on_key_focus_out = function(self) print("collapse",self) collapse:start() end
+    instance.on_key_focus_in  = function(self) expand:start()   end
+    instance.on_key_focus_out = function(self) collapse:start() end
     
     return instance
 end
