@@ -1,18 +1,4 @@
 #include "leaf.h"
-#include <stdlib.h>
-
-/*
-GSequence * get_sequence ( GHashTable * table, int key )
-{
-    gpointer ptr = GINT_TO_POINTER( key + 1 );
-
-    GSequence * seq = g_hash_table_lookup( table, ptr );
-    if ( seq == NULL )
-        g_hash_table_insert( table, ptr, ( seq = g_sequence_new( NULL ) ) );
-
-    return seq;
-}
-*/
 
 void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc cmp_func, gpointer cmp_data )
 {
@@ -44,35 +30,41 @@ void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc
     }
 }
 
-int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
+int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__ ((unused)) )
 {
-    Leaf * aa = (Leaf *) a, * bb = (Leaf *) b;
-    return user_data == LEAF_AREA_COMPARE   ? aa->area - bb->area :
-           user_data == LEAF_WIDTH_COMPARE  ? aa->w    - bb->w    :
-           user_data == LEAF_HEIGHT_COMPARE ? aa->h    - bb->h    : 0;
+    Leaf * aa = (Leaf *) a,
+         * bb = (Leaf *) b;
+    return aa->area - bb->area;
 }
 
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
 {
-    //fprintf(stderr, "new leaf: %i %i %i %i\n",x,y,w,h);
     Leaf * leaf = malloc( sizeof( Leaf ) );
     leaf->x = x;
     leaf->y = y;
     leaf->w = w;
     leaf->h = h;
     leaf->area = w * h;
+    leaf->item = NULL;
 
     return leaf;
 }
 
-void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, GSequence *leaves_sorted_by_area, const Page *smallest )
+void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, GSequence * leaves, Output * output )
 {
     gboolean b = leaf->w - w > leaf->h - h;
-    if ( leaf->w - w > smallest->width )
-        g_sequence_insert_sorted( leaves_sorted_by_area, leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h ), leaf_compare, LEAF_AREA_COMPARE );
-    if ( leaf->h - h > smallest->height )
-        g_sequence_insert_sorted( leaves_sorted_by_area, leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h ), leaf_compare, LEAF_AREA_COMPARE );
+    if ( leaf->w - w > output->smallest.width )
+        g_sequence_insert_sorted( leaves, leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h ), leaf_compare, NULL );
+    if ( leaf->h - h > output->smallest.height )
+        g_sequence_insert_sorted( leaves, leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h ), leaf_compare, NULL );
 
-    g_sequence_remove_sorted( leaves_sorted_by_area, leaf, leaf_compare, LEAF_AREA_COMPARE );
-    free( leaf );
+    g_sequence_remove_sorted( leaves, leaf, leaf_compare, NULL );
+}
+
+char * leaf_tostring ( Leaf * leaf, Options * options )
+{
+    unsigned int a = options->add_buffer_pixels ? 1 : 0;
+    return g_strdup_printf(
+        "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
+        leaf->x + a, leaf->y + a, leaf->item->w - 2*a, leaf->item->h - 2*a, leaf->item->id );
 }
