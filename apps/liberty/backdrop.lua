@@ -145,7 +145,7 @@ local function make_zoom_zoom(group)
         
         if not c_image.is_animating then return end
         
-        c_image:stop_animation()
+        c_image:complete_animation()
         
     end
     function group:animate_dots()
