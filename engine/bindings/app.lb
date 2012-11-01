@@ -160,7 +160,7 @@ global app [[App*]]
 
             if ( list.empty() )
             {
-                g_warning( "CANNOT GET APP CONTENTS" );
+                g_warning( "CANNOT GET APP CONTENTS: %s", Util::where_am_i_lua(L).c_str() );
                 lua_pushnil( L );
             }
             else

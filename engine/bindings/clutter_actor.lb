@@ -1376,7 +1376,7 @@ interface actor [[ClutterActor*]]
         }
         else
         {
-            g_warning( "Trying to raise() an actor that is not in a group" );
+            g_warning( "Trying to raise() an actor that is not in a group: %s", Util::where_am_i_lua(L).c_str() );
         }
     ]];
 
@@ -1415,7 +1415,7 @@ interface actor [[ClutterActor*]]
         }
         else
         {
-            g_warning( "Trying to lower() an actor that is not in a group" );
+            g_warning( "Trying to lower() an actor that is not in a group: %s", Util::where_am_i_lua(L).c_str() );
         }
     ]];
 
@@ -1444,7 +1444,7 @@ interface actor [[ClutterActor*]]
         }
         else
         {
-            g_warning( "Trying to raise_to_top() an actor that is not in a group" );
+            g_warning( "Trying to raise_to_top() an actor that is not in a group: %s", Util::where_am_i_lua(L).c_str() );
         }
     ]];
 
@@ -1473,7 +1473,7 @@ interface actor [[ClutterActor*]]
         }
         else
         {
-            g_warning( "Trying to lower_to_bottom() an actor that is not in a group" );
+            g_warning( "Trying to lower_to_bottom() an actor that is not in a group: %s", Util::where_am_i_lua(L).c_str() );
         }
     ]];
 
@@ -2213,7 +2213,7 @@ interface actor [[ClutterActor*]]
                 {
                     if ( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( c ) ) )
                     {
-                        g_warning( "Trying to add a constraint that has already been added to another actor" );
+                        g_warning( "Trying to add a constraint that has already been added to another actor: %s", Util::where_am_i_lua(L).c_str() );
                     }
                     else
                     {

@@ -508,7 +508,7 @@ global devtools [[ void * ]]
 
             if( !actor )
             {
-                g_warning("Actor not found");
+                g_warning("Actor not found: %s", Util::where_am_i_lua(L).c_str());
                 lua_pushnil( L );
             }
             else
@@ -574,7 +574,7 @@ global devtools [[ void * ]]
 
             if ( ! image )
             {
-                g_warning( "FAILED TO TAKE SCREENSHOT" );
+                g_warning( "FAILED TO TAKE SCREENSHOT: %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
@@ -618,7 +618,7 @@ global devtools [[ void * ]]
 
                     if ( ! image->write_to_png( path.c_str() ) )
                     {
-                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s': %s" , path.c_str(), Util::where_am_i_lua(L).c_str() );
                     }
                     else
                     {
