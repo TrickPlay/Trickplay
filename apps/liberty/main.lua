@@ -118,7 +118,13 @@ main = function()
     
     make_cursor = function(w)
         local cursor_line = hidden_assets_group:find_child("cursor_line")
-        return Group{
+        local box = Rectangle{
+            w = w,
+            h = 16,
+            x = -w/2,
+            anchor_point = {0,8},
+        }
+        cursor_line =  Group{
             name = "cursor",
             children = {
                 Clone{
@@ -126,13 +132,18 @@ main = function()
                     anchor_point = {cursor_line.w/2,cursor_line.h/2},
                     scale = {screen_w / cursor_line.w,1080/720},
                 },
-                Rectangle{
-                    w = w,
-                    h = 16,
-                    anchor_point = {w/2,8},
-                },
+                box,
             }
         }
+        function cursor_line:change_w(new_w)
+            box:animate{
+                duration = 300,
+                w =  new_w,
+                x = -new_w/2,
+            }
+        end
+        
+        return cursor_line
     end
     
     
@@ -170,7 +181,12 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  my_library_menu.is_animating or 
+                    my_dvr_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
                 animating = true
                 
                 menu_layer:add(my_dvr_menu)
@@ -215,7 +231,12 @@ main = function()
     
     local my_dvr_menu_animating = false
     local animate_to_recording_menu = function()
-        if my_dvr_menu_animating then return end
+        if  my_dvr_menu.is_animating or 
+            recording_menu.is_animating or 
+            my_dvr_menu_animating then 
+                
+                return 
+        end
         my_dvr_menu_animating = true
         
         menu_layer:add(recording_menu)
@@ -295,7 +316,13 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  all_videos_menu.parent or
+                    store_menu.is_animating or 
+                    all_videos_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
                 animating = true
                 
                 menu_layer:add(all_videos_menu)
@@ -354,7 +381,14 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  movies_menu.parent or
+                    all_videos_menu.is_animating or 
+                    movies_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
+                
                 animating = true
                 
                 menu_layer:add(movies_menu)

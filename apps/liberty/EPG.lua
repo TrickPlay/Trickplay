@@ -833,23 +833,26 @@ local keypresses = {
         if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid or show_grid__left_edge <= -half_hour_len then return end
         animating_show_grid = true
         
+        local dx
         --if at the left-most show, and but not at the left edge
         if row_i == 1 then 
-            push_out_left_to(show_grid__left_edge - half_hour_len)
+            dx = (show_grid__left_edge <= -2*half_hour_len) and (2*half_hour_len) or (-show_grid__left_edge)
+            push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
                 duration = dur,
-                x = show_grid_text.x + half_hour_len,
+                x = show_grid_text.x + dx,
             }
+            print("hehehe")
             curr_hl:animate{duration = dur,
-                x = curr_hl.x - half_hour_len,
-                w = (curr_hl.w == (screen_w - margin) and (screen_w - margin) or curr_hl.w + half_hour_len),
+                x = curr_hl.x - dx,
+                w = (curr_hl.w == (screen_w - margin) and (screen_w - margin) or curr_hl.w + dx),
                 on_completed = function() 
                     pull_in_right_to(show_grid__left_edge + (screen_w - margin) )
                     animating_show_grid = false
                 end
             }
-            intervals_g:move_x_by(half_hour_len)
+            intervals_g:move_x_by(dx)
             return 
         end
         prev_hl:set{
@@ -873,7 +876,7 @@ local keypresses = {
         else
             next_i = row_i==1 and 1 or row_i - 1
         end
-        local dx = show_grid__left_edge - rows[middle_row].icon.scheduling[next_i].x
+        dx = show_grid__left_edge - rows[middle_row].icon.scheduling[next_i].x
         if dx >= 2*half_hour_len then
             push_out_left_to(show_grid__left_edge - 2*half_hour_len)
             --move_left_vis_x(show_grid__left_edge - 2*half_hour_len )

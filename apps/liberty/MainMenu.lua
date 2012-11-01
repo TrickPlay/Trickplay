@@ -94,10 +94,27 @@ local create = function(items)
         curr_icon.x = x
         curr_icon.opacity = 0
     end
+    
+    
+    
+    local cursor = make_cursor(183+168+153+140+124)
+    cursor.x = screen_w/2
+    cursor.y = -72
+    instance:add(cursor)
+    
+    
+    
+    
     local curr_i = 1
     local animating, new_i
     instance.move_left = function()
-        if animating then return end
+        if  text_items.is_animating or 
+            curr_icon.is_animating or 
+            prev_icon.is_animating or 
+            animating then 
+            
+            return 
+        end
         animating = true
         new_i = wrap_i(curr_i + 1,text)
         text[curr_i].contract:start()--font = MAIN_MENU_FONT
@@ -128,6 +145,9 @@ local create = function(items)
             x = screen_w/2,
             opacity      = 255,
         }
+        
+        cursor:change_w(curr_icon.w)
+        
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
@@ -156,7 +176,13 @@ local create = function(items)
     end
     
     instance.move_right = function()
-        if animating then return end
+        if  text_items.is_animating or 
+            curr_icon.is_animating or 
+            prev_icon.is_animating or 
+            animating then 
+            
+            return 
+        end
         animating = true
         new_i = wrap_i(curr_i - 1,text)
         text[curr_i].contract:start()--.font = MAIN_MENU_FONT
@@ -188,6 +214,9 @@ local create = function(items)
             x = screen_w/2,
             opacity      = 255,
         }
+        
+        cursor:change_w(curr_icon.w)
+        
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
@@ -227,7 +256,13 @@ local create = function(items)
         [keys.Right]  = instance.move_left,
         [keys.Left]  = instance.move_right,
         [keys.BACK] = function()
-            if animating then return end
+            if  instance.is_animating or 
+                currently_playing_content.is_animating or 
+                animating then 
+                
+                return 
+            end
+            
             animating = false 
             menu_layer:add(currently_playing_content)
             currently_playing_content:lower_to_bottom()
@@ -257,10 +292,6 @@ local create = function(items)
         end 
     end
     
-    local cursor = make_cursor(183+168+153+140+124)
-    cursor.x = screen_w/2
-    cursor.y = -72
-    instance:add(cursor)
     
     return instance
     
@@ -270,7 +301,12 @@ local store_is_animating = false
 local store_icon = make_4movies_icon()
 function store_icon:on_key_down(k) 
     if keys.OK == k then
-        if store_is_animating then return end
+        if  store_menu.is_animating or 
+            main_menu.is_animating or 
+            store_is_animating then 
+            
+            return 
+        end
         store_is_animating = true
         
         menu_layer:add(store_menu)
@@ -295,7 +331,12 @@ local library_is_animating = false
 local library_icon = make_4movies_icon()
 function library_icon:on_key_down(k) 
     if keys.OK == k then
-        if library_is_animating then return end
+        if  my_library_menu.is_animating or 
+            main_menu.is_animating or 
+            library_is_animating then 
+            
+            return 
+        end
         library_is_animating = true
         
         menu_layer:add(my_library_menu)
@@ -321,7 +362,12 @@ local channel_is_animating = false
 channel_icon = Clone{source=random_poster(),color={rand(),rand(),rand(),}, on_key_focus_in = function() end,on_key_focus_out = function() end }
 function channel_icon:on_key_down(k) 
     if keys.OK == k then
-        if channel_is_animating then return end
+        if  curr_ch_menu.is_animating or 
+            main_menu.is_animating or 
+            channel_is_animating then 
+            
+            return 
+        end
         channel_is_animating = true
         menu_layer:add(curr_ch_menu)
         curr_ch_menu:lower_to_bottom()
@@ -345,7 +391,12 @@ local epg_is_animating = false
 local epg_icon = Image{src = "assets/epg.png", on_key_focus_in = function() end,on_key_focus_out = function() end }
 function epg_icon:on_key_down(k) 
     if keys.OK == k then
-        if epg_is_animating then return end
+        if  epg_menu.is_animating or 
+            main_menu.is_animating or 
+            epg_is_animating then 
+            
+            return 
+        end
         epg_is_animating = true
         
         menu_layer:add(epg_menu)
