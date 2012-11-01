@@ -233,6 +233,7 @@ local create = function(items)
     local key_presses = {
         [keys.Right]  = instance.move_left,
         [keys.Left]  = instance.move_right,
+        [keys.OK] = items.next_menu,
     }
     
     function instance:on_key_down(k,...)

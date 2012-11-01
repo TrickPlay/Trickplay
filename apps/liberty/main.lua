@@ -212,61 +212,58 @@ main = function()
     --------------------------------------------------------------------
     --  My Library Menu > My DVR Menu
     --------------------------------------------------------------------
-    function make_recording()
-        local animating = false
-        local icon = random_poster()--Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
-        function icon:on_key_down(k) 
-            if keys.OK == k then
-                if animating then return end
-                animating = true
-                
-                menu_layer:add(recording_menu)
-                recording_menu:lower_to_bottom()
-                recording_menu.z = -300
-                recording_menu.opacity = 0
-                
-                dolater(function()
-                my_dvr_menu:animate{
-                    duration = 300,
-                    z = 300,
-                    opacity = 0,
-                    on_completed = function()
-                        animating = false
-                    end
-                }
-                recording_menu:grab_key_focus()
-                end)
+    
+    local my_dvr_menu_animating = false
+    local animate_to_recording_menu = function()
+        if my_dvr_menu_animating then return end
+        my_dvr_menu_animating = true
+        
+        menu_layer:add(recording_menu)
+        recording_menu:lower_to_bottom()
+        recording_menu.z = -300
+        recording_menu.opacity = 0
+        
+        dolater(function()
+        my_dvr_menu:animate{
+            duration = 300,
+            z = 300,
+            opacity = 0,
+            on_completed = function()
+                my_dvr_menu_animating = false
             end
-        end
-        return icon
+        }
+        recording_menu:grab_key_focus()
+        end)
     end
     my_dvr_menu = make_dosado_menu{
         prev_menu = my_library_menu,
         upper = make_movie_menu{
             w = 200,h=300,
-            {label = "Recording A", icon = make_recording()},
-            {label = "Recording B", icon = make_recording()},
-            {label = "Recording C", icon = make_recording()},
-            {label = "Recording D", icon = make_recording()},
-            {label = "Recording E", icon = make_recording()},
-            {label = "Recording F", icon = make_recording()},
-            {label = "Recording G", icon = make_recording()},
-            {label = "Recording H", icon = make_recording()},
-            {label = "Recording I", icon = make_recording()},
-            {label = "Recording J", icon = make_recording()},
+            next_menu = animate_to_recording_menu,
+            {label = "Recording A", icon = random_poster()},
+            {label = "Recording B", icon = random_poster()},
+            {label = "Recording C", icon = random_poster()},
+            {label = "Recording D", icon = random_poster()},
+            {label = "Recording E", icon = random_poster()},
+            {label = "Recording F", icon = random_poster()},
+            {label = "Recording G", icon = random_poster()},
+            {label = "Recording H", icon = random_poster()},
+            {label = "Recording I", icon = random_poster()},
+            {label = "Recording J", icon = random_poster()},
         },
         lower = make_movie_menu{
             w = 200,h=300,
-            {label = "Recording A", icon = make_recording()},
-            {label = "Recording B", icon = make_recording()},
-            {label = "Recording C", icon = make_recording()},
-            {label = "Recording D", icon = make_recording()},
-            {label = "Recording E", icon = make_recording()},
-            {label = "Recording F", icon = make_recording()},
-            {label = "Recording G", icon = make_recording()},
-            {label = "Recording H", icon = make_recording()},
-            {label = "Recording I", icon = make_recording()},
-            {label = "Recording J", icon = make_recording()},
+            next_menu = animate_to_recording_menu,
+            {label = "Recording A", icon = random_poster()},
+            {label = "Recording B", icon = random_poster()},
+            {label = "Recording C", icon = random_poster()},
+            {label = "Recording D", icon = random_poster()},
+            {label = "Recording E", icon = random_poster()},
+            {label = "Recording F", icon = random_poster()},
+            {label = "Recording G", icon = random_poster()},
+            {label = "Recording H", icon = random_poster()},
+            {label = "Recording I", icon = random_poster()},
+            {label = "Recording J", icon = random_poster()},
         },
         upper_y = 500,
         type = "flat",
@@ -325,6 +322,7 @@ main = function()
         prev_menu = main_menu,
         upper = make_movie_menu{
             w=180,h=270,
+            --next_menu = store_menu,
             --Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}
             {label = "Movie A", icon = random_poster()},
             {label = "Movie B", icon = random_poster()},
@@ -415,6 +413,7 @@ main = function()
             {label = "Movie J", icon = random_poster()},
         },
         lower = make_movie_menu{
+            w=200,h=300,
             {label = "Movie A", icon = random_poster()},
             {label = "Movie B", icon = random_poster()},
             {label = "Movie C", icon = random_poster()},
