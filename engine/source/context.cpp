@@ -2075,6 +2075,7 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
         level = "DEBUG";
     }
 
+#ifndef TP_PRODUCTION
 	if(dump_stack)
 	{
          void* callstack[128];
@@ -2086,6 +2087,7 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
          }
          free(strs);
 	 }
+#endif
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
