@@ -11,7 +11,6 @@ typedef struct Page {
     unsigned int width,
         height,
         area;
-    float coverage;
 } Page;
 
 typedef struct Options {
@@ -57,21 +56,21 @@ typedef struct Layout {
 } Layout;
 
 enum {
-    FOUND_NONE,
-    FOUND_SOME,
-    FOUND_ALL
+    LAYOUT_FOUND_NONE,
+    LAYOUT_FOUND_SOME,
+    LAYOUT_FOUND_ALL
 };
 
 Options * options_new();
 void options_free( Options * options );
-gboolean options_allows_id ( Options * options, char * id );
-gboolean options_take_unique_id ( Options * options, char * id );
+gboolean options_allows_id ( Options * options, const char * id );
+gboolean options_take_unique_id ( Options * options, const char * id );
 void options_take_arguments ( Options * options, int argc, char ** argv, Output * output );
 
 Output * output_new();
 void output_free( Output * output );
 void output_load_inputs( Output * output, Options * options );
-void output_add_subsheet ( Output * output, Layout * layout, char * png_path, Options * options );
+void output_add_subsheet ( Output * output, Layout * layout, const char * png_path, Options * options );
 void output_export_files ( Output * output, Options * options );
 
 void layout_free ( Layout * layout );

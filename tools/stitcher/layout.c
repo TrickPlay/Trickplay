@@ -9,7 +9,7 @@ Layout * layout_new ( unsigned int width )
     layout->height = 0;
     layout->area = 0;
     layout->coverage = 0.0f;
-    layout->status = FOUND_NONE;
+    layout->status = LAYOUT_FOUND_NONE;
     layout->leaves = g_sequence_new( NULL );
     layout->places = g_ptr_array_new_with_free_func( g_free );
     
@@ -115,7 +115,7 @@ Layout * layout_new_from_output ( Output * output, unsigned int width, Options *
         i = g_sequence_iter_next( i );
     }
 
-    layout->status = f ? ( !nf ? FOUND_ALL : FOUND_SOME ) : FOUND_NONE;
+    layout->status = f ? ( !nf ? LAYOUT_FOUND_ALL : LAYOUT_FOUND_SOME ) : LAYOUT_FOUND_NONE;
     return layout;
 }
 

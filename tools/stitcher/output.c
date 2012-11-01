@@ -8,8 +8,8 @@ Output * output_new()
 {
     Output * output      = malloc( sizeof( Output ) );
     
-    output->minimum  = (Page) { 0, 0, 0, 0.0f };
-    output->smallest = (Page) { 0, 0, 0, 0.0f };
+    output->minimum  = (Page) { 0, 0, 0 };
+    output->smallest = (Page) { 0, 0, 0 };
     
     output->large_images = g_ptr_array_new_with_free_func( g_free );
     output->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
@@ -69,7 +69,7 @@ void output_add_item ( Output * output, Item * item, Options * options )
     }
 }
 
-void output_add_file ( Output * output, GFile * file, GFile * root, char * root_path, Options * options )
+void output_add_file ( Output * output, GFile * file, GFile * root, const char * root_path, Options * options )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
     GFileType type = g_file_info_get_file_type( info );
@@ -104,7 +104,7 @@ void output_add_file ( Output * output, GFile * file, GFile * root, char * root_
         if ( file == root || options_allows_id( options, id ) )
             if ( options_take_unique_id( options, id ) )
             {
-                char * dir = ( file != root ) ? root_path : NULL;
+                const char * dir = ( file != root ) ? root_path : NULL;
                 output_add_item( output, item_new_from_file( id, dir, file, options ), options );
             }
     }
@@ -112,7 +112,7 @@ void output_add_file ( Output * output, GFile * file, GFile * root, char * root_
     g_object_unref( info );
 }
 
-void output_merge_json ( Output * output, char * path, Options * options )
+void output_merge_json ( Output * output, const char * path, Options * options )
 {
     JsonParser * json = json_parser_new();
     gboolean loaded = json_parser_load_from_file( json, path, NULL );
@@ -178,7 +178,7 @@ void output_load_inputs( Output * output, Options * options )
          output->path = g_ptr_array_index( options->input_paths, 0 );
     
     unsigned int i, length = options->input_paths->len;
-    output->smallest = (Page) { options->output_size_limit, options->output_size_limit, 0, 0.0f };
+    output->smallest = (Page) { options->output_size_limit, options->output_size_limit, 0 };
 
     // load regular inputs
 
@@ -263,7 +263,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
     DestroyExceptionInfo( exception );
 }
 
-void output_add_subsheet ( Output * output, Layout * layout, char * png_path, Options * options )
+void output_add_subsheet ( Output * output, Layout * layout, const char * png_path, Options * options )
 {
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo     * ss_info   = AcquireImageInfo();
@@ -273,6 +273,8 @@ void output_add_subsheet ( Output * output, Layout * layout, char * png_path, Op
     
     fprintf( stderr,"Page match (%i x %i pixels, %.4g%% coverage): ",
              layout->width, layout->height, 100.0f * layout->coverage );
+    
+    // composite output png
     
     gchar ** sprites = calloc( layout->places->len + 1, sizeof( gchar * ) );
     
@@ -285,7 +287,7 @@ void output_add_subsheet ( Output * output, Layout * layout, char * png_path, Op
         leaf->item->placed = TRUE;
     }
     
-    // aggregate json
+    // append to json
     
     g_ptr_array_add( output->subsheets, g_strdup_printf(
         "{\n\t\"sprites\": [%s\n\t],\n\t\"img\": \"%s\"\n}", 
