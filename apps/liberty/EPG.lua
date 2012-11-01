@@ -118,11 +118,11 @@ local intervals = Image{
     src = "assets/epg/timeline-interval.png",
     tile = {true,false},
     y = 195,
-    scale = 1080/720,
+    --scale = 1080/720,
 }
-local half_hour_len = intervals.w*intervals.scale[1]
+local half_hour_len = intervals.w
 intervals_g.x = -4*half_hour_len
-intervals.w = (screen_w-margin)*720/1080 + 8*half_hour_len
+intervals.w = (screen_w-margin) + 8*half_hour_len
 
 
 local refresh = Timer{
