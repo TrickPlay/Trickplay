@@ -140,27 +140,7 @@
       },
       {
         "id": "Be Sport 2",
-        "Name": "Be Sport 2",
-        "Events": {
-          "resultCount": 1,
-          "Event": [
-            {
-              "id": "crid:~~2F~~2Feventis.nl~~2F00000000-0000-1000-0004-000000315730,imi:0010061100000780",
-              "AvailabilityEnd": "2012-11-01T10:00:00Z",
-              "AvailabilityStart": "2012-10-31T23:00:00Z",
-              "Titles": {
-                "resultCount": 1,
-                "Title": [
-                  {
-                    "id": "crid:~~2F~~2Feventis.nl~~2F00000000-0000-1000-0004-000000315730",
-                    "Name": "Geen uitzending"
-                  }
-                ]
-              },
-              "DurationInSeconds": 39600
-            }
-          ]
-        }
+        "Name": "Be Sport 2"
       },
       {
         "id": "Bel RTL",
