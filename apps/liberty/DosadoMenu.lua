@@ -179,14 +179,12 @@ return function(p)
     local switched = false
     local keypresses = {
         [keys.Up] = function()
-            --print("here1")
             if  dosado_1.timeline and 
                 dosado_1.timeline.is_playing or 
                 dosado_1.is_playing or 
                 dosado_2.timeline and 
                 dosado_2.timeline.is_playing or 
                 dosado_2.is_playing then
-                print("crisis averted")
                 return
             end
             if not switched then
@@ -195,9 +193,7 @@ return function(p)
                 dosado_2:start()
             end
             switched = not switched
-            --print("here2")
             instance:grab_key_focus()
-            --print("here3")
         end,
         [keys.Down] = function()
             if  dosado_1.timeline and 
@@ -206,7 +202,6 @@ return function(p)
                 dosado_2.timeline and 
                 dosado_2.timeline.is_playing or 
                 dosado_2.is_playing then
-                print("crisis averted")
                 return
             end
             if not switched then
@@ -253,25 +248,12 @@ return function(p)
             z = 0,
             opacity = 255,
         }
-        --print("d menu okfi1")
         if not switched then
             lower:grab_key_focus()--on_key_focus_in()
         else
             upper:grab_key_focus()--on_key_focus_in()
         end
-        --print("d menu okfi2")
     end
-    --[[
-    function instance:on_key_focus_out(self)
-        print("d menu okfo1")
-        if not switched then
-            lower:on_key_focus_out()
-        else
-            upper:on_key_focus_out()
-        end
-    end
-    --]]
-    --instance.z = -300
     instance.opacity = 0
     local cursor = make_cursor(p.type == "flat" and (200*1.1) or(183+168+153+140+124))
     cursor.x = screen_w/2

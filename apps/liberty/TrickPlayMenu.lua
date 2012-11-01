@@ -73,7 +73,6 @@ local function create()
     end
     
     function instance:on_key_focus_in(self)
-        --print("wat")
         icon.anchor_point = {icon.w/2,icon.h}
         focus[index]:animate{duration = 200,opacity=255}
     end

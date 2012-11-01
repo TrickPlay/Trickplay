@@ -139,11 +139,28 @@ local function make_zoom_zoom(group)
     fake_group:lower_to_bottom()
     c_image:lower_to_bottom()
     
-    c_image:animate{
-        duration = 1000,
-        loop = true,
-        z = INTERVAL*2,
-    }
+    
+    local start_z = c_image.z
+    function group:stop_dots(t)
+        
+        if not c_image.is_animating then return end
+        
+        c_image:stop_animation()
+        
+    end
+    function group:animate_dots()
+        
+        if c_image.is_animating then return end
+        
+        c_image.z = start_z
+        c_image:animate{
+            duration = 1000,
+            loop = true,
+            z = INTERVAL*2,
+        }
+    end
+    
+    group:animate_dots()
     --[[
     local fly_anim = Timeline {
                                 duration = 180,
@@ -221,6 +238,9 @@ local function make_backdrop()
     function backdrop_group:set_bulb_x(x)
         hb:animate{duration=300,x=x}
     end
+    
+    backdrop_group.animate_dots = zoom_group.animate_dots
+    backdrop_group.stop_dots    = zoom_group.stop_dots
     
     return backdrop_group
 end

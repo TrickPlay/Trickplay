@@ -214,7 +214,7 @@ main = function()
     --------------------------------------------------------------------
     function make_recording()
         local animating = false
-        local icon = random_poster():set{w=200,h=300}--Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
+        local icon = random_poster()--Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
         function icon:on_key_down(k) 
             if keys.OK == k then
                 if animating then return end
@@ -243,6 +243,7 @@ main = function()
     my_dvr_menu = make_dosado_menu{
         prev_menu = my_library_menu,
         upper = make_movie_menu{
+            w = 200,h=300,
             {label = "Recording A", icon = make_recording()},
             {label = "Recording B", icon = make_recording()},
             {label = "Recording C", icon = make_recording()},
@@ -322,17 +323,18 @@ main = function()
     store_menu = make_dosado_menu{
         prev_menu = main_menu,
         upper = make_movie_menu{
+            w=180,h=270,
             --Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}
-            {label = "Movie A", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie B", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie C", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie D", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie E", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie F", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie G", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie H", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie I", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie J", icon = random_poster():set{w=180,h=270}},
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
         },
         lower = make_category_menu{
             {label = "ALL VIDEOS",            icon = make_all_videos_icon()},
@@ -398,29 +400,30 @@ main = function()
     movies_menu = make_dosado_menu{
         prev_menu = all_videos_menu,
         upper = make_movie_menu{
+            w=200,h=300,
             --Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
-            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
         },
         lower = make_movie_menu{
-            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
         },
         upper_y = 500,
         type = "flat",
@@ -627,7 +630,7 @@ main = function()
     screen:add(menu_layer)
     
     main_menu:grab_key_focus()
-    
+    --[[
     mediaplayer:load("glee-1.mp4")
     
     function mediaplayer:on_loaded()
@@ -639,6 +642,7 @@ main = function()
         mediaplayer:seek(0)
         mediaplayer:play()
     end
+    --]]
 end
 
 dolater(main)

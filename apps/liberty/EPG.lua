@@ -135,7 +135,6 @@ local start_at_0 = curr_time.min < 30
 curr_time.min = start_at_0 and 0 or 30
 curr_time.sec = 0
 local time_slots = {}
-print("start_at_0",start_at_0)
 intervals_g:add(intervals)
 timeline_header:add(timeline_bg,intervals_g)
 
@@ -162,7 +161,6 @@ local zone_offset = -4
             end
 intervals_g:add(unpack(time_slots))
 function intervals_g:move_x_by(dx)
-    print("move_x_by",dx,2*half_hour_len)
     intervals_g:animate{
         duration = 200,
         x=intervals_g.x + dx,
@@ -189,7 +187,6 @@ function intervals_g:move_x_by(dx)
             end
             intervals_g.x = (intervals_g.x % half_hour_len)-4*half_hour_len
             --]]
-            print("num_zones",num_zones)
             zone_offset = zone_offset + num_zones
             for i,ts in ipairs(time_slots) do
                 i = (start_at_0 and (i-1) or i) + zone_offset
@@ -318,18 +315,13 @@ local push_out_right_to = function(new_x)
         if #s >= 1 then
         --dumptable(s)
         r_i = r.icon.right_i
-        --print(r.icon.name,r_i, #s)
-        print(r_i,#s)
-        print(s[r_i])
         while r_i < #s and new_x >= s[r_i].x+s[r_i].w do
-            --print("- show right edge", s[r_i].x+s[r_i].w)
             r_i = r_i+1
             --add the next show to screen
             r.icon.show_times:add( s[r_i].show_time )
             r.icon.show_names:add( s[r_i].show_name )
             r.icon.separators:add( s[r_i].sep       )
         end
-        --if r_i < #s then print("-- show right edge", s[r_i].x+s[r_i].w) end
         r.icon.right_i = r_i
         end
     end
@@ -348,7 +340,6 @@ pre_pull_in_left_to = function(new_x)
         s = r.icon.scheduling
         
         if #s == 0 then
-            print(i)
             r.icon.no_prog:animate{
                 duration = 200,
                 x = new_x + show_name_margin,
@@ -365,7 +356,6 @@ pre_pull_in_left_to = function(new_x)
             end
             ls[i] = l_i
             if s[l_i].x < new_x then
-            print(i,"true")
                 dx = new_x - s[l_i].x
                 s[l_i].show_name:animate{
                     duration = 200,
@@ -476,8 +466,6 @@ local push_out_left_to = function(new_x)
                 x = s[i].x +   show_name_margin,
                 w = s[i].w - 2*show_name_margin,
             }
-        else
-            print("not animating row",r_i,"s[i].x",s[i].x,"s[i].show_name.x",s[i].show_name.x,"new_x",new_x)
         end
     end
     --]]
@@ -488,7 +476,6 @@ local push_out_left_to = function(new_x)
         s = r.icon.scheduling
         if #s >= 1 then
         --reset_show_x_w(s[r.left_i])
-        print(r.icon.name)
         l_i = r.icon.left_i
         while l_i > 1 and new_x < s[l_i].x do
             l_i = l_i-1
@@ -520,8 +507,6 @@ end
 
 local sep_src = hidden_assets_group:find_child("show_border")
 local populate_row = function(r)
-    print(r.icon)
-    print(#r.icon.scheduling)
     local s = r.icon.scheduling
     if r.icon.no_prog then
         r.icon.show_names:add(r.icon.no_prog)
@@ -684,13 +669,6 @@ local function integrate_schedule()
 end
 
 complete_integrate_schedule= function()
-    --[[
-    for i,channel_icon in ipairs(channel_list) do
-        --print(channel_icon.name,scheduling[channel_icon.name])
-        channel_icon.scheduling = scheduling[channel_icon.name] or {}
-        build_schedule_row(channel_icon)
-    end
-    --]]
     local r
     for i = 1,#rows do
         rows[i].shows:unparent()
@@ -704,15 +682,23 @@ complete_integrate_schedule= function()
     end
     rows[middle_row].shows:add(rows[middle_row].icon.show_times)
     --rows[middle_row].icon:add(rows[middle_row].icon.show_times)
-    rows[middle_row].icon.show_times.opacity = 255
-    row_i = rows[middle_row].icon.left_i
-    print("row_i",row_i)
-    curr_hl:set{
-        x       = rows[middle_row].icon.scheduling[row_i].x,
-        y       = rows[middle_row].y,
-        w       = rows[middle_row].icon.scheduling[row_i].w,
-        opacity = 255
-    }
+    
+    if #rows[middle_row].icon.scheduling == 0 then
+            curr_hl:set{
+                x       = show_grid__left_edge,-- -show_name_margin,
+                y       = rows[middle_row].y,
+                w       = screen_w - margin,-- +show_name_margin*2,
+            }
+    else
+        rows[middle_row].icon.show_times.opacity = 255
+        row_i = rows[middle_row].icon.left_i
+        curr_hl:set{
+            x       = rows[middle_row].icon.scheduling[row_i].x,
+            y       = rows[middle_row].y,
+            w       = rows[middle_row].icon.scheduling[row_i].w,
+            opacity = 255
+        }
+    end
     --[[
     local prev
     for i = 2,#rows-1 do
@@ -745,7 +731,6 @@ function instance:setup_icons(t)
         ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
         show_grid_icons:add(rows[i].icon)
     end
-    print("setup_icons")
     if scheduling ~= nil then
         integrate_schedule()
     end
@@ -797,16 +782,12 @@ function instance:load_scheduling(t)
     t = t.Channels.Channel
     
     scheduling = {}
-    print("p1")
     local slot
     for _,channel in pairs(t) do
-        --print("-------------------------")
-        --dumptable(channel)
         scheduling[channel.Name] = {}
         if channel.Events then
             for i, e in ipairs(channel.Events.Event) do
                 if e.Titles.Title[1].Name == nil then
-                    print("no name")
                     dumptable(e.Titles.Title)
                 end
                 slot = {
@@ -817,19 +798,15 @@ function instance:load_scheduling(t)
                 
                 slot.x = x_from_time(slot.start)--i~=1 and scheduling[t.Name][i-1].x + scheduling[t.Name][i-1].w or 0
                 slot.w = e.DurationInSeconds/60/60 * 2*half_hour_len
-                --dumptable(slot.start)
-                --print(slot.x/(2*half_hour_len),slot.x)
                 scheduling[channel.Name][i] = slot
                 
             end
         end
     end
-    print("p2")
     
     if #channel_list ~= 0 then
         integrate_schedule()
     end
-    print("p3")
     
 end
 --------------------------------------------------------------------
@@ -876,10 +853,8 @@ local keypresses = {
             show_grid:animate{duration = 200,x=scheduling[row_i].x }
         else--]]
         if rows[middle_row].icon.scheduling[row_i].x < show_grid__left_edge then
-            print("the show I'm on is currently hanging off the edge")
             next_i = row_i
         else
-            print("next show")
             next_i = row_i==1 and 1 or row_i - 1
         end
         local dx = show_grid__left_edge - rows[middle_row].icon.scheduling[next_i].x
@@ -950,8 +925,6 @@ local keypresses = {
         }
         prev_hl:animate{duration = 200,opacity = 0}
         next_i = row_i==len and len or row_i + 1
-        print("===============================")
-        print(next_i,row_i)
         local dx = rows[middle_row].icon.scheduling[next_i].x - show_grid__left_edge--show_grid.x
         --if trying to jump by 2 hours, then only jump by an hour, staying on the same show
         if dx >= 4*half_hour_len then
@@ -984,7 +957,6 @@ local keypresses = {
                 animating_show_grid = false
             end
         }
-        print(next_i,row_i)
         
         row_i = next_i
         --[=[
@@ -1213,9 +1185,6 @@ local keypresses = {
                     rows[i].icon.y  = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
                     rows[i].shows.y = rows[i].y+ ((i == middle_row) and row_h or row_h/2)
                 end
-                for i = 1,#rows-1 do
-                    print(i,rows[i].icon.y,rows[i].shows.y,rows[i].icon.name,rows[i].shows.name)
-                end
                 rows[1].icon:unparent()
                 rows[1].shows:unparent()
                 rows[1].icon.show_names:clear()
@@ -1263,6 +1232,7 @@ local keypresses = {
             z = 0,
             opacity = 255,
         }
+        backdrop:animate_dots()
         
     end,
 }
