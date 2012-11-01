@@ -179,7 +179,8 @@ return function(p)
     local switched = false
     local keypresses = {
         [keys.Up] = function()
-            if  dosado_1.timeline and 
+            if  instance.is_animating or 
+                dosado_1.timeline and 
                 dosado_1.timeline.is_playing or 
                 dosado_1.is_playing or 
                 dosado_2.timeline and 
@@ -196,7 +197,8 @@ return function(p)
             instance:grab_key_focus()
         end,
         [keys.Down] = function()
-            if  dosado_1.timeline and 
+            if  instance.is_animating or 
+                dosado_1.timeline and 
                 dosado_1.timeline.is_playing or 
                 dosado_1.is_playing or 
                 dosado_2.timeline and 
@@ -213,7 +215,17 @@ return function(p)
             instance:grab_key_focus()
         end,
         [keys.BACK] = function()
-            if animating_back_to_prev_menu then return end
+            if  prev_menu.is_animating or 
+                instance.is_animating or 
+                animating_back_to_prev_menu or 
+                dosado_1.timeline and 
+                dosado_1.timeline.is_playing or 
+                dosado_1.is_playing or 
+                dosado_2.timeline and 
+                dosado_2.timeline.is_playing or 
+                dosado_2.is_playing then 
+                return 
+            end
             animating_back_to_prev_menu = true
             
             instance:animate{

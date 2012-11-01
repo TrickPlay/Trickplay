@@ -66,9 +66,10 @@ function get_scheduling(f)
     --expected input
     --"2012-10-23T17:50:00Z"
     curr_time.hour = curr_time.hour - 1
+    --curr_time.day = curr_time.day - 3
     local start_time = os.date('*t',os.time(curr_time))
     curr_time.hour = curr_time.hour + 1
-    curr_time.hour = curr_time.day + 1
+    curr_time.day = curr_time.day + 1
     local   end_time = os.date('*t',os.time(curr_time))
     dumptable(curr_time)
     dumptable(start_time)

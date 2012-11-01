@@ -46,6 +46,8 @@ local function create()
         
     end
     
+    --nonfocus[4].x = nonfocus[4].x - .5
+    
     --------------------------------------------------------------------
     
     local index = 1
@@ -65,6 +67,23 @@ local function create()
             focus[index]:animate{duration=290,opacity = 0}
             index = index - 1
             focus[index]:animate{duration = 200,opacity=255,on_completed = function() animating = false end}
+        end,
+        [keys.BACK] = function()
+            if animating then return end
+            animating = true
+            
+            instance:animate{
+                duration = 300,
+                z = -300,
+                opacity = 0,
+                on_completed = function() 
+                    instance:unparent() 
+                    animating = false 
+                end
+            }
+            currently_playing_content:grab_key_focus()
+            backdrop:set_horizon(700)
+            backdrop:set_bulb_x(screen_w/2)
         end,
     }
     
