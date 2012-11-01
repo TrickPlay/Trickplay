@@ -43,7 +43,7 @@ main = function()
     hidden_assets_group:add(Image{name="cursor_line", src="assets/menu-cursor-laser.png"})
     hidden_assets_group:add(Image{name="tp_sprite",   src="assets/trick-play_02.png"    })
     hidden_assets_group:add(Image{name="epg_row_bg",  src="assets/epg/channel-bg.png",tile = {true,true},w = screen_w    })
-    hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/channel-bg-current.png"})
+    hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/epg-focus-bg.png"})
     hidden_assets_group:add(Image{name="show_border", src="assets/epg/show-border.png"})
     hidden_assets_group:add(Image{name="tp-bold-beg",   src="assets/control_menu/control-bar-bold-beg.png"})
     hidden_assets_group:add(Image{name="tp-bold-end",   src="assets/control_menu/control-bar-bold-end.png"})
@@ -256,6 +256,7 @@ main = function()
             {label = "Recording J", icon = make_recording()},
         },
         lower = make_movie_menu{
+            w = 200,h=300,
             {label = "Recording A", icon = make_recording()},
             {label = "Recording B", icon = make_recording()},
             {label = "Recording C", icon = make_recording()},
