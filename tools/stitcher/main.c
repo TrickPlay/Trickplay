@@ -31,7 +31,7 @@ int main ( int argc, char ** argv )
                 recalculate_layout( i, FALSE, &best );
             status = recalculate_layout( best.width, TRUE, &best );
 
-            if ( status == FOUND_NONE )
+            if ( status == LAYOUT_FOUND_NONE )
             {
                 fprintf( stderr, "Failed to fit all of the images.\n" );
                 exit( 1 );
@@ -43,7 +43,7 @@ int main ( int argc, char ** argv )
             output_add_subsheet( output, g_strdup_printf( "%s-%i.png", output->path, j ) );
 
             j++;
-            if ( status == FOUND_ALL )
+            if ( status == LAYOUT_FOUND_ALL )
                 break;
         }
         */
@@ -75,7 +75,7 @@ int main ( int argc, char ** argv )
             best = better;
         }
         
-        if ( !best || best->status != FOUND_ALL )
+        if ( !best || best->status != LAYOUT_FOUND_ALL )
         {
             fprintf( stderr, "Error: can't fit all files within "
                              "output dimensions (%i x %i).\n",

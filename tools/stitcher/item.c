@@ -1,6 +1,6 @@
 #include "item.h"
 
-Item * item_new ( char * id )
+Item * item_new ( const char * id )
 {
     id = strdup( id );
 
@@ -25,17 +25,17 @@ void item_free ( Item * item )
         g_object_unref( item->file );
     if ( item->source )
         DestroyImage( item->source );
-    free( item->id );
-    free( item-> path );
+    free( (char *) item->id );
+    free( (char *) item->path );
         
     free( item );
 }
 
-Item * item_new_from_file ( char * id, char * directory, GFile * file, Options * options )
+Item * item_new_from_file ( const char * id, const char * directory, GFile * file, Options * options )
 {
     Item * item = item_new( id );
 
-    char * path = directory ? g_build_filename( directory, item->id, NULL ) : item->id;
+    const char * path = directory ? g_build_filename( directory, item->id, NULL ) : item->id;
 
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo * input_info = AcquireImageInfo();
