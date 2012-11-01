@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <sstream>
+#include <execinfo.h>
 
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
@@ -2039,15 +2040,19 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     const char * color_start = "";
     const char * color_end = SAFE_ANSI_COLOR_RESET;
 
+	gboolean dump_stack = false;
+
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "ERROR";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "CRITICAL";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
@@ -2069,6 +2074,18 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
         color_start = SAFE_ANSI_COLOR_FG_WHITE;
         level = "DEBUG";
     }
+
+	if(dump_stack)
+	{
+         void* callstack[128];
+         int i, frames = backtrace(callstack, 128);
+         char** strs = backtrace_symbols(callstack, frames);
+         // Skip frames which are the logging functions
+         for (i = 4; i < frames; ++i) {
+             fprintf(stderr,"[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n", log_domain, g_thread_self(), hour, min, sec, ms, color_start, "STACK", color_end, strs[i]);
+         }
+         free(strs);
+	 }
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
