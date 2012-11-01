@@ -1,4 +1,5 @@
 
+local dur = 200
 local curr_time = os.date('*t')
 
 local make_row = function()
@@ -162,7 +163,7 @@ local zone_offset = -4
 intervals_g:add(unpack(time_slots))
 function intervals_g:move_x_by(dx)
     intervals_g:animate{
-        duration = 200,
+        duration = dur,
         x=intervals_g.x + dx,
         on_completed = function(self)
             local num_zones =0
@@ -198,6 +199,8 @@ function intervals_g:move_x_by(dx)
 end
 --------------------------------------------------------------------
 
+local row_h = 70*1080/720
+local middle_row = 5
 local curr_channel = 1
 local row_i = 1
 
@@ -229,13 +232,21 @@ local show_grid_icons = Group{
     --x = margin,
     --y = heading_h,
 }
-show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},show_grid_icons)
-local row_h = 70*1080/720
+
+local channel_hl = Rectangle{
+    name = "channel_hl",
+    x = -margin+5,
+    w = margin-5,
+    h = row_h*2,
+    y = row_h*(middle_row-2),
+    color = "a0a0a0",
+}
+
+show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons)
 local rows = {}
 -- -1 because its looking at the next one to be added,
 -- -2 more for wrap-around
 
-local middle_row = 5
 while (#rows-2)*row_h + margin < screen_h do
     table.insert(rows,make_row():set{y=(#rows-1)*row_h})
     if #rows > middle_row then rows[#rows].y = rows[#rows].y + row_h end
@@ -341,7 +352,7 @@ pre_pull_in_left_to = function(new_x)
         
         if #s == 0 then
             r.icon.no_prog:animate{
-                duration = 200,
+                duration = dur,
                 x = new_x + show_name_margin,
             }
         else
@@ -358,12 +369,12 @@ pre_pull_in_left_to = function(new_x)
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
                 s[l_i].show_name:animate{
-                    duration = 200,
+                    duration = dur,
                     x = new_x + show_name_margin,
                     w = s[l_i].w - dx - 2*show_name_margin,
                 }
                 s[l_i].show_time:animate{
-                    duration = 200,
+                    duration = dur,
                     x = new_x + show_name_margin,
                     w = s[l_i].w - dx - 2*show_name_margin,
                 }
@@ -407,12 +418,12 @@ pull_in_left_to = function(new_x)
         elseif s[i].x < new_x then
             dx = new_x - s[i].x
             s[i].show_name:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid__left_edge + show_name_margin,
                 w = s[i].w - dx - 2*show_name_margin,
             }
             s[i].show_time:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid__left_edge + show_name_margin,
                 w = s[i].w - dx - 2*show_name_margin,
             }
@@ -437,19 +448,19 @@ local push_out_left_to = function(new_x)
         if #s == 0 then
             --move the "No Programming information" to the Left
             r.icon.no_prog:animate{
-                duration = 200,
+                duration = dur,
                 x = new_x + show_name_margin,
             }
         --re-truncate show name
         elseif s[i].x < new_x then
             dx = new_x - s[i].x
             s[i].show_name:animate{
-                duration = 200,
+                duration = dur,
                 x = new_x + show_name_margin,
                 w = s[i].w - dx - 2*show_name_margin,
             }
             s[i].show_time:animate{
-                duration = 200,
+                duration = dur,
                 x = new_x + show_name_margin,
                 w = s[i].w - dx - 2*show_name_margin,
             }
@@ -457,12 +468,12 @@ local push_out_left_to = function(new_x)
         --expand out the name if it isnt alreay expanded out
         elseif s[i].x ~= (s[i].show_name.x-show_name_margin) then
             s[i].show_name:animate{
-                duration = 200,
+                duration = dur,
                 x = s[i].x +   show_name_margin,
                 w = s[i].w - 2*show_name_margin,
             }
             s[i].show_time:animate{
-                duration = 200,
+                duration = dur,
                 x = s[i].x +   show_name_margin,
                 w = s[i].w - 2*show_name_margin,
             }
@@ -486,12 +497,12 @@ local push_out_left_to = function(new_x)
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
                 s[l_i].show_name:set{
-                    --duration = 200,
+                    --duration = dur,
                     x = new_x + show_name_margin,
                     w = s[l_i].w - dx - 2*show_name_margin,
                 }
                 s[l_i].show_time:set{
-                    --duration = 200,
+                    --duration = dur,
                     x = new_x + show_name_margin,
                     w = s[l_i].w - dx - 2*show_name_margin,
                 }
@@ -535,13 +546,13 @@ local populate_row = function(r)
     if rows[middle_row] == r then r.icon.separators.scale={1,2*row_h/sep_src.h} end
     
     dx = show_grid__left_edge - s[r.icon.left_i].x
-    s[r.icon.left_i].show_name:animate{
-        duration = 200,
+    s[r.icon.left_i].show_name:set{
+        --duration = dur,
         x = show_grid__left_edge + show_name_margin,
         w = s[r.icon.left_i].w - dx - 2*show_name_margin,
     }
-    s[r.icon.left_i].show_time:animate{
-        duration = 200,
+    s[r.icon.left_i].show_time:set{
+        --duration = dur,
         x = show_grid__left_edge + show_name_margin,
         w = s[r.icon.left_i].w - dx - 2*show_name_margin,
     }
@@ -648,6 +659,7 @@ local function build_schedule_row(parent)
     end
 end
 local integrating_schedule = false
+local finished_integrating_schedule = false
 local integrating_schedule_i = 1
 local complete_integrate_schedule
 local step_integrate_schedule
@@ -659,13 +671,14 @@ step_integrate_schedule= function()
         integrating_schedule_i = integrating_schedule_i+1
         channel_icon.scheduling = scheduling[channel_icon.name] or {}
         build_schedule_row(channel_icon)
-        dolater(step_integrate_schedule)
+        dolater(10,step_integrate_schedule)
     end
 end
 local function integrate_schedule()
     if integrating_schedule then return end
+    print("Begin building EPG")
     
-    dolater(step_integrate_schedule)
+    dolater(10,step_integrate_schedule)
 end
 
 complete_integrate_schedule= function()
@@ -699,6 +712,8 @@ complete_integrate_schedule= function()
             opacity = 255
         }
     end
+    print("Finished building EPG")
+    finished_integrating_schedule = true
     --[[
     local prev
     for i = 2,#rows-1 do
@@ -815,17 +830,18 @@ local animating_show_grid = false
 local keypresses = {
 ---[==[
     [keys.Left] = function()
-        if #channel_list == 0 or animating_show_grid or show_grid__left_edge <= -half_hour_len then return end
+        if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid or show_grid__left_edge <= -half_hour_len then return end
+        animating_show_grid = true
         
         --if at the left-most show, and but not at the left edge
         if row_i == 1 then 
             push_out_left_to(show_grid__left_edge - half_hour_len)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x + half_hour_len,
             }
-            curr_hl:animate{duration = 200,
+            curr_hl:animate{duration = dur,
                 x = curr_hl.x - half_hour_len,
                 w = (curr_hl.w == (screen_w - margin) and (screen_w - margin) or curr_hl.w + half_hour_len),
                 on_completed = function() 
@@ -850,7 +866,7 @@ local keypresses = {
             channel.separators:add(scheduling[row_i].sep)
             channel.show_names:add(scheduling[row_i].show_name)
             channel.show_times:add(scheduling[row_i].show_time)
-            show_grid:animate{duration = 200,x=scheduling[row_i].x }
+            show_grid:animate{duration = dur,x=scheduling[row_i].x }
         else--]]
         if rows[middle_row].icon.scheduling[row_i].x < show_grid__left_edge then
             next_i = row_i
@@ -863,7 +879,7 @@ local keypresses = {
             --move_left_vis_x(show_grid__left_edge - 2*half_hour_len )
             --next_i = row_i
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x + 2*half_hour_len,
             }
             intervals_g:move_x_by(2*half_hour_len)
@@ -871,7 +887,7 @@ local keypresses = {
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - dx )
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x + dx,
             }
             intervals_g:move_x_by(dx)
@@ -882,8 +898,8 @@ local keypresses = {
             w       = rows[middle_row].icon.scheduling[next_i].w,
             opacity = 0
         }
-        prev_hl:animate{duration = 200,opacity = 0}
-        curr_hl:animate{duration = 200,opacity = 255,
+        prev_hl:animate{duration = dur,opacity = 0}
+        curr_hl:animate{duration = dur,opacity = 255,
             on_completed = function() 
                 pull_in_right_to(show_grid__left_edge + (screen_w - margin) )
                 animating_show_grid = false
@@ -893,7 +909,8 @@ local keypresses = {
         --end
     end,
     [keys.Right] = function()
-        if #channel_list == 0 or animating_show_grid or show_grid__left_edge >= 24*half_hour_len then return end
+        if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid or show_grid__left_edge >= 24*half_hour_len then return end
+        animating_show_grid = true
         --row_i == #rows[middle_row].icon.scheduling then return end
         
         local len = #rows[middle_row].icon.scheduling
@@ -901,10 +918,10 @@ local keypresses = {
             
             push_out_right_to(show_grid__right_edge + 2*half_hour_len )
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x - 2*half_hour_len,
             }
-            curr_hl:animate{duration = 200,x = curr_hl.x + 2*half_hour_len,
+            curr_hl:animate{duration = dur,x = curr_hl.x + 2*half_hour_len,
                 on_completed = function() 
                     pull_in_left_to(show_grid__right_edge - (screen_w - margin))
                     --move_left_vis_x(show_grid__right_edge - (screen_w - margin) )
@@ -923,7 +940,7 @@ local keypresses = {
             h       = curr_hl.h,
             opacity = 255
         }
-        prev_hl:animate{duration = 200,opacity = 0}
+        prev_hl:animate{duration = dur,opacity = 0}
         next_i = row_i==len and len or row_i + 1
         local dx = rows[middle_row].icon.scheduling[next_i].x - show_grid__left_edge--show_grid.x
         --if trying to jump by 2 hours, then only jump by an hour, staying on the same show
@@ -931,14 +948,14 @@ local keypresses = {
             push_out_right_to(show_grid__right_edge + 2*half_hour_len )
             next_i = row_i
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x - 2*half_hour_len,
             }
             intervals_g:move_x_by(-2*half_hour_len)
         elseif dx >= half_hour_len then
             push_out_right_to(show_grid__right_edge + dx )
             show_grid_text:animate{
-                duration = 200,
+                duration = dur,
                 x = show_grid_text.x - dx,
             }
             intervals_g:move_x_by(-dx)
@@ -949,8 +966,8 @@ local keypresses = {
             w       = rows[middle_row].icon.scheduling[next_i].w,
             opacity = 0,
         }
-        prev_hl:animate{duration = 200,opacity = 0,h=row_h}
-        curr_hl:animate{duration = 200,opacity = 255,
+        prev_hl:animate{duration = dur,opacity = 0,h=row_h}
+        curr_hl:animate{duration = dur,opacity = 255,
             on_completed = function() 
                 pull_in_left_to(show_grid__right_edge - (screen_w - margin))
                 --move_left_vis_x(show_grid__right_edge - (screen_w - margin) )
@@ -967,7 +984,7 @@ local keypresses = {
             channel.separators:add(scheduling[row_i].sep)
             channel.show_names:add(scheduling[row_i].show_name)
             channel.show_times:add(scheduling[row_i].show_time)
-            show_grid:animate{duration = 200,x=(scheduling[row_i].x+scheduling[row_i].w)-(screen_w-margin) }
+            show_grid:animate{duration = dur,x=(scheduling[row_i].x+scheduling[row_i].w)-(screen_w-margin) }
         else--]]
             row_i = row_i==1 and 1 or row_i - 1
             curr_hl:set{
@@ -976,7 +993,7 @@ local keypresses = {
                 w       = rows[middle_row].icon.show_names.children[row_i].w+show_name_margin*2,
                 opacity = 255
             }
-            curr_hl:animate{duration = 200,opacity = 255,
+            curr_hl:animate{duration = dur,opacity = 255,
                 on_completed = function() 
                     animating_show_grid = false
                 end
@@ -985,7 +1002,7 @@ local keypresses = {
     end,
     --]==]
     [keys.Up] = function()
-        if #channel_list == 0 or animating_show_grid then return end
+        if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid then return end
         animating_show_grid = true
         rows[1].icon = channel_list[top_i]
         rows[1].shows = channel_list[top_i].shows
@@ -1028,7 +1045,7 @@ local keypresses = {
         end
         --dolater(function()
         show_grid:animate{
-            duration = 200,
+            duration = dur,
             y = heading_h+row_h,
             on_completed = function()
                 animating_show_grid = false
@@ -1072,27 +1089,34 @@ local keypresses = {
                 rows[#rows].icon.separators:clear()
                 --rows[1].icon:unparent()
                 rows[middle_row+1].icon.show_times:unparent()
+                
+                channel_hl.y = row_h*(middle_row-2)
+                
             end
         }
-        prev_hl:animate{duration = 200,opacity = 0,h=row_h}
-        curr_hl:animate{duration = 200,opacity = 255,h=2*row_h}
+        prev_hl:animate{duration = dur,opacity =   0,h=  row_h, y = (middle_row-1)*row_h}
+        curr_hl:animate{duration = dur,opacity = 255,h=2*row_h}
         --expand the next column
         rows[middle_row-1].shows:add(rows[middle_row-1].icon.show_times)
-        rows[middle_row-1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
-        rows[middle_row-1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
-        rows[middle_row-1]:animate{   duration = 200, scale = {1,1}}--{1,2*1080/720}, }
-        rows[middle_row-1].icon:animate{ duration = 200, y = (middle_row-2)*row_h, }
-        --rows[middle_row-1].icon:animate{ duration = 200, y = rows[middle_row-1].icon.y+row_h/2, }
+        rows[middle_row-1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
+        rows[middle_row-1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
+        rows[middle_row-1]:animate{   duration = dur, scale = {1,1}}--{1,2*1080/720}, }
+        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, }
+        rows[middle_row-1].shows:animate{ duration = dur, y = (middle_row-2)*row_h, }
+        --rows[middle_row-1].icon:animate{ duration = dur, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
-        --rows[middle_row]:animate{      duration = 200, y = (middle_row-1)*row_h, }
-        rows[middle_row]:animate{   duration = 200, scale = {1,.5}, y = (middle_row-1)*row_h,}
-        rows[middle_row].icon:animate{ duration = 200, y = (middle_row-1)*row_h+row_h/2, }
-        rows[middle_row].icon.show_times:animate{   duration = 200, opacity = 0,mode="EASE_OUT_QUAD" }
-        rows[middle_row].icon.separators:animate{   duration = 200,scale={1,row_h/sep_src.h} }
+        --rows[middle_row]:animate{      duration = dur, y = (middle_row-1)*row_h, }
+        rows[middle_row]:animate{   duration = dur, scale = {1,.5}, y = (middle_row-1)*row_h,}
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
+        rows[middle_row].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
+        rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
+        rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
+        channel_hl:animate{   duration = dur,y=row_h*(middle_row-3) }
+        
         --end)
     end,
     [keys.Down] = function()
-        if #channel_list == 0 or animating_show_grid then return end
+        if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid then return end
         animating_show_grid = true
         
         rows[#rows].icon  = channel_list[bottom_i]
@@ -1138,7 +1162,7 @@ local keypresses = {
         end
         --dolater(function()
         show_grid:animate{
-            duration = 200,
+            duration = dur,
             y = heading_h-row_h,
             on_completed = function()
                 animating_show_grid = false
@@ -1192,25 +1216,29 @@ local keypresses = {
                 rows[1].icon.separators:clear()
                 
                 rows[middle_row-1].icon.show_times:unparent()
+                
+                channel_hl.y = row_h*(middle_row-2)
+                
             end
         }
         
         
-        prev_hl:animate{duration = 200,opacity = 0,h=row_h}
-        curr_hl:animate{duration = 200,opacity = 255,h=2*row_h, y = (middle_row-1)*row_h}
+        prev_hl:animate{duration = dur,opacity = 0,h=row_h}
+        curr_hl:animate{duration = dur,opacity = 255,h=2*row_h, y = (middle_row-1)*row_h}
         --expand the next column
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
-        rows[middle_row+1].icon.show_times:animate{   duration = 200, opacity = 255,mode="EASE_IN_QUAD" }
-        rows[middle_row+1]:animate{   duration = 200, scale = {1,1}, y = (middle_row-1)*row_h}
-        rows[middle_row+1].icon:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
-        rows[middle_row+1].shows:animate{ duration = 200, y = (middle_row-1)*row_h+row_h, }
-        rows[middle_row+1].icon.separators:animate{   duration = 200,scale={1,2*row_h/sep_src.h} }
+        rows[middle_row+1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
+        rows[middle_row+1]:animate{   duration = dur, scale = {1,1}, y = (middle_row-1)*row_h}
+        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
+        rows[middle_row+1].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
+        rows[middle_row+1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
-        rows[middle_row]:animate{   duration = 200, scale = {1,.5}}--{1,1080/720}, }
-        rows[middle_row].icon:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
-        rows[middle_row].shows:animate{ duration = 200, y = (middle_row-2)*row_h+row_h/2, }
-        rows[middle_row].icon.show_times:animate{   duration = 200, opacity = 0,mode="EASE_OUT_QUAD" }
-        rows[middle_row].icon.separators:animate{   duration = 200,scale={1,row_h/sep_src.h} }
+        rows[middle_row]:animate{   duration = dur, scale = {1,.5}}--{1,1080/720}, }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
+        rows[middle_row].shows:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
+        rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
+        rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
+        channel_hl:animate{   duration = dur, y=row_h*(middle_row-1) }
         --end)
     end,
     [keys.BACK] = function()
@@ -1256,13 +1284,6 @@ instance:add(
         w = screen_w,
         h = screen_h,
         color = "808080",
-    },
-    Rectangle{
-        name = "highlight",
-        w = margin-5,
-        h = row_h*2,
-        y = heading_h + row_h*(middle_row-2),
-        color = "a0a0a0",
     },
     show_grid,
     timeline_header,
