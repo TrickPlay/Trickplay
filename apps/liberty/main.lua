@@ -361,13 +361,13 @@ main = function()
             {label = "Movie H", icon = random_poster()},
             {label = "Movie I", icon = random_poster()},
             {label = "Movie J", icon = random_poster()},
-        },
+        }:set{extra={icon_w = 180}},
         lower = make_category_menu{
             {label = "ALL VIDEOS",            icon = make_all_videos_icon()},
             {label = "RECOMMENDATIONS",       icon = make_4movies_icon(350)},
             {label = "SERVICES & ACCESSORIES",icon = make_4movies_icon(350)},
             {label = "APPS & WIDGETS",        icon = make_4movies_icon(350)},
-        },
+        }:set{extra={icon_w = (183+168+153+140+124)}},
         upper_y = 250,
         lower_y = 825,
     }
