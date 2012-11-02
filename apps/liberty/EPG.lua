@@ -93,7 +93,7 @@ update_curr_time_disp__on_timer()
 top_left:add(
     curr_time_disp,
     Rectangle{
-        x = margin - 5,
+        x = margin - 10,
         w = 5,
         h = heading_h - heading_txt_y - 15,
         color = "white",
@@ -315,6 +315,27 @@ local function reset_show_x_w(s)
    s.show_time.w = s.show_name.w
 end
 
+local get_separator,add_separator_to_pool
+local sep_src = hidden_assets_group:find_child("show_border")
+do
+    local pool = {}
+    get_separator = function(x)
+        return (
+            #pool > 0 and table.remove(pool) or
+            Clone{ source = sep_src }
+        ):set{x=x}
+    end
+    add_separator_to_pool = function(s) table.insert(pool,s) end
+    
+    for i=1,100 do
+        
+        add_separator_to_pool(Clone{ source = sep_src })
+        
+    end
+end
+
+
+
 local show_name_margin = 10
 
 --------------------------------------------------------------------
@@ -334,6 +355,7 @@ local pull_in_right_to = function(new_x)
             s[r_i].show_time:unparent()
             s[r_i].show_name:unparent()
             s[r_i].sep:unparent()
+            add_separator_to_pool(s[r_i].sep)
             r_i = r_i-1
         end
         r.icon.right_i = r_i
@@ -357,6 +379,7 @@ local push_out_right_to = function(new_x)
             --add the next show to screen
             r.icon.show_times:add( s[r_i].show_time )
             r.icon.show_names:add( s[r_i].show_name )
+            s[r_i].sep = get_separator(s[r_i].x)
             r.icon.separators:add( s[r_i].sep       )
         end
         r.icon.right_i = r_i
@@ -426,6 +449,7 @@ pull_in_left_to = function(new_x)
             s[l_i].show_time:unparent()
             s[l_i].show_name:unparent()
             s[l_i].sep:unparent()
+            add_separator_to_pool(s[l_i].sep)
             l_i = l_i+1
         end
         r.icon.left_i = l_i
@@ -521,7 +545,8 @@ local push_out_left_to = function(new_x)
             --add the next show to screen
             r.icon.show_times:add( s[l_i].show_time )
             r.icon.show_names:add( s[l_i].show_name )
-            r.icon.separators:add( s[l_i].sep       )
+            s[l_i].sep = get_separator(s[l_i].x)
+            r.icon.separators:add( s[l_i].sep )
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
                 dx = dx < 0 and 0 or dx
@@ -556,7 +581,6 @@ local push_out_left_to = function(new_x)
     show_grid__left_edge = new_x
 end
 
-local sep_src = hidden_assets_group:find_child("show_border")
 local populate_row = function(r)
     local s = r.icon.scheduling
     if r.icon.no_prog then
@@ -575,7 +599,8 @@ local populate_row = function(r)
             
             r.icon.show_times:add( show.show_time )
             r.icon.show_names:add( show.show_name )
-            r.icon.separators:add( show.sep       )
+            show.sep = get_separator(show.x)
+            r.icon.separators:add( show.sep )
             
             show.show_name:set{
                 --duration = dur,
@@ -676,16 +701,16 @@ local function build_schedule_row(parent)
             ellipsize = "END",
         }
         show_time.anchor_point = {0,show_name_h/2}
-        
+        --[[
         sep = Clone{
             source = sep_src,
             x = show.x,
             --h = row_h,
         }
-        
+        --]]
         parent.scheduling[j].show_name = show_name
         parent.scheduling[j].show_time = show_time
-        parent.scheduling[j].sep       = sep
+        --parent.scheduling[j].sep       = sep
         --[[
         if show.x < screen_w - margin then
             show_times:add(show_time)
@@ -894,7 +919,7 @@ local keypresses = {
         if row_i == 1 then 
             dx = (show_grid__left_edge <= -2*half_hour_len) and 
                 (2*half_hour_len) or 
-                (show_grid__left_edge)
+                (-show_grid__left_edge)
             print("hehehe",dx,show_grid__left_edge)
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
