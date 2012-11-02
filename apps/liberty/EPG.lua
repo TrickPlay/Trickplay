@@ -233,15 +233,20 @@ local show_grid_icons = Group{
     --y = heading_h,
 }
 
-local channel_hl = Clone {source = screen:find_child("horizonbulb"),--Rectangle{
-    name = "channel_hl",
-    x = -830,
-    --w = margin-5,
-    --h = row_h*2,
-    y = row_h*(middle_row-2),
-    anchor_point = {0,30},
+local chl1 = Clone {source = screen:find_child("horizonline"),--Rectangle{
+    w = margin*2-20,
+    --h = row_h/2,
+    scale = {1,2},
+    anchor_point = {0,90},
     --color = "a0a0a0",
 }
+local channel_hl = Group{
+    name = "channel_hl",
+    x = -830,
+    y = row_h*(middle_row-2),
+    children = {chl1}
+}
+
 
 show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons)
 local rows = {}
@@ -768,6 +773,7 @@ function instance:setup_icons(t)
         ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
         show_grid_icons:add(rows[i].icon)
     end
+    rows[middle_row].icon.scale = {1.7,1.7}
     if scheduling ~= nil then
         integrate_schedule()
     end
