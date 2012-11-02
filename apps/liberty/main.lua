@@ -57,6 +57,7 @@ main = function()
     hidden_assets_group:add(Image{name="tp-thin-pause", src="assets/control_menu/control-bar-thin-pause.png"})
     hidden_assets_group:add(Image{name="tp-thin-rew",   src="assets/control_menu/control-bar-thin-rew.png"})
     hidden_assets_group:add(Image{name="tp-thin-stop",  src="assets/control_menu/control-bar-thin-stop.png"})
+    hidden_assets_group:add(Image{name="epg_glow",  src="assets/new-glow-logos.png"})
     screen:add(hidden_assets_group)
     --------------------------------------------------------------------
     posters = Group { name = "posters" }

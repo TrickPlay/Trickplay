@@ -233,6 +233,18 @@ local show_grid_icons = Group{
     --y = heading_h,
 }
 
+
+local chb = Clone {source = screen:find_child("epg_glow"),--Rectangle{
+    x = 330,
+    y = -120,
+    opacity = 255*.8,
+    --w = margin*2-20,
+    --h = row_h/2,
+    --scale = {1,2},
+    --anchor_point = {0,45},
+    --color = "a0a0a0",
+}
+--[[
 local chl1 = Clone {source = screen:find_child("horizonline"),--Rectangle{
     w = margin*2-20,
     --h = row_h/2,
@@ -247,13 +259,14 @@ local chl2 = Clone {source = screen:find_child("horizonline"),--Rectangle{
     anchor_point = {0,45},
     --color = "a0a0a0",
 }
+--]]
 local channel_hl = Group{
     name = "channel_hl",
     x = -830,
     y = row_h*(middle_row-2),
-    children = {chl1,chl2}
+    children = {chl1,chl2,chb}
 }
-
+local sel_scale = 1.5
 
 show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons)
 local rows = {}
@@ -788,7 +801,7 @@ function instance:setup_icons(t)
         ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
         show_grid_icons:add(rows[i].icon)
     end
-    rows[middle_row].icon.scale = {1.7,1.7}
+    rows[middle_row].icon.scale = {sel_scale,sel_scale}
     if scheduling ~= nil then
         integrate_schedule()
     end
@@ -1149,7 +1162,7 @@ local keypresses = {
         rows[middle_row-1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         rows[middle_row-1]:animate{   duration = dur, scale = {1,1}}--{1,2*1080/720}, }
-        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {1.7,1.7} }
+        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {sel_scale,sel_scale} }
         rows[middle_row-1].shows:animate{ duration = dur, y = (middle_row-2)*row_h, }
         --rows[middle_row-1].icon:animate{ duration = dur, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
@@ -1277,7 +1290,7 @@ local keypresses = {
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row+1]:animate{   duration = dur, scale = {1,1}, y = (middle_row-1)*row_h}
-        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {1.7,1.7} }
+        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {sel_scale,sel_scale} }
         rows[middle_row+1].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
