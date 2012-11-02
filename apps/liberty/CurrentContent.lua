@@ -45,6 +45,7 @@ local launch_channel_menu = function()
     channel_menu:grab_key_focus()
     backdrop:set_horizon(500)
     backdrop:set_bulb_x(200)
+    backdrop:anim_x_rot(65) -- 70)
     end)
 end
 
