@@ -175,6 +175,7 @@ local create = function(text)
             currently_playing_content:grab_key_focus()
             backdrop:set_horizon(700)
             backdrop:set_bulb_x(screen_w/2)
+            backdrop:anim_x_rot(90)
         end,
     }
     
