@@ -37,6 +37,9 @@ local create = function(t)
     
     instance.expand  = Timeline{
         duration = t.duration,
+        on_started = function()
+            if instance.contract.is_playing then instance.contract:stop() end
+        end,
         on_new_frame = function(tl,ms,p)
             
             i = math.ceil(w_len*p)
@@ -59,6 +62,9 @@ local create = function(t)
     
     instance.contract = Timeline{
         duration = t.duration,
+        on_started = function()
+            if instance.expand.is_playing then instance.expand:stop() end
+        end,
         on_new_frame = function(tl,ms,p)
             
             p = 1-p

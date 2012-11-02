@@ -236,15 +236,22 @@ local show_grid_icons = Group{
 local chl1 = Clone {source = screen:find_child("horizonline"),--Rectangle{
     w = margin*2-20,
     --h = row_h/2,
-    scale = {1,2},
-    anchor_point = {0,90},
+    --scale = {1,2},
+    anchor_point = {0,45},
+    --color = "a0a0a0",
+}
+local chl2 = Clone {source = screen:find_child("horizonline"),--Rectangle{
+    w = margin*2-20,
+    --h = row_h/2,
+    --scale = {1,2},
+    anchor_point = {0,45},
     --color = "a0a0a0",
 }
 local channel_hl = Group{
     name = "channel_hl",
     x = -830,
     y = row_h*(middle_row-2),
-    children = {chl1}
+    children = {chl1,chl2}
 }
 
 
@@ -374,6 +381,7 @@ pre_pull_in_left_to = function(new_x)
             ls[i] = l_i
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
+                dx = dx < 0 and 0 or dx
                 s[l_i].show_name:animate{
                     duration = dur,
                     x = new_x + show_name_margin,
@@ -460,6 +468,7 @@ local push_out_left_to = function(new_x)
         --re-truncate show name
         elseif s[i].x < new_x then
             dx = new_x - s[i].x
+            dx = dx < 0 and 0 or dx
             s[i].show_name:animate{
                 duration = dur,
                 x = new_x + show_name_margin,
@@ -476,12 +485,12 @@ local push_out_left_to = function(new_x)
             s[i].show_name:animate{
                 duration = dur,
                 x = s[i].x +   show_name_margin,
-                w = s[i].w - 2*show_name_margin,
+                w = s[i].w < (2*show_name_margin) and 0 or s[i].w - 2*show_name_margin,
             }
             s[i].show_time:animate{
                 duration = dur,
                 x = s[i].x +   show_name_margin,
-                w = s[i].w - 2*show_name_margin,
+                w = s[i].w < (2*show_name_margin) and 0 or s[i].w - 2*show_name_margin,
             }
         end
     end
@@ -502,6 +511,7 @@ local push_out_left_to = function(new_x)
             r.icon.separators:add( s[l_i].sep       )
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
+                dx = dx < 0 and 0 or dx
                 s[l_i].show_name:set{
                     --duration = dur,
                     x = new_x + show_name_margin,
@@ -516,12 +526,12 @@ local push_out_left_to = function(new_x)
                 s[l_i].show_name:set{
                     --duration = dur,
                     x = s[l_i].x + show_name_margin,
-                    w = s[l_i].w  - 2*show_name_margin,
+                    w = s[l_i].w < (2*show_name_margin) and 0 or s[l_i].w - 2*show_name_margin,
                 }
                 s[l_i].show_time:set{
                     --duration = dur,
                     x = s[l_i].x + show_name_margin,
-                    w = s[l_i].w  - 2*show_name_margin,
+                    w = s[l_i].w < (2*show_name_margin) and 0 or s[l_i].w - 2*show_name_margin,
                 }
             end
         end
@@ -557,12 +567,12 @@ local populate_row = function(r)
             show.show_name:set{
                 --duration = dur,
                 x = show.x + show_name_margin,
-                w = show.w  - 2*show_name_margin,
+                w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
             }
             show.show_time:set{
                 --duration = dur,
                 x = show.x + show_name_margin,
-                w = show.w  - 2*show_name_margin,
+                w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
             }
             r.icon.left_i  = r.icon.left_i  < i and r.icon.left_i  or i
             r.icon.right_i = r.icon.right_i > i and r.icon.right_i or i
@@ -573,6 +583,7 @@ local populate_row = function(r)
     if rows[middle_row] == r then r.icon.separators.scale={1,2*row_h/sep_src.h} end
     
     dx = show_grid__left_edge - s[r.icon.left_i].x
+    dx = dx < 0 and 0 or dx
     s[r.icon.left_i].show_name:set{
         --duration = dur,
         x = show_grid__left_edge + show_name_margin,
@@ -586,7 +597,11 @@ local populate_row = function(r)
 end
 --------------------------------------------------------------------
 local scheduling = nil
-
+local show_name_h = Text{
+            color = "white",
+            font = "InterstateProBold 40px",
+            text = "h",
+        }.h 
 local function build_schedule_row(parent)
     
     local separators = Group{name = "separators",anchor_point = {0,sep_src.h/2},scale={1,row_h/sep_src.h}}
@@ -627,11 +642,11 @@ local function build_schedule_row(parent)
             font = "InterstateProBold 40px",
             text = show.name,
             x=show.x+show_name_margin,
-            w = show.w-show_name_margin*2,
+            w =  show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
             --y = 10,
             ellipsize = "END",
         }
-        show_name.anchor_point = {0,show_name.h/2}
+        show_name.anchor_point = {0,show_name_h/2}
         
         show_time = Text{
             color = "white",
@@ -642,12 +657,12 @@ local function build_schedule_row(parent)
                 show.stop.hour  .. ":" ..
                 show.stop.min,
             x=show.x+show_name_margin,
-            w = show.w-show_name_margin*2,
+            w = show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
             y = -row_h/2,
             --(i==middle_row) and 255 or 0,
             ellipsize = "END",
         }
-        show_time.anchor_point = {0,show_time.h/2}
+        show_time.anchor_point = {0,show_name_h/2}
         
         sep = Clone{
             source = sep_src,
