@@ -24,7 +24,54 @@ class Text [[ClutterActor*]] actor
 {
     Text(table props =0)
         [[
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
+            // We want to check for the "special" fields: "text", "font", and "color", and
+            // If combinations of those are set, construct this guy more efficiently.
+
+            lua_getfield(L, props, "text");  // Ends up in -3
+            lua_getfield(L, props, "font");  // Ends up in -2
+            lua_getfield(L, props, "color"); // Ends up in -1
+            if(lua_isnil(L, -3) || lua_isnil(L, -2))
+            {
+                // No text and/or font property: so just construct the innefficient way
+                lua_pop(L, 3);
+                self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
+            }
+            else if(lua_isnil(L, -1))
+            {
+                // Do have text and font, but no color
+                self = lb_construct_gobject( ClutterActor,
+                                             CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( clutter_text_new_with_text(
+                                                                                                            lua_tostring(L, -2),
+                                                                                                            lua_tostring(L, -3)
+                                                                                                        ) ) ) ) )
+                                            );
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_setfield(L, props, "text");
+                lua_setfield(L, props, "font");
+                lua_pop(L, 3);
+            }
+            else
+            {
+                // We have all three
+                ClutterColor color;
+                ClutterUtil::to_clutter_color(L, -1, &color);
+                self = lb_construct_gobject( ClutterActor,
+                                             CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( clutter_text_new_full(
+                                                                                                            lua_tostring(L, -2),
+                                                                                                            lua_tostring(L, -3),
+                                                                                                            &color
+                                                                                                        ) ) ) ) )
+                                            );
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_setfield(L, props, "text");
+                lua_setfield(L, props, "font");
+                lua_setfield(L, props, "color");
+                lua_pop(L, 3);
+            }
+
 		    ClutterUtil::initialize_actor(L,self,TEXT_METATABLE);
 		    ClutterUtil::set_props_from_table(L,props);
 		    g_object_unref( self );
