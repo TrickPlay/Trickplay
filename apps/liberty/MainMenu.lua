@@ -32,7 +32,7 @@ local create = function(items)
                     text = t.label,
                     color="white",
                     sz=90,
-                    duration = 200,
+                    duration = 100,
                     center = true,
                 }
             )
@@ -118,7 +118,7 @@ local create = function(items)
         animating = true
         new_i = wrap_i(curr_i + 1,text)
         text[curr_i].contract:start()--font = MAIN_MENU_FONT
-        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --.font  = MAIN_MENU_FONT_FOCUS
         --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[new_i].x - text[curr_i].x
         
@@ -165,6 +165,7 @@ local create = function(items)
                 end)
                 curr_i = new_i
                 animating = false
+                text[new_i].expand:start()
                 curr_icon.source:on_key_focus_in()
             end
         }
@@ -186,7 +187,7 @@ local create = function(items)
         animating = true
         new_i = wrap_i(curr_i - 1,text)
         text[curr_i].contract:start()--.font = MAIN_MENU_FONT
-        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --.font  = MAIN_MENU_FONT_FOCUS
         --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[curr_i].x - text[new_i].x
         
@@ -234,6 +235,7 @@ local create = function(items)
                 end)
                 curr_i = new_i
                 animating = false
+                text[new_i].expand:start()
                 curr_icon.source:on_key_focus_in()
             end
         }
