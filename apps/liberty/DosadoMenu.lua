@@ -175,6 +175,11 @@ return function(p)
         end
     end
     
+    local cursor = make_cursor(p.type == "flat" and (200*1.1) or(183+168+153+140+124))
+    cursor.x = screen_w/2
+    cursor.y = lower_y-42
+    instance:add(cursor)
+    
     local animating_back_to_prev_menu = false
     local switched = false
     local keypresses = {
@@ -188,10 +193,17 @@ return function(p)
                 dosado_2.is_playing then
                 return
             end
+            print(upper.icon_w,lower.icon_w)
             if not switched then
                 dosado_1:start()
+                if upper.icon_w then
+                    cursor:change_w(upper.icon_w)
+                end
             else
                 dosado_2:start()
+                if lower.icon_w then
+                    cursor:change_w(lower.icon_w)
+                end
             end
             switched = not switched
             instance:grab_key_focus()
@@ -206,10 +218,17 @@ return function(p)
                 dosado_2.is_playing then
                 return
             end
+            print(upper.icon_w,lower.icon_w)
             if not switched then
                 dosado_1:start()
+                if upper.icon_w then
+                    cursor:change_w(upper.icon_w)
+                end
             else
                 dosado_2:start()
+                if lower.icon_w then
+                    cursor:change_w(lower.icon_w)
+                end
             end
             switched = not switched
             instance:grab_key_focus()
@@ -227,7 +246,6 @@ return function(p)
                 return 
             end
             animating_back_to_prev_menu = true
-            
             instance:animate{
                 duration = 300,
                 z = -300,
@@ -267,9 +285,5 @@ return function(p)
         end
     end
     instance.opacity = 0
-    local cursor = make_cursor(p.type == "flat" and (200*1.1) or(183+168+153+140+124))
-    cursor.x = screen_w/2
-    cursor.y = lower_y-42
-    instance:add(cursor)
     return instance
 end
