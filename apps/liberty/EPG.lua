@@ -233,13 +233,14 @@ local show_grid_icons = Group{
     --y = heading_h,
 }
 
-local channel_hl = Rectangle{
+local channel_hl = Clone {source = screen:find_child("horizonbulb"),--Rectangle{
     name = "channel_hl",
-    x = -margin+5,
-    w = margin-5,
-    h = row_h*2,
+    x = -830,
+    --w = margin-5,
+    --h = row_h*2,
     y = row_h*(middle_row-2),
-    color = "a0a0a0",
+    anchor_point = {0,30},
+    --color = "a0a0a0",
 }
 
 show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons)
@@ -506,6 +507,17 @@ local push_out_left_to = function(new_x)
                     x = new_x + show_name_margin,
                     w = s[l_i].w - dx - 2*show_name_margin,
                 }
+            else 
+                s[l_i].show_name:set{
+                    --duration = dur,
+                    x = s[l_i].x + show_name_margin,
+                    w = s[l_i].w  - 2*show_name_margin,
+                }
+                s[l_i].show_time:set{
+                    --duration = dur,
+                    x = s[l_i].x + show_name_margin,
+                    w = s[l_i].w  - 2*show_name_margin,
+                }
             end
         end
         r.icon.left_i = l_i
@@ -537,6 +549,16 @@ local populate_row = function(r)
             r.icon.show_names:add( show.show_name )
             r.icon.separators:add( show.sep       )
             
+            show.show_name:set{
+                --duration = dur,
+                x = show.x + show_name_margin,
+                w = show.w  - 2*show_name_margin,
+            }
+            show.show_time:set{
+                --duration = dur,
+                x = show.x + show_name_margin,
+                w = show.w  - 2*show_name_margin,
+            }
             r.icon.left_i  = r.icon.left_i  < i and r.icon.left_i  or i
             r.icon.right_i = r.icon.right_i > i and r.icon.right_i or i
         end
@@ -671,14 +693,14 @@ step_integrate_schedule= function()
         integrating_schedule_i = integrating_schedule_i+1
         channel_icon.scheduling = scheduling[channel_icon.name] or {}
         build_schedule_row(channel_icon)
-        dolater(10,step_integrate_schedule)
+        dolater(step_integrate_schedule)
     end
 end
 local function integrate_schedule()
     if integrating_schedule then return end
     print("Begin building EPG")
     
-    dolater(10,step_integrate_schedule)
+    dolater(step_integrate_schedule)
 end
 
 complete_integrate_schedule= function()
@@ -836,14 +858,16 @@ local keypresses = {
         local dx
         --if at the left-most show, and but not at the left edge
         if row_i == 1 then 
-            dx = (show_grid__left_edge <= -2*half_hour_len) and (2*half_hour_len) or (-show_grid__left_edge)
+            dx = (show_grid__left_edge <= -2*half_hour_len) and 
+                (2*half_hour_len) or 
+                (show_grid__left_edge)
+            print("hehehe",dx,show_grid__left_edge)
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
                 duration = dur,
                 x = show_grid_text.x + dx,
             }
-            print("hehehe")
             curr_hl:animate{duration = dur,
                 x = curr_hl.x - dx,
                 w = (curr_hl.w == (screen_w - margin) and (screen_w - margin) or curr_hl.w + dx),
@@ -969,7 +993,7 @@ local keypresses = {
             w       = rows[middle_row].icon.scheduling[next_i].w,
             opacity = 0,
         }
-        prev_hl:animate{duration = dur,opacity = 0,h=row_h}
+        prev_hl:animate{duration = dur,opacity = 0}
         curr_hl:animate{duration = dur,opacity = 255,
             on_completed = function() 
                 pull_in_left_to(show_grid__right_edge - (screen_w - margin))
@@ -1104,13 +1128,13 @@ local keypresses = {
         rows[middle_row-1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         rows[middle_row-1]:animate{   duration = dur, scale = {1,1}}--{1,2*1080/720}, }
-        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, }
+        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {1.7,1.7} }
         rows[middle_row-1].shows:animate{ duration = dur, y = (middle_row-2)*row_h, }
         --rows[middle_row-1].icon:animate{ duration = dur, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
         --rows[middle_row]:animate{      duration = dur, y = (middle_row-1)*row_h, }
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}, y = (middle_row-1)*row_h,}
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, scale = {1,1} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
@@ -1232,12 +1256,12 @@ local keypresses = {
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row+1]:animate{   duration = dur, scale = {1,1}, y = (middle_row-1)*row_h}
-        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
+        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {1.7,1.7} }
         rows[middle_row+1].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}}--{1,1080/720}, }
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, scale = {1,1} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
