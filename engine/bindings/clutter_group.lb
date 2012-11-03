@@ -7,147 +7,145 @@ module clutter_group;
 #include "clutter_util.h"
 ]]
 
-/*
+/***************************************
     Class: Group
-    
-    The Group data type logically combines multiple TrickPlay objects (Image, 
-    Text, etc.) and enables transformations, such as rotation and scaling, upon 
-    the Group's members as if they were a single object. A Group may also be 
-    used to define a display region and enforce clipping of members that reside 
+
+    The Group data type logically combines multiple TrickPlay objects (Image,
+    Text, etc.) and enables transformations, such as rotation and scaling, upon
+    the Group's members as if they were a single object. A Group may also be
+    used to define a display region and enforce clipping of members that reside
     outside the region.
-    
-    The Group data type provides the properties and functions defined in the 
-    <UIElement> and <Container> interfaces; it provides no additional 
-    properties or functions beyond those interfaces. The Container and 
-    UIElement interfaces are related; Container implements the operations to 
-    add, remove, and find objects in the Group, while UIElement defines 
-    properties and functions to manipulate the objects in the Group, such as 
+
+    The Group data type provides the properties and functions defined in the
+    <UIElement> and <Container> interfaces; it provides no additional
+    properties or functions beyond those interfaces. The Container and
+    UIElement interfaces are related; Container implements the operations to
+    add, remove, and find objects in the Group, while UIElement defines
+    properties and functions to manipulate the objects in the Group, such as
     rotating and clipping.
-    
-    Each TrickPlay object in a Group is considered a "child" of that Group and, 
-    conversely, the Group is the "parent" of the contained object. An object 
-    may belong to one, and only one, Group at any time. Thus, an object may 
+
+    Each TrickPlay object in a Group is considered a "child" of that Group and,
+    conversely, the Group is the "parent" of the contained object. An object
+    may belong to one, and only one, Group at any time. Thus, an object may
     have only one parent.
-    
-    The display location of an object contained in a Group is relative to the 
-    Group's location. The upper-left corner of the Group is coordinate (0,0) 
+
+    The display location of an object contained in a Group is relative to the
+    Group's location. The upper-left corner of the Group is coordinate (0,0)
     with positive X values moving down and positive Y values moving right.
-    
-    A Group's boundary is dependent upon the size and location of its children; 
-    it is defined as the width and height of the rectangular region spanning 
-    the union of the children in the Group. The upper-most, lower-most, 
-    left-most and right-most edges of this union are the edges of the Group's 
-    boundary. A Group's boundary may be larger or smaller than the area 
-    specified in the Group's size property. There is no property that holds the 
-    Group's boundary settings; it must be calculated. A function that 
+
+    A Group's boundary is dependent upon the size and location of its children;
+    it is defined as the width and height of the rectangular region spanning
+    the union of the children in the Group. The upper-most, lower-most,
+    left-most and right-most edges of this union are the edges of the Group's
+    boundary. A Group's boundary may be larger or smaller than the area
+    specified in the Group's size property. There is no property that holds the
+    Group's boundary settings; it must be calculated. A function that
     calculates a Group's boundary is included in an Example section below.
-    
-    Reducing the Group's <UIElement.size> property has no effect on the size 
-    of its children, i.e., it does not scale them. To resize the objects in a 
+
+    Reducing the Group's <UIElement.size> property has no effect on the size
+    of its children, i.e., it does not scale them. To resize the objects in a
     Group, set the <UIElement.scale> property.
-    
-    Nor will the Group's <UIElement.size> property have any effect on the 
-    display of the children; by default, a Group's children will display even 
-    if they exist outside the Group's size region. To clip children that lie 
-    outside a particular region, define a clipping area by setting the 
+
+    Nor will the Group's <UIElement.size> property have any effect on the
+    display of the children; by default, a Group's children will display even
+    if they exist outside the Group's size region. To clip children that lie
+    outside a particular region, define a clipping area by setting the
     <UIElement.clip> property or set the <UIElement.clip_to_size> property to
     true. A code snippet demonstrating how to clip a region using a clipping
     rectangle is included in an Example section below.
-    
+
     *Example:* Determine the width and height of a Group's boundary
-    
-    (code)
-    -- Calculate the width and height of myGroup's boundary
-    function calculateBoundary( myGroup )
-    	local width, height = 0, 0
-    	local minX, maxX, minY, maxY = nil, nil, nil, nil
-    	local children = myGroup.children  -- use local version for efficiency
-    	
-    	-- Cycle through each object in myGroup
-    	for _,child in ipairs( children ) do
-    		-- Is this the right-most edge so far?
-    		if( minX == nil ) or (child.x < minX ) then
-    		  -- Yes, store it
-    		  minX = child.x
-    		end
-    		
-    		-- Is this the left-most edge so far?
-    		if( maxX == nil ) or (child.x + child.width > maxX ) then
-    		  -- Yes, store it
-    		  maxX = child.x + child.width
-    		end
-    		
-    		-- Is this the top-most edge so far?
-    		if( minY == nil ) or (child.y < minY ) then
-    		  -- Yes, store it
-    		  minY = child.y
-    		end
-    		
-    		-- Is this the bottom-most edge so far?
-    		if( maxY == nil ) or (child.y + child.height > maxY ) then
-    		  -- Yes, store it
-    		  maxY = child.y + child.height
-    		end
-    	end
-    	
-    	-- Were there any children in this Group?
-    	if( minX ~= nil ) then
-    	  -- Yes, calculate boundary's width and height
-    	  width  = maxX - minX
-    	  height = maxY - minY
-    	end
-    
-    	-- Return width and height of Group's boundary, if any
-    	return width, height
-    end
-    (end)
-    
-    
-    *Example:* Create three rectangles, place them in a Group, and then 
+
+		(code)
+		-- Calculate the width and height of myGroup's boundary
+		function calculateBoundary( myGroup )
+			local width, height = 0, 0
+			local minX, maxX, minY, maxY = nil, nil, nil, nil
+			local children = myGroup.children  -- use local version for efficiency
+
+			-- Cycle through each object in myGroup
+			for _,child in ipairs( children ) do
+				-- Is this the right-most edge so far?
+				if( minX == nil ) or (child.x < minX ) then
+				  -- Yes, store it
+				  minX = child.x
+				end
+
+				-- Is this the left-most edge so far?
+				if( maxX == nil ) or (child.x + child.width > maxX ) then
+				  -- Yes, store it
+				  maxX = child.x + child.width
+				end
+
+				-- Is this the top-most edge so far?
+				if( minY == nil ) or (child.y < minY ) then
+				  -- Yes, store it
+				  minY = child.y
+				end
+
+				-- Is this the bottom-most edge so far?
+				if( maxY == nil ) or (child.y + child.height > maxY ) then
+				  -- Yes, store it
+				  maxY = child.y + child.height
+				end
+			end
+
+			-- Were there any children in this Group?
+			if( minX ~= nil ) then
+			  -- Yes, calculate boundary's width and height
+			  width  = maxX - minX
+			  height = maxY - minY
+			end
+
+			-- Return width and height of Group's boundary, if any
+			return width, height
+		end
+		(end)
+
+
+    *Example:* Create three rectangles, place them in a Group, and then
     rotate/restore them and clip/unclip them
-    
+
     (code)
     -- Create three rectangle objects
-    local RedRect   = Rectangle{ color = { 255, 0, 0, 255 }, 
+    local RedRect   = Rectangle{ color = { 255, 0, 0, 255 },
                                  position = { 600, 100, 0 },
                                  size = { 800, 250 } }
-    local GreenRect = Rectangle{ color = { 0, 255, 0, 255 }, 
+    local GreenRect = Rectangle{ color = { 0, 255, 0, 255 },
                                  position = { 0, 300, 0 },
                                  size = { 400, 350 } }
     local BlueRect  = Rectangle{ color = { 0, 0, 255, 255 },
                                  position = { 200, 0, 0 },
                                  size = { 1000, 200 } }
-                                 
+
     -- Create a Group
-    -- Note: The size property is not relevant to the clipping operation; by 
+    -- Note: The size property is not relevant to the clipping operation; by
     -- default, objects will be displayed outside of the group's display region.
     local RectGroup = Group{ position = { 100, 100 },
-                             size = { 1400, 650 } }                                 
-    
+                             size = { 1400, 650 } }
+
     -- Add three Rectangles to the Group
     RectGroup.children = { RedRect, GreenRect, BlueRect }
-    
+
     -- -----------------------------------------------------
     -- Rotate all three Rectangles as a single object
     -- Flip upside-down, i.e., 180 degrees
     RectGroup.x_rotation = { 180, RectGroup.height / 2, 0 }
-    
+
     -- Restore original non-rotated position
     RectGroup.x_rotation = { 0, 0, 0 }
-    
+
     -- -----------------------------------------------------
     -- To clip the Rectangles, set the Group's clip property to the desired
     -- display region
     RectGroup.clip = { 0, 0, 500, 250 }
-    
+
     -- To unclip the Rectangles, undefine the Group's clip property
     RectGroup.clip = nil
     -- -----------------------------------------------------
 	(end)
-	
-    *See Also:* the <UIElement> interface, the <Container> interface, 
-    the <UIElement.clip> and <UIElement.clip_to_size> properties
-    
+
+    *See Also:* the <UIElement> and <Container> interfaces and the <UIElement.clip> and <UIElement.clip_to_size> properties
 */
 
 class Group [[ClutterActor*]] actor , container
@@ -163,8 +161,8 @@ class Group [[ClutterActor*]] actor , container
 		    ClutterUtil::set_props_from_table(L,props);
 		    g_object_unref( self );
         ]];
-	
+
     ~Group()
 		[[
-		]];        
+		]];
 }
