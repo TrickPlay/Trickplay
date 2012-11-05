@@ -32,7 +32,6 @@ local create = function(text)
     function instance:populate(t)
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #items < 4 or (#items-1)*item_spacing < screen_h do
-        print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(t) do
             table.insert(items,  clone_proxy(t.Name)  )
             items[#items].orig_w = items[#items].w
@@ -42,12 +41,10 @@ local create = function(text)
         end
     end
     place_on_the_top = function(top_i,curr_i)
-        print("adding",items[curr_i].name,"above",items[top_i].name)
         items[curr_i]:show()
         items[curr_i].y  = items[top_i].y - item_spacing
     end
     place_on_the_bottom = function(bottom_i,curr_i)
-        print("adding",items[curr_i].name,"below",items[bottom_i].name)
         items[curr_i]:show()
         items[curr_i].y  = items[bottom_i].y + item_spacing
     end
@@ -80,19 +77,6 @@ local create = function(text)
     items[curr_i ].scale = {sel_scale,sel_scale}
     
     end
-    --print("VL",top_i,curr_i,bottom_i)
-    --[[
-    local o
-    local opacity_at = function(i)
-        o = (vis_len/2 - math.abs(middle_i - i))*255/(vis_len/2)
-        return o > 0 and o or 0
-    end
-    for i = 1,vis_len do
-        ii = items[wrap_i(top_i + i-1,items)]
-        ii.opacity = opacity_at(i)
-    end
-    --]]
-    
     instance.move_up = function()
         if #items == 0 or inner_group.is_playing then return end
         
@@ -175,14 +159,6 @@ local create = function(text)
     key_presses = {
         [keys.Up]   = instance.move_up,
         [keys.Down] = instance.move_down,
-        --[[
-        [keys.OK  ] = function()
-            if animating_back_to_prev_menu then return end
-            print("setting source of",channel_icon.gid,"to",items[curr_i ].gid)
-            channel_icon.source = items[curr_i ]
-            key_presses[keys.BACK]()
-        end,
-        --]]
         [keys.BACK] = function()
             if animating_back_to_prev_menu then return end
             animating_back_to_prev_menu = true
@@ -199,6 +175,7 @@ local create = function(text)
             currently_playing_content:grab_key_focus()
             backdrop:set_horizon(700)
             backdrop:set_bulb_x(screen_w/2)
+            backdrop:anim_x_rot(90)
         end,
     }
     

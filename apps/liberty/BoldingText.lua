@@ -21,7 +21,6 @@ local create = function(t)
     
     for i,f in ipairs(g_fonts) do
         fonts[i] = f.." "..tostring(t.sz).."px"
-        --print(fonts[i])
         instance.font   = fonts[i]
         ws[i]      = instance.w
         anchors[i] = t.center and
@@ -38,11 +37,13 @@ local create = function(t)
     
     instance.expand  = Timeline{
         duration = t.duration,
+        on_started = function()
+            if instance.contract.is_playing then instance.contract:stop() end
+        end,
         on_new_frame = function(tl,ms,p)
             
             i = math.ceil(w_len*p)
             i = i == 0 and 1 or i
-            --print(i)
             p = (p - (i-1)/w_len)*w_len
             
             scale[1] = 1+(ws[i+1]/ws[i]-1 )* p
@@ -51,7 +52,6 @@ local create = function(t)
             
             instance.font  = fonts[i]
             instance.anchor_point = anchors[i]
-            --print(instance.font,scale[1])
         end,
         on_completed = function(tl)
             instance.font  = fonts[#fonts]
@@ -62,6 +62,9 @@ local create = function(t)
     
     instance.contract = Timeline{
         duration = t.duration,
+        on_started = function()
+            if instance.expand.is_playing then instance.expand:stop() end
+        end,
         on_new_frame = function(tl,ms,p)
             
             p = 1-p
@@ -72,7 +75,6 @@ local create = function(t)
             p = (p - (i-1)/w_len)*w_len
             
             scale[1] = 1+(ws[i+1]/ws[i]-1 )* p
-            --print(i,scale[1])
             instance.scale = scale
             
             instance.font  = fonts[i]
