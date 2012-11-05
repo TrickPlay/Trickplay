@@ -8,7 +8,6 @@
     hdr = dofile("header")
     local currentProjectPath 
 
-
     --TEST Function 
     aa = function ()
         _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd3")
@@ -994,7 +993,7 @@ _VE_.newLayer = function()
 end 
 
 local codeExist = function(contents, layer, obj) 
-    if string.find(contents, "-- BEGIN "..layer.."."..obj.." SECTION") then 
+    if string.find(contents, "[-][-] BEGIN "..layer.."."..obj.." SECTION") then 
         return true 
     else 
         return false
@@ -1008,6 +1007,15 @@ local objCodeGen = function(contents, layer, lowLayer, obj)
         contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_pressed = function() end\n\t"
         contents = contents..lowLayer..".elements."..obj.name..".on_released = function() end\n"
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+    elseif obj.widget_type == "CheckBox" or obj.widget_type == "RadioButton" then 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents..lowLayer..".elements."..obj.name..".on_selection = function() end\n\t"
+        contents = contents..lowLayer..".elements."..obj.name..".on_deselection = function() end\n"
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+    elseif obj.widget_type == "ToastAlert" then 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents..lowLayer..".elements."..obj.name..".on_completed = function() end\n"
         contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
     end 
 
@@ -1023,6 +1031,7 @@ local codeGen = function()
             local lowLayerName = string.lower(layerName)
             
             local contents = readfile(lowLayerName..".lua")
+            print ( contents )
 
             local contents_header = "local "..lowLayerName.." = ...\n" 
             local contents_tail = "return "..lowLayerName 
@@ -1048,7 +1057,8 @@ local codeGen = function()
 				local temp = contents_last 
                 local backup_obj = {}
 
-                c, d = string.find(temp, "-- BEGIN ")
+                c, d = string.find(temp, "[-][-] BEGIN ")
+
                 while c ~=nil do 
                     temp = string.sub(temp, d+1, -1)
                     c, d = string.find(temp, "[.]")
@@ -1059,7 +1069,7 @@ local codeGen = function()
                         table.insert(backup_obj, obj_name)
                     end 
                     temp = string.sub(temp, f+1, -1)
-                    c, d = string.find(temp, "-- BEGIN ")
+                    c, d = string.find(temp, "[-][-] BEGIN ")
                 end 
                         
                 dumptable(backup_obj)
