@@ -50,7 +50,7 @@ for i,dep in ipairs(core_dependencies) do    load(pwd..dep)    end
 
 local widget_dependencies = {
     ArrowPane        = {"Button","ClippingRegion","LayoutManager","ArrowPane"},
-    Button           = {"Button"},
+    Button           = {"NineSlice","Button"},
     ButtonPicker     = {"Button","LayoutManager","ButtonPicker"},
     CheckBox         = {"Button","ToggleButton","CheckBox"},
     CheckBoxGroup    = {"ToggleButton","CheckBox"},

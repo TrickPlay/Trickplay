@@ -6,7 +6,7 @@ WL = dofile("Widget_Library.lua")
 --add_verbosity("ArrayManager")
 
 
-dofile("RadioButton/test.lua")
+dofile("ToastAlert/test.lua")
 
 screen:show()
 controllers:start_pointer()
