@@ -140,7 +140,7 @@ local function Widgetize(instance)
         
     end)
     
-    function instance:on_key_down(key,...)
+    function instance:on_key_down(key)
         if not instance.enabled then return end
         
         if key_functions[key] then
@@ -148,7 +148,7 @@ local function Widgetize(instance)
             local retval = false
             
             for f,_ in pairs(key_functions[key]) do
-                retval = f(self,key,...) or retval
+                retval = f() or retval
             end
             
             return retval
@@ -232,7 +232,7 @@ local function Widgetize(instance)
             
             if enabled_upval or ignore_enabled then 
                 
-                retval = f(instance,...) or retval
+                retval = f(...) or retval
                 
             end
         end

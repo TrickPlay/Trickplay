@@ -5,24 +5,107 @@ local _ENV     = ({...})[2] or _ENV
 
 --make_canvas
 
+local make_corner = function(self,state)
+    local r = self.style.border.corner_radius
+    local inset = self.style.border.width/2
+    
+    if r == 0 then 
+        return Rectangle{w = inset*2,h = inset*2,color = self.style.border.colors[state]}
+    end
+    
+    
+    local c = Canvas(r,r)
+    c.line_width = inset*2
+    c:move_to( inset, inset+r)
+    --top-left corner
+    c:arc( inset+r, inset+r, r,180,270)
+    -- wrap back around out of the visible bounds
+    c:line_to(r+inset,  inset)
+    c:line_to(r+inset,r+inset)
+    c:line_to(  inset,r+inset)
+    
+    c:set_source_color( self.style.fill_colors[state] )     
+    c:fill(true)
+    
+    c:set_source_color( self.style.border.colors[state] )   
+    c:stroke(true)
+    
+    return c:Image()
+end
+
+local make_top = function(self,state)
+    
+    local r = self.style.border.corner_radius
+    local inset = self.style.border.width/2
+    if r == 0 then 
+        return Rectangle{w = 1,h = inset*2,color = self.style.border.colors[state]}
+    end
+    local c = Canvas(1,r)
+    c.line_width = inset*2
+    c:move_to( -inset*2,  inset)
+    c:line_to(  inset*2,  inset)
+    c:line_to(  inset*2,r+inset*2)
+    c:line_to( -inset*2,r+inset*2)
+    c:line_to( -inset*2,  inset)
+    
+    c:set_source_color( self.style.fill_colors[state] )     
+    c:fill(true)
+    
+    c:set_source_color( self.style.border.colors[state] )   
+    c:stroke(true)
+    
+    return c:Image()
+end
+local make_side = function(self,state)
+    
+    local r = self.style.border.corner_radius
+    local inset = self.style.border.width/2
+    if r == 0 then 
+        return Rectangle{w = inset*2,h = 1,color = self.style.border.colors[state]}
+    end
+    local c = Canvas(r,1)
+    c.line_width = inset*2
+    c:move_to(  inset, -inset*2)
+    c:line_to(  inset,  inset*2)
+    c:line_to(r+inset*2,  inset*2)
+    c:line_to(r+inset*2, -inset*2)
+    c:line_to(   inset,-inset*2)
+    
+    c:set_source_color( self.style.fill_colors[state] )     
+    c:fill(true)
+    
+    c:set_source_color( self.style.border.colors[state] )   
+    c:stroke(true)
+    
+    return c:Image()
+end
 local make_canvas = function(self, _ENV, state)
     print(state,"NS CANVAS")
     if type(state) ~= "string" then error("Expected string. Recevied "..type(state),2) end
+    local corner_canvas = make_corner(self,state)
+    local top_canvas    = make_top(self,state)
+    local side_canvas   = make_side(self,state)
+    
+    corner_canvas:hide()
+    side_canvas:hide()
+    top_canvas:hide()
+    clear(self)
+    add( self, corner_canvas,side_canvas,top_canvas)
     return {
         {
-            Widget_Clone{source = self.style.rounded_corner[state]},
-            Widget_Clone{source = self.style.top_edge[state]},
-            Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
+            Widget_Clone{source = corner_canvas},
+            Widget_Clone{source =   top_canvas},
+            Widget_Clone{source = corner_canvas,z_rotation = {90,0,0}},
         },
         {
-            Widget_Clone{source =   self.style.side_edge[state]},
+            Widget_Clone{source =   side_canvas},
             Widget_Rectangle{color = self.style.fill_colors[state] },
-            Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
+            Widget_Clone{source =   side_canvas,z_rotation = {180,0,0}},
         },
         {
-            Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
-            Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-            Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {180,0,0}},
+            Widget_Clone{source = corner_canvas,z_rotation = {270,0,0}},
+            Widget_Clone{source =   top_canvas, z_rotation = {180,0,0}},
+            Widget_Clone{source = corner_canvas,z_rotation = {180,0,0}},
         },
     }
 end

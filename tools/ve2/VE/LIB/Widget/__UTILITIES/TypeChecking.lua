@@ -10,10 +10,6 @@ function expects(type_wanted, received)
     )
 end
 
-function is_ui_element(obj) 
-    return type(obj) == "userdata" and obj.__types__ and obj.__types__.actor 
-end
-
 function is_table_or_nil(name,input)
     
     return input == nil and {} or
