@@ -1,20 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "main.h"
-#include "item.h"
-#include "leaf.h"
+#include <glib.h>
+#include <glib-object.h>
+#include <magick/MagickCore.h>
+#include "options.h"
+#include "output.h"
+#include "layout.h"
 
 int main ( int argc, char ** argv )
 {
     g_type_init();
     MagickCoreGenesis( * argv, MagickTrue );
     
-    Options * options = options_new();
+    Options * options = options_new_from_arguments( argc, argv );
+    
     Output  * output  = output_new();
-
-    options_take_arguments( options, argc, argv, output );
     output_load_inputs( output, options );
 
     if ( options->allow_multiple_sheets )
@@ -40,7 +38,7 @@ int main ( int argc, char ** argv )
             fprintf( stderr, "Page %i match (%i x %i pixels, %.4g%% coverage): ",
                      j, best.width, best.height, 100.0f * best.coverage );
 
-            output_add_subsheet( output, g_strdup_printf( "%s-%i.png", output->path, j ) );
+            output_add_layout( output, g_strdup_printf( "%s-%i.png", output->path, j ) );
 
             j++;
             if ( status == LAYOUT_FOUND_ALL )
@@ -50,7 +48,7 @@ int main ( int argc, char ** argv )
     }
     else
     {
-        if ( output->minimum.area > options->output_size_limit * options->output_size_limit )
+        if ( output->item_area > options->output_size_limit * options->output_size_limit )
         {
             fprintf( stderr, "Error: total area of input files is larger than "
                              "output dimensions (%i x %i).\n",
@@ -63,7 +61,7 @@ int main ( int argc, char ** argv )
         Layout * best = NULL;
         
         unsigned int i;
-        for ( i = output->minimum.width; i <= options->output_size_limit; i += 1 ) //output->size_step )
+        for ( i = output->max_item_w; i <= options->output_size_limit; i += 1 )
         {
             Layout * layout = layout_new_from_output( output, i, options );
             Layout * better = layout_choose( layout, best, options );
@@ -83,10 +81,8 @@ int main ( int argc, char ** argv )
             exit( 0 );
         }
 
-        output_add_subsheet( output, best, g_strdup_printf( "%s.png", output->path ), options );
+        output_add_layout( output, best, g_strdup_printf( "%s.png", options->output_path ), options );
     }
-
-    // export files
 
     output_export_files( output, options );
 

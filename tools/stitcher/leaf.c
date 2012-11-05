@@ -40,6 +40,7 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attrib
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
 {
     Leaf * leaf = malloc( sizeof( Leaf ) );
+    
     leaf->x = x;
     leaf->y = y;
     leaf->w = w;
@@ -50,21 +51,21 @@ Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h
     return leaf;
 }
 
-void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, GSequence * leaves, Output * output )
+void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, Layout * layout )
 {
     gboolean b = leaf->w - w > leaf->h - h;
-    if ( leaf->w - w > output->smallest.width )
-        g_sequence_insert_sorted( leaves, leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h ), leaf_compare, NULL );
-    if ( leaf->h - h > output->smallest.height )
-        g_sequence_insert_sorted( leaves, leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h ), leaf_compare, NULL );
+    if ( leaf->w - w > layout->min_item_w )
+        g_sequence_insert_sorted( layout->leaves, leaf_new( leaf->x + w, leaf->y, leaf->w - w, b ? leaf->h : h ), leaf_compare, NULL );
+    if ( leaf->h - h > layout->min_item_h )
+        g_sequence_insert_sorted( layout->leaves, leaf_new( leaf->x, leaf->y + h, b ? w : leaf->w, leaf->h - h ), leaf_compare, NULL );
 
-    g_sequence_remove_sorted( leaves, leaf, leaf_compare, NULL );
+    g_sequence_remove_sorted( layout->leaves, leaf, leaf_compare, NULL );
 }
 
 char * leaf_tostring ( Leaf * leaf, Options * options )
 {
-    unsigned int a = options->add_buffer_pixels ? 1 : 0;
+    unsigned int bp = options->add_buffer_pixels ? 1 : 0;
     return g_strdup_printf(
         "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
-        leaf->x + a, leaf->y + a, leaf->item->w - 2*a, leaf->item->h - 2*a, leaf->item->id );
+        leaf->x + bp, leaf->y + bp, leaf->item->w - 2*bp, leaf->item->h - 2*bp, leaf->item->id );
 }
