@@ -70,6 +70,8 @@ local key_presses = {
         main_menu:grab_key_focus()
         
     end,
+    [keys.VOL_UP]   = raise_volume,
+    [keys.VOL_DOWN] = lower_volume,
 }
 
 function instance:on_key_down(k,...)

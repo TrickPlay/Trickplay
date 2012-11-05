@@ -18,6 +18,28 @@ MAIN_MENU_FONT  = "InterstateProExtraLight 90px"
 MAIN_MENU_COLOR = "FFFFFF"
 function rand() return 55+20*math.ceil(10*math.random()) end
 
+do
+    local v = mediaplayer.volume
+    local inc = .1
+    function raise_volume()
+        
+        v = v + inc
+        v = v < 1 and v or 1
+        
+        mediaplayer.volume = v
+        
+        return true
+    end
+    function lower_volume()
+        
+        v = v - inc
+        v = v > 0 and v or 0
+        
+        mediaplayer.volume = v
+        
+        return true
+    end
+end
 
 main = function()
     --screen:add(Rectangle{size = screen.size,color = "606060"})

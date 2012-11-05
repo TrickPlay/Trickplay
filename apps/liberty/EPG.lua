@@ -1368,6 +1368,8 @@ local keypresses = {
         backdrop:animate_dots()
         
     end,
+    [keys.VOL_UP]   = raise_volume,
+    [keys.VOL_DOWN] = lower_volume,
 }
 
 function instance:on_key_down(k)
