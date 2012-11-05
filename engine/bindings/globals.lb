@@ -296,7 +296,7 @@ globals
               result += s;
               lua_pop(L, 1);  /* pop result */
             }
-            g_warning("%s",result.c_str());
+            g_warning("%s: %s", result.c_str(), Util::where_am_i_lua(L).c_str());
         ]];
 
     /*
