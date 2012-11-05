@@ -609,17 +609,6 @@ main = function()
     
     main_menu:grab_key_focus()
     
-    mediaplayer:load("glee-1.mp4")
-    
-    function mediaplayer:on_loaded()
-        
-        mediaplayer:play()
-        mediaplayer.volume = 0
-    end
-    function mediaplayer:on_end_of_stream()
-        mediaplayer:seek(0)
-        mediaplayer:play()
-    end
 end
 
 dolater(main)

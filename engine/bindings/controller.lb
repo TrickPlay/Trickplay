@@ -744,7 +744,7 @@ interface Controller [[ControllerDelegate*]]
 
     bool show_multiple_choice_ui()
         [[
-            g_warning("DEPRECATED CALL TO Controller:show_multiple_choice_ui");
+            g_warning("DEPRECATED CALL TO Controller:show_multiple_choice_ui: %s", Util::where_am_i_lua(L).c_str());
             result=false;
         ]];
 
@@ -834,7 +834,7 @@ interface Controller [[ControllerDelegate*]]
 
     bool set_background(string resource)
         [[
-            g_warning("DEPRECATED CALL TO controller:set_background");
+            g_warning("DEPRECATED CALL TO controller:set_background: %s", Util::where_am_i_lua(L).c_str());
             result=false;
         ]];
 
