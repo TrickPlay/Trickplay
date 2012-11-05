@@ -1,42 +1,11 @@
-int gcf( int a, int b )
-{
-    int t;
-    if ( b > a )
-    {
-        t = b;
-        b = a;
-        a = t;
-    }
-    while ( b != 0 )
-    {
-        t = b;
-        b = a % b;
-        a = t;
-    }
-    return a;
-}
+#include "item.h"
 
-typedef struct Item {
-  int x, y, w, h, area;
-  char  * id,
-        * path;
-  GFile * file;
-  Image * source;
-  gboolean placed;
-} Item;
-
-Item * item_new ( char * id )
+Item * item_new ( const char * id )
 {
     id = strdup( id );
-    if ( g_hash_table_contains( input_ids, id ) )
-        return NULL;
-    else
-        g_hash_table_add( input_ids, id );
-        
+
     Item * item = malloc( sizeof( Item ) );
-    
-    item->x = 0;
-    item->y = 0;
+
     item->w = 0;
     item->h = 0;
     item->area = 0;
@@ -46,126 +15,64 @@ Item * item_new ( char * id )
     item->file = NULL;
     item->source = NULL;
     item->placed = FALSE;
-    
+
     return item;
 }
 
-Item * item_new_from_file ( char * id, char * base_path, GFile * file )
+void item_free ( Item * item )
+{
+    if ( item->file )
+        g_object_unref( item->file );
+    if ( item->source )
+        DestroyImage( item->source );
+    free( (char *) item->id );
+    free( (char *) item->path );
+        
+    free( item );
+}
+
+Item * item_new_from_file ( const char * id, const char * directory, GFile * file, Options * options )
 {
     Item * item = item_new( id );
-    if ( item == NULL )
-        return NULL;
-    
-    char * path = base_path ? g_build_filename( base_path, item->id, NULL ) : item->id;
-    
+
+    const char * path = directory ? g_build_filename( directory, item->id, NULL ) : item->id;
+
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo * input_info = AcquireImageInfo();
     CopyMagickString( input_info->filename, path, MaxTextExtent );
     Image * temp_image = PingImage( input_info, exception );
-    
+
     if ( exception->severity != UndefinedException )
     {
         free( item );
         return NULL;
     }
-    
+
+    unsigned int bp = options->add_buffer_pixels ? 2 : 0;
     item->path = path;
     item->file = file;
-    item->w = (int) temp_image->columns + ( add_buffer_pixels ? 2 : 0 );
-    item->h = (int) temp_image->rows    + ( add_buffer_pixels ? 2 : 0 );
+    item->w = (unsigned int) temp_image->columns + bp;
+    item->h = (unsigned int) temp_image->rows    + bp;
     item->area = item->w * item->h;
-    
-    minimum.area += item->area;
-    minimum.width   = MAX( minimum.width,   item->w );
-    minimum.height  = MAX( minimum.height,  item->h );
-    smallest.width  = MIN( smallest.width,  item->w );
-    smallest.height = MIN( smallest.height, item->w );
-    
-    if ( output_size_step == 0 )
-      output_size_step = item->w;
-    else
-      output_size_step = gcf( item->w, output_size_step );
-    
+
     DestroyImage( temp_image );
     DestroyExceptionInfo( exception );
-    
+
     return item;
 }
 
-void item_set_source( Item * item, Image * source )
+void item_set_source( Item * item, Image * source, Options * options )
 {
+    unsigned int bp = options->add_buffer_pixels ? 2 : 0;
     item->source = source;
-    item->w = (int) source->columns + ( add_buffer_pixels ? 2 : 0 );
-    item->h = (int) source->rows    + ( add_buffer_pixels ? 2 : 0 );
+    item->w = (unsigned int) source->columns + bp;
+    item->h = (unsigned int) source->rows    + bp;
     item->area = item->w * item->h;
-    
-    minimum.area += item->area;
-    minimum.width   = MAX( minimum.width,   item->w );
-    minimum.height  = MAX( minimum.height,  item->h );
-    smallest.width  = MIN( smallest.width,  item->w );
-    smallest.height = MIN( smallest.height, item->w );
-    
-    if ( output_size_step == 0 )
-      output_size_step = item->w;
-    else
-      output_size_step = gcf( item->w, output_size_step );
 }
 
-gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data )
+gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
-    int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
+    unsigned int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
     return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
-}
-
-void item_add_to_items ( Item * item )
-{
-    if ( item != NULL )
-    {
-        if ( item->w <= input_size_limit && item->h <= input_size_limit )
-            g_sequence_insert_sorted( items, item, item_compare, NULL );
-        else if ( copy_large_images && allow_multiple_sheets &&
-                  item->w <= output_size_limit && item->h <= output_size_limit )
-            g_ptr_array_add( large_images, item );
-    }
-}
-
-void load ( GFile * file, GFile * base, char * base_path, GPtrArray * input_patterns, gboolean recursive )
-{
-    GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
-    GFileType type = g_file_info_get_file_type( info );
-    
-    if ( type == G_FILE_TYPE_DIRECTORY )
-    {
-        if ( file != base && !recursive )
-            return;
-        
-        GFileEnumerator * children = g_file_enumerate_children( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
-        GFileInfo * child_info;
-        GFile * child;
-        
-        while ( ( child_info = g_file_enumerator_next_file( children, NULL, NULL ) ) != NULL )
-        {
-            child = g_file_get_child( file, g_file_info_get_name( child_info ) );
-            load( child, base, base_path, input_patterns, recursive );
-            g_object_unref( child_info );
-        }
-        
-        g_file_enumerator_close( children, NULL, NULL );
-        g_object_unref( children );
-        
-    }
-    else if ( type == G_FILE_TYPE_REGULAR )
-    {
-        char * path = ( file == base ) ? base_path : g_file_get_relative_path( base, file );
-        int i;
-        for ( i = 0; i < input_patterns->len; i++ )
-            if ( g_pattern_match_string( g_ptr_array_index( input_patterns, i ), path ) )
-                break;
-        
-        if ( i == 0 || i < input_patterns->len || file == base)
-            item_add_to_items( item_new_from_file( path, ( file == base ) ? NULL : base_path, file ) );
-    }
-    
-    g_object_unref( info );
 }
