@@ -398,7 +398,14 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat);
+                    } else {
+                        fd.filter.categoryBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
@@ -424,7 +431,14 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.maskBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat);
+                    } else {
+                        fd.filter.maskBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
