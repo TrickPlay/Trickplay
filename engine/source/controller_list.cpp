@@ -1901,7 +1901,11 @@ ControllerList::ControllerList()
     queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
     stopped( 0 )
 {
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 }
 
 //.............................................................................
@@ -1913,7 +1917,11 @@ ControllerList::~ControllerList()
         ( *it )->controller->unref();
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( &mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
     g_async_queue_unref( queue );
 }
 

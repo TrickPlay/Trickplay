@@ -76,7 +76,11 @@ MediaPlayer::MediaPlayer( TPContext * c , Wrapper * w, Delegate * d )
     g_assert( wrapper );
     wrapper->player = this;
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 
     add_delegate( d );
 
@@ -116,7 +120,11 @@ MediaPlayer::~MediaPlayer()
         g_async_queue_unref( queue );
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( &mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
 }
 
 //-----------------------------------------------------------------------------
