@@ -167,19 +167,17 @@ void World::idle()
 
     int iterations = seconds / sixty;
 
-    seconds = seconds / ( seconds / sixty );
-
     g_timer_start( timer );
 
     UserData * ud = UserData::get_from_client( this );
 
     for( int i = 0; i < iterations; ++i )
     {
-        step( seconds , velocity_iterations , position_iterations );
+        step( sixty , velocity_iterations , position_iterations );
 
         if ( ud )
         {
-            lua_pushnumber( L , seconds );
+            lua_pushnumber( L , sixty );
             lua_pushinteger( L , i );
 
             ud->invoke_callbacks( "on_step" , 2 , 0 );
