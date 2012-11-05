@@ -1,4 +1,5 @@
-Understanding the Folder / File Layout
+[[
+Explanation of Folder / File Layout:
 
     - main.lua & app file: 
         These files merely exist for testing purposes, they also are
@@ -29,6 +30,4 @@ Understanding the Folder / File Layout
         constructor for that widget. Each file also contains a "test.lua"
         file which contains an example of how to create that widget.
     
-Understanding the Object Structure:
-
-
+]]

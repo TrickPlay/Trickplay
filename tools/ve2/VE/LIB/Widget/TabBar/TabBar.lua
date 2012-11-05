@@ -5,29 +5,6 @@ local _ENV     = ({...})[2] or _ENV
 
 
 local top_tabs = function(self,state)
-    
-            return NineSlice{
-                w = self.w,
-                h = self.h,
-                cells={
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
-                    },
-                }
-            }
-    --[[
 	local c = Canvas(self.w,self.h)
     mesg("TABBAR",0,"TabBar make top_tab",self.gid,state)
 	
@@ -59,34 +36,10 @@ local top_tabs = function(self,state)
 	c:stroke(true)
 	
 	return c:Image()
-	--]]
+	
 end
 
 local side_tabs = function(self,state)
-    
-            return NineSlice{
-                w = self.w,
-                h = self.h,
-                cells={
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                    },
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
-                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-                    },
-                }
-            }
-            
-    --[[
 	local c = Canvas(self.w,self.h)
     mesg("TABBAR",0,"TabBar make side_tab",self.gid,state)
 	c.op = "SOURCE"
@@ -118,7 +71,7 @@ local side_tabs = function(self,state)
 	c:stroke(true)
 	
 	return c:Image()
-	--]]
+	
 end
 
 local default_parameters = {tab_w = 200,tab_h = 50,pane_w = 400,pane_h = 300, tab_location = "top"}
@@ -545,7 +498,6 @@ TabBar = setmetatable(
                     end
                     local sel = rbg.selected
                     obj = RadioButton{
-                        hide_icon = true,
                         label  = obj.label,
                         w      = tab_w,
                         h      = tab_h,
@@ -560,11 +512,10 @@ TabBar = setmetatable(
                     ---[[
                     function obj:on_key_focus_in()
                         old_okfi()
-                        --obj.selected = true
+                        obj.selected = true
                         tab_pane.virtual_x = obj.x - tab_pane.pane_w/2
                         tab_pane.virtual_y = obj.y - tab_pane.pane_h/2
                     end
-                    function obj:on_pressed()  obj.selected = true  end
                     --]]
                     obj.contents = pane
                     mesg("TABBAR",0,"button made")

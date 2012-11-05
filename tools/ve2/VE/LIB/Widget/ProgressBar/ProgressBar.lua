@@ -152,7 +152,7 @@ ProgressBar = setmetatable(
                     end
                 end,
                 attributes = function(instance,_ENV)
-                    return function(oldf,self) 
+                    return function(oldf) 
                         local t = oldf(self)
                         
                         t.progress = self.progress

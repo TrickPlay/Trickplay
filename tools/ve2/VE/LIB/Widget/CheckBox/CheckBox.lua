@@ -98,7 +98,7 @@ CheckBoxGroup = function(parameters)
             elseif not items[tb] then
 							  
                 items[tb] = tb:subscribe_to("selected",function() 
-                    if not setting_selected and on_selection_change then on_selection_change(instance) end
+                    if not setting_selected and on_selection_change then on_selection_change() end
                 end)
             end
             
@@ -241,18 +241,6 @@ CheckBox = setmetatable(
         
         functions = {
         }
-    },
-    private = {
-        default_empty_icon = function(instance,_ENV)
-            return function()
-                return Clone{source=instance.style.empty_toggle_icon.default}
-            end
-        end,
-        default_filled_icon = function(instance,_ENV)
-            return function()
-                return Clone{source=instance.style.filled_toggle_icon.default}
-            end
-        end,
     },
     declare = function(self,parameters)
         local instance, _ENV = ToggleButton:declare()

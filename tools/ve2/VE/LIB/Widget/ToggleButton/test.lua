@@ -153,11 +153,10 @@ b2 = WL.ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,r
 b3 = WL.ToggleButton{
     name = "B2",
     x = 600,y = 0,
-    empty_icon  = Image{src="Button/strike-off.png"},
-    filled_icon = Image{src="Button/strike-on.png",x=-8,y=-8},
     images = {
-        default = Image{src="Button/button3.png"},
-        focus   = Image{src="Button/button-focus.png"},
+        default = Group{ children={Image{src="Button/button3.png"},Image{src="Button/strike-off.png"}}},
+        focus   = Group{children={Image{src="Button/button-focus.png"},Image{src="Button/strike-off.png"}}},
+        selection = Group{children={Image{src="Button/strike-on.png",x=-8,y=-8}}},
     },
     reactive=true
 }
