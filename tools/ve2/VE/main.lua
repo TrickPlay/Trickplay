@@ -6,6 +6,7 @@
     -- Constants, Global Variables  
     -------------------------------
     hdr = dofile("header")
+    local currentProjectPath 
 
 
     --TEST Function 
@@ -813,9 +814,9 @@ _VE_.openInspector = function(gid, multi)
 end 
 
 _VE_.setAppPath = function(path)
-    print (path)
     editor_lb:change_app_path(path)
     WL = dofile("LIB/Widget/Widget_Library.lua")
+    currentProjectPath = path 
 end 
 
 _VE_.openFile = function(path)
@@ -859,6 +860,8 @@ _VE_.openFile = function(path)
     WL = dofile("LIB/Widget/Widget_Library.lua")
 
     s = load_layer(layer)
+    print (s, #s.children)
+
     for i,j in ipairs(s.children) do
         --if string.find(j.name, "Layer") ~= nil then 
         if string.find(j.name, "Layer") ~= nil and 
@@ -979,6 +982,7 @@ end
 ]]
 
 _VE_.newLayer = function()
+    
     for m,n in ipairs (screen.children) do
         if n.name == "Layer"..layerNum then 
             layerNum = layerNum + 1
@@ -986,18 +990,125 @@ _VE_.newLayer = function()
     end 
     screen:add(WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
-
     _VE_.refresh()
 end 
 
+local codeExist = function(contents, layer, obj) 
+    if string.find(contents, "-- BEGIN "..layer.."."..obj.." SECTION") then 
+        return true 
+    else 
+        return false
+    end 
+end 
+
+local objCodeGen = function(contents, layer, lowLayer, obj) 
+    print (contents, layer, lowLayer, obj.name, obj.widget_type) 
+
+    if obj.widget_type == "Button" then 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents..lowLayer..".elements."..obj.name..".on_pressed = function() end\n\t"
+        contents = contents..lowLayer..".elements."..obj.name..".on_released = function() end\n"
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+    end 
+
+    return contents 
+end 
+
+local codeGen = function()
+
+    for a,b in ipairs (screen.children) do 
+        if b.name and string.find(b.name, "Layer") then 
+
+            local layerName = b.name
+            local lowLayerName = string.lower(layerName)
+            
+            local contents = readfile(lowLayerName..".lua")
+
+            local contents_header = "local "..lowLayerName.." = ...\n" 
+            local contents_tail = "return "..lowLayerName 
+
+            if contents ~= nil then 
+                local new_contents = ""
+
+                for i, j in pairs(b.elements) do 
+                    if not codeExist(contents, layerName, j.name) then 
+                        new_contents = objCodeGen(new_contents, layerName, lowLayerName, j) 
+                    end
+                end 
+
+				local c,d,e,f, contents_last
+				
+                c, d = string.find(contents, contents_header)
+				if d~=nil then 
+					 contents_last = string.sub(contents, d+1, -1)
+				end
+
+                -----------------------------------
+                print (contents_last)
+				local temp = contents_last 
+                local backup_obj = {}
+
+                c, d = string.find(temp, "-- BEGIN ")
+                while c ~=nil do 
+                    temp = string.sub(temp, d+1, -1)
+                    c, d = string.find(temp, "[.]")
+                    e, f = string.find(temp, " ")
+                    obj_name = string.sub(temp, d+1, f-1) 
+
+                    if b.elements[obj_name] == nil then 
+                        table.insert(backup_obj, obj_name)
+                    end 
+                    temp = string.sub(temp, f+1, -1)
+                    c, d = string.find(temp, "-- BEGIN ")
+                end 
+                        
+                dumptable(backup_obj)
+
+                local temp_first, temp_last, temp_middle
+                for k, l in ipairs(backup_obj) do 
+                    if b.elements[l] == nil then  
+                        c, d = string.find(contents_last, " BEGIN "..layerName.."."..l.." SECTION")
+                        temp_first = string.sub(contents_last, 1, c-1)
+                        e, f = string.find(contents_last, "-- END "..layerName.."."..l.." SECTION")
+                        temp_last = string.sub(contents_last, f+1, -1)
+                        temp_middle = string.sub(contents_last, c, f)
+                        contents_last = temp_first.."[["..temp_middle.." ]]"..temp_last
+                    end 
+                end 
+
+                -----------------------------------
+
+                --print(new_contents)
+                --print(contents_last)
+
+				contents = contents_header..new_contents..contents_last
+                editor_lb:writefile(lowLayerName..".lua", contents, true)
+
+            else
+                
+                contents = contents_header
+
+                for i, j in pairs(b.elements) do 
+                    contents = objCodeGen(contents, layerName, lowLayerName, j) 
+                end 
+
+                contents = contents..contents_tail
+                editor_lb:writefile(lowLayerName..".lua", contents, true)
+            end 
+        end 
+    end
+
+end 
+
 _VE_.saveFile = function(scrJson)
+
     local layer_t = {}
     local style_t = {}
 
     for a, b in ipairs (screen.children) do
-            if b.to_json then -- s1.b1
-                table.insert(layer_t, json:parse(b:to_json()))
-            end
+        if b.to_json then -- s1.b1
+            table.insert(layer_t, json:parse(b:to_json()))
+        end
     end
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
@@ -1005,6 +1116,11 @@ _VE_.saveFile = function(scrJson)
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
+    
+    screen:clear()
+    _VE_.openFile(currentProjectPath)
+
+    codeGen()
 
 end 
 
