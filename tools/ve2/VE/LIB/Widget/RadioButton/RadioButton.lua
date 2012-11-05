@@ -72,7 +72,7 @@ RadioButtonGroup = function(parameters)
 						
 				  end
                   
-                  if on_selection_change then on_selection_change() end
+                  if on_selection_change then on_selection_change(self,selected) end
 				  
 			end,
 			name = function(v)
@@ -251,7 +251,7 @@ RadioButton = setmetatable(
                     end
                     
                     --if setting this RadioButton's group to nil
-                    if v == nil then
+                    if v == nil or v == false then
                         
                         group = nil
                         
@@ -308,6 +308,19 @@ RadioButton = setmetatable(
         
         functions = {
         }
+    },
+    private = {
+            default_empty_icon = function(instance,_ENV)
+                return function()
+                    return Clone{source=instance.style.empty_radio_icon.default}
+                end
+            end,
+            default_filled_icon = function(instance,_ENV)
+                return function()
+                    return Clone{source=instance.style.filled_radio_icon.default}
+                end
+            end,
+        
     },
     declare = function(self,parameters)
         local instance, _ENV = ToggleButton:declare()
