@@ -403,6 +403,8 @@ b2FixtureDef World::create_fixture_def( int properties )
                 lua_pop( L , 1 );
             }
         }
+        // Guarantee that a fixture always has a non-zero category
+        if(0 == fd.filter.categoryBits) fd.filter.categoryBits = 1;
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "mask" );
