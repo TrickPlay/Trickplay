@@ -534,7 +534,7 @@ main = function()
         channel_menu:populate( channels.Channels.Channel )
     end)
     ---[[
-    get_scheduling(function(t)
+    get_scheduling(function(t,old)
         if  type(t) ~= "table" or 
             type(t.Channels) ~= "table" or 
             type(t.Channels.Channel) ~= "table" then
@@ -542,7 +542,7 @@ main = function()
             print("get_scheduling got bad data")
             return
         end
-        epg_menu:load_scheduling(t)
+        epg_menu:load_scheduling(t,old)
     end)--]]
     --[[
     local titles_callback = function(t,parent)
