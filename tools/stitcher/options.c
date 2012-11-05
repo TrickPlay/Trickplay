@@ -1,5 +1,5 @@
-#include <glib.h>
-#include "main.h"
+#include <string.h>
+#include "options.h"
 #include "leaf.h"
 #include "item.h"
 
@@ -9,11 +9,18 @@ Options * options_new()
     
     options->input_size_limit  = 4096;
     options->output_size_limit = 4096;
+    options->output_path = NULL;
+    
+    options->recursive = FALSE;
+    options->add_buffer_pixels = FALSE;
+    options->allow_multiple_sheets = FALSE;
+    options->copy_large_items = FALSE;
     
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
     options->input_paths    = g_ptr_array_new();
     options->json_to_merge  = g_ptr_array_new();
     options->input_ids      = g_hash_table_new_full( g_str_hash, g_str_equal, g_free, NULL );
+    
     return options;
 }
 
@@ -23,6 +30,7 @@ void options_free( Options * options )
     g_ptr_array_free( options->input_paths, TRUE );
     g_ptr_array_free( options->json_to_merge, TRUE );
     g_hash_table_destroy( options->input_ids );
+    //free( options->output_path );
     free( options );
 }
 
@@ -58,8 +66,10 @@ enum {
     NO_ARGS,
 };
 
-void options_take_arguments ( Options * options, int argc, char ** argv, Output * output )
+Options * options_new_from_arguments ( int argc, char ** argv )
 {
+    Options * options = options_new();
+    
     int i, j, l, state = INPUT_PATHS;
     char * arg;
 
@@ -84,7 +94,7 @@ void options_take_arguments ( Options * options, int argc, char ** argv, Output 
                         break;
 
                     case 'c':
-                        options->copy_large_images = TRUE;
+                        options->copy_large_items = TRUE;
                         state = NO_ARGS;
                         break;
 
@@ -104,7 +114,7 @@ void options_take_arguments ( Options * options, int argc, char ** argv, Output 
                         break;
 
                     default:
-                        error( g_strdup_printf( "Error: unknown flag '-%s'\n", (char *) &arg[j] ) );
+                        g_error( "Error: unknown flag '-%s'", (char *) &arg[j] );
                         break;
                 }
         else
@@ -131,7 +141,7 @@ void options_take_arguments ( Options * options, int argc, char ** argv, Output 
                     if ( arg_is_int )
                         options->output_size_limit = (int) strtol( arg, NULL, 10 );
                     else
-                        output->path = arg;
+                        options->output_path = arg;
                     break;
 
                 case SET_JSON_MERGE:
@@ -148,11 +158,26 @@ void options_take_arguments ( Options * options, int argc, char ** argv, Output 
                 }
 
                 default:
-                    error( g_strdup_printf( "Error: ambiguous argument %s\n", arg ) );
+                    g_error( "Error: ambiguous argument %s", arg );
                     break;
             }
         }
     }
+    
+    if ( options->input_paths->len + options->json_to_merge->len == 0 )
+        g_error( "Error: no inputs given" );
+
+    if ( options->output_path == NULL )
+    {
+        if ( options->input_paths->len > 0 )
+            options->output_path = g_ptr_array_index( options->input_paths, 0 );
+        //else if ( options->json_to_merge->len > 0 )
+        //    options->output_path = g_ptr_array_index( options->json_to_merge, 0 );
+        else
+            g_error( "Error: cannot determine output path" );
+    }
+    
+    return options;
 }
 
 /*

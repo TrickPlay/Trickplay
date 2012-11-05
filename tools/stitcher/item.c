@@ -1,3 +1,4 @@
+#include <string.h>
 #include "item.h"
 
 Item * item_new ( const char * id )
@@ -74,5 +75,5 @@ gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attri
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
     unsigned int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
-    return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
+    return m ?: MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 }
