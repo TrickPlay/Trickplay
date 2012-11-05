@@ -70,6 +70,8 @@ local months_r = {
     "NOV",
     "DEC"
 }
+
+
 local update_curr_time_disp__on_timer = function(self)
     local t = os.date('*t')
     curr_time_disp.text = 
@@ -132,34 +134,44 @@ local refresh = Timer{
         --TODO: reload the schedule data
     end
 }
-local start_at_0 = curr_time.min < 30
-curr_time.min = start_at_0 and 0 or 30
-curr_time.sec = 0
+local start_at_0 --= curr_time.min < 30
+--curr_time.min = start_at_0 and 0 or 30
+--curr_time.sec = 0
 local time_slots = {}
 intervals_g:add(intervals)
 timeline_header:add(timeline_bg,intervals_g)
 
 local len = 6 + 4 + 4
 local time_slots = {}
-for i = (start_at_0 and 0 or 1),(start_at_0 and (len-1) or len) do
+for i = 1,len do--(start_at_0 and 0 or 1),(start_at_0 and (len-1) or len) do
     
     table.insert(time_slots, Text{
-        x = (i+(start_at_0 and 1 or 0)-1)*half_hour_len,
+        x = (i--[[+(start_at_0 and 1 or 0)]]-1)*half_hour_len,
         y = 195,
         color = "white",
         font = "InterstateProRegular 50px",
+        --[[
         text = 
             ((curr_time.hour+math.floor((i)/2)-2)%24)..":"..
             ((i%2 == 0) and "00" or "30"),
+            --]]
     })
     
 end
 local zone_offset = -4
-            for i,ts in ipairs(time_slots) do
-                i = (start_at_0 and (i-1) or i)+zone_offset
-                ts.text = ((curr_time.hour+math.floor((i)/2))%24)..":"..
-                    ((i%2 == 0) and "00" or "30")
-            end
+
+local setup_curr_time = function(t)
+    curr_time = os.date('*t',t)
+    start_at_0 = curr_time.min < 30
+    curr_time.min = start_at_0 and 0 or 30
+    curr_time.sec = 0
+    for i,ts in ipairs(time_slots) do
+        i = (start_at_0 and (i-1) or i)+zone_offset
+        ts.text = ((curr_time.hour+math.floor((i)/2))%24)..":"..
+            ((i%2 == 0) and "00" or "30")
+    end
+end
+setup_curr_time(os.time())
 intervals_g:add(unpack(time_slots))
 function intervals_g:move_x_by(dx)
     intervals_g:animate{
@@ -389,7 +401,7 @@ local push_out_right_to = function(new_x)
     pre_pull_in_left_to(new_x - (screen_w-margin))
 end
 
-local show_grid__left_edge=0
+show_grid__left_edge=0
 pre_pull_in_left_to = function(new_x)
     if new_x <= show_grid__left_edge then return end
     local ls = {}
@@ -874,7 +886,10 @@ local function x_from_time(t)
         (t.min  - curr_time.min)  /60
     )
 end
-function instance:load_scheduling(t)
+function instance:load_scheduling(t,old_time)
+    if old_time then 
+        setup_curr_time(old_time) 
+    end
     t = t.Channels.Channel
     
     scheduling = {}
@@ -911,16 +926,20 @@ local animating_show_grid = false
 local keypresses = {
 ---[==[
     [keys.Left] = function()
-        if not finished_integrating_schedule or #channel_list == 0 or animating_show_grid or show_grid__left_edge <= -half_hour_len then return end
+        if  not finished_integrating_schedule or #channel_list == 0 or 
+            animating_show_grid or show_grid__left_edge <= -half_hour_len then 
+            
+            return 
+        end
         animating_show_grid = true
         
         local dx
         --if at the left-most show, and but not at the left edge
         if row_i == 1 then 
-            dx = (show_grid__left_edge <= -2*half_hour_len) and 
+            dx = (show_grid__left_edge >= (-2*half_hour_len)) and 
                 (2*half_hour_len) or 
                 (-show_grid__left_edge)
-            print("hehehe",dx,show_grid__left_edge)
+            print("hehehe",dx,show_grid__left_edge,-2*half_hour_len,(show_grid__left_edge <= (-2*half_hour_len)))
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
