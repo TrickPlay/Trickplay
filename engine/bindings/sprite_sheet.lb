@@ -12,339 +12,6 @@ module sprite_sheet;
 ]]
 
 [[
-/*
-
-int get_sprites_from_lua_table( lua_State * L, JSON::Array ** sprites )
-{
-    JSON::Value map_value = JSON::to_json( L, -1 );
-
-    if ( map_value.get_type() == JSON::Value::T_NULL )
-    {
-        return 0;
-    }
-
-    if ( ! map_value.is<JSON::Object>() )
-    {
-        return 0;
-    }
-
-    JSON::Object map_obj = map_value.as<JSON::Object>();
-
-    if ( ! map_obj.has( "sprites" ) )
-    {
-        return 0;
-    }
-
-    if ( ! map_obj["sprites"].is<JSON::Array>() )
-    {
-        // An empty table is converted to JSON::Object so this handles an empty array
-
-        if ( map_obj["sprites"].is<JSON::Object>() )
-        {
-            JSON::Object sprites_obj = map_obj["sprites"].as<JSON::Object>();
-            if ( sprites_obj.begin() != sprites_obj.end() )
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    *sprites = new JSON::Array( map_obj["sprites"].as<JSON::Array>() );
-
-    return 1;
-}
-
-int get_image_src_from_lua_table( lua_State * L, const char ** image_src )
-{
-    JSON::Value map_value = JSON::to_json( L, -1 );
-
-    if ( map_value.get_type() == JSON::Value::T_NULL )
-    {
-        return 0;
-    }
-
-    if ( ! map_value.is<JSON::Object>() )
-    {
-        return 0;
-    }
-
-    JSON::Object map_obj = map_value.as<JSON::Object>();
-
-    if ( ! map_obj.has( "img" ) )
-    {
-        return 0;
-    }
-
-    if ( ! map_obj["img"].is<String>() )
-    {
-        return 0;
-    }
-
-    *image_src = strdup( map_obj["img"].as<String>().c_str() );
-
-    return 1;
-}
-
-int get_bitmap_image_from_lua_table( lua_State * L, Image ** image, gchar ** error_message )
-{
-    lua_getfield( L, 1, "img" );
-
-    if ( lua_isnil( L, -1 ) )
-    {
-        *error_message = (char*) "Key 'img' not found.";
-        lua_pop( L, 1 );
-        return 0;
-    }
-
-    if ( ! lua_isuserdata( L, -1 ) )
-    {
-        *error_message = (char*) "Property 'img' must be a Bitmap.";
-        lua_pop( L, 1 );
-        return 0;
-    }
-
-    if ( ! luaL_getmetafield( L, -1, "type" ) )
-    {
-        *error_message = (char*) "Property 'img' must be a Bitmap.";
-        lua_pop( L, 1 );
-        return 0;
-    }
-
-    if ( strcmp( lua_tostring( L, -1 ), "Bitmap" ) != 0 )
-    {
-        *error_message = (char*) "Property 'img' must be a Bitmap.";
-        lua_pop( L, 2 );
-        return 0;
-    }
-
-    lua_pop( L, 1 );
-
-    Bitmap * bitmap_image = (Bitmap*) UserData::get_client( L, -1 );
-
-    Image * image_tmp = bitmap_image->get_image();
-
-    if ( ! image_tmp )
-    {
-        *error_message = (char*) "Bitmap must have an associated Image.";
-        return 0;
-    }
-
-    *image = image_tmp;
-
-    lua_pop( L, 1 );
-
-    return 1;
-}
-
-int parse_map( char * map_str, JSON::Array ** sprites, const char ** image_src, char ** error_message )
-{
-    lua_State * L = luaL_newstate();
-
-    JSON::parse( L, map_str );
-
-    if ( lua_isnil( L, -1 ) || ! lua_istable( L, -1 ) )
-    {
-        *error_message = (char*) "Unable to parse JSON file";
-        return 0;
-    }
-
-    if ( ! get_sprites_from_lua_table( L, sprites ) )
-    {
-        *error_message = (char*) "Unable to parse JSON file";
-        return 0;
-    }
-
-    if ( ! get_image_src_from_lua_table( L, image_src ) )
-    {
-        *error_message = (char*) "Unable to parse JSON file";
-        return 0;
-    }
-
-    lua_close( L );
-
-    return 1;
-}
-
-//------------------------------------------------------------------------
-// Synchronous downloader
-
-int download_map( App * app, AppResource resource, char ** contents )
-{
-    if ( resource.is_http() )
-    {
-        Network::Request request( app->get_user_agent(), resource.get_uri() );
-        Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
-
-        if ( response.failed || response.body->len == 0 )
-        {
-            return 0;
-        }
-
-        guint8 null = '\0';
-        *contents = g_strdup( (char*) g_byte_array_append( response.body, &null, 1 )->data );
-    }
-    else if ( resource.is_native() )
-    {
-        const char * path = resource.get_native_path().c_str();
-        if ( ! g_file_test( path, G_FILE_TEST_IS_REGULAR ) )
-        {
-            return 0;
-        }
-
-        GError * error;
-        if ( ! g_file_get_contents( path, contents, NULL, &error ) )
-        {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-//------------------------------------------------------------------------
-// Initializer
-void map_sprites( SpriteSheet * sheet, int tex, JSON::Array sprites )
-{
-    for ( unsigned int i = 0; i < sprites.size(); i++ )
-    {
-        JSON::Object sprite = sprites[i].as<JSON::Object>();
-
-        if (
-            sprite.has( "id" )
-            && sprite.has( "x" )
-            && sprite.has( "y" )
-            && sprite.has( "w" )
-            && sprite.has( "h" )
-            )
-        {
-            const char * id = sprite["id"].as<String>().c_str();
-            sheet->map_subtexture(
-                strdup( id ), tex,
-                sprite["x"].as<long long>(),
-                sprite["y"].as<long long>(),
-                sprite["w"].as<long long>(),
-                sprite["h"].as<long long>() );
-        }
-    }
-}
-
-void initialize( SpriteSheet * sheet, JSON::Array sprites, Image * image )
-{
-    ClutterTexture * image_texture = CLUTTER_TEXTURE(clutter_texture_new());
-    Images::load_texture( image_texture, image );
-    int tex = sheet->add_texture( clutter_texture_get_cogl_texture( image_texture ) );
-
-    char * img_src = (char *) g_object_get_data( sheet->extra, "tp-src" );
-    g_object_set_data_full( G_OBJECT( image_texture ), "tp-src", (gpointer*) strdup( img_src ), g_free );
-
-    map_sprites( sheet, tex, sprites );
-}
-
-//------------------------------------------------------------------------
-// Async constructor helpers
-
-void load_image_callback( Image * image, gpointer me )
-{
-    SpriteSheet * self = (SpriteSheet *) me;
-    if ( ! image )
-    {
-        g_signal_emit_by_name( self->extra, "load-finished", "Could not load image." );
-        return;
-    }
-
-    JSON::Array * sprites = (JSON::Array*) g_object_get_data( self->extra, "tp-sprite-data" );
-
-    initialize( self, * sprites, image );
-
-    g_signal_emit_by_name( self->extra, "load-finished", 0 );
-}
-
-void download_map_callback( const Network::Response & response, gpointer me )
-{
-    SpriteSheet * self = (SpriteSheet*) me;
-    App * app = (App *) g_object_get_data( self->extra, "tp-app" );
-
-    if ( response.failed || response.body->len == 0 )
-    {
-        g_signal_emit_by_name( self->extra, "load-finished", "Could not load SpriteSheet map" );
-        return;
-    }
-
-    char * contents;
-    const unsigned char null = '\0';
-    contents = strdup( (char *) g_byte_array_append( response.body, &null, 1 )->data );
-
-    JSON::Array * sprites;
-    const char * image_src;
-    char * error_message;
-
-    if ( ! parse_map( contents, &sprites, &image_src, &error_message ) )
-    {
-        Action::post( new EmitLoadedSignalLater( self, error_message ) );
-        return;
-    }
-
-    g_object_set_data_full( self->extra, "tp-sprite-data", sprites, g_free );
-    g_object_set_data_full( self->extra, "tp-src", (gpointer *) image_src, g_free );
-
-    app->load_image_async( image_src, false, load_image_callback, self, 0 );
-}
-
-//------------------------------------------------------------------------
-// Async Constructor
-
-void construct_async( SpriteSheet * self, AppResource resource )
-{
-    App * app = (App*) g_object_get_data( self->extra, "tp-app" );
-
-    if ( resource.is_http() )
-    {
-        Network::Request request( app->get_user_agent(), resource.get_uri() );
-        app->get_network()->perform_request_async(
-            request,
-            app->get_cookie_jar(),
-            download_map_callback,
-            self,
-            0 );
-    }
-    else if ( resource.is_native() )
-    {
-        char * contents;
-        const char * path = resource.get_native_path().c_str();
-
-        if ( ! g_file_test( path, G_FILE_TEST_IS_REGULAR ) )
-        {
-            Action::post( new EmitLoadedSignalLater( self, "Could not open map file" ) );
-            return;
-        }
-
-        if ( ! g_file_get_contents( path, &contents, NULL, 0 ) )
-        {
-            Action::post( new EmitLoadedSignalLater( self, "Could not open map file" ) );
-            return;
-        }
-
-        JSON::Array * sprites;
-        const char * image_src;
-        char * error_message;
-
-        if ( ! parse_map( contents, &sprites, &image_src, &error_message ) )
-        {
-            Action::post( new EmitLoadedSignalLater( self, "Could not parse map file" ) );
-            return;
-        }
-
-        g_object_set_data_full( self->extra, "tp-sprite-data", sprites, g_free );
-        g_object_set_data_full( self->extra, "tp-src", (gpointer*) image_src, g_free );
-
-        app->load_image_async( image_src, false, load_image_callback, self, 0 );
-    }
-}
- */
 
 //------------------------------------------------------------------------
 // Emit signal "later"
@@ -362,17 +29,19 @@ public:
 protected:
     bool run()
     {
-        g_signal_emit_by_name( self->extra, "load-finished", error_message );
+        g_signal_emit_by_name( self->extra, "on-loaded", error_message );
         return false;
     }
 
 private:
     SpriteSheet * self;
-    const char * error_message;
+    const char  * error_message;
 };
 
 //------------------------------------------------------------------------
 // Helper functions
+
+#define LUA_CALLBACK( self, status ) g_signal_emit_by_name( ( self )->extra, "on-loaded", status )
 
 typedef void (* LFunc) ( lua_State * L, int index, gpointer user_data );
 
@@ -419,15 +88,18 @@ class SSDef {
         
         void load ( Image * image )
         {
-            ClutterActor * texture = clutter_texture_new();
-            Images::load_texture( CLUTTER_TEXTURE( texture ), image );
-            CoglHandle source = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( texture ) );
-            
-            cogl_handle_ref( source );
-            sheet->add_texture( source );
-            g_ptr_array_foreach( sprites, (GFunc) spritedef_map, sheet );
-            
-            clutter_actor_destroy( texture );
+            if ( image )
+            {
+                ClutterActor * texture = clutter_texture_new();
+                Images::load_texture( CLUTTER_TEXTURE( texture ), image );
+                CoglHandle source = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( texture ) );
+                
+                cogl_handle_ref( source );
+                sheet->add_texture( source );
+                g_ptr_array_foreach( sprites, (GFunc) spritedef_map, sheet );
+                
+                clutter_actor_destroy( texture );
+            }
         }
         
         int tex;
@@ -435,18 +107,12 @@ class SSDef {
         GPtrArray   * sprites;
 };
 
-void load_image_callback ( Image * image, SSDef * ssdef )
+void async_img_callback ( Image * image, SSDef * ssdef )
 {
-    if ( !image )
-    {
-        g_signal_emit_by_name( ssdef->sheet->extra, "load-finished", "Could not load image." );
-        return;
-    }
-    
     ssdef->load( image );
     delete ssdef;
     
-    g_signal_emit_by_name( ssdef->sheet->extra, "load-finished", 0 );
+    LUA_CALLBACK( ssdef->sheet, image ? NULL : "FAILED_IMG_LOAD" );
 }
 
 void ssdef_add_sprite ( lua_State * L, int index, SSDef * ssdef )
@@ -508,7 +174,7 @@ void add_spritesheet_map ( lua_State * L, int index, SpriteSheet * self )
             
             if ( g_object_get_data( self->extra, "tp-async" ) )
             {
-                app->load_image_async( img, false, (Image::DecodeAsyncCallback) load_image_callback, ssdef, 0 );
+                app->load_image_async( img, false, (Image::DecodeAsyncCallback) async_img_callback, ssdef, 0 );
             }
             else
             {
@@ -536,59 +202,89 @@ void add_spritesheet_map ( lua_State * L, int index, SpriteSheet * self )
     LSG_END( 0 );
 }
 
+void async_map_callback ( const Network::Response & response, SpriteSheet * self )
+{
+    if ( !response.failed && response.body->len )
+    {
+        guint8 null = '\0';
+        char * map = g_strdup( (char*) g_byte_array_append( response.body, &null, 1 )->data );
+        
+        lua_State * L = luaL_newstate();
+        
+        JSON::parse( L, map );
+        
+        if ( lua_istable( L, -1 ) )
+        {
+            lua_foreach( L, -1, (LFunc) add_spritesheet_map, self );
+        }
+        else
+        {
+            LUA_CALLBACK( self, "FAILED_MAP_PARSE" );
+        }
+        
+        lua_close( L );
+    }
+    else
+    {
+        LUA_CALLBACK( self, "FAILED_MAP_LOAD" );
+    }
+}
+
 void lua_load_map_uri( lua_State * L, int index, SpriteSheet * self )
 {
     index = index > 0 ? index : lua_gettop( L ) + index + 1;
     
-    App * app = App::get( L );
+    char * map;
+    App  * app = App::get( L );
     AppResource resource( app, lua_tostring( L, -1 ) );
     
-    if ( g_object_get_data( self->extra, "tp-async" ) )
+    if ( resource.is_native() )
     {
-        // do something asyncy
-        lua_pushnil( L );
-    }
-    else
-    {
-        char * map;
-        if ( resource.is_native() )
+        const char * path = resource.get_native_path().c_str();
+        if ( ! g_file_get_contents( path, &map, NULL, NULL ) )
         {
-            const char * path = resource.get_native_path().c_str();
-            if ( ! g_file_get_contents( path, &map, NULL, NULL ) )
-            {
-                luaL_error( L, "SpriteSheet: could not open map" );
-            }
+            luaL_error( L, "SpriteSheet: could not open map %s.", path );
         }
-        else if ( resource.is_http() )
+    }
+    else if ( resource.is_http() )
+    {
+        Network::Request request( app->get_user_agent(), resource.get_uri() );
+        
+        if ( g_object_get_data( self->extra, "tp-async" ) )
         {
-            Network::Request request( app->get_user_agent(), resource.get_uri() );
+            app->get_network()->perform_request_async( request, app->get_cookie_jar(),
+                (Network::ResponseCallback) async_map_callback, self, 0 );
+        }
+        else
+        {
             Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
             
             if ( response.failed || response.body->len == 0 )
             {
-                luaL_error( L, "SpriteSheet: could not download map" );
+                luaL_error( L, "SpriteSheet: could not download map %s.", resource.get_uri().c_str() );
             }
             
             guint8 null = '\0';
             map = g_strdup( (char*) g_byte_array_append( response.body, &null, 1 )->data );
         }
-        else
-        {
-            luaL_error( L, "SpriteSheet: could not understand map URI" );
-        }
-        
-        if ( map )
-        {
-            JSON::parse( L, map );
-        }
-        else
-        {
-            lua_pushnil( L );
-        }
+    }
+    else
+    {
+        luaL_error( L, "SpriteSheet: could not understand map URI %s.", lua_tostring( L, -1 ) );
+    }
+    
+    if ( map )
+    {
+        JSON::parse( L, map );
+    }
+    else
+    {
+        lua_pushnil( L );
     }
 }
 
-void Sprite_Sheet_on_loaded(GObject * extra, gpointer error, lua_State * L );
+void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
+
 ]]
 
 class SpriteSheet [[SpriteSheet*]]
@@ -599,7 +295,7 @@ class SpriteSheet [[SpriteSheet*]]
             self = lb_construct( SpriteSheet, new SpriteSheet() );
             g_object_set_data( self->extra, "tp-app", App::get( L ) );
 
-            g_signal_connect_data( self->extra, "load-finished", G_CALLBACK( Sprite_Sheet_on_loaded ),
+            g_signal_connect_data( self->extra, "on-loaded", (GCallback) Sprite_Sheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
 
             if ( props )
@@ -619,9 +315,9 @@ class SpriteSheet [[SpriteSheet*]]
                 {
                     lua_foreach( L, -1, (LFunc) add_spritesheet_map, self );
                 }
-                else
+                else if ( ! lua_isnil( L, -1 ) )
                 {
-                    luaL_error( L, "SpriteSheet initialization error: key 'map' was not a table or string." );
+                    luaL_error( L, "SpriteSheet initialization error: key 'map' was not a table or URI string." );
                 }
                 
                 lua_pop( L, 2 );
@@ -665,21 +361,23 @@ class SpriteSheet [[SpriteSheet*]]
 }
 
 [[
-void Sprite_Sheet_on_loaded(GObject * extra, gpointer error, lua_State * L )
+void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L )
 {
-    lua_pushboolean(L,error?1:0);
+    lua_pushboolean( L, error ? 1 : 0 );
 
     if ( error )
     {
-        lua_pushstring( L, (char*) error );
+        lua_pushstring( L, error );
     }
     else
     {
         lua_pushnil( L );
     }
 
-    SpriteSheet * self = (SpriteSheet*) g_object_get_data( extra, "tp-sheet" );
+    SpriteSheet * self = (SpriteSheet *) g_object_get_data( extra, "tp-sheet" );
 
-    UserData::invoke_callback(self,"on_loaded",2,0,L);
+    UserData::invoke_callback( self, "on_loaded", 2, 0, L);
 }
+
+#undef LUA_CALLBACK
 ]]
