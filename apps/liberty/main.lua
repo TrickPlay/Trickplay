@@ -1,4 +1,15 @@
 
+if not editor then
+    print([[
+    
+    =======================================================
+    Warning: did not receive editor permissions
+    
+    The app will not be able to save or access local data
+    =======================================================
+    ]])
+end
+
 screen_w = screen.w
 screen_h = screen.h
 
@@ -41,6 +52,25 @@ do
     end
 end
 
+
+------------------------------------------------------------------------
+local meta_file = "local_data/meta"
+if editor then
+    local f = readfile(meta_file)
+    if f then
+        meta = json:parse(f)
+    end
+end
+meta = meta or {}
+save_meta = function()
+    if editor then
+        editor:writefile(
+            meta_file,
+            json:stringify(meta)
+        )
+    end
+end
+------------------------------------------------------------------------
 main = function()
     --screen:add(Rectangle{size = screen.size,color = "606060"})
     --------------------------------------------------------------------
