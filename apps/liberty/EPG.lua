@@ -669,16 +669,18 @@ local populate_row = function(r)
     
     dx = show_grid__left_edge - s[r.icon.left_i].x
     dx = dx < 0 and 0 or dx
-    s[r.icon.left_i].show_name:set{
-        --duration = dur,
-        x = show_grid__left_edge + show_name_margin,
-        w = s[r.icon.left_i].w - dx - 2*show_name_margin,
-    }
-    s[r.icon.left_i].show_time:set{
-        --duration = dur,
-        x = show_grid__left_edge + show_name_margin,
-        w = s[r.icon.left_i].w - dx - 2*show_name_margin,
-    }
+    if s[r.icon.left_i].x < show_grid__left_edge then
+        s[r.icon.left_i].show_name:set{
+            --duration = dur,
+            x = show_grid__left_edge + show_name_margin,
+            w = s[r.icon.left_i].w - dx - 2*show_name_margin,
+        }
+        s[r.icon.left_i].show_time:set{
+            --duration = dur,
+            x = show_grid__left_edge + show_name_margin,
+            w = s[r.icon.left_i].w - dx - 2*show_name_margin,
+        }
+    end
 end
 --------------------------------------------------------------------
 local scheduling = nil
@@ -687,102 +689,108 @@ local show_name_h = Text{
             font = "InterstateProBold 40px",
             text = "h",
         }.h 
-local function build_schedule_row(parent)
-    
-    local separators = Group{name = "separators",anchor_point = {0,sep_src.h/2},scale={1,row_h/sep_src.h}}
-    local show_names = Group{name = "show_names"}
-    local show_times = Group{name = "show_times",opacity = 0}
-    
-    parent.shows = Group{name = parent.name}
-    parent.separators = separators
-    parent.show_names = show_names
-    parent.show_times = show_times
-    parent.left_i  = 1
-    parent.right_i = 1
-    
-    parent.shows:add(show_names,separators)
-    
-    local show_name,show_time, sep
-    parent.schedule_is_loaded = true
-    for j,show in ipairs(parent.scheduling) do
         
-        --if show.x > screen_w - margin then break end
-        --[[
-        if show.x <= 0 and show_name then 
-            show_name:unparent() 
-            show_time:unparent() 
-            sep:unparent()
-            parent.left_i = j
+local build_schedule_row, reset_build_row
+local num_shows_created = 0
+local num_shows_created_per_frame = 10
+do
+    
+    local separators,show_names,show_times, show_name,show_time, sep, show, start_i
+    function reset_build_row(parent)
+        parent.scheduling = scheduling[parent.name] or {}
+        
+        start_i = 1
+        
+        separators = Group{name = "separators",anchor_point = {0,sep_src.h/2},scale={1,row_h/sep_src.h}}
+        show_names = Group{name = "show_names"}
+        show_times = Group{name = "show_times",opacity = 0}
+        
+        parent.shows      = Group{name = parent.name}
+        parent.separators = separators
+        parent.show_names = show_names
+        parent.show_times = show_times
+        parent.left_i     = 1
+        parent.right_i    = 1
+        
+        parent.shows:add(show_names,separators)
+        
+        show_name = nil
+        show_time = nil
+        sep       = nil
+        show      = nil
+    end
+    function build_schedule_row(parent)
+        
+        for j = start_i,#parent.scheduling do
+            --print(j)
+            num_shows_created = num_shows_created + 1
+            if num_shows_created > num_shows_created_per_frame then
+                start_i = j
+                return false
+            end
+        --for j,show in ipairs(parent.scheduling) do
+            show = parent.scheduling[j]
+            
+            show_name = Text{
+                color = "white",
+                font = "InterstateProBold 40px",
+                text = show.name,
+                x=show.x+show_name_margin,
+                w =  show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
+                --y = 10,
+                ellipsize = "END",
+            }
+            show_name.anchor_point = {0,show_name_h/2}
+            
+            show_time = Text{
+                color = "white",
+                font = "InterstateProLight 40px",
+                text = 
+                    show.start.hour .. ":" ..
+                    show.start.min  .." - "..
+                    show.stop.hour  .. ":" ..
+                    show.stop.min,
+                x=show.x+show_name_margin,
+                w = show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
+                y = -row_h/2,
+                --(i==middle_row) and 255 or 0,
+                ellipsize = "END",
+            }
+            show_time.anchor_point = {0,show_name_h/2}
+            --[[
+            sep = Clone{
+                source = sep_src,
+                x = show.x,
+                --h = row_h,
+            }
+            --]]
+            parent.scheduling[j].show_name = show_name
+            parent.scheduling[j].show_time = show_time
         end
-        if show.x > 0 and show_name and show_name.x < 0 then 
-            show_name.w = show_name.w + show_name.x
-            show_time.w = show_time.w + show_time.x
+        --[[
+        if show_name and show_name.x < 0 then 
             show_name.x = show_name_margin
             show_time.x = show_name_margin
-            sep.x = 0
+            --sep.x = 0
         end
         --]]
-        show_name = Text{
-            color = "white",
-            font = "InterstateProBold 40px",
-            text = show.name,
-            x=show.x+show_name_margin,
-            w =  show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
-            --y = 10,
-            ellipsize = "END",
-        }
-        show_name.anchor_point = {0,show_name_h/2}
-        
-        show_time = Text{
-            color = "white",
-            font = "InterstateProLight 40px",
-            text = 
-                show.start.hour .. ":" ..
-                show.start.min  .." - "..
-                show.stop.hour  .. ":" ..
-                show.stop.min,
-            x=show.x+show_name_margin,
-            w = show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
-            y = -row_h/2,
-            --(i==middle_row) and 255 or 0,
-            ellipsize = "END",
-        }
-        show_time.anchor_point = {0,show_name_h/2}
-        --[[
-        sep = Clone{
-            source = sep_src,
-            x = show.x,
-            --h = row_h,
-        }
-        --]]
-        parent.scheduling[j].show_name = show_name
-        parent.scheduling[j].show_time = show_time
-        --parent.scheduling[j].sep       = sep
-        --[[
-        if show.x < screen_w - margin then
-            show_times:add(show_time)
-            show_names:add(show_name)
-            separators:add(sep)
-            parent.right_i = j
+        if #parent.scheduling == 0 then
+            num_shows_created = num_shows_created + 1
+            if num_shows_created > num_shows_created_per_frame then
+                return false
+            end
+            show_name = Text{
+                color = "white",
+                font  = "InterstateProBold 40px",
+                text  = "No Programming Information",
+                x     = show_name_margin,
+                w     = 2*2*half_hour_len,
+            }
+            parent.no_prog = show_name
+            show_name.anchor_point = {0,show_name.h/2}
+            --show_names:add(show_name)
         end
-        --]]
-    end
-    if show_name and show_name.x < 0 then 
-        show_name.x = show_name_margin
-        show_time.x = show_name_margin
-        --sep.x = 0
-    end
-    if #parent.scheduling == 0 then
-        show_name = Text{
-            color = "white",
-            font  = "InterstateProBold 40px",
-            text  = "No Programming Information",
-            x     = show_name_margin,
-            w     = 2*2*half_hour_len,
-        }
-        parent.no_prog = show_name
-        show_name.anchor_point = {0,show_name.h/2}
-        --show_names:add(show_name)
+        return true
     end
 end
 local integrating_schedule = false
@@ -790,19 +798,37 @@ local finished_integrating_schedule = false
 local complete_integrate_schedule
 local step_integrate_schedule
 step_integrate_schedule= function()
-    if integrating_schedule_i > #channel_list then
-        complete_integrate_schedule()
-    else
-        local channel_icon = channel_list[integrating_schedule_i]
-        integrating_schedule_i = integrating_schedule_i+1
-        channel_icon.scheduling = scheduling[channel_icon.name] or {}
-        build_schedule_row(channel_icon)
-        dolater(step_integrate_schedule)
+    num_shows_created = 0
+    
+    while true do
+        
+        --if finished building the current row
+        if build_schedule_row(channel_list[integrating_schedule_i]) then
+            channel_list[integrating_schedule_i].schedule_is_loaded = true
+            --increment to the next one
+            integrating_schedule_i = integrating_schedule_i+1
+            --if out of rows, display
+            if integrating_schedule_i > #channel_list then
+                dolater(complete_integrate_schedule)
+                return
+            --set up the table for the next one
+            else
+                reset_build_row(channel_list[integrating_schedule_i])
+            end
+        else
+            dolater(step_integrate_schedule)
+            return
+        end
     end
+    
 end
 local function integrate_schedule()
     if integrating_schedule then return end
     print("Begin building EPG")
+    
+    integrating_schedule_i = 1
+    reset_build_row(channel_list[integrating_schedule_i])
+    
     
     dolater(step_integrate_schedule)
     mesg.base = "Creating Grid"
