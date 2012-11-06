@@ -62,7 +62,8 @@ function get_scheduling(f)
         
         if editor then 
             editor:writefile("local_data/get_scheduling",response.body)
-            settings.event_data = os.time()
+            meta.time_scheduling_was_requested = os.time()
+            save_meta()
         end
         response = json:parse(response.body)
         
@@ -75,22 +76,25 @@ function get_scheduling(f)
         
         return true
     end
+    local function get_local_data(t)
+        local resp = readfile("local_data/get_scheduling")
+        if type(resp) == "string" then
+            resp = json:parse(resp)
+            if t ~= nil then
+                dolater(f,resp,t)
+            end
+        end
+    end
     
     local curr_time = os.date('*t')
-    if editor and settings.event_data then
-        local t = tonumber(settings.event_data)
+    if editor and meta.time_scheduling_was_requested then
+        local t = tonumber(meta.time_scheduling_was_requested)
         curr_time.hour=curr_time.hour - 11
         --dumptable(os.date('*t',t))
         if os.time(curr_time) < t then
             print("local data is less than a 11 hours old")
-            t = readfile("local_data/get_scheduling")
-            if type(t) == "string" then
-                t = json:parse(t)
-                if t ~= nil then
-                    dolater(f,t)
-                    return
-                end
-            end
+            get_local_data()
+            return
         end
     end
     
@@ -145,15 +149,8 @@ function get_scheduling(f)
         --]]
         on_complete = function(self,response)
             if not received_schedule(response) then
-                
-                response = readfile("local_data/get_scheduling")
-                if type(response) == "string" then
-                    response = json:parse(response)
-                    if response ~= nil then
-                        dolater(f,response,settings.event_data)
-                        return
-                    end
-                end
+                get_local_data(meta.time_scheduling_was_requested)
+                return
             end
         end
     }
