@@ -1077,7 +1077,11 @@ Images::Images()
     external_decoder( 0 ),
     cache( 0 )
 {
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( & mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
@@ -1149,7 +1153,11 @@ Images::~Images()
     	delete cache;
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( & mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
 }
 
 //-----------------------------------------------------------------------------

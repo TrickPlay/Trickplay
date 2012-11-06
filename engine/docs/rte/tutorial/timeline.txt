@@ -12,7 +12,11 @@ The <Timeline> class shares some functionality with the animate() function. For 
 					 } )
 	(end)
 
-While a Timeline-based animation is running, it receives periodic notifications in the form of calls to an event handler. The event handler is responsible for determining the values of each animated property based upon the animation's current position in its running time. This is not as daunting of a task as it may sound because the SDK libraries provide some classes that ease the work required in calculating a property's current value. The event handler is specified in the Timeline constructor's on_new_frame property. An updated Timeline constructor with skeleton event handler is shown below.
+A Timeline-based animation comprises many individual screen frames. Each frame contains a single screen image from the complete animation. For example, if the animation depicts a sphere moving from the left-side of the screen to the right-side, each screen frame would show the sphere in a different location as it made its way from its starting location to its final destination. When the frames are displayed sequentially, they give the impression of movement.
+
+Each screen frame in a TrickPlay animation is created dynamically, immediately before the frame is displayed. Each time a new frame is needed, the application receives notification in the form of a <Timeline.on_new_frame> event. The application can register a handler function that gets invoked whenever the event occurs. The handler function for on_new_frame events should create a new frame that correctly depicts each screen object's position and visual attributes based on the current progress of the animation. This is not as daunting of a task as it may sound because the SDK libraries provide some classes that ease the work required in calculating a property's current value.
+
+To receive notification of each on_new_frame event, we create an event handler function and register it with the event by passing it to the <Timeline.add_onnewframe_listener> function. A skeleton event handler is defined and registered below.
 
 	(code)
 	-- Event handler called to update animated properties
@@ -20,13 +24,8 @@ While a Timeline-based animation is running, it receives periodic notifications 
 		-- Update animated property values here
 	end
 
-	-- Timeline-based animation of spheres
-	local
-	sphereTimeline = Timeline( {
-						duration     = 1000,
-						loop         = true,
-						on_new_frame = sphereFrame,  -- event handler responsible for updating animated property settings
-					 } )
+	-- Register the on_new_frame event handler
+	sphereTimeline:add_onnewframe_listener( sphereFrame )
 	(end)
 
 Notice that the event handler receives three arguments: the Timeline object itself, the number of milliseconds that have elapsed from the animation's start, and a progress value between 0 and 1 indicating the percentage of the animation that has completed. The progress argument is the most useful for calculating each animated property's current values.
@@ -40,7 +39,7 @@ We'll start building up the Timeline animation by implementing a simple movement
 	local sphere1StartY  = (demoSpace2.height / 2) + demoSpace2.y  -- left-center Y
 	local sphere1EndX    = demoSpace2.x + demoSpace2.width - 75    -- right-center X
 	local sphere1EndY    = sphere1StartY                           -- right-center Y
-	
+
 	-- sphereClone positions
 	-- Note: This sphere starts in the center, but to maintain naming consistency,
 	--       we apply Start and End names to the sphere's outer travel boundaries.
@@ -52,9 +51,9 @@ We'll start building up the Timeline animation by implementing a simple movement
 	local sphere2CenterY = (demoSpace2.height / 2) + demoSpace2.y  -- display-center Y
 	(end)
 
-With the animate() function we used earlier, we passed the ending property values to animate(), and animate() calculated the property's intermediate, or "in-between," values for us. With Timeline, we have to specify the in-between values ourself each time the on_new_frame() event handler is called. While it's possible to construct an equation to calculate the in-between values, there is no need to because the SDK library's Interval class will do the work for us.
+With the animate() function we used earlier, we passed the ending property values to animate(), and animate() calculated the property's intermediate, or "in-between," values for us. With Timeline, we have to specify the in-between values ourself each time the on_new_frame event handler is called. While it's possible to construct an equation to calculate the in-between values, there is no need to because the SDK library's Interval class will do the work for us.
 
-An <Interval> object is initialized with a range of values, such as the starting and ending values of an animated property. Then whenever an in-between value is needed by the Timeline event handler, the handler can call the Interval object's get_value() function, passing it the progress argument containing the percentage of elapsed animation time. The Interval's get_value() function, having the property's starting and ending values and the percentage of the animation completed, calculates and returns the in-between property value.
+An <Interval> object is initialized with a range of values, such as the starting and ending values of an animated property. Then whenever an in-between value is needed by the Timeline event handler, the handler can call the Interval object's get_value() function, passing it the progress argument containing the percentage of elapsed animation time. The Interval's get_value() function uses the property's starting and ending values and the percentage of the animation completed to calculate and return the in-between property value.
 
 The code shown below initializes the Interval objects for the X and Y coordinates for the two spheres. It also shows the event handler code that uses the objects to update the animated coordinates. As you can see, the maintenance of each property's in-between values requires no complex calculations.
 
