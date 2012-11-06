@@ -101,9 +101,9 @@ int main (int argc, char **argv)
       clutter_behaviour_apply (behaviour, actor);
     }
   
-  const gchar *names[] = {"slice-00.png", "slice-10.png", "slice-20.png",
-                          "slice-01.png", "slice-11.png", "slice-21.png",
-                          "slice-02.png", "slice-12.png", "slice-22.png"};
+  const gchar *ids[] = {"slice-00.png", "slice-10.png", "slice-20.png",
+                        "slice-01.png", "slice-11.png", "slice-21.png",
+                        "slice-02.png", "slice-12.png", "slice-22.png"};
   
   gint xs[] = {16, 32, 48, 64};
   gint ys[] = {16, 32, 48, 64};
@@ -120,21 +120,35 @@ int main (int argc, char **argv)
   
   ClutterActor *actor3 = clutter_texture_new_from_file("spritesheet.png", NULL);
   CoglHandle texture = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor3 ) );
-  //SpriteSheet *sheet = spritesheet_new(texture, names, data, 9, 0);
-  SpriteSheet *sheet = new SpriteSheet(texture, names, data, 9, SPRITESHEET_NONE); 
+  SpriteSheet *sheet = new SpriteSheet(texture, ids, data, 9, SPRITESHEET_NONE); 
   
   ClutterActor *actor2 = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor2);
   clutter_actor_set_position(actor2, 10, 10);
   
-  ClutterEffect *effect2 = nineslice_effect_new_from_names(names, sheet, TRUE);
+  ClutterEffect *effect2 = nineslice_effect_new_from_ids(ids, sheet, TRUE);
+  
+  SpriteSheet *sheet2 = new SpriteSheet(texture, ids, data, 9, SPRITESHEET_NONE); 
+  nineslice_effect_set_sheet( NINESLICE_EFFECT(effect2), sheet2 );
+  
   clutter_actor_add_effect(actor2, effect2);
+  
+  fprintf(stderr, "tile: %i\n", nineslice_effect_get_tile(NINESLICE_EFFECT(effect2)));
+  
+  nineslice_effect_set_tile( NINESLICE_EFFECT(effect2), FALSE );
+  
+  int * array = (int *) malloc( sizeof( int ) * 4 );
+  nineslice_effect_get_borders( NINESLICE_EFFECT(effect2), array );
+  for (i = 0; i < 4; i++)
+    fprintf(stderr, "border %i: %i\n", i, array[i]);
+    
+  fprintf(stderr, "tile: %i\n", nineslice_effect_get_tile(NINESLICE_EFFECT(effect2)));
   
   ClutterActor *actor = clutter_group_new();
   clutter_container_add_actor (CLUTTER_CONTAINER (actor2), actor);
   clutter_actor_set_position(actor, 200, 100);
   
-  ClutterEffect *effect = nineslice_effect_new_from_names(names, sheet, TRUE);
+  ClutterEffect *effect = nineslice_effect_new_from_ids(ids, sheet, TRUE);
   clutter_actor_add_effect(actor, effect);
   
   ClutterActor *text = clutter_text_new_with_text("Sans 40px","Example Text");
