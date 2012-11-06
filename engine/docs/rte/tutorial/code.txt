@@ -6,7 +6,7 @@ File: app Metadata File
 
 	(code)
 	-- TrickPlay SDK Tutorial's app Metadata File
-	
+
 	app = {
 		name = "SDK Tutorial",
 		version = "1.0",
@@ -19,7 +19,7 @@ File: strings.lua
 
 	(code)
 	-- *** strings.lua ***
-	
+
 	return{
 		header = "TrickPlay SDK Tutorial Animations",
 		demoFooter1 = "animate()",
@@ -31,7 +31,7 @@ File: main.lua
 
 	(code)
 	-- TrickPlay SDK Tutorial
-	
+
 	-- Display message on Engine console
 	print( "TrickPlay SDK Tutorial" )
 
@@ -51,13 +51,13 @@ File: main.lua
 				position = { 0, 0 },
 				color    = { 211, 211, 211, 128 }
 	         } )
-	         
+
 	-- Add the header area to the screen
 	screen:add( header )
 
 	-- Load localized text strings into a table called localStr
 	localStr = dofile( "localized:strings.lua" )
-		
+
 	-- Create header label, using localized header text
 	headerLabel = Text( {
 					text     = localStr.header,
@@ -65,7 +65,7 @@ File: main.lua
 					color    = { 245, 245, 220, 255 },
 					position = { 190, 50 }
 				  } )
-				 
+
 	-- Add the header label to the screen
 	screen:add( headerLabel )
 
@@ -79,7 +79,7 @@ File: main.lua
 					position = { 0, 0 },
 					color    = { 211, 211, 211, 128 }
 	         	} )
-	         	
+
 	-- Create DemoArea1's display space
 	demoSpace1 = Rectangle( {
 					size     = { 550, 450 },
@@ -95,7 +95,7 @@ File: main.lua
 	-- Create a second demo area, repeating the previous steps
 	demoArea2 = Group( { position = { 1050, 300 } } )
 	screen:add( demoArea2 )
-	
+
 	-- Create DemoArea2's base and display space
 	demoBase2  = Rectangle( {
 					size     = { 650, 600 },
@@ -109,7 +109,7 @@ File: main.lua
 					border_width = 4,
 					border_color = { 139, 69, 19, 128 }
 				 } )
-				 
+
     -- Add base and display space rectangles to demoArea group
 	demoArea2:add( demoBase2, demoSpace2 )
 
@@ -121,7 +121,7 @@ File: main.lua
 					position = { 225, 520 }
 				  } )
 	demoArea1:add( demoFooter1 )
-	
+
 	demoFooter2 = Text( {
 					text     = localStr.demoFooter2,
 					font     = "DejaVu Serif Bold 40px",
@@ -136,10 +136,10 @@ File: main.lua
 
 	-- Animate the TrickPlay logo
 	dofile( "logoAnimation.lua" )
-	
+
 	-- Animate the two spheres
 	dofile( "sphereAnimation.lua" )
-	
+
 	-- Show the display
 	screen:show()
 	(end)
@@ -150,12 +150,12 @@ File: loadImages.lua
 	-- *** loadImages.lua ***
 
 	--[[ Creates the following global variables
-	
+
 			logoImage   - Image object with loaded TrickPlay logo image
 			sphereImage - Image object with loaded Red Sphere image
 			sphereClone - Clone object of Red Sphere image
 	--]]
-	
+
 	-- Load the TrickPlay logo image
 	logoImage = Image( { src = "tpLogo.png" } )
 	if( logoImage.loaded == false ) then
@@ -165,36 +165,36 @@ File: loadImages.lua
 
 	-- Set the image's anchor point to its center
 	logoImage.anchor_point = { logoImage.width / 2, logoImage.height / 2 }
-	
+
 	-- Set the image's position in the middle of demoArea1's display space (demoSpace1)
 	logoImage.position = { (demoSpace1.width  / 2) + demoSpace1.x,
 	                       (demoSpace1.height / 2) + demoSpace1.y - 20 }
-	
+
 	-- Add the image to the demoArea1 group
 	demoArea1:add( logoImage )
-	
+
 	-- Load the red sphere image
 	sphereImage = Image( { src = "sphereRed.png" } )
 	if( sphereImage.loaded == false ) then
 		print( "Could not load sphere image" )
 		return
 	end
-	
+
 	-- Set the image's anchor point to its center
 	sphereImage.anchor_point = { sphereImage.width / 2, sphereImage.height / 2 }
-	
+
 	-- Position the image in the left-center of the demoArea2's display space (demoSpace2)
 	sphereImage.position = {  demoSpace2.x + 75,
 	                         (demoSpace2.height / 2) + demoSpace2.y }
 
 	-- Create a clone of the sphere
 	sphereClone = Clone( { source = sphereImage } )
-	
+
 	-- Set Clone's anchor point and position it in the center of the display space
 	sphereClone.anchor_point = { sphereClone.width  / 2, sphereClone.height / 2 }
 	sphereClone.position     = { (demoSpace2.width  / 2) + demoSpace2.x,
 	                             (demoSpace2.height / 2) + demoSpace2.y }
-	
+
 	-- Add the two images to the demoArea2 group
 	demoArea2:add( sphereClone, sphereImage )
 	(end)
@@ -203,15 +203,15 @@ File: logoAnimation.lua
 
 	(code)
 	-- *** logoAnimation.lua ***
-	
+
 	-- Creates an animation using the animate() function
-	
+
 	-- ***********************************************************
 	-- Local variables
-	
+
 	-- Boolean variable indicating which portion of animate() loop that's running
 	local scaling_down = true
-	
+
 	-- ***********************************************************
 	-- Functions
 
@@ -226,13 +226,13 @@ File: logoAnimation.lua
 					on_completed = logoCompleted    -- called when finished
 				  } )
 	end
-	
+
 	-- Scale-up portion of logo animation
 	local
 	function logoScaleUp()
 		-- To continue clockwise spinning, reset z_rotation
 		logoImage.z_rotation = { -360, 0, 0 }
-		
+
 		logoImage:animate( {
 					duration     = 3000,
 					scale        = { 1, 1 },         -- return to original size
@@ -258,7 +258,7 @@ File: logoAnimation.lua
 
 	-- ***********************************************************
 	-- Module entry point
-	
+
 	-- Start logo animation
 	logoScaleDown()
 	(end)
@@ -267,14 +267,14 @@ File: sphereAnimation.lua
 
 	(code)
 	-- *** sphereAnimation.lua ***
-	
+
 	-- Calculate sphere starting and ending positions
 	-- sphereImage positions
 	local sphere1StartX  = demoSpace2.x + 75                       -- left-center X
 	local sphere1StartY  = (demoSpace2.height / 2) + demoSpace2.y  -- left-center Y
 	local sphere1EndX    = demoSpace2.x + demoSpace2.width - 75    -- right-center X
 	local sphere1EndY    = sphere1StartY                           -- right-center Y
-	
+
 	-- sphereClone positions
 	-- Note: This sphere starts in the center, but to maintain naming consistency,
 	--       we apply Start and End names to the sphere's outer travel boundaries.
@@ -290,13 +290,13 @@ File: sphereAnimation.lua
 	sphere1Path:move_to( sphere1StartX, sphere1StartY )
 	sphere1Path:line_to( sphere1EndX,   sphere1EndY   )
 	sphere1Path:line_to( sphere1StartX, sphere1StartY )
-	
+
 	sphere2Path = Path()
 	sphere2Path:move_to( sphere2CenterX, sphere2CenterY )
 	sphere2Path:line_to( sphere2StartX,  sphere2StartY  )
 	sphere2Path:line_to( sphere2EndX,    sphere2EndY    )
 	sphere2Path:line_to( sphere2CenterX, sphere2CenterY )
-	
+
 	-- Define scaling "route" for both spheres
 	-- sphereImage is the X "coordinate," sphereClone is the Y
 	sphereScale = Path()
@@ -305,33 +305,33 @@ File: sphereAnimation.lua
 	sphereScale:line_to( 100, 150 )
 	sphereScale:line_to(  25, 100 )
 	sphereScale:line_to( 100,  25 )
-	
-	-- Event handler called to update animated properties
-	function sphereFrame( sphereTimeline, msecs, progress )
-		-- Update each sphere's X and Y coordinates
-		sphereImage.position = sphere1Path:get_position( progress )
-		sphereClone.position = sphere2Path:get_position( progress )
-		
-		-- Get current scale factors, extract each, and convert back to floating-point scale values
-		-- Note: scaleFactors = table of { ImageScaleFactor, CloneScaleFactor }
-		local scaleFactors     = sphereScale:get_position( progress )
-		local scaleFactorImage = scaleFactors[ 1 ] / 100
-		local scaleFactorClone = scaleFactors[ 2 ] / 100
-		
-		-- Assign each sphere's scale value
-		sphereImage.scale = { scaleFactorImage, scaleFactorImage }
-		sphereClone.scale = { scaleFactorClone, scaleFactorClone }
-	end
 
 	-- Timeline-based animation of spheres
 	local
 	sphereTimeline = Timeline( {
 						duration     = 1000,
 						loop         = true,
-						on_new_frame = sphereFrame,
 					 } )
+
+	-- Event handler called to update animated properties
+	function sphereFrame( sphereTimeline, msecs, progress )
+		-- Update each sphere's X and Y coordinates
+		sphereImage.position = sphere1Path:get_position( progress )
+		sphereClone.position = sphere2Path:get_position( progress )
+
+		-- Get current scale factors, extract each, and convert back to floating-point scale values
+		-- Note: scaleFactors = table of { ImageScaleFactor, CloneScaleFactor }
+		local scaleFactors     = sphereScale:get_position( progress )
+		local scaleFactorImage = scaleFactors[ 1 ] / 100
+		local scaleFactorClone = scaleFactors[ 2 ] / 100
+
+		-- Assign each sphere's scale value
+		sphereImage.scale = { scaleFactorImage, scaleFactorImage }
+		sphereClone.scale = { scaleFactorClone, scaleFactorClone }
+	end
+
+	-- Register the on_new_frame event handler
+	sphereTimeline:add_onnewframe_listener( sphereFrame )
 
 	-- Start the animation
 	sphereTimeline:start()
-	(end)
-
