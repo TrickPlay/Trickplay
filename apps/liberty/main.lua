@@ -1,4 +1,15 @@
 
+if not editor then
+    print([[
+    
+    =======================================================
+    Warning: did not receive editor permissions
+    
+    The app will not be able to save or access local data
+    =======================================================
+    ]])
+end
+
 screen_w = screen.w
 screen_h = screen.h
 
@@ -18,7 +29,48 @@ MAIN_MENU_FONT  = "InterstateProExtraLight 90px"
 MAIN_MENU_COLOR = "FFFFFF"
 function rand() return 55+20*math.ceil(10*math.random()) end
 
+do
+    local v = mediaplayer.volume
+    local inc = .1
+    function raise_volume()
+        
+        v = v + inc
+        v = v < 1 and v or 1
+        
+        mediaplayer.volume = v
+        
+        return true
+    end
+    function lower_volume()
+        
+        v = v - inc
+        v = v > 0 and v or 0
+        
+        mediaplayer.volume = v
+        
+        return true
+    end
+end
 
+
+------------------------------------------------------------------------
+local meta_file = "local_data/meta"
+if editor then
+    local f = readfile(meta_file)
+    if f then
+        meta = json:parse(f)
+    end
+end
+meta = meta or {}
+save_meta = function()
+    if editor then
+        editor:writefile(
+            meta_file,
+            json:stringify(meta)
+        )
+    end
+end
+------------------------------------------------------------------------
 main = function()
     --screen:add(Rectangle{size = screen.size,color = "606060"})
     --------------------------------------------------------------------
