@@ -7,6 +7,13 @@
 
 //=============================================================================
 
+#define TP_LOG_DOMAIN   "MP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//=============================================================================
+
 MediaPlayer::Event * MediaPlayer::Event::make( Type type, int code, const gchar * message, const gchar * value )
 {
     Event * result = g_slice_new( Event );
@@ -49,13 +56,13 @@ MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor 
 
     wrapper->marker = mp;
 
-    g_debug( "MP[%p] <- constructor", mp );
+    tplog( "[%p] <- constructor", mp );
 
-    if ( int result = constructor( mp ) )
+    if ( int result G_GNUC_UNUSED = constructor( mp ) )
     {
         // Construction failed
 
-        g_warning( "MP[%p]    FAILED %d", mp, result );
+        tplog( "[%p]    FAILED %d", mp, result );
 
         g_free( wrapper );
         return NULL;
@@ -104,7 +111,7 @@ MediaPlayer::~MediaPlayer()
 
         if ( wrapper->mp.destroy )
         {
-            g_debug( "MP[%p] <- destroy", get_mp() );
+            tplog( "[%p] <- destroy", get_mp() );
             wrapper->mp.destroy( get_mp() );
         }
 
@@ -190,7 +197,7 @@ void MediaPlayer::reset()
 
     if ( wrapper->mp.reset )
     {
-        g_debug( "MP[%p] <- reset", get_mp() );
+        tplog( "MP[%p] <- reset", get_mp() );
 
         check( TP_MEDIAPLAYER_LOADING | TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED );
 
@@ -230,11 +237,11 @@ int MediaPlayer::load( const char * uri, const char * extra )
 
     if ( ! unescaped_uri )
     {
-    	g_warning( "MP[%p] INVALID URI '%s'" , mp , uri );
+        g_warning( "MP[%p] INVALID URI '%s'" , mp , uri );
         return TP_MEDIAPLAYER_ERROR_INVALID_URI;
     }
 
-    g_debug( "MP[%p] <- load('%s','%s')", mp, unescaped_uri , extra );
+    tplog( "[%p] <- load('%s','%s')", mp, unescaped_uri , extra );
 
     if ( int result = mp->load( mp, unescaped_uri, extra ) )
     {
@@ -270,7 +277,7 @@ int MediaPlayer::play()
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- play", mp );
+    tplog( "[%p] <- play", mp );
 
     if ( int result = mp->play( mp ) )
     {
@@ -303,7 +310,7 @@ int MediaPlayer::seek( double seconds )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- seek(%f)", mp, seconds );
+    tplog( "[%p] <- seek(%f)", mp, seconds );
 
     if ( int result = mp->seek( mp, seconds ) )
     {
@@ -334,7 +341,7 @@ int MediaPlayer::pause()
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- pause", mp );
+    tplog( "[%p] <- pause", mp );
 
     if ( int result = mp->pause( mp ) )
     {
@@ -373,7 +380,7 @@ int MediaPlayer::set_playback_rate( int rate )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- set_playback_rate(%d)", mp, rate );
+    tplog( "[%p] <- set_playback_rate(%d)", mp, rate );
 
     if ( int result = mp->set_playback_rate( mp, rate ) )
     {
@@ -406,7 +413,7 @@ int MediaPlayer::get_position( double * seconds )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_position", mp );
+    tplog( "[%p] <- get_position", mp );
 
     if ( int result = mp->get_position( mp, seconds ) )
     {
@@ -414,7 +421,7 @@ int MediaPlayer::get_position( double * seconds )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %f", mp, *seconds );
+    tplog( "[%p]    RETURNED %f", mp, *seconds );
 
     return 0;
 }
@@ -441,7 +448,7 @@ int MediaPlayer::get_duration( double * seconds )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_duration", mp );
+    tplog( "[%p] <- get_duration", mp );
 
     if ( int result = mp->get_duration( mp, seconds ) )
     {
@@ -449,7 +456,7 @@ int MediaPlayer::get_duration( double * seconds )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %f", mp, *seconds );
+    tplog( "[%p]    RETURNED %f", mp, *seconds );
 
     return 0;
 }
@@ -477,7 +484,7 @@ int MediaPlayer::get_buffered_duration( double * start_seconds, double * end_sec
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_buffered_duration", mp );
+    tplog( "[%p] <- get_buffered_duration", mp );
 
     if ( int result = mp->get_buffered_duration( mp, start_seconds, end_seconds ) )
     {
@@ -485,7 +492,7 @@ int MediaPlayer::get_buffered_duration( double * start_seconds, double * end_sec
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %f,%f", mp, *start_seconds, *end_seconds );
+    tplog( "[%p]    RETURNED %f,%f", mp, *start_seconds, *end_seconds );
 
     return 0;
 }
@@ -513,7 +520,7 @@ int MediaPlayer::get_video_size( int * width, int * height )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_video_size", mp );
+    tplog( "[%p] <- get_video_size", mp );
 
     if ( int result = mp->get_video_size( mp, width, height ) )
     {
@@ -521,7 +528,7 @@ int MediaPlayer::get_video_size( int * width, int * height )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %d,%d", mp, *width, *height );
+    tplog( "[%p]    RETURNED %d,%d", mp, *width, *height );
 
     return 0;
 }
@@ -545,7 +552,7 @@ int MediaPlayer::get_viewport_geometry( int * left, int * top, int * width, int 
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_viewport_geometry", mp );
+    tplog( "[%p] <- get_viewport_geometry", mp );
 
     if ( int result = mp->get_viewport_geometry( mp, left, top, width, height ) )
     {
@@ -553,7 +560,7 @@ int MediaPlayer::get_viewport_geometry( int * left, int * top, int * width, int 
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %d,%d,%d,%d", mp, *left, *top, *width, *height );
+    tplog( "[%p]    RETURNED %d,%d,%d,%d", mp, *left, *top, *width, *height );
 
     return 0;
 }
@@ -584,7 +591,7 @@ int MediaPlayer::set_viewport_geometry( int left, int top, int width, int height
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- set_viewport_geometry(%d,%d,%d,%d)", mp, left, top, width, height );
+    tplog( "[%p] <- set_viewport_geometry(%d,%d,%d,%d)", mp, left, top, width, height );
 
     if ( int result = mp->set_viewport_geometry( mp, left, top, width, height ) )
     {
@@ -629,7 +636,7 @@ int MediaPlayer::get_media_type( int * type )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_media_type", mp );
+    tplog( "[%p] <- get_media_type", mp );
 
     if ( int result = mp->get_media_type( mp, type ) )
     {
@@ -637,7 +644,7 @@ int MediaPlayer::get_media_type( int * type )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %d", mp, *type );
+    tplog( "[%p]    RETURNED %d", mp, *type );
 
     return 0;
 }
@@ -658,7 +665,7 @@ int MediaPlayer::get_audio_volume( double * volume )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_audio_volume", mp );
+    tplog( "[%p] <- get_audio_volume", mp );
 
     if ( int result = mp->get_audio_volume( mp, volume ) )
     {
@@ -666,7 +673,7 @@ int MediaPlayer::get_audio_volume( double * volume )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %f", mp, *volume );
+    tplog( "[%p]    RETURNED %f", mp, *volume );
 
     if ( *volume < 0 )
     {
@@ -703,7 +710,7 @@ int MediaPlayer::set_audio_volume( double volume )
         volume = 1;
     }
 
-    g_debug( "MP[%p] <- set_audio_volume(%f)", mp, volume );
+    tplog( "[%p] <- set_audio_volume(%f)", mp, volume );
 
     if ( int result = mp->set_audio_volume( mp, volume ) )
     {
@@ -730,7 +737,7 @@ int MediaPlayer::get_audio_mute( int * mute )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- get_audio_mute", mp );
+    tplog( "[%p] <- get_audio_mute", mp );
 
     if ( int result = mp->get_audio_mute( mp, mute ) )
     {
@@ -738,7 +745,7 @@ int MediaPlayer::get_audio_mute( int * mute )
         return result;
     }
 
-    g_debug( "MP[%p]    RETURNED %d", mp, *mute );
+    tplog( "[%p]    RETURNED %d", mp, *mute );
 
     return 0;
 }
@@ -762,7 +769,7 @@ int MediaPlayer::set_audio_mute( int mute )
         mute = 1;
     }
 
-    g_debug( "MP[%p] <- set_audio_mute(%d)", mp, mute );
+    tplog( "[%p] <- set_audio_mute(%d)", mp, mute );
 
     if ( int result = mp->set_audio_mute( mp, mute ) )
     {
@@ -984,7 +991,7 @@ void MediaPlayer::remove_delegate( Delegate * delegate )
 
 int tp_media_player_get_state( TPMediaPlayer * mp )
 {
-    g_debug( "MP[%p] -> tp_media_player_get_state", mp );
+    tplog( "[%p] -> tp_media_player_get_state", mp );
     return MediaPlayer::get( mp )->get_state();
 }
 
@@ -992,7 +999,7 @@ int tp_media_player_get_state( TPMediaPlayer * mp )
 
 void tp_media_player_loaded( TPMediaPlayer * mp )
 {
-    g_debug( "MP[%p] -> tp_media_player_loaded", mp );
+    tplog( "[%p] -> tp_media_player_loaded", mp );
     MediaPlayer::get( mp )->loaded();
 }
 
@@ -1000,7 +1007,7 @@ void tp_media_player_loaded( TPMediaPlayer * mp )
 
 void tp_media_player_error( TPMediaPlayer * mp, int code, const char * message )
 {
-    g_debug( "MP[%p] -> tp_media_player_error(%d,'%s')", mp, code, message );
+    tplog( "[%p] -> tp_media_player_error(%d,'%s')", mp, code, message );
     MediaPlayer::get( mp )->error( code, message );
 }
 
@@ -1009,7 +1016,7 @@ void tp_media_player_error( TPMediaPlayer * mp, int code, const char * message )
 
 void tp_media_player_end_of_stream( TPMediaPlayer * mp )
 {
-    g_debug( "MP[%p] -> tp_media_player_end_of_stream", mp );
+    tplog( "[%p] -> tp_media_player_end_of_stream", mp );
     MediaPlayer::get( mp )->end_of_stream();
 }
 
@@ -1017,7 +1024,7 @@ void tp_media_player_end_of_stream( TPMediaPlayer * mp )
 
 void tp_media_player_tag_found( TPMediaPlayer * mp, const char * name, const char * value )
 {
-    g_debug( "MP[%p] -> tp_media_player_tag_found('%s','%s')", mp, name, value );
+    tplog( "[%p] -> tp_media_player_tag_found('%s','%s')", mp, name, value );
     if ( name && value )
     {
         MediaPlayer::get( mp )->tag_found( name, value );
