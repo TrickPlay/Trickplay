@@ -16,7 +16,7 @@ local launch_trickplay_menu = function()
     trick_play_menu:animate{
         duration = 300,
         z        = 0,
-        opacity  = 0,
+        opacity  = 255,
         on_completed = function() 
             animating = false 
         end
@@ -45,6 +45,7 @@ local launch_channel_menu = function()
     channel_menu:grab_key_focus()
     backdrop:set_horizon(500)
     backdrop:set_bulb_x(200)
+    backdrop:anim_x_rot(65) -- 70)
     end)
 end
 
