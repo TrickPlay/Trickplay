@@ -126,7 +126,7 @@ local half_hour_len = intervals.w
 intervals_g.x = -4*half_hour_len
 intervals.w = (screen_w-margin) + 8*half_hour_len
 
-
+--[[
 local refresh = Timer{
     interval = ((curr_time.min > 30 and 60 or 30) - curr_time.min) * 1000*60,
     on_timer = function(self)
@@ -134,6 +134,7 @@ local refresh = Timer{
         --TODO: reload the schedule data
     end
 }
+--]]
 local start_at_0 --= curr_time.min < 30
 --curr_time.min = start_at_0 and 0 or 30
 --curr_time.sec = 0
@@ -146,15 +147,11 @@ local time_slots = {}
 for i = 1,len do--(start_at_0 and 0 or 1),(start_at_0 and (len-1) or len) do
     
     table.insert(time_slots, Text{
-        x = (i--[[+(start_at_0 and 1 or 0)]]-1)*half_hour_len,
+        name = "time slot "..tostring(i),
+        x = (i-1)*half_hour_len,
         y = 195,
         color = "white",
         font = "InterstateProRegular 50px",
-        --[[
-        text = 
-            ((curr_time.hour+math.floor((i)/2)-2)%24)..":"..
-            ((i%2 == 0) and "00" or "30"),
-            --]]
     })
     
 end
@@ -735,7 +732,7 @@ local function build_schedule_row(parent)
     if show_name and show_name.x < 0 then 
         show_name.x = show_name_margin
         show_time.x = show_name_margin
-        sep.x = 0
+        --sep.x = 0
     end
     if #parent.scheduling == 0 then
         show_name = Text{
