@@ -1,0 +1,128 @@
+[[
+#include "tuner_delegates.h"
+]]
+
+#==============================================================================
+
+/*
+    Interface: Tuner
+
+    The Tuner interface provides control of tuners on the platform TrickPlay runs on.
+*/
+
+interface Tuner [[TunerDelegate*]]
+{
+    Tuner()
+        [[
+            self=lb_construct( TunerDelegate , lua_touserdata(L,-2) );
+        ]];
+
+    ~Tuner()
+        [[
+            delete self;
+        ]];
+
+/***************************************
+    Property: name
+
+    The name property is a string the tuner has defined to identify itself. Each tuner is not guaranteed to have a unique name property.
+*/
+
+    readonly string name
+        [[
+            String s(self->get_tuner()->get_name());
+            name=s.c_str();
+        ]];
+
+/***************************************
+    Function: tune_channel
+
+    The tune_channel() function instructs the tuner to tune to the specified channel.
+
+    *Arguments:*
+
+	    new_channel - A URI, the structure of which depends on the tuner implementation of the underlying platform.
+
+    *Return Value:* true if channel change was successful, otherwise false
+
+    *See Also:* the <on_channel_changed> callback
+*/
+
+    bool tune_channel(string new_channel)
+        [[
+            result=self->get_tuner()->tune_channel(new_channel);
+        ]];
+
+
+/***************************************
+	Function: add_on_channel_changed_listener
+
+	The add_on_channel_changed_listener() function registers a handler function for <on_channel_changed> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_on_channel_changed_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( tuner, new_channel )
+		(end)
+
+	*Handler Arguments:*
+
+    	tuner - the Tuner device that has been changed
+    	new_channel - string URI of the channel that the tuner was changed to
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_channel_changed> event and the <remove_on_channel_changed_listener> function
+*/
+
+    int add_on_channel_changed_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+/***************************************
+	Function: remove_on_channel_changed_listener
+
+	The remove_on_channel_changed_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_on_channel_changed_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_on_channel_changed_listener> function
+*/
+
+    remove_on_channel_changed_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+/***************************************
+    Event: on_channel_changed
+
+    The on_channel_changed event occurs when the channel for this tuner is changed externally.
+
+	*See Also:* the <add_on_channel_changed_listener> function
+*/
+
+    function on_channel_changed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_channel_changed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_channel_changed" , L );
+        ]];
+
+/***************************************
+
+*/
+
+}

@@ -434,6 +434,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controller.lb
     ${BINDINGS_SRC}/controllers.lb
+    ${BINDINGS_SRC}/tuner.lb
+    ${BINDINGS_SRC}/tuners.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
@@ -548,6 +550,8 @@ list( APPEND
     ${ENGINE_SRC}/source/controller_list.cpp
     ${ENGINE_SRC}/source/controller_lirc.cpp
     ${ENGINE_SRC}/source/controller_delegates.cpp
+    ${ENGINE_SRC}/source/tuner_list.cpp
+    ${ENGINE_SRC}/source/tuner_delegates.cpp
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp

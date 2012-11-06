@@ -716,7 +716,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	It is possible to change the current state and bypass any associated transition animation by calling the object's <warp> function.
 
-	When the animation has completed, the program is notified by calling the object's <on_completed> event handler. This enables the program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
+	When the animation has finished, an <on_completed> event is fired. Hooking this event enables a program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
 
 	*Code Example:* Animate a sphere in two states: (1) from wildcard-source State to Disappear State and (2) from Disappear State to Appear State. For demonstration purposes, the program loops from one state to the other; in a real application, some activity, such as user input, would commonly cause the state transitions. All the AnimationState code is located in the bottom portion of the code sample.
 
@@ -781,8 +781,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			}
 	} )
 
-	-- Define an on_completed() event handler for the sphere's AnimationState so we can daisy-chain states
-	function sphereAnimationState:on_completed()
+	-- Define an on_completed event handler for the sphere's AnimationState so we can daisy-chain states
+	function reverseDirection()
 		-- Depending on completed state, toggle to other state
 		if( sphereAnimationState.state == "disappear" )then
 			sphereAnimationState.state = "appear"
@@ -790,6 +790,9 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			sphereAnimationState.state = "disappear"
 		end
 	end
+
+	-- Hook the reverseDirection() event handler into the on_completed event
+	sphereAnimationState:add_oncompleted_listener( reverseDirection )
 
 	-- Start the animation
 	sphereAnimationState.state = "disappear"  -- Matches the wildcard "*" source transition
@@ -869,13 +872,13 @@ class AnimationState [[ClutterState*]]
 
 		The state property contains a string specifying the current state of the AnimationState object. By changing the state property, a transition animation may be run if an associated transition from the original (source) state to the new (target) state has been defined.
 
-		When the transition animation, if any, has completed, the object's on_completed() event handler is invoked.
+		When the transition animation, if any, has completed, an <on_completed> event is fired.
 
 		To change the state without performing the transition's animation, use the <warp> function.
 
 		*Default Value:* nil
 
-		*See Also:* the <warp> function and the <on_completed> event handler
+		*See Also:* the <warp> function and the <on_completed> event
     */
 
 	string state
@@ -901,17 +904,64 @@ class AnimationState [[ClutterState*]]
     		clutter_state_warp_to_state(self, target_state_name);
     	]];
 
-	 /*
-    	Event: on_completed
+/***************************************
+	Function: add_oncompleted_listener
 
-    	The on_completed() event handler is called when a new state has been assigned by either setting the object's <state> property or calling the <warp> function. If changing the state caused a transition animation to run, the on_competed() handler is called when the animation completes.
+	The add_oncompleted_listener() function registers a handler function for <on_completed> events.
 
-		*Arguments:* None
+	*Arguments:*
 
-		*Return Value:* None
+		f - reference to handler function. The function prototype is described below.
 
-		*See Also:* the <state> property and the <warp> function
-     */
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( )
+		(end)
+
+	*Handler Arguments:* None
+
+	*Handler Return Value:* None
+
+	*See Also:* the <on_completed> event and <remove_oncompleted_listener> function
+*/
+
+    int add_oncompleted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_completed" , L );
+            UserData::get( L )->connect_signal(
+                "on_completed",
+                "completed",
+                G_CALLBACK(AnimationState_on_completed),
+                L);
+        ]];
+
+/***************************************
+	Function: remove_oncompleted_listener
+
+	The remove_oncompleted_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle of the event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
+
+	*See Also:* the <add_oncompleted_listener> function and the <on_completed> event
+*/
+
+    remove_oncompleted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_completed" , L );
+        ]];
+
+/***************************************
+   	Event: on_completed
+
+   	The on_completed event occurs when a new state is assigned by either setting the object's <state> property or calling the <warp> function. If changing the state causes a transition animation to run, the on_completed event occurs after the animation is finished.
+
+	*See Also:* the <state> property and the <warp> and <add_oncompleted_listener> functions
+*/
 
     function on_completed
         [[
@@ -926,20 +976,6 @@ class AnimationState [[ClutterState*]]
                 L);
         ]];
 
-    int add_oncompleted_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_completed" , L );
-            UserData::get( L )->connect_signal(
-                "on_completed",
-                "completed",
-                G_CALLBACK(AnimationState_on_completed),
-                L);
-        ]];
-
-    remove_oncompleted_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_completed" , L );
-        ]];
 }
 
 [[

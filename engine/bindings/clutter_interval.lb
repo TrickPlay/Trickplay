@@ -18,24 +18,25 @@ struct interval
 
 /*
     Class: Interval
-    
-    The Interval class is a utility class that enables a <Timeline> object to convert a percentage-completed value to a correlating value within a defined range.
-    
-    The Interval class enables a starting and ending range to be defined. During subsequent processing of a Timeline animation's on_new_frame() event handler, the handler's progress argument (which is the animation's percentage that has completed, specified as a value between 0 and 1) can be converted to the correlated value within the Interval's range.
 
-    For example, an Interval object can be defined with a range of 0-360. During the running of the Timeline animation, the on_new_frame() event handler is fired and receives a progress argument of .50. This progress value is passed to the Interval object, which calculates 50% (a progress value of .50 indicates 50% of the animation has completed) of the Interval's range of 0-360 and returns the result of 180.
-    
+    The Interval class is a utility class that enables a <Timeline> object to convert a percentage-completed value to a correlating value within a defined range.
+
+    The Interval class enables a starting and ending range to be defined. During subsequent processing of a Timeline animation's on_new_frame event, the handler's progress argument (which is the animation's percentage that has completed, specified as a value between 0 and 1) can be converted to the correlated value within the Interval's range.
+
+    For example, an Interval object can be defined with a range of 0-360. During the subsequent running of the Timeline animation, the on_new_frame event is fired and all handlers attached to the event receive a progress argument with a value of (for the sake of our example) .50. This progress value can be passed to the Interval object, which then calculates 50% (a progress value of .50 indicates 50% of the animation has completed) of the Interval's range of 0-360 and returns the result of 180.
+
     The range of an Interval object can be reset if a Timeline's range changes or as new Timelines with different ranges are created.
-    
+
     Although the Interval class is intended to be used in conjunction with a Timeline object, it can actually be used in any situation where conversion from a percentage to a correlating range value is needed.
 
     *Code Example:* The following statements use Timeline and Interval objects to animate a Rectangle so it moves across the display while rotating around its X-axis.
-    
+
     (code)
     -- Create the Rectangle to animate
    	movingRect = Rectangle{ position = { -100, 400 },
-	                        size = { 100, 100 },
-	                        color = { 225, 225, 0, 255 } }
+	                        size     = { 100, 100 },
+	                        color    = { 225, 225, 0, 255 },
+	}
 
 	-- Show it on the screen
 	screen:add( movingRect )
@@ -46,18 +47,23 @@ struct interval
 
 	-- Animate the Rectangle using a Timeline
 	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
-							  loop = true,      -- loop forever
-
-		-- Event handler
-		on_new_frame = function( self, msecs, progress )
-		
-			-- X changes along range specified in acrossScreen
-			movingRect.x = acrossScreen:get_value( progress )
-			
-			-- X rotation around range specified in fullCircle
-			movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
-		end
+							  loop     = true,  -- loop forever
 	}
+
+	-- Handler for on_new_frame events: Updates the Rectangle's location and rotation
+	function moveRect( self, msecs, progress )
+		-- X changes along range specified in acrossScreen
+		movingRect.x = acrossScreen:get_value( progress )
+
+		-- X rotation around range specified in fullCircle
+		movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
+	end
+
+	-- Hook the Timeline into on_new_frame event
+	movingRect_tl:add_onnewframe_listener( moveRect )
+
+	-- Show the screen
+	screen:show()
 
 	-- Start the Timeline animation
 	movingRect_tl:start()
@@ -70,42 +76,44 @@ class Interval [[interval*]]
 {
 	/*
 		Constructor: Interval
-		
+
 		The Interval constructor creates a new Interval object with defined starting and ending range values.
-		
+
 		Range values can be positive or negative, and can move in either direction (low-to-high or high-to-low).
-		
+
 		*Arguments:*
-		
+
 		from - double value specifying the range's starting value
 		to -  double value specifying the range's ending value
-		
+
 		*Return Value:* None
-		
+
 		*Code Example:* Create and use an Interval object with a range of 0-360
-		
+
 		(code)
 		-- Create a new Interval object with a range of 0-360
 		fullCircle = Interval( 0, 360 )
-		
-		-- In a Timeline's on_new_frame() event handler, use the Interval object to convert
-		-- the Timeline's progress value to its correlating Interval range.
-		on_new_frame = function( self, msecs, progress )
+
+		-- In response to a Timeline's on_new_frame event, use the Interval object to convert
+		-- the Timeline's progress value to its corresponding Interval range.
+		function rotateObject( self, msecs, progress )
 			-- Convert progress percentage to number of degrees of rotation in circle
 			num_degrees = fullCircle:get_value( progress )
-			
+
 			-- Rotate object the appropriate number of degrees
 			self.z_rotation = { num_degrees, 0, 0 }
+		end
+		myTimeline:add_onnewframe_listener( rotateObject )
 		(end)
-		
-		*See Also:* the <get_value> function and the <Timeline.on_new_frame> event handler
-	*/ 
+
+		*See Also:* the <get_value> function and the <Timeline.on_new_frame> event
+	*/
 
     Interval( double from, double to )
 		[[
 		    self = lb_construct( interval , new interval(from,to) );
 		]];
-    
+
     ~Interval()
 		[[
 		    delete self;
@@ -113,68 +121,68 @@ class Interval [[interval*]]
 
 	/*
 		Property: from
-		
+
 		The from property is a double value specifying the Interval range's starting value.
-		
+
 		The range's starting value is initially set when the Interval object is created. Setting the from property enables the starting value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
-		
+
 		To change the range's ending value, set the <to> property.
-		
+
 		*Default Value:* Starting value specified in object's constructor
-		
+
 		*See Also:* the Interval constructor and the <to> property
 	*/
-		
+
     double from
 		[[from=self->a;]]
 		[[self->a=from;]];
-	
+
 	/*
 		Property: to
-		
+
 		The to property is a double value specifying the Interval range's ending value.
-		
+
 		The range's ending value is initially set when the Interval object is created. Setting the to property enables the ending value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
-		
+
 		To change the range's starting value, set the <from> property
-		
+
 		*Default Value:* Ending value specified in object's constructor
-		
+
 		*See Also:* the Interval constructor and the <from> property
 	*/
-	 
+
     double to
 		[[to=self->b;]]
-		[[self->b=to;]];    
+		[[self->b=to;]];
 
 	/*
 		Function: get_value
-		
+
 		The get_value() function converts a percentage progress indicator to the correlating value within the object's defined range. The percentage progress indicator is a double value between 0 and 1, inclusive.
-		
+
 		*Argument:*
-		
+
 			factor - double value specifying the percentage of progress completed. Must be a value between 0 and 1, inclusive.
-			
+
 		*Return Value:* Double value specifying the correlating range value
-		
+
 		*Code Example:*
-		
+
 			(code)
 			range = Interval( -20, 20 )
 			print( "Range value when 50% complete = ", range:get_value( 0.5 )
-			
+
 			-- The code statements above will print:
 			--   Range value when 50% complete = 0
 			(end)
 
 		*See Also:* the Interval constructor and the <from> and <to> properties
 	*/
-	
+
     double get_value(double factor)
 		[[
 		    result=(factor*(self->b-self->a))+self->a;
 		]];
-	
+
 }
 
