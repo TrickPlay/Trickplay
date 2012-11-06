@@ -54,6 +54,7 @@ extern int luaopen_clutter_image( lua_State * L );
 
 extern int luaopen_sprite_sheet( lua_State * L );
 extern int luaopen_sprite( lua_State * L );
+extern int luaopen_nineslice( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_animator( lua_State * L );
@@ -1148,6 +1149,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     luaopen_sprite_sheet( L );
     luaopen_sprite( L );
+    luaopen_nineslice( L );
 
     luaopen_idle( L );
     luaopen_timer( L );

@@ -287,8 +287,71 @@ void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
 
 ]]
 
+/*
+    Class: SpriteSheet
+    
+    The SpriteSheet class will load a single image containing many sprites. An app may want to do this to avoid loading possibly hundreds of small icons or sprites, or to simplify the management of many similar images onscreen at once. A SpriteSheet, once created, is a static userdata that can be referenced by <Sprite> or <NineSlice>. These objects can then draw sections from the SpriteSheet directly without creating copies or clones.
+    
+    In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in the texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
+    
+    (code)
+    // assets.json
+    {
+        "sprites": [
+            { "x": 0, "y": 0, "w": 16, "h": 16, "id": "sprite-1.png" },
+            { "x": 16, "y": 0, "w": 16, "h": 16, "id": "subfolder/sprite-2.png },
+            ...
+        ],
+        "img": "assets.png"
+    }
+    
+    -- main.lua
+    sheet1 = SpriteSheet { map = "assets.json" }
+    sheet2 = SpriteSheet { map = {
+        sprites = {
+            { x = 0, y = 0, w = 16, h = 16, id = "sprite-1.png" },
+            { x = 16, y = 0, w = 16, h = 16, id = "subfolder/sprite-2.png" },
+            ...
+        }
+    }, img = Bitmap{ src = "assets.png" } }
+    (end)
+    
+    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheet textures are usually generated from seperate source images, using a path name as if the SpriteSheet is actually a folder of images is often clearer. By default, the SpriteSheet will load the image named by the "img" property in the .json file. This can be overridden by passing a different image along with the map to the SpriteSheet constructor, as below. If map is a Lua table, passing a <Bitmap> to img is required.
+    
+    (code)
+    sheet = SpriteSheet { map = "assets.json", img = Bitmap{ src = "assets.png" } }
+    (end)
+    
+    What if the app needs to download its assets from a URL? The SpriteSheet can take URI paths as well as local paths, and load its map and texture asynchronously.
+    
+    (code)
+    sheet = SpriteSheet { map = "http://www.trickplay.com/resources/assets.json", async = true }
+    (end)
+    
+    *See Also:* the <Sprite> class
+    
+*/
+
 class SpriteSheet [[SpriteSheet*]]
 {
+    /*
+        Constructor: SpriteSheet
+        
+        The SpriteSheet() constructor creates a new SpriteSheet object.
+        
+        *Arguments:*
+        
+        props - table defining the object's construction
+        
+        *Properties:*
+        
+        map - Lua table or path to a .json file of sprite definitions
+        [img] - Bitmap to load from. This is required if map is a Lua table, or a .json file with no "img" property
+        [async] - load remote URIs asynchronously
+        
+        *Return Value:* new NineSlice object
+    */
+    
     SpriteSheet(table props = 0 )
         [[
             LSG;
@@ -330,6 +393,12 @@ class SpriteSheet [[SpriteSheet*]]
             LSG_END(0);
         ]];
 
+    /*
+        Function: get_ids()
+        
+        Returns a table of all the sprite ids in this SpriteSheet
+    */
+
     table get_ids()
         [[
             GList * iter = self->get_ids();
@@ -354,6 +423,19 @@ class SpriteSheet [[SpriteSheet*]]
         [[
             self->dump();
         ]];
+
+    /*
+        Callback: on_loaded
+        
+        The on_loaded() event handler is fired when an asynchronously-loaded SpriteSheet has finished loading. 
+        
+        *Prototype:*
+        (code)
+        void on_loaded( SpriteSheet *sheet )
+        (end)
+        
+        *Return Value:* None
+    */
 
     callback on_loaded
         [[

@@ -7,6 +7,8 @@ module sprite;
 #include "spritesheet.h"
 #include <glib.h>
 
+#include "sprite_sheet.lb.h"
+
 #ifdef CLUTTER_VERSION_1_10
 #define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
 #define TP_CoglTexture CoglTexture *
@@ -116,8 +118,29 @@ void set_sheet_first( lua_State * L , int table )
 
 ]]
 
+/*
+    Class: Sprite
+    
+    The Sprite class will draw a single sprite from a <SpriteSheet> as if it were an Image that had been loaded seperately. Instead of a 'src' property, Sprite objects have 'sheet' and 'id' properties, indicating what SpriteSheet to draw from and which sprite in that sheet to draw.
+    
+    In addition to the properties and functions described on this page, the Image data type also supports all the properties and functions defined in the <UIElement> interface.
+*/
+
 class Sprite [[ClutterActor*]] actor
 {
+
+    /*
+        Constructor: Sprite
+        
+        The Sprite() constructor creates a new Sprite object.
+        
+        *Arguments:*
+        
+        props - table defining the object's construction
+        
+        *Return Value:* new Sprite object
+    */
+    
     Sprite(table props = 0 )
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
@@ -138,7 +161,13 @@ class Sprite [[ClutterActor*]] actor
         ]];
 
     /*
-        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+        Property: sheet
+        
+        The sheet property is a SpriteSheet object from which the Sprite will be drawn. The sheet property can be changed even if the current id does not exist in the sheet; in this case, the Sprite will simply draw nothing.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <id> property
     */
 
     SpriteSheet sheet
@@ -146,32 +175,43 @@ class Sprite [[ClutterActor*]] actor
             push_lua_sheet( L , G_OBJECT( self ) );
         ]]
         [[
-            luaL_checkudata(L,2,"SPRITESHEET_METATABLE");
-            GObject * g_self = G_OBJECT( self );
-
-            SpriteSheet * old_sheet = get_sheet( L , g_self );
-            SpriteSheet * new_sheet = (SpriteSheet*) UserData::get_client( L , -1 );
-
-            if ( old_sheet != new_sheet )
+            if ( SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 ) )
             {
-                if ( new_sheet->is_initialized() )
+                GObject * g_self = G_OBJECT( self );
+    
+                SpriteSheet * old_sheet = get_sheet( L , g_self );
+    
+                if ( old_sheet != new_sheet )
                 {
-                    int * new_sheet_ref = g_new( int , 1 );
-                    *new_sheet_ref = lb_strong_ref( L );
-
-                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
-
-                    refresh_texture( L , g_self , 0 , 0 );
+                    if ( new_sheet->is_initialized() )
+                    {
+                        int * new_sheet_ref = g_new( int , 1 );
+                        *new_sheet_ref = lb_strong_ref( L );
+    
+                        g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
+    
+                        refresh_texture( L , g_self , 0 , 0 );
+                    }
+                    else
+                    {
+                        luaL_error( L , "Failed to set 'sheet': SpriteSheet not initialized." );
+                    }
                 }
-                else
-                {
-                    luaL_error( L , "SpriteSheet not initialized." );
-                }
+            }
+            else
+            {
+                g_warning( "Failed to set 'sheet': not a SpriteSheet." );
             }
         ]];
 
     /*
-        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+        Property: id
+        
+        The id property is a string specfifying which sprite to draw from the current sheet. Specifying an id that does not exist in the current sheet will throw an error.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <sheet> property
     */
 
     string id
