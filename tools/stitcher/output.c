@@ -14,7 +14,7 @@ Output * output_new()
     output->max_item_w = 0;
     output->item_area = 0;
     
-    output->large_items = g_ptr_array_new_with_free_func( g_free );
+    output->large_items  = g_ptr_array_new_with_free_func( g_free );
     output->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
     output->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
     output->subsheets    = g_ptr_array_new_with_free_func( g_free );
@@ -72,6 +72,14 @@ void output_add_item ( Output * output, Item * item, Options * options )
 void output_add_file ( Output * output, GFile * file, GFile * root, const char * root_path, Options * options )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
+    
+    if ( !info )
+    {
+        fprintf( stderr, "Could not open %s.\n", g_file_get_path( file ) );
+        g_object_unref( file );
+        return;
+    }
+    
     GFileType type = g_file_info_get_file_type( info );
 
     if ( type == G_FILE_TYPE_DIRECTORY )
@@ -116,10 +124,11 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 {
     JsonParser * json = json_parser_new();
     gboolean loaded = json_parser_load_from_file( json, path, NULL );
+    
     if ( !loaded )
     {
-        g_error( "Error: could not load spritesheet %s as json.", path );
-        exit(1);
+        fprintf( stderr, "Could not load spritesheet %s.\n", path );
+        exit( 1 );
     }
 
     JsonObject * root = json_node_get_object( json_parser_get_root( json ) );
@@ -134,7 +143,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
     if ( exception->severity != UndefinedException )
     {
-        g_error( "Could not load source image of spritesheet %s, %s.", path, img );
+        fprintf( stderr, "Could not load source image %s of spritesheet %s.\n", path, img );
         exit( 1 );
     }
 
@@ -256,7 +265,7 @@ void output_add_layout ( Output * output, Layout * layout, const char * png_path
     SetImageExtent ( ss_image, layout->width, layout->height );
     SetImageOpacity( ss_image, QuantumRange );
     
-    fprintf( stderr,"Page match (%i x %i pixels, %.4g%% coverage): ",
+    fprintf( stdout,"Page match (%i x %i pixels, %.4g%% coverage): ",
              layout->width, layout->height, 100.0f * layout->coverage );
     
     // composite output png
@@ -288,7 +297,7 @@ void output_add_layout ( Output * output, Layout * layout, const char * png_path
     g_ptr_array_add( output->images, ss_image );
     g_ptr_array_add( output->infos,  ss_info );
     
-    fprintf( stderr, "%s\n", png_path );
+    fprintf( stdout, "%s\n", png_path );
     
     // collect garbage
     
@@ -333,7 +342,7 @@ void output_export_files ( Output * output, Options * options )
         g_file_replace_contents( file, json, strlen( json ), NULL, FALSE,
                                  G_FILE_CREATE_NONE, NULL, NULL, NULL );
         
-        fprintf( stderr, "Output map to %s\n", path );
+        fprintf( stdout, "Output map to %s\n", path );
         g_object_unref( file );
     }
 }

@@ -50,10 +50,10 @@ int main ( int argc, char ** argv )
     {
         if ( output->item_area > options->output_size_limit * options->output_size_limit )
         {
-            fprintf( stderr, "Error: total area of input files is larger than "
+            fprintf( stderr, "Total area of input files is larger than "
                              "output dimensions (%i x %i).\n",
                      options->output_size_limit, options->output_size_limit );
-            exit( 0 );
+            exit( 1 );
         }
 
         // iterate to find the best layout
@@ -75,10 +75,9 @@ int main ( int argc, char ** argv )
         
         if ( !best || best->status != LAYOUT_FOUND_ALL )
         {
-            fprintf( stderr, "Error: can't fit all files within "
-                             "output dimensions (%i x %i).\n",
+            fprintf( stderr, "Can't fit all files within output dimensions (%i x %i).\n",
                      options->output_size_limit, options->output_size_limit );
-            exit( 0 );
+            exit( 1 );
         }
 
         output_add_layout( output, best, g_strdup_printf( "%s.png", options->output_path ), options );
