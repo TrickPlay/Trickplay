@@ -85,6 +85,8 @@ local function create()
             backdrop:set_horizon(700)
             backdrop:set_bulb_x(screen_w/2)
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)

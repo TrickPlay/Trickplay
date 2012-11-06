@@ -234,6 +234,8 @@ local create = function(items)
         [keys.Right]  = instance.move_left,
         [keys.Left]  = instance.move_right,
         [keys.OK] = items.next_menu,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)
