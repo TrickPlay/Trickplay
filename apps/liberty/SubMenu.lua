@@ -12,7 +12,7 @@ return function(options)
             text = o,
             color="white",
             sz=40,
-            duration = 200,
+            duration = 100,
             center = true,
         }--[[
         Text{
@@ -56,6 +56,7 @@ return function(options)
         }
         --]]
         items[index].contract:start()
+        index = 1
     end
     
     local keypress = {

@@ -22,18 +22,17 @@ local create = function(items)
     local icons = {}
     local next_x = 0
     
-    for _,t in ipairs(items) do icon_sources:add(t.icon) end
+    --for _,t in ipairs(items) do icon_sources:add(t.icon) end
     
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #text < 4 or (#text-1)*item_spacing < screen_w*3/2 do
-        --print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(items) do
-            --print("a",#text)
             table.insert(icons,
                 Clone{
                     source  = t.icon,
-                    anchor_point = {t.icon.w/2,t.icon.h/2},
-                    y = -65-t.icon.h/2
+                    size = {(items.w or t.icon.w),(items.h or t.icon.h)},
+                    anchor_point = {(items.w or t.icon.w)/2,(items.h or t.icon.h)/2},
+                    y = -65-(items.h or t.icon.h)/2
                 }
             )
             table.insert(text,
@@ -79,7 +78,6 @@ local create = function(items)
     icons[1].x = screen_w/2
     --position from middle to the right
     while text[right_i].x + item_spacing <= screen_w*5/4 do
-        --print("r")
         curr_item = wrap_i(right_i + 1,text)
         place_on_the_right(right_i,curr_item)
         right_i = curr_item
@@ -90,48 +88,6 @@ local create = function(items)
         place_on_the_left(left_i,curr_item)
         left_i = curr_item
     end
-    
-    
-    
-    --[[
-    local first_item = true
-    repeat
-        
-        curr_item = text[i]
-        if not first_item then
-            next_x = next_x + curr_item.w/2 
-        else
-            first_item = false
-        end
-        curr_item:show()
-        curr_item.x = next_x
-        next_x = next_x + curr_item.w/2 + item_spacing
-        print("l",i,curr_item.x)
-        i = wrap_i(i + 1,text)
-        if i == 1 then
-            error("this shouldnt be able to happen")
-        end
-    until curr_item.x + curr_item.w/2 > screen_w
-    right_i = i
-    next_x = screen_w/2 - text[1].w/2 - item_spacing
-    i = #text
-    while next_x > 0 do
-        
-        curr_item = text[i]
-        curr_item:show()
-        next_x = next_x - curr_item.w/2
-        curr_item.x = next_x
-        next_x = next_x - curr_item.w/2 - item_spacing
-        print("r",i,curr_item.x)
-        i = wrap_i(i - 1,text)
-        print(i,right_i)
-        if i<right_i then
-            error("this shouldnt be able to happen")
-        end
-    end
-    
-    left_i = i
-    --]]
     
     local new_icon = function(source,x)
         prev_icon:set{
@@ -199,7 +155,6 @@ local create = function(items)
                         child.x = child.x - dx
                     end
                 end)
-                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
             end
@@ -264,7 +219,6 @@ local create = function(items)
                         child.x = child.x + dx
                     end
                 end)
-                print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
             end
@@ -279,6 +233,7 @@ local create = function(items)
     local key_presses = {
         [keys.Right]  = instance.move_left,
         [keys.Left]  = instance.move_right,
+        [keys.OK] = items.next_menu,
     }
     
     function instance:on_key_down(k,...)
@@ -286,22 +241,14 @@ local create = function(items)
     end
     icons[1].x = screen_w/2
     function instance:on_key_focus_in(self)
-        --print("wat")
         text[curr_i]:animate{duration=290,opacity = 255}
         icons[curr_i]:animate{duration=290,scale = {1.1,1.1}}
     end
     function instance:on_key_focus_out(self)
-        --print("he")
         text[curr_i]:animate{duration=290,opacity = 0}
         icons[curr_i]:animate{duration=290,scale = {1,1}}
     end
-    --[[
-    function curr_icon:on_key_down(...) 
-        if curr_icon.source.on_key_down then 
-            curr_icon.source:on_key_down(...)
-        end 
-    end
-    --]]
+    
     return instance
     
 end

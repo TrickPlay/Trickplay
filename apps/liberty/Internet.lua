@@ -44,6 +44,38 @@ end
 local scheduling_url = [[http://217.149.130.199/traxis/web/json/Channels/Sort/Name/props/Events,Name]]
 function get_scheduling(f)
     
+    local received_schedule = function(response)
+        
+        print("here")
+        if response.failed then
+            print("response.failed")
+            return
+        elseif response.code ~= 200 then
+            print("response.code ~= 200")
+            return
+        elseif response.body == nil then
+            print("response.body == nil")
+            return
+        end
+        
+        --print( response.body )
+        
+        if editor then 
+            editor:writefile("local_data/get_scheduling",response.body)
+            settings.event_data = os.time()
+        end
+        response = json:parse(response.body)
+        
+        if response == nil then
+            print("json:parse(response.body) == nil")
+            return
+        end
+        
+        f(response)
+        
+        return true
+    end
+    
     local curr_time = os.date('*t')
     if editor and settings.event_data then
         local t = tonumber(settings.event_data)
@@ -66,9 +98,10 @@ function get_scheduling(f)
     --expected input
     --"2012-10-23T17:50:00Z"
     curr_time.hour = curr_time.hour - 1
+    --curr_time.day = curr_time.day - 3
     local start_time = os.date('*t',os.time(curr_time))
     curr_time.hour = curr_time.hour + 1
-    curr_time.hour = curr_time.day + 1
+    curr_time.day = curr_time.day + 1
     local   end_time = os.date('*t',os.time(curr_time))
     dumptable(curr_time)
     dumptable(start_time)
@@ -111,32 +144,17 @@ function get_scheduling(f)
         },
         --]]
         on_complete = function(self,response)
-            print("here")
-            if response.failed then
-                print("response.failed")
-                return
-            elseif response.code ~= 200 then
-                print("response.code ~= 200")
-                return
-            elseif response.body == nil then
-                print("response.body == nil")
-                return
+            if not received_schedule(response) then
+                
+                response = readfile("local_data/get_scheduling")
+                if type(response) == "string" then
+                    response = json:parse(response)
+                    if response ~= nil then
+                        dolater(f,response,settings.event_data)
+                        return
+                    end
+                end
             end
-            
-            --print( response.body )
-            
-            if editor then 
-                editor:writefile("local_data/get_scheduling",response.body)
-                settings.event_data = os.time()
-            end
-            response = json:parse(response.body)
-            
-            if response == nil then
-                print("json:parse(response.body) == nil")
-                return
-            end
-            
-            f(response)
         end
     }
     print("sending")

@@ -43,8 +43,21 @@ main = function()
     hidden_assets_group:add(Image{name="cursor_line", src="assets/menu-cursor-laser.png"})
     hidden_assets_group:add(Image{name="tp_sprite",   src="assets/trick-play_02.png"    })
     hidden_assets_group:add(Image{name="epg_row_bg",  src="assets/epg/channel-bg.png",tile = {true,true},w = screen_w    })
-    hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/channel-bg-current.png"})
+    hidden_assets_group:add(Image{name="epg_row_hl",  src="assets/epg/epg-focus-bg.png"})
     hidden_assets_group:add(Image{name="show_border", src="assets/epg/show-border.png"})
+    hidden_assets_group:add(Image{name="tp-bold-beg",   src="assets/control_menu/control-bar-bold-beg.png"})
+    hidden_assets_group:add(Image{name="tp-bold-end",   src="assets/control_menu/control-bar-bold-end.png"})
+    hidden_assets_group:add(Image{name="tp-bold-ff",    src="assets/control_menu/control-bar-bold-ff.png"})
+    hidden_assets_group:add(Image{name="tp-bold-pause", src="assets/control_menu/control-bar-bold-pause.png"})
+    hidden_assets_group:add(Image{name="tp-bold-rew",   src="assets/control_menu/control-bar-bold-rew.png"})
+    hidden_assets_group:add(Image{name="tp-bold-stop",  src="assets/control_menu/control-bar-bold-stop.png"})
+    hidden_assets_group:add(Image{name="tp-thin-beg",   src="assets/control_menu/control-bar-thin-beg.png"})
+    hidden_assets_group:add(Image{name="tp-thin-end",   src="assets/control_menu/control-bar-thin-end.png"})
+    hidden_assets_group:add(Image{name="tp-thin-ff",    src="assets/control_menu/control-bar-thin-ff.png"})
+    hidden_assets_group:add(Image{name="tp-thin-pause", src="assets/control_menu/control-bar-thin-pause.png"})
+    hidden_assets_group:add(Image{name="tp-thin-rew",   src="assets/control_menu/control-bar-thin-rew.png"})
+    hidden_assets_group:add(Image{name="tp-thin-stop",  src="assets/control_menu/control-bar-thin-stop.png"})
+    hidden_assets_group:add(Image{name="epg_glow",  src="assets/new-glow-logos.png"})
     screen:add(hidden_assets_group)
     --------------------------------------------------------------------
     posters = Group { name = "posters" }
@@ -106,7 +119,13 @@ main = function()
     
     make_cursor = function(w)
         local cursor_line = hidden_assets_group:find_child("cursor_line")
-        return Group{
+        local box = Rectangle{
+            w = w,
+            h = 16,
+            x = -w/2,
+            anchor_point = {0,8},
+        }
+        cursor_line =  Group{
             name = "cursor",
             children = {
                 Clone{
@@ -114,13 +133,18 @@ main = function()
                     anchor_point = {cursor_line.w/2,cursor_line.h/2},
                     scale = {screen_w / cursor_line.w,1080/720},
                 },
-                Rectangle{
-                    w = w,
-                    h = 16,
-                    anchor_point = {w/2,8},
-                },
+                box,
             }
         }
+        function cursor_line:change_w(new_w)
+            box:animate{
+                duration = 300,
+                w =  new_w,
+                x = -new_w/2,
+            }
+        end
+        
+        return cursor_line
     end
     
     
@@ -158,7 +182,12 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  my_library_menu.is_animating or 
+                    my_dvr_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
                 animating = true
                 
                 menu_layer:add(my_dvr_menu)
@@ -200,59 +229,63 @@ main = function()
     --------------------------------------------------------------------
     --  My Library Menu > My DVR Menu
     --------------------------------------------------------------------
-    function make_recording()
-        local animating = false
-        local icon = random_poster():set{w=200,h=300}--Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
-        function icon:on_key_down(k) 
-            if keys.OK == k then
-                if animating then return end
-                animating = true
+    
+    local my_dvr_menu_animating = false
+    local animate_to_recording_menu = function()
+        if  my_dvr_menu.is_animating or 
+            recording_menu.is_animating or 
+            my_dvr_menu_animating then 
                 
-                menu_layer:add(recording_menu)
-                recording_menu:lower_to_bottom()
-                recording_menu.z = -300
-                recording_menu.opacity = 0
-                
-                dolater(function()
-                my_dvr_menu:animate{
-                    duration = 300,
-                    z = 300,
-                    opacity = 0,
-                    on_completed = function()
-                        animating = false
-                    end
-                }
-                recording_menu:grab_key_focus()
-                end)
-            end
+                return 
         end
-        return icon
+        my_dvr_menu_animating = true
+        
+        menu_layer:add(recording_menu)
+        recording_menu:lower_to_bottom()
+        recording_menu.z = -300
+        recording_menu.opacity = 0
+        
+        dolater(function()
+        my_dvr_menu:animate{
+            duration = 300,
+            z = 300,
+            opacity = 0,
+            on_completed = function()
+                my_dvr_menu_animating = false
+            end
+        }
+        recording_menu:grab_key_focus()
+        end)
     end
     my_dvr_menu = make_dosado_menu{
         prev_menu = my_library_menu,
         upper = make_movie_menu{
-            {label = "Recording A", icon = make_recording()},
-            {label = "Recording B", icon = make_recording()},
-            {label = "Recording C", icon = make_recording()},
-            {label = "Recording D", icon = make_recording()},
-            {label = "Recording E", icon = make_recording()},
-            {label = "Recording F", icon = make_recording()},
-            {label = "Recording G", icon = make_recording()},
-            {label = "Recording H", icon = make_recording()},
-            {label = "Recording I", icon = make_recording()},
-            {label = "Recording J", icon = make_recording()},
+            w = 200,h=300,
+            next_menu = animate_to_recording_menu,
+            {label = "Recording A", icon = random_poster()},
+            {label = "Recording B", icon = random_poster()},
+            {label = "Recording C", icon = random_poster()},
+            {label = "Recording D", icon = random_poster()},
+            {label = "Recording E", icon = random_poster()},
+            {label = "Recording F", icon = random_poster()},
+            {label = "Recording G", icon = random_poster()},
+            {label = "Recording H", icon = random_poster()},
+            {label = "Recording I", icon = random_poster()},
+            {label = "Recording J", icon = random_poster()},
         },
         lower = make_movie_menu{
-            {label = "Recording A", icon = make_recording()},
-            {label = "Recording B", icon = make_recording()},
-            {label = "Recording C", icon = make_recording()},
-            {label = "Recording D", icon = make_recording()},
-            {label = "Recording E", icon = make_recording()},
-            {label = "Recording F", icon = make_recording()},
-            {label = "Recording G", icon = make_recording()},
-            {label = "Recording H", icon = make_recording()},
-            {label = "Recording I", icon = make_recording()},
-            {label = "Recording J", icon = make_recording()},
+            w = 200,h=300,
+            next_menu = animate_to_recording_menu,
+            {label = "Recording A", icon = random_poster()},
+            {label = "Recording B", icon = random_poster()},
+            {label = "Recording C", icon = random_poster()},
+            {label = "Recording D", icon = random_poster()},
+            {label = "Recording E", icon = random_poster()},
+            {label = "Recording F", icon = random_poster()},
+            {label = "Recording G", icon = random_poster()},
+            {label = "Recording H", icon = random_poster()},
+            {label = "Recording I", icon = random_poster()},
+            {label = "Recording J", icon = random_poster()},
         },
         upper_y = 500,
         type = "flat",
@@ -284,7 +317,13 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  all_videos_menu.parent or
+                    store_menu.is_animating or 
+                    all_videos_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
                 animating = true
                 
                 menu_layer:add(all_videos_menu)
@@ -310,24 +349,26 @@ main = function()
     store_menu = make_dosado_menu{
         prev_menu = main_menu,
         upper = make_movie_menu{
+            w=180,h=270,
+            --next_menu = store_menu,
             --Rectangle{w=180,h=270,color={rand(),rand(),rand(),}}
-            {label = "Movie A", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie B", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie C", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie D", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie E", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie F", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie G", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie H", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie I", icon = random_poster():set{w=180,h=270}},
-            {label = "Movie J", icon = random_poster():set{w=180,h=270}},
-        },
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
+        }:set{extra={icon_w = 180}},
         lower = make_category_menu{
             {label = "ALL VIDEOS",            icon = make_all_videos_icon()},
             {label = "RECOMMENDATIONS",       icon = make_4movies_icon(350)},
             {label = "SERVICES & ACCESSORIES",icon = make_4movies_icon(350)},
             {label = "APPS & WIDGETS",        icon = make_4movies_icon(350)},
-        },
+        }:set{extra={icon_w = (183+168+153+140+124)}},
         upper_y = 250,
         lower_y = 825,
     }
@@ -341,7 +382,14 @@ main = function()
         local icon = make_4movies_icon(350)
         function icon:on_key_down(k) 
             if keys.OK == k then
-                if animating then return end
+                if  movies_menu.parent or
+                    all_videos_menu.is_animating or 
+                    movies_menu.is_animating or 
+                    animating then 
+                        
+                        return 
+                end
+                
                 animating = true
                 
                 menu_layer:add(movies_menu)
@@ -386,29 +434,31 @@ main = function()
     movies_menu = make_dosado_menu{
         prev_menu = all_videos_menu,
         upper = make_movie_menu{
+            w=200,h=300,
             --Rectangle{w=200,h=300,color={rand(),rand(),rand(),}}
-            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
         },
         lower = make_movie_menu{
-            {label = "Movie A", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie B", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie C", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie D", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie E", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie F", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie G", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie H", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie I", icon = random_poster():set{w=200,h=300}},
-            {label = "Movie J", icon = random_poster():set{w=200,h=300}},
+            w=200,h=300,
+            {label = "Movie A", icon = random_poster()},
+            {label = "Movie B", icon = random_poster()},
+            {label = "Movie C", icon = random_poster()},
+            {label = "Movie D", icon = random_poster()},
+            {label = "Movie E", icon = random_poster()},
+            {label = "Movie F", icon = random_poster()},
+            {label = "Movie G", icon = random_poster()},
+            {label = "Movie H", icon = random_poster()},
+            {label = "Movie I", icon = random_poster()},
+            {label = "Movie J", icon = random_poster()},
         },
         upper_y = 500,
         type = "flat",
@@ -429,6 +479,13 @@ main = function()
         "sport1", 
     }
     channel_menu.x = 200
+    --------------------------------------------------------------------
+    
+    trick_play_menu = dofile("TrickPlayMenu.lua")
+    
+    
+    trick_play_menu.x = screen_w/2
+    trick_play_menu.y = 715
     --------------------------------------------------------------------
     
     currently_playing_content = dofile("CurrentContent.lua")
@@ -477,7 +534,7 @@ main = function()
         channel_menu:populate( channels.Channels.Channel )
     end)
     ---[[
-    get_scheduling(function(t)
+    get_scheduling(function(t,old)
         if  type(t) ~= "table" or 
             type(t.Channels) ~= "table" or 
             type(t.Channels.Channel) ~= "table" then
@@ -485,7 +542,7 @@ main = function()
             print("get_scheduling got bad data")
             return
         end
-        epg_menu:load_scheduling(t)
+        epg_menu:load_scheduling(t,old)
     end)--]]
     --[[
     local titles_callback = function(t,parent)
@@ -598,7 +655,7 @@ main = function()
         --recording_menu,
         --my_dvr_menu,
         --my_library_menu,
-        main_menu
+        main_menu--,trick_play_menu
         --channel_menu,
         --curr_ch_menu,
         --epg_menu,
@@ -608,7 +665,19 @@ main = function()
     screen:add(menu_layer)
     
     main_menu:grab_key_focus()
+    --[[
+    mediaplayer:load("glee-1.mp4")
     
+    function mediaplayer:on_loaded()
+        
+        mediaplayer:play()
+        mediaplayer.volume = 0
+    end
+    function mediaplayer:on_end_of_stream()
+        mediaplayer:seek(0)
+        mediaplayer:play()
+    end
+    --]]
 end
 
 dolater(main)
