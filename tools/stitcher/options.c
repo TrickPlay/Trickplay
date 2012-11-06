@@ -30,7 +30,7 @@ void options_free( Options * options )
     g_ptr_array_free( options->input_paths, TRUE );
     g_ptr_array_free( options->json_to_merge, TRUE );
     g_hash_table_destroy( options->input_ids );
-    //free( options->output_path );
+    
     free( options );
 }
 
@@ -114,7 +114,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
                         break;
 
                     default:
-                        g_error( "Error: unknown flag '-%s'", (char *) &arg[j] );
+                        fprintf( stderr, "Unknown flag '-%s'.\n", (char *) &arg[j] );
                         break;
                 }
         else
@@ -158,14 +158,14 @@ Options * options_new_from_arguments ( int argc, char ** argv )
                 }
 
                 default:
-                    g_error( "Error: ambiguous argument %s", arg );
+                    fprintf( stderr, "Ambiguous argument %s.\n", arg );
                     break;
             }
         }
     }
     
     if ( options->input_paths->len + options->json_to_merge->len == 0 )
-        g_error( "Error: no inputs given" );
+        fprintf( stderr, "No inputs given.\n" );
 
     if ( options->output_path == NULL )
     {
@@ -174,7 +174,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         //else if ( options->json_to_merge->len > 0 )
         //    options->output_path = g_ptr_array_index( options->json_to_merge, 0 );
         else
-            g_error( "Error: cannot determine output path" );
+            fprintf( stderr, "Ambiguous output path.\n" );
     }
     
     return options;
