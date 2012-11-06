@@ -210,7 +210,11 @@ private:
 
     //.........................................................................
 
+#ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
+#else
+    GRecMutex mutex;
+#endif
 
     //.........................................................................
     // List of our standard decoders

@@ -259,16 +259,12 @@ void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
 void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*L);
 ]]
 
-/*
+/***************************************
     Class: Image
 
-    The Image data type handles operations associated with image files, such as
-    their loading and display.
+    The Image data type handles operations associated with image files, such as their loading and display.
 
-    In addition to the properties and functions described on this page, the
-    Image data type also supports all the properties and functions defined in
-    the <UIElement> interface.
-
+    In addition to the properties and functions described on this page, the Image data type also supports all the properties and functions defined in the <UIElement> interface.
 */
 
 class Image [[ClutterActor*]] actor
@@ -295,25 +291,18 @@ class Image [[ClutterActor*]] actor
         [[
         ]];
 
-    /*
+/***************************************
+	Property: src
 
-        Property: src
+    The src property is a string that references an image file. The string may refer to either a path in your application bundle or a URI.
 
-        The src property is a string that references an image file. The string
-        may refer to either a path in your application bundle or a URI.
+    Setting the src property also begins the process of loading the image. By default, image loading is performed synchronously. To determine the success or failure of a synchronous load, you can check the <loaded> property immediately after setting the src property.
 
-        Setting the src property also begins the process of loading the image.
-        By default, image loading is performed synchronously. To determine the
-        success or failure of a synchronous load, you can check the <loaded>
-        property immediately after setting the src property.
+    Asynchronous image loading is supported by setting the async property prior to setting the src property. For instructions on handling asynchonous image loading, refer to the <async> property.
 
-        Asynchronous image loading is supported by setting the async
-        property prior to setting the src property. For instructions on
-        handling asynchonous image loading, refer to the <async> property.
+    *Default Setting:* nil
 
-        *Default Setting:* nil
-
-        *Examples:* Create an Image object and load its associated image synchronously
+    *Code Examples:* Create an Image object and load its associated image synchronously
 
         (code)
         local myImage = Image()
@@ -326,15 +315,14 @@ class Image [[ClutterActor*]] actor
         (code)
         -- Same as above, but combining object creation and
         -- the setting of the src property in a single statement
-        local myImage = Image{ src = "assets/images/foo.png" }
+        local myImage = Image( { src = "assets/images/foo.png" } )
         if myImage.loaded == false then
           -- Insert error-handling code here
         end
         (end)
 
-        *See Also:* the <read_tags>, <loaded>, and <async> properties
-
-    */
+    *See Also:* the <read_tags>, <loaded>, and <async> properties
+*/
 
     string src
         [[
@@ -346,63 +334,39 @@ class Image [[ClutterActor*]] actor
             load_image( L, CLUTTER_TEXTURE( self ) );
         ]];
 
-    /*
-        Property: loaded
+/***************************************
+    Property: loaded
 
-        The boolean loaded property indicates the success/true or failure/false
-        of the image's synchronous-load operation.
+    The boolean loaded property indicates the success/true or failure/false of the image's synchronous-load operation.
 
-        The loaded property will also be set to false while an image is loading
-        asynchronously. This may make it tempting to intermittently poll the
-        loaded property to determine if the image has finished loading, but you
-        should not do this because the loaded property can also be set to false
-        due to the load operation failing; in such a scenario, your polling
-        application will wait forever for the property to become true. Instead,
-        you should set up an on_loaded() event handler to notify your
-        application when an asynchronous-load operation has completed.
+    The loaded property will also be set to false while an image is loading asynchronously. This may make it tempting to intermittently poll the loaded property to determine if the image has finished loading, but you should not do this because the loaded property can also be set to false due to the load operation failing; in such a scenario, your polling application will wait forever for the property to become true. Instead, you should register an <on_loaded> event handler to notify your application when an asynchronous-load operation has completed.
 
-        *Default Setting:* false
+    *Default Setting:* false
 
-        *Example:* To see the loaded property in use, check the code example
-        given in the <src> property.
+    *Code Example:* To see the loaded property in use, check the code example given in the <src> property.
 
-        *See Also:* the <src> property
-    */
+    *See Also:* the <src> property
+*/
 
     readonly bool loaded
         [[
             loaded = ImageExtra::get( self )->loaded;
         ]];
 
-    /*
-        Property: async
+/***************************************
+    Property: async
 
-        The async property is a boolean value that determines whether the image
-        is loaded synchronously (async == nil or async == false) or
-        asynchronously (async == true).
+    The async property is a boolean value that determines whether the image is loaded synchronously (async == nil or async == false) or asynchronously (async == true).
 
-        Asynchronously-loaded images enable your application to continue to run
-        while the image is loading. After the image is completely loaded, your
-        application is notified by firing the Image object's on_loaded() event
-        handler. The event handler can then perform any applicable operations,
-        such as resize or display the image.
+    Asynchronously-loaded images enable your application to continue to run while the image is loading. After the image is completely loaded, your application is notified by the firing of an <on_loaded> event. Registered event handlers can then perform the desired operations, such as resize or display the image.
 
-        After starting one asynchronous load, it is possible for your
-        application to begin a second image-load  (synchronous or
-        asynchronous) before the first load completes. There is no guarantee,
-        however, that load operations will complete in the same order in which
-        they were started; it is possible that the second load will finish
-        before the first load. Therefore, your code should not contain any
-        assumptions about the order in which images finish loading.
+    After starting one asynchronous load, it is possible for your application to begin a second image-load (synchronous or asynchronous) before the first load completes. There is no guarantee, however, that load operations will complete in the same order in which they were started; it is possible that the second load will finish before the first load. Therefore, your code should not contain any assumptions about the order in which images finish loading.
 
-        To load the image asynchronously, the async property must be initialized
-        prior to beginning the load operation. The load operation is then started
-        by setting the src property. The example code below demonstrates the required
-        operations.
+    To load the image asynchronously, the async property must be initialized prior to beginning the load operation. The load operation is then started by setting the src property. The example code below demonstrates the required operations.
 
-        *Default Setting:* false, i.e., images are loaded synchronously
+    *Default Setting:* false, i.e., images are loaded synchronously
 
-        *Example:* Load an image asynchronously
+    *Code Example:* Load an image asynchronously
 
         (code)
         -- Create an Image object
@@ -410,26 +374,28 @@ class Image [[ClutterActor*]] actor
         myImage.async = true        -- will load image asynchronously
 
         -- Define event handler
+        handleLoadedEvent = nil
         function on_loadedHandler( loadedImage, failed )
           -- Best practice is to unhook the handler after it has served its purpose
-          loadedImage.on_loaded = nil
+          loadedImage:remove_onloaded_listener( handleLoadedEvent )
+          handleLoadedEvent = nil
 
           if failed then
             -- Image did not load; insert handling code here
           else
-            -- Image is loaded; insert any applicable operations here
+            -- Image is loaded; insert any desired operations here
           end
         end
 
-        -- Hook our event handler to the Image object
-        myImage.on_loaded = on_loadedHandler
+        -- Register our event handler to the Image object
+        handleLoadedEvent = myImage:add_onloaded_listener( on_loadedHandler )
 
         -- Start loading the image asynchronously
         myImage.src = "assets/images/SplashScreen.png"
         (end)
 
-        *See Also:* the <on_loaded> event handler, the <src> property
-    */
+    *See Also:* the <on_loaded> event and the <src> property
+*/
 
     bool async
         [[
@@ -439,26 +405,26 @@ class Image [[ClutterActor*]] actor
             ImageExtra::get( self )->async = async;
         ]];
 
-    /*
-        Property: read_tags
+/***************************************
+    Property: read_tags
 
-        The read_tags property is a boolean value specifying whether or not to store any Exif (Exchangable image file format) tags contained in the image file (true = save Exif tags). Exif tags are read while the image is loading, so the read_tags property must be set before loading the image. After the image has loaded, stored Exif tags can be accessed through the <tags> property.
+    The read_tags property is a boolean value specifying whether or not to store any Exif (Exchangable image file format) tags contained in the image file (true = save Exif tags). Exif tags are read while the image is loading, so the read_tags property must be set before loading the image. After the image has loaded, stored Exif tags can be accessed through the <tags> property.
 
-        Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
+    Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
 
-        *Default Setting:* false, i.e., do not store Exif tags
+    *Default Setting:* false, i.e., do not store Exif tags
 
-        *Code Example:* Load an image, specifying that Exif tags should be saved.
+    *Code Example:* Load an image, specifying that Exif tags should be saved.
 
-            (code)
-            myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
-            if myImage.loaded == false then
-              -- Insert error-handling code here
-            end
-            (end)
+        (code)
+        myImage = Image( { src = "assets/images/foo.jpg", read_tags = true } )
+        if myImage.loaded == false then
+          -- Insert error-handling code here
+        end
+        (end)
 
-        *See Also:* the <tags> property
-    */
+    *See Also:* the <tags> property
+*/
 
     bool read_tags
         [[
@@ -470,31 +436,31 @@ class Image [[ClutterActor*]] actor
             extra->read_tags = read_tags ? 1 : 0;
         ]];
 
-    /*
-        Property: tags
+/***************************************
+    Property: tags
 
-        The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded image. If the storage of Exif tags was not enabled (via the <read_tags> property) or if the image file contained no tags then the tags table will be empty.
+    The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded image. If the storage of Exif tags was not enabled (via the <read_tags> property) or if the image file contained no tags then the tags table will be empty.
 
-           Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
+    Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
 
-        *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
+    *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
 
-        *Default Setting:* {}, i.e., an empty table
+    *Default Setting:* { }, i.e., an empty table
 
-        *Code Example:* Output image tag names and values to the console
+    *Code Example:* Output image tag names and values to the console
 
-            (code)
-            -- Load an image, including its Exif tags
-            myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
+        (code)
+        -- Load an image, including its Exif tags
+        myImage = Image( { src = "assets/images/foo.jpg", read_tags = true } )
 
-            -- If the image loaded successfully, dump all the Exif tags to the console
-            if( myImage.loaded ) then
-                dumptable( myImage.tags )
-            end
-            (end)
+        -- If the image loaded successfully, dump all the Exif tags to the console
+        if( myImage.loaded ) then
+            dumptable( myImage.tags )
+        end
+        (end)
 
-        *See Also:* the <read_tags> property
-    */
+    *See Also:* the <read_tags> property
+*/
 
     readonly table tags
         [[
@@ -509,24 +475,19 @@ class Image [[ClutterActor*]] actor
             }
         ]];
 
-    /*
-        Property: base_size
+/***************************************
+    Property: base_size
 
-        The base_size is a table that contains two integer values that specify
-        the image's original width and height, in that order, in pixels.
+    The base_size is a table that contains two integer values that specify the image's original width and height, in that order, in pixels.
 
-        The base_size property is set automatically as part of the image-loading
-        operation. Its values can be retrieved, but they cannot be set.
+    The base_size property is set automatically as part of the image-loading operation. Its values can be retrieved, but they cannot be set.
 
-        Notice that the image's display width and height may change during
-        the execution of your application, but the base_size values will remain
-        set to the image's original size.
+    Notice that the image's display width and height may change during the execution of your application, but the base_size values will remain set to the image's original size.
 
-        *Default Setting:* Before the image has been loaded: nil.
+    *Default Setting:* Before the image has been loaded: nil.
 
-        *See Also:* the <src> property
-
-    */
+    *See Also:* the <src> property
+*/
 
     readonly table base_size
         [[
@@ -540,14 +501,13 @@ class Image [[ClutterActor*]] actor
             lua_rawseti(L,-2,2);
         ]];
 
-    /*
-          *** FOR INTERNAL USE ONLY ***
+/***************************************
+      *** FOR INTERNAL USE ONLY ***
 
-          The sync_size property is a boolean value specifying whether or not the texture's preferred size should be the same as the image size.
+      The sync_size property is a boolean value specifying whether or not the texture's preferred size should be the same as the image size.
 
-          The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
-
-    */
+      The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+*/
 
     bool sync_size
         [[
@@ -557,14 +517,13 @@ class Image [[ClutterActor*]] actor
             clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);
         ]];
 
-    /*
-        *** FOR INTERNAL USE ONLY ***
+/***************************************
+    *** FOR INTERNAL USE ONLY ***
 
-        The keep_aspect_ratio property is a boolean value specifying whether or not the texture's preferred size should preserve the aspect ratio of the image.
+    The keep_aspect_ratio property is a boolean value specifying whether or not the texture's preferred size should preserve the aspect ratio of the image.
 
-        The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
-
-    */
+    The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+*/
 
     bool keep_aspect_ratio
         [[
@@ -574,35 +533,25 @@ class Image [[ClutterActor*]] actor
             clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
         ]];
 
-    /*
-        Property: tile
+/***************************************
+    Property: tile
 
-        The tile property is a table containing two boolean values that specify
-        whether the image should be tiled horizontally and/or vertically. An
-        image may be tiled if its actual size is less than the size of the area
-        it needs to fill.
+    The tile property is a table containing two boolean values that specify whether the image should be tiled horizontally and/or vertically. An image may be tiled if its actual size is less than the size of the area it needs to fill.
 
-        The image area to fill is defined by setting the Image object's
-        width and height properties.
+    The image area to fill is defined by setting the Image object's width and height properties.
 
-        If tiling is activated, the image will tile as many times as necessary
-        to fill the area. For example, an image that is 50 pixels wide and
-        whose width property is 200 pixels will tile four times to fill the
-        entire width. Given the same scenario, but with tiling not activated,
-        the image will display one time and the remaining space will remain
-        empty.
+    If tiling is activated, the image will tile as many times as necessary to fill the area. For example, an image that is 50 pixels wide and whose width property is 200 pixels will tile four times to fill the entire width. Given the same scenario, but with tiling not activated, the image will display one time and the remaining space will remain empty.
 
-        *Default Setting:* tile = { false, false }
+    *Default Setting:* tile = { false, false }
 
-        *Example:* Activate horizontal tiling
+    *Code Example:* Activate horizontal tiling
 
         (code)
         mImage.tile = { true, false }    -- horizontal tiling active, vertical tiling inactive
         (end)
 
-        *See Also:* the <UIElement.width> and <UIElement.height> properties
-
-    */
+    *See Also:* the <UIElement.width> and <UIElement.height> properties
+*/
 
     table tile
         [[
@@ -623,6 +572,12 @@ class Image [[ClutterActor*]] actor
             lua_pop(L,2);
         ]];
 
+/***************************************
+	UndocumentedFunction: load_from_date
+
+
+*/
+
     bool load_from_data(lstring data)
         [[
             result = Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
@@ -630,11 +585,12 @@ class Image [[ClutterActor*]] actor
             g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( "[data]" ) , g_free);
         ]];
 
-    /*
-        This one lets you get an image from another app. We may want to leave it
-        undocumented. I don't think it is dangerous because we are not returning
-        the data to Lua, we are just sticking it into an image.
-    */
+/***************************************
+	UndocumentedFunction: load_app_icon
+
+    This one lets you get an image from another app. We may want to leave it undocumented. I don't think it is dangerous because we are not returning the data to Lua, we are just sticking it into an image.
+
+*/
 
     bool load_app_icon( string app_id, string file_name )
         [[
@@ -664,50 +620,34 @@ class Image [[ClutterActor*]] actor
 
         ]];
 
-    /*
-        Event Handler: on_loaded
+/***************************************
+	Function: add_onloaded_listener
 
-        The on_loaded() event handler is fired when an asynchronously-loaded
-        image has finished loading.
+	The add_onloaded_listener() function registers a handler function for <on_loaded> events.
 
-        *Prototype:*
+	*Arguments:*
 
-        (code)
-        void on_loaded( Image loadedImage, boolean failed )
-        (end)
+		f - reference to handler function. The function prototype is described below.
 
-        *Arguments:*
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( loadedImage, failed )
+		(end)
+
+	*Handler Arguments:*
 
         loadedImage - the Image object that has finished loading
-        failed - boolean value indicating failure/true or success/false of the
-        load operation
+        failed - boolean value indicating failure or success of the load operation (true=failure)
 
-        *Return Value:* None
+    *Handler Return Value:* None
 
-        When you are finished with the event handler, it is a recommended best
-        practice to set it to nil.
+	*Code Example:* Refer to the <async> property
 
-        *Default Setting:* nil
-
-        *Example:* To see a code sample that uses the on_loaded() event handler,
-        refer to the <async> property.
-
-        *See Also:* the <async> property, the <src> property
-
-    */
-
-    function on_loaded
-        [[
-            return UserData::get( L )->get_last_callback( (char*) "on_loaded" , L );
-        ]]
-        [[
-            UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
-            UserData::get( L )->connect_signal(
-                "on_loaded",
-                "load-finished",
-                G_CALLBACK(Image_on_loaded),
-                L);
-        ]];
+	*See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
 
     int add_onloaded_listener( function f )
         [[
@@ -719,51 +659,58 @@ class Image [[ClutterActor*]] actor
                 L);
         ]];
 
+/***************************************
+	Function: remove_onloaded_listener
+
+	The remove_onloaded_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onloaded_listener> function
+*/
+
     remove_onloaded_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
         ]];
 
+/***************************************
+	Function: add_onsizechanged_listener
 
+	The add_onsizechanged_listener() function registers a handler function for <on_size_changed> events.
 
-    /*
-        Event Handler: on_size_changed
+	*Arguments:*
 
-        The on_size_changed() event handler is fired in the following
-        situations: (1) after the object's first image is loaded, and (2) after
-        the object loads a subsequent image whose size differs from the
-        previously-loaded image.
+		f - reference to handler function. The function prototype is described below.
 
-        The event handler is *not* fired by changing the image's display size,
-        for example, by scaling the image or altering its width or height
-        properties in any way. The handler is also not fired if a
-        subsequently-loaded image is the same size as the previously-loaded
-        image.
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onsizechanged_listener> function to unregister the handler.
 
-        *Prototype:*
+	*Handler Prototype:*
 
-        (code)
-        void on_size_changed( Image changedImage, int newWidth, int newHeight )
-        (end)
+		(code)
+		f( loadedImage, newWidth, newHeight )
+		(end)
 
-        *Arguments:*
+	*Handler Arguments:*
 
-        changedImage - the Image object that has changed size
+        loadedImage - the Image object that has changed size
         newWidth - integer width in pixels of the loaded image
         newHeight - integer height in pixels of the loaded image
 
-        *Return Value:* None
+    *Handler Return Value:* None
 
-        *Default Setting:* nil
-
-        *Example:*
+    *Code Example:*
 
         (code)
         -- Create an Image object
         local myImage = Image()
 
         -- Define event handler
-        function on_changeHandler( changedImage, newWidth, newHeight )
+        function sizeChangeHandler( changedImage, newWidth, newHeight )
           -- Perform any desired operations here. For example...
 
           -- Get current tile settings
@@ -785,10 +732,72 @@ class Image [[ClutterActor*]] actor
           changedImage.tile = tile
         end
 
-        -- Hook our event handler into the Image object
-        myImage.on_size_changed = on_changeHandler
+        -- Register our event handler
+        myImage:add_onsizechanged_listener( sizeChangeHandler )
         (end)
-    */
+
+	*See Also:* the <on_size_changed> event and the <remove_onsizechanged_listener> function
+*/
+
+    int add_onsizechanged_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_size_changed" , L );
+            UserData::get( L )->connect_signal(
+                "on_size_changed",
+                "size-change",
+                G_CALLBACK(Image_on_size_changed),
+                L);
+        ]];
+
+/***************************************
+	Function: remove_onsizechanged_listener
+
+	The remove_onsizechanged_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onsizechanged_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onsizechanged_listener> function
+*/
+
+    remove_onsizechanged_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_size_changed" , L );
+        ]];
+
+/***************************************
+	Event: on_loaded
+
+    The on_loaded event occurs when an asynchronously-loaded image has finished loading.
+
+	*See Also:* the <add_onloaded_listener> function
+*/
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
+            UserData::get( L )->connect_signal(
+                "on_loaded",
+                "load-finished",
+                G_CALLBACK(Image_on_loaded),
+                L);
+        ]];
+
+/***************************************
+    Event: on_size_changed
+
+    The on_size_changed event occurs in the following situations: (1) after the object's first image is loaded, and (2) after the object loads a subsequent image whose size differs from the previously-loaded image.
+
+    The event handler is *not* fired by changing the image's display size, for example, by scaling the image or altering its width or height properties in any way. The handler is also not fired if a subsequently-loaded image is the same size as the previously-loaded image.
+
+	*See Also:* the <add_onsizechanged_listener> function
+*/
 
     function on_size_changed
         [[
@@ -803,20 +812,10 @@ class Image [[ClutterActor*]] actor
                 L);
         ]];
 
-    int add_onsizechanged_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_size_changed" , L );
-            UserData::get( L )->connect_signal(
-                "on_size_changed",
-                "size-change",
-                G_CALLBACK(Image_on_size_changed),
-                L);
-        ]];
+/***************************************
 
-    remove_onsizechanged_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_size_changed" , L );
-        ]];
+*/
+
 }
 
 [[

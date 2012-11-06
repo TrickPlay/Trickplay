@@ -195,7 +195,7 @@ CheckBox = setmetatable(
                     end
                     
                     
-                    if v == nil then
+                    if v == nil or v == false then
                         
                         group = nil
                         

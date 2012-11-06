@@ -75,6 +75,8 @@ extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers( lua_State * L );
 extern int luaopen_Controller( lua_State * L );
+extern int luaopen_tuners( lua_State * L );
+extern int luaopen_Tuner( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -864,6 +866,14 @@ int App::lua_panic_handler( lua_State * L )
     throw LUA_ERRRUN;
 }
 
+
+static gboolean lua_gc_every_frame( gpointer state )
+{
+    lua_State *L = (lua_State *)state;
+    lua_gc( L, LUA_GCCOLLECT, 0);
+    return true;
+}
+
 //-----------------------------------------------------------------------------
 
 App::App( TPContext * c, const App::Metadata & md, const String & dp, const LaunchInfo & _launch )
@@ -878,7 +888,8 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     cookie_jar( NULL ),
     screen( NULL ),
     launch( _launch ),
-    stage_allocation_handler( 0 )
+    stage_allocation_handler( 0 ),
+    lua_gc_func ( 0 )
 
 #ifndef TP_PRODUCTION
 
@@ -1150,6 +1161,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_regex( L );
     luaopen_Controller( L );
     luaopen_controllers( L );
+    luaopen_Tuner( L );
+    luaopen_tuners( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -1240,6 +1253,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     LuaAPIPlugin::call_open( L );
 
     //.........................................................................
+    // Collect garbage every frame
+
+    lua_gc_func = clutter_threads_add_repaint_func( lua_gc_every_frame, L, 0 );
+
+    //.........................................................................
     // Run the script
 
     FreeLater free_later;
@@ -1317,6 +1335,10 @@ App::~App()
     // Close plugins
 
     LuaAPIPlugin::call_close( L );
+
+    // Remove GC callback per frame
+
+    clutter_threads_remove_repaint_func( lua_gc_func );
 
     // Close Lua
 

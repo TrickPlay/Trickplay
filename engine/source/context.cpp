@@ -1,6 +1,9 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <execinfo.h>
+#include <cxxabi.h>
+
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
@@ -2039,15 +2042,19 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     const char * color_start = "";
     const char * color_end = SAFE_ANSI_COLOR_RESET;
 
+	gboolean dump_stack = false;
+
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "ERROR";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "CRITICAL";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
@@ -2069,6 +2076,79 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
         color_start = SAFE_ANSI_COLOR_FG_WHITE;
         level = "DEBUG";
     }
+
+#ifndef TP_PRODUCTION
+	if(dump_stack)
+	{
+         void* callstack[128];
+         int i, frames = backtrace(callstack, 128);
+         char** strs = backtrace_symbols(callstack, frames);
+
+		size_t funcnamesize = 256; // Max 256 pls
+		char *funcname = (char *)malloc(funcnamesize);
+
+         // Skip frames which are the logging functions
+         for (i = 4; i < frames; ++i) {
+			char *begin_name = 0, *end_name = 0, *begin_offset = 0, *end_offset = 0;
+
+#if !defined(CLUTTER_WINDOWING_OSX)
+			// find parentheses and +address offset surrounding the mangled name:
+			// ./module(function+0x15c) [0x8048a6d]
+			for (char *p = strs[i]; *p; ++p)
+			{
+				if (*p == '(')
+					begin_name = p+1;
+				else if (*p == '+')
+				{
+					end_name = p-1;
+					begin_offset = p+1;
+					*p = '\0';
+				}
+				else if (*p == ')' && begin_offset) {
+					end_offset = p-1;
+					*p = '\0';
+					break;
+				}
+			}
+#else
+			// find "+ offset" at end of the line and mangled name just before it
+			// x   module                           0x000000010bec0d1f _function + 751
+			end_offset = strrchr(strs[i], '\0');
+			char *plus = strrchr(strs[i], '+');
+			begin_offset = plus+2;
+			end_name  = plus-1;
+			*end_name = '\0';
+			begin_name = strrchr(strs[i], ' ');
+			begin_name++;
+#endif
+
+			if (begin_name && begin_offset && end_offset
+				&& begin_name < begin_offset)
+			{
+				int status;
+				char* ret = abi::__cxa_demangle(begin_name,
+												funcname, &funcnamesize, &status);
+				if (status == 0) {
+					funcname = ret; // use possibly realloc()-ed string
+					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s+%s\n",
+							 log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C++", color_end, funcname, begin_offset);
+				}
+				else {
+					// demangling failed. Output function name as a C function with
+					// no arguments.
+					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s()+%s\n",
+							log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C", color_end, begin_name, begin_offset);
+				}
+			}
+			else
+			{
+				// couldn't parse the line? print the whole line.
+             fprintf(stderr,"[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n", log_domain, g_thread_self(), hour, min, sec, ms, color_start, "STACK", color_end, strs[i]);
+         }
+		}
+         free(strs);
+	 }
+#endif
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
@@ -2185,6 +2265,13 @@ MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delega
 ControllerList * TPContext::get_controller_list()
 {
     return &controller_list;
+}
+
+//-----------------------------------------------------------------------------
+
+TunerList * TPContext::get_tuner_list()
+{
+    return &tuner_list;
 }
 
 //-----------------------------------------------------------------------------
@@ -2726,6 +2813,25 @@ void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayer
     g_assert( context );
 
     context->media_player_constructor = constructor;
+}
+
+//-----------------------------------------------------------------------------
+// Tuners
+//-----------------------------------------------------------------------------
+
+TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, TPChannelChangeCallback cb, void *data )
+{
+	g_assert( context );
+
+	return context->tuner_list.add_tuner( context, name, cb, data );
+}
+
+void tp_context_remove_tuner( TPContext * context, TPTuner * tuner )
+{
+	g_assert( context );
+	g_assert( tuner );
+
+	context->tuner_list.remove_tuner( tuner );
 }
 
 //-----------------------------------------------------------------------------

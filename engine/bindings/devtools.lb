@@ -272,7 +272,7 @@ static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointe
 
 	The devtools global variable provides low-level capabilities that are useful during development of a TrickPlay application.
 
-	Note: The devtools variable is available in TrickPlay Engine non-production builds only; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
+	Note: The devtools variable is available only in TrickPlay Engine non-production builds; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
 
 */
 
@@ -508,7 +508,7 @@ global devtools [[ void * ]]
 
             if( !actor )
             {
-                g_warning("Actor not found");
+                g_warning("Actor not found: %s", Util::where_am_i_lua(L).c_str());
                 lua_pushnil( L );
             }
             else
@@ -574,7 +574,7 @@ global devtools [[ void * ]]
 
             if ( ! image )
             {
-                g_warning( "FAILED TO TAKE SCREENSHOT" );
+                g_warning( "FAILED TO TAKE SCREENSHOT: %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
@@ -618,7 +618,7 @@ global devtools [[ void * ]]
 
                     if ( ! image->write_to_png( path.c_str() ) )
                     {
-                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s': %s" , path.c_str(), Util::where_am_i_lua(L).c_str() );
                     }
                     else
                     {

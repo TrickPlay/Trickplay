@@ -51,12 +51,17 @@ Group: OEM Integration  {
 
    Group: Integration Elements  {
 
-      File: TrickPlay Context*  (no auto-title, public/include/trickplay/trickplay.h)
-      File: Controller*  (no auto-title, public/include/trickplay/controller.h)
-      File: Media Player*  (no auto-title, public/include/trickplay/mediaplayer.h)
-      File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
-      File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
-      File: Resource Loading*  (no auto-title, public/include/trickplay/resource.h)
+      Group: Public  {
+
+         File: TrickPlay Context*  (no auto-title, public/include/trickplay/trickplay.h)
+         File: Controller*  (no auto-title, public/include/trickplay/controller.h)
+         File: Media Player*  (no auto-title, public/include/trickplay/mediaplayer.h)
+         File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
+         File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
+         File: Resource Loading*  (no auto-title, public/include/trickplay/resource.h)
+         File: Tuner*  (no auto-title, public/include/trickplay/tuner.h)
+         }  # Group: Public
+
       File: SDK Plug-in Extensions  (no auto-title, docs/oem/text/plugin.txt)
       }  # Group: Integration Elements
 

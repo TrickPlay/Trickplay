@@ -167,19 +167,17 @@ void World::idle()
 
     int iterations = seconds / sixty;
 
-    seconds = seconds / ( seconds / sixty );
-
     g_timer_start( timer );
 
     UserData * ud = UserData::get_from_client( this );
 
     for( int i = 0; i < iterations; ++i )
     {
-        step( seconds , velocity_iterations , position_iterations );
+        step( sixty , velocity_iterations , position_iterations );
 
         if ( ud )
         {
-            lua_pushnumber( L , seconds );
+            lua_pushnumber( L , sixty );
             lua_pushinteger( L , i );
 
             ud->invoke_callbacks( "on_step" , 2 , 0 );
@@ -398,11 +396,20 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat);
+                    } else {
+                        fd.filter.categoryBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
         }
+        // Guarantee that a fixture always has a non-zero category
+        if(0 == fd.filter.categoryBits) fd.filter.categoryBits = 1;
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "mask" );
@@ -422,7 +429,14 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.maskBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat);
+                    } else {
+                        fd.filter.maskBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }

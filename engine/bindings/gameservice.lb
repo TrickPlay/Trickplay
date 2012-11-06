@@ -12,7 +12,7 @@ void gameservice_app_error_handler(TPContext * context,const char *,void * l);
 ]]
 
 /*
-    Global: gameservice
+    UndocumentedGlobal: gameservice
 
     The gameservice global variable. It provides access to XMPP based multi-user game play functionality.
     Game service functionality is enabled when TP_GAMESERVICE_ENABLED configuration variable is set to 1. Set it to
@@ -40,7 +40,7 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
     /*
-        Property:     user_id
+        UndocumentedProperty:     user_id
         The user_id property returns the login account id used to connect to XMPP based game server.
         A unique account is created automatically for each profile and stored in the underlying persistent store (system.db)
         The user_id is a GUID.
@@ -52,7 +52,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_ready
+        UndocumentedEvent Handler: on_ready
 
         The on_ready() event handler is invoked after the Trickplay establishes a session
         with the XMPP game server.
@@ -94,7 +94,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        EEvent Handler: on_error
+        UndocumentedEvent Handler: on_error
 
         The on_error() event handler is invoked when the Trickplay fails on to establish a session with XMPP game server.
 
@@ -142,7 +142,7 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
     /*
-        Function: register_game
+        UndocumentedFunction: register_game
         Callback Function: on_register_game_completed
 
         Use this function to register a game
@@ -208,8 +208,8 @@ global gameservice [[GameServiceSupport*]]
 
 
     /*
-        Function: get_match_data
-        Callback Function: on_get_match_data_completed
+        UndocumentedFunction: get_match_data
+        UndocumentedCallback Function: on_get_match_data_completed
 
         Use this function to get a list of matches in which the logged user is participating
          *Prototype:*
@@ -288,8 +288,8 @@ global gameservice [[GameServiceSupport*]]
 
 
     /*
-        Function: get_user_game_data
-        Callback Function: on_get_user_game_data_completed
+        UndocumentedFunction: get_user_game_data
+        UndocumentedCallback Function: on_get_user_game_data_completed
 
         Use this function to get the unique user data object associated with each unique game_id
          *Prototype:*
@@ -350,8 +350,8 @@ global gameservice [[GameServiceSupport*]]
 
 
     /*
-        Function: update_user_game_data
-        Callback Function: update_user_game_data_completed
+        UndocumentedFunction: update_user_game_data
+        UndocumentedCallback Function: update_user_game_data_completed
 
         Use this function to get the unique user data object associated with each unique game_id
          *Prototype:*
@@ -411,8 +411,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
     /*
-        Function: assign_match
-        Callback Function: assign_match_completed
+        UndocumentedFunction: assign_match
+        UndocumentedCallback Function: assign_match_completed
 
         Use this function to request a match for the user to play
          *Prototype:*
@@ -470,8 +470,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
     /*
-        Function: join_match
-        Callback Function: join_match_completed
+        UndocumentedFunction: join_match
+        UndocumentedCallback Function: join_match_completed
 
         Use this function to join a match which was previously assigned to the user
          *Prototype:*
@@ -541,8 +541,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
     /*
-        Function: join_match
-        Callback Function: join_match_completed
+        UndocumentedFunction: join_match
+        UndocumentedCallback Function: join_match_completed
 
         Use this function to join a match with a specific role. if the user previously joined the match with a role
         then specifying that role is optional if he is attempting to rejoin the same match.
@@ -612,8 +612,8 @@ global gameservice [[GameServiceSupport*]]
 
 
         /*
-        Function: start_match
-        Callback Function: start_match_completed
+        UndocumentedFunction: start_match
+        UndocumentedCallback Function: start_match_completed
 
         Use this function to start a match. The callback to this function gets called immediately with a success status even if
         the server fails to start the match. Basically a failed start message cannot be detected by the client currently.
@@ -654,8 +654,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
         /*
-        Function: leave_match
-        Callback Function: leave_match_completed
+        UndocumentedFunction: leave_match
+        UndocumentedCallback Function: leave_match_completed
 
         Use this function to leave a match. The callback to this function gets called immediately with a success status even if
         the server fails to remove the user from the requested match. Basically a failed leave message cannot be detected by the client currently.
@@ -696,8 +696,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
         /*
-        Function: send_turn
-        Callback Function: send_turn_completed
+        UndocumentedFunction: send_turn
+        UndocumentedCallback Function: send_turn_completed
 
         Use this function to play a turn. The callback to this function gets called immediately with a success status even if
         the server fails play the turn as requested. Basically a failed send_turn message cannot be detected by the client currently.
@@ -744,8 +744,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
         /*
-        Function: send_turn
-        Callback Function: send_turn_completed
+        UndocumentedFunction: send_turn
+        UndocumentedCallback Function: send_turn_completed
 
         Use this function to play a turn and also specify the role of the player whose turn it is next.
         The callback to this function gets called immediately with a success status even if
@@ -795,8 +795,8 @@ global gameservice [[GameServiceSupport*]]
         ]];
 
         /*
-        Function: update_state
-        Callback Function: update_state_completed
+        UndocumentedFunction: update_state
+        UndocumentedCallback Function: update_state_completed
 
         Use this function to update the state of the match without advancing the turn.
         The callback to this function gets called immediately with a success status even if
@@ -847,7 +847,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_turn_received
+        UndocumentedEvent Handler: on_turn_received
 
         The on_turn_received() event handler is invoked when one of the participants of the match plays his turn.
 
@@ -902,7 +902,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_match_started
+        UndocumentedEvent Handler: on_match_started
 
         The on_match_started() event handler is invoked when match is started.
 
@@ -949,7 +949,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_participant_joined
+        UndocumentedEvent Handler: on_participant_joined
 
         The on_participant_joined() event handler is invoked when a new player joins the match
 
@@ -1004,7 +1004,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_participant_left
+        UndocumentedEvent Handler: on_participant_left
 
         The on_participant_left() event handler is invoked when a player leaves the match
 
@@ -1051,7 +1051,7 @@ global gameservice [[GameServiceSupport*]]
 
     /*
 
-        Event Handler: on_match_updated
+        UndocumentedEvent Handler: on_match_updated
 
         The match_updated() event handler is invoked when the match_status attribute of a match changes
 
