@@ -25,11 +25,49 @@ end
 local instance = Group()
 
 local channel_list = {}
+local integrating_schedule_i = 1
 
 local margin = 425
 local heading_h = 285
 local heading_txt_y = 65
 local channel_logo_x = -120
+--------------------------------------------------------------------
+local mesg = Text{
+    x    = (screen_w - margin)/2,
+    y    = (screen_h - heading_h)/2,
+    text = "Fetching Data",
+    font = "InterstateProRegular 40px",
+    color = "white",
+}
+mesg.anchor_point = {mesg.w/2, mesg.h/2}
+mesg.base = "Fetching Data"
+mesg.num = 0
+
+local ellipsis = function(self)
+    if mesg == nil then 
+        self:stop() 
+        return
+    end
+    
+    mesg.num = mesg.num%4+1
+    
+    local t = mesg.base
+    for i=1,mesg.num do t = t.."." end
+    mesg.text = t
+end
+local progress = function(self)
+    if mesg == nil then 
+        self:stop() 
+        return
+    end
+    
+    mesg.text = mesg.base.." "..string.format("%02d",100*(integrating_schedule_i / #channel_list)).."%"
+end
+
+local mesg_timer = Timer{
+    interval = 500,
+    on_timer = ellipsis
+}
 --------------------------------------------------------------------
 local top_left = Group{
     name = "top-left date/time",
@@ -277,7 +315,7 @@ local channel_hl = Group{
 }
 local sel_scale = 1.5
 
-show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons)
+show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons,mesg)
 local rows = {}
 -- -1 because its looking at the next one to be added,
 -- -2 more for wrap-around
@@ -749,7 +787,6 @@ local function build_schedule_row(parent)
 end
 local integrating_schedule = false
 local finished_integrating_schedule = false
-local integrating_schedule_i = 1
 local complete_integrate_schedule
 local step_integrate_schedule
 step_integrate_schedule= function()
@@ -768,6 +805,8 @@ local function integrate_schedule()
     print("Begin building EPG")
     
     dolater(step_integrate_schedule)
+    mesg.base = "Creating Grid"
+    mesg_timer.on_timer = progress
 end
 
 complete_integrate_schedule= function()
@@ -803,6 +842,8 @@ complete_integrate_schedule= function()
     end
     print("Finished building EPG")
     finished_integrating_schedule = true
+    mesg:unparent()
+    mesg = nil
     --[[
     local prev
     for i = 2,#rows-1 do
