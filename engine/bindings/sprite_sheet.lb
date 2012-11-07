@@ -1,8 +1,9 @@
 module sprite_sheet;
 
 [[
-#include "spritesheet.h"
 #include <glib.h>
+#include "spritesheet.h"
+#include "clutter_util.h"
 #include <string.h>
 #include "bitmap.h"
 #include "bitmap.lb.h"
@@ -29,7 +30,7 @@ public:
 protected:
     bool run()
     {
-        g_signal_emit_by_name( self->extra, "on-loaded", error_message );
+        g_signal_emit_by_name( self->extra, "load-finished", error_message );
         return false;
     }
 
@@ -41,7 +42,7 @@ private:
 //------------------------------------------------------------------------
 // Helper functions
 
-#define LUA_CALLBACK( self, status ) g_signal_emit_by_name( ( self )->extra, "on-loaded", status )
+#define LUA_CALLBACK( self, status ) g_signal_emit_by_name( ( self )->extra, "load-finished", status )
 
 typedef void (* LFunc) ( lua_State * L, int index, gpointer user_data );
 
@@ -166,7 +167,6 @@ void add_spritesheet_map ( lua_State * L, int index, SpriteSheet * self )
     {
         lua_foreach( L, -2, (LFunc) ssdef_add_sprite, ssdef );
         
-        g_message( "[img] type is %s", lua_typename( L, lua_type( L, -1 ) ) );
         if ( lua_isstring( L, -1 ) )
         {
             const char * img = lua_tostring( L, -1 );
@@ -358,7 +358,7 @@ class SpriteSheet [[SpriteSheet*]]
             self = lb_construct( SpriteSheet, new SpriteSheet() );
             g_object_set_data( self->extra, "tp-app", App::get( L ) );
 
-            g_signal_connect_data( self->extra, "on-loaded", (GCallback) Sprite_Sheet_on_loaded,
+            g_signal_connect_data( self->extra, "load-finished", (GCallback) Sprite_Sheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
 
             if ( props )
@@ -384,6 +384,8 @@ class SpriteSheet [[SpriteSheet*]]
                 }
                 
                 lua_pop( L, 2 );
+                
+                ClutterUtil::set_props_from_table( L, props );
             }
             else
             {
@@ -427,14 +429,19 @@ class SpriteSheet [[SpriteSheet*]]
     /*
         Callback: on_loaded
         
-        The on_loaded() event handler is fired when an asynchronously-loaded SpriteSheet has finished loading. 
+        The on_loaded() event handler is fired whenever SpriteSheet gets a result from an asynchronous load. A single SpriteSheet may load a map and/or one or more image files asynchronously.
         
         *Prototype:*
         (code)
-        void on_loaded( SpriteSheet *sheet )
+        void on_loaded( SpriteSheet self, boolean success, string status )
         (end)
         
-        *Return Value:* None
+        *Status Strings:*
+        
+        FAILED_MAP_LOAD - Couldn't load the JSON map from a remote URI
+        FAILED_MAP_PARSE - Couldn't parse the JSON map correctly
+        FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
+        nil - Successfully loaded a source image (remote or local)
     */
 
     callback on_loaded
@@ -445,7 +452,7 @@ class SpriteSheet [[SpriteSheet*]]
 [[
 void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L )
 {
-    lua_pushboolean( L, error ? 1 : 0 );
+    lua_pushboolean( L, !error );
 
     if ( error )
     {
