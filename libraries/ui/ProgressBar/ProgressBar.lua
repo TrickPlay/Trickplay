@@ -25,7 +25,7 @@ local create_fill = function(self)
         
     else
         
-        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.activation or "ff0000"}
         
     end
     
@@ -147,7 +147,7 @@ ProgressBar = setmetatable(
                     function(oldf,self,v)
                         
                         progress = v
-                        
+                        print(v)
                         if fill then expand_fill() end
                     end
                 end,
@@ -170,6 +170,7 @@ ProgressBar = setmetatable(
         private = {
             expand_fill = function(instance,_ENV)
                 return function() 
+                    print(progress)
                     scale_t[1] = progress
                     fill.scale = scale_t
                 end
