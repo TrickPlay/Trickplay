@@ -48,7 +48,7 @@ static const char kLibjingle[] = "libjingle";
 #include "stream.h"
 #include "stringencode.h"
 #include "stringutils.h"
-#include "time.h"
+#include "txmpptime.h"
 
 namespace txmpp {
 
@@ -168,7 +168,7 @@ LogMessage::LogMessage(const char* file, int line, LoggingSeverity sev,
         break;
       }
 #endif  // WIN32
-#if OSX
+#if 0 // old OSX
       case ERRCTX_OSSTATUS: {
         tmp << " " << nonnull(GetMacOSStatusErrorString(err), "Unknown error");
         if (const char* desc = GetMacOSStatusCommentString(err)) {

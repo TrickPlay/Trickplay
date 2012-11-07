@@ -448,7 +448,11 @@ void TPAudioSampler::Thread::Event::destroy( Event * event )
 TPAudioSampler::Thread::Thread( TPContext * _context )
 :
     context( _context ),
+#ifndef GLIB_VERSION_2_32
     mutex( g_mutex_new() ),
+#else
+    mutex( new GMutex ),
+#endif
     queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) ),
     thread( 0 ),
     max_buffer_kb( 0 ),
@@ -456,6 +460,9 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
     event_group( 0 ),
     network( 0 )
 {
+#ifdef GLIB_VERSION_2_32
+    g_mutex_init(mutex);
+#endif
     if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
         tpwarn( "AUDIO SAMPLER IS DISABLED" );
@@ -486,7 +493,11 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             GError * error = 0;
 
+#ifndef GLIB_VERSION_2_32
             thread = g_thread_create( process , this , TRUE , & error );
+#else
+            thread = g_thread_try_new( "AudioSampler", process, this, &error );
+#endif
 
             if ( ! thread )
             {
@@ -498,7 +509,10 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             if ( thread )
             {
+// Since 2.32, thread priorities no longer have any effect: http://developer.gnome.org/glib/2.32/glib-Deprecated-Thread-APIs.html#g-thread-set-priority
+#ifndef GLIB_VERSION_2_32
                 g_thread_set_priority( thread , G_THREAD_PRIORITY_LOW );
+#endif
 
                 event_group = new EventGroup();
 
@@ -537,7 +551,12 @@ TPAudioSampler::Thread::~Thread()
 
     g_async_queue_unref( queue );
 
+#ifndef GLIB_VERSION_2_32
     g_mutex_free( mutex );
+#else
+    g_mutex_clear( mutex );
+    free( mutex );
+#endif
 
     if ( ! plugins.empty() )
     {

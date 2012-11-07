@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "libexif/exif-data.h"
 
