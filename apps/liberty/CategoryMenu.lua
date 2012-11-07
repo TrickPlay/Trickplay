@@ -247,7 +247,9 @@ local create = function(items)
     
     local key_presses = {
         [keys.Right]  = instance.move_left,
-        [keys.Left]  = instance.move_right,
+        [keys.Left]   = instance.move_right,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)
