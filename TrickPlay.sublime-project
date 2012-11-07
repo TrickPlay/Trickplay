@@ -1,0 +1,10 @@
+{
+    "folders":
+    [
+        {
+            "path": "/Users/craig/code/trickplay",
+            "folder_exclude_patterns": ["build","certificates","controllers","libraries","pdk","qa","sdk","tests"],
+            "file_exclude_patterns": ["*.sublime-*", "cached_options.txt"]
+        }
+    ]
+}
