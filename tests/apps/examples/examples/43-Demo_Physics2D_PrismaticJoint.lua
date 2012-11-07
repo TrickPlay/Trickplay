@@ -17,10 +17,9 @@ end
 -- gBox02 stuff
 
 	-- Create a large rectangle
-	gBox02 = Rectangle( {
-						size         = { 100, 100 },
-						position     = { (screen.width / 2) - 25, (screen.height / 4) + 100, 0 },
-						color        = { 224, 255, 255, 127 }
+	gBox02 = Rectangle( { size     = { 100, 100 },
+						  position = { (screen.width / 2) - 25, (screen.height / 4) + 100, 0 },
+						  color    = { 224, 255, 255, 127 },
 	} )
 	gBox02.anchor_point = { 50, 50 }
 	screen:add( gBox02 )
@@ -31,10 +30,9 @@ end
 -- gBox01 stuff
 
 	-- Create a smaller rectangle to the right of gBox02
-	gBox01 = Rectangle( {
-						size         = { 50, 50 },
-						position     = { gBox02.x + 100, gBox02.y + 50 },
-						color        = "SaddleBrown",
+	gBox01 = Rectangle( { size     = { 50, 50 },
+						  position = { gBox02.x + 100, gBox02.y + 50 },
+						  color    = "SaddleBrown",
 	} )
 	gBox01.anchor_point = { 25, 25 }	-- center of object
 	screen:add( gBox01 )
@@ -51,12 +49,12 @@ end
 	-- Pressing any key will pull the box down
 	gBox02:PrismaticJoint( gBox01,
 			               { 0, -1 },						-- axis going straight up
-			               { enable_limit = true,
+			               { enable_limit      = true,
 			                 upper_translation = 200,		-- 200 vector units up
 			                 lower_translation = -400,		-- 400 vector units down
-			                 enable_motor = true,
-		                     motor_speed = 5.0,
-		                     max_motor_force = 10.0,
+			                 enable_motor      = true,
+		                     motor_speed       = 5.0,
+		                     max_motor_force   = 10.0,
 			               }
 	)
 
@@ -67,5 +65,5 @@ end
 	physics:start( )
 
 	-- Any keypress will push the box down
-	screen.on_key_down = pushBoxDown
+	screen:add_onkeydown_listener( pushBoxDown )
 

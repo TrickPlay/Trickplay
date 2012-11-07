@@ -560,7 +560,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 ]]
 
-/*
+/***************************************
     Class: AnimationState
 
 	The AnimationState class provides a method of organizing an animation as a group of different states and transitions from one state to another. Each state transition defines one or more objects to animate, their properties to modify, and the final property values they should transition to. During the transition from one state to another, the object's properties gradually change, and the animation results. When the target state is eventually reached, the program receives notification by having the AnimationState object's on_completed() event handler invoked. Upon arriving at the target state, the animation may continue by immediately transitioning to a new target state, but this is not a requirement. In fact, one strength of AnimationState-based animations is that they can transition from one state to another at different points in a running program, with transitions being determined by any number of factors, including user input. For example, the user clicking on a menu header may cause an animation to transition to a state that expands the menu and then waits for further user input. Subsequent user actions may cause the animation to transition to a different state which closes the menu. An indeterminate amount of time and program activity may pass before movement to any particular state occurs.
@@ -732,15 +732,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	screen:add( bckgndImage )
 
 	-- Create a rectangular demo area
-	demoArea = Rectangle {
-					color = { 100, 100, 100, 255 },
-					border_color = { 0, 0, 0, 255 },
-					border_width = 4,
-					name = "demoArea",
-					position = { 746, 96, 0 },
-					size = { 308, 308 },
-					opacity = 255,
-				}
+	demoArea = Rectangle( { color        = { 100, 100, 100, 255 },
+							border_color = { 0, 0, 0, 255 },
+							border_width = 4,
+							name         = "demoArea",
+							position     = { 746, 96, 0 },
+							size         = { 308, 308 },
+							opacity      = 255,
+	} )
 	screen:add( demoArea )
 
 	-- Create a sphere image using Canvas
@@ -791,7 +790,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		end
 	end
 
-	-- Hook the reverseDirection() event handler into the on_completed event
+	-- Register the reverseDirection() handler with the on_completed event
 	sphereAnimationState:add_oncompleted_listener( reverseDirection )
 
 	-- Start the animation
