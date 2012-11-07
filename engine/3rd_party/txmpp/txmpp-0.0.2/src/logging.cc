@@ -48,7 +48,7 @@ static const char kLibjingle[] = "libjingle";
 #include "stream.h"
 #include "stringencode.h"
 #include "stringutils.h"
-#include "time.h"
+#include "txmpptime.h"
 
 namespace txmpp {
 
