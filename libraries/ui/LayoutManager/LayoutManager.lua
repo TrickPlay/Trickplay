@@ -327,7 +327,7 @@ ListManager = setmetatable(
             end,
 
             update = function(instance,_ENV)
-                return function()
+                return function(self)
                     
                     if  new_placeholder then
                         local v = new_placeholder
@@ -346,12 +346,9 @@ ListManager = setmetatable(
                         placeholder = v 
                     end
                     if  new_cells then
-                        
+                        print(#new_cells)
                         --cells.length = #new_cells
                         cells:new_data(new_cells) 
-                        
-                        focused_child = cells[1]
-                        focused_child:grab_key_focus()
                         
                         find_col_widths    = true
                         find_col_heights   = true

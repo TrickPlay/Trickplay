@@ -1,6 +1,7 @@
 #ifndef _TRICKPLAY_IMAGES_H
 #define _TRICKPLAY_IMAGES_H
 
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "cairo/cairo.h"
 
@@ -210,7 +211,11 @@ private:
 
     //.........................................................................
 
+#ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
+#else
+    GRecMutex mutex;
+#endif
 
     //.........................................................................
     // List of our standard decoders

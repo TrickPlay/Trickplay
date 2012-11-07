@@ -24,9 +24,7 @@ local create = function(items)
     
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #text < 4 or (#text-1)*item_spacing < screen_w*3/2 do
-        print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(items) do
-            print("a",#text)
             table.insert(icons,
                 Clone{
                     source  = t.icon,
@@ -86,7 +84,6 @@ local create = function(items)
     icons[1].x = screen_w/2
     --position from middle to the right
     while text[right_i].x + item_spacing <= screen_w*5/4 do
-        print("r")
         curr_item = wrap_i(right_i + 1,text)
         place_on_the_right(right_i,curr_item)
         right_i = curr_item
@@ -97,48 +94,6 @@ local create = function(items)
         place_on_the_left(left_i,curr_item)
         left_i = curr_item
     end
-    
-    
-    
-    --[[
-    local first_item = true
-    repeat
-        
-        curr_item = text[i]
-        if not first_item then
-            next_x = next_x + curr_item.w/2 
-        else
-            first_item = false
-        end
-        curr_item:show()
-        curr_item.x = next_x
-        next_x = next_x + curr_item.w/2 + item_spacing
-        print("l",i,curr_item.x)
-        i = wrap_i(i + 1,text)
-        if i == 1 then
-            error("this shouldnt be able to happen")
-        end
-    until curr_item.x + curr_item.w/2 > screen_w
-    right_i = i
-    next_x = screen_w/2 - text[1].w/2 - item_spacing
-    i = #text
-    while next_x > 0 do
-        
-        curr_item = text[i]
-        curr_item:show()
-        next_x = next_x - curr_item.w/2
-        curr_item.x = next_x
-        next_x = next_x - curr_item.w/2 - item_spacing
-        print("r",i,curr_item.x)
-        i = wrap_i(i - 1,text)
-        print(i,right_i)
-        if i<right_i then
-            error("this shouldnt be able to happen")
-        end
-    end
-    
-    left_i = i
-    --]]
     
     local new_icon = function(source,x)
         prev_icon:set{
@@ -169,7 +124,6 @@ local create = function(items)
         --new_icon(text[new_i].icon,screen_w - 100)
         
         --while text[right_i].x + text[right_i].w/2 <= screen_w+dx do
-            print("adding 1 from the right")
             curr_item = wrap_i(right_i + 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_right(right_i,curr_item)
@@ -197,7 +151,6 @@ local create = function(items)
             x = text_items.x - dx,
             on_completed = function()
                 --while text[left_i].x + text[left_i].w/2 < dx do
-                    print("hiding 1 from the left")
                     text[left_i]:hide()
                     icons[left_i]:hide()
                     left_i = wrap_i(left_i + 1,text)
@@ -208,7 +161,6 @@ local create = function(items)
                         child.x = child.x - dx
                     end
                 end)
-                print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
                 icons[new_i].source:on_key_focus_in()
@@ -235,11 +187,9 @@ local create = function(items)
         local dx = text[curr_i].x - text[new_i].x
         
         --new_icon(text[new_i].icon, 100)
-        --print(text[new_i].icon,text[new_i].icon.gid)
         --local item = text[new_i].icon
         
         --while text[left_i].x + text[left_i].w/2 >= -dx do
-            print("adding 1 from the left")
             curr_item = wrap_i(left_i - 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_left(left_i,curr_item)
@@ -260,7 +210,6 @@ local create = function(items)
         }
         --]]
         --prev_icon.source:on_key_focus_out()
-        --print(curr_icon.source,curr_icon.source.gid)
         --curr_icon.source:on_key_focus_in()
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
@@ -268,7 +217,6 @@ local create = function(items)
             x = text_items.x + dx,
             on_completed = function()
                 --while text[right_i].x - text[right_i].w/2 > screen_w-dx do
-                    print("hiding 1 from the right")
                     text[right_i]:hide()
                     icons[right_i]:hide()
                     right_i = wrap_i(right_i - 1,text)
@@ -279,7 +227,6 @@ local create = function(items)
                         child.x = child.x + dx
                     end
                 end)
-                print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
                 icons[new_i].source:on_key_focus_in()
@@ -300,7 +247,9 @@ local create = function(items)
     
     local key_presses = {
         [keys.Right]  = instance.move_left,
-        [keys.Left]  = instance.move_right,
+        [keys.Left]   = instance.move_right,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)
@@ -308,13 +257,11 @@ local create = function(items)
     end
     
     function instance:on_key_focus_in(self)
-        print("c menu okfi")
         text[curr_i].expand:start()--[[.font  = STORE_MENU_FONT_FOCUS
         text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}--]]
         icons[curr_i].source:on_key_focus_in()
     end
     function instance:on_key_focus_out(self)
-        print("c menu okfo")
         text[curr_i].contract:start()--[[.font  = STORE_MENU_FONT
         text[curr_i].anchor_point = { text[curr_i].w/2, text[curr_i].h/2}--]]
         icons[curr_i].source:on_key_focus_out()

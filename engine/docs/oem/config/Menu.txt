@@ -59,7 +59,7 @@ Group: OEM Integration  {
          File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
          File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
          File: Resource Loading*  (no auto-title, public/include/trickplay/resource.h)
-         File: Tuner  (public/include/trickplay/tuner.h)
+         File: Tuner*  (no auto-title, public/include/trickplay/tuner.h)
          }  # Group: Public
 
       File: SDK Plug-in Extensions  (no auto-title, docs/oem/text/plugin.txt)

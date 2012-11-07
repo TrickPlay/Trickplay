@@ -251,7 +251,7 @@ RadioButton = setmetatable(
                     end
                     
                     --if setting this RadioButton's group to nil
-                    if v == nil then
+                    if v == nil or v == false then
                         
                         group = nil
                         
