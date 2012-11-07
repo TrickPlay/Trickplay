@@ -1,6 +1,7 @@
 module ease;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "clutter_alpha_mode.h"
 
