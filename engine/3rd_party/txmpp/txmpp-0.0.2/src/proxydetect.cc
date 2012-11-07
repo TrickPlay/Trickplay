@@ -36,7 +36,7 @@
 #include "config.h"
 #endif
 
-#ifdef OSX
+#if 0 // old OSX
 #include <SystemConfiguration/SystemConfiguration.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
@@ -399,7 +399,7 @@ bool GetFirefoxProfilePath(Pathname* path) {
   path->SetFolder(ToUtf8(w_path, wcslen(w_path)));
   path->AppendFolder("Mozilla");
   path->AppendFolder("Firefox");
-#elif OSX
+#elif 0 // old OSX
   FSRef fr;
   if (0 != FSFindFolder(kUserDomain, kApplicationSupportFolderType,
                         kCreateFolder, &fr)) {
@@ -950,7 +950,7 @@ bool GetIeProxySettings(const char* agent, const char* url, ProxyInfo* proxy) {
 
 #endif  // WIN32
 
-#ifdef OSX  // OSX specific implementation for reading system wide
+#if 0 // old OSX  // OSX specific implementation for reading system wide
             // proxy settings.
 
 bool p_getProxyInfoForTypeFromDictWithKeys(ProxyInfo* proxy,
@@ -1200,7 +1200,7 @@ bool GetSystemDefaultProxySettings(const char* agent, const char* url,
                                    ProxyInfo* proxy) {
 #ifdef WIN32
   return GetIeProxySettings(agent, url, proxy);
-#elif OSX
+#elif 0 // old OSX
   return GetMacProxySettings(proxy);
 #else
   // TODO(oja): Get System settings if browser is not firefox.

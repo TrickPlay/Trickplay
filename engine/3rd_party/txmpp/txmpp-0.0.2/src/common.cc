@@ -52,7 +52,7 @@ namespace txmpp {
 void Break() {
 #if WIN32
   ::DebugBreak();
-#elif OSX  // !WIN32
+#elif 0  // !WIN32 - old OSX
   ::Debugger();
 #else // !OSX && !WIN32
 #if _DEBUG_HAVE_BACKTRACE
