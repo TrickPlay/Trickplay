@@ -1836,7 +1836,11 @@ interface actor [[ClutterActor*]]
         lua_pop(L,1);
 
         GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
+#ifndef GLIB_VERSION_2_32
         GValueArray * values=g_value_array_new(6);
+#else
+        GArray * values = g_array_sized_new(FALSE, FALSE, sizeof(GValue), 6);
+#endif
 
         lua_pushnil(L);
 
@@ -1853,35 +1857,55 @@ interface actor [[ClutterActor*]]
                     g_value_init(&value,G_TYPE_FLOAT);
                     g_value_set_float(&value,lua_tonumber(L,-1));
                     g_ptr_array_add(names,g_strdup(k));
+#ifndef GLIB_VERSION_2_32
                     g_value_array_append(values,&value);
+#else
+                    g_array_append_val(values,value);
+#endif
                 }
                 else if (!strcmp("w",k)||!strcmp("width",k))
                 {
                     g_value_init(&value,G_TYPE_FLOAT);
                     g_value_set_float(&value,lua_tonumber(L,-1));
                     g_ptr_array_add(names,g_strdup("width"));
+#ifndef GLIB_VERSION_2_32
                     g_value_array_append(values,&value);
+#else
+                    g_array_append_val(values,value);
+#endif
                 }
                 else if (!strcmp("h",k)||!strcmp("height",k))
                 {
                     g_value_init(&value,G_TYPE_FLOAT);
                     g_value_set_float(&value,lua_tonumber(L,-1));
                     g_ptr_array_add(names,g_strdup("height"));
+#ifndef GLIB_VERSION_2_32
                     g_value_array_append(values,&value);
+#else
+                    g_array_append_val(values,value);
+#endif
                 }
                 else if (!strcmp("z",k)||!strcmp("depth",k))
                 {
                     g_value_init(&value,G_TYPE_FLOAT);
                     g_value_set_float(&value,lua_tonumber(L,-1));
                     g_ptr_array_add(names,g_strdup("depth"));
+#ifndef GLIB_VERSION_2_32
                     g_value_array_append(values,&value);
+#else
+                    g_array_append_val(values,value);
+#endif
                 }
                 else if (!strcmp("opacity",k))
                 {
                     g_value_init(&value,G_TYPE_UINT);
                     g_value_set_uint(&value,lua_tointeger(L,-1));
                     g_ptr_array_add(names,g_strdup(k));
+#ifndef GLIB_VERSION_2_32
                     g_value_array_append(values,&value);
+#else
+                    g_array_append_val(values,value);
+#endif
                 }
                 else if (!strcmp("position",k))
                 {
@@ -1893,14 +1917,22 @@ interface actor [[ClutterActor*]]
                         lua_rawgeti(L,-1,1);
                         g_value_init(&value,G_TYPE_FLOAT);
                         g_value_set_float(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
 
                         lua_rawgeti(L,-1,2);
                         g_value_unset(&value);
                         g_value_init(&value,G_TYPE_FLOAT);
                         g_value_set_float(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
                     }
                 }
@@ -1914,14 +1946,22 @@ interface actor [[ClutterActor*]]
                         lua_rawgeti(L,-1,1);
                         g_value_init(&value,G_TYPE_FLOAT);
                         g_value_set_float(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
 
                         lua_rawgeti(L,-1,2);
                         g_value_unset(&value);
                         g_value_init(&value,G_TYPE_FLOAT);
                         g_value_set_float(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
                     }
                 }
@@ -1935,14 +1975,22 @@ interface actor [[ClutterActor*]]
                         lua_rawgeti(L,-1,1);
                         g_value_init(&value,G_TYPE_DOUBLE);
                         g_value_set_double(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
 
                         lua_rawgeti(L,-1,2);
                         g_value_unset(&value);
                         g_value_init(&value,G_TYPE_DOUBLE);
                         g_value_set_double(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                         lua_pop(L,1);
                     }
                 }
@@ -1957,7 +2005,11 @@ interface actor [[ClutterActor*]]
                         g_ptr_array_add(names,g_strdup("rotation-angle-x"));
                         g_value_init(&value,G_TYPE_DOUBLE);
                         g_value_set_double(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                     }
                 }
                 else if (!strcmp("y_rotation",k))
@@ -1971,7 +2023,11 @@ interface actor [[ClutterActor*]]
                         g_ptr_array_add(names,g_strdup("rotation-angle-y"));
                         g_value_init(&value,G_TYPE_DOUBLE);
                         g_value_set_double(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                     }
                 }
                 else if (!strcmp("z_rotation",k))
@@ -1985,7 +2041,11 @@ interface actor [[ClutterActor*]]
                         g_ptr_array_add(names,g_strdup("rotation-angle-z"));
                         g_value_init(&value,G_TYPE_DOUBLE);
                         g_value_set_double(&value,lua_tonumber(L,-1));
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                     }
                 }
                 else if ( ! strcmp( "clip" , k ) )
@@ -1998,7 +2058,11 @@ interface actor [[ClutterActor*]]
                         g_ptr_array_add(names,g_strdup("clip"));
                         g_value_init(&value, CLUTTER_TYPE_GEOMETRY);
                         g_value_set_boxed(&value, &geometry);
+#ifndef GLIB_VERSION_2_32
                         g_value_array_append(values,&value);
+#else
+                        g_array_append_val(values,value);
+#endif
                     }
                 }
             }
@@ -2006,9 +2070,17 @@ interface actor [[ClutterActor*]]
             lua_pop(L,1);
         }
 
+#ifndef GLIB_VERSION_2_32
         if ( values->n_values == 0 )
+#else
+        if ( values->len == 0 )
+#endif
         {
+#ifndef GLIB_VERSION_2_32
             g_value_array_free(values);
+#else
+            g_array_unref(values);
+#endif
             g_ptr_array_free(names,TRUE);
             lua_pushnil( L );
             luaL_error( L , "Call to animate has no properties" );
@@ -2016,9 +2088,18 @@ interface actor [[ClutterActor*]]
         }
 
         ClutterAnimation * a=clutter_actor_animatev(self,mode,duration,
+#ifndef GLIB_VERSION_2_32
                             values->n_values,
+#else
+                            values->len,
+#endif
                             (gchar**)names->pdata,
-                            values->values);
+#ifndef GLIB_VERSION_2_32
+                            values->values
+#else
+                            (const GValue *)values->data
+#endif
+                            );
 
         if ( ! a )
         {
@@ -2075,7 +2156,11 @@ interface actor [[ClutterActor*]]
             }
         }
 
+#ifndef GLIB_VERSION_2_32
         g_value_array_free(values);
+#else
+        g_array_unref(values);
+#endif
         g_ptr_array_free(names,TRUE);
     ]];
 
