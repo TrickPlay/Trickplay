@@ -254,8 +254,15 @@ public:
         :
         new_session( true ),
         file_name( fn ),
+#ifndef GLIB_VERSION_2_32
         mutex( g_mutex_new() )
+#else
+        mutex( new GMutex )
+#endif
     {
+#ifdef GLIB_VERSION_2_32
+        g_mutex_init( mutex );
+#endif
         tplog( "CREATED COOKIE JAR %p", this );
 
         if ( g_file_test( fn, G_FILE_TEST_EXISTS ) )
@@ -325,7 +332,12 @@ private:
         tplog( "DESTROYING COOKIE JAR %p", this );
 
         save();
+#ifndef GLIB_VERSION_2_32
         g_mutex_free( mutex );
+#else
+        g_mutex_clear( mutex );
+        free( mutex );
+#endif
     }
 
     void save()

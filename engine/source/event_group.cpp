@@ -71,14 +71,26 @@ private:
 
 EventGroup::EventGroup()
     :
+#ifndef GLIB_VERSION_2_32
     mutex( g_mutex_new() )
+#else
+    mutex( new GMutex )
+#endif
 {
+#ifdef GLIB_VERSION_2_32
+    g_mutex_init(mutex);
+#endif
 }
 
 EventGroup::~EventGroup()
 {
     cancel_all();
+#ifndef GLIB_VERSION_2_32
     g_mutex_free( mutex );
+#else
+    g_mutex_clear(mutex);
+    free(mutex);
+#endif
 }
 
 guint EventGroup::add_idle( gint priority, GSourceFunc function, gpointer data, GDestroyNotify notify )
