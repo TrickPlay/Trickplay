@@ -240,7 +240,7 @@ void output_load_inputs( Output * output, Options * options )
             if ( options_take_unique_id( options, id ) )
             {
                 g_ptr_array_add( output->subsheets, g_strdup_printf("{\n  \"sprites\": ["
-                    "\n    { \"x\": -1, \"y\": -1, \"w\": -1, \"h\": -1, \"id\": \"%s\" }"
+                    "\n    { \"x\": 0, \"y\": 0, \"w\": -1, \"h\": -1, \"id\": \"%s\" }"
                     "\n  ],\n  \"img\": \"%s\"\n}", id, path ) );
             }
         }
