@@ -23,7 +23,7 @@ typedef struct Output {
 Output * output_new ();
 void output_free ( Output * output );
 void output_load_inputs ( Output * output, Options * options );
-void output_add_layout ( Output * output, Layout * layout, const char * png_path, Options * options );
+void output_add_layout ( Output * output, Layout * layout, Options * options );
 void output_export_files ( Output * output, Options * options );
 
 #endif

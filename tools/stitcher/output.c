@@ -127,54 +127,66 @@ void output_merge_json ( Output * output, const char * path, Options * options )
     
     if ( !loaded )
     {
-        fprintf( stderr, "Could not load spritesheet %s.\n", path );
+        fprintf( stderr, "Could not load JSON file of spritesheet %s.\n", path );
         exit( 1 );
     }
 
-    JsonObject * root = json_node_get_object( json_parser_get_root( json ) );
-
-    char * img = g_build_filename( g_path_get_dirname( path ),
-        json_object_get_string_member( root, "img" ), NULL );
-
-    ExceptionInfo * exception = AcquireExceptionInfo();
-    ImageInfo * source_info = AcquireImageInfo();
-    CopyMagickString( source_info->filename, img, MaxTextExtent );
-    Image * source_image = ReadImage( source_info, exception );
-
-    if ( exception->severity != UndefinedException )
+    JsonNode * root = json_parser_get_root( json );
+    
+    if ( !JSON_NODE_HOLDS_ARRAY( root ) )
     {
-        fprintf( stderr, "Could not load source image %s of spritesheet %s.\n", path, img );
+        fprintf( stderr, "Could not parse JSON file of spritesheet %s.\n", path );
         exit( 1 );
     }
-
-    JsonArray * sprites = json_object_get_array_member( root, "sprites" );
-    int length = json_array_get_length( sprites );
-
-    int i;
-
-    for ( i = 0; i < length; i++ )
+    
+    JsonArray * maps = json_node_get_array( root );
+    
+    int i, j, lj, li = json_array_get_length( maps );
+    for ( i = 0; i < li; i++ )
     {
-        JsonObject * sprite = json_array_get_object_element( sprites, i );
-        char * id = (char *) json_object_get_string_member( sprite, "id" );
+        JsonObject * map = json_array_get_object_element( maps, i );
+    
+        char * img = g_build_filename( g_path_get_dirname( path ),
+            json_object_get_string_member( map, "img" ), NULL );
 
-        if ( options_take_unique_id( options, id ) )
+        ExceptionInfo * exception = AcquireExceptionInfo();
+        ImageInfo * source_info = AcquireImageInfo();
+        CopyMagickString( source_info->filename, img, MaxTextExtent );
+        Image * source_image = ReadImage( source_info, exception );
+    
+        if ( exception->severity != UndefinedException )
         {
-            RectangleInfo rect = {
-                json_object_get_int_member( sprite, "w" ),
-                json_object_get_int_member( sprite, "h" ),
-                json_object_get_int_member( sprite, "x" ),
-                json_object_get_int_member( sprite, "y" )
-            };
-
-            Item * item = item_new( id );
-            item_set_source( item, ExcerptImage( source_image, &rect, exception ), options );
-            output_add_item( output, item, options );
+            fprintf( stderr, "Could not load source image %s in spritesheet %s.\n", img, path );
+            exit( 1 );
         }
+    
+        JsonArray * sprites = json_object_get_array_member( map, "sprites" );
+        
+        lj = json_array_get_length( sprites );
+        for ( j = 0; j < lj; j++ )
+        {
+            JsonObject * sprite = json_array_get_object_element( sprites, j );
+            char * id = (char *) json_object_get_string_member( sprite, "id" );
+    
+            if ( options_take_unique_id( options, id ) )
+            {
+                RectangleInfo rect = {
+                    json_object_get_int_member( sprite, "w" ),
+                    json_object_get_int_member( sprite, "h" ),
+                    json_object_get_int_member( sprite, "x" ),
+                    json_object_get_int_member( sprite, "y" )
+                };
+    
+                Item * item = item_new( id );
+                item_set_source( item, ExcerptImage( source_image, &rect, exception ), options );
+                output_add_item( output, item, options );
+            }
+        }
+        
+        DestroyImage( source_image );
+        DestroyImageInfo( source_info );
+        DestroyExceptionInfo( exception );
     }
-
-    DestroyImage( source_image );
-    DestroyImageInfo( source_info );
-    DestroyExceptionInfo( exception );
     g_object_unref( json );
 }
 
@@ -257,7 +269,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
     DestroyExceptionInfo( exception );
 }
 
-void output_add_layout ( Output * output, Layout * layout, const char * png_path, Options * options )
+void output_add_layout ( Output * output, Layout * layout, Options * options )
 {
     ExceptionInfo * exception = AcquireExceptionInfo();
     ImageInfo     * ss_info   = AcquireImageInfo();
@@ -284,20 +296,22 @@ void output_add_layout ( Output * output, Layout * layout, const char * png_path
     
     // append to json
     
+    char * path = g_strdup_printf( "%s-%i.png", options->output_path, output->subsheets->len );
+    
     g_ptr_array_add( output->subsheets, g_strdup_printf(
         "{\n\t\"sprites\": [%s\n\t],\n\t\"img\": \"%s\"\n}", 
-        g_strjoinv( ",", sprites ), g_path_get_basename( png_path ) ) );
+        g_strjoinv( ",", sprites ), g_path_get_basename( path ) ) );
     
     // tell the image where to save
     
-    CopyMagickString( ss_info->filename,  png_path, MaxTextExtent );
-    CopyMagickString( ss_info->magick,    "png",    MaxTextExtent );
-    CopyMagickString( ss_image->filename, png_path, MaxTextExtent );
+    CopyMagickString( ss_info->filename,  path,  MaxTextExtent );
+    CopyMagickString( ss_info->magick,    "png", MaxTextExtent );
+    CopyMagickString( ss_image->filename, path,  MaxTextExtent );
     
     g_ptr_array_add( output->images, ss_image );
     g_ptr_array_add( output->infos,  ss_info );
     
-    fprintf( stdout, "%s\n", png_path );
+    fprintf( stdout, "%s\n", path );
     
     // collect garbage
     
@@ -330,11 +344,8 @@ void output_export_files ( Output * output, Options * options )
     
     char  * json;
     g_ptr_array_set_size( output->subsheets, output->subsheets->len + 1 );
-    if ( options->allow_multiple_sheets )
-        json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
-    else
-        json = output->subsheets->pdata[0];
-        
+    json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
+    
     if ( json )
     {
         char  * path = g_strdup_printf( "%s.json", options->output_path );
