@@ -71,6 +71,14 @@ bool SpriteSheet::map_subtexture( const gchar * id, int tex, int x, int y, int w
     if ( !texture )
         g_error( "Trying to map a subtexture to an unknown texture." );
     
+    int x2 = x + w, tw = cogl_texture_get_width( TP_COGL_TEXTURE( texture ) );
+    x = MAX( 0, x );
+    w = MIN( w < 0 ? tw : x2, tw ) - x;
+    
+    int y2 = y + h, th = cogl_texture_get_height( TP_COGL_TEXTURE( texture ) );
+    y = MAX( 0, y );
+    h = MIN( h < 0 ? th : y2, th ) - y;
+    
     CoglHandle subtexture = cogl_texture_new_from_sub_texture( TP_COGL_TEXTURE( texture ), x, y, w, h );
 
     // We don't need the extra reference taken by cogl_texture_new_from_sub_texture
