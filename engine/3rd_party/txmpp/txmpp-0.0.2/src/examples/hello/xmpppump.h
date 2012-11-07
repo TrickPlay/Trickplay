@@ -31,7 +31,7 @@
 #include "../../messagequeue.h"
 #include "../../taskrunner.h"
 #include "../../thread.h"
-#include "../../time.h"
+#include "../../txmpptime.h"
 #include "../../xmppclient.h"
 #include "../../xmppengine.h"
 #include "../../xmpptask.h"
