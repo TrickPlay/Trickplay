@@ -135,7 +135,11 @@ global screen [[ClutterActor*]] actor , container
 
     show_all()
         [[
+#ifndef CLUTTER_VERSION_1_10
             clutter_actor_show_all(self);
+#else
+            clutter_actor_show(self);
+#endif
             // Show the stage as well
             clutter_actor_show(App::get(L)->get_context()->get_stage());
         ]];

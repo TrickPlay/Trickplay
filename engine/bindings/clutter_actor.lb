@@ -1184,7 +1184,13 @@ interface actor [[ClutterActor*]]
 */
 
     show_all()
-        [[clutter_actor_show_all(self);]];
+        [[
+#ifndef CLUTTER_VERSION_1_10
+            clutter_actor_show_all(self);
+#else
+            clutter_actor_show(self);
+#endif
+        ]];
 
 /***************************************
     Function: hide
@@ -1234,7 +1240,13 @@ interface actor [[ClutterActor*]]
 */
 
     hide_all()
-        [[clutter_actor_hide_all(self);]];
+        [[
+#ifndef CLUTTER_VERSION_1_10
+            clutter_actor_hide_all(self);
+#else
+            clutter_actor_hide(self);
+#endif
+        ]];
 
 /***************************************
     Function: move_by
