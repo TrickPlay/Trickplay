@@ -148,7 +148,7 @@ end
 
 
 local names
-local neigbor_info
+local neigbor_info, clone_info
 local curr_neighbors
 local obj
 
@@ -219,10 +219,13 @@ construct = function(t)
     obj = _G[t.type] and _G[t.type](t) or WL[t.type] and WL[t.type](t) or
 
         error("Received invalid type: "..t.type)
-
+    
     names[obj.name] = obj
     neigbor_info[obj] = curr_neighbors
     obj_to_elements_map[obj] = elements
+    if t.type == "Widget_Clone" then
+        clone_info[obj] = t.source
+    end
     return obj
 
 end
@@ -232,7 +235,9 @@ function load_layer(str)
 
     names = {}
     neigbor_info = {}
-
+    clone_info = {}
+    
+    
       --load_styles should be called before load_layer
     if type(styles) ~= "table" then
 
@@ -269,7 +274,11 @@ function load_layer(str)
             --layer.elements[ string.gsub( v.name, " ", "_" ) ] = v
         end
     end
-
+    
+    for clone,src in pairs(clone_info) do
+        clone.source = names[src]
+    end
+    
     for obj,neighbors in pairs(neigbor_info) do
 
         for k,v in pairs(neighbors) do
