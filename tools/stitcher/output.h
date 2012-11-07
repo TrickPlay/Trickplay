@@ -13,6 +13,8 @@ typedef struct Output {
                * subsheets;
     
     GSequence  * items;
+    
+    GRegex * url_regex;
 } Output;
 
 #define __OUTPUT_H__

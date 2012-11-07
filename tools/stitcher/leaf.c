@@ -66,6 +66,6 @@ char * leaf_tostring ( Leaf * leaf, Options * options )
 {
     unsigned int bp = options->add_buffer_pixels ? 1 : 0;
     return g_strdup_printf(
-        "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
+        "\n    { \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
         leaf->x + bp, leaf->y + bp, leaf->item->w - 2*bp, leaf->item->h - 2*bp, leaf->item->id );
 }
