@@ -1,8 +1,8 @@
 
+add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
+
 add_subdirectory( lua )
 add_subdirectory( clutter_alpha_mode )
-
-add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
 set( LB_GENERATOR   ${ENGINE_SRC}/lb/bin/lb.py )
