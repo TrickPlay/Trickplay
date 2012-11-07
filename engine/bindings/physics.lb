@@ -3,6 +3,7 @@ module physics_module;
 
 [[
 #include "Box2D/Box2D.h"
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 
 #include "physics.h"
