@@ -48,27 +48,27 @@ bckgndImage.name = "Background"
 screen:add( bckgndImage )
 
 -- Create a rectangular demo area
-demoArea = Rectangle{ color        = { 100, 100, 100, 255 },
-					  border_color = { 0, 0, 0, 255 },
-					  border_width = 4,
-					  name         = "demoArea",
-					  position     = { 96, 96, 0 },
-					  size         = { 308, 308 },
-					  opacity      = 255,
-}
+demoArea = Rectangle( { color        = { 100, 100, 100, 255 },
+						border_color = { 0, 0, 0, 255 },
+						border_width = 4,
+						name         = "demoArea",
+						position     = { 96, 96, 0 },
+						size         = { 308, 308 },
+						opacity      = 255,
+} )
 screen:add( demoArea )
 
 -- Create clone demo areas
-demoArea2 = Clone{ source   = demoArea,
-				   name     = "demoArea2",
-				   position = { 421, 96, 0 },
-}
+demoArea2 = Clone( { source   = demoArea,
+				     name     = "demoArea2",
+				     position = { 421, 96, 0 },
+} )
 screen:add( demoArea2 )
 
-demoArea3 = Clone{ source   = demoArea,
-				   name     = "demoArea3",
-				   position = { 746, 96, 0 },
-}
+demoArea3 = Clone( { source   = demoArea,
+				     name     = "demoArea3",
+				     position = { 746, 96, 0 },
+} )
 screen:add( demoArea3 )
 
 -- Create a sphere image using Canvas
@@ -86,16 +86,16 @@ sphereImage.name     = "Sphere"
 screen:add( sphereImage )
 
 -- Create clone sphere images
-sphereImage2 = Clone{ source   = sphereImage,
-				      name     = "Sphere2",
-				      position = { 555, 100, 0 },
-}
+sphereImage2 = Clone( { source   = sphereImage,
+				        name     = "Sphere2",
+				        position = { 555, 100, 0 },
+} )
 screen:add( sphereImage2 )
 
-sphereImage3 = Clone{ source   = sphereImage,
-				      name     = "Sphere3",
-				      position = { 880, 100, 0 },
-}
+sphereImage3 = Clone( { source   = sphereImage,
+				        name     = "Sphere3",
+				        position = { 880, 100, 0 },
+} )
 screen:add( sphereImage3 )
 
 -- Define an Interval for our animation

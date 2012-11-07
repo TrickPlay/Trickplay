@@ -68,8 +68,6 @@ struct interval
 	-- Start the Timeline animation
 	movingRect_tl:start()
     (end)
-
-
 */
 
 class Interval [[interval*]]

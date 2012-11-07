@@ -54,17 +54,16 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
     *Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis.
 
     (code)
-    -- Create the Rectangle to animate
-   	movingRect = Rectangle{ position = { -100, 400 },
-	                        size     = { 100, 100 },
-	                        color    = { 225, 225, 0, 255 },
-	}
+	movingRect = Rectangle( { position = { -100, 400 },
+	                          size     = { 100, 100 },
+	   	                      color    = { 225, 225, 0, 255 },
+	} )
 	screen:add( movingRect )
 
 	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
-							  loop     = true,  -- loop forever
-	}
+	movingRect_tl = Timeline( { duration = 5000,  -- 5 seconds
+							    loop     = true,  -- loop forever
+	} )
 
 	-- Define a handler for on_new_frame events
 	function onNewFrame( timeline, duration, progress )
@@ -75,7 +74,7 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
 		movingRect.x_rotation = { 360 * progress, 0, 0 }
 	end
 
-	-- Hook the handler into the on_new_frame event
+	-- Register the handler for the on_new_frame event
 	movingRect_tl:add_onnewframe_listener( onNewFrame )
 
 	-- Show everything on the screen
@@ -86,7 +85,6 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
     (end)
 
 	*Code Example:* The source code for an <Expanded Timeline Demo> is listed at the end of this page. The program uses a single Timeline object to animate multiple properties of three rectangles.
-
 */
 
 class Timeline [[ClutterTimeline*]]
@@ -1220,13 +1218,13 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 	local DEMO_X, DEMO_Y = 800, 300
 
 	-- Create a rectangular demo area and add it to the screen
-	demoArea = Rectangle( { position = { DEMO_X, DEMO_Y },
-    	            	    size = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
-    	            		color = { 100, 100, 100, 255 },
+	demoArea = Rectangle( { position     = { DEMO_X, DEMO_Y },
+    	            	    size         = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
+    	            		color        = { 100, 100, 100, 255 },
     	            		border_color = { 0, 0, 0, 255 },
     	            		border_width = 4,
-    	            		name = "demoArea",
-    	            		opacity = 255,
+    	            		name         = "demoArea",
+    	            		opacity      = 255,
 	} )
 	screen:add( demoArea )
 
