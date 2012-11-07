@@ -123,7 +123,7 @@ global regex [[void*]]
 
             if (error)
             {
-                g_warning("FAILED TO COMPILE REGEX '%s' : %s",pattern,error->message);
+                g_warning("FAILED TO COMPILE REGEX '%s' : %s (%s)",pattern,error->message, Util::where_am_i_lua(L).c_str());
                 g_clear_error(&error);
                 result = origin;
             }
@@ -133,7 +133,7 @@ global regex [[void*]]
 
                 if (error)
                 {
-                    g_warning("FAILED TO EXECUTE REGEX REPLACE '%s' : %s",pattern,error->message);
+                    g_warning("FAILED TO EXECUTE REGEX REPLACE '%s' : %s (%s)",pattern,error->message, Util::where_am_i_lua(L).c_str());
                     g_clear_error(&error);
                     result = origin;
                 }
@@ -195,7 +195,7 @@ global regex [[void*]]
         
         if (error)
         {
-            g_warning("FAILED IN REGEX MATCH: %s",error->message);
+            g_warning("FAILED IN REGEX MATCH: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
             g_clear_error(&error);
         }
         else
@@ -245,7 +245,7 @@ global regex [[void*]]
 
         if (error)
         {
-            g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s",error->message);
+            g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
             g_clear_error(&error);
         }
         
@@ -286,7 +286,7 @@ global regex [[void*]]
 
         if (error)
         {
-            g_warning("FAILED TO COMPILE REGEX '%s' : %s",pattern,error->message);
+            g_warning("FAILED TO COMPILE REGEX '%s' : %s (%s)",pattern,error->message, Util::where_am_i_lua(L).c_str());
             g_clear_error(&error);
             return 0;
         }
@@ -296,7 +296,7 @@ global regex [[void*]]
             gboolean result = g_regex_match_full( re_pat, origin, origin_len, start_pos-1, (GRegexMatchFlags) 0, &match_info, &error );
             if (error)
             {
-                g_warning("FAILED IN REGEX MATCH: %s",error->message);
+                g_warning("FAILED IN REGEX MATCH: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
                 g_clear_error(&error);
             }
             else
@@ -336,7 +336,7 @@ global regex [[void*]]
 
             if (error)
             {
-                g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s",error->message);
+                g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
                 g_clear_error(&error);
             }
         }

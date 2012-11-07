@@ -1,15 +1,11 @@
 cmake_minimum_required( VERSION 2.6 )
 
 #------------------------------------------------------------------------------
-#building txmpp locally as it doesn't support either cmake or autoconf currently. 
+#building txmpp locally as it doesn't support either cmake or autoconf currently.
 
 set( TXMPP_VERSION 0.0.2 )
 
 set( TXMPP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/txmpp-${TXMPP_VERSION} )
-
-#set( TXMPP_INCLUDE_DIRS )
-#set( TXMPP_LIBRARY_NAMES )
-#set( TXMPP_SOURCE_FILES )
 
 add_definitions( -DPOSIX -DFEATURE_ENABLE_SSL -DHAVE_OPENSSL_SSL_H -DSSL_USE_OPENSSL -DUSE_SSLSTREAM )
 
@@ -20,7 +16,6 @@ OPTION( SSL_USE_OPENSSL "Enable Use SSL" ON )
 OPTION( USE_SSLSTREAM "Enable USE SSLSTREAM" ON )
 
 include(../../../util.cmake)
-#include_directories( ${TXMPP_ROOT}/src ) 
 
 #------------------------------------------------------------------------------
 # Include directories
@@ -31,32 +26,19 @@ include( FindPkgConfig )
 IF( PKG_CONFIG_FOUND )
 
 
-#    pkg_check_modules(CRYPTO        REQUIRED    crypto)
-#    pkg_check_modules(EXPAT         REQUIRED    expat)
+    pkg_check_modules(EXPAT         REQUIRED    expat)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
-#    pkg_check_modules(PTHREAD       REQUIRED    pthread)
 
 
     list(APPEND TXMPP_INCLUDE_DIRS
-#        ${CRYPTO_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
-#        ${EXPAT_INCLUDE_DIRS}
-#        ${PTHREAD_INCLUDE_DIRS}
+        ${EXPAT_INCLUDE_DIRS}
     )
 
     list(APPEND TXMPP_LIBRARY_NAMES
-#        ${CRYPTO_LIBRARIES}
         ${OPENSSL_LIBRARIES}
-#        ${EXPAT_LIBRARIES}
-#        ${PTHREAD_LIBRARIES}
+        ${EXPAT_LIBRARIES}
     )
-
-    list(APPEND TXMPP_LIBRARY_NAMES
-        crypto 
-        expat
-        pthread
-    )
-
 
 ELSE ( PKG_CONFIG_FOUND )
 
@@ -67,13 +49,13 @@ ELSE ( PKG_CONFIG_FOUND )
 
     list(APPEND TXMPP_LIBRARY_NAMES
 
-        ssl 
-        crypto 
+        ssl
+        crypto
         expat
         pthread
 
     )
-    
+
 ENDIF ( PKG_CONFIG_FOUND )
 
 
@@ -152,36 +134,39 @@ set( TXMPP_SOURCE_FILES
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    
-    list(APPEND      TXMPP_SOURCE_FILES    
 
-    	${TXMPP_ROOT}/src/macconversion.cc
-    	${TXMPP_ROOT}/src/macutils.cc
+    list(APPEND      TXMPP_SOURCE_FILES
+
+        ${TXMPP_ROOT}/src/macconversion.cc
+        ${TXMPP_ROOT}/src/macutils.cc
     )
-    
-    OPTION( OSX "Enable OSX" ON )
-    
-else(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    
-#    list(APPEND      TXMPP_SOURCE_FILES    
-    	
-#    	${TXMPP_ROOT}/src/latebindingsymboltable.cc
-#    	${TXMPP_ROOT}/src/linux.cc
 
-	OPTION( LINUX "Enable LINUX" ON )
-    
-#	)
-    
+    OPTION( OSX "Enable OSX" ON )
+
+else(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+    list(APPEND      TXMPP_SOURCE_FILES
+
+        ${TXMPP_ROOT}/src/latebindingsymboltable.cc
+        ${TXMPP_ROOT}/src/linux.cc
+    )
+
+    OPTION( LINUX "Enable LINUX" ON )
+
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/txmpp/config.h )
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR}/include/txmpp )
+
+include_directories( ${CMAKE_CURRENT_BINARY_DIR}/include/txmpp ${TXMPP_INCLUDE_DIRS} )
+
 
 foreach( LIB ${TXMPP_LIBRARY_NAMES} )
     TP_FIND_LIBRARY( ${LIB} TXMPP_LIBRARIES )
 endforeach( LIB )
-    
+
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 FIND_LIBRARY (CORESERVICES_LIBRARY CoreServices)
@@ -192,7 +177,7 @@ FIND_LIBRARY (SECURITY_LIBRARY Security)
 MARK_AS_ADVANCED (SECURITY_LIBRARY)
 FIND_LIBRARY (SYSTEM_CONFIGURATION_LIBRARY SystemConfiguration)
 MARK_AS_ADVANCED (SYSTEM_CONFIGURATION_LIBRARY)
-        
+
 list( APPEND
 
     TXMPP_LIBRARIES
@@ -204,8 +189,8 @@ list( APPEND
     objc
 )
 
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")   
- 
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 set_source_files_properties(
 
     ${TXMPP_SOURCE_FILES}

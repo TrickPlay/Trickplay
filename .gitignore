@@ -13,4 +13,5 @@ engine/source/stash/*
 *~
 *.orig
 *.swp
-
+cached_options.txt
+*.sublime-workspace

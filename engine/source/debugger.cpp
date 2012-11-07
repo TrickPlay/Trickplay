@@ -285,7 +285,11 @@ public:
 			//.................................................................
 			// Create and start the thread that will run the HTTP server
 
+#ifndef GLIB_VERSION_2_32
 			thread = g_thread_create( process , this , TRUE , 0 );
+#else
+            thread = g_thread_new( "DebuggerServer", process, this );
+#endif
 		}
 	}
 

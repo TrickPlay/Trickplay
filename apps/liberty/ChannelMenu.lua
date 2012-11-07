@@ -15,29 +15,10 @@ local create = function(text)
     local sel_scale = 1.7
     --create text elements
     local items = {}
+    local curr_i = 1
+    local new_i
     
-    --if there are not enough items to cover the width of the screen, duplicate the list
-    while #items < 4 or (#items-1)*item_spacing < screen_h do
-        print("looping once",total_w , largest_w , screen_w)
-        for _,t in ipairs(text) do
-            table.insert(items,  Clone{ name = t,source  = screen:find_child(t), }  )
-            items[#items].orig_w = items[#items].w
-            items[#items].anchor_point = { items[#items].w/2, items[#items].h/2}
-            inner_group:add(items[#items])
-            items[#items]:hide()
-        end
-    end
-    local place_on_the_top = function(top_i,curr_i)
-        print("adding",items[curr_i].name,"above",items[top_i].name)
-        items[curr_i]:show()
-        items[curr_i].y  = items[top_i].y - item_spacing
-    end
-    local place_on_the_bottom = function(bottom_i,curr_i)
-        print("adding",items[curr_i].name,"below",items[bottom_i].name)
-        items[curr_i]:show()
-        items[curr_i].y  = items[bottom_i].y + item_spacing
-    end
-    
+    instance.is_ready = false
     
     local top_i  = 1
     local bottom_i = 1
@@ -46,6 +27,29 @@ local create = function(text)
     local curr_item
     local vis_len = 1
     local middle_i = 1
+    local place_on_the_top
+    local place_on_the_bottom
+    function instance:populate(t)
+    --if there are not enough items to cover the width of the screen, duplicate the list
+    while #items < 4 or (#items-1)*item_spacing < screen_h do
+        for _,t in ipairs(t) do
+            table.insert(items,  clone_proxy(t.Name)  )
+            items[#items].orig_w = items[#items].w
+            --items[#items].anchor_point = { items[#items].w/2, items[#items].h/2}
+            inner_group:add(items[#items])
+            items[#items]:hide()
+        end
+    end
+    place_on_the_top = function(top_i,curr_i)
+        items[curr_i]:show()
+        items[curr_i].y  = items[top_i].y - item_spacing
+    end
+    place_on_the_bottom = function(bottom_i,curr_i)
+        items[curr_i]:show()
+        items[curr_i].y  = items[bottom_i].y + item_spacing
+    end
+    
+    
     
     items[1]:show()
     items[1].y = h/2
@@ -69,23 +73,12 @@ local create = function(text)
         middle_i = middle_i + 1
     end
     
-    local curr_i = 1
-    local new_i
-    --print("VL",top_i,curr_i,bottom_i)
-    --[[
-    local o
-    local opacity_at = function(i)
-        o = (vis_len/2 - math.abs(middle_i - i))*255/(vis_len/2)
-        return o > 0 and o or 0
-    end
-    for i = 1,vis_len do
-        ii = items[wrap_i(top_i + i-1,items)]
-        ii.opacity = opacity_at(i)
-    end
-    --]]
+    instance.is_ready = true
+    items[curr_i ].scale = {sel_scale,sel_scale}
     
+    end
     instance.move_up = function()
-        if inner_group.is_playing then return end
+        if #items == 0 or inner_group.is_playing then return end
         
         curr_item = wrap_i(top_i - 1,items)
         if items[curr_item].is_visible then error("woops") end
@@ -120,7 +113,7 @@ local create = function(text)
     end
     
     instance.move_down = function()
-        if inner_group.is_playing then return end
+        if #items == 0 or inner_group.is_playing then return end
         
         curr_item = wrap_i(bottom_i + 1,items)
         if items[curr_item].is_visible then error("woops") end
@@ -153,7 +146,6 @@ local create = function(text)
         }
         
     end
-    items[curr_i ].scale = {sel_scale,sel_scale}
     function instance:on_key_focus_in(self)
         instance:animate{
             duration = 300,
@@ -163,7 +155,8 @@ local create = function(text)
     end
     
     local animating_back_to_prev_menu = false
-    local key_presses = {
+    local key_presses
+    key_presses = {
         [keys.Up]   = instance.move_up,
         [keys.Down] = instance.move_down,
         [keys.BACK] = function()
@@ -182,7 +175,10 @@ local create = function(text)
             currently_playing_content:grab_key_focus()
             backdrop:set_horizon(700)
             backdrop:set_bulb_x(screen_w/2)
+            backdrop:anim_x_rot(90)
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)

@@ -1,8 +1,8 @@
 
+add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
+
 add_subdirectory( lua )
 add_subdirectory( clutter_alpha_mode )
-
-add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
 set( LB_GENERATOR   ${ENGINE_SRC}/lb/bin/lb.py )
@@ -343,12 +343,6 @@ include_directories(
 foreach( LIB ${ENGINE_LIBRARY_NAMES} )
     TP_FIND_LIBRARY( ${LIB} ENGINE_LIBRARIES )
 endforeach( LIB )
-
-#------------------------------------------------------------------------------
-# all warnings
-#------------------------------------------------------------------------------
-
-set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions
