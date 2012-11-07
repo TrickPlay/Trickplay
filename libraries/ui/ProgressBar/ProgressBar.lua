@@ -25,7 +25,7 @@ local create_fill = function(self)
         
     else
         
-        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h-2*self.style.border.width},color=self.style.fill_colors.activation or "ff0000"}
         
     end
     
