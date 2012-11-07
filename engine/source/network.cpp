@@ -546,7 +546,11 @@ public:
     Thread( GAsyncQueue * q )
         :
         queue( q ),
+#ifndef GLIB_VERSION_2_32
         thread( g_thread_create( process, q, TRUE, NULL ) )
+#else
+        thread( g_thread_new( "Network", process, q ) )
+#endif
     {
         g_assert( queue );
         g_async_queue_ref( queue );
