@@ -6,14 +6,14 @@ typedef struct Output {
     unsigned int size_step,
                  max_item_w,
                  item_area;
-         
+
     GPtrArray  * large_items,
                * images,
                * infos,
                * subsheets;
-    
+
     GSequence  * items;
-    
+
     GRegex * url_regex;
 } Output;
 
