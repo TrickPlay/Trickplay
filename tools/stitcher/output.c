@@ -284,17 +284,27 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
         if ( options->add_buffer_pixels )
         {
             RectangleInfo rects[8] =
-                { { 1, item->h - 2,  0, 0 },
+                {
+                    { 1,            item->h - 2,            0,           0 },
                   { 1, item->h - 2,  item->w - 3, 0 },
                   { item->w - 2, 1,  0, 0 },
                   { item->w - 2, 1,  0, item->h - 3 },
                   { 1, 1,  0, 0 },
                   { 1, 1,  item->w - 3, 0 },
                   { 1, 1,  0, item->h - 3 },
-                  { 1, 1,  item->w - 3, item->h - 3 } };
+                    { 1,                      1,  item->w - 3, item->h - 3 }
+                };
             int points[16] =
-                { 0, 1,  item->w - 1, 1,  1, 0,            1, item->h - 1,
-                  0, 0,  item->w - 1, 0,  0, item->h - 1,  item->w - 1, item->h - 1 };
+                {
+                    0, 1,
+                    item->w - 1, 1,
+                    1, 0,
+                    1, item->h - 1,
+                    0, 0,
+                    item->w - 1, 0,
+                    0, item->h - 1,
+                    item->w - 1, item->h - 1
+                };
     
             for (unsigned j = 0; j < 8; j++)
             {

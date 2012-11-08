@@ -12,9 +12,14 @@ void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc
     {
         found = g_sequence_get( sj );
         if ( found == data )
-            return g_sequence_remove( sj );
+        {
+            g_sequence_remove( sj );
+            return;
+        }
         else if ( cmp_func( found, data, cmp_data ) != 0 )
+        {
             break;
+        }
         sj = g_sequence_iter_next( sj );
     }
 
@@ -24,10 +29,15 @@ void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc
         sj = g_sequence_iter_prev( sj );
         found = g_sequence_get( sj );
         if ( found == data )
-            return g_sequence_remove( sj );
+        {
+            g_sequence_remove( sj );
+            return;
+        }
         else if ( cmp_func( found, data, cmp_data ) != 0 )
+        {
             break;
     }
+}
 }
 
 int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__ ((unused)) )
