@@ -13,8 +13,8 @@
         {
             "name": "TrickPlay",
             "working_dir": "$project_path/build",
-            "cmd":  [ "cmake", "--build", ".", "--", "-j8" ],
-            "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+error:\\s+([^\\n]*)$",
+            "cmd":  [ "cmake", "--build", "." ],
+            "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+(?:error|warning):\\s+([^\\n]*)$",
 
             "variants": [
                 {
@@ -24,7 +24,7 @@
                         "CC" : "clang",
                         "CXX": "clang++"
                         },
-                    "cmd": [ "cmake", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", ".." ]
+                    "cmd": [ "cmake", "-G", "Ninja", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", ".." ]
                 }
             ]
         }
