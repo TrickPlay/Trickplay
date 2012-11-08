@@ -80,6 +80,16 @@ if(OPT3)
 endif(OPT3)
 
 #------------------------------------------------------------------------------
+# Colorize Clang output under ninja etc
+#------------------------------------------------------------------------------
+
+CHECK_CXX_COMPILER_FLAG("-fcolor-diagnostics" COLOR_CLANG_OUTPUT)
+if(COLOR_CLANG_OUTPUT)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics")
+endif(COLOR_CLANG_OUTPUT)
+
+
+#------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
 # the engine library and not the executables
 
