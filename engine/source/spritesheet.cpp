@@ -20,14 +20,25 @@ void init_extra( SpriteSheet * sheet );
 
 bool SpriteSheet::class_initialized = false;
 
-SpriteSheet::SpriteSheet() :
-    map( g_hash_table_new_full( g_str_hash, g_str_equal, g_free, g_free ) ),
-    textures( g_ptr_array_new_with_free_func( (GDestroyNotify) cogl_handle_unref ) )
+class Sprite
 {
-    init_extra( this );
+public:
+    Sprite( unsigned tex, unsigned x, unsigned y, int w, int h )
+      : tex( tex ), x( x ), y( y ), w( w ), h( h ), dirty( true );
+      
+    void fit( int tw, int th )
+    {   
+        w = MIN( w < 0 ? tw : x + w, tw ) - x;
+        h = MIN( h < 0 ? th : y + h, th ) - y;
+        dirty = false;
+    }
+    
+    unsigned x, y, tex;
+    int w, h;
+    bool dirty;
 }
 
-SpriteSheet::SpriteSheet ( CoglHandle texture ) :
+SpriteSheet::SpriteSheet() :
     map( g_hash_table_new_full( g_str_hash, g_str_equal, g_free, g_free ) ),
     textures( g_ptr_array_new_with_free_func( (GDestroyNotify) cogl_handle_unref ) )
 {
@@ -39,16 +50,6 @@ SpriteSheet::~SpriteSheet()
     g_hash_table_destroy( map );
     g_ptr_array_free( textures, TRUE );
     g_free( extra );
-}
-
-void SpriteSheet::set_texture( CoglHandle texture )
-{
-    if ( this->textures->len > 0 )
-    {
-        g_error( "SpriteSheet texture is already set." );
-    }
-    
-    g_ptr_array_add( this->textures, texture );
 }
 
 int SpriteSheet::add_texture( CoglHandle texture )
@@ -66,38 +67,31 @@ bool SpriteSheet::map_subtexture( const gchar * id, int tex, int x, int y, int w
 {
     if ( tex == -1 )
         tex = this->textures->len - 1;
+        
+    g_hash_table_insert( map, id, new Sprite( tex, x, y, w, h ) );
     
-    CoglHandle texture = (CoglHandle) g_ptr_array_index( this->textures, tex );
-    if ( !texture )
-        g_error( "Trying to map a subtexture to an unknown texture." );
-    
-    int x2 = x + w, tw = cogl_texture_get_width( TP_COGL_TEXTURE( texture ) );
-    x = MAX( 0, x );
-    w = MIN( w < 0 ? tw : x2, tw ) - x;
-    
-    int y2 = y + h, th = cogl_texture_get_height( TP_COGL_TEXTURE( texture ) );
-    y = MAX( 0, y );
-    h = MIN( h < 0 ? th : y2, th ) - y;
-    
-    CoglHandle subtexture = cogl_texture_new_from_sub_texture( TP_COGL_TEXTURE( texture ), x, y, w, h );
-
-    // We don't need the extra reference taken by cogl_texture_new_from_sub_texture
-    cogl_handle_unref( texture );
-
-    if ( subtexture )
-    {
-        g_hash_table_insert( map, (gpointer) id, (gpointer) subtexture );
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 CoglHandle SpriteSheet::get_subtexture( const gchar * id )
 {
-    check_initialized();
-    return (CoglHandle) g_hash_table_lookup( map, id );
+    Sprite * sprite = g_hash_table_lookup( map, id );
+    CoglHandle texture = (CoglHandle) g_ptr_array_index( textures, sprite->tex );
+    
+    if ( !texture )
+    {
+        g_error( "Trying to use sprite id '%s' before its source texture has been loaded.", id );
+        return NULL;
+    }
+        
+    if ( sprite->dirty )
+    {
+        sprite->fit( cogl_texture_get_width(  TP_COGL_TEXTURE( texture ) ),
+                     cogl_texture_get_height( TP_COGL_TEXTURE( texture ) ) );
+    }
+    
+    return cogl_texture_new_from_sub_texture( TP_COGL_TEXTURE( texture ), 
+        sprite->x, sprite->y, sprite->w, sprite->h );
 }
 
 GList * SpriteSheet::get_ids()
@@ -112,6 +106,7 @@ void SpriteSheet::dump()
     tpinfo( "}" );
 }
 
+/*
 void SpriteSheet::make_material_from_subtexture( const gchar * id, CoglMaterial ** material, int * w, int * h )
 {
     check_initialized();
@@ -144,6 +139,7 @@ void log_subtexture( gpointer id_ptr, gpointer subtexture_ptr, gpointer none )
 
     tplog( "\t%15s : %10dx%-10d", id, w, h );
 }
+*/
 
 void init_extra( SpriteSheet * sheet )
 {
