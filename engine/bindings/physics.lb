@@ -1130,8 +1130,6 @@ interface Body [[ ClutterActor * ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
 
-            result = 0;
-
             b2FixtureDef fd = me->world->create_fixture_def( properties );
 
             if ( ! fd.shape )
