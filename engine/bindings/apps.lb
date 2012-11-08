@@ -125,7 +125,6 @@ public:
         lua_setfield(L,-2,"badge_text" );
 
         lua_newtable( L );
-        i = 1;
         for ( StringSet::const_iterator fit = info.attributes.begin(); fit != info.attributes.end(); ++fit )
         {
             lua_pushstring( L , fit->c_str() );
