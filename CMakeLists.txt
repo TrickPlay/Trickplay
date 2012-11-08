@@ -72,10 +72,10 @@ set(CMAKE_CXX_FLAGS "-Wall")
 #------------------------------------------------------------------------------
 
 include( CheckCXXCompilerFlag )
-CHECK_CXX_COMPILER_FLAG("-O4" OPT4)
-if(${OPT4})
-    set(CMAKE_CXX_FLAGS_RELEASE "-O4")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O4")
+CHECK_CXX_COMPILER_FLAG("-O3" OPT3)
+if(${OPT3})
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3")
 endif(${OPT4})
 
 #------------------------------------------------------------------------------
