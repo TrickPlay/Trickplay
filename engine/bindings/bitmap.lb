@@ -79,22 +79,22 @@ class Bitmap [[ Bitmap * ]]
 	*Code Example:* Create a Bitmap object, loading the image asynchronously
 
 		(code)
-		-- Asynchronous-load event handler
-		function handleBitmapLoad( failed )
-		  if failed then
-		    -- Image did not load; insert handling code here
-		    print( "Failed to load the image" )
-		  else
-		    -- Image is loaded; insert any applicable operations here
-		    print( "The image has been loaded, size = ", self.width, " x ", self.height )
-		  end
-		end
+        -- Asynchronous-load event handler
+        function handleBitmapLoad( loadedImage, failed )
+          if failed then
+            -- Image did not load; insert handling code here
+            print( "Failed to load the image" )
+          else
+            -- Image is loaded; insert any applicable operations here
+            print( "The image has been loaded, size = ", loadedImage.width, " x ", loadedImage.height )
+          end
+        end
 
-		-- Initiate asynchronous image load
-		local myBitmap = Bitmap( "image.png", true )
+        -- Initiate asynchronous image load
+        local myBitmap = Bitmap( "image.png", true )
 
-		-- Register image-load event handler
-		myBitmap:add_onloaded_listener( handleBitmapLoad )
+        -- Register image-load event handler
+        myBitmap:add_onloaded_listener( handleBitmapLoad )
 		(end)
 
 	*See Also:* the <on_loaded> event, the <Canvas at file:canvas-lb.html#Canvas> and <Image at file:clutter_image-lb.html#Image> classes and the <loaded> and <Image.async> properties
