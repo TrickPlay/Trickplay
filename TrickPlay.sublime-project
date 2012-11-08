@@ -20,12 +20,12 @@
                 {
                     // This doesn't really Run, it just makes the "cmake" command get a keybinding by default
                     "name": "Run",
-            "env": {
-                "CC" : "clang",
-                "CXX": "clang++"
-                },
-            "cmd": [ "cmake", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", ".." ]
-        }
+                    "env": {
+                        "CC" : "clang",
+                        "CXX": "clang++"
+                        },
+                    "cmd": [ "cmake", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", ".." ]
+                }
             ]
         }
     ],
