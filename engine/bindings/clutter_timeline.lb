@@ -32,7 +32,7 @@ void Timeline_paused( ClutterTimeline * timeline , gpointer )
 void Timeline_completed( ClutterTimeline * timeline , gpointer )
 {
 #ifdef CLUTTER_VERSION_1_10
-    if ( clutter_timeline_get_repeat_count( timeline ) != 0 )
+    if ( clutter_timeline_get_repeat_count( timeline ) == 0 )
 #else
     if ( ! clutter_timeline_get_loop( timeline ) )
 #endif
