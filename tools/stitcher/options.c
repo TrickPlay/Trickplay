@@ -7,14 +7,14 @@ Options * options_new()
 {
     Options * options = malloc( sizeof( Options ) );
     
-    options->input_size_limit  = 4096;
+    options->input_size_limit  = 512;
     options->output_size_limit = 4096;
     options->output_path = NULL;
     
-    options->recursive = FALSE;
-    options->add_buffer_pixels = FALSE;
-    options->allow_multiple_sheets = FALSE;
-    options->copy_large_items = FALSE;
+    options->recursive = TRUE;
+    options->add_buffer_pixels = TRUE;
+    options->allow_multiple_sheets = TRUE;
+    options->copy_large_items = TRUE;
     
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
     options->input_paths    = g_ptr_array_new();
