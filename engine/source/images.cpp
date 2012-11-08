@@ -222,7 +222,12 @@ private:
 
 Image * Image::make( const TPImage & image )
 {
-    return new Image( g_slice_dup( TPImage,  &image ) );
+    Image *img = new Image( g_slice_dup( TPImage,  &image ) );
+
+    // This next line is superfluous but helps clang realize we're not leaking that buffer
+    img->image->pixels = image.pixels;
+
+    return img;
 }
 
 //-----------------------------------------------------------------------------
