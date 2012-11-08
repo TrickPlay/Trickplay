@@ -199,6 +199,8 @@ guint8 * TypedArray::get( gulong index )
         return 0;
     }
 
+    g_assert(buffer);
+
     return buffer->get_data() + offset + ( bpe * index );
 }
 
