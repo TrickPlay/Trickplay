@@ -18,7 +18,7 @@ static int invoke_lua_callback( lua_State* L, CallbackDataStruct* cb_data, int n
 {
 
 	int lua_callback_ref = cb_data != NULL ? cb_data->lua_callback_ref : LUA_REFNIL;
-	UserData * ud = cb_data->user_data;
+	UserData * ud = cb_data ? cb_data->user_data : NULL;
 
     LSG;
 
