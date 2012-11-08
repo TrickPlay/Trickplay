@@ -73,10 +73,10 @@ set(CMAKE_CXX_FLAGS "-Wall")
 
 include( CheckCXXCompilerFlag )
 CHECK_CXX_COMPILER_FLAG("-O3" OPT3)
-if(${OPT3})
+if(OPT3)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3")
-endif(${OPT4})
+endif(OPT3)
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
