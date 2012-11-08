@@ -142,31 +142,31 @@ void output_merge_json ( Output * output, const char * path, Options * options )
     
     JsonArray * maps = json_node_get_array( root );
     
-    int i, j, lj, li = json_array_get_length( maps );
-    for ( i = 0; i < li; i++ )
+    guint li = json_array_get_length( maps );
+    for ( guint i = 0; i < li; i++ )
     {
         JsonObject * map = json_array_get_object_element( maps, i );
     
         const char * img = json_object_get_string_member( map, "img" );
         JsonArray * sprites = json_object_get_array_member( map, "sprites" );
-        lj = json_array_get_length( sprites );
+        guint lj = json_array_get_length( sprites );
         
         if ( g_regex_match( output->url_regex, img, 0, NULL ) )
         {
             GPtrArray * array = g_ptr_array_new();
             
-            for ( j = lj; j--; )
+            for ( guint j = lj; j--; )
             {
                 JsonObject * sprite = json_array_get_object_element( sprites, j );
                 const char * id = json_object_get_string_member( sprite, "id" );
                 if ( options_take_unique_id( options, id ) )
                 {
                     g_ptr_array_add( array, g_strdup_printf(
-                        "\n    { \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
-                        (int) json_object_get_int_member( sprite, "x" ),
-                        (int) json_object_get_int_member( sprite, "y" ),
-                        (int) json_object_get_int_member( sprite, "w" ),
-                        (int) json_object_get_int_member( sprite, "h" ),
+                        "\n    { \"x\": %li, \"y\": %li, \"w\": %li, \"h\": %li, \"id\": \"%s\" }",
+                        json_object_get_int_member( sprite, "x" ),
+                        json_object_get_int_member( sprite, "y" ),
+                        json_object_get_int_member( sprite, "w" ),
+                        json_object_get_int_member( sprite, "h" ),
                         json_object_get_string_member( sprite, "id" ) ) );
                 }
             }
@@ -196,7 +196,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
                 exit( 1 );
             }
             
-            for ( j = 0; j < lj; j++ )
+            for ( guint j = 0; j < lj; j++ )
             {
                 JsonObject * sprite = json_array_get_object_element( sprites, j );
                 char * id = (char *) json_object_get_string_member( sprite, "id" );
@@ -204,10 +204,10 @@ void output_merge_json ( Output * output, const char * path, Options * options )
                 if ( options_take_unique_id( options, id ) )
                 {
                     RectangleInfo rect = {
-                        json_object_get_int_member( sprite, "w" ),
-                        json_object_get_int_member( sprite, "h" ),
-                        json_object_get_int_member( sprite, "x" ),
-                        json_object_get_int_member( sprite, "y" )
+                        (size_t)json_object_get_int_member( sprite, "w" ),
+                        (size_t)json_object_get_int_member( sprite, "h" ),
+                        (size_t)json_object_get_int_member( sprite, "x" ),
+                        (size_t)json_object_get_int_member( sprite, "y" )
                     };
         
                     Item * item = item_new( id );
@@ -227,11 +227,9 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
 void output_load_inputs( Output * output, Options * options )
 {
-    unsigned int i, length = options->input_paths->len;
-
     // load regular inputs
 
-    for ( i = 0; i < length; i++ )
+    for ( unsigned i = 0; i < options->input_paths->len; i++ )
     {
         char * path = (char *) g_ptr_array_index( options->input_paths, i );
         if ( g_regex_match( output->url_regex, path, 0, NULL ) )
@@ -253,8 +251,7 @@ void output_load_inputs( Output * output, Options * options )
 
     // load the json files of spritesheets to merge
     
-    length = options->json_to_merge->len;
-    for ( i = 0; i < length; i++ )
+    for ( unsigned i = 0; i < options->json_to_merge->len; i++ )
     {
         output_merge_json ( output, (char *) g_ptr_array_index( options->json_to_merge, i ), options );
     }
@@ -299,8 +296,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
                 { 0, 1,  item->w - 1, 1,  1, 0,            1, item->h - 1,
                   0, 0,  item->w - 1, 0,  0, item->h - 1,  item->w - 1, item->h - 1 };
     
-            int j;
-            for (j = 0; j < 8; j++)
+            for (unsigned j = 0; j < 8; j++)
             {
                 Image * excerpt_image = ExcerptImage( temp_image, &rects[j], exception );
                 CompositeImage( dest, ReplaceCompositeOp, excerpt_image,
@@ -368,8 +364,7 @@ void output_add_layout ( Output * output, Layout * layout, Options * options )
 
 void output_export_files ( Output * output, Options * options )
 {
-    unsigned int i = output->large_items->len;
-    while ( i-- )
+    for ( unsigned i = output->large_items->len; i--; )
     {
         Item  * item = g_ptr_array_index( output->large_items, i );
         GFile * dest = g_file_new_for_path( item->id );
@@ -377,21 +372,20 @@ void output_export_files ( Output * output, Options * options )
         g_file_copy( item->file, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL );
         g_object_unref( dest );
         
-        int a = options->add_buffer_pixels ? 2 : 0;
+        unsigned a = options->add_buffer_pixels ? 2 : 0;
         g_ptr_array_add( output->subsheets, g_strdup_printf( "{\n  \"sprites\": ["
             "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }"
             "\n  ],\n  \"img\": \"%s\"\n}", item->w - a, item->h - a, item->id, item->id ) );
     }
     
-    i = output->images->len;
-    while ( i-- )
+    for ( unsigned i = output->images->len; i--; )
     {
         WriteImage( (ImageInfo *) g_ptr_array_index( output->infos, i ),
                     (Image     *) g_ptr_array_index( output->images, i ) );
     }
     
     char  * json;
-    g_ptr_array_set_size( output->subsheets, output->subsheets->len + 1 );
+    g_ptr_array_set_size( output->subsheets, (gint)output->subsheets->len + 1 );
     json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
     
     if ( json )
