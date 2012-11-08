@@ -13,6 +13,9 @@
         {
             "name": "TrickPlay",
             "working_dir": "$project_path/build",
+            "env": {
+                "NINJA_STATUS": "[%u -> %r -> %f] "
+            },
             "cmd":  [ "cmake", "--build", "." ],
             "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+(?:error|warning):\\s+([^\\n]*)$",
 
