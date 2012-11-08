@@ -44,8 +44,7 @@ Tuner::Tuner( TunerList * _list, TPContext * _context , const char * _name, TPCh
     tp_tuner( new TPTuner( this, _list ) ),
     name( _name ),
     cb( _cb ),
-    data( _data ),
-    context( _context )
+    data( _data )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
