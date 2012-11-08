@@ -32,6 +32,10 @@
 
     "settings":
     {
+        "sublimeclang_options":
+        [
+            "-Wno-#warnings"
+        ],
         "sublimeclang_options_script": "python ${project_path:cmake_options_script.py}"
     }
 }
