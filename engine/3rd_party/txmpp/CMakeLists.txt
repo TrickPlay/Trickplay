@@ -26,8 +26,14 @@ include( FindPkgConfig )
 IF( PKG_CONFIG_FOUND )
 
 
-    pkg_check_modules(EXPAT         REQUIRED    expat)
+    pkg_check_modules(EXPAT                     expat)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
+
+    if( NOT(EXPAT_FOUND) )
+        # expat only doesn't exist on broken version of shitty Ubuntu
+        TP_FIND_INCLUDE( expat.h TXMPP_INCLUDE_DIRS )
+        list( APPEND TXMPP_LIBRARY_NAMES expat )
+    endif( NOT(EXPAT_FOUND) )
 
 
     list(APPEND TXMPP_INCLUDE_DIRS
