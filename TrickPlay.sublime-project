@@ -12,12 +12,12 @@
     [
         {
             "name": "TrickPlay",
-            "working_dir": "$project_path/build",
+            "working_dir": "$project_path",
             "env": {
-                "NINJA_STATUS": "[%u -> %r -> %f] "
+                "NINJA_STATUS": "[%c/%o: %r+%u -> %f] "
             },
-            "cmd":  [ "cmake", "--build", "." ],
             "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+(?:error|warning):\\s+([^\\n]*)$",
+            "cmd":  [ "cmake", "--build", "build" ],
 
             "variants": [
                 {
@@ -27,7 +27,8 @@
                         "CC" : "clang",
                         "CXX": "clang++"
                         },
-                    "cmd": [ "cmake", "-G", "Ninja", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", ".." ]
+                    "file_regex":   "^\\s*([^\\n:]+):(\\d+)(?::|\\s+\\(pkg_check_modules\\))",
+                    "cmd": [ "cmake", "-G", "Ninja", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", "-H.", "-Bbuild" ]
                 }
             ]
         }
