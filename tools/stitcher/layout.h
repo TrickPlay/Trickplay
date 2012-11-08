@@ -4,17 +4,17 @@
 
 typedef struct Layout {
     unsigned int width,
-        height,
+                 height,
                  area,
                  items_placed,
-        items_skipped,
-        min_item_w,
-        min_item_h,
-        max_item_w,
-        item_area;
+                 items_skipped,
+                 min_item_w,
+                 min_item_h,
+                 max_item_w,
+                 item_area;
     float        coverage;
-    GSequence * leaves;
-    GPtrArray * places;
+    GSequence *  leaves;
+    GPtrArray *  places;
 } Layout;
 
 #define __LAYOUT_H__

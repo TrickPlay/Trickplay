@@ -28,7 +28,7 @@ void item_free ( Item * item )
         DestroyImage( item->source );
     free( (char *) item->id );
     free( (char *) item->path );
-        
+
     free( item );
 }
 

@@ -6,7 +6,7 @@
 Layout * layout_new ( unsigned int width )
 {
     Layout * layout = malloc( sizeof( Layout ) );
-    
+
     layout->width = width;
     layout->height = 0;
     layout->area = 0;
@@ -17,10 +17,10 @@ Layout * layout_new ( unsigned int width )
     layout->min_item_h = 256;
     layout->max_item_w = 0;
     layout->item_area  = 0;
-    
+
     layout->leaves = g_sequence_new( NULL );
     layout->places = g_ptr_array_new_with_free_func( g_free );
-    
+
     return layout;
 }
 
@@ -74,7 +74,7 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
                 }
             }
         }
-        
+
         si = g_sequence_iter_next( si );
     }
 
@@ -95,14 +95,14 @@ void layout_scan_item( Item * item, Layout * layout )
 void layout_loop_item( Item * item, Layout * layout )
 {
     Leaf * leaf = layout_leaf_for_item( layout, item );
-    
+
     if ( leaf )
     {
         unsigned int covered = (unsigned int) ( layout->coverage * (float) layout->area );
         layout->height = MAX( layout->height, leaf->y + item->h );
         layout->area = layout->width * layout->height;
         layout->coverage = (float) ( covered + item->w * item->h ) / (float) layout->area;
-        
+
         leaf->item = item;
         g_ptr_array_add( layout->places, leaf );
         leaf_cut( leaf, item->w, item->h, layout );
@@ -118,18 +118,18 @@ Layout * layout_new_from_output ( Output * output, unsigned int width, Options *
 {
     Layout * layout = layout_new( width );
     g_sequence_foreach( output->items, (GFunc) layout_scan_item, layout );
-    
+
     if ( width < layout->max_item_w )
     {
         return layout;
     }
-    
+
     Leaf * leaf = leaf_new( 0, 0, width,
         options->output_size_limit * ( options->allow_multiple_sheets ? 1 : 2 ) );
     g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
-    
+
     g_sequence_foreach( output->items, (GFunc) layout_loop_item, layout );
-    
+
     return layout;
 }
 
@@ -142,11 +142,11 @@ Layout * layout_choose( Layout * a, Layout * b, Options * options )
 {
     if(!a) return b;
     if(!b) return a;
-    
+
     if ( a->height <= options->output_size_limit
         && ( options->allow_multiple_sheets ? a->items_placed > 0 : a->items_skipped == 0 )
         && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
             return a;
-    
+
     return b;
 }
