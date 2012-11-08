@@ -63,7 +63,6 @@ ELSE ( PKG_CONFIG_FOUND )
 ENDIF ( PKG_CONFIG_FOUND )
 
 include( FindThreads )
-find_package(threads)
 list( APPEND TXMPP_LIBRARY_NAMES ${CMAKE_THREAD_LIBS_INIT} )
 
 set( TXMPP_SOURCE_FILES
