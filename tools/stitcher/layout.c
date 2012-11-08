@@ -78,7 +78,10 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
         si = g_sequence_iter_next( si );
     }
 
-    return best ?: close ?: fallback ?: NULL;
+    if(best) return best;
+    if(close) return close;
+    if(fallback) return fallback;
+    return NULL;
 }
 
 void layout_scan_item( Item * item, Layout * layout )
@@ -137,8 +140,8 @@ float layout_heuristic( Layout * layout )
 
 Layout * layout_choose( Layout * a, Layout * b, Options * options )
 {
-	  if ( !a || !b )
-        return a ?: b;
+    if(!a) return b;
+    if(!b) return a;
     
     if ( a->height <= options->output_size_limit
         && ( options->allow_multiple_sheets ? a->items_placed > 0 : a->items_skipped == 0 )
