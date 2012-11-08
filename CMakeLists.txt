@@ -15,7 +15,6 @@ endif(CMAKE_TOOLCHAIN_FILE)
 
 #------------------------------------------------------------------------------
 # For now, enable both
-
 set( TP_CONTROLLER_DISCOVERY_MDNS 1 )
 set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
@@ -36,16 +35,18 @@ endif(NOT TP_WITH_GAMESERVICE)
 
 include(util.cmake)
 
+find_package(Git)
+
 execute_process(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMAND git log -1 --pretty=format:%h
+    COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%h
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE GIT_CURRENT_REVISION
 )
 
 execute_process(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMAND git describe --tags --dirty
+    COMMAND ${GIT_EXECUTABLE} describe --tags --dirty
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
