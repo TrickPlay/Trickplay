@@ -5,80 +5,67 @@
 #include "output.h"
 #include "layout.h"
 
-int main ( int argc, char ** argv )
-{
-    g_type_init();
-    MagickCoreGenesis( * argv, MagickTrue );
-    
-    Options * options = options_new_from_arguments( argc, argv );
-    
-    Output  * output  = output_new();
-    output_load_inputs( output, options );
-
-    if ( options->allow_multiple_sheets )
-    {
-        // fit sprites into sheets in the densest way possible, until we run out of sprites
-        
-        while ( TRUE )
+Layout * place_attempt(Output *output, Options *options)
         {
             Layout * best = layout_new( 0 );
 
-            // iterate to find a good layout
-            
             unsigned int i;
             for ( i = 0; i <= options->output_size_limit; i++ )
             {
                 Layout * layout = layout_new_from_output( output, i, options );
                 Layout * better = layout_choose( layout, best, options );
             
-                layout_free( better != best ? best : layout );  
-                best = better;
+        if(layout == better)
+        {
+            layout_free( best );
+            best = layout;
+        }
+        else
+        {
+            layout_free( layout );
+        }
             }
 
-            if ( best->items_placed == 0 )
+    if ( !options->allow_multiple_sheets && (!best || best->items_skipped != 0) )
+    {
+        fprintf( stderr, "Can't fit all files within output dimensions (%i x %i).\n",
+                 options->output_size_limit, options->output_size_limit );
+        exit( 1 );
+    }
+    else if ( options->allow_multiple_sheets && best->items_placed == 0 )
             {
                 fprintf( stderr, "Failed to fit all of the images.\n" );
                 exit( 1 );
             }
 
+
             output_add_layout( output, best, options );
 
-            if ( best->items_skipped == 0 )
-                break;
+    return best;
+    }
+
+int main ( int argc, char ** argv )
+        {
+    g_type_init();
+    MagickCoreGenesis( * argv, MagickTrue );
+
+    Options * options = options_new_from_arguments( argc, argv );
+        
+    Output  * output  = output_new();
+    output_load_inputs( output, options );
+        
+    if ( options->allow_multiple_sheets )
+        {
+        // fit sprites into sheets in the densest way possible, until we run out of sprites
+        
+        while ( place_attempt(output, options)->items_skipped )
+        {
+            continue;
         }
     }
     else
     {
-        if ( output->item_area > options->output_size_limit * options->output_size_limit )
-        {
-            fprintf( stderr, "Total area of input files is larger than "
-                             "output dimensions (%i x %i).\n",
-                     options->output_size_limit, options->output_size_limit );
-            exit( 1 );
-        }
-
-        // iterate to find the best layout
-        
-        Layout * best = layout_new( 0 );
-        
-        unsigned int i;
-        for ( i = 0; i <= options->output_size_limit; i++ )
-        {
-            Layout * layout = layout_new_from_output( output, i, options );
-            Layout * better = layout_choose( layout, best, options );
-            
-            layout_free( better != best ? best : layout );
-            best = better;
-        }
-        
-        if ( !best || best->items_skipped != 0 )
-        {
-            fprintf( stderr, "Can't fit all files within output dimensions (%i x %i).\n",
-                     options->output_size_limit, options->output_size_limit );
-            exit( 1 );
-        }
-
-        output_add_layout( output, best, options );
+        place_attempt(output,options);
     }
 
     output_export_files( output, options );
