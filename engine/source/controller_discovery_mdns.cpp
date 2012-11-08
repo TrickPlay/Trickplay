@@ -14,7 +14,7 @@ ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const Str
     name( n ),
     port( _port ),
     http_port( _http_port ),
-    ready( false ),
+    ready( false )
 {
     avahi_set_allocator( avahi_glib_allocator() );
 
