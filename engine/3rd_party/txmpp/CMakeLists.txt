@@ -153,7 +153,6 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     list(APPEND      TXMPP_SOURCE_FILES
 
-        ${TXMPP_ROOT}/src/latebindingsymboltable.cc
         ${TXMPP_ROOT}/src/linux.cc
     )
 
