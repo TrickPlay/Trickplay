@@ -70,15 +70,14 @@ Options * options_new_from_arguments ( int argc, char ** argv )
 {
     Options * options = options_new();
     
-    int i, j, l, state = INPUT_PATHS;
-    char * arg;
+    int state = INPUT_PATHS;
 
-    for ( i = 1; i < argc; i++ )
+    for ( int i = 1; i < argc; i++ )
     {
-        arg = argv[i];
-        l = strlen( arg );
+        char * arg = argv[i];
+        size_t l = strlen( arg );
         if ( (char) arg[0] == '-' )
-            for ( j = 1; j < l; j++ )
+            for ( size_t j = 1; j < l; j++ )
                 switch( (char) arg[j] )
                 {
                     case 'f':
@@ -120,7 +119,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         else
         {
             gboolean arg_is_int = TRUE;
-            for ( j = 0; j < l; j++ )
+            for ( size_t j = 0; j < l; j++ )
                 if ( !g_ascii_isdigit( arg[j] ) )
                     arg_is_int = FALSE;
             
@@ -132,14 +131,14 @@ Options * options_new_from_arguments ( int argc, char ** argv )
 
                 case SET_INPUT:
                     if ( arg_is_int )
-                        options->input_size_limit = (int) strtol( arg, NULL, 10 );
+                        options->input_size_limit = strtoul( arg, NULL, 0 );
                     else
                         g_ptr_array_add( options->input_patterns, g_pattern_spec_new( arg ) );
                     break;
 
                 case SET_OUTPUT:
                     if ( arg_is_int )
-                        options->output_size_limit = (int) strtol( arg, NULL, 10 );
+                        options->output_size_limit = strtoul( arg, NULL, 0 );
                     else
                         options->output_path = arg;
                     break;

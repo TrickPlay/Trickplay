@@ -34,7 +34,7 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attrib
 {
     Leaf * aa = (Leaf *) a,
          * bb = (Leaf *) b;
-    return aa->area - bb->area;
+    return (int)aa->area - (int)bb->area;
 }
 
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
