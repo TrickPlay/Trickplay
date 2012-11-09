@@ -672,10 +672,11 @@ LayoutManager = setmetatable(
                     function(oldf,self,v)        children_want_focus = v end
                 end,
                 cell_w = function(instance,_ENV)
-                    return function(oldf) return cell_w     end,
+                    return function(oldf) return cell_w or nil     end,
                     function(oldf,self,v) 
+                        v = type(v) == "number" and v or false
                         cell_w = v 
-                        for_each(cells,function(cell) cell.w = v end)
+                        --for_each(cells,function(cell) cell.w = v end)
                         find_col_widths    = true
                         find_col_heights   = true
                         reposition         = true
@@ -684,10 +685,11 @@ LayoutManager = setmetatable(
                     end
                 end,
                 cell_h = function(instance,_ENV)
-                    return function(oldf) return cell_h     end,
+                    return function(oldf) return cell_h or nil     end,
                     function(oldf,self,v) 
+                        v = type(v) == "number" and v or false
                         cell_h = v 
-                        for_each(cells,function(cell) cell.h = v end)
+                        --for_each(cells,function(cell) cell.h = v end)
                         find_col_widths    = true
                         find_col_heights   = true
                         reposition         = true
@@ -760,8 +762,8 @@ LayoutManager = setmetatable(
                         t.horizontal_alignment = instance.horizontal_alignment
                         t.vertical_spacing     = instance.vertical_spacing
                         t.horizontal_spacing   = instance.horizontal_spacing
-                        t.cell_h = instance.cell_h
-                        t.cell_w = instance.cell_w
+                        t.cell_h = cell_h or json.null
+                        t.cell_w = cell_w or json.null
                         t.cells = {}
                         for_each(cells,function(obj,r,c)
                             if not t.cells[r] then
@@ -876,7 +878,7 @@ LayoutManager = setmetatable(
                     if cell_w then
                         for i = 1, cells.number_of_rows do
                             for j = 1, cells.number_of_cols do
-                                cells[i][j].x = (horizontal_spacing + cell_w) * (i-1)
+                                cells[i][j].x = (j-1) > 0 and ((horizontal_spacing + cell_w) * (j-1)) or 0
                             end
                         end
                     else
@@ -890,7 +892,7 @@ LayoutManager = setmetatable(
                     if cell_h then
                         for i = 1, cells.number_of_rows do
                             for j = 1, cells.number_of_cols do
-                                cells[i][j].y = (vertical_spacing + cell_h) * (i-1)
+                                cells[i][j].y = (i-1) > 0 and ((vertical_spacing + cell_h) * (i-1)) or 0
                             end
                         end
                     else
