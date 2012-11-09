@@ -202,6 +202,17 @@ construct = function(t)
                 elements = concat_elements(elements,obj_to_elements_map[t.cells[i]])
             end
         end
+    elseif t.type == "MenuButton" then
+        elements = {}
+        for i,v in ipairs(t.items) do
+
+            if v then -- v == false when no item was specified
+                t.items[i] = construct(v)
+    
+                elements[t.items[i].name] = t.items[i]
+                elements = concat_elements(elements,obj_to_elements_map[t.items[i]])
+            end
+        end
     elseif t.children then
         elements = {}
         for i,v in ipairs(t.children) do
