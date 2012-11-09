@@ -147,6 +147,11 @@ ArrayManager = function(p)
                     error("Expected table. Received "..type(t),2) 
                 end
                 
+                for i = instance.length,1,-1 do
+                --while number_of_rows < v do
+                    
+                    instance:remove(i)--number_of_rows)
+                end
                 for k,v in pairs(t) do   self[k] = v   end
                 report_change("set")
             end,
