@@ -106,7 +106,9 @@ ListManager = setmetatable(
                     return function(oldf) return spacing     end,
                     function(oldf,self,v)        
                         spacing = v
-                        reposition = true
+                        reposition  = true
+                        find_width  = true
+                        find_height = true
                      end
                 end,
                 horizontal_alignment = function(instance,_ENV)
@@ -698,6 +700,7 @@ LayoutManager = setmetatable(
                     function(oldf,self,v) 
                         horizontal_spacing = v 
                         reposition = true
+                        find_width = true
                     end
                 end,
                 vertical_spacing = function(instance,_ENV)
@@ -705,6 +708,7 @@ LayoutManager = setmetatable(
                     function(oldf,self,v) 
                         vertical_spacing = v
                         reposition = true
+                        find_height = true
                     end
                 end,
                 horizontal_alignment = function(instance,_ENV)
