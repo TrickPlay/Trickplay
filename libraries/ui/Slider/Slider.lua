@@ -149,22 +149,22 @@ Slider = setmetatable(
             end,
             update = function(instance,_ENV)
                 return function()
-                    print("\n\nupdate\n\n")
+                    --print("\n\nupdate\n\n")
                     if resized then
                         resized = false
-                        print("grip sz1",grip.w,grip.h)
+                        --print("grip sz1",grip.w,grip.h)
                         grip.x = grip.x
-                        print("grip sz1.5",grip.w,grip.h)
+                        --print("grip sz1.5",grip.w,grip.h)
                         grip.anchor_point = {
                             grip.w/2,
                             grip.h/2
                         }
-                        print("grip ap",grip.w,grip.h)
+                        --print("grip ap",grip.w,grip.h)
                         if direction == "horizontal" then
                             local w = grip.w/2
-                            print("settin x",w*2,grip.h)
+                            --print("settin x",w*2,grip.h)
                             grip.x = w
-                            print("set x",grip.w,grip.h)
+                            --print("set x",grip.w,grip.h)
                             grip.y = track.h/2
                         elseif direction == "vertical" then
                             grip.x = track.w/2
@@ -172,6 +172,9 @@ Slider = setmetatable(
                         else
                             error("invalid direction",2)
                         end
+                        
+                        instance.w = grip.w > track.w and grip.w or track.w
+                        instance.h = grip.h > track.h and grip.h or track.h
                     end
                 end
             end,
