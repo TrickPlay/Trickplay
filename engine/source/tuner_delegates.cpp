@@ -15,8 +15,7 @@ extern int new_Tuner( lua_State * );
 TunerDelegate::TunerDelegate(lua_State * _LS,Tuner * _tuner,TunerListDelegate * _list)
 :
     L(_LS),
-    tuner(_tuner),
-    list(_list)
+    tuner(_tuner)
 {
     tuner->ref();
     tuner->add_delegate(this);

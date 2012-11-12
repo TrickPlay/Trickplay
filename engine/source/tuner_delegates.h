@@ -30,7 +30,6 @@ private:
 
     lua_State *             L;
     Tuner *                 tuner;
-    TunerListDelegate *     list;
 
 };
 

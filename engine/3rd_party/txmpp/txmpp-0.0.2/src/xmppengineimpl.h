@@ -232,7 +232,6 @@ private:
    private:
     XmppEngineImpl* engine_;
     State state_;
-    Error error_;
 
   };
 

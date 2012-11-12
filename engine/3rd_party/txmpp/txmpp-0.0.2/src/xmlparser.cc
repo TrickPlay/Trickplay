@@ -198,7 +198,6 @@ XmlParser::ParseXml(XmlParseHandler *pxph, std::string text) {
 }
 
 XmlParser::ParseContext::ParseContext(XmlParser *parser) :
-    parser_(parser),
     xmlnsstack_(),
     raised_(XML_ERROR_NONE),
     line_number_(0),

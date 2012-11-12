@@ -47,7 +47,6 @@ private:
 
     TPChannelChangeCallback  cb;
     void *              data;
-    TPContext *         context;
 
     //.........................................................................
 

@@ -96,7 +96,10 @@ std::string DecodeEvent(EventRef event) {
 static bool GetGestalt(OSType ostype, int* value) {
   ASSERT(NULL != value);
   SInt32 native_value;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   OSStatus result = Gestalt(ostype, &native_value);
+#pragma clang diagnostic pop
   if (noErr == result) {
     *value = native_value;
     return true;
@@ -145,7 +148,7 @@ bool GetQuickTimeVersion(std::string* out) {
   int ver;
   if (!GetGestalt(gestaltQuickTimeVersion, &ver))
     return false;
-  
+
   std::stringstream ss;
   ss << std::hex << ver;
   *out = ss.str();

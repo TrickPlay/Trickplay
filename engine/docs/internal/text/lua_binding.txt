@@ -61,7 +61,7 @@ All C/C++ code must be surrounded by two opening and two closing square brackets
 
 	(code)
 	[[ C/C++ code ]]
-	
+
 	[[ C/C++ code
 	   more C/C++ code
 	]]
@@ -74,12 +74,12 @@ Group: LB Comments
 Comments in embedded C/C++ code are regular C/C++ comments. Comments outside of embedded C/C++ code are specified with # for single-line comments; /* and */ specify the boundaries of a multi-line comment.
 
 	*Example Code:*
-	
+
 		(code)
 		module myUtilLib;
-		
+
 		# This module defines some utility functions.
-		
+
 		/* Utility Function List:
 				printNum()
 				printStr()
@@ -96,25 +96,25 @@ Group: The module Directive
 		(code)
 		module ModuleName;
 		(end)
-		
+
 The module directive instructs the LB code generator to create a single luaopen_XXX() function that injects all the .lb file's class, interface and global definitions into the Lua state variable. The XXX portion of the function name will be the ModuleName specified in the directive. If an .lb file does not specify a module directive, a separate luaopen_XXX() function is created for each class, interface and global definition in the file, with the XXX portion being the class/interface/global name. The luaopen_XXX() function must be added to the engine/source/app.cpp file as described in <Creating a New LB Module>.
 
-An .lb file may have a maximum of one module directive. It is typically specified at the beginning of the file. 
+An .lb file may have a maximum of one module directive. It is typically specified at the beginning of the file.
 
 
 
 Group: The interface Directive
 
 	*Syntax:*
-	
+
 		(code)
 		interface InterfaceName [[ C/C++ data pointer ]]
 		{
-			# Define interface properties, functions and callbacks (event handlers) here
+			# Define interface properties, functions and callbacks (events/event handlers) here
 		}
 		(end)
 
-The interface directive defines a group of properties, functions and callbacks (event handlers) with the intention of being inherited by one or more LB classes or global variables. It is not possible for a Lua application to create an instance of an interface. Instead, an LB class or global variable inherits the properties and functions of the interface. When a Lua application creates an instance of the class/global variable, the properties and functions of the inherited interface(s) are also created. An example of an interface in the TrickPlay SDK is the UIElement interface which is inherited by severak SDK classes, including the Rectangle and Image classes. The screen global variable also inherits the UIElement interface.
+The interface directive defines a group of properties, functions and callbacks (events/event handlers) with the intention of being inherited by one or more LB classes or global variables. It is not possible for a Lua application to create an instance of an interface. Instead, an LB class or global variable inherits the properties and functions of the interface. When a Lua application creates an instance of the class/global variable, the properties and functions of the inherited interface(s) are also created. An example of an interface in the TrickPlay SDK is the UIElement interface which is inherited by several SDK classes, including the Rectangle and Image classes. The screen global variable also inherits the UIElement interface.
 
 To reference the interface, use the InterfaceName specified in its definition.
 
@@ -125,15 +125,15 @@ The C/C++ data pointer specifies either an existing C/C++ class/struct or a void
 Group: The class Directive
 
 	*Syntax:*
-	
+
 		(code)
 		class ClassName [[ C/C++ data pointer ]] InterfaceInheritanceList
 		{
-			# Define class constructor, destructor, properties, functions and callbacks (event handlers) here
+			# Define class constructor, destructor, properties, functions and callbacks (events/event handlers) here
 		}
-		(end)	
+		(end)
 
-The class directive defines a Lua class that can provide a constructor, destructor, properties, functions and callbacks (event handlers). The LB code generator automatically creates the necessary framework so a Lua application can create instances of the class using the name specified as the ClassName.
+The class directive defines a Lua class that can provide a constructor, destructor, properties, functions and callbacks (events/event handlers). The LB code generator automatically creates the necessary framework so a Lua application can create instances of the class using the name specified as the ClassName.
 
 The C/C++ data pointer specifies either an existing C/C++ class/struct or a void *. The LB code generator creates a C/C++ variable called "self" of the same data type. The "self" variable can be accessed in the embedded C/C++ code of the class's constructor, destructor, property handlers, functions and callbacks. Each LB-generated class also includes an "extra" table.
 
@@ -147,17 +147,17 @@ Some example LB class directives are shown below.
 	{
 		# Constructor, functions, etc. defined here
 	}
-	
+
 	# Define some interfaces that will be inherited by some classes
 	interface Color [[ Object * ]] { /* Properties, functions and callback definitions */ }
 	interface Font  [[ Object * ]] { /* Properties, functions and callback definitions */ }
-	
+
 	# Define a class that inherits from the Color interface
 	class Box [[ Object * ]] Color
 	{
 		# Constructor, functions, etc. definitions
 	}
-	
+
 	# Define a class that inherits from the Color and Font interfaces
 	class TextBox [[ Object * ]] Color, Font
 	{
@@ -170,15 +170,15 @@ Some example LB class directives are shown below.
 Group: The global Directive
 
 	*Syntax:*
-	
+
 		(code)
 		global GlobalName [[ C/C++ data pointer ]] InterfaceInheritanceList
 		{
-			# Define global properties, functions and callbacks (event handlers) here
+			# Define global properties, functions and callbacks (events/event handlers) here
 		}
 		(end)
 
-The global directive defines a Lua global variable that can provide properties, functions and callbacks (event handlers). A single instance of the variable using the name specified by GlobalName is created by the generated code; no additional instances can be created. An example of a global variable is the TrickPlay SDK's screen variable.
+The global directive defines a Lua global variable that can provide properties, functions and callbacks (events/event handlers). A single instance of the variable using the name specified by GlobalName is created by the generated code; no additional instances can be created. An example of a global variable is the TrickPlay SDK's screen variable.
 
 The C/C++ data pointer specifies either an existing C/C++ class/struct or a void *. The LB code generator creates a C/C++ variable called "self" of the same data type. The "self" variable can be accessed in the embedded C/C++ code of the global's property handlers, functions and callbacks. Each LB-generated global variable also includes an "extra" table.
 
@@ -237,12 +237,12 @@ Note: A bug exists that prevents default values from containing spaces. The bug 
 	(code)
 	# This doesn't work because of the spaces in the default value
 	printTitle( string title = "Welcome to TrickPlay" )
-	
+
 	# Here is the work-around
 	[[
 	#define	DEFAULT_TITLE		"Welcome to TrickPlay"
 	]]
-	
+
 	printTitle( string title = DEFAULT_TITLE )
 	(end)
 
@@ -297,7 +297,7 @@ To correctly initialize the new object, the constructor's embedded C++ code must
 	lb_construct_gobject( DataType, gobject ) - Constructs a new object of type DataType.
 	                                            The gobject argument references an instance of the new GObject-based object.
 	(end)
-		
+
 For information on GObjects, refer to the <GObject Reference Manual at http://developer.gnome.org/gobject/stable/>. Many of the TrickPlay SDK's Clutter-based objects, such as Rectangle and Image, are implemented as GObjects.
 
 The LB code generator automatically creates a variable called "self" of type DataType. The self variable will be available in the object's destructor, functions, property handlers, and callbacks. If the constructor's embedded C++ code assigns the return value of the lb_construct() macros to the self variable, these other functions will be able to access the object. Assigning a value to the self variable is optional; however, if the constructor allocates memory for the object, having the self variable reference the object might be necessary in order to free the memory. The example below shows a common constructor definition.
@@ -351,7 +351,7 @@ A property can be either read-only or read-write. Read-only properties have only
 		[[
 			C++ get implementation
 		]];
-	
+
 		# Define a read-write property
 		LBdataType propertyName
 		[[
@@ -390,13 +390,13 @@ A function can return zero or more values. By default, functions return nothing 
 		[[
 			C++ function implementation
 		]];
-	
+
 		# Function that returns a single value
 		int funcName( argList )
 		[[
 			C++ function implementation
 		]];
-	
+
 		# Function that returns multiple values
 		multi funcName( argList )
 		[[
@@ -412,7 +412,7 @@ The LB code generator automatically creates and returns a local variable called 
 
 Group: Callbacks
 
-An LB class, interface or global variable can define callback functions (also referred to as event handlers). In some cases, the LB code generator is capable of creating the entire callback implementation, relieving the programmer from writing any embedded C/C++ code. The LB code generator can create the code to assign a function (or nil value) to the callback and retrieve the callback's current setting. If operations besides these common get and set procedures are necessary, an embedded C/C++ code section can be written.
+An LB class, interface or global variable can define callback functions (also referred to as events or event handlers). In some cases, the LB code generator is capable of creating the entire callback implementation, relieving the programmer from writing any embedded C/C++ code. The LB code generator can create the code to assign a function (or nil value) to the callback and retrieve the callback's current setting. If operations besides these common get and set procedures are necessary, an embedded C/C++ code section can be written.
 
 A callback function accepts no arguments and specifies no return value.
 
@@ -421,7 +421,7 @@ A callback function accepts no arguments and specifies no return value.
 		(code)
 		# Define a callback function
 		callback funcName;
-	
+
 		# Define a callback function with C/C++ implementation code
 		callback funcName
 		[[
