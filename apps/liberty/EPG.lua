@@ -315,7 +315,7 @@ local channel_hl = Group{
 }
 local sel_scale = 1.5
 
-show_grid:add(show_grid_bg,show_grid_text,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons,mesg)
+show_grid:add(show_grid_bg,Rectangle{color="black",x=-margin,w=margin,h=screen_h*2,y = -screen_h/2},channel_hl,show_grid_icons,mesg)
 local rows = {}
 -- -1 because its looking at the next one to be added,
 -- -2 more for wrap-around
@@ -1416,11 +1416,12 @@ local keypresses = {
         menu_layer:add(main_menu)
         instance:animate{
             duration = 300,
-            z = -300,
+            z = 300,
             opacity = 0,
             on_completed = function() 
                 instance:unparent() 
                 animating_back_to_prev_menu = false 
+                show_grid_text:unparent()
             end
         }
         main_menu:grab_key_focus()
@@ -1446,6 +1447,12 @@ function instance:on_key_focus_in(self)
         duration = 300,
         z = 0,
         opacity = 255,
+        on_completed = function()
+            
+            show_grid:add(show_grid_text)
+            show_grid_text:lower_to_bottom()
+            show_grid_bg:lower_to_bottom()
+        end
     }
 end
 --------------------------------------------------------------------
@@ -1473,8 +1480,5 @@ instance:add(
         color = "b0b0b0",
     }
 )
-
-instance.opacity = 0
-instance.z = -300
 
 return instance
