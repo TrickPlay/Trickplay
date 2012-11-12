@@ -2085,9 +2085,6 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
          int i, frames = backtrace(callstack, 128);
          char** strs = backtrace_symbols(callstack, frames);
 
-		size_t funcnamesize = 256; // Max 256 pls
-		char *funcname = (char *)malloc(funcnamesize);
-
          // Skip frames which are the logging functions
          for (i = 4; i < frames; ++i) {
 			char *begin_name = 0, *end_name = 0, *begin_offset = 0, *end_offset = 0;
@@ -2127,10 +2124,9 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
 				&& begin_name < begin_offset)
 			{
 				int status;
-				char* ret = abi::__cxa_demangle(begin_name,
-												funcname, &funcnamesize, &status);
+                char* funcname = abi::__cxa_demangle(begin_name,
+                                                NULL, NULL, &status);
 				if (status == 0) {
-					funcname = ret; // use possibly realloc()-ed string
 					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s+%s\n",
 							 log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C++", color_end, funcname, begin_offset);
 				}
@@ -2140,6 +2136,8 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
 					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s()+%s\n",
 							log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C", color_end, begin_name, begin_offset);
 				}
+
+                free(funcname);
 			}
 			else
 			{

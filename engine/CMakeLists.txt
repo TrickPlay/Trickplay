@@ -1,8 +1,8 @@
 
+add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
+
 add_subdirectory( lua )
 add_subdirectory( clutter_alpha_mode )
-
-add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
 set( LB_GENERATOR   ${ENGINE_SRC}/lb/bin/lb.py )
@@ -53,6 +53,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(SQLITE        REQUIRED    sqlite3)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
     pkg_check_modules(EXIF          REQUIRED    libexif)
+    pkg_check_modules(EXPAT                     expat)
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
         pkg_check_modules(UUID      REQUIRED    uuid)
@@ -245,14 +246,19 @@ endif( TP_FONT_DEBUG )
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
 
-TP_FIND_INCLUDE( expat.h                                ENGINE_INCLUDE_DIRS )
+if( NOT(EXPAT_FOUND) )
+    # expat only doesn't exist on broken version of shitty Ubuntu
+    TP_FIND_INCLUDE( expat.h                                ENGINE_INCLUDE_DIRS )
+    list( APPEND ENGINE_LIBRARY_NAMES expat )
+endif( NOT(EXPAT_FOUND) )
+
 TP_FIND_INCLUDE( jpeglib.h                              ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.h                               ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx                             ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h                              ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h                        ENGINE_INCLUDE_DIRS )
 
-list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
+list( APPEND  ENGINE_LIBRARY_NAMES jpeg png tiff tiffxx gif uriparser )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -343,12 +349,6 @@ include_directories(
 foreach( LIB ${ENGINE_LIBRARY_NAMES} )
     TP_FIND_LIBRARY( ${LIB} ENGINE_LIBRARIES )
 endforeach( LIB )
-
-#------------------------------------------------------------------------------
-# all warnings
-#------------------------------------------------------------------------------
-
-set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions

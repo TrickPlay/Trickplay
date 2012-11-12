@@ -2126,11 +2126,7 @@ interface actor [[ClutterActor*]]
             int animation = lua_gettop( L );
 
             lua_getfield(L,props,"loop");
-
-            if (!lua_isnil(L,-1))
-            {
-                clutter_animation_set_loop(a,lua_toboolean(L,-1));
-            }
+            clutter_animation_set_loop(a,lua_toboolean(L,-1));
             lua_pop(L,1);
 
             // If you call animate several times, clutter reuses the same

@@ -1,6 +1,3 @@
-/Debug
-/src
-/build
 *.o
 *.a
 !libAVCEncoder.a
@@ -14,5 +11,4 @@ engine/source/stash/*
 *.orig
 *.swp
 cached_options.txt
-*.sublime-project
 *.sublime-workspace
