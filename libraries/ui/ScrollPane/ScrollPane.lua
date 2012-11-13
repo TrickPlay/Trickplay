@@ -278,6 +278,9 @@ ScrollPane = setmetatable(
                     { l_horizontal,        nil },
                 },
             }
+            
+            WL_parent_redirect[l_pane] = instance
+            
             local getter, setter
             
             pane       = l_pane
