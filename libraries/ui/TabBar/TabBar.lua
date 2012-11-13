@@ -471,6 +471,9 @@ TabBar = setmetatable(
                     end
                 end
             }
+            
+            WL_parent_redirect[panes_obj] = instance
+            
             tab_w = 200
             tab_h = 50
             tab_images   = nil 
