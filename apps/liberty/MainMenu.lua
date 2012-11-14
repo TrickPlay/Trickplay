@@ -405,13 +405,13 @@ function epg_icon:on_key_down(k)
         
         menu_layer:add(epg_menu)
         epg_menu:lower_to_bottom()
-        epg_menu.z = -300
+        epg_menu.z = 300
         epg_menu.opacity = 0
         
         dolater(function()
         main_menu:animate{
             duration = 300,
-            z = 300,
+            z = -300,
             opacity = 0,
             on_completed = function() 
                 main_menu:unparent()
