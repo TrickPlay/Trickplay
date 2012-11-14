@@ -183,19 +183,12 @@ class Sprite [[ClutterActor*]] actor
     
                 if ( old_sheet != new_sheet )
                 {
-                    if ( new_sheet->is_initialized() )
-                    {
-                        int * new_sheet_ref = g_new( int , 1 );
-                        *new_sheet_ref = lb_strong_ref( L );
-    
-                        g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
-    
-                        refresh_texture( L , g_self , 0 , 0 );
-                    }
-                    else
-                    {
-                        luaL_error( L , "Failed to set 'sheet': SpriteSheet not initialized." );
-                    }
+                    int * new_sheet_ref = g_new( int , 1 );
+                    *new_sheet_ref = lb_strong_ref( L );
+
+                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
+
+                    refresh_texture( L , g_self , 0 , 0 );
                 }
             }
             else

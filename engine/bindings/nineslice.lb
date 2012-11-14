@@ -171,20 +171,13 @@ class NineSlice [[ClutterActor*]] actor
                 
                 if ( old_sheet != new_sheet )
                 {
-                    if ( new_sheet->is_initialized() )
-                    {
-                        int * new_sheet_ref = g_new( int, 1 );
-                        * new_sheet_ref = lb_strong_ref( L );
-                        
-                        g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
-                        
-                        nineslice_effect_set_sheet( get_effect( self ), new_sheet );
-                        clutter_actor_queue_redraw( self );
-                    }
-                    else
-                    {
-                        luaL_error( L, "Failed to set 'sheet': SpriteSheet not initialized." );
-                    }
+										int * new_sheet_ref = g_new( int, 1 );
+										* new_sheet_ref = lb_strong_ref( L );
+										
+										g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
+										
+										nineslice_effect_set_sheet( get_effect( self ), new_sheet );
+										clutter_actor_queue_redraw( self );
                 }
             }
             else

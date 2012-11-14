@@ -45,6 +45,7 @@ private:
 #define LUA_CALLBACK( self, status ) g_signal_emit_by_name( ( self )->extra, "load-finished", status )
 
 typedef void (* LFunc) ( lua_State * L, int index, gpointer user_data );
+typedef SpriteSheet::Source Source;
 
 void lua_foreach ( lua_State * L, int index, LFunc func, gpointer user_data )
 {
@@ -58,65 +59,13 @@ void lua_foreach ( lua_State * L, int index, LFunc func, gpointer user_data )
     }
 }
 
-class SpriteDef {
-    public:
-        SpriteDef( int x, int y, int w, int h, char * id )
-            : x( x ), y( y ), w( w ), h( h ), id( id )
-        {}
-        
-        int x, y, w, h;
-        char * id;
-};
-
-void spritedef_delete ( SpriteDef * sprite )
+void async_img_callback ( Image * image, Source * source )
 {
-    delete sprite;
+    source->load_image( image );
+    LUA_CALLBACK( source->sheet, image ? NULL : "FAILED_IMG_LOAD" );
 }
 
-void spritedef_map ( SpriteDef * sprite, SpriteSheet * self )
-{
-    self->map_subtexture( sprite->id, -1, sprite->x, sprite->y, sprite->w, sprite->h );
-}
-
-class SSDef {
-    public:
-        SSDef( SpriteSheet * ss )
-            : sheet( ss ),
-              sprites( g_ptr_array_new_with_free_func( (GDestroyNotify) spritedef_delete ) )
-        {}
-        
-        ~SSDef() { g_ptr_array_free( sprites, true ); }
-        
-        void load ( Image * image )
-        {
-            if ( image )
-            {
-                ClutterActor * texture = clutter_texture_new();
-                Images::load_texture( CLUTTER_TEXTURE( texture ), image );
-                CoglHandle source = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( texture ) );
-                
-                cogl_handle_ref( source );
-                sheet->add_texture( source );
-                g_ptr_array_foreach( sprites, (GFunc) spritedef_map, sheet );
-                
-                clutter_actor_destroy( texture );
-            }
-        }
-        
-        int tex;
-        SpriteSheet * sheet;
-        GPtrArray   * sprites;
-};
-
-void async_img_callback ( Image * image, SSDef * ssdef )
-{
-    ssdef->load( image );
-    delete ssdef;
-    
-    LUA_CALLBACK( ssdef->sheet, image ? NULL : "FAILED_IMG_LOAD" );
-}
-
-void ssdef_add_sprite ( lua_State * L, int index, SSDef * ssdef )
+void spritesheet_add_sprite ( lua_State * L, int index, SpriteSheet * self )
 {
     LSG;
     
@@ -132,15 +81,11 @@ void ssdef_add_sprite ( lua_State * L, int index, SSDef * ssdef )
     lua_getfield( L, index, "h" );
     lua_getfield( L, index, "id" );
     
-    SpriteDef * sprite = new SpriteDef(
+    self->map_subtexture( strdup( (char *) lua_tostring( L, -1 ) ),
         (int) lua_tointeger( L, -5 ),
         (int) lua_tointeger( L, -4 ),
         (int) lua_tointeger( L, -3 ),
-        (int) lua_tointeger( L, -2 ),
-        strdup( (char *) lua_tostring( L, -1 ) )
-    );
-    
-    g_ptr_array_add( ssdef->sprites, sprite );
+        (int) lua_tointeger( L, -2 ) );
     
     lua_pop( L, 5 );
     
@@ -158,14 +103,14 @@ void add_spritesheet_map ( lua_State * L, int index, SpriteSheet * self )
     }
     
     Bitmap * bitmap;
-    SSDef  * ssdef = new SSDef( self );
+    Source * source = self->add_source();
     
     lua_getfield( L, index, "sprites" );
     lua_getfield( L, index, "img" );
     
     if ( lua_istable( L, -2 ) )
     {
-        lua_foreach( L, -2, (LFunc) ssdef_add_sprite, ssdef );
+        lua_foreach( L, -2, (LFunc) spritesheet_add_sprite, self );
         
         if ( lua_isstring( L, -1 ) )
         {
@@ -174,18 +119,16 @@ void add_spritesheet_map ( lua_State * L, int index, SpriteSheet * self )
             
             if ( g_object_get_data( self->extra, "tp-async" ) )
             {
-                app->load_image_async( img, false, (Image::DecodeAsyncCallback) async_img_callback, ssdef, 0 );
+                app->load_image_async( img, false, (Image::DecodeAsyncCallback) async_img_callback, source, 0 );
             }
             else
             {
-                ssdef->load( app->load_image( img, false ) );
-                delete ssdef;
+                source->load_image( app->load_image( img, false ) );
             }
         }
         else if (( bitmap = LB_GET_BITMAP( L, -1 ) ))
         {
-            ssdef->load( bitmap->get_image() );
-            delete ssdef;
+            source->load_image( bitmap->get_image() );
         }
         else
         {
@@ -232,6 +175,8 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
 
 void lua_load_map_uri( lua_State * L, int index, SpriteSheet * self )
 {
+    LSG;
+    
     index = index > 0 ? index : lua_gettop( L ) + index + 1;
     
     char * map;
@@ -281,6 +226,8 @@ void lua_load_map_uri( lua_State * L, int index, SpriteSheet * self )
     {
         lua_pushnil( L );
     }
+    
+    LSG_END( 1 );
 }
 
 void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
@@ -290,37 +237,39 @@ void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
 /*
     Class: SpriteSheet
     
-    The SpriteSheet class will load a single image containing many sprites. An app may want to do this to avoid loading possibly hundreds of small icons or sprites, or to simplify the management of many similar images onscreen at once. A SpriteSheet, once created, is a static userdata that can be referenced by <Sprite> or <NineSlice>. These objects can then draw sections from the SpriteSheet directly without creating copies or clones.
+    The SpriteSheet class will load a set of large images containing many small sprites. An app may want to do this to avoid loading possibly hundreds of small icons or sprites, or to simplify the management of many similar images onscreen at once. A SpriteSheet, once created, is a static userdata that can be referenced by <Sprite> or <NineSlice>. These objects can then draw sprites from the SpriteSheet directly without creating copies or clones.
     
-    In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in the texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
+    In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in each source texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
     
     (code)
     // assets.json
-    {
-        "sprites": [
-            { "x": 0, "y": 0, "w": 16, "h": 16, "id": "sprite-1.png" },
-            { "x": 16, "y": 0, "w": 16, "h": 16, "id": "subfolder/sprite-2.png },
-            ...
-        ],
-        "img": "assets.png"
-    }
+    [
+        {
+            "sprites": [
+                { "x": 0, "y": 0, "w": 16, "h": 16, "id": "sprite-1.png" },
+                { "x": 16, "y": 0, "w": 16, "h": 16, "id": "subfolder/sprite-2.png },
+                ...
+            ],
+            "img": "assets.png"
+        },
+        ...
+    ]
     
     -- main.lua
     sheet1 = SpriteSheet { map = "assets.json" }
     sheet2 = SpriteSheet { map = {
-        sprites = {
-            { x = 0, y = 0, w = 16, h = 16, id = "sprite-1.png" },
-            { x = 16, y = 0, w = 16, h = 16, id = "subfolder/sprite-2.png" },
-            ...
-        }
-    }, img = Bitmap{ src = "assets.png" } }
+        {
+            sprites = {
+                { x = 0, y = 0, w = 16, h = 16, id = "sprite-1.png" },
+                { x = 16, y = 0, w = 16, h = 16, id = "subfolder/sprite-2.png" },
+                ...
+            }, img = Bitmap{ src = "assets.png" }
+        },
+        ...
+    }
     (end)
     
-    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheet textures are usually generated from seperate source images, using a path name as if the SpriteSheet is actually a folder of images is often clearer. By default, the SpriteSheet will load the image named by the "img" property in the .json file. This can be overridden by passing a different image along with the map to the SpriteSheet constructor, as below. If map is a Lua table, passing a <Bitmap> to img is required.
-    
-    (code)
-    sheet = SpriteSheet { map = "assets.json", img = Bitmap{ src = "assets.png" } }
-    (end)
+    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheets are usually generated from seperate source files, using a path name as if the SpriteSheet is actually a folder of images is often clearer.
     
     What if the app needs to download its assets from a URL? The SpriteSheet can take URI paths as well as local paths, and load its map and texture asynchronously.
     
@@ -345,8 +294,7 @@ class SpriteSheet [[SpriteSheet*]]
         
         *Properties:*
         
-        map - Lua table or path to a .json file of sprite definitions
-        [img] - Bitmap to load from. This is required if map is a Lua table, or a .json file with no "img" property
+        map - Lua table or path to a .json file of source-and-sprite definitions
         [async] - load remote URIs asynchronously
         
         *Return Value:* new NineSlice object
@@ -392,7 +340,7 @@ class SpriteSheet [[SpriteSheet*]]
                 luaL_error( L, "SpriteSheet initialization error: Must pass a table to SpriteSheet constructor." );
             }
 
-            LSG_END(0);
+            LSG_END( 0 );
         ]];
 
     /*
