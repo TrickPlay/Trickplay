@@ -399,6 +399,9 @@ ArrowPane = setmetatable(
                     {    nil, l_down,     nil },
                 },
             }
+            
+            WL_parent_redirect[l_pane] = instance
+            
             style_flags = {
                 border = "redraw_pane",
                 arrow = {

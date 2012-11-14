@@ -55,6 +55,11 @@ local table_of_envs = {}
 
 function get_env(w) return table_of_envs[w] end
 
+--------------------------------------------------------------------------------
+
+WL_parent_redirect = setmetatable({},{__mode='v'})
+
+--------------------------------------------------------------------------------
 local function Widgetize(instance)
     
     local _ENV = setmetatable({},{__index=_ENV})
@@ -467,7 +472,19 @@ local function Widgetize(instance)
 	)
     
     unsubscribe = style:subscribe_to( nil, subscription )
+    ----------------------------------------------------------------------------
     
+	override_property(instance,"parent",
+        function(oldf,self) 
+            local p = oldf(self)
+            while WL_parent_redirect[p] do
+                p = WL_parent_redirect[p]
+            end
+            return p 
+        end
+    )
+    
+    ----------------------------------------------------------------------------
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)

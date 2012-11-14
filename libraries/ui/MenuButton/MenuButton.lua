@@ -201,6 +201,9 @@ MenuButton = setmetatable(
             }
             
             popup = ListManager{focus_to_index=1}
+            
+            WL_parent_redirect[popup] = instance
+            
             style_flags = "restyle_button"
             old_update = update
             new_direction  = "down"

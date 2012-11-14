@@ -56,7 +56,7 @@ TextInput = setmetatable(
                     end
                 end,
                 text = function(instance,_ENV)
-                    return function(oldf) return orientation end,
+                    return function(oldf) return text.text end,
                     function(oldf,self,v) 
             
                         text.text = v
@@ -66,7 +66,17 @@ TextInput = setmetatable(
                 widget_type = function(instance,_ENV)
                     return function() return "TextInput" end
                 end,
-    
+                attributes = function(instance,_ENV)
+                    return function(oldf,self) 
+                        local t = oldf(self)
+                        
+                        t.text = self.text
+                        
+                        t.type = "TextInput"
+                        
+                        return t
+                    end
+                end,
             },
             functions = {
             },
