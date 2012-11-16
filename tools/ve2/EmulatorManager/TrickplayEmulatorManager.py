@@ -15,7 +15,9 @@ class TrickplayEmulatorManager(QWidget):
         self.main = main
         self.unsavedChanges = False
         self.contentMoveBlock = False
+        self.fscontentMoveBlock = False
         self.inspector = main._inspector
+        self.filesystem = main._ifilesystem
         self._path = os.path.join(self.main.apath, 'VE')
         self.trickplay = QProcess()
 
@@ -199,10 +201,15 @@ class TrickplayEmulatorManager(QWidget):
 				                self.inspector.ui.screenCombo.addItem(scrName)
 				        self.inspector.addItemToScreens = False
 
+				    elif luaCmd == "imageInfo":
+				        self.imgData = json.loads(s[9:])
+				        self.fscontentMoveBlock = True 
+				        self.filesystem.buildImageTree(self.imgData)
+				        self.fscontentMoveBlock = False 
 				    else:
 				        pass
 
-				    if gid is not None and luaCmd == "clearInsp":
+				    if gid is not None and luaCmd == "clear:Insp":
 					try:
 					    try:
 					        gid = int(gid)

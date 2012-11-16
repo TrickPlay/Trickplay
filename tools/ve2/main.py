@@ -6,6 +6,7 @@ from PyQt4.QtCore import *
 from wizard import Wizard
 from UI.MainWindow import Ui_MainWindow
 from Inspector.TrickplayInspector import TrickplayInspector
+from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 
 class MainWindow(QMainWindow):
@@ -15,6 +16,13 @@ class MainWindow(QMainWindow):
         QWidget.__init__(self, parent)
         
         self.apath = apath
+
+        self.stitcher = QProcess()
+
+        QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
+        QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
+        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stderr)
+        QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stderr)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -26,9 +34,14 @@ class MainWindow(QMainWindow):
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
+
         self._inspector = TrickplayInspector(self)
         self.ui.InspectorLayout.addWidget(self._inspector)
         
+        # Create Image File System
+        self._ifilesystem = TrickplayImageFileSystem(self)
+        self.ui.fileSystemLayout.addWidget(self._ifilesystem)
+
         # Create EmulatorManager
         self._emulatorManager = TrickplayEmulatorManager(self) 
         self._inspector.emulatorManager = self._emulatorManager
@@ -41,6 +54,8 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionNew_Project, SIGNAL("triggered()"),  self.newProject)
         QObject.connect(self.ui.actionOpen_Project, SIGNAL("triggered()"),  self.openProject)
         QObject.connect(self.ui.actionSave_Project, SIGNAL("triggered()"),  self.saveProject)
+        QObject.connect(self.ui.actionImport_Assets, SIGNAL("triggered()"),  self.importAssets)
+        QObject.connect(self.ui.actionImport_Skins, SIGNAL("triggered()"),  self.importSkins)
         
 		#Edit Menu
         QObject.connect(self.ui.action_Button, SIGNAL("triggered()"),  self.button)
@@ -135,8 +150,8 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
-
         self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
+        self.imageJsonFile = str(os.path.join(self.path, "assets/images/images.json"))
         return True
     
     def setAppPath(self):
@@ -146,6 +161,35 @@ class MainWindow(QMainWindow):
     def newLayer(self):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
         return True
+
+    """
+    def okMsg(self, eMsg):
+        msg = QMessageBox()
+        msg.setText(eMsg)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setWindowTitle("Notification")
+        ret = msg.exec_()
+        if ret == QMessageBox.Ok:
+            return
+    """
+
+    def errorMsg(self, eMsg):
+        msg = QMessageBox()
+        msg.setText(eMsg)
+        #msg.setStandardButtons(QMessageBox.Retry | QMessageBox.Cancel)
+        #msg.setDefaultButton(QMessageBox.Cancel)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setWindowTitle("Error")
+        ret = msg.exec_()
+        #if ret == QMessageBox.Retry:
+        #    self.importAssets()
+        #    return
+        #elif ret == QMessageBox.Cancel:
+        #    return 
+        if ret == QMessageBox.Ok:
+            return
 
     def warningMsg(self):
         msg = QMessageBox()
@@ -160,6 +204,52 @@ class MainWindow(QMainWindow):
             self.saveProject()
         elif ret == QMessageBox.Cancel:
             return 
+
+    def import_started(self):
+        return 
+
+    """
+    def import_stderr(self):
+        errorMsg = str(self.stitcher.readAllStandardError().data())
+        if errorMsg[:5] == "Error" :
+            self.errorMsg(errorMsg)
+        return
+    """
+    def import_stderr(self):
+        errorMsg = str(self.stitcher.readAllStandardError().data())
+        if errorMsg[:5] == "Error" :
+            self.errorMsg(errorMsg)
+        elif errorMsg[:6] == "Output" :
+            #self.okMsg(errorMsg)
+            #build virtual file system ...
+            self.sendLuaCommand("buildVF", '_VE_.buildVF()')
+            pass
+        return
+
+    def import_finished(self, errorCode):
+        return 
+
+
+    def importAssets(self):
+        path = -1 
+        while path == -1 :
+            if self.path is None:
+		        self.path = self.apath
+            path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
+
+        if path:
+            print ("[VDBG] Import Asset Images ...[%s]"%path)
+
+            if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
+                print("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                self.stitcher.start("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+            else:
+                print("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                self.stitcher.start("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+
+
+    def importSkins(self):
+        return true
 
     def newProject(self):
         orgPath = self.path
@@ -181,6 +271,7 @@ class MainWindow(QMainWindow):
             self.setAppPath()
             self.run()
             self.command = "newProject"
+            self._ifilesystem.ui.fileSystemTree.clear()
 
             while self.inspector.ui.screenCombo.count() > 0 :
                 curIdx = self.inspector.ui.screenCombo.currentIndex()
