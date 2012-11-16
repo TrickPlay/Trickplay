@@ -818,6 +818,17 @@ _VE_.setAppPath = function(path)
     currentProjectPath = path 
 end 
 
+_VE_.buildVF = function(path)
+    local images_file = "assets/images/images.json"
+    local images = readfile(images_file)
+    if #images > 0 then 
+        images = string.gsub (images, "(\n+)", "")
+        --images = string.sub(images, 2, string.len(images)-1)
+        print("imageInfo["..images.."]")
+    end
+    --spriteSheet = SpriteSheet { map = image_file } 
+end
+
 _VE_.openFile = function(path)
 
     blockReport = true
@@ -936,6 +947,7 @@ _VE_.openFile = function(path)
     end
     
     _VE_.refresh()
+    _VE_.buildVF()
     --[[
     for i,j in ipairs(s.children) do
         if string.find(j.name, "Layer") ~= nil then 
@@ -1333,11 +1345,14 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         }
     elseif uiTypeStr == "Slider" then 
        uiInstance:set{x=500, y = 300, grip_w = 50, grip_h = 20, track_w = 500, track_h = 50}
-    elseif uiTypeStr == "ProgressBar" or uiTypeStr == "ProgressSpinner" or uiTypeStr == "OrbittingDots" then 
-        uiInstance:set{x=500, y = 300, size = {300,200} }
-        if uiTypeStr == "ProgressBar" then 
-            uiInstance.progress = 0.25
-        end 
+    elseif uiTypeStr == "ProgressSpinner" then 
+        uiInstance:set{x=500, y = 300, size = {100,100} }
+    elseif uiTypeStr == "OrbittingDots" then 
+        uiInstance:set{x=500, y = 300, size = {200,200} }
+        uiInstance.num_dots = 10
+    elseif uiTypeStr == "ProgressBar" then 
+        uiInstance:set{x=500, y = 300, size = {300,50} }
+        uiInstance.progress = 0.25
     elseif uiTypeStr == "TextInput" then 
        uiInstance:set{enabled = false, size = {300,200}}
     elseif uiTypeStr == "TabBar" then 
@@ -1359,6 +1374,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     if uiTypeStr == "Image" or uiTypeStr == "Widget_Image" then 
         uiInstance.src = path
+        --uiUnstance.sheet = spriteSheet
+        --uiInstance.id = path
     elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
         editor.text(uiInstance)
     end
