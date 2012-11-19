@@ -675,7 +675,7 @@ Widget_Text = function(parameters)
 end
 
 local image_properties = {
-    "src","loaded","async","read_tags","tags","base_size","tile"
+    "src","loaded","async","read_tags","tags","base_size","tile","sheet","id"
 }
 Widget_Image = function(parameters)
     
@@ -738,12 +738,47 @@ Widget_Clone = function(parameters)
     
 end
 
+local sprite_properties = { 
+    "id","sheet"
+}
+Widget_Sprite = function(parameters)
+    
+    local instance = Widgetize(  Sprite()  )
+    
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Sprite" end
+    )
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.style = nil
+            
+            for _,k in pairs(sprite_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.type = "Widget_Sprite"
+            
+            return t
+        end
+    )
+    
+    return parameters and instance:set(parameters) or instance
+    
+end
+
 external.Widget           = Widget
 external.Widget_Group     = Widget_Group
 external.Widget_Clone     = Widget_Clone
 external.Widget_Image     = Widget_Image
 external.Widget_Text      = Widget_Text
 external.Widget_Rectangle = Widget_Rectangle
+external.Widget_Sprite    = Widget_Sprite
 
 
 
