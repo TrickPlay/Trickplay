@@ -179,7 +179,6 @@ class NineSlice [[ClutterActor*]] actor
 					
 					g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", new_sheet_ref, g_free );
 					
-					//nineslice_effect_set_sheet( get_effect( self ), new_sheet );
                     nineslice_effect_set_sprites( get_effect( self ), TRUE, new_sheet, list );
 					clutter_actor_queue_redraw( self );
                 }
@@ -190,7 +189,6 @@ class NineSlice [[ClutterActor*]] actor
                 
                 g_object_set_data( G_OBJECT( self ), "tp-sheet-ref", NULL );
                 
-                //nineslice_effect_set_sheet( get_effect( self ), NULL );
                 nineslice_effect_set_sprites( get_effect( self ), TRUE, NULL, NULL );
                 clutter_actor_queue_redraw( self );
             }
@@ -251,7 +249,6 @@ class NineSlice [[ClutterActor*]] actor
                     lua_pop(L, 1);
                 }
             
-                //nineslice_effect_set_ids( get_effect( self ), list );
                 nineslice_effect_set_sprites( get_effect( self ), FALSE, NULL, list );
                 clutter_actor_queue_redraw( self );
             }

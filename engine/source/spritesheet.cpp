@@ -79,6 +79,8 @@ void Source::deref_signal()
 
 void Source::ensure()
 {
+    g_message( "Source::ensure" );
+    g_message( "\tdepth is %i", image->depth() );
     if ( !texture )
     {
         g_message( "Source::load" );
@@ -95,12 +97,14 @@ void Source::ensure()
         cogl_handle_ref( texture );
         
         clutter_actor_destroy( actor );
+        
+        g_message( "Source::load finished" );
     }
 }
 
 void async_img_callback( Image * image, Source * source )
 {
-    source->image = image ;
+    source->image = image;
     source->sheet->emit_signal( image ? NULL : "FAILED_IMG_LOAD" );
 }
 
@@ -179,11 +183,11 @@ void SpriteSheet::map_subtexture( const char * id, int x, int y, int w, int h )
 
 Sprite * SpriteSheet::get_sprite( const char * id )
 {
-    if ( sprites.count( id ) )
+    if ( !id || !sprites.count( id ) )
     {
-        return & sprites[ std::string( id ) ];
+        return NULL;
     }
-    return NULL;
+    return & sprites[ std::string( id ) ];
 }
 
 CoglHandle SpriteSheet::get_subtexture( const char * id )
