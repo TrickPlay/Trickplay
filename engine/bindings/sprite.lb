@@ -56,10 +56,10 @@ SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
 
     return sheet;
 }
-
+/*
 int refresh_texture( lua_State * L , GObject * sprite , int check_validity , char ** error_message )
 {
-    char * id = (char*) g_object_get_data( sprite , "tp-id" );
+    char * id = (char *) g_object_get_data( sprite , "tp-id" );
 
     SpriteSheet * sheet = get_sheet( L , sprite );
 
@@ -71,28 +71,58 @@ int refresh_texture( lua_State * L , GObject * sprite , int check_validity , cha
             if ( sprite_texture != clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( sprite ) ) )
             {
                 clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , TP_COGL_TEXTURE( sprite_texture ) );
-
-                char * sheet_src = (char*) g_object_get_data( sheet->extra , "tp-src" );
-
-                char * sprite_src = (char*) malloc( snprintf( NULL, 0, "(Sprite) \"%s\"", sheet_src ) + 1 );
-                sprintf( sprite_src , "(Sprite) \"%s\"", sheet_src );
-
-                g_object_set_data_full( sprite , "tp-src" , strdup( sprite_src ) , g_free );
+                
+                //char * sheet_src = (char *) g_object_get_data( sheet->extra , "tp-src" );
+                
             }
         }
         else if ( check_validity )
         {
-            *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
+            * error_message = (char *) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
             return 0;
         }
     }
     else if ( check_validity )
     {
-        *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
+        * error_message = (char *) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
         return 0;
     }
 
     return 1;
+}
+*/
+
+void refresh_texture( GObject * g_self, SpriteSheet * sheet, const char * new_id )
+{
+    const char * id = new_id;
+    SpriteSheet::Sprite * sprite = (SpriteSheet::Sprite *) g_object_get_data( g_self, "tp-sprite" );
+    
+    if ( sprite )
+    {
+        if ( !id )
+        {
+            id = sprite->get_id();
+        }
+        sprite->deref_subtexture();
+        g_object_set_data( g_self, "tp-sprite", NULL );
+    }
+
+    if ( sheet && id )
+    {
+        if (( sprite = sheet->get_sprite( id ) ))
+        {
+            g_object_set_data( g_self, "tp-sprite", sprite );
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), sprite->ref_subtexture() );
+        }
+        else if ( new_id )
+        {
+            g_warning( "Sprite's sheet does not contain the id '%s' (If you are trying to change both, change the sheet first).", id );
+        }
+    }
+    else if ( new_id )
+    {
+        g_warning( "Trying to set the id '%s' on a Sprite without first specifying a SpriteSheet.", id );
+    }
 }
 
 void set_sheet_first( lua_State * L , int table )
@@ -156,8 +186,8 @@ class Sprite [[ClutterActor*]] actor
 
     ~Sprite()
         [[
-            int *sheet_ref = (int *)g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
-            lb_strong_unref( L , *sheet_ref );
+            int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
+            lb_strong_unref( L , * sheet_ref );
         ]];
 
     /*
@@ -184,11 +214,12 @@ class Sprite [[ClutterActor*]] actor
                 if ( old_sheet != new_sheet )
                 {
                     int * new_sheet_ref = g_new( int , 1 );
-                    *new_sheet_ref = lb_strong_ref( L );
+                        * new_sheet_ref = lb_strong_ref( L );
 
-                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
+                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify) g_free );
 
-                    refresh_texture( L , g_self , 0 , 0 );
+                    //refresh_texture( L , g_self , 0 , 0 );
+                    refresh_texture( g_self, new_sheet, NULL );
                 }
             }
             else
@@ -209,13 +240,15 @@ class Sprite [[ClutterActor*]] actor
 
     string id
         [[
-            id = (char*) g_object_get_data( G_OBJECT( self ) , "tp-id" );
+            //id = (char*) g_object_get_data( G_OBJECT( self ) , "tp-id" );
+            id = (char *) ((SpriteSheet::Sprite *) g_object_get_data( G_OBJECT( self ), "tp-sprite" ))->get_id();
         ]]
         [[
+            /*
             GObject * g_self = G_OBJECT( self );
 
-            char * old_id = (char*) g_object_get_data( g_self , "tp-id" );
-            char * new_id = (char*) lua_tostring( L , -1 );
+            char * old_id = (char *) g_object_get_data( g_self , "tp-id" );
+            char * new_id = (char *) lua_tostring( L , -1 );
 
             if ( ! old_id || strcmp( old_id , new_id ) != 0 )
             {
@@ -223,6 +256,7 @@ class Sprite [[ClutterActor*]] actor
                 char * old_id_copy = old_id ? strdup( old_id ) : 0;
 
                 g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
+                g_object_set_data_full( g_self , "tp-src" , g_strdup_printf( "(Sprite) \"%s\"", id) , g_free );
 
                 if ( ! refresh_texture( L , g_self , 1 , &error_message ) )
                 {
@@ -234,6 +268,18 @@ class Sprite [[ClutterActor*]] actor
                     g_free( old_id_copy );
                 }
             }
+            */
+            
+            GObject * g_self = G_OBJECT( self );
+            SpriteSheet::Sprite * sprite = (SpriteSheet::Sprite *) g_object_get_data( g_self, "tp-sprite" );
+            
+            char * new_id = (char *) lua_tostring( L , -1 );
+            
+            if ( !sprite || strcmp( new_id, sprite->get_id() ) != 0 )
+            {
+                g_object_set_data_full( g_self , "tp-src" , g_strdup_printf( "(Sprite) \"%s\"", new_id) , g_free );
+                refresh_texture( g_self, get_sheet( L, g_self ), new_id );
+            }
         ]];
 
     /*
@@ -242,13 +288,13 @@ class Sprite [[ClutterActor*]] actor
 
     UIElement set(table props)
         [[
-            luaL_checktype(L,-1,LUA_TTABLE);
+            luaL_checktype( L, -1, LUA_TTABLE );
 
-            lua_pushvalue( L , -2 );
-            set_sheet_first( L , props );
-            lua_pop( L , 1 );
+            lua_pushvalue( L, -2 );
+            set_sheet_first( L, props );
+            lua_pop( L, 1 );
 
-            ClutterUtil::set_props_from_table(L,props);
-            lua_pushvalue(L,1);
+            ClutterUtil::set_props_from_table( L, props );
+            lua_pushvalue( L, 1 );
         ]];
 }

@@ -23,24 +23,26 @@ public:
     class Source
     {
     public:
-        Source( SpriteSheet * sheet ) : sheet( sheet ), texture( NULL ), refs( 0 ) {};
+        Source( SpriteSheet * sheet ) : sheet( sheet ), texture( NULL ), can_signal( true ), refs( 0 ) {};
         ~Source();
         
         void set_source( const char * path );
         void set_source( Bitmap * bitmap );
-        void load_image( Image * image );
         void get_dimensions( int * w, int * h );
         CoglHandle get_subtexture( int x, int y, int w, int h );
         
         void ref() { refs++; g_message( "Ref'ed, now %i", refs ); }
         void deref();
+        void deref_signal();
         
         SpriteSheet * sheet;
+        Image * image;
         
     private:
         void ensure();
         
         TP_CoglTexture texture;
+        bool can_signal;
         int refs;
     };
 
@@ -55,12 +57,17 @@ public:
             x = _x; y = _y; w = _w; h = _h;
         }
         
-        CoglHandle get_subtexture();
-        const char * id;
+        int get_w() { return w; }
+        int get_h() { return h; }
+        const char * get_id() { return id; }
+        CoglHandle ref_subtexture();
+        void deref_subtexture();
+        void deref_signal();
         
     private:
         Source * source;
-        int x, y, w, h;
+        const char * id;
+        int x, y, w, h, refs;
         bool init;
     };
     
@@ -73,6 +80,8 @@ public:
 
     void emit_signal( const char * msg );
     void map_subtexture( const char * id, int x, int y, int w, int h );
+    
+    Sprite * get_sprite( const char * id );
     CoglHandle get_subtexture( const char * id );
     std::list< const char * > * get_ids();
 
