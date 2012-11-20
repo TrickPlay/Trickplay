@@ -30,7 +30,7 @@ local integrating_schedule_i = 1
 local margin = 425
 local heading_h = 285
 local heading_txt_y = 65
-local channel_logo_x = -120
+local channel_logo_x = -50
 --------------------------------------------------------------------
 local mesg = Text{
     x    = (screen_w - margin)/2,
@@ -883,8 +883,12 @@ function instance:setup_icons(t)
     --TODO setup wrap around stuff here
     
     if type(t) ~= "table" or #t == 0 then return end
+    local item
     for i,channel in ipairs(t) do
-        channel_list[i] = Group{children={clone_proxy(channel.Name):set{x=channel_logo_x}}}
+        item = clone_proxy(channel.Name)
+        item.x = channel_logo_x
+        item.anchor_point = {item.w,item.h/2}
+        channel_list[i] = item--Group{children={item}}
         channel_list[i].name = channel.Name
     end
     
@@ -899,7 +903,8 @@ function instance:setup_icons(t)
             
             wrap_i(curr_channel+i-middle_row,channel_list)
             
-        ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
+        ]:set{  y=rows[i].y+((i == middle_row) and row_h or row_h/2)  }
+        
         show_grid_icons:add(rows[i].icon)
     end
     rows[middle_row].icon.scale = {sel_scale,sel_scale}
@@ -1175,7 +1180,7 @@ local keypresses = {
         animating_show_grid = true
         rows[1].icon = channel_list[top_i]
         rows[1].shows = channel_list[top_i].shows
-        rows[1].icon.x = 0
+        --rows[1].icon.x = 0
         rows[1].icon.y = rows[1].y+row_h/2
         rows[1].shows.y = rows[1].y+row_h/2
         show_grid_text:add(rows[1].shows)
@@ -1290,7 +1295,7 @@ local keypresses = {
         
         rows[#rows].icon  = channel_list[bottom_i]
         rows[#rows].shows = channel_list[bottom_i].shows
-        rows[#rows].icon.x = 0
+        --rows[#rows].icon.x = 0
         rows[#rows].icon.y  = rows[#rows].y+row_h/2
         rows[#rows].shows.y = rows[#rows].y+row_h/2
         show_grid_text:add( rows[#rows].shows)
