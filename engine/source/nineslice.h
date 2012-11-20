@@ -1,9 +1,3 @@
-/*
-
-    nineslice.h
-
-*/
-
 #ifndef __TRICKPLAY_NINESLICE_H__
 #define __TRICKPLAY_NINESLICE_H__
 
@@ -24,16 +18,18 @@ typedef struct _NineSliceEffectClass NineSliceEffectClass;
 typedef struct _NineSliceEffectPrivate NineSliceEffectPrivate;
 
 struct _NineSliceEffect {
-  ClutterEffect parent_instance;
-  NineSliceEffectPrivate * priv;
+    ClutterEffect parent_instance;
+    NineSliceEffectPrivate * priv;
 };
 
 struct _NineSliceEffectClass {
-  ClutterEffectClass parent_class;
+    ClutterEffectClass parent_class;
 };
 
 ClutterEffect * nineslice_effect_new();
 ClutterEffect * nineslice_effect_new_from_ids( const gchar * ids[], SpriteSheet * sheet, gboolean tile[6] );
+
+void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet, SpriteSheet * sheet, const gchar * ids[] );
 
 void nineslice_effect_set_ids( NineSliceEffect * effect, const gchar * ids[] );
 
