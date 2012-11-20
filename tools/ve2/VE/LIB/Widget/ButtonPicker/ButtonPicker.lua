@@ -140,7 +140,7 @@ ButtonPicker = setmetatable(
                         if orientation == v then return end
                         
                         orientation = v
-                        
+                        new_orientation = true
                     end
                 end,
     

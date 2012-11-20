@@ -334,6 +334,9 @@ DialogBox = setmetatable(
             }
             title = Text{text="DialogBox"}
             content_group = Widget_Group()
+            
+            WL_parent_redirect[content_group] = instance
+            
             bg = nil
             separator_y_set = false
             separator_y = 50
