@@ -84,6 +84,12 @@ void spritesheet_add_sprite ( lua_State * L, int index, SpriteSheet * self )
     LSG_END( 0 );
 }
 
+void async_img_callback( Image * image, Source * source )
+{
+    source->load( image );
+    source->sheet->emit_signal( image ? NULL : "FAILED_IMG_LOAD" );
+}
+
 void spritesheet_add_map ( lua_State * L, int index, SpriteSheet * self )
 {
     LSG;
@@ -94,6 +100,7 @@ void spritesheet_add_map ( lua_State * L, int index, SpriteSheet * self )
         return;
     }
     
+    App    * app = App::get( L );
     Bitmap * bitmap;
     Source * source = self->add_source();
     
@@ -106,11 +113,19 @@ void spritesheet_add_map ( lua_State * L, int index, SpriteSheet * self )
         
         if ( lua_isstring( L, -1 ) )
         {
-            source->set_source( lua_tostring( L, -1 ) );
+            char * path = lua_tostring( L, -1 );
+            if ( self->async )
+            {
+                app->load_image_async( path, false, (Image::DecodeAsyncCallback) async_img_callback, source, NULL );
+            }
+            else
+            {
+                source->load( app->load_image( path, false ) );
+            }
         }
         else if (( bitmap = LB_GET_BITMAP( L, -1 ) ))
         {
-            source->set_source( bitmap );
+            source->set_source( bitmap->get_image() );
         }
         else
         {
@@ -286,8 +301,6 @@ class SpriteSheet [[SpriteSheet*]]
         [[
             LSG;
             self = lb_construct( SpriteSheet, new SpriteSheet() );
-            self->app = App::get( L );
-            //g_object_set_data( self->extra, "tp-app", App::get( L ) );
 
             g_signal_connect_data( self->extra, "load-finished",
                 (GCallback) Sprite_Sheet_on_loaded,

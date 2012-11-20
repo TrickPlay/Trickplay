@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include "common.h"
 #include "app_resource.h"
-#include "bitmap.h"
 #include "util.h"
 
 #ifdef CLUTTER_VERSION_1_10
@@ -27,7 +26,7 @@ public:
             ~Source();
             
             void set_source( const char * path );
-            void set_source( Bitmap * bitmap );
+            void set_source( Image * image );
             void get_dimensions( int * w, int * h );
             CoglHandle get_subtexture( int x, int y, int w, int h );
             
@@ -36,11 +35,11 @@ public:
             void deref_signal();
             
             SpriteSheet * sheet;
-            Image * image;
             
         private:
-            
             void ensure();
+            
+            Image * image;
             TP_CoglTexture texture;
             bool can_signal;
             int refs;
@@ -85,7 +84,6 @@ public:
     CoglHandle get_subtexture( const char * id );
     std::list< const char * > * get_ids();
 
-    App * app;
     GObject * extra;
     bool async;
     bool weak;

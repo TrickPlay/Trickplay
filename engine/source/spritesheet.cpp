@@ -102,27 +102,9 @@ void Source::ensure()
     }
 }
 
-void async_img_callback( Image * image, Source * source )
+void Source::set_source( Image * _image )
 {
-    source->image = image;
-    source->sheet->emit_signal( image ? NULL : "FAILED_IMG_LOAD" );
-}
-
-void Source::set_source( const char * path )
-{
-    if ( sheet->async )
-    {
-        sheet->app->load_image_async( path, false, (Image::DecodeAsyncCallback) async_img_callback, this, 0 );
-    }
-    else
-    {
-        image = sheet->app->load_image( path, false );
-    }
-}
-
-void Source::set_source( Bitmap * bitmap )
-{
-    image = bitmap->get_image();
+    image = _image;
 }
 
 void Source::get_dimensions( int * w, int * h )
