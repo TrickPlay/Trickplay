@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionMenuButton, SIGNAL("triggered()"),  self.menubutton)
 
         QObject.connect(self.ui.actionWidgetText, SIGNAL("triggered()"),  self.text)
-        QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
+        #QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
         QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
 
         QObject.connect(self.ui.actionGroup, SIGNAL("triggered()"),  self.group)

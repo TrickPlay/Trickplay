@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Nov  9 14:07:45 2012
+# Created: Tue Nov 20 14:15:15 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -394,14 +394,13 @@ class Ui_MainWindow(object):
         self.menuInsert_UI_Element.addAction(self.actionProgressBar)
         self.menuInsert_UI_Element.addAction(self.actionProgressSpinner)
         self.menuInsert_UI_Element.addAction(self.actionRadioButton)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
         self.menuInsert_UI_Element.addAction(self.actionScrollPane)
         self.menuInsert_UI_Element.addAction(self.actionSlider)
         self.menuInsert_UI_Element.addAction(self.actionTabBar)
+        self.menuInsert_UI_Element.addAction(self.actionWidgetText)
         self.menuInsert_UI_Element.addAction(self.actionTextInput)
         self.menuInsert_UI_Element.addAction(self.actionToastAlert)
-        self.menuInsert_UI_Element.addAction(self.actionWidgetText)
-        self.menuInsert_UI_Element.addAction(self.actionWidgetImage)
-        self.menuInsert_UI_Element.addAction(self.actionWidgetRectangle)
         self.menuEdit.addAction(self.menuInsert_UI_Element.menuAction())
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionDelete)
@@ -545,9 +544,9 @@ class Ui_MainWindow(object):
         self.actionArrowPane.setText(QtGui.QApplication.translate("MainWindow", "ArrowPane", None, QtGui.QApplication.UnicodeUTF8))
         self.actionButtonPicker.setText(QtGui.QApplication.translate("MainWindow", "ButtonPicker", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMenuButton.setText(QtGui.QApplication.translate("MainWindow", "MenuButton", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionWidgetText.setText(QtGui.QApplication.translate("MainWindow", "WidgetText", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetText.setText(QtGui.QApplication.translate("MainWindow", "Text", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetImage.setText(QtGui.QApplication.translate("MainWindow", "WidgetImage", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionWidgetRectangle.setText(QtGui.QApplication.translate("MainWindow", "WidgetRectangle", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWidgetRectangle.setText(QtGui.QApplication.translate("MainWindow", "Rectangle", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetGroup.setText(QtGui.QApplication.translate("MainWindow", "WidgetGroup", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWidgetClone.setText(QtGui.QApplication.translate("MainWindow", "WidgetClone", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUngroup.setText(QtGui.QApplication.translate("MainWindow", "Ungroup", None, QtGui.QApplication.UnicodeUTF8))
