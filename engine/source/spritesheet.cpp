@@ -7,6 +7,22 @@
 typedef SpriteSheet::Source Source;
 typedef SpriteSheet::Sprite Sprite;
 
+class UnloadSignal : public Action
+{
+    public:
+        UnloadSignal( Source * source ) : source( source ) {}
+
+    protected:
+        bool run()
+        {
+            source->deref_signal();
+            return false;
+        }
+
+    private:
+        Source * source;
+};
+
 CoglHandle Sprite::ref_subtexture()
 {
     if ( init )
@@ -34,22 +50,6 @@ Source::~Source()
     if ( texture ) cogl_handle_unref( texture );
 }
 
-class UnloadSignal : public Action
-{
-public:
-    UnloadSignal( Source * source ) : source( source ) {}
-
-protected:
-    bool run()
-    {
-        source->deref_signal();
-        return false;
-    }
-
-private:
-    Source * source;
-};
-
 void Source::deref()
 {
     refs = MAX( 0, refs - 1 );
@@ -58,6 +58,7 @@ void Source::deref()
     
     if ( !refs && sheet->weak && can_signal )
     {
+        g_message( "Posting deref signal" );
         Action::post( new UnloadSignal( this ) );
         can_signal = false;
     }
@@ -67,7 +68,7 @@ void Source::deref_signal()
 {
     g_message( "Sourse::deref_signal %i", refs );
     
-    if ( !refs )
+    if ( !refs && texture)
     {
         cogl_handle_unref( texture );
         texture = NULL;
