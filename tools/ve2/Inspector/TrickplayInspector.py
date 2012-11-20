@@ -1104,7 +1104,7 @@ class TrickplayInspector(QWidget):
                 elif p in COMBOBOX_PROP: 
                     comboPropertyFill(p, n, data) 
 
-                if p in NESTED_PROP_LIST: 
+                if p in NESTED_PROP_LIST and not ( p == "text" and  data['type'] == "TextInput" ): 
                     z = data[p]
                     if p == "items" and data["type"] == "ButtonPicker":
                         pass
