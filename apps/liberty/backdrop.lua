@@ -151,7 +151,7 @@ local function make_zoom_zoom(group)
                                 c_image.y  = p*INTERVAL
                             end,
                         }
-    function group:stop_dots(t)
+    function group:stop_dots()
         
         if not t.is_playing then return end
         
