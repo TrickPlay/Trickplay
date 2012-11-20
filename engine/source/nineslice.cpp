@@ -11,11 +11,7 @@ struct _NineSliceEffectPrivate {
     SpriteSheet  * sheet;
     Sprite       * sprites[9];
     CoglMaterial * material[9];
-    //const gchar    * ids[9];
-    //gint w[9],
-    //     h[9];
     gboolean tile[6];
-    //gboolean has_ids;
 };
 
 static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
@@ -29,13 +25,6 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
     {
         return FALSE;
     }
-    
-    /*
-    float l = (float) MAX( MAX( priv->w[0], priv->w[3] ), priv->w[6] ),
-          r = (float) MAX( MAX( priv->w[2], priv->w[5] ), priv->w[8] ),
-          t = (float) MAX( MAX( priv->h[0], priv->h[1] ), priv->h[2] ),
-          b = (float) MAX( MAX( priv->h[6], priv->h[7] ), priv->h[8] );
-    */
     
     int width[9], height[9];
     for ( unsigned i = 0; i < 9; i++ )
@@ -65,9 +54,8 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
     float xs[] = { 0.0, l, w - r, w },
           ys[] = { 0.0, t, h - b, h };
     
-    gint i, j;
-    for ( i = 0; i < 3; i++ )
-        for ( j = 0; j < 3; j++ )
+    for ( unsigned i = 0; i < 3; i++ )
+        for ( unsigned j = 0; j < 3; j++ )
             if ( priv->material[i*3 + j] )
             {
                 cogl_set_source( priv->material[i*3 + j] );
@@ -75,7 +63,7 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
                          ty = i == 1 && priv->tile[ (j == 0) ? 4 : (j == 1) ? 1 : 5 ];
                 cogl_rectangle_with_texture_coords( xs[j], ys[i], xs[j+1], ys[i+1], 0.0, 0.0,
                          tx ? ( xs[j+1] - xs[j] ) / (float) width[i*3 + j] : 1.0,
-                         ty ? ( ys[i+1] - ys[i] ) / (float) height[i*3 + j] : 1.0 ); // priv->h[i*3 + j]
+                         ty ? ( ys[i+1] - ys[i] ) / (float) height[i*3 + j] : 1.0 );
             }
 
     return FALSE;
@@ -85,10 +73,8 @@ static void nineslice_effect_dispose( GObject * gobject )
 {
     NineSliceEffectPrivate * priv = NINESLICE_EFFECT( gobject )->priv;
     
-    gint i;
-    for ( i = 0; i < 9; i++ )
+    for ( unsigned i = 0; i < 9; i++ )
     {
-        //free( (void *) priv->ids[i] );
         if ( priv->material[i] )
         {
             cogl_handle_unref( priv->material[i] );
@@ -145,101 +131,21 @@ void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet,
         clutter_actor_destroy( texture );
     }
 }
-/*
-static void nineslice_effect_reevaluate( NineSliceEffect * effect )
-{
-    NineSliceEffectPrivate * priv = effect->priv;
-    gboolean ready = priv->sheet && priv->has_ids;
-    ClutterActor * texture;
-    
-    if ( ready )
-        texture = clutter_texture_new();
-        
-    gint i;
-    for ( i = 0; i < 9; i++ )
-    {
-        if ( priv->material[i] != NULL )
-        {
-            cogl_handle_unref( priv->material[i] );
-            priv->material[i] = NULL;
-            priv->w[i] = 0;
-            priv->h[i] = 0;
-        }
-        
-        if ( ready && priv->ids[i] )
-        {
-            Sprite * sprite = priv->sheet->get_sprite( priv->ids[i] );
-            CoglHandle subtexture = priv->sheet->get_subtexture( priv->ids[i] );
-            if ( cogl_is_texture( subtexture ) )
-            {
-                clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), subtexture );
-                
-                priv->material[i] = cogl_material_copy( COGL_MATERIAL(
-                        clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
-                clutter_texture_get_base_size( CLUTTER_TEXTURE( texture ), &priv->w[i], &priv->h[i] );
-            }
-        }
-    }
-    
-    if ( ready )
-        clutter_actor_destroy( texture );
-}
-*/
+
 void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] )
 {
-    int i;
-    for ( i = 0; i < 6; i++ )
+    for ( unsigned i = 0; i < 6; i++ )
         effect->priv->tile[i] = tile[i];
 }
 
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] )
 {
-    int i;
-    for ( i = 0; i < 6; i++ )
+    for ( unsigned i = 0; i < 6; i++ )
         tile[i] = effect->priv->tile[i];
 }
-/*
-void nineslice_effect_set_sheet( NineSliceEffect * effect, SpriteSheet * sheet )
-{
-    NineSliceEffectPrivate * priv = effect->priv;
-    if ( priv->sheet != sheet )
-    {
-        priv->sheet = sheet;
-        nineslice_effect_reevaluate( effect );
-    }
-}
 
-void nineslice_effect_set_ids( NineSliceEffect * effect, const gchar * ids[] )
-{
-    NineSliceEffectPrivate * priv = effect->priv;
-    gint i;
-    for ( i = 0; i < 9; i++ )
-    {
-        if( priv->ids[i] )
-            free( (void *) priv->ids[i] );
-            
-        if ( ids )
-        {
-            if( ids[i] )
-                priv->ids[i] = strdup( ids[i] );
-            else
-                priv->ids[i] = NULL;
-        }
-    }
-    
-    priv->has_ids = ids ? TRUE : FALSE;
-    nineslice_effect_reevaluate( effect );
-}
-*/
 void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] )
 {
-    /*
-    int * w = effect->priv->w, * h = effect->priv->h;
-    borders[0] = MAX( MAX( w[0], w[3] ), w[6] );
-    borders[1] = MAX( MAX( w[2], w[5] ), w[8] );
-    borders[2] = MAX( MAX( h[0], h[1] ), h[2] );
-    borders[3] = MAX( MAX( h[6], h[7] ), h[8] );
-    */
     int width[9], height[9];
     for ( unsigned i = 0; i < 9; i++ )
     {
@@ -278,10 +184,7 @@ ClutterEffect * nineslice_effect_new()
 ClutterEffect * nineslice_effect_new_from_ids( const gchar * ids[], SpriteSheet * sheet, gboolean tile[6] )
 {
     ClutterEffect * self = (ClutterEffect *) g_object_new( TYPE_NINESLICE_EFFECT, NULL );
-    //NineSliceEffectPrivate * priv = NINESLICE_EFFECT( self )->priv;
     
-    //priv->sheet = sheet;
-    //nineslice_effect_set_ids( NINESLICE_EFFECT( self ), ids );
     nineslice_effect_set_tile( NINESLICE_EFFECT( self ), tile );
     nineslice_effect_set_sprites( NINESLICE_EFFECT( self ), TRUE, sheet, ids );
     

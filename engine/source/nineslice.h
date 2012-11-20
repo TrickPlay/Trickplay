@@ -31,10 +31,6 @@ ClutterEffect * nineslice_effect_new_from_ids( const gchar * ids[], SpriteSheet 
 
 void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet, SpriteSheet * sheet, const gchar * ids[] );
 
-void nineslice_effect_set_ids( NineSliceEffect * effect, const gchar * ids[] );
-
-void nineslice_effect_set_sheet( NineSliceEffect * effect, SpriteSheet * sheet );
-
 void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] );
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );
 
