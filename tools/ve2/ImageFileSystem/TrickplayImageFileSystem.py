@@ -7,32 +7,91 @@ from UI.NewFolder import Ui_newFolderDialog
 
 multiSelect = 'false'
 
-class DnDTableWidget(QTableWidget):
-    def __init__(self, parent=None, pickerTable = None):
-        super(DnDTableWidget, self).__init__(parent)
-        if parent :
-            self.sendData = pickerTable.sendItemsData
-        self.setAcceptDrops(True)
-        self.setDragEnabled(True)
-        
-    def dragEnterEvent(self, event):
-        event.accept()
 
-    def dragMoveEvent(self, event):
-        event.setDropAction(Qt.MoveAction)
-        event.accept()
+try:
+    _fromUtf8 = QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
 
-    def dropEvent(self, event):
-        table = event.source ()
-        orgItem = table.selectedItems()[0]
-        orgIdx = table.indexFromItem(orgItem).row()
-        newItem = table.itemAt(event.pos())
-        newText = newItem.text()
-        newIdx = table.indexFromItem(newItem).row()
-        newItem.setText(orgItem.text())
-        orgItem.setText(newText)
-        table.setCurrentItem(newItem)
-        self.sendData()
+class DnDTreeWidget(QTreeWidget):
+     def __init__(self, parent=None):
+         QTreeWidget.__init__(self, parent)
+         self.fileSystem = parent
+         self.setSelectionMode(self.ExtendedSelection)
+         self.setDragDropMode(self.InternalMove)
+         self.setDragEnabled(True)
+         self.setDropIndicatorShown(True)
+
+     def dropEvent(self, event):
+         if event.source() == self:
+             QAbstractItemView.dropEvent(self, event)
+
+     def dropMimeData(self, parent, row, data, action):
+         if action == Qt.MoveAction:
+             return self.moveSelection(parent, row)
+         return False
+
+     def moveSelection(self, parent, position):
+	    # save the selected items
+         dropTo = None
+         dragFrom = None
+
+         if parent :
+            #print parent.whatsThis(0), "To"
+            dropTo =  parent.whatsThis(0)
+            if dropTo[len(dropTo)-1:] != "/":
+                return False
+         else:
+            dropTo = ""
+
+         selection = [QPersistentModelIndex(i)
+                      for i in self.selectedIndexes()]
+         parent_index = self.indexFromItem(parent)
+         if parent_index in selection:
+             return False
+         # save the drop location in case it gets moved
+         target = self.model().index(position, 0, parent_index).row()
+         #print position, parent_index, target, "***"
+
+         if target < 0:
+             target = position
+         # remove the selected items
+         taken = []
+         for index in reversed(selection):
+             item = self.itemFromIndex(QModelIndex(index))
+             if item is None or item.parent() is None:
+                 print item.whatsThis(0), "Look 111"
+                 taken.append(self.takeTopLevelItem(index.row()))
+             else:
+                 if self.fileSystem.isThisUniq(item.text(0), dropTo) == False :
+                    return False
+                 taken.append(item.parent().takeChild(index.row()))
+         #print taken[0].whatsThis(0), "From"
+         dragFrom =  taken[0]#.whatsThis(0)
+         if self.fileSystem.dragNdrop(dragFrom, dropTo) == False :
+            return False
+
+         # insert the selected items at their new positions
+         while taken:
+             if position == -1:
+                 # append the items if position not specified
+                 if parent_index.isValid():
+                     parent.insertChild(
+                         parent.childCount(), taken.pop(0))
+                 else:
+                     self.insertTopLevelItem(
+                         self.topLevelItemCount(), taken.pop(0))
+             else:
+		# insert the items at the specified position
+                 if parent_index.isValid():
+                     parent.insertChild(min(target,
+                         parent.childCount()), taken.pop(0))
+                 else:
+                     self.insertTopLevelItem(min(target,
+                         self.topLevelItemCount()), taken.pop(0))
+
+         return True
+
 
 class TrickplayImageFileSystem(QWidget):
     
@@ -48,6 +107,11 @@ class TrickplayImageFileSystem(QWidget):
               
         self.main = main
         
+        self.ui.fileSystemTree = DnDTreeWidget(self)
+        self.ui.fileSystemTree.setObjectName(_fromUtf8("fileSystemTree"))
+        self.ui.fileSystemTree.headerItem().setText(0, _fromUtf8("1"))
+        self.ui.fileSystem.addWidget(self.ui.fileSystemTree, 0, 0, 1, 1)
+
         self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
         self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
@@ -69,6 +133,17 @@ class TrickplayImageFileSystem(QWidget):
         else:
             return False
         
+    def getLastDir(self, id) :
+        folder = ""
+        while re.search("\/", id):
+            n = re.search("\/", id).end()
+            folder = id[:n-1]
+            id = id[n:]
+        if folder :
+            return folder+"/"
+        else :
+            return ""
+
     def getDir(self, id) :
         dirVal = ""
         while re.search("\/", id):
@@ -79,6 +154,107 @@ class TrickplayImageFileSystem(QWidget):
 
         return dirVal
         
+    def isOnTop(self, id):
+        if self.isDir(id) == True and id.count("/") == 1 :
+            return True
+        if self.isDir(id) == False and id.count("/") == 0 :
+            return True
+        return False
+            
+    def isSameDir(self, id, id2):
+        if self.getDir(id) == self.getDir(id2) : 
+            return True
+        return False
+
+    def isThisUniq(self, dragId, dropTo):
+
+        if self.isDir(dropTo) == True or dropTo == "":
+            for imageData in self.data:
+                for imageFile in imageData['sprites']:
+                    id = imageFile['id']
+                    if dropTo == "" and id[:len(dragId)] == dragId :
+                        print dropTo+dragId, "is existing"
+                        return False
+                        
+                    if id.find(dropTo+dragId) == 0 :
+                        print dropTo+dragId, "is existing"
+                        return False
+        else:
+            return True
+
+    def imageJsonItemSub(self, org, new) :
+        if self.main._emulatorManager.fscontentMoveBlock == True :
+            return
+        f = open(self.main.imageJsonFile)
+        jsonFileContents = f.read()
+
+        f = open(self.main.imageJsonFile, 'w')
+        f.write(jsonFileContents.replace(org, new))
+        f.close()
+        self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
+
+    def dragNdrop(self, dragFrom, dropTo):
+        dragFromText = dragFrom.text(0)
+        dragFrom = dragFrom.whatsThis(0)
+
+        print "Drag From : %s"%dragFrom
+        print "Drop To : %s"%dropTo
+        
+        #Dir -> Dir
+        if self.isOnTop(dragFrom) == True :
+            org = dragFrom
+            new = dropTo+dragFrom
+        elif self.isDir(dragFrom) == True :
+            org = dragFrom
+            new = dropTo+self.getLastDir(dragFrom)
+        elif self.isDir(dragFrom) == False :
+            org = dragFrom
+            new = dropTo+dragFromText
+
+        print "Org Id : %s "%org
+        print "New Id : %s "%new
+        if org != new :
+            self.imageJsonItemSub(org, new) 
+
+        """
+        if self.isOnTop(dragFrom) == True :
+            #if self.isDir(dropTo) == False and self.isOnTop(dropTo) == True :
+                #print ("same level 111 ")
+            #else :
+            org = dragFrom
+            new = dropTo+dragFrom
+            self.imageJsonItemSub(org, new) 
+            # TODO : (1) need to delete empty dropTo/ if dropTo was empty 
+            print ("case1")
+        else :
+            if self.isOnTop(dropTo) == True :
+                if self.isDir(dragFrom) == False : 
+                    org = dragFrom
+                    new = dragFromText
+                    self.imageJsonItemSub(org, new) 
+                    # TODO : (2) need to create empty dragFrom folder / if dragFrom is empty 
+                    print ("case2")
+                else : 
+                    for imageData in self.data:
+                        for imageFile in imageData['sprites']:
+                            id = imageFile['id']
+                            if id[:len(dragFrom)] == dragFrom :
+                                org = id 
+                                new = id[len(dragFrom):]
+                                self.imageJsonItemSub(org, new) 
+                                print ("case3")
+            elif self.isSameDir(dragFrom, dropTo) == True:
+                print ("same level 222 ")
+            else :
+                print ("case4")
+                if self.isDir(dragFrom) == False :
+                    org = dragFrom
+                    new = dragFromText
+                    self.imageJsonItemSub(org, new) 
+                    
+            #"""
+        return True
+
     def createContextMenu(self):
         # Toolbar font 
         font = QFont()
@@ -131,6 +307,8 @@ class TrickplayImageFileSystem(QWidget):
             if fileCnt == 1 :
                 orgId = "}\n\t],"
                 newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+self.getDir(itemWhatsThis)+"\" }\n\t],"
+                self.imageJsonItemSub(orgId, newFolderInfo) 
+                """
                 f = open(self.main.imageJsonFile)
                 jsonFileContents = f.read()
                 f.close()
@@ -138,13 +316,13 @@ class TrickplayImageFileSystem(QWidget):
                 f.write(jsonFileContents.replace(orgId, newFolderInfo))
                 f.close()
                 self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
+                """
 
     def insertImage(self) :
         item = self.ui.fileSystemTree.currentItem()
         source = item.whatsThis(0)
 
-        self.main.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self.main._inspector.curLayerGid)+",
-        'Image', "+"'"+str(source)+"')")
+        self.main.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self.main._inspector.curLayerGid)+", 'Image', "+"'"+str(source)+"')")
 
         """
             spriteSheet = SpriteSheet { map = "assets/image/images.json" }
@@ -152,8 +330,8 @@ class TrickplayImageFileSystem(QWidget):
         """
         
     def createNewFolder(self) :
-        if self.main._emulatorManager.fscontentMoveBlock == True :
-            return
+        #if self.main._emulatorManager.fscontentMoveBlock == True :
+            #return
         item = self.ui.fileSystemTree.currentItem()
         newFolderParent = self.getDir(item.whatsThis(0))
 
@@ -169,6 +347,9 @@ class TrickplayImageFileSystem(QWidget):
 			    newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
 			else:
 			    newFolderInfo = orgId+"\" },\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path
+
+			self.imageJsonItemSub(orgId, newFolderInfo) 
+			"""
 			f = open(self.main.imageJsonFile)
 			jsonFileContents = f.read()
 			f.close()
@@ -176,14 +357,18 @@ class TrickplayImageFileSystem(QWidget):
 			f.write(jsonFileContents.replace(orgId, newFolderInfo))
 			f.close()
 			self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
+			"""
             
     def fileItemChanged(self, item, col):
-        if self.main._emulatorManager.fscontentMoveBlock == True :
-            return
+        #if self.main._emulatorManager.fscontentMoveBlock == True :
+            #return
         #print "fileItemChanged"
         orgId = str(item.whatsThis(0))
         newId = self.getDir(orgId)+str(item.text(0))
 
+        self.imageJsonItemSub(orgId, newId) 
+
+        """
         #jsonFileContents = os.read(self.main.imageJsonFile)
         f = open(self.main.imageJsonFile)
         jsonFileContents = f.read()
@@ -192,6 +377,7 @@ class TrickplayImageFileSystem(QWidget):
         f = open(self.main.imageJsonFile, 'w')
         f.write(jsonFileContents.replace(orgId, newId))
         f.close()
+        """
 
     def buildImageTree(self,  data, styleIndex=None):
 
@@ -205,7 +391,7 @@ class TrickplayImageFileSystem(QWidget):
         self.data = data
 
         for imageData in data:
-            folders = {}
+            #folders = {}
             cnt = 0
             
             for imageFile in imageData['sprites']:
@@ -237,17 +423,25 @@ class TrickplayImageFileSystem(QWidget):
                     idx = idx + 1
                     id = id[n:]
 
+                    if folders.has_key(folderIdx) == False :
+                        folders[folderIdx] = {}
+                        folders[folderIdx][0] = i[idx - 1]                    
+                        folders[folderIdx][1] = i[1]                    
+
+                """
                 if folders.has_key(folderIdx) == False and idx > 1:
                     folders[folderIdx] = {}
                     folders[folderIdx][0] = i[idx - 1]                    
                     folders[folderIdx][1] = i[1]                    
+                """
 
                 fileName = id    
                 if idx > 1 :
-                    j = QTreeWidgetItem(folders[folderIdx][0]) 
-                    j.setText (0, fileName)  
-                    j.setFlags(j.flags() ^Qt.ItemIsEditable)
-                    j.setWhatsThis(0, imageFile['id'])
+                    if len(id) > 0:
+                        j = QTreeWidgetItem(folders[folderIdx][0]) 
+                        j.setText (0, fileName)  
+                        j.setFlags(j.flags() ^Qt.ItemIsEditable)
+                        j.setWhatsThis(0, imageFile['id'])
                     self.ui.fileSystemTree.addTopLevelItem(folders[folderIdx][1]) # top level item
                 else :
                     j = QTreeWidgetItem()
