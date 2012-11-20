@@ -244,6 +244,7 @@ function intervals_g:move_x_by(dx)
         end,
     }
 end
+intervals_g:clear()
 --------------------------------------------------------------------
 
 local row_h = 70*1080/720
@@ -1427,6 +1428,7 @@ local keypresses = {
                 instance:unparent() 
                 animating_back_to_prev_menu = false 
                 show_grid_text:unparent()
+                intervals_g:clear()
             end
         }
         main_menu:grab_key_focus()
@@ -1454,6 +1456,8 @@ function instance:on_key_focus_in(self)
         opacity = 255,
         on_completed = function()
             
+            intervals_g:add(intervals)
+            intervals_g:add(unpack(time_slots))
             show_grid:add(show_grid_text)
             show_grid_text:lower_to_bottom()
             show_grid_bg:lower_to_bottom()
