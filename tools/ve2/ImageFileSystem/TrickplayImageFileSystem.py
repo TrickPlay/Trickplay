@@ -123,7 +123,7 @@ class TrickplayImageFileSystem(QWidget):
         QObject.connect(self.ui.deleteButton, SIGNAL('clicked()'), self.removeAsset)
         QObject.connect(self.ui.newFolderButton, SIGNAL('clicked()'), self.createNewFolder)
         
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.fileSystemTree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.createContextMenu()
         QObject.connect(self.ui.fileSystemTree, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
 
@@ -263,14 +263,16 @@ class TrickplayImageFileSystem(QWidget):
         # Popup Menu
         self.popMenu = QMenu( self)
         self.popMenu.setFont(font)
+        self.popMenu.addAction( '&Import New Assets', self.importAsset )
+        self.popMenu.addSeparator()
         self.popMenu.addAction( '&Create New Folder', self.createNewFolder)
         self.popMenu.addSeparator()
         self.popMenu.addAction( '&Delete', self.removeAsset )
         self.popMenu.addSeparator()
-        self.popMenu.addAction( '&Import New Assets', self.importAsset )
+        self.popMenu.addAction( '&Insert Image To Screen', self.insertImage )
         
     def contextMenu(self, point):
-        self.popMenu.exec_( self.view.mapToGlobal(point) )
+        self.popMenu.exec_( self.ui.fileSystemTree.mapToGlobal(point) )
 
     def importAsset(self) :
         self.main.importAssets()
@@ -319,12 +321,20 @@ class TrickplayImageFileSystem(QWidget):
                 """
 
     def insertImage(self) :
+        
+        item = self.ui.fileSystemTree.currentItem()
+        source = item.whatsThis(0)
+        if self.isDir(source) == False :
+            print ("Insert Image : %s"%source)
+        else:
+            print ("Error : Dir is selected")
+
+        """
         item = self.ui.fileSystemTree.currentItem()
         source = item.whatsThis(0)
 
         self.main.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self.main._inspector.curLayerGid)+", 'Image', "+"'"+str(source)+"')")
 
-        """
             spriteSheet = SpriteSheet { map = "assets/image/images.json" }
             image = WidgetImage{ sheet = spriteSheet, id = "ee/ff.png" }
         """
