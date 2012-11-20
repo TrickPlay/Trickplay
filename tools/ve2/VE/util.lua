@@ -14,8 +14,8 @@ local uiElementCreate_map =
     ['Widget_Rectangle'] = function(p)  return WL.Widget_Rectangle(p) end, 
     ['Text'] = function(p)  return WL.Widget_Text(p) end, 
     ['Widget_Text'] = function(p)  return WL.Widget_Text(p) end, 
-    ['Image'] = function(p)  return WL.Widget_Image(p) end, 
-    ['Widget_Image'] = function(p)  return WL.Widget_Image(p) end, 
+    ['Image'] = function(p)  return WL.Widget_Sprite(p) end, 
+    ['Widget_Sprite'] = function(p)  return WL.Widget_Sprite(p) end, 
     ['Button'] = function(p)  return WL.Button(p) end, 
     ['DialogBox'] = function(p) return WL.DialogBox(p) end,
     ['ToastAlert'] = function(p) return WL.ToastAlert(p) end,
@@ -37,7 +37,7 @@ local uiElementName_map =
     ['Widget_Group'] = function()  return "group" end,
     ['Widget_Rectangle'] = function()  return "rectangle" end,
     ['Widget_Text'] = function()  return "text" end,
-    ['Widget_Image'] = function()  return "image" end,
+    ['Widget_Sprite'] = function()  return "image" end,
 }
 
 function util.addIntoLayer (uiInstance, group)
