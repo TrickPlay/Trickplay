@@ -826,7 +826,7 @@ _VE_.buildVF = function(path)
         --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo["..images.."]")
     end
-    --spriteSheet = SpriteSheet { map = image_file } 
+    spriteSheet = SpriteSheet { map = image_file } 
 end
 
 _VE_.openFile = function(path)
@@ -933,7 +933,7 @@ _VE_.openFile = function(path)
                     end 
                 end 
 
-                if uiTypeStr == "Widget_Image" or uiTypeStr == "Image" then 
+                if uiTypeStr == "Widget_Sprite" or uiTypeStr == "Image" then 
                     m.src = image_path..m.src
                 end 
                 m.reactive = true 
@@ -1372,10 +1372,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         
     util.assign_right_name(uiInstance, uiTypeStr)
 
-    if uiTypeStr == "Image" or uiTypeStr == "Widget_Image" then 
-        uiInstance.src = path
-        --uiUnstance.sheet = spriteSheet
-        --uiInstance.id = path
+    if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
+        --uiInstance.src = path
+        uiUnstance.sheet = spriteSheet
+        uiInstance.id = path
     elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
         editor.text(uiInstance)
     end
