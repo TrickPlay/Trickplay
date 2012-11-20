@@ -105,14 +105,13 @@
      <addaction name="actionProgressBar"/>
      <addaction name="actionProgressSpinner"/>
      <addaction name="actionRadioButton"/>
+     <addaction name="actionWidgetRectangle"/>
      <addaction name="actionScrollPane"/>
      <addaction name="actionSlider"/>
      <addaction name="actionTabBar"/>
+     <addaction name="actionWidgetText"/>
      <addaction name="actionTextInput"/>
      <addaction name="actionToastAlert"/>
-     <addaction name="actionWidgetText"/>
-     <addaction name="actionWidgetImage"/>
-     <addaction name="actionWidgetRectangle"/>
     </widget>
     <addaction name="menuInsert_UI_Element"/>
     <addaction name="separator"/>
@@ -745,7 +744,7 @@
   </action>
   <action name="actionWidgetText">
    <property name="text">
-    <string>WidgetText</string>
+    <string>Text</string>
    </property>
   </action>
   <action name="actionWidgetImage">
@@ -755,7 +754,7 @@
   </action>
   <action name="actionWidgetRectangle">
    <property name="text">
-    <string>WidgetRectangle</string>
+    <string>Rectangle</string>
    </property>
   </action>
   <action name="actionWidgetGroup">
