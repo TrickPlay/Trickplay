@@ -19,36 +19,63 @@ class SpriteSheet : public RefCounted
 {
 public:
     
-    class Source
+    class RefTexture
     {
         public:
-            Source( SpriteSheet * sheet ) : sheet( sheet ), texture( NULL ), can_signal( true ), refs( 0 ) {};
-            ~Source();
             
-            void set_source( const char * path );
-            void set_source( Image * image );
-            void get_dimensions( int * w, int * h );
-            CoglHandle get_subtexture( int x, int y, int w, int h );
+            class Signal : public Action
+            {
+                RefTexture * self;
+                
+                public: Signal( RefTexture * self ) : self( self ) {}
+                
+                protected: bool run()
+                {
+                    self->deref_signal();
+                    return false;
+                }
+            };
             
-            void ref() { refs++; g_message( "Ref'ed, now %i", refs ); }
-            void deref();
+            RefTexture() : texture( NULL ), can_signal( true ), refs( 0 ) {};
+            ~RefTexture();
+            
+            CoglHandle ref_texture();
+            void deref_texture();
             void deref_signal();
+            
+        protected:
+            virtual CoglHandle get_texture() = 0;
+            virtual void before_deref_signal() = 0;
+            
+        private:
+            CoglHandle texture;
+            bool can_signal;
+            int refs;
+    };
+    
+    class Source : public RefTexture
+    {
+        public:
+            Source( SpriteSheet * sheet ) : sheet( sheet ), image( NULL ) {};
+            
+            void load( Image * image );
+            void get_dimensions( int * w, int * h );
+            CoglHandle ref_subtexture( int x, int y, int w, int h );
+            CoglHandle get_texture();
             
             SpriteSheet * sheet;
             
         private:
-            void ensure();
+            void before_deref_signal() {};
             
             Image * image;
-            TP_CoglTexture texture;
-            bool can_signal;
-            int refs;
     };
 
-    class Sprite
+    class Sprite : public RefTexture
     {
         public:
-            Sprite() : id( NULL ), init( true ) {};
+            Sprite() : id( NULL ) {};
+            
             void set( const char * _id, Source * _source, int _x, int _y, int _w, int _h )
             {
                 id = _id;
@@ -59,15 +86,14 @@ public:
             int get_w() { return w; }
             int get_h() { return h; }
             const char * get_id() { return id; }
-            CoglHandle ref_subtexture();
-            void deref_subtexture();
-            void deref_signal();
+            CoglHandle get_texture();
             
         private:
+            void before_deref_signal() { source->deref_texture(); };
+            
             Source * source;
             const char * id;
-            int x, y, w, h, refs;
-            bool init;
+            int x, y, w, h;
     };
     
     inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
@@ -81,10 +107,10 @@ public:
     void map_subtexture( const char * id, int x, int y, int w, int h );
     
     Sprite * get_sprite( const char * id );
-    CoglHandle get_subtexture( const char * id );
     std::list< const char * > * get_ids();
 
     GObject * extra;
+    char * native_json_path;
     bool async;
     bool weak;
 

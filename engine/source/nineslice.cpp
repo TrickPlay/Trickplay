@@ -111,7 +111,7 @@ void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet,
         
         if ( priv->sprites[i] )
         {
-            priv->sprites[i]->deref_subtexture();
+            priv->sprites[i]->deref_texture();
             priv->sprites[i] = NULL;
         }
         
@@ -119,7 +119,7 @@ void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet,
         {
             if (( priv->sprites[i] = priv->sheet->get_sprite( ids[i] ) ))
             {
-                clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), priv->sprites[i]->ref_subtexture() );
+                clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), priv->sprites[i]->ref_texture() );
                 priv->material[i] = cogl_material_copy( COGL_MATERIAL(
                     clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
             }
