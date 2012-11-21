@@ -44,7 +44,7 @@ public:
             void deref_signal();
             
         protected:
-            virtual CoglHandle get_texture() = 0;
+            virtual CoglHandle make_texture() = 0;
             virtual void before_deref_signal() = 0;
             
         private:
@@ -61,7 +61,7 @@ public:
             void load( Image * image );
             void get_dimensions( int * w, int * h );
             CoglHandle ref_subtexture( int x, int y, int w, int h );
-            CoglHandle get_texture();
+            CoglHandle make_texture();
             
             SpriteSheet * sheet;
             
@@ -86,7 +86,7 @@ public:
             int get_w() { return w; }
             int get_h() { return h; }
             const char * get_id() { return id; }
-            CoglHandle get_texture();
+            CoglHandle make_texture();
             
         private:
             void before_deref_signal() { source->deref_texture(); };
@@ -112,7 +112,6 @@ public:
     GObject * extra;
     char * native_json_path;
     bool async;
-    bool weak;
 
 private:
     std::map < std::string, Sprite > sprites;
