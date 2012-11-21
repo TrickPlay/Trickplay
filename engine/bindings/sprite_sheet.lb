@@ -381,6 +381,10 @@ class SpriteSheet [[SpriteSheet*]]
             LSG_END( 0 );
         ]];
 
+    ~SpriteSheet()
+        [[
+        ]];
+
     /*
         Function: get_ids()
         
@@ -389,27 +393,18 @@ class SpriteSheet [[SpriteSheet*]]
 
     table get_ids()
         [[
-            /*GList * iter = self->get_ids();
-
-            int index = 1;
-
+            std::list< std::string > * ids = self->get_ids();
+            
             lua_newtable( L );
-
-            for ( ; iter ; iter = iter->next )
+            int index = 1;
+            
+            for ( std::list< std::string >::iterator id = ids->begin(); id != ids->end(); ++id )
             {
-                lua_pushstring( L, (char*) iter->data );
-                lua_rawseti( L, -2, index );
-                ++index;
-            }*/
-        ]];
-
-    ~SpriteSheet()
-        [[
-        ]];
-
-    dump()
-        [[
-            //self->dump();
+                lua_pushstring( L, id->c_str() );
+                lua_rawseti( L, -2, index++ );
+            }
+            
+            delete ids;
         ]];
 
     /*

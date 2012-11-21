@@ -107,7 +107,7 @@ public:
     void map_subtexture( const char * id, int x, int y, int w, int h );
     
     Sprite * get_sprite( const char * id );
-    std::list< const char * > * get_ids();
+    std::list< std::string > * get_ids();
 
     GObject * extra;
     char * native_json_path;

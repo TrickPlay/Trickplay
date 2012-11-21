@@ -148,19 +148,19 @@ Sprite * SpriteSheet::get_sprite( const char * id )
 {
     if ( !id || !sprites.count( id ) )
     {
-        //g_warning( "Trying to use unknown sprite id '%s'.", id );
         return NULL;
     }
     
     return & sprites[ std::string( id ) ];
 }
 
-std::list< const char * > * SpriteSheet::get_ids() // untested
+std::list< std::string > * SpriteSheet::get_ids()
 {
-    std::list< const char * > * ids = new std::list< const char * >;
+    std::list< std::string > * ids = new std::list< std::string >();
+    
     for ( std::map< std::string, Sprite >::iterator it = sprites.begin(); it != sprites.end(); ++it )
     {
-        ids->push_back( it->first.c_str() );
+        ids->push_back( it->first );
     }
     
     return ids;
