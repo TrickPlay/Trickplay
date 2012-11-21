@@ -17,21 +17,22 @@ public:
     ~SpriteSheet();
 
     void set_texture( CoglHandle texture );
-    bool is_initialized();
+    int add_texture( CoglHandle texture );
+    bool is_initialized(); 
 
-    bool map_subtexture( const gchar * id , int x , int y , int w , int h );
+    bool map_subtexture( const gchar * id, int tex, int x, int y, int w, int h );
     CoglHandle get_subtexture( const gchar * id );
     GList * get_ids();
     void dump();
-    void make_material_from_subtexture( const gchar * id , CoglMaterial ** material , int * w , int * h );
+    void make_material_from_subtexture( const gchar * id, CoglMaterial ** material, int * w, int * h );
 
     GObject * extra;
 
 private:
-    GHashTable *map;
-    CoglHandle texture;
+    GHashTable * map;
+    GPtrArray  * textures;
 
-    inline void check_initialized() { if ( ! texture ) g_error( "SpriteSheet not initialized" ); }
+    inline void check_initialized() { if ( ! g_ptr_array_index( this->textures, 0 ) ) g_error( "SpriteSheet not initialized" ); }
 };
 
 #endif
