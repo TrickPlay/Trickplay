@@ -4,121 +4,102 @@
 
 #include "log.h"
 
+typedef SpriteSheet::RefTexture RefTexture;
+typedef RefTexture::Signal Signal;
 typedef SpriteSheet::Source Source;
 typedef SpriteSheet::Sprite Sprite;
 
-class UnloadSignal : public Action
-{
-    public:
-        UnloadSignal( Source * source ) : source( source ) {}
-
-    protected:
-        bool run()
-        {
-            source->deref_signal();
-            return false;
-        }
-
-    private:
-        Source * source;
-};
-
-CoglHandle Sprite::ref_subtexture()
-{
-    if ( init )
-    {
-        init = false;
-        int tw, th;
-        source->get_dimensions( &tw, &th );
-        
-        x = MAX( x, 0 );
-        y = MAX( y, 0 );
-        w = MIN( w < 0 ? tw : x + w, tw ) - x;
-        h = MIN( h < 0 ? th : y + h, th ) - y;
-    }
-    
-    return source->get_subtexture( x, y, w, h );
-}
-
-void Sprite::deref_subtexture()
-{
-    source->deref();
-}
-
-Source::~Source()
+RefTexture::~RefTexture()
 {
     if ( texture ) cogl_handle_unref( texture );
 }
 
-void Source::deref()
+CoglHandle RefTexture::ref_texture()
+{
+    refs++;
+    if ( !texture ) texture = get_texture();
+    return texture;
+}
+
+void RefTexture::deref_texture()
 {
     refs = MAX( 0, refs - 1 );
     
-    g_message( "Deref'ed, now %i", refs );
-    
-    if ( !refs && sheet->weak && can_signal )
+    if ( !refs && can_signal )
     {
-        g_message( "Posting deref signal" );
-        Action::post( new UnloadSignal( this ) );
+        Action::post( new Signal( this ) );
         can_signal = false;
     }
 }
 
-void Source::deref_signal()
+void RefTexture::deref_signal()
 {
-    g_message( "Sourse::deref_signal %i", refs );
-    
-    if ( !refs && texture)
+    if ( !refs && texture )
     {
+        before_deref_signal();
+        
         cogl_handle_unref( texture );
         texture = NULL;
     }
-    
     can_signal = true;
 }
 
-void Source::ensure()
+/* Source */
+
+CoglHandle Source::get_texture()
 {
-    g_message( "Source::ensure" );
-    g_message( "\tdepth is %i", image->depth() );
-    if ( !texture )
+    if ( !image || !image->width() )
     {
-        g_message( "Source::load" );
-        
-        if ( !image )
-        {
-            g_error( "Source image has not been loaded." );
-        }
-        
-        ClutterActor * actor = clutter_texture_new();
-        Images::load_texture( CLUTTER_TEXTURE( actor ), image );
-        texture = TP_COGL_TEXTURE( clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) ) );
-        
-        cogl_handle_ref( texture );
-        
-        clutter_actor_destroy( actor );
-        
-        g_message( "Source::load finished" );
+        g_error( "Source image has not been loaded." );
     }
+    
+    ClutterActor * actor = clutter_texture_new();
+    Images::load_texture( CLUTTER_TEXTURE( actor ), image );
+    
+    CoglHandle texture = (CoglHandle) clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+    cogl_handle_ref( texture );
+    
+    clutter_actor_destroy( actor );
+    
+    return texture;
 }
 
-void Source::set_source( Image * _image )
+void Source::load( Image * _image )
 {
-    image = _image;
+    if ( image )
+    {
+        delete image;
+    }
+    
+    image = _image->make_copy();
 }
 
 void Source::get_dimensions( int * w, int * h )
 {
-    ensure();
+    TP_CoglTexture texture = TP_COGL_TEXTURE( ref_texture() );
     * w = cogl_texture_get_width ( texture );
     * h = cogl_texture_get_height( texture );
+    deref_texture();
 }
 
-CoglHandle Source::get_subtexture( int x, int y, int w, int h )
+CoglHandle Source::ref_subtexture( int x, int y, int w, int h )
 {
-    ensure();
-    ref();
-    return cogl_texture_new_from_sub_texture( texture, x, y, w, h );
+    return cogl_texture_new_from_sub_texture( TP_COGL_TEXTURE( ref_texture() ), x, y, w, h );
+}
+
+/* Sprite */
+
+CoglHandle Sprite::get_texture()
+{
+    int tw, th;
+    source->get_dimensions( &tw, &th );
+    
+    x = MAX( x, 0 );
+    y = MAX( y, 0 );
+    w = MIN( w < 0 ? tw : x + w, tw ) - x;
+    h = MIN( h < 0 ? th : y + h, th ) - y;
+    
+    return cogl_handle_ref( source->ref_subtexture( x, y, w, h ) );
 }
 
 /* SpriteSheet */
@@ -167,22 +148,11 @@ Sprite * SpriteSheet::get_sprite( const char * id )
 {
     if ( !id || !sprites.count( id ) )
     {
+        //g_warning( "Trying to use unknown sprite id '%s'.", id );
         return NULL;
     }
+    
     return & sprites[ std::string( id ) ];
-}
-
-CoglHandle SpriteSheet::get_subtexture( const char * id )
-{
-    Sprite * sprite = get_sprite( id );
-    
-    if ( !sprite )
-    {
-        g_warning( "Trying to use unknown sprite id '%s'.", id );
-        return NULL;
-    }
-    
-    return sprite->ref_subtexture();
 }
 
 std::list< const char * > * SpriteSheet::get_ids() // untested

@@ -68,20 +68,33 @@ void refresh_texture( GObject * g_self, SpriteSheet * sheet, const char * new_id
         {
             id = sprite->get_id();
         }
-        sprite->deref_subtexture();
+        sprite->deref_texture();
         g_object_set_data( g_self, "tp-sprite", NULL );
     }
-
+    
+    if ( id )
+    {
+        g_object_set_data_full( g_self, "tp-id", strdup( id ), g_free );
+    }
+    else
+    {
+        id = (char *) g_object_get_data( g_self, "tp-id" );
+    }
+    
     if ( sheet )
     {
         if (( sprite = sheet->get_sprite( id ) ))
         {
             g_object_set_data( g_self, "tp-sprite", sprite );
-            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), sprite->ref_subtexture() );
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), sprite->ref_texture() );
         }
         else if ( new_id )
         {
             g_warning( "Sprite's sheet does not contain the id '%s' (If you are trying to change both, change the sheet first).", id );
+        }
+        else
+        {
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ) );
         }
     }
     else if ( new_id )
