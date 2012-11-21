@@ -114,7 +114,7 @@ local create = function(items)
         animating = true
         new_i = wrap_i(curr_i + 1,text)
         icons[curr_i].source:on_key_focus_out()
-        dolater(100,function()
+        dolater(0,function()
         text[curr_i].contract:start()--font = MAIN_MENU_FONT
         text[new_i].expand:start()
         --.font  = MAIN_MENU_FONT_FOCUS
@@ -145,9 +145,10 @@ local create = function(items)
         --]]
         --prev_icon.source:on_key_focus_out()
         --curr_icon.source:on_key_focus_in()
+        dolater(200,icons[new_i].source.on_key_focus_in,icons[new_i].source)
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
-            duration = 300,
+            duration = 400,
             x = text_items.x - dx,
             on_completed = function()
                 --while text[left_i].x + text[left_i].w/2 < dx do
@@ -163,7 +164,7 @@ local create = function(items)
                 end)
                 curr_i = new_i
                 animating = false
-                icons[new_i].source:on_key_focus_in()
+                --icons[new_i].source:on_key_focus_in()
             end
         }
         
@@ -179,7 +180,7 @@ local create = function(items)
         animating = true
         new_i = wrap_i(curr_i - 1,text)
         icons[curr_i].source:on_key_focus_out()
-        dolater(100,function()
+        dolater(0,function()
         text[curr_i].contract:start()--font = MAIN_MENU_FONT
         text[new_i].expand:start()
         --icons[new_i].source:on_key_focus_in()--.font  = MAIN_MENU_FONT_FOCUS
@@ -211,9 +212,10 @@ local create = function(items)
         --]]
         --prev_icon.source:on_key_focus_out()
         --curr_icon.source:on_key_focus_in()
+        dolater(200,icons[new_i].source.on_key_focus_in,icons[new_i].source)
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
-            duration = 300,
+            duration = 400,
             x = text_items.x + dx,
             on_completed = function()
                 --while text[right_i].x - text[right_i].w/2 > screen_w-dx do
@@ -229,7 +231,7 @@ local create = function(items)
                 end)
                 curr_i = new_i
                 animating = false
-                icons[new_i].source:on_key_focus_in()
+                --icons[new_i].source:on_key_focus_in()
             end
         }
         
