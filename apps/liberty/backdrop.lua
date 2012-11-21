@@ -260,9 +260,12 @@ local function make_backdrop()
     backdrop_group:add(zoom_clip,horizonbacking,horizon)
     
     function backdrop_group:set_horizon(y)
+        backdrop_group:animate{duration=300,y=y-bd.h}
+        --[[
         horizon:animate{duration=300,y=y}
         bd:animate{duration=300,h=y}
         zoom_clip:animate{duration=300,y=y-700}
+        --]]
     end
     function backdrop_group:set_bulb_x(x)
         hb:animate{duration=300,x=x}
