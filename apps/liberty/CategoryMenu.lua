@@ -253,7 +253,7 @@ local create = function(items)
     }
     
     function instance:on_key_down(k,...)
-        return key_presses[k] and key_presses[k]() or icons[curr_i].source.on_key_down and icons[curr_i].source:on_key_down(k,...)
+        return animating or key_presses[k] and key_presses[k]() or icons[curr_i].source.on_key_down and icons[curr_i].source:on_key_down(k,...)
     end
     
     function instance:on_key_focus_in(self)

@@ -530,7 +530,7 @@ main = function()
         "sb6",         
         "sport1", 
     }
-    channel_menu.x = 200
+    channel_menu.x = 100
     --------------------------------------------------------------------
     
     trick_play_menu = dofile("TrickPlayMenu.lua")

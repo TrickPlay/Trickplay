@@ -30,7 +30,7 @@ local integrating_schedule_i = 1
 local margin = 425
 local heading_h = 285
 local heading_txt_y = 65
-local channel_logo_x = -120
+local channel_logo_x = -50
 --------------------------------------------------------------------
 local mesg = Text{
     x    = (screen_w - margin)/2,
@@ -244,6 +244,7 @@ function intervals_g:move_x_by(dx)
         end,
     }
 end
+intervals_g:clear()
 --------------------------------------------------------------------
 
 local row_h = 70*1080/720
@@ -346,22 +347,6 @@ show_grid_text:add(prev_hl,curr_hl)
 --------------------------------------------------------------------
 --------------------------------------------------------------------
 
-local function truncate_show_to_x(s,x)
-    
-    if x > s.x + s.w then error("you silly goose") end
-    
-    s.show_name.w = s.w + s.x - x
-    s.show_name.x = x + margin
-    s.show_time.x = s.show_name.x
-    s.show_time.w = s.show_name.w
-end
-local function reset_show_x_w(s)
-   s.show_name.w = s.w - margin*2
-   s.show_name.x = x + margin
-   s.show_time.x = s.show_name.x
-   s.show_time.w = s.show_name.w
-end
-
 local get_separator,add_separator_to_pool
 local sep_src = hidden_assets_group:find_child("show_border")
 do
@@ -399,8 +384,10 @@ local pull_in_right_to = function(new_x)
         if #s >= 1 then
         r_i = r.icon.right_i
         while r_i >r.icon.left_i and new_x <= s[r_i].x do
-            s[r_i].show_time:unparent()
-            s[r_i].show_name:unparent()
+            if  s[r_i].show_name then
+                s[r_i].show_time:unparent()
+                s[r_i].show_name:unparent()
+            end
             s[r_i].sep:unparent()
             add_separator_to_pool(s[r_i].sep)
             r_i = r_i-1
@@ -424,8 +411,10 @@ local push_out_right_to = function(new_x)
         while r_i < #s and new_x >= s[r_i].x+s[r_i].w do
             r_i = r_i+1
             --add the next show to screen
-            r.icon.show_times:add( s[r_i].show_time )
-            r.icon.show_names:add( s[r_i].show_name )
+            if s[r_i].show_name then
+                r.icon.show_times:add( s[r_i].show_time )
+                r.icon.show_names:add( s[r_i].show_name )
+            end
             s[r_i].sep = get_separator(s[r_i].x)
             r.icon.separators:add( s[r_i].sep       )
         end
@@ -462,7 +451,7 @@ pre_pull_in_left_to = function(new_x)
                 l_i = l_i+1
             end
             ls[i] = l_i
-            if s[l_i].x < new_x then
+            if s[l_i].x < new_x and s[l_i].show_name then
                 dx = new_x - s[l_i].x
                 dx = dx < 0 and 0 or dx
                 s[l_i].show_name:animate{
@@ -493,8 +482,10 @@ pull_in_left_to = function(new_x)
         l_i = r.icon.left_i
         while l_i < r.icon.right_i and new_x >= s[l_i].x+s[l_i].w do
             --add the next show to screen
-            s[l_i].show_time:unparent()
-            s[l_i].show_name:unparent()
+            if s[l_i].show_name then
+                s[l_i].show_time:unparent()
+                s[l_i].show_name:unparent()
+            end
             s[l_i].sep:unparent()
             add_separator_to_pool(s[l_i].sep)
             l_i = l_i+1
@@ -549,6 +540,7 @@ local push_out_left_to = function(new_x)
                 duration = dur,
                 x = new_x + show_name_margin,
             }
+        elseif s[i].show_name == false then
         --re-truncate show name
         elseif s[i].x < new_x then
             dx = new_x - s[i].x
@@ -589,11 +581,12 @@ local push_out_left_to = function(new_x)
         l_i = r.icon.left_i
         while l_i > 1 and new_x < s[l_i].x do
             l_i = l_i-1
+            s[l_i].sep = get_separator(s[l_i].x)
+            r.icon.separators:add( s[l_i].sep )
+            if s[l_i].show_name then
             --add the next show to screen
             r.icon.show_times:add( s[l_i].show_time )
             r.icon.show_names:add( s[l_i].show_name )
-            s[l_i].sep = get_separator(s[l_i].x)
-            r.icon.separators:add( s[l_i].sep )
             if s[l_i].x < new_x then
                 dx = new_x - s[l_i].x
                 dx = dx < 0 and 0 or dx
@@ -619,6 +612,7 @@ local push_out_left_to = function(new_x)
                     w = s[l_i].w < (2*show_name_margin) and 0 or s[l_i].w - 2*show_name_margin,
                 }
             end
+            end
         end
         r.icon.left_i = l_i
         end
@@ -643,22 +637,23 @@ local populate_row = function(r)
                 show_grid__left_edge  >= (show.x+ show.w) or 
                 show_grid__right_edge <=  show.x
             ) then
-            
-            r.icon.show_times:add( show.show_time )
-            r.icon.show_names:add( show.show_name )
             show.sep = get_separator(show.x)
             r.icon.separators:add( show.sep )
-            
-            show.show_name:set{
-                --duration = dur,
-                x = show.x + show_name_margin,
-                w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
-            }
-            show.show_time:set{
-                --duration = dur,
-                x = show.x + show_name_margin,
-                w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
-            }
+            if show.show_name then
+                r.icon.show_times:add( show.show_time )
+                r.icon.show_names:add( show.show_name )
+                
+                show.show_name:set{
+                    --duration = dur,
+                    x = show.x + show_name_margin,
+                    w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
+                }
+                show.show_time:set{
+                    --duration = dur,
+                    x = show.x + show_name_margin,
+                    w = show.w < (2*show_name_margin) and 0 or show.w - 2*show_name_margin,
+                }
+            end
             r.icon.left_i  = r.icon.left_i  < i and r.icon.left_i  or i
             r.icon.right_i = r.icon.right_i > i and r.icon.right_i or i
         end
@@ -669,7 +664,7 @@ local populate_row = function(r)
     
     dx = show_grid__left_edge - s[r.icon.left_i].x
     dx = dx < 0 and 0 or dx
-    if s[r.icon.left_i].x < show_grid__left_edge then
+    if s[r.icon.left_i].x < show_grid__left_edge and s[r.icon.left_i].show_name then
         s[r.icon.left_i].show_name:set{
             --duration = dur,
             x = show_grid__left_edge + show_name_margin,
@@ -684,11 +679,13 @@ local populate_row = function(r)
 end
 --------------------------------------------------------------------
 local scheduling = nil
-local show_name_h = Text{
-            color = "white",
-            font = "InterstateProBold 40px",
-            text = "h",
-        }.h 
+local show_name_min_w, show_name_h = unpack(
+    Text{
+        color = "white",
+        font = "InterstateProBold 40px",
+        text = "...",
+    }.size
+) 
         
 local build_schedule_row, reset_build_row
 local num_shows_created = 0
@@ -731,39 +728,45 @@ do
         --for j,show in ipairs(parent.scheduling) do
             show = parent.scheduling[j]
             
-            show_name = Text{
-                color = "white",
-                font = "InterstateProBold 40px",
-                text = show.name,
-                x=show.x+show_name_margin,
-                w =  show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
-                --y = 10,
-                ellipsize = "END",
-            }
-            show_name.anchor_point = {0,show_name_h/2}
-            
-            show_time = Text{
-                color = "white",
-                font = "InterstateProLight 40px",
-                text = 
-                    show.start.hour .. ":" ..
-                    show.start.min  .." - "..
-                    show.stop.hour  .. ":" ..
-                    show.stop.min,
-                x=show.x+show_name_margin,
-                w = show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
-                y = -row_h/2,
-                --(i==middle_row) and 255 or 0,
-                ellipsize = "END",
-            }
-            show_time.anchor_point = {0,show_name_h/2}
-            --[[
-            sep = Clone{
-                source = sep_src,
-                x = show.x,
-                --h = row_h,
-            }
-            --]]
+            if (show.w - show_name_margin*2) < show_name_min_w then
+                show_name = false
+                show_time = false
+            else
+                
+                show_name = Text{
+                    color = "white",
+                    font = "InterstateProBold 40px",
+                    text = show.name,
+                    x=show.x+show_name_margin,
+                    w =  show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
+                    --y = 10,
+                    ellipsize = "END",
+                }
+                show_name.anchor_point = {0,show_name_h/2}
+                
+                show_time = Text{
+                    color = "white",
+                    font = "InterstateProLight 40px",
+                    text = 
+                        show.start.hour .. ":" ..
+                        show.start.min  .." - "..
+                        show.stop.hour  .. ":" ..
+                        show.stop.min,
+                    x=show.x+show_name_margin,
+                    w = show.w>(show_name_margin*2) and show.w-show_name_margin*2 or 0,
+                    y = -row_h/2,
+                    --(i==middle_row) and 255 or 0,
+                    ellipsize = "END",
+                }
+                show_time.anchor_point = {0,show_name_h/2}
+                --[[
+                sep = Clone{
+                    source = sep_src,
+                    x = show.x,
+                    --h = row_h,
+                }
+                --]]
+            end
             parent.scheduling[j].show_name = show_name
             parent.scheduling[j].show_time = show_time
         end
@@ -883,8 +886,12 @@ function instance:setup_icons(t)
     --TODO setup wrap around stuff here
     
     if type(t) ~= "table" or #t == 0 then return end
+    local item
     for i,channel in ipairs(t) do
-        channel_list[i] = Group{children={clone_proxy(channel.Name):set{x=channel_logo_x}}}
+        item = clone_proxy(channel.Name)
+        item.x = channel_logo_x
+        item.anchor_point = {item.w,item.h/2}
+        channel_list[i] = item--Group{children={item}}
         channel_list[i].name = channel.Name
     end
     
@@ -899,7 +906,8 @@ function instance:setup_icons(t)
             
             wrap_i(curr_channel+i-middle_row,channel_list)
             
-        ]:set{y=rows[i].y+((i == middle_row) and row_h or row_h/2)}
+        ]:set{  y=rows[i].y+((i == middle_row) and row_h or row_h/2)  }
+        
         show_grid_icons:add(rows[i].icon)
     end
     rows[middle_row].icon.scale = {sel_scale,sel_scale}
@@ -1175,7 +1183,7 @@ local keypresses = {
         animating_show_grid = true
         rows[1].icon = channel_list[top_i]
         rows[1].shows = channel_list[top_i].shows
-        rows[1].icon.x = 0
+        --rows[1].icon.x = 0
         rows[1].icon.y = rows[1].y+row_h/2
         rows[1].shows.y = rows[1].y+row_h/2
         show_grid_text:add(rows[1].shows)
@@ -1290,7 +1298,7 @@ local keypresses = {
         
         rows[#rows].icon  = channel_list[bottom_i]
         rows[#rows].shows = channel_list[bottom_i].shows
-        rows[#rows].icon.x = 0
+        --rows[#rows].icon.x = 0
         rows[#rows].icon.y  = rows[#rows].y+row_h/2
         rows[#rows].shows.y = rows[#rows].y+row_h/2
         show_grid_text:add( rows[#rows].shows)
@@ -1422,6 +1430,7 @@ local keypresses = {
                 instance:unparent() 
                 animating_back_to_prev_menu = false 
                 show_grid_text:unparent()
+                intervals_g:clear()
             end
         }
         main_menu:grab_key_focus()
@@ -1449,6 +1458,8 @@ function instance:on_key_focus_in(self)
         opacity = 255,
         on_completed = function()
             
+            intervals_g:add(intervals)
+            intervals_g:add(unpack(time_slots))
             show_grid:add(show_grid_text)
             show_grid_text:lower_to_bottom()
             show_grid_bg:lower_to_bottom()
