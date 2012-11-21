@@ -17,7 +17,7 @@ RefTexture::~RefTexture()
 CoglHandle RefTexture::ref_texture()
 {
     refs++;
-    if ( !texture ) texture = get_texture();
+    if ( !texture ) texture = make_texture();
     return texture;
 }
 
@@ -46,7 +46,7 @@ void RefTexture::deref_signal()
 
 /* Source */
 
-CoglHandle Source::get_texture()
+CoglHandle Source::make_texture()
 {
     if ( !image || !image->width() )
     {
@@ -89,7 +89,7 @@ CoglHandle Source::ref_subtexture( int x, int y, int w, int h )
 
 /* Sprite */
 
-CoglHandle Sprite::get_texture()
+CoglHandle Sprite::make_texture()
 {
     int tw, th;
     source->get_dimensions( &tw, &th );
