@@ -198,7 +198,10 @@ Group: Engine Reference {
             File: Clone (no auto-title, bindings/clutter_clone.lb)
             File: Group (no auto-title, bindings/clutter_group.lb)
             File: Image (no auto-title, bindings/clutter_image.lb)
+		    File: NineSlice  (bindings/nineslice.lb)
             File: Rectangle (no auto-title, bindings/clutter_rectangle.lb)
+            File: Sprite  (bindings/sprite.lb)
+            File: SpriteSheet  (bindings/sprite_sheet.lb)
             File: Text (no auto-title, bindings/clutter_text.lb)
         }
 

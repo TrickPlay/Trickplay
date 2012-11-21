@@ -19,7 +19,10 @@ class SpriteSheet {
   public:
     SpriteSheet(CoglHandle texture, const gchar **names, gint *data, gint n, SpriteSheetFlags flags);
     void get_sprite(const gchar *name, CoglMaterial **material, CoglHandle *texture, gint *w, gint *h);
+    
     ~SpriteSheet();
+    
+    CoglHandle get_subtexture( const gchar * id );
     
   private:
     gint num_sprites;
