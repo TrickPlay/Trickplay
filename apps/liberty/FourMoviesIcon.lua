@@ -57,7 +57,6 @@ return function(dur)
     }
     local time_slot=1/#intervals
     for i,c in ipairs(instance.children) do
-        print(i,((#intervals+1)/2-math.abs((#intervals+1)/2 -i)),time_slot*((#intervals+1)/2-math.abs((#intervals+1)/2 -i)))
         table.insert(
             state[1].keys,
             {c,'x',"LINEAR",intervals[#intervals - i+1]:get_value(1),time_slot*((#intervals+1)/2-math.abs((#intervals+1)/2 -i)),0}--,time_slot*i}
