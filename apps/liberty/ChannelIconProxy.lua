@@ -17,6 +17,7 @@ return function(name,src)
         on_loaded = function(self,failed)
             if failed then 
                 --error("loading "..src.." failed",2)
+                self:unparent()
                 return
             end
             

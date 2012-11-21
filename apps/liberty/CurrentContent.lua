@@ -49,27 +49,29 @@ local launch_channel_menu = function()
     end)
 end
 
+local launch_main_menu = function()
+    if animating then return end
+    animating = true
+    
+    main_menu:animate{
+        duration = 300,
+        z        = 0,
+        opacity  = 255,
+        on_completed = function() 
+            instance:unparent() 
+            animating = false 
+        end
+    }
+    main_menu:grab_key_focus()
+end
+
 local key_presses = {
     [keys.Up]    = launch_channel_menu,
     [keys.Down]  = launch_channel_menu,
     [keys.Left]  = launch_trickplay_menu,
     [keys.Right] = launch_trickplay_menu,
-    [keys.BACK] = function()
-        if animating then return end
-        animating = true
-        
-        main_menu:animate{
-            duration = 300,
-            z        = 0,
-            opacity  = 255,
-            on_completed = function() 
-                instance:unparent() 
-                animating = false 
-            end
-        }
-        main_menu:grab_key_focus()
-        
-    end,
+    [keys.MENU]  = launch_main_menu,
+    [keys.BACK]  = launch_main_menu,
     [keys.VOL_UP]   = raise_volume,
     [keys.VOL_DOWN] = lower_volume,
 }

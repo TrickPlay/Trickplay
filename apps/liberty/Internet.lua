@@ -107,9 +107,9 @@ function get_scheduling(f)
     curr_time.hour = curr_time.hour + 1
     curr_time.day = curr_time.day + 1
     local   end_time = os.date('*t',os.time(curr_time))
-    dumptable(curr_time)
-    dumptable(start_time)
-    dumptable(end_time)
+    --dumptable(curr_time)
+    --dumptable(start_time)
+    --dumptable(end_time)
     ---[[
     start_time = 
         string.format("%04d",start_time.year) .."-"..
@@ -127,7 +127,7 @@ function get_scheduling(f)
         string.format("%02d",end_time.min)  ..":"..
         string.format("%02d",end_time.sec)  .."Z"
         --]]
-    print(start_time,end_time)
+    print("Requesting scheduling for the interval",start_time,end_time)
     local req = URLRequest{
         url = scheduling_url,
         timeout = 60*5,
