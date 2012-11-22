@@ -1,7 +1,6 @@
 module nineslice;
 
 [[
-#include "clutter/clutter.h"
 #include "clutter_util.h"
 #include "util.h"
 #include "nineslice.h"
