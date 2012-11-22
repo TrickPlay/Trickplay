@@ -215,7 +215,7 @@ void spritesheet_load_json( SpriteSheet * self, const char * path )
     g_object_set_data_full( self->extra, "tp-json-path", strdup( path ), g_free );
     
     char * map;
-    long unsigned length;
+    gsize length;
     AppResource resource( app, path );
     
     if ( resource.is_native() )
