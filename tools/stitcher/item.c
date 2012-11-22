@@ -1,3 +1,4 @@
+#include <string.h>
 #include "item.h"
 
 Item * item_new ( const char * id )
@@ -27,7 +28,7 @@ void item_free ( Item * item )
         DestroyImage( item->source );
     free( (char *) item->id );
     free( (char *) item->path );
-        
+
     free( item );
 }
 
@@ -73,6 +74,8 @@ void item_set_source( Item * item, Image * source, Options * options )
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
-    unsigned int m = MAX( bb->w, bb->h ) - MAX( aa->w, aa->h );
-    return m != 0 ? m : MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
+    unsigned int m = (MAX( bb->w, bb->h ) - MAX( aa->w, aa->h ));
+    if(!m) m = MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
+
+    return m;
 }
