@@ -48,7 +48,7 @@ typedef SpriteSheet::Source Source;
 void lua_foreach ( lua_State * L, int index, LFunc func, gpointer user_data )
 {
     index = index > 0 ? index : lua_gettop( L ) + index + 1;
-    
+
     lua_pushnil( L );
     while ( lua_next( L, index ) )
     {
@@ -70,13 +70,13 @@ void spritesheet_source_path( SpriteSheet * self, const char * path )
 {
     App * app = (App *) g_object_get_data( G_OBJECT( self->extra ), "tp-app" );
     const char * json = (const char *) g_object_get_data( self->extra, "tp-json-path" );
-    
+
     if ( json )
     {
         json = g_path_get_dirname( json );
         path = g_build_filename( json, path, NULL );
     }
-    
+
     if ( self->async )
     {
         app->load_image_async( path, false, (Image::DecodeAsyncCallback) async_img_callback,
@@ -86,7 +86,7 @@ void spritesheet_source_path( SpriteSheet * self, const char * path )
     {
         self->add_source()->load( app->load_image( path, false ) );
     }
-    
+
     if( json )
     {
         free( (void *) path );
@@ -97,19 +97,19 @@ void spritesheet_source_path( SpriteSheet * self, const char * path )
 void spritesheet_add_lua_sprite ( lua_State * L, int index, SpriteSheet * self )
 {
     LSG;
-    
+
     if ( !lua_istable( L, index ) )
     {
         g_warning( "Couldn't understand that sprite definition." );
         return;
     }
-    
+
     lua_getfield( L, index, "x" );
     lua_getfield( L, index, "y" );
     lua_getfield( L, index, "w" );
     lua_getfield( L, index, "h" );
     lua_getfield( L, index, "id" );
-    
+
     self->map_subtexture(
         strdup( (char *) lua_tostring( L, -1 ) ),
         (int) lua_tointeger( L, -5 ),
@@ -117,27 +117,27 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, SpriteSheet * self )
         (int) lua_tointeger( L, -3 ),
         (int) lua_tointeger( L, -2 )
     );
-    
+
     lua_pop( L, 5 );
-    
+
     LSG_END( 0 );
 }
 
 void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
 {
     LSG;
-    
+
     if ( !lua_istable( L, index ) )
     {
         g_warning( "Couldn't understand that map definition." );
         return;
     }
-    
+
     Bitmap * bitmap;
-    
+
     lua_getfield( L, index, "sprites" );
     lua_getfield( L, index, "img" );
-    
+
     if ( lua_istable( L, -2 ) )
     {
         if ( lua_isstring( L, -1 ) )
@@ -152,16 +152,16 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
         {
             g_warning( "Couldn't understand that source image." );
         }
-        
+
         lua_foreach( L, -2, (LFunc) spritesheet_add_lua_sprite, self );
     }
     else
     {
         g_warning( "Couldn't understand that list of sprites." );
     }
-    
+
     lua_pop( L, 2 );
-    
+
     LSG_END( 0 );
 }
 
@@ -170,10 +170,10 @@ void spritesheet_add_json_maps ( SpriteSheet * self, JSON::Array & array )
     for ( unsigned i = 0; i < array.size(); i++ )
     {
         JSON::Object map = array[i].as<JSON::Object>();
-        
+
         spritesheet_source_path( self, map.at( "img" ).as<std::string>().c_str() );
         JSON::Array sprites = map.at( "sprites" ).as<JSON::Array>();
-        
+
         for( unsigned i = 0; i < sprites.size(); i++ )
         {
             JSON::Object sprite = sprites[i].as<JSON::Object>();
@@ -193,7 +193,7 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
     if ( !response.failed && response.body->len )
     {
         JSON::Value root = JSON::Parser::parse( (char *) response.body->data, response.body->len );
-        
+
         if ( root.is<JSON::Array>() )
         {
             spritesheet_add_json_maps( self, root.as<JSON::Array>() );
@@ -210,14 +210,14 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
 }
 
 void spritesheet_load_json( SpriteSheet * self, const char * path )
-{   
+{
     App  * app = (App *) g_object_get_data( G_OBJECT( self->extra ), "tp-app" );
     g_object_set_data_full( self->extra, "tp-json-path", strdup( path ), g_free );
-    
-    char * map;
+
+    char * map = NULL;
     gsize length;
     AppResource resource( app, path );
-    
+
     if ( resource.is_native() )
     {
         if ( ! g_file_get_contents( resource.get_native_path().c_str(), &map, &length, NULL ) )
@@ -228,7 +228,7 @@ void spritesheet_load_json( SpriteSheet * self, const char * path )
     else if ( resource.is_http() )
     {
         Network::Request request( app->get_user_agent(), resource.get_uri() );
-        
+
         if ( self->async )
         {
             app->get_network()->perform_request_async( request, app->get_cookie_jar(),
@@ -237,12 +237,12 @@ void spritesheet_load_json( SpriteSheet * self, const char * path )
         else
         {
             Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
-            
+
             if ( response.failed || response.body->len == 0 )
             {
                 g_warning( "SpriteSheet: could not download map %s.", path );
             }
-            
+
             map = (char *) response.body->data;
             length = response.body->len;
         }
@@ -251,11 +251,11 @@ void spritesheet_load_json( SpriteSheet * self, const char * path )
     {
         g_warning( "SpriteSheet: could not understand map URI %s.", path );
     }
-    
+
     if ( map )
     {
         JSON::Value root = JSON::Parser::parse( map, length );
-        
+
         if ( root.is<JSON::Array>() )
         {
             spritesheet_add_json_maps( self, root.as<JSON::Array>() );
@@ -273,11 +273,11 @@ void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
 
 /*
     Class: SpriteSheet
-    
+
     The SpriteSheet class will load a set of large images containing many small sprites. An app may want to do this to avoid loading possibly hundreds of small icons or sprites, or to simplify the management of many similar images onscreen at once. A SpriteSheet, once created, is a static userdata that can be referenced by <Sprite> or <NineSlice>. These objects can then draw sprites from the SpriteSheet directly without creating copies or clones.
-    
+
     In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in each source texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
-    
+
     (code)
     // assets.json
     [
@@ -291,7 +291,7 @@ void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
         },
         ...
     ]
-    
+
     -- main.lua
     sheet1 = SpriteSheet { map = "assets.json" }
     sheet2 = SpriteSheet { map = {
@@ -306,38 +306,38 @@ void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
         ...
     }
     (end)
-    
+
     Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheets are usually generated from seperate source files, using a path name as if the SpriteSheet is actually a folder of images is often clearer.
-    
+
     What if the app needs to download its assets from a URL? The SpriteSheet can take URI paths as well as local paths, and load its map and texture asynchronously.
-    
+
     (code)
     sheet = SpriteSheet { map = "http://www.trickplay.com/resources/assets.json", async = true }
     (end)
-    
+
     *See Also:* the <Sprite> class
-    
+
 */
 
 class SpriteSheet [[SpriteSheet*]]
 {
     /*
         Constructor: SpriteSheet
-        
+
         The SpriteSheet() constructor creates a new SpriteSheet object.
-        
+
         *Arguments:*
-        
+
         props - table defining the object's construction
-        
+
         *Properties:*
-        
+
         map - Lua table or path to a .json file of source-and-sprite definitions
         [async] - load remote URIs asynchronously
-        
+
         *Return Value:* new NineSlice object
     */
-    
+
     SpriteSheet(table props = 0 )
         [[
             LSG;
@@ -346,16 +346,16 @@ class SpriteSheet [[SpriteSheet*]]
             g_signal_connect_data( self->extra, "load-finished",
                 (GCallback) Sprite_Sheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
-            
+
             g_object_set_data( G_OBJECT( self->extra ), "tp-app", App::get( L ) );
 
             if ( props )
             {
                 ClutterUtil::set_props_from_table( L, props );
-                
+
                 lua_getfield( L, 1, "async" );
                 lua_getfield( L, 1, "map" );
-                
+
                 self->async = lua_toboolean( L, -2 );
 
                 if ( lua_isstring( L, -1 ) )
@@ -370,7 +370,7 @@ class SpriteSheet [[SpriteSheet*]]
                 {
                     luaL_error( L, "SpriteSheet initialization error: key 'map' was not a table or URI string." );
                 }
-                
+
                 lua_pop( L, 2 );
             }
             else
@@ -387,38 +387,38 @@ class SpriteSheet [[SpriteSheet*]]
 
     /*
         Function: get_ids()
-        
+
         Returns a table of all the sprite ids in this SpriteSheet
     */
 
     table get_ids()
         [[
             std::list< std::string > * ids = self->get_ids();
-            
+
             lua_newtable( L );
             int index = 1;
-            
+
             for ( std::list< std::string >::iterator id = ids->begin(); id != ids->end(); ++id )
             {
                 lua_pushstring( L, id->c_str() );
                 lua_rawseti( L, -2, index++ );
             }
-            
+
             delete ids;
         ]];
 
     /*
         Callback: on_loaded
-        
+
         The on_loaded() event handler is fired whenever SpriteSheet gets a result from an asynchronous load. A single SpriteSheet may load a map and/or one or more image files asynchronously.
-        
+
         *Prototype:*
         (code)
         void on_loaded( SpriteSheet self, boolean success, string status )
         (end)
-        
+
         *Status Strings:*
-        
+
         FAILED_MAP_LOAD - Couldn't load the JSON map from a remote URI
         FAILED_MAP_PARSE - Couldn't parse the JSON map correctly
         FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
