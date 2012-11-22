@@ -1,7 +1,10 @@
 #ifndef __ITEM_H__
 #define __ITEM_H__
 
-#include "main.h"
+#include <glib.h>
+#include <gio/gio.h>
+#include <magick/MagickCore.h>
+#include "options.h"
 
 typedef struct Item {
   unsigned int w, h, area;
