@@ -30,52 +30,55 @@ local create = function(text)
     local place_on_the_top
     local place_on_the_bottom
     function instance:populate(t)
-    --if there are not enough items to cover the width of the screen, duplicate the list
-    while #items < 4 or (#items-1)*item_spacing < screen_h do
-        for _,t in ipairs(t) do
-            table.insert(items,  clone_proxy(t.Name)  )
-            items[#items].orig_w = items[#items].w
-            --items[#items].anchor_point = { items[#items].w/2, items[#items].h/2}
-            inner_group:add(items[#items])
-            items[#items]:hide()
+        local i
+        --if there are not enough items to cover the width of the screen, duplicate the list
+        while #items < 4 or (#items-1)*item_spacing < screen_h do
+            for _,t in ipairs(t) do
+                i = clone_proxy(t.Name)
+                i.anchor_point = {0,i.h/2}
+                i.orig_w = i.w
+                table.insert(items,  i  )
+                --items[#items].anchor_point = { items[#items].w/2, items[#items].h/2}
+                inner_group:add(i)
+                i:hide()
+            end
         end
-    end
-    place_on_the_top = function(top_i,curr_i)
-        items[curr_i]:show()
-        items[curr_i].y  = items[top_i].y - item_spacing
-    end
-    place_on_the_bottom = function(bottom_i,curr_i)
-        items[curr_i]:show()
-        items[curr_i].y  = items[bottom_i].y + item_spacing
-    end
-    
-    
-    
-    items[1]:show()
-    items[1].y = h/2
-    --position from middle to the right
-    while items[bottom_i].y + item_spacing + items[bottom_i].h/2 <= h do
+        place_on_the_top = function(top_i,curr_i)
+            items[curr_i]:show()
+            items[curr_i].y  = items[top_i].y - item_spacing
+        end
+        place_on_the_bottom = function(bottom_i,curr_i)
+            items[curr_i]:show()
+            items[curr_i].y  = items[bottom_i].y + item_spacing
+        end
         
-        curr_item = wrap_i(bottom_i + 1,items)
-        place_on_the_bottom(bottom_i,curr_item)
-        bottom_i = curr_item
-        vis_len = vis_len + 1
         
-    end
-    --position from middle to the left
-    while items[top_i].y - item_spacing - items[top_i].h/2 >= 0 do
         
-        curr_item = wrap_i(top_i - 1,items)
-        place_on_the_top(top_i,curr_item)
-        top_i = curr_item
-        vis_len = vis_len + 1
+        items[1]:show()
+        items[1].y = h/2
+        --position from middle to the right
+        while items[bottom_i].y + item_spacing + items[bottom_i].h/2 <= h do
+            
+            curr_item = wrap_i(bottom_i + 1,items)
+            place_on_the_bottom(bottom_i,curr_item)
+            bottom_i = curr_item
+            vis_len = vis_len + 1
+            
+        end
+        --position from middle to the left
+        while items[top_i].y - item_spacing - items[top_i].h/2 >= 0 do
+            
+            curr_item = wrap_i(top_i - 1,items)
+            place_on_the_top(top_i,curr_item)
+            top_i = curr_item
+            vis_len = vis_len + 1
+            
+            middle_i = middle_i + 1
+        end
         
-        middle_i = middle_i + 1
-    end
-    
-    instance.is_ready = true
-    items[curr_i ].scale = {sel_scale,sel_scale}
-    
+        instance.is_ready = true
+        items[curr_i ].scale = {sel_scale,sel_scale}
+        
     end
     instance.move_up = function()
         if #items == 0 or inner_group.is_playing then return end

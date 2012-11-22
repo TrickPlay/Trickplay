@@ -120,7 +120,7 @@ local create = function(text)
         end
     end
     
-    instance.move_up = function()
+    instance.move_down = function()
         if animate_list.is_playing then return end
         
         animate_list.on_new_frame = on_new_frame__animate_up
@@ -139,7 +139,7 @@ local create = function(text)
         
     end
     
-    instance.move_down = function()
+    instance.move_up = function()
         if animate_list.is_playing then return end
         
         animate_list.on_new_frame = on_new_frame__animate_down
