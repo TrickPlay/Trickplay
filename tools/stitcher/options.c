@@ -115,8 +115,6 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { NULL }
     };
     
-    g_message( "buffer %i", options->add_buffer_pixels );
-    
     GOptionGroup * group = g_option_group_new( "all", NULL, NULL, options, NULL );
     g_option_group_add_entries( group, entries );
     g_option_context_set_main_group( context, group );
@@ -126,6 +124,8 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         fprintf( stderr, "Could not parse arguments.\n" ); // this doesn't seem to be working right
         exit( 1 );
     }
+    
+    g_message( "buffer %i", options->add_buffer_pixels );
     
     g_option_context_free( context );
 
