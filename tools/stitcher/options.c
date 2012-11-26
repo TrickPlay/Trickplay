@@ -17,8 +17,8 @@ Options * options_new()
     options->copy_large_items = TRUE;
 
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
-    options->input_paths    = g_ptr_array_new();
-    options->json_to_merge  = g_ptr_array_new();
+    options->input_paths    = g_ptr_array_new_with_free_func( g_free );
+    options->json_to_merge  = g_ptr_array_new_with_free_func( g_free );
     options->input_ids      = g_hash_table_new_full( g_str_hash, g_str_equal, g_free, NULL );
 
     return options;
@@ -57,27 +57,27 @@ gboolean options_take_unique_id ( Options * options, const char * id )
     return TRUE;
 }
 
-gboolean opt_forget( const gchar * option_name, const gchar * value, gpointer * data, GError ** error )
+gboolean opt_forget( const gchar * opt, const gchar * value, Options * options, GError ** error )
 {
-    options_take_unique_id( (Options *) data, strdup( value ) );
+    options_take_unique_id( options, value );
     return TRUE;
 }
 
-gboolean opt_filter( const gchar * option_name, const gchar * value, gpointer * data, GError ** error )
+gboolean opt_filter( const gchar * opt, const gchar * value, Options * options, GError ** error )
 {
-    g_ptr_array_add( ((Options *) data)->input_patterns, g_pattern_spec_new( strdup( value ) ) );
+    g_ptr_array_add( options->input_patterns, g_pattern_spec_new( value ) );
     return TRUE;
 }
 
-gboolean opt_json( const gchar * option_name, const gchar * value, gpointer * data, GError ** error )
+gboolean opt_json( const gchar * opt, const gchar * value, Options * options, GError ** error )
 {
-    g_ptr_array_add( ((Options *) data)->json_to_merge, strdup( (char *) value ) );
+    g_ptr_array_add( options->json_to_merge, strdup( value ) );
     return TRUE;
 }
 
-gboolean opt_input( const gchar * option_name, const gchar * value, gpointer * data, GError ** error )
+gboolean opt_input( const gchar * opt, const gchar * value, Options * options, GError ** error )
 {
-    g_ptr_array_add( ((Options *) data)->input_paths, strdup( (char *) value ) );
+    g_ptr_array_add( options->input_paths, strdup( value ) );
     return TRUE;
 }
 
@@ -97,7 +97,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "no-copy",        'C', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->copy_large_items,         "Do not copy over files that fail the input size filter as stand-alone images", NULL },
         { "forget",         'f', 0,                         G_OPTION_ARG_CALLBACK,
-            & opt_forget,                        "Name of a sprite to skip or forget in output", "ID" },
+            & opt_forget,                        "Id of a sprite to skip or forget", "ID" },
         { "input-filter",   'i', 0,                         G_OPTION_ARG_CALLBACK, 
             & opt_filter,                        "Inclusive wildcard (?, *) filter for files within input directories (default: *)", "FILTER" },
         { "merge-json",     'j', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
@@ -121,11 +121,9 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     
     if ( !g_option_context_parse( context, &argc, &argv, NULL ) )
     {
-        fprintf( stderr, "Could not parse arguments.\n" ); // this doesn't seem to be working right
+        fprintf( stderr, "Could not parse arguments.\n" );
         exit( 1 );
     }
-    
-    g_message( "buffer %i", options->add_buffer_pixels );
     
     g_option_context_free( context );
 
