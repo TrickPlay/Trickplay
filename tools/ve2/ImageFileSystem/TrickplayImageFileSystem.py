@@ -269,7 +269,7 @@ class TrickplayImageFileSystem(QWidget):
         self.popMenu.addSeparator()
         self.popMenu.addAction( '&Delete', self.removeAsset )
         self.popMenu.addSeparator()
-        self.popMenu.addAction( '&Insert Image To Screen', self.insertImage )
+        self.popMenu.addAction( '&Add To Screen', self.insertImage )
         
     def contextMenu(self, point):
         self.popMenu.exec_( self.ui.fileSystemTree.mapToGlobal(point) )

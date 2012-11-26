@@ -29,28 +29,28 @@
  
     local key_map =
     {
-        [ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
-        [ keys.d	] = function() editor.duplicate() input_mode = hdr.S_SELECT end,
-        [ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
-        [ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
+        --[ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
+        --[ keys.d	] = function() editor.duplicate() input_mode = hdr.S_SELECT end,
+        --[ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
+        --[ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
         --[ keys.k	] = function() editor_lb:execute(debugger_script.." "..current_dir) end,
-	    [ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
-        [ keys.t	] = function() editor.text() input_mode = hdr.S_SELECT end,
-        [ keys.u	] = function() editor.ugroup() input_mode = hdr.S_SELECT end,
+	    --[ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
+        --[ keys.t	] = function() editor.text() input_mode = hdr.S_SELECT end,
+        --[ keys.u	] = function() editor.ugroup() input_mode = hdr.S_SELECT end,
         --[ keys.z	] = function() editor.undo() input_mode = hdr.S_SELECT end,
-        [ keys.v	] = function() editor.v_guideline() input_mode = hdr.S_SELECT end,
-        [ keys.w	] = function() editor.image() input_mode = hdr.S_SELECT end,
-        [ keys.BackSpace ] = function() editor.delete() input_mode = hdr.S_SELECT end,
-        [ keys.Delete    ] = function() editor.delete() input_mode = hdr.S_SELECT end,
+        --[ keys.v	] = function() editor.v_guideline() input_mode = hdr.S_SELECT end,
+        --[ keys.w	] = function() editor.image() input_mode = hdr.S_SELECT end,
+        --[ keys.BackSpace ] = function() editor.delete() input_mode = hdr.S_SELECT end,
+        --[ keys.Delete    ] = function() editor.delete() input_mode = hdr.S_SELECT end,
 	    [ keys.Shift_L   ] = function() shift = true end,
 	    [ keys.Shift_R   ] = function() shift = true end,
 	    [ keys.Control_L ] = function() control = true end,
 	    [ keys.Control_R ] = function() control = true end,
-        [ keys.Return    ] = function() screen_ui.n_select_all() input_mode = hdr.S_SELECT end ,
-        [ keys.Left     ] = function() screen_ui.move_selected_obj("Left") input_mode = hdr.S_SELECT end,
-        [ keys.Right    ] = function() screen_ui.move_selected_obj("Right") input_mode = hdr.S_SELECT end ,
-        [ keys.Down     ] = function() screen_ui.move_selected_obj("Down") input_mode = hdr.S_SELECT end,
-        [ keys.Up       ] = function() screen_ui.move_selected_obj("Up") input_mode = hdr.S_SELECT end,
+        --[ keys.Return    ] = function() screen_ui.n_select_all() input_mode = hdr.S_SELECT end ,
+        --[ keys.Left     ] = function() screen_ui.move_selected_obj("Left") input_mode = hdr.S_SELECT end,
+        --[ keys.Right    ] = function() screen_ui.move_selected_obj("Right") input_mode = hdr.S_SELECT end ,
+        --[ keys.Down     ] = function() screen_ui.move_selected_obj("Down") input_mode = hdr.S_SELECT end,
+        --[ keys.Up       ] = function() screen_ui.move_selected_obj("Up") input_mode = hdr.S_SELECT end,
     }
     
     -------------------------------
@@ -789,6 +789,8 @@ end
 
 -- REPORT 
 _VE_.repUIInfo = function(uiInstance)
+    print("repUIInfo")
+
     if blockReport == true then 
         return
     end 
@@ -826,7 +828,7 @@ _VE_.buildVF = function(path)
         --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo["..images.."]")
     end
-    spriteSheet = SpriteSheet { map = image_file } 
+    spriteSheet = SpriteSheet { map = images_file } 
 end
 
 _VE_.openFile = function(path)
@@ -868,6 +870,8 @@ _VE_.openFile = function(path)
 
     -- Library 
     WL = dofile("LIB/Widget/Widget_Library.lua")
+
+    print(layer)
 
     s = load_layer(layer)
     print (s, #s.children)
@@ -1374,7 +1378,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
         --uiInstance.src = path
-        uiUnstance.sheet = spriteSheet
+        uiInstance.sheet = spriteSheet
         uiInstance.id = path
     elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
         editor.text(uiInstance)
