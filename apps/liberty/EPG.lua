@@ -910,7 +910,7 @@ function instance:setup_icons(t)
         
         show_grid_icons:add(rows[i].icon)
     end
-    rows[middle_row].icon.scale = {sel_scale,sel_scale}
+    rows[middle_row].icon.scale = rows[middle_row].icon.base_scale*sel_scale--{sel_scale,sel_scale}
     if scheduling ~= nil then
         integrate_schedule()
     end
@@ -1228,7 +1228,7 @@ local keypresses = {
                 animating_show_grid = false
                 show_grid.y = heading_h
                 --consolidated all the other on_completed's
-                if rows[middle_row-1].is_animating   then rows[middle_row-1]:stop_animation()   end
+                if rows[middle_row-1].is_animating      then rows[middle_row-1]:stop_animation()   end
                 if rows[middle_row-1].icon.is_animating then rows[middle_row-1].icon:stop_animation() end
                 if rows[middle_row].is_animating        then rows[middle_row]:stop_animation()        end
                 if rows[middle_row].icon.is_animating   then rows[middle_row].icon:stop_animation()   end
@@ -1278,13 +1278,13 @@ local keypresses = {
         rows[middle_row-1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         rows[middle_row-1]:animate{   duration = dur, scale = {1,1}}--{1,2*1080/720}, }
-        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {sel_scale,sel_scale} }
+        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {rows[middle_row-1].icon.base_scale*sel_scale,rows[middle_row-1].icon.base_scale*sel_scale} }
         rows[middle_row-1].shows:animate{ duration = dur, y = (middle_row-2)*row_h, }
         --rows[middle_row-1].icon:animate{ duration = dur, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
         --rows[middle_row]:animate{      duration = dur, y = (middle_row-1)*row_h, }
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}, y = (middle_row-1)*row_h,}
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, scale = {1,1} }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, scale = {rows[middle_row].icon.base_scale,rows[middle_row].icon.base_scale} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
@@ -1406,12 +1406,12 @@ local keypresses = {
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row+1]:animate{   duration = dur, scale = {1,1}, y = (middle_row-1)*row_h}
-        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {sel_scale,sel_scale} }
+        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {rows[middle_row+1].icon.base_scale*sel_scale,rows[middle_row+1].icon.base_scale*sel_scale} }
         rows[middle_row+1].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}}--{1,1080/720}, }
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, scale = {1,1} }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, scale = {rows[middle_row].icon.base_scale,rows[middle_row].icon.base_scale} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }

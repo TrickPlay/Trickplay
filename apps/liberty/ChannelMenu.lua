@@ -77,11 +77,11 @@ local create = function(text)
         end
         
         instance.is_ready = true
-        items[curr_i ].scale = {sel_scale,sel_scale}
+        items[curr_i ].scale = {items[curr_i ].base_scale*sel_scale,items[curr_i ].base_scale*sel_scale}--{sel_scale,sel_scale}
         
     end
     instance.move_up = function()
-        if #items == 0 or inner_group.is_playing then return end
+        if #items == 0 or inner_group.is_animating then return end
         
         curr_item = wrap_i(top_i - 1,items)
         if items[curr_item].is_visible then error("woops") end
@@ -106,17 +106,18 @@ local create = function(text)
         }
         items[curr_i ]:animate{
             duration = 300,
-            scale = {1,1},
+            scale = {items[curr_i ].base_scale,items[curr_i ].base_scale},--{1,1},
         }
         items[new_i ]:animate{
             duration = 300,
-            scale = {sel_scale,sel_scale},
+            scale = {items[new_i ].base_scale*sel_scale,items[new_i ].base_scale*sel_scale},
+            --scale = {sel_scale,sel_scale},
         }
         
     end
     
     instance.move_down = function()
-        if #items == 0 or inner_group.is_playing then return end
+        if #items == 0 or inner_group.is_animating then return end
         
         curr_item = wrap_i(bottom_i + 1,items)
         if items[curr_item].is_visible then error("woops") end
@@ -141,11 +142,12 @@ local create = function(text)
         }
         items[curr_i ]:animate{
             duration = 300,
-            scale = {1,1},
+            scale = {items[curr_i ].base_scale,items[curr_i ].base_scale},--{1,1},
         }
         items[new_i ]:animate{
             duration = 300,
-            scale = {sel_scale,sel_scale},
+            scale = {items[new_i ].base_scale*sel_scale,items[new_i ].base_scale*sel_scale},
+            --scale = {sel_scale,sel_scale},
         }
         
     end
