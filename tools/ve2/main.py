@@ -323,51 +323,51 @@ class MainWindow(QMainWindow):
         return True
 
     def slider(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Slider')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Slider')")
         return True
 
     def layoutmanager(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'LayoutManager')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'LayoutManager')")
         return True
 
     def scrollpane(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ScrollPane')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ScrollPane')")
         return True
 
     def tabbar(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TabBar')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'TabBar')")
         return True
 
     def arrowpane(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ArrowPane')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ArrowPane')")
         return True
 
     def buttonpicker(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ButtonPicker')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ButtonPicker')")
         return True
 
     def menubutton(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'MenuButton')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'MenuButton')")
         return True
 
     def textinput(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TextInput')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'TextInput')")
         return True
 
     def orbittingdots(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'OrbittingDots')")
         return True
 
     def progressbar(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressBar')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ProgressBar')")
         return True
 
     def progressspinner(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ProgressSpinner')")
         return True
 
     def toastalert(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ToastAlert')")
         return True
 
     """
@@ -377,102 +377,102 @@ class MainWindow(QMainWindow):
     """
 
     def checkbox(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'CheckBox')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'CheckBox')")
         return True
 
     def radiobutton(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'RadioButton')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'RadioButton')")
         return True
 
     def dialogbox(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'DialogBox')")
         return True
 
     def button(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Button')")
         return True
 
     def text(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Text')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Text')")
         return True
 
     def image(self):
         path = QFileDialog.getOpenFileName(None, 'Set Image Source', str(os.path.join(self.path, 'assets/images')), "*.jpg *.gif *.png")
         path = os.path.basename(str(path))
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'assets/images'))+'")')
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Image', "+"'"+str(path)+"')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Image', "+"'"+str(path)+"')")
         return True
 
     def clone(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Clone')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Clone')")
         return True
 
     def group(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Group')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Group')")
         return True
 
     def ungroup(self):
-        self.sendLuaCommand("ungroup", "_VE_.ungroup("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("ungroup", "_VE_.ungroup('"+str(self._inspector.curLayerGid)+"')")
         return True
 
     def delete(self):
-        self.sendLuaCommand("delete", "_VE_.delete("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("delete", "_VE_.delete('"+str(self._inspector.curLayerGid)+"')")
         return True
 
     def duplicate(self):
-        self.sendLuaCommand("duplicate", "_VE_.duplicate("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(self._inspector.curLayerGid)+"')")
         return True
 
     def rectangle(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Rectangle')")
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Rectangle')")
         return True
 
     def left(self):
-        self.sendLuaCommand("alignLeft", "_VE_.alignLeft("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("alignLeft", "_VE_.alignLeft('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def right(self):
-        self.sendLuaCommand("alignRight", "_VE_.alignRight("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("alignRight", "_VE_.alignRight('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def top(self):
-        self.sendLuaCommand("alignTop", "_VE_.alignTop("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("alignTop", "_VE_.alignTop('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def bottom(self):
-        self.sendLuaCommand("alignButtom", "_VE_.alignButtom("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("alignButtom", "_VE_.alignButtom('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def horizontalCenter(self):
-        self.sendLuaCommand("horizontalCenter", "_VE_.alignHorizontalCenter("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("horizontalCenter", "_VE_.alignHorizontalCenter('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def verticalCenter(self):
-        self.sendLuaCommand("verticalCenter", "_VE_.alignVerticalCenter("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("verticalCenter", "_VE_.alignVerticalCenter('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def distributeHorizontal(self):
-        self.sendLuaCommand("distributeHorizontal", "_VE_.distributeHorizontal("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("distributeHorizontal", "_VE_.distributeHorizontal('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def distributeVertical(self):
-        self.sendLuaCommand("distributeVertical", "_VE_.distributeVertical("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("distributeVertical", "_VE_.distributeVertical('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def bringToFront(self):
-        self.sendLuaCommand("bringToFront", "_VE_.bringToFront("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("bringToFront", "_VE_.bringToFront('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def bringForward(self):
-        self.sendLuaCommand("bringForward", "_VE_.bringForward("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("bringForward", "_VE_.bringForward('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def sendToBack(self):
-        self.sendLuaCommand("sendToBack", "_VE_.sendToBack("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("sendToBack", "_VE_.sendToBack('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def sendBackward(self):
-        self.sendLuaCommand("sendBackward", "_VE_.sendBackward("+str(self._inspector.curLayerGid)+")")
+        self.sendLuaCommand("sendBackward", "_VE_.sendBackward('"+str(self._inspector.curLayerGid)+"')")
         return True
 
     def stop(self, serverStoped=False, exit=False):

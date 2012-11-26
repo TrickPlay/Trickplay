@@ -50,7 +50,7 @@ class TrickplayElementModel(QStandardItemModel):
                             if self.lmCol == "nil" :
                                 self.lmCol = int( the_item.rowCount() )
                             print "[", self.lmRow, self.lmCol ,"]"
-                            self.newParentGid = the_item.parent()['gid'] #LayoutManager
+                            self.newParentGid = the_item.parent()['gid'] 
                         else : #Drop into Empty Cell 
                             self.lmCol = int(the_item.row()) # layout manager col number 
                             self.lmRow = int(the_item.parent().text()[3:])
@@ -116,9 +116,9 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
-                    inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+","+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 else:
-                    inputCmd = str("_VE_.contentMove("+str(self.newChildGid)+","+str(self.newParentGid)+","+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 print inputCmd
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
@@ -131,109 +131,7 @@ class TrickplayElementModel(QStandardItemModel):
             self.tabIndex = "nil"
             self.lmParentGid = "nil"
             
-    """
-    #---------------------------------------------------------------------------
-    #def supportedDropActions(self): 
-        #return Qt.MoveAction 
-    #---------------------------------------------------------------------------
-    def mimeTypes(self):
-        types = QStringList() 
-        types.append('text/plain') 
-        return types 
-
-    def mimeData(self, index): 
-        rc = ""
-        theIndex = index[1] #<- for testing purposes we only deal with 1st item
-        while theIndex.isValid():
-            rc = rc + str(theIndex.row()) + ";" + str(theIndex.column())
-            theIndex = self.parent(theIndex)
-            if theIndex.isValid():
-                rc = rc + ","
-        mimeData = QMimeData()
-        mimeData.setText(rc)
-        return mimeData
-
-    def nodeFromIndex(self, index):        
-    ##return index.internalPointer() if index.isValid() else self.root        
-        return index.model() if index.isValid() else self.parent()
-
-    def dropMimeData(self, data, action, row, column, parentIndex):
-       if action == Qt.IgnoreAction:
-           return True
     
-       print self.itemFromIndex(parentIndex).text() #Layer0
-       print self.itemFromIndex(parentIndex).row() #0
-       print self.itemFromIndex(parentIndex).column() #0 
-
-       if data.hasText():
-            ancestorL = str(data.text()).split(",") 
-            ancestorL.reverse() #<- stored from the child up, we read from ancestor down
-            print ancestorL
-            pIndex = QModelIndex()
-            for ancestor in ancestorL:
-                srcRow = int(ancestor.split(";")[0])
-                srcCol = int(ancestor.split(";")[1])
-                itemIndex = self.index(srcRow, srcCol, pIndex)
-                print self.itemFromIndex(itemIndex).text()
-                pIndex = itemIndex
-
-       dragNode = self.nodeFromIndex(pIndex)
-       #parentNode = self.nodeFromIndex(parentIndex)
-       newNode = deepcopy(dragNode)
-
-       #newNode.setParent(parentNode)
-       #self.insertRow(len(parentNode)-1, newNode)
-       #self.insertRow(len(parentNode)-1, parentIndex)
-       self.removeRow(row, parentIndex)
-       return True
->>>>>>>>>>>>>>>>
-        self.beginInsertRows(parentIndex, row-1, row)
-        print parentIndex, row-1, row
-        self.beginInsertRows(parentIndex, row-1, row)
-
-       dragNode = mimedata.instance()
-       parentNode = self.nodeFromIndex(parentIndex)
-
-       # make a copy of the node being moved
-       newNode = deepcopy(dragNode)
-       newNode.setParent(parentNode)
-       self.insertRow(len(parentNode)-1, parentIndex)
-       self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), parentIndex, parentIndex) 
-       if (mimedata.hasFormat('compass/x-ets-qt4-instance')):
-           self.removeRow(row, parentIndex)
-
-    #---------------------------------------------------------------------------
-    def insertRow(self, row, parent): 
-        print "insertRow"
-        return self.insertRows(row, 1, parent) 
-
-
-    #---------------------------------------------------------------------------
-    def insertRows(self, row, count, parent): 
-        print "insertRows"
-        self.beginInsertRows(parent, row, (row + (count - 1))) 
-        self.endInsertRows() 
-        return True 
-
-
-    #---------------------------------------------------------------------------
-    def removeRow(self, row, parentIndex): 
-        print "removeRow"
-        return self.removeRows(row, 1, parentIndex) 
-
-
-    #---------------------------------------------------------------------------
-    def removeRows(self, row, count, parentIndex): 
-        self.beginRemoveRows(parentIndex, row, row) 
-        #print "about to remove child at row:",row
-        #print "which is under the parent named:",parentIndex.internalPointer().get_name()
-        #print "and whose own name is:",parentIndex.internalPointer().get_child_at_row(row).get_name()
-        #parentIndex.internalPointer().remove_child_at_row(row)
-        self.endRemoveRows() 
-        return True 
-
-    """
-
     def inspector_reply_finished(self, pdata=None, sdata=None):
         if pdata is not None :
             root = self.invisibleRootItem()
@@ -327,8 +225,8 @@ class TrickplayElementModel(QStandardItemModel):
                         self.inspector.screens[self.inspector.currentScreenName].append(title)
 
         else:
-            self.inspector.layerName[int(gid)] = self.inspector.curLayerName
-            self.inspector.layerGid[int(gid)] = self.inspector.curLayerGid
+            self.inspector.layerName[(gid)] = self.inspector.curLayerName
+            self.inspector.layerGid[(gid)] = self.inspector.curLayerGid
 
         if gid > self.theBigestGid:
             self.theBigestGid = gid 

@@ -47,9 +47,9 @@ class TrickplayEmulatorManager(QWidget):
         
     def setUIInfo(self, gid, property, value, n=None):
         if n:
-            inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"','"+str(value)+"',"+str(n)+")")
+            inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
-            inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"',"+str(value)+")")
+            inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
@@ -168,14 +168,15 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "getStInfo" :
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
-				        gid = int(s[9:])
+				        gid = (s[9:])
+				        #gid = int(s[9:])
 				    elif luaCmd == "focusSet2":
 				        focusObj = str(s[9:])
 				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
 				        self.inspector.neighbors.toggled(False)
 				    elif luaCmd == "openInspc":
-				        #gid = int(s[9:])
-				        gid = int(s[10:])
+				        #gid = int(s[10:])
+				        gid = (s[10:])
 				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
 				        scrData = json.loads(s[9:])
@@ -211,10 +212,10 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "clear:Insp":
 					try:
-					    try:
-					        gid = int(gid)
-					    except:
-					        print("error :( gid is missing!") 
+					    #try:
+					        #gid = int(gid)
+					    #except:
+					        #print("error :( gid is missing!") 
 
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
@@ -232,10 +233,10 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "openInspc":
 					try:
-					    try:
-					        gid = int(gid)
-					    except:
-					        print("error :( gid is missing!") 
+					    #try:
+					        #gid = int(gid)
+					    #except:
+					        #print("error :( gid is missing!") 
 
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 

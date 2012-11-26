@@ -1035,7 +1035,7 @@ class TrickplayInspector(QWidget):
                             path = QFileDialog.getOpenFileName(None, 'Set Image Source', str(os.path.join(self.main.path, 'assets/images')), "*.jpg *.gif *.png")
                             if len(path) > 0 :
                                 path = os.path.basename(str(path))
-                                self.sendData(int(data['gid']), 'src', path)
+                                self.sendData((data['gid']), 'src', path)
                             self.preventChanges = False
 
                     source_button = QPushButton()
@@ -1147,7 +1147,7 @@ class TrickplayInspector(QWidget):
                                         if sssp in ['activation', 'default', 'focus']:
                                             colNums = [n,c1,c2,c3]
                                             colNames = [sssp, ssp, sp, 'style']
-                                            colorPropertyFill(colNames, colNums, r, int(data['gid'])) 
+                                            colorPropertyFill(colNames, colNums, r, (data['gid'])) 
                                         else:
                                             m.setText(1,str(r[sssp]))
                                             m.setFlags(k.flags() ^Qt.ItemIsEditable)
@@ -1158,13 +1158,13 @@ class TrickplayInspector(QWidget):
                                     colNums = [n,c1,c2]
                                     colNames = [ssp,sp,'style']
                                     if ssp in ['activation', 'default', 'focus']:
-                                        colorPropertyFill(colNames, colNums, q, int(data['gid'])) 
+                                        colorPropertyFill(colNames, colNums, q, (data['gid'])) 
                                     elif ssp == "font":
-                                        fontPropertyFill(colNames, colNums, q, int(data['gid'])) 
+                                        fontPropertyFill(colNames, colNums, q, (data['gid'])) 
                                     elif ssp == "alignment":
-                                        comboPropertyFill(colNames, colNums, q, int(data['gid'])) 
+                                        comboPropertyFill(colNames, colNums, q, (data['gid'])) 
                                     elif ssp in ['justify', 'wrap']:
-                                        boolPropertyFill(colNames, colNums, q, int(data['gid'])) 
+                                        boolPropertyFill(colNames, colNums, q, (data['gid'])) 
                                     else:
                                         l.setText(1,str(q[ssp]))
                                         l.setFlags(l.flags() ^Qt.ItemIsEditable)
@@ -1371,7 +1371,7 @@ class TrickplayInspector(QWidget):
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
-                inputCmd = str("_VE_.selectUIElement("+str(selItem.TPJSON()['gid'])+','+multiSelect+")")
+                inputCmd = str("_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
                 print inputCmd
                 self.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.main._emulatorManager.trickplay.waitForBytesWritten()
@@ -1382,7 +1382,7 @@ class TrickplayInspector(QWidget):
             deselItem = self.inspectorModel.itemFromIndex(deselIdx)
             try :
                 #print (str(deselItem.TPJSON()['name'])+" deselected!!!")
-                inputCmd = str("_VE_.deselectUIElement("+str(deselItem.TPJSON()['gid'])+','+multiSelect+")")
+                inputCmd = str("_VE_.deselectUIElement('"+str(deselItem.TPJSON()['gid'])+"',"+multiSelect+")")
                 print inputCmd
                 self.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.main._emulatorManager.trickplay.waitForBytesWritten()
@@ -1411,7 +1411,7 @@ class TrickplayInspector(QWidget):
                         tempdata['index'] = item.tabIndex
                         #tempdata['neighbors'] = item.tabdata['tabs'][item.tabIndex]['contents']['neighbors']
                         self.propertyFill(tempdata)
-                        self.curLayerName = self.layerName[int(item.tabdata['gid'])] 
+                        self.curLayerName = self.layerName[(item.tabdata['gid'])] 
                         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                     self.preventChanges = False
                     return
@@ -1439,9 +1439,9 @@ class TrickplayInspector(QWidget):
                     self.curLayerGid = self.curData['gid']
                     self.curItemGid = self.curData['gid']
                     self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
-                elif self.layerName[int(self.curData['gid'])] : 
-                    self.curLayerName = self.layerName[int(self.curData['gid'])] 
-                    self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
+                elif self.layerName[(self.curData['gid'])] : 
+                    self.curLayerName = self.layerName[(self.curData['gid'])] 
+                    self.curLayerGid = self.layerGid[(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
 
                 if multiSelect == "true":
@@ -1540,7 +1540,7 @@ class TrickplayInspector(QWidget):
 
     def getGid (self):
         g_item = self.ui.property.findItems("gid", Qt.MatchExactly, 0)
-        return int(g_item[0].text(1))
+        return (g_item[0].text(1))
 
     def getType (self):
         g_item = self.ui.property.findItems("type", Qt.MatchExactly, 0)
