@@ -97,7 +97,11 @@ function get_scheduling(f)
             return
         end
         --]]
+        
+        ---[[
         get_local_data(meta.time_scheduling_was_requested)
+        return
+        --]]
     end
     
     curr_time = os.date('*t')
