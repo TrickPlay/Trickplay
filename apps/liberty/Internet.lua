@@ -46,7 +46,6 @@ function get_scheduling(f)
     
     local received_schedule = function(response)
         
-        print("here")
         if response.failed then
             print("response.failed")
             return
@@ -88,6 +87,7 @@ function get_scheduling(f)
     
     local curr_time = os.date('*t')
     if editor and meta.time_scheduling_was_requested then
+        --[[
         local t = tonumber(meta.time_scheduling_was_requested)
         curr_time.hour=curr_time.hour - 11
         --dumptable(os.date('*t',t))
@@ -96,6 +96,8 @@ function get_scheduling(f)
             get_local_data()
             return
         end
+        --]]
+        get_local_data(meta.time_scheduling_was_requested)
     end
     
     curr_time = os.date('*t')
