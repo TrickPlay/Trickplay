@@ -12,9 +12,14 @@ void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc
     {
         found = g_sequence_get( sj );
         if ( found == data )
-            return g_sequence_remove( sj );
+        {
+            g_sequence_remove( sj );
+            return;
+        }
         else if ( cmp_func( found, data, cmp_data ) != 0 )
+        {
             break;
+        }
         sj = g_sequence_iter_next( sj );
     }
 
@@ -24,9 +29,14 @@ void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc
         sj = g_sequence_iter_prev( sj );
         found = g_sequence_get( sj );
         if ( found == data )
-            return g_sequence_remove( sj );
+        {
+            g_sequence_remove( sj );
+            return;
+        }
         else if ( cmp_func( found, data, cmp_data ) != 0 )
+        {
             break;
+        }
     }
 }
 
@@ -34,13 +44,13 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attrib
 {
     Leaf * aa = (Leaf *) a,
          * bb = (Leaf *) b;
-    return aa->area - bb->area;
+    return (int)aa->area - (int)bb->area;
 }
 
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
 {
     Leaf * leaf = malloc( sizeof( Leaf ) );
-    
+
     leaf->x = x;
     leaf->y = y;
     leaf->w = w;
@@ -66,6 +76,6 @@ char * leaf_tostring ( Leaf * leaf, Options * options )
 {
     unsigned int bp = options->add_buffer_pixels ? 1 : 0;
     return g_strdup_printf(
-        "\n\t\t{ \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
+        "\n    { \"x\": %i, \"y\": %i, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
         leaf->x + bp, leaf->y + bp, leaf->item->w - 2*bp, leaf->item->h - 2*bp, leaf->item->id );
 }

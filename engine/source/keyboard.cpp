@@ -342,7 +342,11 @@ public:
 
     virtual void hide()
     {
+#ifndef CLUTTER_VERSION_1_10
         clutter_actor_hide_all( get_container() );
+#else
+        clutter_actor_hide( get_container() );
+#endif
     }
 
     virtual void show_for_field( const Keyboard::Form::Field & field ) = 0;
@@ -635,9 +639,13 @@ public:
     {
         g_assert( ok() );
 
+#ifndef CLUTTER_VERSION_1_10
         clutter_actor_show_all( kb->typing_container );
         clutter_actor_hide_all( kb->typing_focus );
         clutter_actor_hide_all( kb->typing_layout );
+#else
+        clutter_actor_show( kb->typing_container );
+#endif
 
         clutter_actor_show( kb->typing_focus );
         clutter_actor_show( kb->typing_layout );
@@ -818,9 +826,13 @@ public:
 
         field = & _field;
 
+#ifndef CLUTTER_VERSION_1_10
         clutter_actor_show_all( kb->list_container );
         clutter_actor_hide_all( kb->list_focus );
         clutter_actor_hide_all( kb->list_layout );
+#else
+        clutter_actor_show( kb->list_container );
+#endif
 
         clutter_actor_show( kb->list_focus );
         clutter_actor_show( kb->list_layout );
@@ -828,7 +840,11 @@ public:
 
         clutter_actor_hide( kb->current_field_value );
 
+#ifndef CLUTTER_VERSION_1_10
         clutter_actor_hide_all( item_container );
+#else
+        clutter_actor_hide(item_container );
+#endif
 
         clutter_actor_set_y( item_container , 0 );
 
@@ -1507,21 +1523,7 @@ void Keyboard::on_finished_hiding( ClutterAnimation * animation , ClutterActor *
 
 void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_path )
 {
-    if ( CLUTTER_IS_CONTAINER( actor ) )
-    {
-#ifdef CLUTTER_VERSION_1_10
-        ClutterActorIter iter;
-        ClutterActor *child;
-        clutter_actor_iter_init( &iter, actor );
-        while(clutter_actor_iter_next( &iter, &child ))
-        {
-            load_static_images( child, assets_path );
-        }
-#else
-        clutter_container_foreach( CLUTTER_CONTAINER( actor ) , CLUTTER_CALLBACK( load_static_images ) , (gpointer)assets_path );
-#endif
-    }
-    else if ( CLUTTER_IS_TEXTURE( actor ) )
+    if ( CLUTTER_IS_TEXTURE( actor ) )
     {
         if ( const gchar * name = clutter_actor_get_name( actor ) )
         {
@@ -1537,6 +1539,20 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
             g_free( filename );
             g_free( base );
         }
+    }
+    else if ( CLUTTER_IS_CONTAINER( actor ) )
+    {
+#ifdef CLUTTER_VERSION_1_10
+        ClutterActorIter iter;
+        ClutterActor *child;
+        clutter_actor_iter_init( &iter, actor );
+        while(clutter_actor_iter_next( &iter, &child ))
+        {
+            load_static_images( child, assets_path );
+        }
+#else
+        clutter_container_foreach( CLUTTER_CONTAINER( actor ) , CLUTTER_CALLBACK( load_static_images ) , (gpointer)assets_path );
+#endif
     }
 }
 
@@ -2108,7 +2124,11 @@ bool Keyboard::build_field_list()
     //.........................................................................
     // Hide everything
 
+#ifndef CLUTTER_VERSION_1_10
     clutter_actor_hide_all( field_list_container );
+#else
+    clutter_actor_hide( field_list_container );
+#endif
 
     //.........................................................................
     // Now, set-up each field

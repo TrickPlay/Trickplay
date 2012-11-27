@@ -399,6 +399,9 @@ ArrowPane = setmetatable(
                     {    nil, l_down,     nil },
                 },
             }
+            
+            WL_parent_redirect[l_pane] = instance
+            
             style_flags = {
                 border = "redraw_pane",
                 arrow = {
@@ -421,6 +424,7 @@ ArrowPane = setmetatable(
             instance:add_key_handler(keys.Down,   down.click)
             instance:add_key_handler(keys.Left,   left.click)
             instance:add_key_handler(keys.Right, right.click)
+            --[[
     		up:add_mouse_handler("on_button_up", function()
     		    pane.virtual_y = pane.virtual_y - move_by
     		end)
@@ -436,6 +440,7 @@ ArrowPane = setmetatable(
 		    right:add_mouse_handler("on_button_up", function()
     	    	pane.virtual_x = pane.virtual_x + move_by
     		end)
+            --]]
             arrows = {
                 up    = up,
                 down  = down,

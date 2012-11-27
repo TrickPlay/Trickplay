@@ -48,9 +48,11 @@ local create = function()
     cursor.y = slider.y - 42
     instance:add(cursor)
     --------------------------------------------------------------------
+    local i = 1
     local keypresses = {
         [keys.Left] = function()
-            if slider.is_animating then return end
+            if i==1 or slider.is_animating then return end
+            i = i - 1
             slider:animate{
                 duration = 300,
                 x = 0,
@@ -59,7 +61,8 @@ local create = function()
             txt__next.contract:start()
         end,
         [keys.Right] = function()
-            if slider.is_animating then return end
+            if i == 2 or slider.is_animating then return end
+            i = i + 1
             slider:animate{
                 duration = 300,
                 x = left_margin - right_margin,
@@ -83,6 +86,8 @@ local create = function()
             backdrop:set_horizon(700)
             
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k)

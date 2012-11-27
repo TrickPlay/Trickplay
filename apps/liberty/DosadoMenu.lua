@@ -175,52 +175,77 @@ return function(p)
         end
     end
     
+    local cursor = make_cursor(p.type == "flat" and (200*1.1) or(183+168+153+140+124))
+    cursor.x = screen_w/2
+    cursor.y = lower_y-42
+    instance:add(cursor)
+    
     local animating_back_to_prev_menu = false
     local switched = false
     local keypresses = {
         [keys.Up] = function()
-            --print("here1")
-            if  dosado_1.timeline and 
+            if  instance.is_animating or 
+                dosado_1.timeline and 
                 dosado_1.timeline.is_playing or 
                 dosado_1.is_playing or 
                 dosado_2.timeline and 
                 dosado_2.timeline.is_playing or 
                 dosado_2.is_playing then
-                print("crisis averted")
                 return
             end
+            print(upper.icon_w,lower.icon_w)
             if not switched then
                 dosado_1:start()
+                if upper.icon_w then
+                    cursor:change_w(upper.icon_w)
+                end
             else
                 dosado_2:start()
+                if lower.icon_w then
+                    cursor:change_w(lower.icon_w)
+                end
             end
             switched = not switched
-            --print("here2")
             instance:grab_key_focus()
-            --print("here3")
         end,
         [keys.Down] = function()
-            if  dosado_1.timeline and 
+            if  instance.is_animating or 
+                dosado_1.timeline and 
                 dosado_1.timeline.is_playing or 
                 dosado_1.is_playing or 
                 dosado_2.timeline and 
                 dosado_2.timeline.is_playing or 
                 dosado_2.is_playing then
-                print("crisis averted")
                 return
             end
+            print(upper.icon_w,lower.icon_w)
             if not switched then
                 dosado_1:start()
+                if upper.icon_w then
+                    cursor:change_w(upper.icon_w)
+                end
             else
                 dosado_2:start()
+                if lower.icon_w then
+                    cursor:change_w(lower.icon_w)
+                end
             end
             switched = not switched
             instance:grab_key_focus()
         end,
         [keys.BACK] = function()
-            if animating_back_to_prev_menu then return end
+            if  prev_menu.is_animating or 
+                instance.is_animating or 
+                animating_back_to_prev_menu or 
+                dosado_1.timeline and 
+                dosado_1.timeline.is_playing or 
+                dosado_1.is_playing or 
+                dosado_2.timeline and 
+                dosado_2.timeline.is_playing or 
+                dosado_2.is_playing then 
+                return 
+            end
             animating_back_to_prev_menu = true
-            
             instance:animate{
                 duration = 300,
                 z = -300,
@@ -241,6 +266,8 @@ return function(p)
             end
             
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k)
@@ -253,29 +280,12 @@ return function(p)
             z = 0,
             opacity = 255,
         }
-        --print("d menu okfi1")
         if not switched then
             lower:grab_key_focus()--on_key_focus_in()
         else
             upper:grab_key_focus()--on_key_focus_in()
         end
-        --print("d menu okfi2")
     end
-    --[[
-    function instance:on_key_focus_out(self)
-        print("d menu okfo1")
-        if not switched then
-            lower:on_key_focus_out()
-        else
-            upper:on_key_focus_out()
-        end
-    end
-    --]]
-    --instance.z = -300
     instance.opacity = 0
-    local cursor = make_cursor(p.type == "flat" and (200*1.1) or(183+168+153+140+124))
-    cursor.x = screen_w/2
-    cursor.y = lower_y-42
-    instance:add(cursor)
     return instance
 end

@@ -12,7 +12,7 @@ return function(options)
             text = o,
             color="white",
             sz=40,
-            duration = 200,
+            duration = 100,
             center = true,
         }--[[
         Text{
@@ -56,6 +56,7 @@ return function(options)
         }
         --]]
         items[index].contract:start()
+        index = 1
     end
     
     local keypress = {
@@ -101,6 +102,8 @@ return function(options)
             }
             --]]
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k)

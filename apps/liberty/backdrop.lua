@@ -133,17 +133,59 @@ local function make_zoom_zoom(group)
     canvas:close_path()
     canvas:fill()
 
-    local c_image = --[[canvas:--]]Image( { src= "assets/tronlight.png", name = "fly_bground", tile = { true, true }, width = 5760, height = 2200, x_rotation = { 90, 971, -300 }, x = -1280 } )
-    local fake_group = Group{ name = "fake", children = { c_image }, y = -50 }
+    local c_image = --[[canvas:--]]Image( { src= "assets/tronlight.png", name = "fly_bground", tile = { true, true }, width = 5760, height = 2200,  x = -1280 } )
+    local fake_group = Group{ name = "fake", children = { c_image },x_rotation = { 90, 971, -300 }, y = -50 }
     group:add(fake_group)
     fake_group:lower_to_bottom()
     c_image:lower_to_bottom()
     
-    c_image:animate{
-        duration = 1000,
-        loop = true,
-        z = INTERVAL*2,
-    }
+    
+    local start_z = c_image.z
+    
+    local t = Timeline {
+                            duration = 1000*60*60,
+                            loop = true,
+                            on_new_frame = function ( tl, ms, p )
+                                ms = ms % 500
+                                p  = ms / 500
+                                c_image.y  = p*INTERVAL
+                            end,
+                        }
+    function group:stop_dots()
+        
+        if not t.is_playing then return end
+        
+        t:stop()
+        --[[
+        if not c_image.is_animating then return end
+        
+        c_image:complete_animation()
+        --]]
+    end
+    function group:anim_x_rot(new)
+        
+        print(fake_group.is_animating)
+        if fake_group.is_animating then return end
+        fake_group:animate{duration = 200,x_rotation = new}--{new, 971, -300 }}
+        
+    end
+    function group:animate_dots()
+        if t.is_playing then return end
+        
+        t:start()
+        --[[
+        if c_image.is_animating then return end
+        
+        c_image.z = start_z
+        c_image:animate{
+            duration = 1000/2,
+            loop = true,
+            y = INTERVAL-1,
+        }
+        --]]
+    end
+    
+    t:start()--group:animate_dots()
     --[[
     local fly_anim = Timeline {
                                 duration = 180,
@@ -207,6 +249,10 @@ local function make_backdrop()
     local hl = Clone { name = "horizonline", source = screen:find_child("horizonline"), x = screen_w/2, w = screen_w }
     hl.h = hl.h*2
     hl.anchor_point = { hl.w/2, hl.h/2 }
+    horizon:add(hl)
+    hl = Clone { name = "horizonline", source = screen:find_child("horizonline"), x = screen_w/2, w = screen_w }
+    hl.h = hl.h*2
+    hl.anchor_point = { hl.w/2, hl.h/2 }
     horizon:add(hl,hb)
 
     horizon.y = bd.h--screen:find_child("background_img").h
@@ -214,13 +260,20 @@ local function make_backdrop()
     backdrop_group:add(zoom_clip,horizonbacking,horizon)
     
     function backdrop_group:set_horizon(y)
+        backdrop_group:animate{duration=300,y=y-bd.h}
+        --[[
         horizon:animate{duration=300,y=y}
         bd:animate{duration=300,h=y}
         zoom_clip:animate{duration=300,y=y-700}
+        --]]
     end
     function backdrop_group:set_bulb_x(x)
         hb:animate{duration=300,x=x}
     end
+    
+    backdrop_group.animate_dots = zoom_group.animate_dots
+    backdrop_group.stop_dots    = zoom_group.stop_dots
+    backdrop_group.anim_x_rot   = zoom_group.anim_x_rot
     
     return backdrop_group
 end

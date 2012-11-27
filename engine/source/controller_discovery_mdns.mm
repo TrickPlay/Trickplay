@@ -15,9 +15,7 @@ ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const Str
     remote_service( NULL ),
     http_service( NULL ),
     name( NULL ),
-    ready( false ),
-    port( _port ),
-    http_port( _http_port )
+    ready( false )
 {
     name = CFStringCreateWithCString( NULL, n.c_str(), kCFStringEncodingUTF8 );
 

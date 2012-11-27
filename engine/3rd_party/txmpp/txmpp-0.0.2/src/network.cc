@@ -55,7 +55,7 @@
 #include "scoped_ptr.h"
 #include "socket.h"  // includes something that makes windows happy
 #include "stringencode.h"
-#include "time.h"
+#include "txmpptime.h"
 
 namespace {
 
