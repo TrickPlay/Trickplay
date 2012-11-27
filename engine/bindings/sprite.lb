@@ -19,11 +19,13 @@ module sprite;
 ]]
 
 [[
-void push_lua_sheet( lua_State * L , GObject * sprite )
+void push_lua_sheet( lua_State * L , GObject * self )
 {
-    LSG;
+    lb_strong_deref( L , (int) * g_object_get_data( self , "tp-sheet-ref" ) );
+    
+    /*LSG;
 
-    int * sheet_ref = (int*) g_object_get_data( sprite , "tp-sheet-ref" );
+    int * sheet_ref = (int *) g_object_get_data( self , "tp-sheet-ref" );
 
     if ( sheet_ref )
     {
@@ -34,16 +36,33 @@ void push_lua_sheet( lua_State * L , GObject * sprite )
         lua_pushnil( L );
     }
 
-    LSG_CHECK( 1 );
+    LSG_CHECK( 1 );*/
 }
 
-SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
+void ref_sheet( lua_State * L , GObject * self )
 {
+    // refs the sheet at -1 on the stack
+    
+    int * sheet_ref = (int *) g_object_get_data( self , "tp-sheet-ref" );
+    lb_strong_unref( L, * sheet_ref );
+    * sheet_ref = lb_strong_ref( L );
+}
+
+SpriteSheet * get_sheet( lua_State * L , GObject * self )
+{
+    push_lua_sheet( L, self );
+    void * sheet = lua_isnil( L, -1 ) ? NULL : UserData::get_client( L , -1 );
+    
+    lua_pop( L, 1 );
+    
+    return (SpriteSheet *) sheet;
+    
+    /*
     LSG;
 
     SpriteSheet * sheet = 0;
 
-    int * sheet_ref = (int *) g_object_get_data( sprite , "tp-sheet-ref" );
+    int * sheet_ref = (int *) g_object_get_data( self , "tp-sheet-ref" );
 
     if ( sheet_ref )
     {
@@ -55,6 +74,7 @@ SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
     LSG_END( 0 );
 
     return sheet;
+    */
 }
 
 void refresh_texture( GObject * g_self, SpriteSheet * sheet, const char * new_id )
@@ -153,6 +173,10 @@ class Sprite [[ClutterActor*]] actor
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
             ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
+            
+            int * sheet_ref = g_new( int, 1 );
+            * sheet_ref = LUA_NOREF;
+            g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", sheet_ref, (GDestroyNotify) g_free );
 
             lua_pushvalue( L , -1 );
             set_sheet_first( L , props );
@@ -188,16 +212,22 @@ class Sprite [[ClutterActor*]] actor
             {
                 GObject * g_self = G_OBJECT( self );
                 
-                SpriteSheet * old_sheet = get_sheet( L, g_self );
+                //SpriteSheet * old_sheet = ;
                 
-                if ( old_sheet != new_sheet )
+                if ( new_sheet != get_sheet( L, g_self ) )
                 {
-                    int * new_sheet_ref = g_new( int, 1 );
-                    * new_sheet_ref = lb_strong_ref( L );
-                        
-                    g_object_set_data_full( g_self, "tp-sheet-ref", new_sheet_ref, (GDestroyNotify) g_free );
+                    ref_sheet( L, g_self );
+                    //int * sheet_ref = (int *) g_object_get_data( sprite , "tp-sheet-ref" );
+                    //lb_strong_unref( L, * sheet_ref );
+                    //* sheet_ref = lb_strong_ref( L );
                     
-                    refresh_texture( g_self, new_sheet, NULL );
+                    
+                    //int * new_sheet_ref = g_new( int, 1 );
+                    //* new_sheet_ref = lb_strong_ref( L );
+                        
+                    //g_object_set_data_full( g_self, "tp-sheet-ref", new_sheet_ref, (GDestroyNotify) g_free );
+                    
+                    refresh_texture( g_self, get_sheet( L, g_self ), NULL );
                 }
             }
             else
