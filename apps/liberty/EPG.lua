@@ -1,6 +1,6 @@
 
 local dur = 200
-local curr_time = os.date('*t')
+local curr_time = os.date('!*t')
 
 local make_row = function()
     
@@ -111,7 +111,7 @@ local months_r = {
 
 
 local update_curr_time_disp__on_timer = function(self)
-    local t = os.date('*t')
+    local t = os.date('!*t')
     curr_time_disp.text = 
         string.format("%02d",t.hour) ..":"..
         string.format("%02d",t.min)  
@@ -196,7 +196,8 @@ end
 local zone_offset = -4
 
 local setup_curr_time = function(t)
-    curr_time = os.date('*t',t)
+    
+    curr_time = os.date('!*t',(t - 8*60*60))
     start_at_0 = curr_time.min < 30
     curr_time.min = start_at_0 and 0 or 30
     curr_time.sec = 0
@@ -1001,6 +1002,9 @@ local keypresses = {
         if  not finished_integrating_schedule or #channel_list == 0 or 
             animating_show_grid or show_grid__left_edge <= -half_hour_len then 
             
+            --print(not finished_integrating_schedule, #channel_list == 0,
+            --animating_show_grid, show_grid__left_edge <= -half_hour_len)
+            
             return 
         end
         animating_show_grid = true
@@ -1011,7 +1015,7 @@ local keypresses = {
             dx = (show_grid__left_edge >= (-2*half_hour_len)) and 
                 (2*half_hour_len) or 
                 (-show_grid__left_edge)
-            print("hehehe",dx,show_grid__left_edge,-2*half_hour_len,(show_grid__left_edge <= (-2*half_hour_len)))
+            --print("hehehe",dx,show_grid__left_edge,-2*half_hour_len,(show_grid__left_edge <= (-2*half_hour_len)))
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
