@@ -1,0 +1,45 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_exclude_patterns": ["build","certificates","controllers","libraries","pdk","qa","sdk","tests"],
+            "file_exclude_patterns": ["TrickPlay.sublime-workspace", "cached_options.txt"]
+        }
+    ],
+
+    "build_systems":
+    [
+        {
+            "name": "TrickPlay",
+            "working_dir": "$project_path",
+            "env": {
+                "NINJA_STATUS": "[%c/%o: %r+%u -> %f] "
+            },
+            "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+(?:error|warning):\\s+([^\\n]*)$",
+            "cmd":  [ "cmake", "--build", "build" ],
+
+            "variants": [
+                {
+                    // This doesn't really Run, it just makes the "cmake" command get a keybinding by default
+                    "name": "Run",
+                    "env": {
+                        "CC" : "clang",
+                        "CXX": "clang++"
+                        },
+                    "file_regex":   "^\\s*([^\\n:]+):(\\d+)(?::|\\s+\\(pkg_check_modules\\))",
+                    "cmd": [ "cmake", "-G", "Ninja", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", "-H.", "-Bbuild" ]
+                }
+            ]
+        }
+    ],
+
+    "settings":
+    {
+        "sublimeclang_options":
+        [
+            "-Wno-#warnings"
+        ],
+        "sublimeclang_options_script": "python ${project_path:cmake_options_script.py}"
+    }
+}

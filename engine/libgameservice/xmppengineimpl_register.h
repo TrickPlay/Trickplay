@@ -204,7 +204,6 @@ private:
    private:
     XmppEngineImplRegister* engine_;
     State state_;
-    Error error_;
 
   };
 

@@ -46,12 +46,13 @@ private:
 
 #if !defined(CLUTTER_WINDOWING_OSX)
     String              name;
+    int                 port;
+    int                 http_port;
 #else
     CFStringRef         name;
 #endif
+
     bool                ready;
-    int                 port;
-    int					http_port;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_DISCOVERY_MDNS_H

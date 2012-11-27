@@ -364,13 +364,25 @@ namespace Util
     {
     public:
 
+#ifndef GLIB_VERSION_2_32
         GSRMutexLock( GStaticRecMutex * mutex ) : m( mutex )
+#else
+        GSRMutexLock( GRecMutex * mutex ) : m( mutex )
+#endif
         {
+#ifndef GLIB_VERSION_2_32
             g_static_rec_mutex_lock( m );
+#else
+            g_rec_mutex_lock( m );
+#endif
         }
         ~GSRMutexLock()
         {
+#ifndef GLIB_VERSION_2_32
             g_static_rec_mutex_unlock( m );
+#else
+            g_rec_mutex_unlock( m );
+#endif
         }
 
     private:
@@ -378,7 +390,11 @@ namespace Util
         GSRMutexLock() {}
         GSRMutexLock( const GSRMutexLock & ) {}
 
+#ifndef GLIB_VERSION_2_32
         GStaticRecMutex * m;
+#else
+        GRecMutex * m;
+#endif
     };
 
     //-----------------------------------------------------------------------------

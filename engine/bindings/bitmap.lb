@@ -4,7 +4,7 @@ module bitmap;
 #include "bitmap.h"
 ]]
 
-/*
+/***************************************
     Class: Bitmap
 
 	The Bitmap data type is typically used as a brush when drawing on a
@@ -20,58 +20,49 @@ module bitmap;
 
 class Bitmap [[ Bitmap * ]]
 {
-    /*
-        Constructor: Bitmap
 
-        The constructor for a Bitmap object; initiates a synchronous(default) or asynchronous image-load operation.
+/***************************************
+    Constructor: Bitmap
 
-        *Prototype:* The Bitmap constructor accepts arguments in two formats: (1) as a list of variables and values and (2) as a table of properties. Each format is shown below.
+    The constructor for a Bitmap object; initiates a synchronous(default) or asynchronous image-load operation.
 
-        	(code)
-        	-- Variable/Value Prototype -- Arguments must be enclosed within parentheses
-        	Bitmap( src, async, read_tags )
+    *Prototype:* The Bitmap constructor accepts arguments in two formats: (1) as a list of variables and values and (2) as a table of properties. Each format is shown below.
 
-        	-- Table of Properties Prototype -- Arguments must be enclosed within curly braces
-        	Bitmap{ src = "filename", async = true, read_tags = true }
-        	(end)
+       	(code)
+       	-- Variable/Value Prototype -- Arguments must be enclosed within parentheses
+       	Bitmap( src, async, read_tags )
 
-        *Arguments:*
+       	-- Table of Properties Prototype -- Arguments must be enclosed within curly braces
+       	Bitmap{ src = "filename", async = true, read_tags = true }
+       	(end)
+
+    *Arguments:*
 
 		src - String specifying the image file to load. The src argument can reference either the application bundle or a URI.
 		async - Boolean flag indicating whether to load the image asynchronously(true) or synchronously(false). By default, files are loaded synchronously. The async argument is optional; however, if calling the constructor using variable/value arguments and the read_tags argument is specified then the async argument must also be specified.
 		read_tags - Boolean flag indicating whether or not to store any Exif (Exchangable image file format) tags contained in the bitmap file (true = store tags). If tags are stored, they can be accessed through the <tags> property. By default, Exif tags are not stored. Note: Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
 
-		*Argument Examples:*
+	*Argument Examples:*
 
-			(code)
-			-- Sample variable/value arguments
-			myBitmap01 = Bitmap( "bitmap01.jpg" )
-			myBitmap02 = Bitmap( "bitmap02.jpg", true )
-			myBitmap03 = Bitmap( "bitmap03.jpg", true, true )
-			myBitmap04 = Bitmap( "bitmap04.jpg", false, true )  -- async is false by default, but must be specified here because read_tags argument is specified
+		(code)
+		-- Sample variable/value arguments
+		myBitmap01 = Bitmap( "bitmap01.jpg" )
+		myBitmap02 = Bitmap( "bitmap02.jpg", true )
+		myBitmap03 = Bitmap( "bitmap03.jpg", true, true )
+		myBitmap04 = Bitmap( "bitmap04.jpg", false, true )  -- async is false by default, but must be specified here because read_tags argument is specified
 
-			-- Equivalent table of properties arguments
-			myBitmap01 = Bitmap{ src = "bitmap01.jpg" }
-			myBitmap02 = Bitmap{ src = "bitmap02.jpg", async = true }
-			myBitmap03 = Bitmap{ src = "bitmap03.jpg", async = true, read_tags = true }
-			myBitmap04 = Bitmap{ src = "bitmap04.jpg", read_tags = true }  -- async argument is not needed here; it defaults to the desired false
-			(end)
+		-- Equivalent table of properties arguments
+		myBitmap01 = Bitmap{ src = "bitmap01.jpg" }
+		myBitmap02 = Bitmap{ src = "bitmap02.jpg", async = true }
+		myBitmap03 = Bitmap{ src = "bitmap03.jpg", async = true, read_tags = true }
+		myBitmap04 = Bitmap{ src = "bitmap04.jpg", read_tags = true }  -- async argument is not needed here; it defaults to the desired false
+		(end)
 
-		*Return Value:* The generated Bitmap object
+	*Return Value:* The generated Bitmap object
 
-		Loading the image file for a Bitmap object is essentially identical to
-		loading one for an <Image at file:clutter_image-lb.html#Image> object.
-		Both objects load the image synchronously by default, and both also
-		support asynchronous loading. A Bitmap asynchronous-load operation is
-		initiated by sending a true value as the async argument to the object's
-		constructor. Completion of an asynchronous load causes the firing of
-		the <on_loaded> event handler. Also, the Bitmap object's <loaded>
-		property can be accessed to check on the success or failure of a
-		synchronous-load operation. Refer to the discussion of the
-		<Image.async> property for additional details concerning synchronous
-		and asynchronous file loading.
+	Loading the image file for a Bitmap object is essentially identical to loading one for an <Image at file:clutter_image-lb.html#Image> object. Both objects load the image synchronously by default, and both also support asynchronous loading. A Bitmap asynchronous-load operation is initiated by sending a true value as the async argument to the object's constructor. Completion of an asynchronous load causes the firing of the <on_loaded> event. Also, the Bitmap object's <loaded> property can be accessed to check on the success or failure of a synchronous-load operation. Refer to the discussion of the <Image.async> property for additional details concerning synchronous and asynchronous file loading.
 
-		*Code Example:* Create a Bitmap object, loading the image synchronously
+	*Code Example:* Create a Bitmap object, loading the image synchronously
 
 		(code)
 		-- Initiate synchronous image load
@@ -85,30 +76,30 @@ class Bitmap [[ Bitmap * ]]
 		end
 		(end)
 
-		*Code Example:* Create a Bitmap object, loading the image asynchronously
+	*Code Example:* Create a Bitmap object, loading the image asynchronously
 
 		(code)
-		-- Initiate asynchronous image load
-		local myBitmap = Bitmap( "image.png", true )
+        -- Asynchronous-load event handler
+        function handleBitmapLoad( loadedImage, failed )
+          if failed then
+            -- Image did not load; insert handling code here
+            print( "Failed to load the image" )
+          else
+            -- Image is loaded; insert any applicable operations here
+            print( "The image has been loaded, size = ", loadedImage.width, " x ", loadedImage.height )
+          end
+        end
 
-		-- Asynchronous-load event handler
-		function myBitmap:on_loaded( failed )
-		  if failed then
-		    -- Image did not load; insert handling code here
-		    print( "Failed to load the image" )
-		  else
-		    -- Image is loaded; insert any applicable operations here
-		    print( "The image has been loaded, size = ", self.width, " x ", self.height )
-		  end
-		end
+        -- Initiate asynchronous image load
+        local myBitmap = Bitmap( "image.png", true )
+
+        -- Register image-load event handler
+        myBitmap:add_onloaded_listener( handleBitmapLoad )
 		(end)
 
-		*See Also:* the <Canvas at file:canvas-lb.html#Canvas> class,
-		the <Image at file:clutter_image-lb.html#Image> class,
-		the <loaded> property, the <on_loaded> event handler,
-		the <Image.async> property
+	*See Also:* the <on_loaded> event, the <Canvas at file:canvas-lb.html#Canvas> and <Image at file:clutter_image-lb.html#Image> classes and the <loaded> and <Image.async> properties
 
-    */
+*/
 
     Bitmap( any props )
         [[
@@ -175,70 +166,56 @@ class Bitmap [[ Bitmap * ]]
             }
         ]];
 
-    /*
-        Property: width
+/***************************************
+    Property: width
 
-		The width property specifies the width in pixels of the Bitmap object's
-		loaded image. The value of the width property may be retrieved, but it
-		may not be set.
+	The width property specifies the width in pixels of the Bitmap object's loaded image. The value of the width property may be retrieved, but it may not be set.
 
-		*See Also:* the <height> property, the <w> property
-
-    */
+	*See Also:* the <height> property, the <w> property
+*/
 
     readonly int width
         [[
             width = self->width();
         ]];
 
-    /*
-        Property: w
+/***************************************
+    Property: w
 
-        The w property specifies the width in pixels of the Bitmap object's
-        loaded image. The value of the w property may be retrieved, but it may
-        not be set.
+    The w property specifies the width in pixels of the Bitmap object's loaded image. The value of the w property may be retrieved, but it may not be set.
 
-        The w property is a shorthand version of the <width> property; both
-        properties will return the same value.
+    The w property is a shorthand version of the <width> property; both properties will return the same value.
 
-        *See Also:* the <height> property
-
-    */
+    *See Also:* the <height> property
+*/
 
     readonly int w
         [[
             w = self->width();
         ]];
 
-    /*
-        Property: height
+/***************************************
+    Property: height
 
-		The height property specifies the height in pixels of the Bitmap
-		object's loaded image. The value of the height property may be
-		retrieved, but it may not be set.
+	The height property specifies the height in pixels of the Bitmap object's loaded image. The value of the height property may be retrieved, but it may not be set.
 
-		*See Also:* the <width> property, the <h> property
-
-    */
+	*See Also:* the <width> property, the <h> property
+*/
 
     readonly int height
         [[
             height = self->height();
         ]];
 
-    /*
-        Property: h
+/***************************************
+    Property: h
 
-		The h property specifies the height in pixels of the Bitmap object's
-		loaded image. The value of the h property may be retrieved, but it may
-		not be set.
+	The h property specifies the height in pixels of the Bitmap object's loaded image. The value of the h property may be retrieved, but it may not be set.
 
-		The h property is a shorthand version of the <height> property; both
-		properties will return the same value.
+	The h property is a shorthand version of the <height> property; both properties will return the same value.
 
-		*See Also:* the <width> property
-
-    */
+	*See Also:* the <width> property
+*/
 
     readonly int h
         [[
@@ -246,86 +223,72 @@ class Bitmap [[ Bitmap * ]]
         ]];
 
 
-    /*
-        Property: depth
+/***************************************
+    Property: depth
 
-        The depth property specifies the number of bytes per pixel. If a bitmap has
-        an alpha channel, it will be 4, otherwise it will be 3.
-
-        If the bitmap has not been loaded yet, it will return 0.
-    */
+    The depth property specifies the number of bytes per pixel. If a bitmap has an alpha channel, it will be 4, otherwise it will be 3. If the bitmap has not been loaded yet, it will return 0.
+*/
 
     readonly int depth
         [[
             depth = self->depth();
         ]];
 
-    /*
-        Property: has_alpha
+/***************************************
+    Property: has_alpha
 
-        This property is true when the bitmap has an alpha channel and false otherwise.
-    */
+    This property is true when the bitmap has an alpha channel and false otherwise.
+*/
 
     readonly bool has_alpha
         [[
             has_alpha = self->depth() == 4;
         ]];
 
-    /*
-        Property: loaded
+/***************************************
+    Property: loaded
 
-		The boolean loaded property indicates the success/true or failure/false
-		of the Bitmap object's synchronous-load operation.
+	The boolean loaded property indicates the success/true or failure/false of the Bitmap object's synchronous-load operation.
 
-		The loaded property will also be set to false while an image is loading
-		asynchronously. This may make it tempting to intermittently poll the
-		loaded property to determine if the image has finished loading, but you
-		should not do this because the loaded property can also be set to false
-		due to the load operation failing; in such a scenario, your polling
-		application will wait forever for the property to become true. Instead,
-		you should set up an <on_loaded> event handler to notify your
-		application when an asynchronous-load operation has completed.
+	The loaded property will also be set to false while an image is loading asynchronously. This may make it tempting to intermittently poll the loaded property to determine if the image has finished loading, but you should not do this because the loaded property can also be set to false due to the load operation failing; in such a scenario, your polling application will wait forever for the property to become true. Instead, you should register an <on_loaded> event handler to notify your application when an asynchronous-load operation has completed.
 
-		*Default Setting:* false
+	*Default Setting:* false
 
-		*Code Example:* To see the loaded property in use, check the synchronous
-		code example given in the <Bitmap> constructor description.
+	*Code Example:* To see the loaded property in use, check the synchronous code example given in the <Bitmap> constructor description.
 
-		*See Also:* the <Bitmap> constructor
-
-    */
+	*See Also:* the <Bitmap> constructor
+*/
 
     readonly bool loaded
         [[
             loaded = self->loaded();
         ]];
 
-    /*
-        Property: tags
+/***************************************
+    Property: tags
 
-        The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded bitmap. If the storage of Exif tags was not enabled (via the read_tags argument to the Bitmap constructor) or if the bitmap file contained no tags then the tags table will be empty.
+    The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded bitmap. If the storage of Exif tags was not enabled (via the read_tags argument to the Bitmap constructor) or if the bitmap file contained no tags then the tags table will be empty.
 
-        Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
+    Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
 
-        *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
+    *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
 
-        *Default Setting:* {}, i.e., an empty table
+    *Default Setting:* { }, i.e., an empty table
 
-        *Code Example:* Output bitmap tag names and values to the console
+    *Code Example:* Output bitmap tag names and values to the console
 
-			(code)
-			-- Load a bitmap, including its Exif tags
-			myBitmap = Bitmap{ src = "assets/images/foo.jpg", read_tags = true }
+		(code)
+		-- Load a bitmap, including its Exif tags
+		myBitmap = Bitmap( { src = "assets/images/foo.jpg", read_tags = true } )
 
-			-- If the image loaded successfully, dump all the Exif tags to the console
-			if( myBitmap.loaded ) then
-				dumptable( myBitmap.tags )
-			end
-			(end)
+		-- If the image loaded successfully, dump all the Exif tags to the console
+		if( myBitmap.loaded ) then
+			dumptable( myBitmap.tags )
+		end
+		(end)
 
-		*See Also:* the read_tags argument in the <Bitmap> constructor
-
-    */
+	*See Also:* the read_tags argument in the <Bitmap> constructor
+*/
 
     readonly table tags
         [[
@@ -347,21 +310,20 @@ class Bitmap [[ Bitmap * ]]
             }
         ]];
 
-    /*
-        Function: get_pixel
+/***************************************
+    Function: get_pixel
 
-        The get_pixel() function retrieves the RGB color and alpha components
-        of a specific pixel in the Bitmap object.
+    The get_pixel() function retrieves the RGB color and alpha components of a specific pixel in the Bitmap object.
 
-        *Arguments:*
+    *Arguments:*
 
-        x, y - coordinates of the desired pixel
+	    x, y - coordinates of the desired pixel
 
-        *Return Value:*
+    *Return Value:*
 
         color_info - table of color and alpha/transparency values specified as three RGB (Red/Green/Blue) integer values and an alpha/transparency integer value. If the bitmap does not have an alpha channel, the returned alpha value will be 255 (opaque). For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. If a bitmap had not yet been loaded or if invalid X, Y coordinates were specified, returns nil.
 
-    */
+*/
 
     table get_pixel( int x, int y )
         [[
@@ -403,38 +365,26 @@ class Bitmap [[ Bitmap * ]]
             }
         ]];
 
-    /*
-        Function: Image
+/***************************************
+    Function: Image
 
-        The Image() function converts the Bitmap object to an Image object which
-        can then be added to the screen. It is possible to convert the Bitmap's
-        entire image or a just portion of it.
+    The Image() function converts the Bitmap object to an Image object which can then be added to the screen. It is possible to convert the Bitmap's entire image or a just portion of it.
 
-        If the Bitmap object has Exif (Exchangable image file format) tags
-        associated with it, the tags are carried over to the Image object.
+    If the Bitmap object has Exif (Exchangable image file format) tags associated with it, the tags are carried over to the Image object.
 
-        After the Bitmap has been converted, the resulting Image object has no
-        dependencies upon the original Bitmap object; the Bitmap object may be
-        dereferenced (set to nil), if desired.
+    After the Bitmap has been converted, the resulting Image object has no dependencies upon the original Bitmap object; the Bitmap object may be dereferenced (set to nil), if desired.
 
-        *Arguments:*
+    *Arguments:*
 
-        props - Optional table of Image properties that are passed to the
-        Image constructor
+        props - Optional table of Image properties that are passed to the Image constructor
 
-        source_rectangle - Optional table of four coordinates specifying the
-        portion of the Bitmap image to convert. The four coordinates, in order,
-        are { left, top, width(right), height(bottom) }. By default, the entire
-        image is converted.
+        source_rectangle - Optional table of four coordinates specifying the portion of the Bitmap image to convert. The four coordinates, in order, are { left, top, width(right), height(bottom) }. By default, the entire image is converted.
 
-        *Return Values:*
+    *Return Values:*
 
-        image - the new Image object. If an error occurred, returns nil.
-        Possible reasons for failure include the Bitmap's image had not been
-        successfully loaded or the source_rectangle argument's coordinates were
-        invalid.
+        image - the new Image object. If an error occurred, returns nil. Possible reasons for failure include the Bitmap's image had not been successfully loaded or the source_rectangle argument's coordinates were invalid.
 
-        *Code Example:* Generate an Image object from a Bitmap
+    *Code Example:* Generate an Image object from a Bitmap
 
         (code)
         -- Create a Bitmap object
@@ -446,9 +396,8 @@ class Bitmap [[ Bitmap * ]]
                                         { 0, 0, 100, 100 } ) -- portion of Bitmap to convert
         (end)
 
-		*See Also:* the <Image at file:clutter_image-lb.html#Image> class
-
-    */
+	*See Also:* the <Image at file:clutter_image-lb.html#Image> class
+*/
 
     Image Image( table props = 0 , table source_rectangle = 0 )
         [[
@@ -518,26 +467,64 @@ class Bitmap [[ Bitmap * ]]
             }
         ]];
 
-    /*
-        Event Handler: on_loaded
+/***************************************
+	Function: add_onloaded_listener
 
-		The on_loaded() event handler is fired when an asynchronously-loaded
-		image has finished loading.
+	The add_onloaded_listener() function registers a handler function for <on_loaded> events.
 
-		*Arguments:*
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( bitmap, failed )
+		(end)
+
+	*Handler Arguments:*
 
 		bitmap - the Bitmap object whose image has finished loading
-		failed - boolean value indicating failure/true or success/false of the
-		load operation
+		failed - boolean value indicating the failure or success of the load operation (true=failure)
 
-		*Return Value:* None
+    *Handler Return Value:* None
 
-		*Code Example:* To see the on_loaded() event handler in use, check the
-		asynchronous code example given in the <Bitmap> constructor description.
+	*See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
 
-		*See Also:* the <Bitmap> constructor
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
+        ]];
 
-    */
+/***************************************
+	Function: remove_onloaded_listener
+
+	The remove_onloaded_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onloaded_listener> function
+*/
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Event: on_loaded
+
+	The on_loaded event occurs when an asynchronously-loaded image has finished loading.
+
+	*See Also:* the <add_onloaded_listener> function
+*/
 
     function on_loaded
         [[
@@ -547,13 +534,8 @@ class Bitmap [[ Bitmap * ]]
             UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
         ]];
 
-    int add_onloaded_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
-        ]];
+/***************************************
 
-    remove_onloaded_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
-        ]];
+*/
+
 }

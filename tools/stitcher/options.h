@@ -6,18 +6,18 @@
 typedef struct Options {
     unsigned int input_size_limit,
                  output_size_limit;
-                 
+
     char * output_path;
-    
+
     gboolean recursive,
              add_buffer_pixels,
              allow_multiple_sheets,
              copy_large_items;
-    
+
     GPtrArray  * input_patterns,
                * input_paths,
                * json_to_merge;
-    
+
     GHashTable * input_ids;
 } Options;
 

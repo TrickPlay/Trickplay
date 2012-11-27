@@ -26,15 +26,13 @@ local create = function(items)
     for _,t in ipairs(items) do icon_sources:add(t.icon) end
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #text < 4 or total_w - (largest_w+item_spacing)*3 < screen_w do
-        --print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(items) do
-            --print("a",#text)
             table.insert(text,
                 make_bolding_text{
                     text = t.label,
                     color="white",
                     sz=90,
-                    duration = 200,
+                    duration = 100,
                     center = true,
                 }
             )
@@ -70,9 +68,7 @@ local create = function(items)
     text[1]:show()
     text[1].x = screen_w/2
     --position from middle to the right
-    print(text[right_i].x + text[right_i].w/2, screen_w)
     while text[right_i].x + text[right_i].w/2 <= screen_w do
-        --print("r")
         curr_item = wrap_i(right_i + 1,text)
         place_on_the_right(right_i,text[curr_item])
         right_i = curr_item
@@ -86,46 +82,6 @@ local create = function(items)
     
     
     
-    --[[
-    local first_item = true
-    repeat
-        
-        curr_item = text[i]
-        if not first_item then
-            next_x = next_x + curr_item.w/2 
-        else
-            first_item = false
-        end
-        curr_item:show()
-        curr_item.x = next_x
-        next_x = next_x + curr_item.w/2 + item_spacing
-        print("l",i,curr_item.x)
-        i = wrap_i(i + 1,text)
-        if i == 1 then
-            error("this shouldnt be able to happen")
-        end
-    until curr_item.x + curr_item.w/2 > screen_w
-    right_i = i
-    next_x = screen_w/2 - text[1].w/2 - item_spacing
-    i = #text
-    while next_x > 0 do
-        
-        curr_item = text[i]
-        curr_item:show()
-        next_x = next_x - curr_item.w/2
-        curr_item.x = next_x
-        next_x = next_x - curr_item.w/2 - item_spacing
-        print("r",i,curr_item.x)
-        i = wrap_i(i - 1,text)
-        print(i,right_i)
-        if i<right_i then
-            error("this shouldnt be able to happen")
-        end
-    end
-    
-    left_i = i
-    --]]
-    
     local new_icon = function(source,x)
         prev_icon:set{
             source       = curr_icon.source,
@@ -138,21 +94,37 @@ local create = function(items)
         curr_icon.x = x
         curr_icon.opacity = 0
     end
+    
+    
+    
+    local cursor = make_cursor(183+168+153+140+124)
+    cursor.x = screen_w/2
+    cursor.y = -72
+    instance:add(cursor)
+    
+    
+    
+    
     local curr_i = 1
     local animating, new_i
     instance.move_left = function()
-        if animating then return end
+        if  text_items.is_animating or 
+            curr_icon.is_animating or 
+            prev_icon.is_animating or 
+            animating then 
+            
+            return 
+        end
         animating = true
         new_i = wrap_i(curr_i + 1,text)
         text[curr_i].contract:start()--font = MAIN_MENU_FONT
-        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --.font  = MAIN_MENU_FONT_FOCUS
         --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[new_i].x - text[curr_i].x
         
         new_icon(text[new_i].icon,screen_w - 100)
         
         while text[right_i].x + text[right_i].w/2 <= screen_w+dx do
-            --print("adding 1 from the right")
             curr_item = wrap_i(right_i + 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_right(right_i,text[curr_item])
@@ -173,13 +145,15 @@ local create = function(items)
             x = screen_w/2,
             opacity      = 255,
         }
+        
+        cursor:change_w(curr_icon.w)
+        
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
             x = text_items.x - dx,
             on_completed = function()
                 while text[left_i].x + text[left_i].w/2 < dx do
-                    --print("hiding 1 from the left")
                     text[left_i]:hide()
                     left_i = wrap_i(left_i + 1,text)
                 end
@@ -189,9 +163,9 @@ local create = function(items)
                         child.x = child.x - dx
                     end
                 end)
-                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
+                text[new_i].expand:start()
                 curr_icon.source:on_key_focus_in()
             end
         }
@@ -203,20 +177,24 @@ local create = function(items)
     end
     
     instance.move_right = function()
-        if animating then return end
+        if  text_items.is_animating or 
+            curr_icon.is_animating or 
+            prev_icon.is_animating or 
+            animating then 
+            
+            return 
+        end
         animating = true
         new_i = wrap_i(curr_i - 1,text)
         text[curr_i].contract:start()--.font = MAIN_MENU_FONT
-        text[new_i].expand:start()--.font  = MAIN_MENU_FONT_FOCUS
+        --.font  = MAIN_MENU_FONT_FOCUS
         --text[new_i].anchor_point = { text[new_i].w/2, text[new_i].h/2}
         local dx = text[curr_i].x - text[new_i].x
         
         new_icon(text[new_i].icon, 100)
-        print(text[new_i].icon,text[new_i].icon.gid)
         local item = text[new_i].icon
         
         while text[left_i].x + text[left_i].w/2 >= -dx do
-            --print("adding 1 from the left")
             curr_item = wrap_i(left_i - 1,text)
             if text[curr_item].is_visible then error("woops") end
             place_on_the_left(left_i,text[curr_item])
@@ -237,13 +215,15 @@ local create = function(items)
             x = screen_w/2,
             opacity      = 255,
         }
+        
+        cursor:change_w(curr_icon.w)
+        
         text_items:animate{
             mode = "EASE_IN_OUT_QUAD",
             duration = 300,
             x = text_items.x + dx,
             on_completed = function()
                 while text[right_i].x - text[right_i].w/2 > screen_w-dx do
-                    --print("hiding 1 from the right")
                     text[right_i]:hide()
                     right_i = wrap_i(right_i - 1,text)
                 end
@@ -253,9 +233,9 @@ local create = function(items)
                         child.x = child.x + dx
                     end
                 end)
-                --print("old = ",curr_i,text[curr_i].text,"new = ",new_i,text[new_i].text)
                 curr_i = new_i
                 animating = false
+                text[new_i].expand:start()
                 curr_icon.source:on_key_focus_in()
             end
         }
@@ -278,7 +258,13 @@ local create = function(items)
         [keys.Right]  = instance.move_left,
         [keys.Left]  = instance.move_right,
         [keys.BACK] = function()
-            if animating then return end
+            if  instance.is_animating or 
+                currently_playing_content.is_animating or 
+                animating then 
+                
+                return 
+            end
+            
             animating = false 
             menu_layer:add(currently_playing_content)
             currently_playing_content:lower_to_bottom()
@@ -292,6 +278,8 @@ local create = function(items)
             currently_playing_content:grab_key_focus()
             
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)
@@ -308,10 +296,6 @@ local create = function(items)
         end 
     end
     
-    local cursor = make_cursor(183+168+153+140+124)
-    cursor.x = screen_w/2
-    cursor.y = -72
-    instance:add(cursor)
     
     return instance
     
@@ -321,7 +305,12 @@ local store_is_animating = false
 local store_icon = make_4movies_icon()
 function store_icon:on_key_down(k) 
     if keys.OK == k then
-        if store_is_animating then return end
+        if  store_menu.is_animating or 
+            main_menu.is_animating or 
+            store_is_animating then 
+            
+            return 
+        end
         store_is_animating = true
         
         menu_layer:add(store_menu)
@@ -330,7 +319,6 @@ function store_icon:on_key_down(k)
         store_menu.opacity = 0
         
         dolater(function()
-        --print("doit")
         main_menu:animate{
             duration = 300,
             z = 300,
@@ -347,7 +335,12 @@ local library_is_animating = false
 local library_icon = make_4movies_icon()
 function library_icon:on_key_down(k) 
     if keys.OK == k then
-        if library_is_animating then return end
+        if  my_library_menu.is_animating or 
+            main_menu.is_animating or 
+            library_is_animating then 
+            
+            return 
+        end
         library_is_animating = true
         
         menu_layer:add(my_library_menu)
@@ -367,14 +360,19 @@ function library_icon:on_key_down(k)
         end)
     end
 end
+library_icon:on_key_focus_out()
 -------------------------------------------------------
 local channel_is_animating = false
-local channel_icon = random_poster():set{w = 100,h = 150,color={rand(),rand(),rand(),}, on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+channel_icon = Clone{source=random_poster(),color={rand(),rand(),rand(),}, on_key_focus_in = function() end,on_key_focus_out = function() end }
 function channel_icon:on_key_down(k) 
     if keys.OK == k then
-        if channel_is_animating then return end
+        if  curr_ch_menu.is_animating or 
+            main_menu.is_animating or 
+            channel_is_animating then 
+            
+            return 
+        end
         channel_is_animating = true
-        print("this")
         menu_layer:add(curr_ch_menu)
         curr_ch_menu:lower_to_bottom()
         curr_ch_menu.z = -300
@@ -394,27 +392,33 @@ function channel_icon:on_key_down(k)
 end
 -------------------------------------------------------
 local epg_is_animating = false
-local epg_icon = Image{src = "assets/epg.png", on_key_focus_in = function() print("in") end,on_key_focus_out = function() print("out") end }
+local epg_icon = Image{src = "assets/epg.png", on_key_focus_in = function() end,on_key_focus_out = function() end }
 function epg_icon:on_key_down(k) 
     if keys.OK == k then
-        if epg_is_animating then return end
+        if  epg_menu.is_animating or 
+            main_menu.is_animating or 
+            epg_is_animating then 
+            
+            return 
+        end
         epg_is_animating = true
         
         menu_layer:add(epg_menu)
         epg_menu:lower_to_bottom()
-        epg_menu.z = -300
+        epg_menu.z = 300
         epg_menu.opacity = 0
         
         dolater(function()
         main_menu:animate{
             duration = 300,
-            z = 300,
+            z = -300,
             opacity = 0,
             on_completed = function() 
                 main_menu:unparent()
                 epg_is_animating = false 
             end
         }
+        backdrop:stop_dots()
         epg_menu:grab_key_focus()
         end)
     end

@@ -19,7 +19,6 @@ local hs = {
 local tot_w = 0
 for i,w in ipairs(ws) do tot_w = tot_w + w end
 local collapsed_w = ws[1] + collapsed_spacing*(#ws-1)
-print("collapsed_w",collapsed_w)
 
 
 return function(dur)
@@ -52,6 +51,23 @@ return function(dur)
         c.x = intervals[#intervals-i+1].to
     end
     
+    local state = {
+        { source = "*", target = "EXPANDED",   keys = {} },
+        { source = "*", target = "CONTRACTED", keys = {} },
+    }
+    
+    for i,c in ipairs(instance.children) do
+        table.insert(
+            state[1].keys,
+            {c,'x',intervals[#intervals - i+1]:get_value(1)}
+        )
+        table.insert(
+            state[2].keys,
+            {c,'x',intervals[#intervals - i+1]:get_value(0)}
+        )
+    end
+    state = AnimationState{ duration = 200, transitions = state}
+    --[[
     local expand = Timeline{
         duration = 200,--dur,
         on_new_frame = function(tl,ms,p)
@@ -68,8 +84,10 @@ return function(dur)
             end
         end
     }
-    instance.on_key_focus_in  = function(self) print("expand",self) expand:start()   end
-    instance.on_key_focus_out = function(self) print("collapse",self) collapse:start() end
+    --]]
+    instance.new_state = function(self,new_state) state.state = new_state end
+    instance.on_key_focus_in  = function(self) state.state = "EXPANDED" end--expand:start()   end
+    instance.on_key_focus_out = function(self) state.state = "CONTRACTED" end--collapse:start() end
     
     return instance
 end

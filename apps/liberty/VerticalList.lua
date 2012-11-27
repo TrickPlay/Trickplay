@@ -19,49 +19,19 @@ local create = function(text)
     
     --if there are not enough items to cover the width of the screen, duplicate the list
     while #items < 4 or (#items-1)*item_spacing < h do
-        --print("looping once",total_w , largest_w , screen_w)
         for _,t in ipairs(text) do
             table.insert(items, make_bolding_text{text = t,color=RECORDING_MENU_COLOR,sz=RECORDING_MENU_SIZE,duration = 200})
-            --[[
-                Text{
-                    text  = t,
-                    opacity = 255,
-                    font  = RECORDING_MENU_FONT,
-                    color = RECORDING_MENU_COLOR,
-                }
-            )
-            items[#items].orig_w = items[#items].w
-            items[#items].light_w = Text{
-                    text  = t,
-                    opacity = 255,
-                    font  = "InterstateProLight 75px",
-                    color = RECORDING_MENU_COLOR,
-                }.w
-            items[#items].reg_w = Text{
-                    text  = t,
-                    opacity = 255,
-                    font  = "InterstateProRegular 75px",
-                    color = RECORDING_MENU_COLOR,
-                }.w
-            items[#items].bold_w = Text{
-                    text  = t,
-                    opacity = 255,
-                    font  = "InterstateProBold 75px",
-                    color = RECORDING_MENU_COLOR,
-                }.w
-            --]]
+            
             items[#items].anchor_point = { 0, items[#items].h/2}
             inner_group:add(items[#items])
             items[#items]:hide()
         end
     end
     local place_on_the_top = function(top_i,curr_i)
-        --print("adding",items[curr_i].text,"above",items[top_i].text)
         items[curr_i]:show()
         items[curr_i].y  = items[top_i].y - item_spacing
     end
     local place_on_the_bottom = function(bottom_i,curr_i)
-        --print("adding",items[curr_i].text,"below",items[bottom_i].text)
         items[curr_i]:show()
         items[curr_i].y  = items[bottom_i].y + item_spacing
     end
@@ -99,7 +69,6 @@ local create = function(text)
     
     local curr_i = 1
     local new_i
-    --print("VL",top_i,curr_i,bottom_i)
     
     local o
     local opacity_at = function(i)
@@ -114,97 +83,21 @@ local create = function(text)
     
     local animate_list = Timeline{ duration = 200 }
     on_new_frame__animate_down = function(tl,ms,p)
-        --print("--------------------------")
         inner_group.y =  item_spacing*p
         for i = 1,vis_len+1 do
             ii = items[wrap_i(top_i + i-1,items)]
             ii.opacity = opacity_at(i+p-1)
-            --print(wrap_i(i,items),opacity_at(i+p-1))
-        --for i = top_i,top_i+vis_len+1 do
-            --items[wrap_i(i,items)].opacity = opacity_at(i-top_i+p)
         end
-        --[[
-        selected_text.opacity = 255*p
-        print(selected_text.w,items[new_i].orig_w)
-        --items[curr_i].w = items[curr_i].orig_w + (selected_text.w-items[curr_i].orig_w )*p
-        items[new_i ].scale = {1+(items[new_i ].sel_w/items[new_i ].orig_w-1 )*   p, 1}
-        items[curr_i].scale = {1+(items[curr_i].sel_w/items[curr_i].orig_w-1 )*(1-p),1}
-        items[new_i ].opacity = 255*(1-p)*(1-p)
-        --]]
-        --[[
-        if p < .8 then
-            p = (1/.8)*p
-            items[new_i ].scale = {1+(items[new_i ].sel_w/items[new_i ].orig_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].sel_w/items[curr_i].orig_w-1 )*(1-p),1}
-        else
-            p = (1/.2)*(p-.8)
-            selected_text.opacity = 255*p
-            items[new_i ].opacity = 255*(1-p)*(1-p)
-        end
-        --]]
-        --[[
-        if p < 1/3 then
-            items[new_i ].font = "InterstateProExtraLight 75px"
-            items[curr_i ].font = "InterstateProBold 75px"
-            p = p*3
-            items[new_i ].scale = {1+(items[new_i ].light_w/items[new_i ].orig_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].reg_w/items[curr_i].bold_w-1 )*p,1}
-        elseif p < 2/3 then
-            items[new_i ].font = "InterstateProLight 75px"
-            items[curr_i ].font = "InterstateProRegular 75px"
-            p = (p-1/3)*3
-            items[new_i ].scale = {1+(items[new_i ].reg_w/items[new_i ].light_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].light_w/items[curr_i].reg_w-1 )*p,1}
-        else
-            items[new_i ].font = "InterstateProRegular 75px"
-            items[curr_i ].font = "InterstateProLight 75px"
-            p = (p-2/3)*3
-            items[new_i ].scale = {1+(items[new_i ].bold_w/items[new_i ].reg_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].orig_w/items[curr_i].light_w-1 )*p,1}
-        end
-        --]]
     end
     on_new_frame__animate_up = function(tl,ms,p)
-        --print("--------------------------")
         inner_group.y = -item_spacing*p
         for i = 1,vis_len+1 do
             ii = items[wrap_i(top_i + i-1,items)]
             ii.opacity = opacity_at(i-p)
-            --print(wrap_i(i,items),opacity_at(i-p))
-        --for i = top_i,top_i+vis_len+1 do
-            --items[wrap_i(i,items)].opacity = opacity_at(i-top_i-p)
         end
-        --items[curr_i].w = items[curr_i].orig_w + (selected_text.w-items[curr_i].orig_w )*p
-        --[[
-        if p < 1/3 then
-            items[new_i ].font = "InterstateProExtraLight 75px"
-            items[curr_i ].font = "InterstateProBold 75px"
-            p = p*3
-            items[new_i ].scale = {1+(items[new_i ].light_w/items[new_i ].orig_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].reg_w/items[curr_i].bold_w-1 )*p,1}
-        elseif p < 2/3 then
-            items[new_i ].font = "InterstateProLight 75px"
-            items[curr_i ].font = "InterstateProRegular 75px"
-            p = (p-1/3)*3
-            items[new_i ].scale = {1+(items[new_i ].reg_w/items[new_i ].light_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].light_w/items[curr_i].reg_w-1 )*p,1}
-        else
-            items[new_i ].font = "InterstateProRegular 75px"
-            items[curr_i ].font = "InterstateProLight 75px"
-            p = (p-2/3)*3
-            items[new_i ].scale = {1+(items[new_i ].bold_w/items[new_i ].reg_w-1 )*   p, 1}
-            items[curr_i].scale = {1+(items[curr_i].orig_w/items[curr_i].light_w-1 )*p,1}
-        end
-        --]]
-        
     end
     local ii
     on_completed__animate_down = function(tl)
-        --print("end")
-        --items[new_i ].font = "InterstateProBold 75px"
-        --items[curr_i ].font = "InterstateProExtraLight 75px"
-        --items[curr_i ].scale = 1
-        --items[new_i ].scale = 1
         curr_i = new_i
         items[bottom_i]:hide()
         bottom_i = wrap_i(bottom_i - 1,items)
@@ -212,18 +105,10 @@ local create = function(text)
         for i = 1,vis_len do
             ii = items[wrap_i(top_i + i-1,items)]
             ii.y = ii.y + item_spacing
-            --items[wrap_i(top_i + i-1,items)].opacity = opacity_at(i)
             ii.opacity = opacity_at(i)
-            --print(wrap_i(i,items),opacity_at(i))
         end
-        --items[new_i ].opacity = 0
     end
     on_completed__animate_up = function(tl)
-        --items[curr_i ].scale = 1
-        --items[new_i ].scale = 1
-        --print("end")
-        --items[new_i ].font = "InterstateProBold 75px"
-        --items[curr_i ].font = "InterstateProExtraLight 75px"
         curr_i = new_i
         items[top_i]:hide()
         top_i = wrap_i(top_i + 1,items)
@@ -231,14 +116,11 @@ local create = function(text)
         for i = 1,vis_len do
             ii = items[wrap_i(top_i + i-1,items)]
             ii.y = ii.y - item_spacing
-            --items[wrap_i(top_i + i-1,items)].opacity = opacity_at(i)
             ii.opacity = opacity_at(i)
-            --print(wrap_i(i,items),opacity_at(i))
         end
-        --items[new_i ].opacity = 0
     end
     
-    instance.move_up = function()
+    instance.move_down = function()
         if animate_list.is_playing then return end
         
         animate_list.on_new_frame = on_new_frame__animate_up
@@ -249,11 +131,7 @@ local create = function(text)
         place_on_the_bottom(bottom_i,curr_item)
         bottom_i = curr_item
         
-        
-        --items[curr_i].font = RECORDING_MENU_FONT
         new_i = wrap_i(curr_i + 1,items)
-        --items[curr_i].font = RECORDING_MENU_FONT_FOCUS
-        
         
         items[curr_i].contract:start()
         items[new_i ].expand:start()
@@ -261,7 +139,7 @@ local create = function(text)
         
     end
     
-    instance.move_down = function()
+    instance.move_up = function()
         if animate_list.is_playing then return end
         
         animate_list.on_new_frame = on_new_frame__animate_down
@@ -272,10 +150,7 @@ local create = function(text)
         place_on_the_top(top_i,curr_item)
         top_i = curr_item
         
-        
-        --items[curr_i].font = RECORDING_MENU_FONT
         new_i = wrap_i(curr_i - 1,items)
-        --items[curr_i].font = RECORDING_MENU_FONT_FOCUS
         
         items[curr_i].contract:start()
         items[new_i ].expand:start()
@@ -291,8 +166,7 @@ local create = function(text)
     end
     
     items[1].font = RECORDING_MENU_FONT_FOCUS
-    --.font  = STORE_MENU_FONT_FOCUS
-    --text[1].icon:grab_key_focus()
+    
     local animating_back_to_prev_menu = false
     local key_presses = {
         [keys.Up]   = instance.move_up,
@@ -318,18 +192,14 @@ local create = function(text)
             }
             
         end,
+        [keys.VOL_UP]   = raise_volume,
+        [keys.VOL_DOWN] = lower_volume,
     }
     
     function instance:on_key_down(k,...)
         return key_presses[k] and key_presses[k]()
     end
-    --[[
-    function curr_icon:on_key_down(...) 
-        if curr_icon.source.on_key_down then 
-            curr_icon.source:on_key_down(...)
-        end 
-    end
-    --]]
+    
     instance.opacity = 0
     return instance
     

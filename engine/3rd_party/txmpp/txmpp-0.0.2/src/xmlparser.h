@@ -101,7 +101,6 @@ private:
     void SetPosition(int line, int column, long byte_index);
 
   private:
-    const XmlParser * parser_;
     XmlnsStack xmlnsstack_;
     XML_Error raised_;
     XML_Size line_number_;

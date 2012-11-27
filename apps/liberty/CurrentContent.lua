@@ -16,7 +16,7 @@ local launch_trickplay_menu = function()
     trick_play_menu:animate{
         duration = 300,
         z        = 0,
-        opacity  = 0,
+        opacity  = 255,
         on_completed = function() 
             animating = false 
         end
@@ -25,7 +25,7 @@ local launch_trickplay_menu = function()
     end)
 end
 local launch_channel_menu = function()
-    if animating then return end
+    if animating or not channel_menu.is_ready then return end
     animating = true
     
     menu_layer:add(channel_menu)
@@ -45,7 +45,24 @@ local launch_channel_menu = function()
     channel_menu:grab_key_focus()
     backdrop:set_horizon(500)
     backdrop:set_bulb_x(200)
+    backdrop:anim_x_rot(65) -- 70)
     end)
+end
+
+local launch_main_menu = function()
+    if animating then return end
+    animating = true
+    
+    main_menu:animate{
+        duration = 300,
+        z        = 0,
+        opacity  = 255,
+        on_completed = function() 
+            instance:unparent() 
+            animating = false 
+        end
+    }
+    main_menu:grab_key_focus()
 end
 
 local key_presses = {
@@ -53,22 +70,10 @@ local key_presses = {
     [keys.Down]  = launch_channel_menu,
     [keys.Left]  = launch_trickplay_menu,
     [keys.Right] = launch_trickplay_menu,
-    [keys.BACK] = function()
-        if animating then return end
-        animating = true
-        
-        main_menu:animate{
-            duration = 300,
-            z        = 0,
-            opacity  = 255,
-            on_completed = function() 
-                instance:unparent() 
-                animating = false 
-            end
-        }
-        main_menu:grab_key_focus()
-        
-    end,
+    [keys.MENU]  = launch_main_menu,
+    [keys.BACK]  = launch_main_menu,
+    [keys.VOL_UP]   = raise_volume,
+    [keys.VOL_DOWN] = lower_volume,
 }
 
 function instance:on_key_down(k,...)
