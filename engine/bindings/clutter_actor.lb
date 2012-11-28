@@ -263,7 +263,7 @@ interface actor [[ClutterActor*]]
 /***************************************
     Property: gid
 
-    The gid property is a globally unique numeric value for each instance of a UIElement object. The gid is assigned automatically when the UIElement object is created.
+    The gid property is a globally unique string for each instance of a UIElement object. The maximum number of characters in the gid string is 31. The gid is assigned automatically when the UIElement object is created.
 */
 
     readonly string gid
