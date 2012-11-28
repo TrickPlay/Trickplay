@@ -3,19 +3,7 @@ ARROWPANE = true
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
-local create_arrow = function(self,state)
-    mesg("ArrowPane",0,"ArrowPane:create_arrow()",self.gid,state)
-	local c = Canvas(self.w,self.h)
-	
-    c:move_to(0,   c.h/2)
-    c:line_to(c.w,     0)
-    c:line_to(c.w,   c.h)
-    c:line_to(0,   c.h/2)
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	return c:Image()
-	
-end
+local create_arrow = function(self,state) return Clone{source=self.style.triangle[state]} end
 
 ArrowPane = setmetatable(
     {},
@@ -269,7 +257,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = { 90,0,0} ,
                         on_released = function() pane.virtual_y = pane.virtual_y - move_by end,
@@ -284,7 +272,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = {270,0,0},
                         on_released = function() pane.virtual_y = pane.virtual_y + move_by end,
@@ -299,7 +287,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow,
                         on_released = function() pane.virtual_x = pane.virtual_x - move_by end,
                     }
@@ -313,7 +301,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = {180,0,0},
                         on_released = function() pane.virtual_x = pane.virtual_x + move_by end,
@@ -330,7 +318,7 @@ ArrowPane = setmetatable(
                                     instance.style.arrow.size/2,
                                     instance.style.arrow.size/2
                                 },
-                                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                                --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                             }
                         end
                     end
@@ -350,12 +338,12 @@ ArrowPane = setmetatable(
                     end
                     if redraw_pane then
                         redraw_pane = false
-                        pane:set{
+                        pane:set{--[[
                             style = {
                                 name=false,
                                 fill_colors=instance.style.fill_colors.attributes,
                                 border={colors=instance.style.border.colors.attributes},
-                            }
+                            }--]]
                         }
                     end
                     lm_update()
@@ -434,7 +422,7 @@ ArrowPane = setmetatable(
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
-            local l_pane  = ClippingRegion{style = false}
+            local l_pane  = ClippingRegion()
             local l_up    = Button:declare()
             local l_down  = Button:declare()
             local l_left  = Button:declare()
