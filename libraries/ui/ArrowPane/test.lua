@@ -23,6 +23,8 @@ s = ap1:to_json()
 ap1 = WL.ArrowPane()
 ap1:from_json(s)
 ap2 = WL.ArrowPane{x = 500,virtual_w = 400}
+ap2.horizontal_arrows_are_visible = true
+ap2.vertical_arrows_are_visible = false
 ap2.arrow_move_by = 40
 ap2:add(WL.Widget_Rectangle{w=1000,h=1000,color="ffff00"},WL.Widget_Rectangle{w=100,h=100,color="ff0000"},WL.Widget_Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
 --]]

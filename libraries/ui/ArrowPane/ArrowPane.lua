@@ -151,6 +151,34 @@ ArrowPane = setmetatable(
                         pane.y_offset = v
                     end
                 end,
+                horizontal_arrows_are_visible = function(instance,_ENV)
+                    
+                    return function(oldf) return instance.number_of_cols == 3 end,
+                    
+                    function(oldf,self,v) 
+                        
+                        if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
+                        
+                        horizontal_arrows_are_visible = v
+                        
+                        new_w = (v == nil) and true or new_w
+                        
+                    end
+                end,
+                vertical_arrows_are_visible = function(instance,_ENV)
+                    
+                    return function(oldf) return instance.number_of_rows == 3 end,
+                    
+                    function(oldf,self,v) 
+                        
+                        if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
+                        
+                        vertical_arrows_are_visible = v
+                        
+                        new_h = (v == nil) and true or new_h
+                        
+                    end
+                end,
                 widget_type = function(instance,_ENV)
                     return function(oldf) return "ArrowPane" end
                 end,
@@ -332,7 +360,19 @@ ArrowPane = setmetatable(
                     end
                     lm_update()
                     
-                    if  new_w then
+                    
+                    if horizontal_arrows_are_visible == true and instance.number_of_cols == 1 then
+                        if instance.number_of_rows == 1 then
+                            instance.cells:insert_col(1,{left})
+                            instance.cells:insert_col(3,{right})
+                        elseif instance.number_of_rows == 3 then
+                            instance.cells:insert_col(1,{nil,left,nil})
+                            instance.cells:insert_col(3,{nil,right,nil})
+                        end
+                    elseif horizontal_arrows_are_visible == false and instance.number_of_cols == 3 then
+                        instance.cells:remove_col(3)
+                        instance.cells:remove_col(1)
+                    elseif new_w and horizontal_arrows_are_visible == nil then
                         new_w = false
                         
                         if pane.virtual_w <= pane.w then
@@ -353,7 +393,19 @@ ArrowPane = setmetatable(
                         end
                     end
                     
-                    if  new_h then
+                    if vertical_arrows_are_visible == true and instance.number_of_rows == 1 then
+                        if instance.number_of_cols == 1 then
+                            instance.cells:insert_row(1,{up})
+                            instance.cells:insert_row(3,{down})
+                        elseif instance.number_of_cols == 3 then
+                            instance.cells:insert_row(1,{nil,up,  nil})
+                            instance.cells:insert_row(3,{nil,down,nil})
+                        end
+                    elseif vertical_arrows_are_visible == false and instance.number_of_rows == 3 then
+                        instance.cells:remove_row(3)
+                        instance.cells:remove_row(1)
+                    elseif new_h and vertical_arrows_are_visible == nil then
+                        
                         new_h = false
                                     
                         if pane.virtual_h <= pane.h then
