@@ -717,8 +717,8 @@ main = function()
     screen:add(menu_layer)
     
     main_menu:grab_key_focus()
-    --[[
-    mediaplayer:load("glee-1.mp4")
+    ---[[
+    mediaplayer:load("glee.mp4")
     
     function mediaplayer:on_loaded()
         
