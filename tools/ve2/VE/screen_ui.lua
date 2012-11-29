@@ -129,6 +129,23 @@ function screen_ui.container_selected(obj, x, y)
     end
 end  
 
+function screen_ui.getSelectedObj()
+	for i, j in pairs (screen.children) do 
+		if j.name then 
+			if string.find(j.name, "border") then 
+				local a, b = string.find(j.name,"border")
+		    	local selObj = screen:find_child(string.sub(j.name, 1, a-1))
+                if selObj then 
+		    	    return selObj
+                else 
+		    	    return nil
+                end 
+            end 
+        end 
+    end
+    return nil
+end 
+
 function screen_ui.getSelectedName()
 	for i, j in pairs (screen.children) do 
 		if j.name then 

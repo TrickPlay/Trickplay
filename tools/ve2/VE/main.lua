@@ -162,8 +162,8 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
     blockReport = true 
 
-    screen_ui.n_selected(devtools:gid(newChildGid))
-    screen_ui.n_selected(devtools:gid(newParentGid))
+    screen_ui.n_selected(newChild)
+    screen_ui.n_selected(newParent)
 
     -- Drop into Layer 
 
@@ -826,7 +826,7 @@ _VE_.buildVF = function(path)
     if #images > 0 then 
         images = string.gsub (images, "(\n+)", "")
         --images = string.sub(images, 2, string.len(images)-1)
-        print("imageInfo["..images.."]")
+        print("imageInfo"..images)
     end
     spriteSheet = SpriteSheet { map = images_file } 
 end
@@ -1456,12 +1456,16 @@ end
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
         if input_mode == hdr.S_FOCUS then 
-            local selObjName, selObjGid = screen_ui.getSelectedName()
+            --local selObjName, selObjGid = screen_ui.getSelectedName()
+            local selObj = screen_ui.getSelectedObj()
 
-            blockReport = true
-            hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), nil) 
-            blockReport = false
-
+            if selObj then 
+                blockReport = true
+                --hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), nil) 
+                hdr.neighberKey_map[focusKey](selObj, nil) 
+                blockReport = false
+            end 
+    
             print("focusSet2".."empty")
             input_mode = hdr.S_SELECT
             return true 
