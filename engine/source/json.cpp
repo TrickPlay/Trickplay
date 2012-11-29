@@ -96,6 +96,11 @@ namespace JSON
 
         Value result;
 
+        if ( index < 0 )
+        {
+            index = lua_gettop( L ) + index + 1;
+        }
+
         switch( lua_type( L , index ) )
         {
             case LUA_TNUMBER:
@@ -134,7 +139,7 @@ namespace JSON
                 //
                 // If in Lua it is {} , should it be {} or [] in JSON?
 
-                if ( lua_objlen( L, index ) > 0 )
+                if ( lua_rawlen( L, index ) > 0 )
                 {
                     Array & array( result.as< Array >() );
 
@@ -748,7 +753,7 @@ namespace JSON
     {
         return map[ key ];
     }
-    
+
     Value & Object::at ( const String & key )
     {
         return map[ key ];

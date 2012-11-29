@@ -1,0 +1,1116 @@
+module gameservice_module;
+
+[[
+#include "context.h"
+#include "app.h"
+#include "gameservice_support.h"
+#include "gameservice_util.h"
+
+
+void gameservice_app_ready_handler(TPContext * context,const char *,void * l);
+void gameservice_app_error_handler(TPContext * context,const char *,void * l);
+]]
+
+/*
+    UndocumentedGlobal: gameservice
+
+    The gameservice global variable. It provides access to XMPP based multi-user game play functionality.
+    Game service functionality is enabled when TP_GAMESERVICE_ENABLED configuration variable is set to 1. Set it to
+    0 if you don't need gameservice functionality. This variable is enabled by default.
+
+    Only apps which have "gameservice" attribute in their app metadata file can use this functionality.
+
+    Please set TP_GAMESERVICE_DOMAIN, TP_GAMESERVICE_HOST, TP_GAMESERVICE_PORT configuration variables to the
+    appropriate values based on your XMPP server location. The default values for these variables are the following:
+    TP_GAMESERVICE_DOMAIN = gameservice.trickplay.com
+    TP_GAMESERVICE_HOST = gameservice.gameservice.trickplay.com
+    TP_GAMESERVICE_PORT = 5222
+
+*/
+
+global gameservice [[GameServiceSupport*]]
+{
+
+    gameservice()
+        [[
+            self=lb_construct( GameServiceSupport , App::get(L)->get_context()->get_gameservice() );
+
+            self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_READY, gameservice_app_ready_handler,L);
+            self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
+        ]];
+
+    /*
+        UndocumentedProperty:     user_id
+        The user_id property returns the login account id used to connect to XMPP based game server.
+        A unique account is created automatically for each profile and stored in the underlying persistent store (system.db)
+        The user_id is a GUID.
+    */
+    readonly string user_id
+        [[
+            user_id=self->GetUserId().c_str();
+        ]];
+
+    /*
+
+        UndocumentedEvent Handler: on_ready
+
+        The on_ready() event handler is invoked after the Trickplay establishes a session
+        with the XMPP game server.
+        If the registration fails, the <on_error> event handler will be invoked, instead.
+
+        *Prototype:*
+
+            (code)
+            on_ready( self, app_id)
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            app_id - a table with following attributes:
+                { name = "xxxx", version = "xxx" }
+
+        *Return Value:* None
+
+    */
+
+    function on_ready
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_ready" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_ready" , L );
+        ]];
+
+    int add_onready_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_ready" , L );
+        ]];
+
+    remove_onready_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_ready" , L );
+        ]];
+
+    /*
+
+        UndocumentedEvent Handler: on_error
+
+        The on_error() event handler is invoked when the Trickplay fails on to establish a session with XMPP game server.
+
+        *Prototype:*
+
+            (code)
+            on_error( self, response_status)
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            response_status - a table with following attributes:
+                { status = <int>, status_as_string = "xxx", error_message = "xxx" }
+
+        *Return Value:* None
+
+    */
+
+    function on_error
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_error" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_error" , L );
+        ]];
+
+    int add_onerror_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_error" , L );
+        ]];
+
+    remove_onerror_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_error" , L );
+        ]];
+
+
+/*
+ * TODO: get the registered games from the server as payload of open_app call
+ */
+    readonly table registered_games
+        [[
+            TPGameServiceUtil::push_registered_games(L);
+        ]];
+
+    /*
+        UndocumentedFunction: register_game
+        Callback Function: on_register_game_completed
+
+        Use this function to register a game
+         *Prototype:*
+
+            (code)
+            gameservice:register_game( props, on_register_game_completed )
+            (end)
+
+        *Arguments:*
+
+            props - is a lua table that should have the following definition:
+                (code)
+                props =  {
+                      app_id = { name = "com.trickplay.hangman", version = 1 }, // only hardcoded value of version 1 is supported for now
+                     name = "com.trickplay.hangman",
+                     description = "hangman game",
+                    category = "Car Racing",
+                    turn_policy = "roundrobin", // valid values are either roudrobin or specifiedRole
+                    game_type = "correspondence", // valid values are either correspondence or online
+                    join_after_start = true,
+                    min_players_for_start = 2,
+                    max_duration_per_turn = 120000, // 5 minutes in milliseconds
+                    abort_when_player_leaves = true,
+                    roles = {
+                         {    name = "p1", cannot_start = false, first_role = true },
+                         {   name = "p2", cannot_start = true, first_role = false }
+                    }
+                  }
+                 (end)
+
+            on_register_game_completed - this a lua callback function which will be invoked when register_game finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_register_game_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when register_game call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+
+        *Return Value:* returns response_status table
+
+    */
+    table register_game(table props, function on_register_game_completed = 0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_register_game_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::Game game_obj;
+            TPGameServiceUtil::populate_game(L, props, game_obj);
+            libgameservice::StatusCode sc = self->RegisterGame(ud, game_obj, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+
+
+    /*
+        UndocumentedFunction: get_match_data
+        UndocumentedCallback Function: on_get_match_data_completed
+
+        Use this function to get a list of matches in which the logged user is participating
+         *Prototype:*
+
+            (code)
+            gameservice:get_match_data( game_id, on_get_match_data_completed )
+            (end)
+
+        *Arguments:*
+
+            game_id - is a lua table that should have the following structure:
+                (code)
+                game_id =  {
+                              app_id = { name = "com.trickplay.hangman", version = 1 },
+                              name = "com.trickplay.hangman",
+                         }
+                 (end)
+
+            on_get_match_data_completed - this a lua callback function which will be invoked when get_match_data finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_get_match_data_completed =
+                                                function (self, response_status, match_data)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when get_match_data call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        match_data is available only when the call finishes successfully
+                                        match_data has the following structure:
+                                        (code)
+                                        match_data = {
+                                            game_id = "urn:xmpp:mug:tp:com.trickplay.hangman:1:com.trickplay.hangman" // a urn of the game
+                                            match_infos = {
+                                            // first match info
+                                                {
+                                                    match_id = "xx",
+                                                    match_status = "xxx", // either active, started, aborted, completed ...
+                                                    nickname = "xxx", // a nickname user selects when joining the match
+                                                    in_room_id = "xxx" // a unique id for this user in the match
+                                                    match_state = {
+                                                        opaque = "xxx", // the opaque state of the game
+                                                        terminate = false, // whether the game is terminated or not
+                                                        first = "xxx", // role of the player who made the first move in the match
+                                                        next = "xxx", // role of the player who should make the next move
+                                                        last = "xxx", // role of the player who made the most recent move in the match
+                                                        players = { "x", "y" } // roles of players who are currently participating in the match
+                                                    }
+                                                },
+                                                // next match info
+                                                ...
+
+                                            }
+                                        }
+                                        (end)
+
+
+        *Return Value:* returns response_status table
+     */
+    table get_match_data(table game_id, function on_get_match_data_completed = 0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_get_match_data_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::GameId game_id_obj;
+            TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+            libgameservice::StatusCode sc = self->GetMatchData(ud, game_id_obj, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+
+    /*
+        UndocumentedFunction: get_user_game_data
+        UndocumentedCallback Function: on_get_user_game_data_completed
+
+        Use this function to get the unique user data object associated with each unique game_id
+         *Prototype:*
+
+            (code)
+            gameservice:get_user_game_data( game_id, on_get_user_game_data_completed )
+            (end)
+
+        *Arguments:*
+
+            game_id - is a lua table that should the have following structure:
+                (code)
+                game_id =  {
+                              app_id = { name = "com.trickplay.hangman", version = 1 },
+                              name = "com.trickplay.hangman",
+                         }
+                 (end)
+
+            on_get_user_game_data_completed - this a lua callback function which will be invoked when get_user_game_data finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_get_user_game_data_completed =
+                                                function (self, response_status, user_game_data)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when get_user_game_data call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        user_game_data is available only when the call finishes successfully
+                                        user_game_data has the following structure:
+                                        (code)
+                                        user_game_data = {
+                                            game_id = "urn:xmpp:mug:tp:com.trickplay.hangman:1:com.trickplay.hangman" // a urn of the game
+                                            version = <int> // this is a int value assigned by the server. will be incremented each time the user game data is updated
+                                            opaque = "xx" // a opaque string value managed by the game
+                                        }
+                                        (end)
+
+
+        *Return Value:* returns response_status table
+     */
+    table get_user_game_data(table game_id, function on_get_user_game_data_completed = 0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_get_user_game_data_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::GameId game_id_obj;
+            TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+            libgameservice::StatusCode sc = self->GetUserGameData(ud, game_id_obj, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+
+    /*
+        UndocumentedFunction: update_user_game_data
+        UndocumentedCallback Function: update_user_game_data_completed
+
+        Use this function to get the unique user data object associated with each unique game_id
+         *Prototype:*
+
+            (code)
+            gameservice:update_user_game_data( game_id, opaque, on_update_user_game_data_completed )
+            (end)
+
+        *Arguments:*
+
+            game_id - is a lua table that should have the following structure:
+                (code)
+                game_id =  {
+                              app_id = { name = "com.trickplay.hangman", version = 1 },
+                              name = "com.trickplay.hangman",
+                         }
+                 (end)
+            opaque - this is a string which the game wants to save on the server.
+            on_update_user_game_data_completed - this a lua callback function which will be invoked when update_user_game_data finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_update_user_game_data_completed =
+                                                function (self, response_status, user_game_data)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when update_user_game_data call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        user_game_data is available only when the call finishes successfully
+                                        user_game_data has the following structure:
+                                        (code)
+                                        user_game_data = {
+                                            game_id = "urn:xmpp:mug:tp:com.trickplay.hangman:1:com.trickplay.hangman" // a urn of the game
+                                            version = <int> // this is a int value assigned by the server. will be incremented each time the user game data is updated
+                                            opaque = "xx" // a opaque string value managed by the game
+                                        }
+                                        (end)
+
+
+        *Return Value:* returns response_status table
+     */
+    table update_user_game_data(table game_id, string opaque, function on_update_user_game_data_completed = 0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_update_user_game_data_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::GameId game_id_obj;
+            TPGameServiceUtil::populate_game_id(L, game_id, game_id_obj);
+            libgameservice::StatusCode sc = self->UpdateUserGameData(ud, game_id_obj, opaque, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+    /*
+        UndocumentedFunction: assign_match
+        UndocumentedCallback Function: assign_match_completed
+
+        Use this function to request a match for the user to play
+         *Prototype:*
+
+            (code)
+            gameservice:assign_match( match_request, on_assign_match_completed )
+            (end)
+
+        *Arguments:*
+
+            match_request - is a lua table that should have the following structure:
+                (code)
+                match_request =  {
+                                 game_id = "urn:xmpp:mug:tp:com.trickplay.hangman:1:com.trickplay.hangman", // urn of the game
+                                 free_role = true,
+                                 role = "p1",
+                                 new_match = true,
+                                 nick = "best_gamer"
+                             }
+                 (end)
+
+            on_assign_match_completed - this a lua callback function which will be invoked when assign_match finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_assign_match_completed =
+                                                function (self, response_status, match_request, new_match_id)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when assign_match call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        match_request is available only when the call finishes sucessfully
+                                        match_request will have the same contents as the match_request table which is passed as the input argument to assign_match call
+
+                                        new_match_id is the match_id of the assigned match
+
+
+        *Return Value:* returns response_status table
+    */
+    table assign_match(table match_request, function on_assign_match_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_assign_match_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::MatchRequest match_request_obj;
+            TPGameServiceUtil::populate_match_request(L, match_request, match_request_obj);
+            libgameservice::StatusCode sc = self->AssignMatch(ud, match_request_obj, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+    /*
+        UndocumentedFunction: join_match
+        UndocumentedCallback Function: join_match_completed
+
+        Use this function to join a match which was previously assigned to the user
+         *Prototype:*
+
+            (code)
+            gameservice:join_match( match_id, nick, any_role, on_join_match_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to join
+            nick - the nickname user chooses for the duration of this match
+            any_role - a boolean value. if true the user will be assigned some unassigned role
+                       or a role already assigned to him in the prior assign_match call.
+                       Also, if the user previously joined this match as a spectator ( role = "" or nil ) then
+                       user can request to join the match with a unassigned role when any_role passed in is true.
+                        If any_role is false, the user will join the match without a role as a spectator.
+            on_join_match_completed - this a lua callback function which will be invoked when join_match finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_join_match_completed =
+                                                function (self, response_status, match_id, from, item)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when join_match call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        match_id is available only when the call finishes successfully
+                                        match_id identifies the match which the user is attempting to join
+
+                                        from is available only when the call finishes successfully
+                                        from is a table with the following structure:
+                                        (code)
+                                            from = {
+                                                        id = "xx", // this is a unique id in the context of the match assigned to the user
+                                                        nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                                                    }
+                                        (end)
+
+                                        item is available only when the call finishes successfully
+                                        item is a table with the following structure:
+                                        (code)
+                                            item = {
+                                                        role = "xxx",
+                                                        affiliation = "none", // either owner, member or none
+                                                        jid = "xxx", // is the user's unique xmpp account id
+                                                        nick = "" // will be a empty string or nil. this will not have a valid value
+                                                    }
+                                        (end)
+
+
+        *Return Value:* returns response_status table
+    */
+    table join_match(string match_id, string nick, bool any_role, function on_join_match_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_join_match_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::StatusCode sc = self->JoinMatch(ud, match_id, nick, any_role, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+    /*
+        UndocumentedFunction: join_match
+        UndocumentedCallback Function: join_match_completed
+
+        Use this function to join a match with a specific role. if the user previously joined the match with a role
+        then specifying that role is optional if he is attempting to rejoin the same match.
+        If the user previously joined the match as spectator ( role = "" or nil ) then user can use this call to
+        pick a specific role
+         *Prototype:*
+
+            (code)
+            gameservice:join_match( match_id, nick, any_role, on_join_match_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to join
+            nick - the nickname user chooses for the duration of this match
+            role - a role which user wants.
+            on_join_match_completed - this a lua callback function which will be invoked when join_match finishes.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_join_match_completed =
+                                                function (self, response_status, match_id, from, item)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 when join_match call completes successfully
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+                                        match_id is available only when the call finishes successfully
+                                        match_id identifies the match which the user is attempting to join
+
+                                        from is available only when the call finishes successfully
+                                        from is a table with the following structure:
+                                        (code)
+                                            from = {
+                                                        id = "xx", // this is a unique id in the context of the match assigned to the user
+                                                        nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                                                    }
+                                        (end)
+
+                                        item is available only when the call finishes successfully
+                                        item is a table with the following structure:
+                                        (code)
+                                            item = {
+                                                        role = "xxx",
+                                                        affiliation = "none", // either owner, member or none
+                                                        jid = "xxx", // is the user's unique xmpp account id
+                                                        nick = "" // will be a empty string or nil. this will not have a valid value
+                                                    }
+                                        (end)
+
+
+        *Return Value:* returns response_status table
+    */
+    table join_match_with_role(string match_id, string nick, string role, function on_join_match_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_join_match_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::StatusCode sc = self->JoinMatch(ud, match_id, nick, role, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+
+        /*
+        UndocumentedFunction: start_match
+        UndocumentedCallback Function: start_match_completed
+
+        Use this function to start a match. The callback to this function gets called immediately with a success status even if
+        the server fails to start the match. Basically a failed start message cannot be detected by the client currently.
+         *Prototype:*
+
+            (code)
+            gameservice:start_match( match_id, on_start_match_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to start
+            on_start_match_completed - this a lua callback function which will be invoked as soon as start_match message is sent to the server.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_start_match_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 whether start_match completes successfully or not
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+        *Return Value:* returns response_status table
+    */
+    table start_match(string match_id, function on_start_match_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_start_match_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::StatusCode sc = self->StartMatch(ud, match_id, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+        /*
+        UndocumentedFunction: leave_match
+        UndocumentedCallback Function: leave_match_completed
+
+        Use this function to leave a match. The callback to this function gets called immediately with a success status even if
+        the server fails to remove the user from the requested match. Basically a failed leave message cannot be detected by the client currently.
+         *Prototype:*
+
+            (code)
+            gameservice:leave_match( match_id, on_leave_match_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to leave
+            on_leave_match_completed - this a lua callback function which will be invoked as soon as leave_match message is sent to the server.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_leave_match_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 whether leave_match completes successfully or not
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+        *Return Value:* returns response_status table
+    */
+    table leave_match(string match_id, function on_leave_match_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_leave_match_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            libgameservice::StatusCode sc = self->LeaveMatch(ud, match_id, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+        /*
+        UndocumentedFunction: send_turn
+        UndocumentedCallback Function: send_turn_completed
+
+        Use this function to play a turn. The callback to this function gets called immediately with a success status even if
+        the server fails play the turn as requested. Basically a failed send_turn message cannot be detected by the client currently.
+         *Prototype:*
+
+            (code)
+            gameservice:send_turn( match_id, state, terminate, on_send_turn_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to which the turn is being sent
+            state - the new opaque state of the match
+            terminate - a boolean value indicating whether to end the match or not. If this value is true and the
+                        server can successfully terminate the match, then the new match_status will be "completed"
+            on_send_turn_completed - this a lua callback function which will be invoked as soon as send_turn message is sent to the server.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_send_turn_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 whether send_turn completes successfully or not
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+        *Return Value:* returns response_status table
+    */
+    table send_turn(string match_id, string state, bool terminate, function on_send_turn_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_send_turn_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            Turn turn;
+            turn.set_new_state(state);
+            turn.set_terminate(terminate);
+            libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+        /*
+        UndocumentedFunction: send_turn
+        UndocumentedCallback Function: send_turn_completed
+
+        Use this function to play a turn and also specify the role of the player whose turn it is next.
+        The callback to this function gets called immediately with a success status even if
+        the server fails play the turn as requested. Basically a failed send_turn message cannot be detected by the client currently.
+         *Prototype:*
+
+            (code)
+            gameservice:send_turn( match_id, state, terminate, on_send_turn_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - is the match to which the turn is being sent
+            state - the new opaque state of the match
+            next_role - identifies the role whose turn it is next. next_role attribute is only used when game is registered with turn_policy of "specifiedRole"
+            terminate - a boolean value indicating whether to end the match or not. If this value is true and the
+                        server can successfully terminate the match, then the new match_status will be "completed"
+            on_send_turn_completed - this a lua callback function which will be invoked as soon as send_turn message is sent to the server.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_send_turn_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 whether send_turn completes successfully or not
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+        *Return Value:* returns response_status table
+    */
+    table send_turn_to_role(string match_id, string state, string next_role, bool terminate, function on_send_turn_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_send_turn_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            Turn turn;
+            turn.set_new_state(state);
+            turn.set_next_turn(next_role);
+            turn.set_terminate(terminate);
+            libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+        /*
+        UndocumentedFunction: update_state
+        UndocumentedCallback Function: update_state_completed
+
+        Use this function to update the state of the match without advancing the turn.
+        The callback to this function gets called immediately with a success status even if
+        the server fails update the state as requested. Basically a failed update_state message cannot be detected by the client currently.
+         *Prototype:*
+
+            (code)
+            gameservice:update_state( match_id, state, terminate, on_update_state_completed )
+            (end)
+
+        *Arguments:*
+
+            match_id - identifies the match whose state is to be updated
+            state - the new opaque state of the match
+            terminate - a boolean value indicating whether to end the match or not. If this value is true and the
+                        server can successfully terminate the match, then the new match_status will be "completed"
+            on_update_state_completed - this a lua callback function which will be invoked as soon as update_state message is sent to the server.
+                                        The function should have the following signature:
+                                        (code)
+                                            on_update_state_completed =
+                                                function (self, response_status)
+                                                  ...
+                                                end
+                                        (end)
+                                        response_status.status is 0 whether update_state completes successfully or not
+
+                                        response_status is a lua table with the following structure:
+                                        { status = <int>, status_as_string = "xx", error_message }
+
+        *Return Value:* returns response_status table
+    */
+    table update_state(string match_id, string new_state, bool terminate, function on_send_turn_completed=0)
+        [[
+            int function_idx = LUA_REFNIL;
+            if ( on_send_turn_completed )
+            {
+                function_idx = luaL_ref(L, LUA_REGISTRYINDEX);
+            }
+            UserData * ud = UserData::get(L);
+            Turn turn;
+            turn.set_new_state(new_state);
+            turn.set_terminate(terminate);
+            turn.set_only_update(true);
+            libgameservice::StatusCode sc = self->SendTurn(ud, match_id, turn, function_idx);
+            TPGameServiceUtil::push_response_status_arg(L, sc);
+        ]];
+
+
+    /*
+
+        UndocumentedEvent Handler: on_turn_received
+
+        The on_turn_received() event handler is invoked when one of the participants of the match plays his turn.
+
+        *Prototype:*
+
+            (code)
+            on_turn_received( self, match_id, from, turn_message )
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            match_id - the match_id of the match
+            from - a table with the following structure:
+                (code)
+                    from = {
+                                id = "xx", // this is a unique id in the context of the match
+                                nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                            }
+                (end)
+            turn_message - a table with the following structure:
+                (code)
+                    turn_message = {
+                        new_state = "xxx", // the new opaque state of the match
+                        terminate = <boolean>, // a boolean value indicating whether the match has terminated
+                        next_turn = "xxx" // the role of the player whose turn it is next
+                    }
+                (end)
+
+        *Return Value:* None
+
+    */
+
+    function on_turn_received
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_turn_received" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_turn_received" , L );
+        ]];
+
+    int add_onturnreceived_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_turn_received" , L );
+        ]];
+
+    remove_onturnreceived_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_turn_received" , L );
+        ]];
+
+
+    /*
+
+        UndocumentedEvent Handler: on_match_started
+
+        The on_match_started() event handler is invoked when match is started.
+
+        *Prototype:*
+
+            (code)
+            on_match_started( self, match_id, from )
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            match_id - the match_id of the match that is started
+            from - identifies the player who started the match. it is a table with the following structure:
+                (code)
+                    from = {
+                                id = "xx", // this is a unique id in the context of the match
+                                nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                            }
+                (end)
+
+        *Return Value:* None
+
+    */
+
+    function on_match_started
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_match_started" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_match_started" , L );
+        ]];
+
+    int add_onmatchstarted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_match_started" , L );
+        ]];
+
+    remove_onmatchstarted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_match_started" , L );
+        ]];
+
+
+    /*
+
+        UndocumentedEvent Handler: on_participant_joined
+
+        The on_participant_joined() event handler is invoked when a new player joins the match
+
+        *Prototype:*
+
+            (code)
+            on_participant_joined( self, match_id, from, item )
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            match_id - the match_id of the match
+            from - identifies the player who joined the match. it is a table with the following structure:
+                (code)
+                    from = {
+                                id = "xx", // this is a unique id in the context of the match
+                                nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                            }
+                (end)
+            item - this table provides more information about the player who joined. it has the following structure:
+                                    (code)
+                                        item = {
+                                                    role = "xxx",
+                                                    affiliation = "none", // either owner, member or none
+                                                    jid = "xxx", // is the user's unique xmpp account id
+                                                    nick = "" // will be a empty string or nil. this will not have a valid value
+                                                }
+                                    (end)
+        *Return Value:* None
+
+    */
+
+    function on_participant_joined
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_participant_joined" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_participant_joined" , L );
+        ]];
+
+    int add_onparticipantjoined_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_participant_joined" , L );
+        ]];
+
+    remove_onparticipantjoined_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_participant_joined" , L );
+        ]];
+
+
+    /*
+
+        UndocumentedEvent Handler: on_participant_left
+
+        The on_participant_left() event handler is invoked when a player leaves the match
+
+        *Prototype:*
+
+            (code)
+            on_participant_left( self, match_id, from )
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            match_id - the match_id of the match
+            from - identifies the player who left the match. it is a table with the following structure:
+                (code)
+                    from = {
+                                id = "xx", // this is a unique id in the context of the match
+                                nick = "xxx" // nickname the user has chosen in the join_match or assign_match call
+                            }
+                (end)
+
+        *Return Value:* None
+
+    */
+
+    function on_participant_left
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_participant_left" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_participant_left" , L );
+        ]];
+
+    int add_onparticipantleft_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_participant_left" , L );
+        ]];
+
+    remove_onparticipantleft_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_participant_left" , L );
+        ]];
+
+
+    /*
+
+        UndocumentedEvent Handler: on_match_updated
+
+        The match_updated() event handler is invoked when the match_status attribute of a match changes
+
+        *Prototype:*
+
+            (code)
+            on_match_updated( self, match_id, match_status, match_state )
+            (end)
+
+        *Arguments:*
+
+            self - a reference to gameservice
+            match_id - the match_id of the match
+            match_status -  a string which describes the status of the match// either active, started, aborted, completed ...
+            match_state - is a table with the following structure:
+            (code)
+             {
+                opaque = "xxx", // the opaque state of the game
+                terminate = false, // whether the game is terminated or not
+                first = "xxx", // role of the player who made the first move in the match
+                next = "xxx", // role of the player who should make the next move
+                last = "xxx", // role of the player who made the most recent move in the match
+                players = { "x", "y" } // roles of players who are currently participating in the match
+            }
+            (end)
+
+        *Return Value:* None
+
+    */
+
+    function on_match_updated
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_match_updated" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_match_updated" , L );
+        ]];
+
+    int add_onmatchupdated_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_match_updated" , L );
+        ]];
+
+    remove_onmatchupdated_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_match_updated" , L );
+        ]];
+
+[[
+void gameservice_app_ready_handler(TPContext * context, const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    lb_invoke_callbacks(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_ready",0,0);
+}
+
+void gameservice_app_error_handler(TPContext * context, const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    lb_invoke_callbacks(L,context->get_gameservice(),"GAMESERVICE_METATABLE","on_error",0,0);
+}
+]]
+}

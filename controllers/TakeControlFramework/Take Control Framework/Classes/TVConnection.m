@@ -18,10 +18,14 @@
 @interface TVConnectionContext : TVConnection <SocketManagerDelegate> {
     
 @private
+    // truly private
     SocketManager *socketManager;
     TVBrowser *tvBrowser;
     AppBrowser *appBrowser;
     
+    id <TVConnectionDidConnectDelegate> connectionDelegate;
+    
+    // exposed publicly
     BOOL isConnected;
     
     NSUInteger port;
@@ -31,10 +35,10 @@
     
     NSNetService *connectedService;
     
-    id <TVConnectionDidConnectDelegate> connectionDelegate;
     id <TVConnectionDelegate> delegate;
 }
 
+// public
 @property (readonly) BOOL isConnected;
 @property (readonly) NSUInteger port;
 @property (readonly) NSUInteger http_port;
@@ -42,10 +46,11 @@
 @property (readonly) NSString *TVName;
 @property (readonly) NSNetService *connectedService;
 
+// private
 @property (nonatomic, readonly) SocketManager *socketManager;
 @property (assign) id <TVConnectionDidConnectDelegate> connectionDelegate;
 
-- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)delegate;
+- (id)initWithService:(NSNetService *)service delegate:(id <TVConnectionDelegate>)delegate;
 
 - (void)invalidateConnection;
 

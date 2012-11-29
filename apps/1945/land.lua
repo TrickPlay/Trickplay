@@ -63,7 +63,7 @@ lvlbg = {
                 self.img_h = self.image.h
                 lvlbg[1].doodad_list[self] = true
                 if type(overwrite_vars) == "table"  then
-                    print("self.overwrite_vars", overwrite_vars)
+                    --print("self.overwrite_vars", overwrite_vars)
                     recurse_and_apply(  self, overwrite_vars  )
                 end
             end,
@@ -201,7 +201,7 @@ lvlbg = {
         self.image.y = self.image.y + self.speed*seconds
         if self.image.y > 0 then
             self.image.y = self.image.y - self.img_h
-            print(self)
+            --print(self)
         end
     end,
     remove = function(self)
@@ -283,7 +283,7 @@ lvlbg = {
             self.q_i = self.q_i + 1
             
             if o ~= nil and o[self.q_i] ~= nil then
-                print(type(o[self.q_i]),#o[self.q_i])
+                --print(type(o[self.q_i]),#o[self.q_i])
                 for j = 1, #o[self.q_i] do
                     g:add(Clone{
                         source     =  _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ],
@@ -302,15 +302,15 @@ lvlbg = {
             
         end
         if o ~= nil then
-            print("num o",#o)
+            --print("num o",#o)
             for i = (self.q_i+1), #o do
                 self.queues[i] = {}
-                print(#o[i])
+                --print(#o[i])
                 for j = 1, #o[i] do
                     table.insert(self.queues[i],o[i][j])
                 end
                 if o[i].enemies ~= nil then
-                print("rite hurr")
+                --print("rite hurr")
                     if  self.enemies[i] == nil then
                         self.enemies[i] = {}
                     end
@@ -343,7 +343,7 @@ lvlbg = {
             end
             if q[k][i].times ~= nil then
                 assert(q[k][i][1] ~= nil and q[k][i][2] == nil)
-                print(q[k][i].times)
+                --print(q[k][i].times)
                 
                 for j = 1, q[k][i].times do
                     if  self.queues[self.append_i+q_i] == nil then
@@ -433,10 +433,10 @@ lvlbg = {
                         for _,e in ipairs(self.enemies[self.q_i]) do
                             f = _G
                             for j = 1,#e.f do
-                                print(e.f[j])
+                                --print(e.f[j])
                                 f = f[ e.f[j] ]
                             end
-                            print("done\n\n")
+                            --print("done\n\n")
                             f(unpack(e.p))
                         end
                     end
@@ -542,7 +542,7 @@ lvlbg = {
             self.q_i = self.q_i + 1
             
             if o ~= nil and o[self.q_i] ~= nil then
-                print(type(o[self.q_i]),#o[self.q_i])
+                --print(type(o[self.q_i]),#o[self.q_i])
                 for j = 1, #o[self.q_i] do
                     g:add(Clone{
                         source     =  _G[ o[self.q_i][j].source[1] ][ o[self.q_i][j].source[2] ],
@@ -566,15 +566,15 @@ lvlbg = {
             end
         end
         if o ~= nil then
-            print("num o",#o)
+            --print("num o",#o)
             for i = (self.q_i+1), #o do
                 self.queues[i] = {}
-                print(#o[i])
+                --print(#o[i])
                 for j = 1, #o[i] do
                     table.insert(self.queues[i],o[i][j])
                 end
                 if o[i].enemies ~= nil then
-                print("rite hurr")
+                --print("rite hurr")
                     if  self.enemies[i] == nil then
                         self.enemies[i] = {}
                     end
@@ -591,7 +591,7 @@ lvlbg = {
     end,
     ---[[
     add_building = function(building,x,y,z_rot, big_explo,o)
-    print(building,x,y,z_rot, big_explo,o)
+    --print(building,x,y,z_rot, big_explo,o)
         add_to_render_list( {
                 image = Clone{source=curr_lvl_imgs[building],x=x,y=y,z_rotation={z_rot,0,0}},
                 dead = false,
@@ -764,7 +764,7 @@ lvlbg = {
             end
             if q[i].times ~= nil then
                 assert(q[i][1] ~= nil and q[i][2] == nil)
-                print(q[i].times)
+                --print(q[i].times)
                 
                 for j = 1, q[i].times do
                     if  self.queues[self.append_i+q_i] == nil then
@@ -902,10 +902,10 @@ lvlbg = {
                         for _,e in ipairs(self.enemies[self.q_i]) do
                             f = _G
                             for j = 1,#e.f do
-                                print(e.f[j])
+                                --print(e.f[j])
                                 f = f[ e.f[j] ]
                             end
-                            print("done\n\n")
+                            --print("done\n\n")
                             f(unpack(e.p))
                         end
                     end
@@ -1081,7 +1081,7 @@ function salvage_level_2(o)
     add_to_render_list(lvlbg[2],o.queues,o.top_doodad)
 end
 function salvage_level_3(o)
-print("o shit")
+--print("o shit")
     add_to_render_list(lvlbg[3],o.queues,o.top_doodad)
 end
 function salvage_level_4(o)

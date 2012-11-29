@@ -2,7 +2,7 @@
 Filename: app1.lua
 Author: Peter von dem Hagen
 Date: January 24, 2011
-Description:  Test the basic values of the app api. 
+Description:  Test the basic values of the app api.
    	      Verify that app.on_load gets called.
 
 Note: app.on_load is called in main.lua and set as a global variable
@@ -19,7 +19,7 @@ Note: app.on_load is called in main.lua and set as a global variable
 function test_app_basic ()
 
 -- looped through app.contents and check if AdvancedUIClasses exists --
-    local found_AdvancedUIClasses = false  
+    local found_AdvancedUIClasses = false
     for i = 1, #app.contents - 200 do
 	if app.contents[i] == "AdvancedUIClasses.lua" then
 		found_AdvancedUIClasses = true
@@ -35,23 +35,10 @@ function test_app_basic ()
     assert_equal( app.author, "Trickplay QA", "app.author returned: "..app.author.." Expected:Trickplay QA")
     assert_equal( app.copyright, "© Trickplay Inc.", "app.copyright returned: "..app.copyright.." Expected: © Trickplay Inc.")
  	assert_equal( app.description, "Unit tests for the Trickplay engine.", "app.description failed" )
- 
+
  	is_nil (app.launch, "app.launch is not nil" )
  	assert_equal( appOnLoadedCalled, true, "app.on_loaded not called" )
 end
 
 
 -- Test Tear down --
-
-
-
-
-
-
-
-
-
-
-
-
-

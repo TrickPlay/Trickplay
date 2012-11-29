@@ -23,11 +23,14 @@
 
 @interface NetServiceManager : NSObject <NSNetServiceBrowserDelegate,
 NSNetServiceDelegate> {
-    id <NetServiceManagerDelegate> delegate;
-    
+    // private
     NSNetServiceBrowser *netServiceBrowser;
+    
+    // public
     NSMutableArray *connectingServices;
     NSMutableArray *services;
+    
+    id <NetServiceManagerDelegate> delegate;
 }
 
 - (id)initWithClientDelegate:(id <NetServiceManagerDelegate>)client;

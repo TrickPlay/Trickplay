@@ -184,9 +184,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	local plus, item_plus, label_plus, separator_plus, rows 
 
 	if item_n == "tab_labels" then 
-		rows = table.getn(v.tab_labels)
+		rows = #v.tab_labels
 	else 
-		rows = table.getn(v.items)
+		rows = #v.items
 	end 
 
 	if save_items == true then 

@@ -19,7 +19,7 @@ In addition to these conventions, every plug-in must define the four functions l
 	(code)
 	tp_plugin_initialize()	-- called when the plug-in is loaded
 	tp_plugin_shutdown()	-- called when the TrickPlay Engine is shutting down
-	
+
 	tp_lua_api_open()		-- called when a new TrickPlay Lua application is starting
 	tp_lua_api_close()		-- called when a TrickPlay Lua application is terminating
 	(end)
@@ -36,7 +36,7 @@ When a plug-in is loaded, its tp_plugin_initialize() function is called. Every p
 	void
 	tp_plugin_initialize( TPPluginInfo * info, const char * config )
 	(end)
-	
+
 The TPPluginInfo structure is defined below.
 
 	(code)
@@ -57,7 +57,7 @@ The TPPluginInfo structure passed into tp_plugin_initialize() has all its fields
 	reserved - reserved for future use. Do not set this field.
 	resident - integer value. When the TrickPlay Engine terminates, the Engine can either unload the plug-in from memory or let the plug-in unload itself. By default, the Engine unloads the plug-in. To have the plug-in be responsible for unloading itself, set the resident field to any non-zero value.
 	user_data - pointer to an optional memory area allocated by the plug-in. This memory may contain any data the plug-in desires. The pointer is passed as an argument to each of the other required plug-in functions. The plug-in is responsible for freeing any allocated memory, typically in the tp_plugin_shutdown() function.
-	
+
 The config argument is a pointer to a null-terminated string that contains the contents of a configuration file that may accompany the plug-in. The configuration file is optional. If it exists, it must be located in the same directory as the plug-in and share the plug-in's filename, except the .so extension should be replaced with .config, as in tp_lua_api-Name.config. The contents of the configuration file may be in any format; the file's contents are simply read and passed without modification to the tp_plugin_initialize() function.
 
 The tp_plugin_initialize() function below is from the sample Perlin Noise plug-in. It simply initializes some of the TPPluginInfo fields, and then calls a function to initialize the Perlin Noise data structures.
@@ -191,10 +191,12 @@ All plug-in functions must conform to the prototype shown below.
 	(code)
 	typedef int (*lua_CFunction)( lua_State * L );
 	(end)
-	
-This prototype receives a single argument of a pointer to the Lua state structure. The arguments passed to the plug-in function are stored on the top of this structure, as on a stack. To access the arguments, the plug-in function pops them from the Lua stack. The function also returns an integer value that specifies the number of values the plug-in function is returning to the caller. These return values must be pushed onto the Lua stack by the plug-in function.
 
-The Perlin Noise plug-in contains the pnoise() function that we wish to make available to Lua applications. However, the pnoise() prototype does not conform to the required format; instead, it accepts three arguments of type double. To enable a Lua program to call pnoise(), we create an intermediate function between the Lua application and pnoise(). This intermediate function's prototype will conform to the required prototype. It will also pop the pnoise() arguments from the Lua stack and pass them to pnoise(). Finally, the intermediate function will push the pnoise() function's single return value onto the Lua stack before returning control back to the Lua application. 
+This prototype receives a single argument of a pointer to the Lua state structure. The arguments passed to the plug-in function are stored within this structure. To access the arguments, a plug-in function may call any of Lua's auxiliary luaL_checkXXX() functions, such as luaL_checknumber() or luaL_checkstring(). Refer to the <Lua Reference Manual at http://www.lua.org/manual/5.1/index.html> for the complete list of available functions.
+
+Each plug-in function also returns an integer value that specifies the number of values the plug-in function is returning to the caller. These return values must be pushed onto the Lua stack by the plug-in function.
+
+The Perlin Noise plug-in contains the pnoise() function that we wish to make available to Lua applications. However, the pnoise() prototype does not conform to the required format; instead, it accepts three arguments of type double. To enable a Lua program to call pnoise(), we create an intermediate function between the Lua application and pnoise(). This intermediate function's prototype will conform to the required prototype. It will also access the pnoise() arguments from the Lua stack and pass them to pnoise(). Finally, the intermediate function will push the pnoise() function's single return value onto the Lua stack before returning control back to the Lua application.
 
 The intermediate function called getPerlinNoise() is shown below. For details about the luaL_checknumber() and lua_pushnumber() functions, refer to the Lua documentation.
 
@@ -202,7 +204,7 @@ The intermediate function called getPerlinNoise() is shown below. For details ab
 	int
 	getPerlinNoise( lua_State *L ){
 
-		/* Pop function's arguments from stack */
+		/* Access function's arguments from Lua state */
 		double x = luaL_checknumber( L, 1 );
 		double y = luaL_checknumber( L, 2 );
 		double z = luaL_checknumber( L, 3 );
@@ -216,13 +218,13 @@ The intermediate function called getPerlinNoise() is shown below. For details ab
 	} /* getPerlinNoise() */
 	(end)
 
-The second requirement for the intermediate function to be called by a Lua application is that it must be registered with the application's Lua state structure. This is accomplished by passing the function to the Lua luaL_register() function. The luaL_register() prototype is shown below.
+The second requirement for the intermediate function to be called by a Lua application is that it must be registered with the application's Lua state structure. This is accomplished by passing the function to the Lua luaL_setfuncs() function. The luaL_register() prototype is shown below.
 
 	(code)
-	void luaL_register( lua_State * L, const char * libName, const luaL_Reg * registerList )
+	void luaL_setfuncs( lua_State *L, const luaL_Reg *registerList, int nup )
 	(end)
-	
-The L argument is simply the Lua state structure. The libName argument is a string that provides a kind of namespace for the registered functions. For example, calling the init() function in a plug-in with the libName "myPlugIn" would use the syntax myPlugIn.init(). The libname string can be NULL, but then the registered functions are placed in the global Lua namespace where the possibility of naming conflicts can occur, e.g., two plug-ins that each provide a function called init(). The registerList argument is a structure that contains Lua function names and their associated C plug-in functions. When a Lua application references the Lua function name, the Lua engine directs the reference to its associated C plug-in function. The definition of the luaL_Reg structure is shown below.
+
+The L argument is simply the Lua state structure. The registerList argument is a structure that contains Lua function names and their associated C plug-in functions. When a Lua application references the Lua function name, the Lua engine directs the reference to its associated C plug-in function. The definition of the luaL_Reg structure is shown below. The nup argument specifies an optional upvalue. For TrickPlay plug-in functions, the nup argument can be 0. Refer to the Lua documentation for details about the upvalue.
 
 	(code)
 	typedef struct luaL_Reg {
@@ -245,22 +247,24 @@ The Perlin Noise plug-in's definition of the array of luaL_Reg structures is sho
 	};
 	(end)
 
-The noiseAPI array is then passed to the luaL_register() function to add the plug-in function to the Lua state structure, making it available to Lua applications. A plug-in's functions must be registered for every Lua application when the application starts up, so the call to luaL_register() is placed in the tp_lua_api_open() function. In the call to luaL_register(), we also specify a namespace called "noiseAPI". Any references to the plug-in's functions should be prefaced with this namespace, as in noiseAPI.getPerlinNoise(). Finally, when luaL_register() returns, it leaves the luaL_Reg structure on the Lua stack. There is no reason to leave it there, so we pop it off. The code statements that perform these operations are shown below.
+The noiseAPI array is passed to the luaL_setfuncs() function to add the plug-in function to the Lua state structure, making it available to Lua applications. A plug-in's functions must be registered for every Lua application when the application starts up, so the call to luaL_setfuncs() is placed in the tp_lua_api_open() function.
+
+In the call to luaL_register(), we also specify a namespace called "noiseAPI". Any references to the plug-in's functions should be prefaced with this namespace, as in noiseAPI.getPerlinNoise(). Finally, when luaL_register() returns, it leaves the luaL_Reg structure on the Lua stack. There is no reason to leave it there, so we pop it off. The code statements that perform these operations are shown below.
 
 	(code)
 	int
 	tp_lua_api_open( lua_State * L, const char * app_id, void * user_data ){
 
 		/* ... other code statements described earlier ... */
-		
+
 		/* Register the Lua interface functions */
 		luaL_register( L, "noiseAPI", noiseAPI );
 
 		/* luaL_register() leaves the registered table on the stack; pop it off before returning */
 		lua_pop( L, 1 );
-		
+
 		/* ... other code statements described earlier ... */
-	}	
+	}
 	(end)
 
 

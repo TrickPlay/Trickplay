@@ -23,11 +23,11 @@ function external_devices:start()
     
     function controllers:on_controller_connected( c )
         
-        print("CONTROLLER ADDED")
+        --print("CONTROLLER ADDED")
         
         if c.has_pointer then
             
-            print("new controller has pointer")
+            --print("new controller has pointer")
             
             local cursor = cursor_class:make_cursor()
             
@@ -52,15 +52,15 @@ function external_devices:start()
             if ui_w == 435 then
                 c:declare_resource("splash","iphone_assets/ipod-start.png")
                 
-                print("Connected IPOD")
+                --print("Connected IPOD")
             elseif ui_w == 640 then
                 c:declare_resource("splash","iphone_assets/iphone-start.png")
                 
-                print("Connected IPHONE")
+                --print("Connected IPHONE")
             else
                 c:declare_resource("splash","iphone_assets/ipad-start.png")
                 
-                print("Connected IPAD")
+                --print("Connected IPAD")
             end
             
             controller:set_ui_background("splash","STRETCH")

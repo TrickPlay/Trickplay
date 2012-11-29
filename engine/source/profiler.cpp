@@ -10,15 +10,25 @@
 
 GQueue * Profiler::get_queue()
 {
+#ifndef GLIB_VERSION_2_32
     static GStaticPrivate current_queue = G_STATIC_PRIVATE_INIT;
 
     GQueue * queue = ( GQueue * ) g_static_private_get( & current_queue );
+#else
+    static GPrivate current_queue = G_PRIVATE_INIT( ( GDestroyNotify ) g_queue_free );
+
+    GQueue * queue = ( GQueue * ) g_private_get( & current_queue );
+#endif
 
     if ( ! queue )
     {
         queue = g_queue_new();
 
+#ifndef GLIB_VERSION_2_32
         g_static_private_set( & current_queue, queue, ( GDestroyNotify ) g_queue_free );
+#else
+        g_private_set( & current_queue, queue );
+#endif
     }
 
     return queue;
@@ -49,14 +59,14 @@ Profiler::Profiler( const char * _name , int _type )
 
     type = _type;
 
-    timer = g_timer_new();
-
     GQueue * queue = get_queue();
 
     if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
     {
         g_timer_stop( previous->timer );
     }
+
+    timer = g_timer_new();
 
     g_queue_push_tail( queue, this );
 }
@@ -69,13 +79,13 @@ Profiler::Profiler( const Profiler & )
 
 Profiler::~Profiler()
 {
+    g_timer_stop( timer );
+
     GQueue * queue = get_queue();
 
-    g_assert( this == g_queue_peek_tail( queue ) );
+    g_assert( this == g_queue_pop_tail( queue ) );
 
     double elapsed = ( g_timer_elapsed( timer, NULL ) * 1000 );
-
-    g_queue_pop_tail( queue );
 
     if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
     {

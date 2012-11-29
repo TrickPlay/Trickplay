@@ -313,7 +313,6 @@ function bg:slide_in_hangman(on_c,p)
     hangman_kill.timeline.on_completed = function()
         if on_c then on_c(p) end
         sway_tl:start()
-        print("right hurr")
     end
 end
 

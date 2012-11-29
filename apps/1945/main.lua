@@ -509,7 +509,7 @@ local key_events = {
                         lives[i].opacity=255
                     end
                 end
-                print("done done")
+                --print("done done")
             else
                 launch_new_game()
 		--[[
@@ -592,18 +592,18 @@ local key_events = {
         [keys.o] = function()
             
             if type(settings.salvage_list) == "table" and #settings.salvage_list > 0 then
-                print("salvage list is size ",#settings.salvage_list)
+                --print("salvage list is size ",#settings.salvage_list)
                 out_splash__in_hud()
                 local f
                 for _,i in ipairs(settings.salvage_list) do
                     f = _G
                     for j = 1,#i.func do
-                        print(i.func[j])
+                        --print(i.func[j])
                         f = f[ i.func[j] ]
                     end
-                    print("done\n\n")
+                    --print("done\n\n")
                     f(unpack(i.table_params))
-                    print("?")
+                    --print("?")
                 end
                 
                 recurse_and_apply(state,settings.state)
@@ -612,9 +612,9 @@ local key_events = {
                     lives[i].opacity=255
                 end
                 
-                print("done done")
+                --print("done done")
             else
-                print("No salvage list saved, cannot restore an old game")
+                --print("No salvage list saved, cannot restore an old game")
             end
 
         end,
@@ -872,7 +872,7 @@ end
 
 function app:on_closing()
     
-    print(my_plane.dead)
+    --print(my_plane.dead)
     settings.state = {}
     local temp_table = {}
     recurse_and_apply(temp_table, state)

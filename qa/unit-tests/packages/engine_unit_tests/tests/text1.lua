@@ -14,7 +14,7 @@ Description:   Verify use_markup returns correct value
 local myText_markup = Text ()
 myText_markup.font = "DejaVu Sans 38px"
 myText_markup.color = "FFFFFFAA"
-textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
+textString = "<span foreground=\"blue\" size=\"x-large\">Trickplay</span> rizzocks the <i>hizzouse</i>!" 
 myText_markup.markup = string.format( "%s" , textString ) 
 test_group:add(myText_markup)
 

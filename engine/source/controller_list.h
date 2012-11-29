@@ -26,9 +26,9 @@ public:
     	return id;
     }
 
-    unsigned int get_capabilities() const;
+    unsigned long long get_capabilities() const;
 
-    inline bool has_cap( int cap ) const
+    inline bool has_cap( unsigned long long cap ) const
     {
         return spec.capabilities & cap;
     }
@@ -51,6 +51,12 @@ public:
     void key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
 
     void accelerometer( double x, double y, double z , unsigned long int modifiers );
+
+    void gyroscope( double x, double y, double z , unsigned long int modifiers );
+
+    void magnetometer( double x, double y, double z , unsigned long int modifiers );
+
+    void attitude( double roll, double pitch, double yaw , unsigned long int modifiers );
 
     void pointer_move( int x, int y , unsigned long int modifiers );
 
@@ -77,12 +83,22 @@ public:
     void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
 
     void cancel_image ( void );
-    
+
     void cancel_audio_clip ( void );
 
     void advanced_ui_ready( void );
 
     void advanced_ui_event( const char * json );
+
+    void streaming_video_connected( const char * address );
+
+    void streaming_video_failed( const char * address, const char * reason );
+
+    void streaming_video_dropped( const char * address, const char * reason );
+
+    void streaming_video_ended( const char * address, const char * who );
+
+    void streaming_video_status( const char * status, const char * arg );
 
     //.........................................................................
 
@@ -94,6 +110,9 @@ public:
         virtual bool key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
         virtual bool key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
         virtual void accelerometer( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void gyroscope( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void magnetometer( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void attitude( double roll, double pitch, double yaw , unsigned long int modifiers ) = 0;
         virtual bool pointer_move( int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_down( int button , int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_up( int button , int x, int y , unsigned long int modifiers ) = 0;
@@ -110,6 +129,11 @@ public:
         virtual void cancel_audio_clip( void ) = 0;
         virtual void advanced_ui_ready( void ) = 0;
         virtual void advanced_ui_event( const char * json ) = 0;
+        virtual void streaming_video_connected( const char * address ) = 0;
+        virtual void streaming_video_failed( const char * address, const char * reason ) = 0;
+        virtual void streaming_video_dropped( const char * address, const char * reason ) = 0;
+        virtual void streaming_video_ended( const char * address, const char * who ) = 0;
+        virtual void streaming_video_status( const char * status, const char * arg ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -120,13 +144,25 @@ public:
     // Things you can tell a controller to do
 
     enum UIBackgroundMode {CENTER, STRETCH, TILE};
-    enum AccelerometerFilter {NONE, LOW, HIGH};
+    enum MotionFilter {NONE, LOW, HIGH};
 
     bool reset();
 
-    bool start_accelerometer( AccelerometerFilter filter, double interval );
+    bool start_accelerometer( MotionFilter filter, double interval );
 
     bool stop_accelerometer();
+
+    bool start_gyroscope( double interval );
+
+    bool stop_gyroscope();
+
+    bool start_magnetometer( double interval );
+
+    bool stop_magnetometer();
+
+    bool start_attitude( double interval );
+
+    bool stop_attitude();
 
     bool start_pointer();
 
@@ -172,9 +208,30 @@ public:
 
     bool hide_virtual_remote();
 
+    bool streaming_video_start_call( const String & address );
+
+    bool streaming_video_end_call( const String & address );
+
+    bool streaming_video_send_status();
+
     inline bool wants_accelerometer_events() const
     {
         return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );
+    }
+
+    inline bool wants_gyroscope_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_gyroscope_started );
+    }
+
+    inline bool wants_magnetometer_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_magnetometer_started );
+    }
+
+    inline bool wants_attitude_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_attitude_started );
     }
 
     inline bool wants_pointer_events() const
@@ -224,6 +281,9 @@ private:
     KeyMap              key_map;
 
     gint                ts_accelerometer_started;
+    gint                ts_gyroscope_started;
+    gint                ts_magnetometer_started;
+    gint                ts_attitude_started;
     gint                ts_pointer_started;
     gint                ts_touch_started;
 
@@ -276,6 +336,9 @@ private:
     friend void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
     friend void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
     friend void tp_controller_accelerometer( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers );
     friend void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers );
@@ -292,6 +355,11 @@ private:
     friend void tp_controller_advanced_ui_ready( TPController * controller );
     friend void tp_controller_advanced_ui_event( TPController * controller , const char * json );
     friend void tp_controller_scroll( TPController * controller , int direction , unsigned long int modifiers );
+    friend void tp_controller_streaming_video_connected( TPController * controller, const char * address );
+    friend void tp_controller_streaming_video_failed( TPController * controller, const char * address, const char * reason );
+    friend void tp_controller_streaming_video_dropped( TPController * controller, const char * address, const char * reason );
+    friend void tp_controller_streaming_video_ended( TPController * controller, const char * address, const char * who );
+    friend void tp_controller_streaming_video_status( TPController * controller, const char * status, const char * arg );
 
     //.........................................................................
 
@@ -299,7 +367,11 @@ private:
 
     //.........................................................................
 
+#ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
+#else
+    GRecMutex mutex;
+#endif
 
     //.........................................................................
 

@@ -61,16 +61,16 @@ local yo = - hopper.h / 2
 local function create_edges( points )
 
     for i = 1 , # points - 1 do
-    
+
         local p1 = { unpack( points[ i ] ) }
         local p2 = { unpack( points[ i + 1 ] ) }
-        
+
         p1[ 1 ] = p1[ 1 ] + xo
         p1[ 2 ] = p1[ 2 ] + yo
-        
+
         p2[ 1 ] = p2[ 1 ] + xo
         p2[ 2 ] = p2[ 2 ] + yo
-        
+
         hopper:add_fixture
         {
             shape = physics:Edge( p1 , p2 ) ,
@@ -135,37 +135,37 @@ local balls_in_fan = {}
 function fan:on_begin_contact( contact )
 
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
         balls_in_fan[ ball.handle ] = ball
     end
-    
+
 end
 
 function fan:on_end_contact( contact )
 
     local handle = contact.other_body[ self.handle ]
-    
+
     balls_in_fan[ handle ] = nil
-    
+
 end
 
 local function fan_blow( seconds )
 
     if fan_on then
-    
+
         if fan_speed < 1 then
-        
+
             fan_speed = math.min( fan_speed + 0.25 * seconds , 1 )
-            
+
         end
 
         for _ , ball in pairs( balls_in_fan ) do
-        
+
             ball:apply_force( { 0 , - G * FAN_FORCE * ball.mass * fan_speed } , { ball.x , ball.y } )
-            
+
         end
-        
+
     end
 
 end
@@ -203,36 +203,36 @@ local sucker = physics:Body(
 local balls_in_sucker = {}
 
 function sucker:on_begin_contact( contact )
-    
+
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
-    
+
         balls_in_sucker[ ball.handle ] = ball
-        
+
     end
-    
+
 end
 
 function sucker:on_end_contact( contact )
-    local handle = contact.other_body[ self.handle ]    
-    balls_in_sucker[ handle ] = nil    
+    local handle = contact.other_body[ self.handle ]
+    balls_in_sucker[ handle ] = nil
 end
 
 local function sucker_suck()
 
     for _ , ball in pairs( balls_in_sucker ) do
-    
+
         local force = - G * SUCKER_FORCE * ball.mass
-        
+
         if not sucker_on then
             force = - force
         end
-    
+
         ball:apply_force( { 0 , force  } , ball.position )
-        
+
     end
-        
+
 end
 
 table.insert( step_functions , sucker_suck )
@@ -308,17 +308,17 @@ screen:add( pusher_floor )
 local push_it = false
 
 function pusher_sensor:on_begin_contact( contact )
-    
+
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball and sucker_on then
-    
+
         pusher:apply_linear_impulse( { 4000 , 0 } , pusher.position )
 
         sucker_on = false
 
-        push_it = true        
-        
+        push_it = true
+
     end
 
 end
@@ -326,33 +326,33 @@ end
 local pusher_start_x = pusher.x
 
 local function pusher_push( seconds )
-    
+
     if not push_it then
         return
     end
-    
+
     local vx , vy = unpack( pusher.linear_velocity )
-    
+
     if vx > 0 then
-    
+
         if pusher.x >= pusher_start_x + PUSHER_DISTANCE then
 
             pusher.x = pusher_start_x + PUSHER_DISTANCE
-            
+
             pusher.linear_velocity = { 0 , 0 }
-            
+
             push_it = false
-        
+
         end
-    
+
     elseif vx < 0 then
-    
+
         if pusher.x <= pusher_start_x then
-        
+
             pusher.linear_velocity = { 0 , 0 }
-            
+
             pusher.x = pusher_start_x
---[[            
+--[[
             local t = Timer( 4000 )
             function t.on_timer()
                 sucker_on = true
@@ -361,13 +361,13 @@ local function pusher_push( seconds )
             t:start()
 ]]
             sucker_on = true
-            
+
             push_it = false
-            
+
         end
-    
+
     end
-    
+
 end
 
 table.insert( step_functions , pusher_push )
@@ -417,7 +417,7 @@ local function hold_gate()
         return
     end
     gate:apply_force( { -400 , 0 } , gate.position )
-    
+
 end
 
 table.insert( step_functions , hold_gate )
@@ -440,16 +440,16 @@ local BALL_POSITION = { 390 * 2 , 204 * 2 }
 local function make_ball( i )
 
     local text =
-    
+
         Text
         {
             text = tostring( i ),
-            position = { 10 , 10 },
+            position = { 14 , 10 },
             color = "000000D0",
             font = "DejaVu Mono bold 70px",
         }
-    
-    local result = 
+
+    local result =
 
         Group
         {
@@ -468,9 +468,9 @@ local function make_ball( i )
                 number = i
             }
         }
-        
+
     if i == 6 or i == 9 then
-    
+
         result:add(
             Rectangle
             {
@@ -480,11 +480,11 @@ local function make_ball( i )
                 size = { 18 , 6 }
             }
         )
-    
+
     end
-    
+
     return result
-end        
+end
 
 
 
@@ -494,8 +494,8 @@ for i = 1 , BALL_COUNT do
 
         make_ball( i ):set
         {
-            position = BALL_POSITION,
-        
+            position = { BALL_POSITION[1]+i, BALL_POSITION[2]+i },
+
         }
         ,
         {
@@ -504,16 +504,16 @@ for i = 1 , BALL_COUNT do
             friction = 0.2 ,
             bounce = 0.7,
             filter = { category = 1 , mask = { 0 , 1 } },
-            
+
         }
     )
 
     screen:add( ball )
-    
+
     ball:show()
 
     balls[ ball.handle ] = ball
-    
+
 end
 
 -------------------------------------------------------------------------------
@@ -536,7 +536,7 @@ local elevator_start_x = false
 for i = 1 , ELEVATOR_COUNT do
 
     local elevator = physics:Body(
-        
+
         Clone
         {
             source = elevator_image,
@@ -551,26 +551,26 @@ for i = 1 , ELEVATOR_COUNT do
             filter = { group = -1 }
         }
     )
-    
+
     screen:add( elevator )
-    
+
     elevator:hide()
-    
+
     elevators[ elevator ] = true
-    
+
     if not elevator_start_x then
-    
+
         elevator_start_x = elevator.x
-        
+
     end
-    
+
 end
 
 local ELEVATOR_SENSOR_POSITION = { 366 , 1000 }
 local ELEVATOR_SENSOR_SIZE     = { 10 , 20 }
 
 local elevator_sensor = physics:Body(
-    
+
     Rectangle
     {
         color = SENSOR_COLOR,
@@ -591,7 +591,7 @@ elevator_sensor_time:stop()
 
 function elevator_sensor:on_begin_contact( contact )
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
         elevator_sensor_time:start()
     end
@@ -599,7 +599,7 @@ end
 
 function elevator_sensor:on_end_contact( contact )
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
         elevator_sensor_time:stop()
     end
@@ -610,73 +610,73 @@ local elevators_on = false
 local function elevate()
 
     -- If the sensor has been active long enough, deploy one elevator
-    
+
     if elevators_on then
-    
+
         if elevator_sensor_time.elapsed_seconds >= ELEVATOR_INTERVAL then
-        
+
             for elevator , _ in pairs( elevators ) do
-            
+
                 if not elevator.is_visible then
-                
+
                     elevator:show()
-                    
+
                     elevator_sensor_time:start()
-                    
+
                     break
-                    
+
                 end
-                
+
             end
-        
+
         end
-        
+
     end
 
     -- Now, push all the visible elevators up. If they reach the top, they are
     -- hidden until they are re-deployed. Near the top of the tube, they tilt
     -- to push the ball out.
-    
+
     for elevator , _ in pairs( elevators ) do
-    
+
         if elevator.is_visible then
-    
+
             if elevator.y < 60 then
-                            
+
                 elevator:hide()
-                
+
                 elevator.x = elevator_start_x
-                
+
                 elevator.y = ELEVATOR_POSITION[ 2 ]
-                
+
                 elevator.linear_velocity = { 0 , 0 }
-                
+
                 elevator.angle = 0
-                
+
             elseif elevator.y < 142 then
-            
+
                 elevator.angle = 20
-                
+
             end
-        
+
             if elevator.is_visible then
-            
+
                 elevator.x = elevator_start_x
-                
+
                 local vx , vy = unpack( elevator.linear_velocity )
-                
+
                 if vy > - G * 0.4 then
-            
+
                     elevator:apply_force( { 0 , - G * 2.05 * elevator.mass } , elevator.position )
-                
+
                 end
-                
+
             end
         end
-        
+
     end
-        
-end    
+
+end
 
 table.insert( step_functions , elevate )
 
@@ -735,44 +735,44 @@ local chosen_group = Group{ position = { 120 , 140 } }
 function out_sensor:on_begin_contact( contact )
 
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
-    
+
         balls_out = balls_out + 1
-    
+
         local count = # chosen_group.children
-    
+
         if count == 6 then
-        
+
             chosen_group:clear()
-            
+
             count = 0
-            
+
         end
-        
+
         chosen_group:add(
-        
+
             make_ball( ball.extra.number ):set
             {
                 x = 0,
                 y = ( ball.h + 20 ) * count
             }
         )
-        
+
         if balls_out < 6 then
-        
+
             pusher:apply_linear_impulse( { -1000 , 0 } , pusher.position )
-        
+
             push_it = true
-            
+
         else
-        
+
             elevators_on = true
-            
+
             fan_on = false
-                        
+
         end
-    
+
     end
 
 end
@@ -783,27 +783,27 @@ screen:add( chosen_group )
 function in_sensor:on_begin_contact( contact )
 
     local ball = balls[ contact.other_body[ self.handle ] ]
-    
+
     if ball then
-        
+
         local vx , vy = unpack( ball.linear_velocity )
-        
+
         if vy < 0 then
-            
+
             ball:apply_linear_impulse( { 0 , 10 } , ball.position )
-            
+
         else
-        
+
             balls_out = balls_out - 1
-            
+
             if balls_out == 0 then
-            
+
                 pusher:apply_linear_impulse( { -1000 , 0 } , pusher.position )
-            
+
                 push_it = true
-                
+
                 elevators_on = false
-                
+
                 local t = Timer( 3000 )
                 function t.on_timer()
                     fan_speed = 0
@@ -811,12 +811,12 @@ function in_sensor:on_begin_contact( contact )
                     return false
                 end
                 t:start()
-                
-            
+
+
             end
-        
+
         end
-    
+
     end
 
 end
@@ -843,17 +843,17 @@ function idle:on_idle( seconds )
 
     -- Step physics multiple times per redraw frame to keep the physics at ~60 steps per second
     for iteration = 1, iterations do
-        physics:step(step)
-        
+        physics:step(step, 30, 30)
+
         for i = 1 , # step_functions do
-        
+
             step_functions[ i ]( step )
-            
+
         end
     end
-    
+
    --physics:draw_debug()
-    
+
 end
 
 local BACK_KEY = keys.BACK
@@ -875,7 +875,16 @@ function controllers.on_controller_connected(controllers,controller)
     -- Track this controller's fingers
     finger_places[controller] = {}
 
-    if(controller.has_accelerometer) then
+    if(controller.has_fullmotion) then
+        print("Using full motion")
+        function controller.on_attitude(controller, roll, pitch, yaw)
+			screen.y_rotation = { roll*180/math.pi, 0, 0 }
+			screen.x_rotation = { -pitch*180/math.pi, 0, 0 }
+--			screen.z_rotation = { -yaw*180/math.pi, 0, 0 }
+        end
+
+        controller:start_attitude(0.01)
+    elseif(controller.has_accelerometer) then
     	function controller.on_accelerometer(controller, x, y, z)
     		--[[
 				Decompose rotation into 2 rotations, about y-axis onto x-z plane, then about x-axis onto negative y-axis

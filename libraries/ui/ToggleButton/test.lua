@@ -1,16 +1,5 @@
 
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("Button/Button.lua")                 end
-if not TOGGLEBUTTON      then dofile("ToggleButton/ToggleButton.lua")     end
-
-
-
+--[[
 local button_test_group = Group{}
 
 screen:add( button_test_group )
@@ -116,15 +105,16 @@ for i,test in ipairs(toggle_tests) do
     if not test() then print("toggle_test "..i.." failed") end
     
 end
+--]]
 --[[
 for i,test in ipairs(button_tests) do
     
     if not test() then print("button_test "..i.." failed") end
     
 end
---]]
 
 button_test_group:unparent()
+--]]
 
 
 
@@ -150,28 +140,39 @@ local style = {
 
 
 screen:show()
-
-b0 = ToggleButton()
-
+print("ssssssssssssssssssssssssssssssssss")
+---[[
+b0 = WL.ToggleButton()
 b0.x = 400
-b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text"}
-b2 = ToggleButton{x=400,y=200,style = style,selected = true}
 
-b3 = ToggleButton{
+b1 = WL.ToggleButton{x=400,y=100,style = style,selected = false, label = "text",reactive=true}
+
+b2 = WL.ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,reactive=true}
+
+--]]
+b3 = WL.ToggleButton{
     name = "B2",
     x = 600,y = 0,
+    empty_icon  = Image{src="Button/strike-off.png"},
+    filled_icon = Image{src="Button/strike-on.png",x=-8,y=-8},
     images = {
-        default = Group{ children={Image{src="Button/button3.png"},Image{src="Button/strike-off.png"}}},
-        focus   = Group{children={Image{src="Button/button-focus.png"},Image{src="Button/strike-off.png"}}},
-        selection = Image{src="Button/strike-on.png",x=-8,y=-8},
+        default = Image{src="Button/button3.png"},
+        focus   = Image{src="Button/button-focus.png"},
     },
+    reactive=true
 }
 
-
+--]]
+print("tttttttttttttttttttttttttttttttttt")
 
 
 
 screen:add(b0,b1,b2,b3)
+
+b0.reactive = true
+b1.reactive = true
+b2.reactive = true
+b3.reactive = true
 
 controllers:start_pointer()
 

@@ -1,5 +1,19 @@
 TYPECHECKING = true
 
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+function expects(type_wanted, received)
+    return type(received) == type_wanted or error(
+        "Expected "..type_wanted..". Received "..type(received)..
+        " with value '"..received.."'",3
+    )
+end
+
+function is_ui_element(obj) 
+    return type(obj) == "userdata" and obj.__types__ and obj.__types__.actor 
+end
+
 function is_table_or_nil(name,input)
     
     return input == nil and {} or
@@ -22,21 +36,21 @@ end
 
 
 
-check_name = function(table,instance,name,generic)
+check_name = function(curr_names,instance,name,generic)
     --print(generic)
     if name == nil then name = generic end
     
-    if table[name] == nil then
+    if curr_names[name] == nil then
         
-        table[name] = instance
+        curr_names[name] = instance
         
     else
         
         local i = 1
         
-        while table[name.." ("..i..")"] ~= nil do    i = i + 1    end
+        while curr_names[name.." ("..i..")"] ~= nil do    i = i + 1    end
         
-        table[name.." ("..i..")"] = instance
+        curr_names[name.." ("..i..")"] = instance
         
         name = name.." ("..i..")"
     end

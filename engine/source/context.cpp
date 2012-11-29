@@ -1,6 +1,10 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <execinfo.h>
+#include <cxxabi.h>
+
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
@@ -29,6 +33,11 @@
 #include "desktop_controller.h"
 #include "ansi_color.h"
 
+#ifdef TP_WITH_GAMESERVICE
+#include "libgameservice.h"
+#include "gameservice_support.h"
+#endif
+
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
 #define TP_DEFAULT_RESOURCES_PATH   "/usr/share/trickplay/resources"
@@ -45,6 +54,7 @@ static char ** g_argv = 0;
 TPContext::TPContext()
     :
     is_running( false ),
+    stage( NULL ),
     sysdb( NULL ),
     controller_server( NULL ),
     controller_lirc( NULL ),
@@ -54,6 +64,9 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
+#ifdef TP_WITH_GAMESERVICE
+    gameservice_support( NULL ),
+#endif
     media_player_constructor( NULL ),
     media_player( NULL ),
     http_trickplay_api_support( NULL ),
@@ -671,7 +684,9 @@ int TPContext::run()
 
     g_info( "INITIALIZING STAGE..." );
 
-    ClutterActor * stage = clutter_stage_get_default();
+    stage = clutter_stage_new();
+
+    g_assert(stage != NULL);
 
     int display_width = get_int( TP_SCREEN_WIDTH );
     int display_height = get_int( TP_SCREEN_HEIGHT );
@@ -701,7 +716,11 @@ int TPContext::run()
     color.blue = 0;
     color.alpha = 0;
 
+#ifdef CLUTTER_VERSION_1_10
+	clutter_actor_set_background_color( stage, &color );
+#else
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+#endif
 
     clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , true );
 
@@ -738,6 +757,15 @@ int TPContext::run()
         g_info( "MEDIA PLAYER IS DISABLED..." );
     }
 
+    //.........................................................................
+    // connect to gameservice server
+#ifdef TP_WITH_GAMESERVICE
+    if ( get_bool( TP_GAMESERVICE_ENABLED ) )
+    {
+		libgameservice::setGameServiceXmppDomain(get(TP_GAMESERVICE_DOMAIN));
+		gameservice_support = new GameServiceSupport(this);
+    }
+#endif
     //.........................................................................
 
     load_background();
@@ -821,9 +849,6 @@ int TPContext::run()
 
     }
 
-	g_debug("RELEASING CLUTTER LOCK...");
-	clutter_threads_leave ();
-
     //.....................................................................
 
     notify( this , TP_NOTIFICATION_EXITING );
@@ -871,8 +896,11 @@ int TPContext::run()
     //.....................................................................
     // Clean up the stage
 
-    clutter_group_remove_all( CLUTTER_GROUP( clutter_stage_get_default() ) );
-
+#ifdef CLUTTER_VERSION_1_10
+	clutter_actor_remove_all_children( stage );
+#else
+    clutter_group_remove_all( CLUTTER_GROUP( stage ) );
+#endif
     //.....................................................................
     // Shutdown the app
 
@@ -954,6 +982,14 @@ int TPContext::run()
 
     //.........................................................................
     // Not running any more
+
+
+	g_debug("DESTROYING STAGE...");
+	clutter_actor_destroy( stage );
+
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     is_running = false;
 
@@ -1588,7 +1624,7 @@ void TPContext::load_external_configuration()
 
     // Now open the Lua state
 
-    lua_State * L = lua_open();
+    lua_State * L = luaL_newstate();
 
     const luaL_Reg lualibs[] =
     {
@@ -1613,9 +1649,8 @@ void TPContext::load_external_configuration()
 
     for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
     {
-        lua_pushcfunction( L, lib->func );
-        lua_pushstring( L, lib->name );
-        lua_call( L, 1, 0 );
+        luaL_requiref(L, lib->name, lib->func, 1);
+        lua_pop(L, 1);  /* remove lib */
     }
 
     //.....................................................................
@@ -1695,7 +1730,7 @@ void TPContext::load_external_configuration()
         TP_FONTS_PATH,
         TP_DOWNLOADS_PATH,
         TP_NETWORK_DEBUG,
-        TP_SSL_VERIFY_PEER,
+        TP_SSL_VERIFYPEER,
         TP_SSL_CA_CERT_FILE,
         TP_LIRC_ENABLED,
         TP_LIRC_UDS,
@@ -1719,6 +1754,10 @@ void TPContext::load_external_configuration()
         TP_APP_ANIMATIONS_ENABLED,
         TP_DEBUGGER_PORT,
         TP_START_DEBUGGER,
+        TP_GAMESERVICE_ENABLED,
+        TP_GAMESERVICE_DOMAIN,
+        TP_GAMESERVICE_HOST,
+        TP_GAMESERVICE_PORT,
 
         NULL
     };
@@ -1905,6 +1944,35 @@ void TPContext::validate_configuration()
 
     set( TP_RESOURCES_PATH , resources_path_s );
 
+    // gameservice configuration variable validation
+    if ( !get( TP_GAMESERVICE_ENABLED ) )
+    {
+        set( TP_GAMESERVICE_ENABLED,  TP_GAMESERVICE_ENABLED_DEFAULT);
+    }
+    g_debug( "USING TP_GAMESERVICE_ENABLED: '%s'", get( TP_GAMESERVICE_ENABLED ) );
+
+    if ( get( TP_GAMESERVICE_ENABLED ) )
+    {
+		if ( !get( TP_GAMESERVICE_DOMAIN ) )
+		{
+			set( TP_GAMESERVICE_DOMAIN,  TP_GAMESERVICE_DOMAIN_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_DOMAIN: '%s'", get( TP_GAMESERVICE_DOMAIN ) );
+
+		if ( !get( TP_GAMESERVICE_HOST ) )
+		{
+			set( TP_GAMESERVICE_HOST,  TP_GAMESERVICE_HOST_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_HOST: '%s'", get( TP_GAMESERVICE_HOST ) );
+
+		if ( !get( TP_GAMESERVICE_PORT, 0 ) )
+		{
+			set( TP_GAMESERVICE_PORT,  TP_GAMESERVICE_PORT_DEFAULT);
+		}
+		g_debug( "USING TP_GAMESERVICE_PORT: '%s'", get( TP_GAMESERVICE_PORT ) );
+    }
+
+
     // Allowed secure objects
 
     const gchar * allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
@@ -1975,15 +2043,19 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     const char * color_start = "";
     const char * color_end = SAFE_ANSI_COLOR_RESET;
 
+	gboolean dump_stack = false;
+
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "ERROR";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
         color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "CRITICAL";
+        dump_stack = true;
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
@@ -2006,12 +2078,91 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
         level = "DEBUG";
     }
 
+#ifndef TP_PRODUCTION
+	if(dump_stack)
+	{
+         void* callstack[128];
+         int i, frames = backtrace(callstack, 128);
+         char** strs = backtrace_symbols(callstack, frames);
+
+         // Skip frames which are the logging functions
+         for (i = 4; i < frames; ++i) {
+			char *begin_name = 0, *end_name = 0, *begin_offset = 0, *end_offset = 0;
+
+#if !defined(CLUTTER_WINDOWING_OSX)
+			// find parentheses and +address offset surrounding the mangled name:
+			// ./module(function+0x15c) [0x8048a6d]
+			for (char *p = strs[i]; *p; ++p)
+			{
+				if (*p == '(')
+					begin_name = p+1;
+				else if (*p == '+')
+				{
+					end_name = p-1;
+					begin_offset = p+1;
+					*p = '\0';
+				}
+				else if (*p == ')' && begin_offset) {
+					end_offset = p-1;
+					*p = '\0';
+					break;
+				}
+			}
+#else
+			// find "+ offset" at end of the line and mangled name just before it
+			// x   module                           0x000000010bec0d1f _function + 751
+			end_offset = strrchr(strs[i], '\0');
+			char *plus = strrchr(strs[i], '+');
+			begin_offset = plus+2;
+			end_name  = plus-1;
+			*end_name = '\0';
+			begin_name = strrchr(strs[i], ' ');
+			begin_name++;
+#endif
+
+			if (begin_name && begin_offset && end_offset
+				&& begin_name < begin_offset)
+			{
+				int status;
+                char* funcname = abi::__cxa_demangle(begin_name,
+                                                NULL, NULL, &status);
+				if (status == 0) {
+					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s+%s\n",
+							 log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C++", color_end, funcname, begin_offset);
+				}
+				else {
+					// demangling failed. Output function name as a C function with
+					// no arguments.
+					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s()+%s\n",
+							log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C", color_end, begin_name, begin_offset);
+				}
+
+                free(funcname);
+			}
+			else
+			{
+				// couldn't parse the line? print the whole line.
+             fprintf(stderr,"[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n", log_domain, g_thread_self(), hour, min, sec, ms, color_start, "STACK", color_end, strs[i]);
+         }
+		}
+         free(strs);
+	 }
+#endif
+
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
                             g_thread_self() ,
                             hour , min , sec , ms ,
                             color_start , level , color_end ,
                             message );
+}
+
+//-----------------------------------------------------------------------------
+
+ClutterActor * TPContext::get_stage() const
+{
+    g_assert( stage );
+    return stage;
 }
 
 //-----------------------------------------------------------------------------
@@ -2052,6 +2203,15 @@ Console * TPContext::get_console() const
 {
     return console;
 }
+
+//-----------------------------------------------------------------------------
+
+#ifdef TP_WITH_GAMESERVICE
+GameServiceSupport * TPContext::get_gameservice() const
+{
+    return gameservice_support;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -2104,6 +2264,13 @@ MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delega
 ControllerList * TPContext::get_controller_list()
 {
     return &controller_list;
+}
+
+//-----------------------------------------------------------------------------
+
+TunerList * TPContext::get_tuner_list()
+{
+    return &tuner_list;
 }
 
 //-----------------------------------------------------------------------------
@@ -2401,8 +2568,6 @@ void TPContext::load_background()
 
 			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
 
-			ClutterActor * stage = clutter_stage_get_default();
-
 	        gfloat width;
 	        gfloat height;
 
@@ -2410,7 +2575,11 @@ void TPContext::load_background()
 
 	        clutter_actor_set_scale( bg , width / iw , height / ih );
 
+#ifdef CLUTTER_VERSION_1_10
+			clutter_actor_add_child( stage, bg );
+#else
 	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
+#endif
 
 	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
 		}
@@ -2465,12 +2634,14 @@ String TPContext::get_control_message( App * app ) const
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
+#ifndef CLUTTER_VERSION_1_10
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
     }
 
 	clutter_threads_init ();
+#endif
 
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
@@ -2644,6 +2815,25 @@ void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayer
 }
 
 //-----------------------------------------------------------------------------
+// Tuners
+//-----------------------------------------------------------------------------
+
+TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, TPChannelChangeCallback cb, void *data )
+{
+	g_assert( context );
+
+	return context->tuner_list.add_tuner( context, name, cb, data );
+}
+
+void tp_context_remove_tuner( TPContext * context, TPTuner * tuner )
+{
+	g_assert( context );
+	g_assert( tuner );
+
+	context->tuner_list.remove_tuner( tuner );
+}
+
+//-----------------------------------------------------------------------------
 // Controllers
 //-----------------------------------------------------------------------------
 
@@ -2676,3 +2866,4 @@ void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, 
 }
 
 //-----------------------------------------------------------------------------
+

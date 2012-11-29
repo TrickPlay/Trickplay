@@ -2,6 +2,7 @@
 local game_hist = Group{name = "Game History", x = 49, y = 756}
 
 local make_frame
+local game_server
 local loaded = false
 
 local function make_flash_text_animation(object,shadow)
@@ -124,9 +125,10 @@ function game_hist:init(t)
     
     if type(t) ~= "table" then error("must pass a table as the parameter",2) end
     
-    make_frame        = t.make_frame        or error( "must pass make_frame",        2 )
-    box_w             = t.box_w             or 208
-    box_h             = t.box_h             or 324
+    make_frame  = t.make_frame  or error( "must pass make_frame",  2 )
+    game_server = t.game_server or error( "must pass game_server", 2 )
+    box_w       = t.box_w       or 208
+    box_h       = t.box_h       or 324
     
     local f = Clone{source = t.img_srcs.game_hist_bg }
     
@@ -135,6 +137,7 @@ function game_hist:init(t)
         color = { 60,204, 72},
         font  = g_font .. " bold 80px",
         alignment = "CENTER",
+        wrap = true,
         w     = t.img_srcs.game_hist_bg.w,
         y     = 12,
         x     = -2,
@@ -145,6 +148,7 @@ function game_hist:init(t)
         color     = "000000",
         font      = wins.font,
         alignment = wins.alignment,
+        wrap = true,
         w         = wins.w,
         x         = wins.x-2,
         y         = wins.y-2,
@@ -154,6 +158,7 @@ function game_hist:init(t)
         text  = "Wins",
         color = "a7a7a7",
         alignment = "CENTER",
+        wrap = true,
         w     = t.img_srcs.game_hist_bg.w,
         font  = g_font .. " Medium 40px",
         y     = wins.y+wins.h-7,
@@ -164,6 +169,7 @@ function game_hist:init(t)
         color = {252,6,6},
         font  = g_font .. " bold 80px",
         alignment = "CENTER",
+        wrap = true,
         w     = t.img_srcs.game_hist_bg.w,
         y     = 140,
         x     = -2,
@@ -174,6 +180,7 @@ function game_hist:init(t)
         color     = "000000",
         font      = losses.font,
         alignment = losses.alignment,
+        wrap = true,
         w         = losses.w,
         x         = losses.x-2,
         y         = losses.y-2,
@@ -184,6 +191,7 @@ function game_hist:init(t)
         color = "a7a7a7",
         font  = g_font .. " Medium 40px",
         alignment = "CENTER",
+        wrap = true,
         w     = t.img_srcs.game_hist_bg.w,
         y     = losses.y+losses.h-12,
     }
@@ -207,6 +215,7 @@ function game_hist:init(t)
             color     = "000000",
             font      = wins_caption.font,
             alignment = wins_caption.alignment,
+            wrap = true,
             w         = wins_caption.w,
             y         = wins_caption.y-2,
             x         = wins_caption.x-2,
@@ -219,6 +228,7 @@ function game_hist:init(t)
             color     = "000000",
             font      = losses_caption.font,
             alignment = losses_caption.alignment,
+            wrap = true,
             w         = losses_caption.w,
             y         = losses_caption.y-2,
             x         = losses_caption.x-2,
@@ -236,6 +246,8 @@ function game_hist:set_wins(score)
     
     wins.anim:start(score)
     
+    game_server:update_game_history(function() print("history updated") end)
+    
 end
 
 function game_hist:set_losses(score)
@@ -244,6 +256,8 @@ function game_hist:set_losses(score)
     if type(score) ~= "number" then error("must pass a number",2) end
     
     losses.anim:start(score)
+    
+    game_server:update_game_history(function() print("history updated") end)
     
 end
 

@@ -10,7 +10,7 @@
 #include "context.h"
 #include "desktop_controller.h"
 
-static int controller_execute_command( TPController * , unsigned int command , void * , void * )
+static int controller_execute_command( TPController * , unsigned int command , void * , void *context )
 {
     switch( command )
     {
@@ -21,11 +21,11 @@ static int controller_execute_command( TPController * , unsigned int command , v
             return 0;
 
         case TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR:
-        	clutter_stage_show_cursor( CLUTTER_STAGE( clutter_stage_get_default() ) );
+        	clutter_stage_show_cursor( CLUTTER_STAGE( ((TPContext *)context)->get_stage() ) );
         	return 0;
 
         case TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR:
-        	clutter_stage_hide_cursor( CLUTTER_STAGE( clutter_stage_get_default() ) );
+        	clutter_stage_hide_cursor( CLUTTER_STAGE( ((TPContext *)context)->get_stage() ) );
         	return 0;
 
         case TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR:
@@ -231,9 +231,9 @@ void install_desktop_controller( TPContext * context )
 
     // This controller won't leak because the controller list will free it
 
-    TPController * keyboard = tp_context_add_controller( context , "Keyboard", & spec , 0 );
+    TPController * keyboard = tp_context_add_controller( context , "Keyboard", & spec , (void *)context );
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     g_signal_connect( stage , "captured-event", ( GCallback ) controller_keys , keyboard );
 }

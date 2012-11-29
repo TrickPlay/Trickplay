@@ -7,7 +7,7 @@ local ground = Rectangle
     position = { 0 , screen.h - 30 }
 }
 
-ground = physics:Body( ground , 
+ground = physics:Body( ground ,
 {
     type = "static",
     density = 1,
@@ -44,7 +44,7 @@ bumper = physics:Body(
             size = { screen.h * 1.2 , screen.h / 4 },
         },
         {
-            type = "static"    
+            type = "static"
         })
 
 bumper.position = { screen.w , screen.h / 2 }
@@ -65,7 +65,7 @@ local pole = Rectangle
 
 screen:add( pole )
 
-pole = physics:Body( pole , 
+pole = physics:Body( pole ,
 {
     density = 1,
     type = "static",
@@ -74,30 +74,28 @@ pole = physics:Body( pole ,
 
 -------------------------------------------------------------------------------
 
-local PADDLE_HEIGHT = POLE_HEIGHT / 2 
+local PADDLE_HEIGHT = POLE_HEIGHT / 2
 
 local paddle = physics:Body(
     Rectangle
     {
         color = "FFFFFF",
-        size = { 30 , PADDLE_HEIGHT }
+        size = { PADDLE_HEIGHT, 30 }
     },
     {
-        density = 0.8,    
+        density = 0.8,
     } )
 
 paddle.position = { pole.x , pole.y - POLE_HEIGHT / 2 }
-paddle.angle = 90
 
-paddle:PrismaticJoint( pole , { 0 , 0 } , { 0 , 1 } ,
-
+pole:PrismaticJoint( paddle, { 0, -1 },
     {
         enable_limit = true,
-        lower_translation = 0 ,
-        upper_translation = POLE_HEIGHT ,
-        enable_motor = false,
-        motor_speed = 1,
-        max_motor_force = 1000
+        upper_translation = 0,
+        lower_translation = -(POLE_HEIGHT / 2),
+        enable_motor = true,
+        motor_speed = 5,
+        max_motor_force = 70
     }
 )
 
@@ -128,7 +126,7 @@ for i = 1 , BLOCK_COUNT do
             shape = physics:Circle( ( globe.w / 2 ) * GLOBE_SCALE ),
             filter = { category = 3 , mask = { 0 , 2 , 3 } }
         })
-    
+
     screen:add( block )
 end
 
@@ -137,14 +135,14 @@ end
 if false then
 
     function idle.on_idle()
-    
+
         physics:step()
         physics:draw_debug( 255 )
-        
+
     end
-    
+
 else
 
     physics:start()
-    
+
 end

@@ -129,7 +129,7 @@ def parse( source ):
 
             j = source.find( "*/" , i )
 
-            for c in token:
+            for c in source[ i : j ]:
                 if c == "\n":
                     line += 1
 
@@ -1142,7 +1142,7 @@ def emit( stuff , f , header ):
             )
 
             f.write(
-                "  luaL_register(L,NULL,meta_methods);\n"
+                "  luaL_setfuncs(L,meta_methods,0);\n"
             )
 
             # If there are no properties, we set the __index metafield to point to
@@ -1186,7 +1186,7 @@ def emit( stuff , f , header ):
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
-                    "  luaL_register(L,NULL,getters);\n"
+                    "  luaL_setfuncs(L,getters,0);\n"
                     "  lua_rawset(L,-3);\n"
                 )
 
@@ -1211,7 +1211,7 @@ def emit( stuff , f , header ):
                 f.write(
                     "    {NULL,NULL}\n"
                     "  };\n"
-                    "  luaL_register(L,NULL,setters);\n"
+                    "  luaL_setfuncs(L,setters,0);\n"
                     "  lua_rawset(L,-3);\n"
                 )
 

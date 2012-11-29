@@ -12,8 +12,8 @@ screen_h = screen.height
 
 
 
-function create_UI() 
-	
+function create_UI()
+
 	-- UI: App Title
 	local app_title_txt = Text
 		{
@@ -138,11 +138,11 @@ function create_UI()
 -- UI: text for box containing steps
 	test_steps_txt = Text
 		{
-			markup = "<span foreground\=\"red\" size\=\"large\"\>To start testing, open Trickplay on an iOS device and connect to QA_Test_TV.<\/span>",
+			markup = "<span foreground=\"red\" size=\"large\">To start testing, open Trickplay on an iOS device and connect to QA_Test_TV.</span>",
 			position = { screen_w - 620, 130 },
 			size = { 500, 420 },
 			font = "DejaVu 30px",
-			wrap = true, 
+			wrap = true,
 			color = "FFFFFF",
 			use_markup = true
 		}
@@ -155,7 +155,7 @@ function create_UI()
 			position = { 545, 130 },
 			size = {500, 475 },
 			font = "DejaVu 30px",
-			wrap = true, 
+			wrap = true,
 			color = "FFFFFF"
 		}
 	test_list:add (test_desc_txt)
@@ -232,22 +232,22 @@ end
 
 function load_test_list ()
 	local loaded_test_list = {}
-	
+
 	local tests_file_string = readfile ("smoke_tests_generic.txt")
-	
+
 	return json:parse(tests_file_string)
-	
+
 end
 
 
 
 function populate_test_fields ()
 	if test_steps ~= nil then test_steps_txt.text = test_steps end
---[[ if test_description ~= nil then 
+--[[ if test_description ~= nil then
 			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\n\nDescription: "..test_description
 	end
 --]]
-	
+
 
 --[[
 
@@ -256,7 +256,7 @@ function populate_test_fields ()
 		if failed then
 			screenshot:hide()
 			no_screenshot_found_msg_txt:show()
-		else      
+		else
 			screenshot.position = { 675, 470 }
 			screenshot.size = { 320, 480 }
 			no_screenshot_found_msg_txt:hide()
@@ -268,12 +268,12 @@ function populate_test_fields ()
 
 	screenshot_name = string.gsub(all_tests[current_focus]["name"], "lua", "PNG")
 
-	screenshot.async = true        
+	screenshot.async = true
 	screenshot.src = "baseline_pics/"..screenshot_name
 	screenshot.on_loaded = on_loadedHandler
 	if test_steps ~= nil then test_steps_txt.text = test_steps end
 	if test_verify ~= nil then test_verify_txt.text = test_verify end
-	if test_description ~= nil then 
+	if test_description ~= nil then
 			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\n\nDescription: "..test_description
 	end
 
@@ -311,7 +311,7 @@ end
 
 function controllers:on_controller_connected(controller)
     print("CONNECTED", controller.name)
-	test_steps_txt.markup = "<span foreground\=\"green\" size\=\"large\"\>Connected...\nScroll through the tests in the Tests Section and hit enter to run a specific test.<\/span>"
+	test_steps_txt.markup = "<span foreground=\"green\" size=\"large\">Connected...\nScroll through the tests in the Tests Section and hit enter to run a specific test.</span>"
 
     -- Set up disconnection routine
     function controller:on_disconnected()
@@ -351,7 +351,7 @@ function controllers:on_controller_connected(controller)
 			elseif key == keys.Left then
 				controller:stop_touches()
 			end
-			
+
 	end
 
 
@@ -368,11 +368,11 @@ end
 
 
 --main --
-create_UI() 
+create_UI()
 all_tests = load_test_list()
 screen:add(test_list)
 populate_test_list()
-populate_test_fields ()	
+populate_test_fields ()
 focus_manager(current_focus)
 move_focus (nil, 1)
 screen:add(screenshot)

@@ -1,6 +1,7 @@
 module clutter_screen;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "context.h"
 #include "clutter_util.h"
@@ -10,16 +11,16 @@ module clutter_screen;
 ]]
 
 /*
-    Global: screen 
-    
+    Global: screen
+
     The screen variable is a global variable created automatically by the TrickPlay Engine. The screen variable is available to every application at any time during its execution.
-    
+
     In addition to the properties and functions described on this page, the screen variable also supports all the properties and functions defined in the <UIElement> and <Container> interfaces.
-    
+
     As its name suggests, the screen variable represents an application's display screen. The screen has a fixed size of 1920 pixels (width) x 1080 pixels (height). This fixed size is automatically scaled to fit the actual display dimensions. A program can retrieve the actual display dimensions by accessing the screen variable's <display_size> property.
-    
+
     Upon application start-up, the screen is not visible. This enables an application to completely organize and arrange the desired display prior to showing it. To place a user interface element on the display, the element should be added to the screen variable. After the screen has been composed and is ready to be displayed, it can be shown by calling the <show> function.
-    
+
     The order in which elements are added to the screen defines the screen's Z-order, or the order in which elements are in front of and behind each other. An element added to the screen is appended to the end of the Z-order; that is, it is placed behind all previously-added elements. The screen's Z-order can be modified by calling the <Container.raise_child> and <Container.lower_child> functions, or the <UIElement.raise>, <UIElement.lower>, <UIElement.raise_to_top>, and <UIElement.lower_to_bottom> functions.
 
 */
@@ -27,60 +28,60 @@ module clutter_screen;
 global screen [[ClutterActor*]] actor , container
 {
     screen()
-	[[
-		// Screen is a global and we don't want its reference toggling all the
-		// time, so we take an extra one and hold on to it.
-		
-		self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid() );		
-	    self=lb_construct_gobject( ClutterActor , g_object_ref( self ) );
-	    
-	    ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
-	]];
-    
+    [[
+        // Screen is a global and we don't want its reference toggling all the
+        // time, so we take an extra one and hold on to it.
+
+        self=App::get(L)->get_screen();
+        self=lb_construct_gobject( ClutterActor , g_object_ref( self ) );
+
+        ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
+    ]];
+
     ~screen()
-	[[
-	    Toast::hide(App::get(L)->get_context());
-		g_object_unref( self );
-	]];
+    [[
+        Toast::hide(App::get(L)->get_context());
+        g_object_unref( self );
+    ]];
 
-	/*
-		Property: display_size
-		
-		The display_size property is a table of integers specifying the screen's actual width and height, respectively.
-		
-		*Table Format:* { width, height }
-		
-		The screen variable has a fixed size of 1920 x 1080 pixels. These values are automatically scaled to match the actual screen dimensions.
-		
-		*Code Example:* Output screen dimension information
-		
-		(code)
-		print( "Screen: Width = ", screen.width, ", Height = ", screen.height )
-		print( "Screen: Actual Width = ", screen.display_size[ 1 ], ", Actual Height = ", screen.display_size[ 2 ] )
-		if( screen.is_scaled ) then
-			print( "Screen is scaled. Scaling factors: X = ", screen.scale[ 1 ], ", Y = ", screen.scale[ 2 ] )
-		else
-			print( "Screen is not scaled" )
-		end
-		(end)
+    /*
+        Property: display_size
 
-		When executed on a sample machine, the following output resulted. Output will vary depending upon the underlying system hardware.
-		
-		(code)
-			Screen: Width =  1920 , Height =  1080
-			Screen: Actual Width =  960 , Actual Height =  540
-			Screen is scaled. Scaling factors: X =  0.5 , Y =  0.5
-		(end)
-		
-	*/	
-	
+        The display_size property is a table of integers specifying the screen's actual width and height, respectively.
+
+        *Table Format:* { width, height }
+
+        The screen variable has a fixed size of 1920 x 1080 pixels. These values are automatically scaled to match the actual screen dimensions.
+
+        *Code Example:* Output screen dimension information
+
+        (code)
+        print( "Screen: Width = ", screen.width, ", Height = ", screen.height )
+        print( "Screen: Actual Width = ", screen.display_size[ 1 ], ", Actual Height = ", screen.display_size[ 2 ] )
+        if( screen.is_scaled ) then
+            print( "Screen is scaled. Scaling factors: X = ", screen.scale[ 1 ], ", Y = ", screen.scale[ 2 ] )
+        else
+            print( "Screen is not scaled" )
+        end
+        (end)
+
+        When executed on a sample machine, the following output resulted. Output will vary depending upon the underlying system hardware.
+
+        (code)
+            Screen: Width =  1920 , Height =  1080
+            Screen: Actual Width =  960 , Actual Height =  540
+            Screen is scaled. Scaling factors: X =  0.5 , Y =  0.5
+        (end)
+
+    */
+
     readonly table display_size
         [[
 
             gfloat w;
             gfloat h;
 
-            clutter_actor_get_size( clutter_stage_get_default(), &w, &h );
+            clutter_actor_get_size( App::get(L)->get_context()->get_stage(), &w, &h );
 
             lua_newtable( L );
             lua_pushnumber( L, w );
@@ -92,153 +93,165 @@ global screen [[ClutterActor*]] actor , container
     #..........................................................................
     # We have to override these from regular actors, so that app developers
     # cannot reach outside their screen
-    
+
     /*
-    	Function: show
-    	
-    	The show() function displays all the non-hidden user interface elements currently on the screen.
-    	
-    	When an application begins, the display screen is not shown. This enables the screen to be fully constructed by adding user interface elements to it prior to being displayed.
-    	
-    	*Return Value:* None
-    	
-		*Code Example:* Add some user interface elements to the screen and then display the screen
-		
-		(code)
-		-- Add some user interface elements to the screen
-		-- Assume these elements have been appropriately constructed and initialized
-		screen:add( buttonOne, buttonTwo, checkBoxOne )
-		
-		-- Show the screen
-		screen:show()
-		(end)
-		
-		*See Also:* the <show_all> function
+        Function: show
+
+        The show() function displays all the non-hidden user interface elements currently on the screen.
+
+        When an application begins, the display screen is not shown. This enables the screen to be fully constructed by adding user interface elements to it prior to being displayed.
+
+        *Return Value:* None
+
+        *Code Example:* Add some user interface elements to the screen and then display the screen
+
+        (code)
+        -- Add some user interface elements to the screen
+        -- Assume these elements have been appropriately constructed and initialized
+        screen:add( buttonOne, buttonTwo, checkBoxOne )
+
+        -- Show the screen
+        screen:show()
+        (end)
+
+        *See Also:* the <show_all> function
     */
-    
+
     show()
         [[
-	    	clutter_actor_show(self);
-	    	// Show the stage as well
-	    	clutter_actor_show(clutter_stage_get_default());
-		]];
-        
+            clutter_actor_show(self);
+            // Show the stage as well
+            clutter_actor_show(App::get(L)->get_context()->get_stage());
+        ]];
+
     /*
-    	Function: show_all
-    	
-    	The show_all() function displays all the user interface elements, hidden, as well as non-hidden, currently on the screen.
-    	
-    	*Return Value:* None
-    	
-    	*See Also:* the <show> function
-   	*/
-   	
+        Function: show_all
+
+        The show_all() function displays all the user interface elements, hidden, as well as non-hidden, currently on the screen.
+
+        *Return Value:* None
+
+        *See Also:* the <show> function
+       */
+
     show_all()
         [[
-	    	clutter_actor_show_all(self);
-	    	// Show the stage as well
-	    	clutter_actor_show(clutter_stage_get_default());
-		]];
-	
-	# I don't think parent and unparent need to be documented here. They are
-	# documented sufficiently in UIElement.
-	/*
-		# Property: parent
-		
-		This property always returns nil, because the screen's parent is private to
-		TrickPlay.
-	*/
-	
-    readonly UIElement parent
-		[[
-		    lua_pushnil(L);
-		]];
+#ifndef CLUTTER_VERSION_1_10
+            clutter_actor_show_all(self);
+#else
+            clutter_actor_show(self);
+#endif
+            // Show the stage as well
+            clutter_actor_show(App::get(L)->get_context()->get_stage());
+        ]];
 
-	/*
-		# Function: unparent
-		
-		Calling unparent on the screen has no effect, because the screen's parent
-		is private to TrickPlay.
-	*/
-	
+    # I don't think parent and unparent need to be documented here. They are
+    # documented sufficiently in UIElement.
+    /*
+        # Property: parent
+
+        This property always returns nil, because the screen's parent is private to
+        TrickPlay.
+    */
+
+    readonly UIElement parent
+        [[
+            lua_pushnil(L);
+        ]];
+
+    /*
+        # Function: unparent
+
+        Calling unparent on the screen has no effect, because the screen's parent
+        is private to TrickPlay.
+    */
+
     unparent()
-		[[
-		    // Cannot let the app developer remove his screen from the stage,
-		    // because he would not have a way to put it back
-		]];
-	
-    #..........................................................................	
+        [[
+            // Cannot let the app developer remove his screen from the stage,
+            // because he would not have a way to put it back
+        ]];
+
+    #..........................................................................
     # These are stage properties
-    
+
 
     # TODO
     # This can potentionally let an app get an actor outside its group, so I'll
     # have to rework it.
-    
+
     /*
     udata key_focus
-	[[
-	    wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(clutter_stage_get_default())));
-	]]
-	[[
-	    ClutterActor *k=user_data_to_actor(L,2);
-	    if (k)
-	    {
-		clutter_stage_set_key_focus(CLUTTER_STAGE(clutter_stage_get_default()),k);
-	    }
-	]];
-    
-    
+    [[
+        wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(App::get(L)->get_context()->get_stage())));
+    ]]
+    [[
+        ClutterActor *k=user_data_to_actor(L,2);
+        if (k)
+        {
+        clutter_stage_set_key_focus(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),k);
+        }
+    ]];
+
+
     # This doesn't seem to work
-    
+
     udata get_object_at( double x , double y )
-	[[
-	    wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(clutter_stage_get_default()),CLUTTER_PICK_ALL,x,y));
-	]];
-    */		    
-    
-	
+    [[
+        wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),CLUTTER_PICK_ALL,x,y));
+    ]];
+    */
+
+
 /*
     // App developers cannot control the color of the stage - and their new 'screen'
     // doesn't have a color, since it is a group.
-    
+
     table color
         [[
             ClutterColor color;
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_get_background_color( self, &color );
+#else
             clutter_stage_get_color(CLUTTER_STAGE(self),&color);
+#endif
             push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             to_clutter_color(L,2,&color);
-            clutter_stage_set_color(CLUTTER_STAGE(self),&color);            
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_background_color( self, &color );
+#else
+            clutter_stage_set_color(CLUTTER_STAGE(self),&color);
+#endif
         ]];
-*/	
+*/
     table perspective
-	[[
-	    ClutterPerspective p;
-	    clutter_stage_get_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
-	    lua_newtable(L);
-	    lua_pushnumber(L,p.fovy);
-	    lua_rawseti(L,-2,1);
-	    lua_pushnumber(L,p.aspect);
-	    lua_rawseti(L,-2,2);
-	    lua_pushnumber(L,p.z_near);
-	    lua_rawseti(L,-2,3);
-	    lua_pushnumber(L,p.z_far);
-	    lua_rawseti(L,-2,4);
-	]]
-	[[
-	    luaL_checktype(L,2,LUA_TTABLE);
+    [[
+        ClutterPerspective p;
+        clutter_stage_get_perspective(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),&p);
+        lua_newtable(L);
+        lua_pushnumber(L,p.fovy);
+        lua_rawseti(L,-2,1);
+        lua_pushnumber(L,p.aspect);
+        lua_rawseti(L,-2,2);
+        lua_pushnumber(L,p.z_near);
+        lua_rawseti(L,-2,3);
+        lua_pushnumber(L,p.z_far);
+        lua_rawseti(L,-2,4);
+    ]]
+    [[
+        luaL_checktype(L,2,LUA_TTABLE);
         lua_rawgeti(L,2,1);
         lua_rawgeti(L,2,2);
         lua_rawgeti(L,2,3);
         lua_rawgeti(L,2,4);
-	    ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
-		lua_tonumber(L,-2),lua_tonumber(L,-1)};
-        clutter_stage_set_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
+        ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
+        lua_tonumber(L,-2),lua_tonumber(L,-1)};
+        clutter_stage_set_perspective(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),&p);
         lua_pop(L,4);
-	]];	
+    ]];
 
 
     bool toast( string title , string prompt , Bitmap bitmap = 0 )
@@ -248,14 +261,37 @@ global screen [[ClutterActor*]] actor , container
             result = Toast::show( L , title , prompt , image );
         ]];
 
-    callback on_toast;
-    
+    function on_toast
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_toast" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_toast" , L );
+        ]];
+
+    int add_ontoast_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_toast" , L );
+        ]];
+
+    remove_ontoast_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_toast" , L );
+        ]];
+
     /*
         This is here to hide UIElement's on_parent_changed. We don't want anyone to
         be able to access the screen's parent...ever. So, we install a callback that
         does nothing.
     */
-    
-    callback on_parent_changed;
-}
 
+    function on_parent_changed
+        [[]]
+        [[]];
+
+    int add_onparentchanged_listener( function f )
+        [[ result = 0; ]];
+
+    remove_onparentchanged_listener( int ref )
+        [[]];
+}

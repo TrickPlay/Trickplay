@@ -70,7 +70,7 @@ do
 	
 	
 	
-	Splash:add(backing,title,start,h_score,help,quit,scrim)--,arrow)
+	Splash:add(title,start,h_score,help,quit,scrim)--,arrow)
 	
 	
 	

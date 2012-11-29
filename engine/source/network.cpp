@@ -254,8 +254,15 @@ public:
         :
         new_session( true ),
         file_name( fn ),
+#ifndef GLIB_VERSION_2_32
         mutex( g_mutex_new() )
+#else
+        mutex( new GMutex )
+#endif
     {
+#ifdef GLIB_VERSION_2_32
+        g_mutex_init( mutex );
+#endif
         tplog( "CREATED COOKIE JAR %p", this );
 
         if ( g_file_test( fn, G_FILE_TEST_EXISTS ) )
@@ -325,7 +332,12 @@ private:
         tplog( "DESTROYING COOKIE JAR %p", this );
 
         save();
+#ifndef GLIB_VERSION_2_32
         g_mutex_free( mutex );
+#else
+        g_mutex_clear( mutex );
+        delete mutex;
+#endif
     }
 
     void save()
@@ -466,7 +478,7 @@ void Network::Response::replace_body( gpointer data , gsize size )
 Network::Settings::Settings( TPContext * context )
 :
     debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
-    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFYPEER, true ) ),
     ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
 {
 }
@@ -534,7 +546,11 @@ public:
     Thread( GAsyncQueue * q )
         :
         queue( q ),
+#ifndef GLIB_VERSION_2_32
         thread( g_thread_create( process, q, TRUE, NULL ) )
+#else
+        thread( g_thread_new( "Network", process, q ) )
+#endif
     {
         g_assert( queue );
         g_async_queue_ref( queue );

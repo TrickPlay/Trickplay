@@ -1,509 +1,635 @@
-function ui_element.tabBar(t)
+TABBAR = true
+
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
+
+
+local top_tabs = function(self,state)
     
-    --default parameters
-    local p = {
-
-        --> font -> deleted because it is duplicated with text_font   
-        text_font = "FreeSans Medium 26px",
-        
-    	skin = "CarbonCandy", 
-    	button_width = 150, 			--> ui_width -> button_width
-    	button_height = 60, 			--> ui_height -> button_height 
-        
-    	border_color     = {255,255,255,255},
-    	focus_border_color = { 27,145, 27,255},
-    	focus_fill_color = { 27,145, 27,255},
-        fill_color  = { 60, 60, 60,255}, --> unsel_color -> fill_color 
-    	focus_text_color = {255,255,255,255},
-    	text_color = {255,255,255,255}, 
-    	border_width = 1,
-    	border_corner_radius = 12,
-		--border_width = 2, -> duplicated ! 
-        
-        tab_labels = {
-            "Label",
-            "Label",
-            "Label",
-        },
-
-        tabs = {},
-        tab_position = "top",
-        tab_spacing = 0,
-		
-		--> label_padding -> deleted because it is not used 
-
-        display_width  = 600,
-        display_height = 500,
-        display_fill_color   = { 0,  0,  0,255}, --> fill_color -> display_fill_color 
-        display_border_color = {255,255,255,255}, --> border_color
-        display_border_width = 2, --> border_width
-
-        arrow_color  = {255,255,255,255}, --> label_color -> arrow_color  
-		
-		arrow_size     = 15,
-		arrow_dist_to_frame = 5,
-
-		ui_position = {200,200},
-		ui_width = 150,
-		ui_height = 60, 
-    }
-    
-	local offset = {}
-    local buttons = {}
-    
-    --overwrite defaults
-    if t ~= nil then
-		for k, v in pairs (t) do p[k] = v end
-    end
-    
-	local ap = nil
+            return NineSlice{
+                w = self.w,
+                h = self.h,
+                cells={
+                    {
+                        Widget_Clone{source = self.style.rounded_corner[state]},
+                        Widget_Clone{source = self.style.top_edge[state]},
+                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
+                    },
+                    {
+                        Widget_Clone{source =   self.style.side_edge[state]},
+                        Widget_Rectangle{color = self.style.fill_colors[state] },
+                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
+                    },
+                    {
+                        Widget_Clone{source =   self.style.side_edge[state]},
+                        Widget_Rectangle{color = self.style.fill_colors[state] },
+                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
+                    },
+                }
+            }
+    --[[
+	local c = Canvas(self.w,self.h)
+    mesg("TABBAR",0,"TabBar make top_tab",self.gid,state)
 	
-    local create
-    local current_index = 1
-    --local tabs = {}
-    local tab_bg = {}
-    local tab_focus = {}
+	c.op = "SOURCE"
 	
-    local umbrella     = Group{
-		
-        name="tabBar",
-		reactive = true,
-		position = p.ui_position, 
-        extra={
-            
-            type="TabBar",
-			
-            insert_tab = function(self,index)
-                
-                if index == nil then index = #p.tab_labels + 1 end
-                
-                --table.insert(p.tab_labels,index,"Label "..tostring(index))
-                table.insert(p.tab_labels,index,"Label")
-                
-                table.insert(p.tabs,index,Group{})
-                
-                create()
-                
-            end,
-
-			
-            remove_tab = function(self,index)
-                
-				if index == nil then index = #p.tab_labels + 1 end
-                
-                table.remove(p.tab_labels,index)
-                table.remove(p.tabs,index)
-                
-                create()
-				
-            end,
-			
-            rename_tab = function(self,index,name)
-                assert(index)
-                p.tab_labels[index] = name
-                
-                create()
-            end,
-            
-            move_tab_up = function(self,index)
-                if index == 1 then return end
-                local temp  = p.tab_labels[index-1]
-                p.tab_labels[index-1] = p.tab_labels[index]
-                p.tab_labels[index]   = temp
-                
-                temp      = p.tabs[index-1]
-                p.tabs[index-1] = p.tabs[index]
-                p.tabs[index]   = temp
-                
-                create()
-            end,
-            move_tab_down = function(self,index)
-                if index == #p.tab_labels then return end
-                local temp  = p.tab_labels[index+1]
-                p.tab_labels[index+1] = p.tab_labels[index]
-                p.tab_labels[index]   = temp
-                
-                temp      = p.tabs[index+1]
-                p.tabs[index+1] = p.tabs[index]
-                p.tabs[index]   = temp
-                
-                create()
-            end,
-            
-            --switching 'visible tab' functions
-            display_tab = function(self,index)
-                
-				if index < 1 or index > #p.tab_labels then return end
-                
-				p.tabs[current_index]:hide()
-                buttons[current_index].clear_focus()
-				
-                current_index = index
-				
-                p.tabs[current_index]:show()
-                buttons[current_index].set_focus()
-				
-				if ap then
-					ap:pan_to(
-						
-						buttons[current_index].x+buttons[current_index].w/2,
-						buttons[current_index].y+buttons[current_index].h/2
-						
-					)
-				end
-            end,
-			
-            previous_tab = function(self)
-                if current_index == 1 then return end
-
-                
-                self:display_tab(current_index-1)
-            end,
-			
-            next_tab = function(self)
-                if current_index == #p.tab_labels then return end
-                
-                self:display_tab(current_index+1)
-            end,
-			
-			get_tab_group = function(self,index) return p.tabs[index] end,
-			
-			get_index = function(self) return current_index end,
-			
-			get_offset = function(self) return self.x+offset.x, self.y+offset.y end 
-			
-        }
-		
-    }
-    
-    create = function()
-        
-        local labels, txt_h, txt_w 
-        
-		current_index = 1
-		
-        umbrella:clear()
-
-		if ap then ap = nil end
-
-        tab_bg = {}
-        tab_focus = {}
-        
-        local bg = Rectangle {
-            color        = p.display_fill_color,
-            border_color = p.display_border_color, --> border_color
-            border_width = p.display_border_width, --> border_width
-            w = p.display_width,
-            h = p.display_height,
-        }
-        
-        umbrella:add(bg)
-
-		-- added these two lines for selected rectangle of contents
-		p.ui_width = p.button_width
-		p.ui_height = p.button_height
-
-        for i = 1, #p.tab_labels do
-            
-			editor_use = true
-            if p.tabs[i] == nil then
-                p.tabs[i] = Group{}
-            end
-            p.tabs[i]:hide()
-
-			
-			buttons[i] = ui_element.button{
-				
-				ui_position          = { 0, 0 },
-				skin                 = p.skin,
-				ui_width             = p.button_width,
-				ui_height            = p.button_height,
-				focus_border_color   = p.focus_border_color,
-				border_width         = p.border_width,
-				border_corner_radius = p.border_corner_radius,
-				label                = p.tab_labels[i],
-				border_color         = p.border_color, 
-				text_color           = p.text_color,
-				text_font            = p.text_font,
-				fill_color           = p.fill_color,
-				focus_fill_color     = p.focus_fill_color,
-				focus_text_color     = p.focus_text_color,
-				on_press              = function () umbrella:display_tab(i) end,
-				
-			}
-			
-            if p.tab_position == "top" then
-                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
-                p.tabs[i].y  = buttons[i].h
-                p.tabs[i].x  = 0
-            else
-                p.tabs[i].y  = 0
-                p.tabs[i].x  = buttons[i].w
-                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
-            end
-            umbrella:add(p.tabs[i],buttons[i])
-			offset.x = p.tabs[i].x
-			offset.y = p.tabs[i].y
-			editor_use = false
-        end
-		
-        for i = #p.tab_labels + 1, #buttons do
-            
-            if buttons[i].parent then buttons[i]:unparent() end
-            
-            buttons[i] = nil
-            
-        end
-		--ap = nil
-		
-		if p.arrow_image then p.arrow_size = assets(p.arrow_image).w end
-		
-		if p.tab_position == "top" and
-			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
-			
-			ap = ui_element.arrowPane{
-				visible_width=p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame),
-				visible_height=buttons[# buttons].h,
-				virtual_width=buttons[# buttons].w + buttons[# buttons].x,
-				virtual_height=buttons[# buttons].h,
-				arrow_color=p.arrow_color,
-				box_border_width=0,
-				scroll_distance=buttons[# buttons].w,
-				arrow_size = p.arrow_size,
-				arrow_dist_to_frame = p.arrow_dist_to_frame,
-				arrow_src = p.arrow_image,
-			}
-			
-			ap.x = p.arrow_size+p.arrow_dist_to_frame
-			ap.y = 0
-			
-			for _,b in ipairs(buttons) do
-				
-				b:unparent()
-				ap.content:add(b)
-				
-			end
-			
-			umbrella:add(ap)
-			
-		elseif (buttons[# buttons].h + buttons[# buttons].y) > (p.display_height - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
-			
-			ap = ui_element.arrowPane{
-				visible_width=buttons[# buttons].w,
-				visible_height=p.display_height - 2*(p.arrow_size+p.arrow_dist_to_frame),
-				virtual_width=buttons[# buttons].w,
-				virtual_height=buttons[# buttons].h + buttons[# buttons].y,
-				arrow_color=p.arrow_color,
-				box_border_width=0,
-				scroll_distance=buttons[# buttons].h,
-				arrow_size = p.arrow_size,
-				arrow_dist_to_frame = p.arrow_dist_to_frame,
-				arrow_src = p.arrow_image,
-			}
-			
-			ap.x = 0
-			ap.y = p.arrow_size+p.arrow_dist_to_frame
-			
-			for _,b in ipairs(buttons) do
-				
-				b:unparent()
-				ap.content:add(b)
-				
-			end
-			
-			umbrella:add(ap)
-			
-		end
-		
-		if ap then
-			
-		end
-		
-        if p.tab_position == "top" then
-            bg.y = buttons[1].h-p.border_width
-        else
-            bg.x = buttons[1].w-p.border_width
-        end
-        
-        for i = #p.tab_labels+1, #p.tabs do
-            p.tabs[i]  = nil
-            --tab_bg[i]  = nil
-            buttons[i] = nil
-        end
-		if editor_lb then 
-			umbrella:display_tab(current_index)
-		end 
-
-    end
-    
-    create()
+	c.line_width = self.style.border.width
 	
-	local function tabBar_on_key_down(key)
-		if umbrella.focus[key] then
-			if type(umbrella.focus[key]) == "function" then
-				umbrella.focus[key]()
-			elseif screen:find_child(umbrella.focus[key]) then
-				if umbrella.clear_focus then
-					umbrella.clear_focus(key)
-				end
-				screen:find_child(umbrella.focus[key]):grab_key_focus()
-				if screen:find_child(umbrella.focus[key]).set_focus then
-					screen:find_child(umbrella.focus[key]).set_focus(key)
-				end
-			end
-		end
-		return true
-	end
-
-    --Key Handler
-		local keys={
-			[keys.Left] = function()
-			if umbrella.tab_position == "top" then 
-				if current_index - 1 >= 1 then
-					umbrella:display_tab(current_index - 1)
-				else
-					tabBar_on_key_down(keys.Left)
-				end
-			else
-				if current_focus.parent.name == umbrella.name then 
-					--tabBar_on_key_down(keys.Up)
-					local left_obj_name = umbrella.tabs[current_index].left_focus
-					local left_obj 
-
-					if left_obj_name then
-						left_obj = screen:find_child(left_obj_name)
-						if left_obj then
-							if umbrella.clear_focus then
-								umbrella.clear_focus(key)
-							end
-							left_obj:grab_key_focus()
-							if left_obj.set_focus then
-								left_obj.set_focus(key)
-							end
-						end
-					end
-				end
-			end
-		end,
-		[keys.Right] = function()
-			if umbrella.tab_position == "top" then 
-				if current_index + 1 >  #umbrella.tab_labels then
-					tabBar_on_key_down(keys.Right)
-				else
-					umbrella:display_tab(current_index + 1)
-				end
-			else 
-				local right_obj_name = umbrella.tabs[current_index].right_focus
-				local right_obj 
-
-				if right_obj_name then
-					right_obj = screen:find_child(right_obj_name)
-					if right_obj then
-						if umbrella.clear_focus then
-							umbrella.clear_focus(key)
-						end
-						right_obj:grab_key_focus()
-						if right_obj.set_focus then
-							right_obj.set_focus(key)
-						end
-					end
-				end
-			end 
-		end,
-		[keys.Up] = function()
-			if umbrella.tab_position == "top" then 
-				if current_focus.parent.name == umbrella.name then 
-				--tabBar_on_key_down(keys.Up)
-				
-					local up_obj_name = umbrella.tabs[current_index].up_focus
-					local up_obj 
-
-					if up_obj_name then
-						up_obj = screen:find_child(up_obj_name)
-						if up_obj then
-							if umbrella.clear_focus then
-								umbrella.clear_focus(key)
-							end
-							up_obj:grab_key_focus()
-							if up_obj.set_focus then
-								up_obj.set_focus(key)
-							end
-						end
-					end
-				end 
-			else 
-				if current_index - 1 >= 1 then
-					umbrella:display_tab(current_index - 1)
-				else
-					tabBar_on_key_down(keys.Up)
-				end
-			end
-		end,
-		[keys.Down] = function()
-			if umbrella.tab_position == "top" then 
-				local down_obj_name = umbrella.tabs[current_index].down_focus
-				local down_obj 
-
-				if down_obj_name then
-					down_obj = screen:find_child(down_obj_name)
-					if down_obj then
-						if umbrella.clear_focus then
-							umbrella.clear_focus(key)
-						end
-						down_obj:grab_key_focus()
-						if down_obj.set_focus then
-							down_obj.set_focus(key)
-						end
-					end
-				end
-			else
-				if current_index + 1 >  #umbrella.tab_labels then
-					tabBar_on_key_down(keys.Down)
-				else
-					umbrella:display_tab(current_index + 1)
-				end
-			end 
-		end,
-
-		}
-
-	umbrella.on_key_down = function (self, key)
-		
-		if keys[key] then keys[key]() end 
-
-	end 
-
-	umbrella.set_focus = function (key)
-		umbrella:grab_key_focus()
-		umbrella:display_tab(current_index)
-	end 
-
-	umbrella.clear_focus = function ()
-		if current_focus then 
-			current_focus.clear_focus ()
-		end 
-		current_focus = nil 
-		screen:grab_key_focus()
-	end 
-
-    --set the meta table to overwrite the parameters
-    setmetatable(umbrella.extra,{
-		
-		__newindex = function(t,k,v)
-			
-			p[k] = v
-
-			if k ~= "selected" then
-				
-				create()
-				
-			end
-			
-		end,
-		
-		__index = function(t,k)       return p[k]       end,
-		
-    })
-
-    return umbrella
+	local r     = self.style.border.corner_radius
+    local inset = c.line_width/2
+    
+    c:move_to( inset, inset+r)
+    --top-left corner
+    c:arc( inset+r, inset+r, r,180,270)
+    c:line_to(c.w - (inset+r), inset)
+    --top-right corner
+    c:arc( c.w - (inset+r), inset+r, r,270,360)
+    c:line_to(c.w - inset,c.h + inset)
+    --bottom-right corner
+    c:line_to( inset, c.h + inset)
+    --bottom-left corner
+    c:line_to( inset, inset+r)
+    
+	c:set_source_color( self.style.fill_colors[state] or "00000000" )
+	
+	c:fill(true)
+    
+	c:set_source_color( self.style.border.colors[state] or "ffffff" )
+	
+	c:stroke(true)
+	
+	return c:Image()
+	--]]
 end
+
+local side_tabs = function(self,state)
+    
+            return NineSlice{
+                w = self.w,
+                h = self.h,
+                cells={
+                    {
+                        Widget_Clone{source = self.style.rounded_corner[state]},
+                        Widget_Clone{source = self.style.top_edge[state]},
+                        Widget_Clone{source = self.style.top_edge[state]},
+                    },
+                    {
+                        Widget_Clone{source =   self.style.side_edge[state]},
+                        Widget_Rectangle{color = self.style.fill_colors[state] },
+                        Widget_Rectangle{color = self.style.fill_colors[state] },
+                    },
+                    {
+                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
+                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
+                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
+                    },
+                }
+            }
+            
+    --[[
+	local c = Canvas(self.w,self.h)
+    mesg("TABBAR",0,"TabBar make side_tab",self.gid,state)
+	c.op = "SOURCE"
+	
+	c.line_width = self.style.border.width
+	
+	local r     = self.style.border.corner_radius
+    local inset = c.line_width/2
+    
+    c:move_to( inset, inset+r)
+    --top-left corner
+    c:arc( inset+r, inset+r, r,180,270)
+    c:line_to(c.w + inset, inset)
+    --top-right corner
+    c:line_to(c.w + inset, c.h - inset)
+    --bottom-right corner
+    c:line_to( inset+r, c.h - inset)
+    --bottom-left corner
+    c:arc( inset+r, c.h - (inset+r), r,90,180)
+    c:line_to( inset, inset+r)
+    
+    
+	c:set_source_color( self.style.fill_colors[state] or "00000000" )
+	
+	c:fill(true)
+    
+	c:set_source_color( self.style.border.colors[state] or "ffffff" )
+	
+	c:stroke(true)
+	
+	return c:Image()
+	--]]
+end
+
+local default_parameters = {tab_w = 200,tab_h = 50,pane_w = 400,pane_h = 300, tab_location = "top"}
+
+
+
+-----------------------------------------------------------------------------
+-- TabBar's base is a ListManager, this allows for easier alignment when
+--         switching the location of the tabs
+-- This ListManager contains 2 items: an ArrowPane and a Group
+-- The ArrowPane contains a ListManager of ToggleButtons, linked with a 
+-- RadioButtonGroup
+-----------------------------------------------------------------------------
+TabBar = setmetatable(
+    {},
+    {
+        __index = function(self,k)
+            
+            return getmetatable(self)[k]
+            
+        end,
+        __call = function(self,p)
+            
+            return self:declare():set(p or {})
+            
+        end,
+        
+        subscriptions = {
+        },
+        public = {
+            properties = {
+                enabled = function(instance,_ENV)
+                    return nil,
+                    function(oldf,self,v)  
+                        oldf(self,v)
+                        for i = 1,tabs_lm.length do
+                            tabs_lm.cells[i].enabled = v
+                        end
+                        tab_pane.enabled = v
+                    end
+                end,
+                pane_w = function(instance,_ENV) -- TODO check need for these upvals
+                    return function(oldf) return   pane_w     end,
+                    function(oldf,self,v)  
+                        pane_w = v 
+                        panes_obj.w = v
+                        if tab_location == "top" then
+                            tab_pane.pane_w    = pane_w
+                        end
+                    end
+                end,
+                pane_h = function(instance,_ENV)
+                    return function(oldf) return   pane_h     end,
+                    function(oldf,self,v)   
+                        pane_h = v 
+                        panes_obj.h = v
+                        if tab_location == "left" then
+                            tab_pane.pane_h    = pane_h
+                        end
+                    end
+                end,
+                tab_w = function(instance,_ENV)
+                    return function(oldf) return   tab_w     end,
+                    function(oldf,self,v)          
+                        tab_w = v 
+                        resize_tabs = true
+                    end
+                end,
+                tab_images = function(instance,_ENV)
+                    return function(oldf) return   tab_images     end, -- TODO either return clone, or metatable for changes
+                    function(oldf,self,v)          
+                        local old_images = tab_images or {}
+                        tab_images = v
+                        
+                        for k,v in pairs(v) do
+                            add(instance,v)
+                            v:hide()
+                        end
+                        
+                        for i = 1,tabs_lm.length do
+                            
+                            local clones = {}
+                            
+                            for k,v in pairs(v) do
+                                clones[k] = Clone{source=v}
+                            end
+                            
+                            tabs_lm.cells[i].images = clones
+                            
+                        end
+                        
+                        for k,v in pairs(old_images) do
+                            v:unparent()
+                        end
+                    end
+                end,
+                tab_h = function(instance,_ENV)
+                    return function(oldf) return   tab_h     end,
+                    function(oldf,self,v)          
+                        tab_h = v 
+                        resize_tabs = true
+                    end
+                end,
+                widget_type = function(instance,_ENV)
+                    return function() return "TabBar" end, nil
+                end,
+                selected_tab = function(instance,_ENV)
+                    return function(oldf) return new_selection or rbg.selected end,
+                    function(oldf,self,v)        new_selection = v  end
+                end,
+                tabs = function(instance,_ENV)
+                    return function(oldf)  return   tabs_interface      end,
+                    function(oldf,self,v)    
+                        if type(v) ~= "table" then error("Expected table. Received: ",2) end
+                        new_tabs = v  
+                        resize_tabs = true
+                    end
+                end,
+                tab_location = function(instance,_ENV)
+                    return function(oldf) return   tab_location     end,
+                    function(oldf,self,v)  
+                        mesg("TABBAR",0,"TabBar.tab_location =",v)
+                        if tab_location == v then return end
+                        new_tab_location = true
+                        --[[
+                        if v == "top" then
+                            updating = true --TODO need a better way to do a non-updating set of this
+                            instance.direction  = "vertical"
+                            updating = false
+                            tabs_lm.direction  = "horizontal"
+                            --TODO set??
+                            print("oreo\n\n\n\n",pane_w,tabs_lm.w)
+                            tab_pane.pane_w    = pane_w
+                            tab_pane.pane_h    = tab_h
+                            tab_pane.virtual_w = tabs_lm.w
+                            tab_pane.virtual_h = tab_h
+                            tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
+                                tab.create_canvas = top_tabs
+                                tab.w = 200
+                            end
+                        elseif v == "left" then
+                            updating = true --TODO need a better way to do a non-updating set of this
+                            instance.direction  = "horizontal"
+                            updating = false
+                            tabs_lm.direction  = "vertical"
+                            --TODO set??
+                            print("pane_h = "..pane_h)
+                            tab_pane.pane_w    = tab_w
+                            tab_pane.pane_h    = pane_h
+                            tab_pane.virtual_w = tab_w
+                            tab_pane.virtual_h = tabs_lm.h
+                            tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
+                                tab.create_canvas = side_tabs
+                            end
+                        else
+                            error("Expected 'top' or 'left'. Received "..v,2)
+                        end
+                        --]]
+                        tab_location = v
+                    end
+                end,
+    
+                attributes = function(instance,_ENV)
+                    return function(oldf,self) 
+                        local t = oldf(self)
+                        
+                        t.length               = nil
+                        t.number_of_cols       = nil
+                        t.number_of_rows       = nil
+                        t.vertical_alignment   = nil
+                        t.horizontal_alignment = nil
+                        t.vertical_spacing     = nil
+                        t.horizontal_spacing   = nil
+                        t.cell_h = nil
+                        t.cell_w = nil
+                        t.cells  = nil
+                        
+                        t.style = instance.style
+                        
+                        t.tab_w  = instance.tab_w
+                        t.tab_h  = instance.tab_h
+                        t.pane_w = instance.pane_w
+                        t.pane_h = instance.pane_h
+                        t.tabs   = instance.tabs
+                        t.tab_location = instance.tab_location
+                        
+                        t.tabs = {}
+                        
+                        for i = 1,tabs_lm.length do
+                            t.tabs[i]    = {
+                                label    = tabs_lm.cells[i].label,
+                                contents = tabs_lm.cells[i].contents.attributes
+                            }
+                        end
+                        
+                        t.type = "TabBar"
+                        
+                        return t
+                    end
+                end,
+                
+    
+            },
+            functions = {
+            },
+        },  
+        
+        private = {
+        
+            update = function(instance,_ENV)
+                return function()
+                    mesg("TABBAR",{0,5},"TabBar update called")
+                    if restyle_tabs then
+                        restyle_tabs = false
+                        for i = 1,tabs_lm.length do
+                                
+                            tabs_lm.cells[i].style:set(instance.style.attributes)
+                            
+                        end
+                    end
+                    if restyle_arrows then
+                        restyle_arrows = false
+                        
+                        tab_pane.style.arrow:set(instance.style.arrow.attributes)
+                    end
+                    if resize_tabs then
+                        resize_tabs = false
+                        if not new_tabs then
+                            for i = 1,tabs_lm.length do
+                                
+                                tabs_lm.cells[i].size = {tab_w,tab_h}
+                                
+                            end
+                        end
+                        if tab_location == "top" then
+                            
+                            tab_pane.pane_h        = tab_h
+                            tab_pane.virtual_h     = tab_h
+                            tab_pane.arrow_move_by = tab_w + tabs_lm.spacing
+                        elseif tab_location == "left" then
+                            tab_pane.pane_w        = tab_w
+                            tab_pane.virtual_w     = tab_w
+                            tab_pane.arrow_move_by = tab_h + tabs_lm.spacing
+                        end
+                    end
+                    if new_tabs then
+                        mesg("TABBAR",0,"TabBar:update() setting new_tabs")
+                        tabs_lm.cells = new_tabs
+                        if tab_location == "top" then
+                            tab_pane.virtual_w = tabs_lm.w
+                        else
+                            tab_pane.virtual_h = tabs_lm.h
+                        end
+                        new_tabs = false
+                    end
+                    if new_tab_location then
+                        new_tab_location = false
+                        if tab_location == "top" then
+                            instance.direction  = "vertical"
+                            tabs_lm.direction  = "horizontal"
+                            --TODO set??
+                            tab_pane.pane_w    = pane_w
+                            tab_pane.pane_h    = tab_h
+                            tab_pane.virtual_w = tabs_lm.w
+                            tab_pane.virtual_h = tab_h
+                            tab_pane.arrow_move_by   = tab_w + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
+                                tab.create_canvas = top_tabs
+                                tab.w = 200
+                            end
+                        elseif tab_location == "left" then
+                            instance.direction  = "horizontal"
+                            tabs_lm.direction  = "vertical"
+                            --TODO set??
+                            tab_pane.pane_w    = tab_w
+                            tab_pane.pane_h    = pane_h
+                            tab_pane.virtual_w = tab_w
+                            tab_pane.virtual_h = tabs_lm.h
+                            tab_pane.arrow_move_by   = tab_h + tabs_lm.spacing
+                            for _,tab in tabs_lm.cells.pairs() do
+                                tab.create_canvas = side_tabs
+                            end
+                        else
+                            error("Expected 'top' or 'left'. Received "..v,2)
+                        end
+                        
+                    end
+                    
+                    old_update()
+                    print("here")
+                    if  new_selection then
+                        print("DQDQQQDQDDQ")
+                        rbg.selected = new_selection
+                        new_selection = false
+                    end
+                    
+                    --tabs_lm__ENV:call_update()
+                end
+            end,
+        },
+        declare = function(self,parameters)
+            
+            parameters = parameters or {}
+            
+            local instance,_ENV = ListManager:declare{vertical_alignment = "top",spacing=0}
+            style_flags = {
+                border      = "restyle_tabs",
+                text        = "restyle_tabs",
+                fill_colors = "restyle_tabs",
+                arrow       = "restyle_arrows",
+            }
+            
+            function instance:on_key_focus_in()
+                if tabs_lm.length > 0 then
+                    rbg.items[rbg.selected]:grab_key_focus()
+                end
+            end
+            panes = {}
+            tabs = {}
+            rbg= RadioButtonGroup{name = "TabBar",
+                on_selection_change = function()
+                    mesg("TABBAR",0,"TabBar.rbg.on_selection_change")
+                    for i = 1,tabs_lm.length do
+                        local t = tabs_lm.cells[i]
+                        if t.selected then
+                            t.contents:show()
+                            --t:grab_key_focus()
+                        else
+                            t.contents:hide()
+                        end
+                    end
+                end
+            }
+            
+            
+            
+            old_update = update
+            
+            pane_w = 400
+            pane_h = 300
+            panes_obj = Widget_Group{
+                size = {pane_w,pane_h},
+                name = "Panes",
+                clip_to_size = true,
+                on_key_focus_in = function()
+                    if tabs_lm.length > 0 then
+                        rbg.items[rbg.selected].contents:grab_key_focus()
+                    end
+                end
+            }
+            
+            WL_parent_redirect[panes_obj] = instance
+            
+            tab_w = 200
+            tab_h = 50
+            tab_images   = nil 
+            tab_style    = nil
+            tab_location = "top"
+            resize_tabs = true
+            new_selection = 1
+            
+            local function make_tab_interface(tb)
+                --prevents the user from getting/setting any of the other fields of the ToggleButtons
+                local setter = {
+                    label    = function(v) tb.label = v end,
+                    contents = function(v) 
+                        tb.contents:unparent()
+                        tb.contents = v
+                        panes_obj:add(v)
+                        if not tb.selected then v:hide() end
+                    end,
+                }
+                local getter = {
+                    label    = function() return tb.label end,
+                    contents = function() return tb.contents end,
+                }
+                return setmetatable({},{
+                    __index = function(_,k)
+                        return getter[k] and getter[k]()
+                    end,
+                    __newindex = function(_,k,v)
+                        return setter[k] and setter[k](v)
+                    end,
+                })
+            end
+            tab_to_interface_map = {}
+            
+            tabs_lm = ListManager:declare{
+                name = "Tabs ListManager",
+                spacing = 0,
+                vertical_alignment = "top",
+                direction = "horizontal",
+                node_constructor = function(obj)
+                    
+                    
+                    
+                    mesg("TABBAR",{0,3},"New Tab Button")
+                    if obj == nil then 
+                        obj = {label = "Tab",contents = Widget_Group()}
+                    elseif type(obj) ~= "table" then
+                        error("Expected tab entry to be a string. Received "..type(obj),2)
+                    elseif type(obj.label) ~= "string" then
+                        error("Received a tab without a label",2)
+                    end
+                    if type(obj.contents) == "table" and obj.contents.type then 
+                        
+                        obj.contents = _ENV[obj.contents.type](obj.contents)
+                        
+                    elseif type(obj.contents) ~= "userdata" and obj.contents.__types__.actor then 
+                        
+                        error("Must be a UIElement or nil. Received "..obj.contents,2) 
+                    end
+                    local pane = obj.contents
+                    
+                    local style = instance.style.attributes
+                    style.name = style
+                    style.border.colors.selection = style.border.colors.selection or "ffffff"
+                    local clones
+                    if tab_images then
+                        clones = {}
+                        
+                        for k,v in pairs(tab_images) do
+                            clones[k] = Clone{source=v}
+                        end
+                    end
+                    local sel = rbg.selected
+                    obj = RadioButton{
+                        hide_icon = true,
+                        label  = obj.label,
+                        w      = tab_w,
+                        h      = tab_h,
+                        style  = style,
+                        group  = rbg,
+                        images = clones,
+                        reactive = true,
+                        create_canvas = tab_location == "top" and top_tabs or side_tabs,
+                        --images = tab_images,
+                    }
+                    local old_okfi = obj.on_key_focus_in
+                    ---[[
+                    function obj:on_key_focus_in()
+                        old_okfi()
+                        --obj.selected = true
+                        tab_pane.virtual_x = obj.x - tab_pane.pane_w/2
+                        tab_pane.virtual_y = obj.y - tab_pane.pane_h/2
+                    end
+                    function obj:on_pressed()  obj.selected = true  end
+                    --]]
+                    obj.contents = pane
+                    mesg("TABBAR",0,"button made")
+                    ---[[
+                    if tab_style then
+                        obj.style:set(tab_style.attributes) -- causes extra redraw
+                    end
+                    --]]
+                    
+                    tab_to_interface_map[obj] = make_tab_interface(obj)
+                    --table.insert(tabs,obj)
+                    --obj.pane = pane
+                    --table.insert(panes,pane)
+                    obj.contents:hide()
+                    panes_obj:add(obj.contents)
+                    obj.contents.w = pane_w
+                    obj.contents.h = pane_h
+                    
+                    if sel then new_selection = sel end
+                    return obj
+                end
+            }
+            
+            tabs_interface = setmetatable({},{
+                __index = function(_,k)
+                    local v = tabs_lm.cells[k]
+                    return type(k) == "number" and v and 
+                        tab_to_interface_map[v] or 
+                        v
+                end,
+                --pass through to the ListManager
+                __newindex = function(_,k,v)
+                    tabs_lm = v
+                end,
+            })
+            
+            tabs_lm__ENV = get_env(tabs_lm)
+            
+            --TODO roll into a single set
+            tab_pane = ArrowPane{
+                name = "ArrowPane",
+                style = false,
+                arrow_move_by = tab_w,
+                on_key_focus_in = function()
+                    if tabs_lm.length > 0 then
+                        rbg.items[rbg.selected]:grab_key_focus()
+                    end
+                end
+            }
+            tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
+            tab_pane.style.border.colors.default = "00000000"
+            tab_pane.style.fill_colors.default   = "00000000"
+            tab_pane:add(tabs_lm)
+            
+            instance.cells = {tab_pane,panes_obj}
+            
+            setup_object(self,instance,_ENV)
+            
+            dumptable(get_children(instance))
+            return instance, _ENV
+            
+        end
+    }
+)
+external.TabBar = TabBar

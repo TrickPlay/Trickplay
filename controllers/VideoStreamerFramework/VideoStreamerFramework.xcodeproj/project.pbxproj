@@ -1,0 +1,515 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CD4702501561E07500A89E9C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD47024E1561E07500A89E9C /* InfoPlist.strings */; };
+		CD4702631561E43600A89E9C /* sm_math.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702601561E43600A89E9C /* sm_math.m */; };
+		CD4702641561E43600A89E9C /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702621561E43600A89E9C /* MyExtensions.m */; };
+		CD47026A1561E45900A89E9C /* rtpenc_aac.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702671561E45900A89E9C /* rtpenc_aac.m */; };
+		CD47026B1561E45900A89E9C /* rtpenc_h264.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702691561E45900A89E9C /* rtpenc_h264.m */; };
+		CD4702701561E46800A89E9C /* RTSPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD47026D1561E46800A89E9C /* RTSPClient.m */; };
+		CD4702711561E46800A89E9C /* NetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD47026F1561E46800A89E9C /* NetworkManager.m */; };
+		CD4702751561E49E00A89E9C /* STUNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702741561E49E00A89E9C /* STUNClient.m */; };
+		CD4702971561E4E500A89E9C /* rtp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD47028B1561E4E500A89E9C /* rtp.c */; };
+		CD4702981561E4E500A89E9C /* sdp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD47028C1561E4E500A89E9C /* sdp.c */; };
+		CD4702991561E4E500A89E9C /* net_udp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD47028D1561E4E500A89E9C /* net_udp.c */; };
+		CD47029A1561E4E500A89E9C /* net_tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD47028E1561E4E500A89E9C /* net_tcp.c */; };
+		CD47029B1561E4E500A89E9C /* net_common.c in Sources */ = {isa = PBXBuildFile; fileRef = CD47028F1561E4E500A89E9C /* net_common.c */; };
+		CD47029C1561E4E500A89E9C /* ntp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702901561E4E500A89E9C /* ntp.c */; };
+		CD47029D1561E4E500A89E9C /* debug.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702911561E4E500A89E9C /* debug.c */; };
+		CD47029E1561E4E500A89E9C /* drand48.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702921561E4E500A89E9C /* drand48.c */; };
+		CD47029F1561E4E500A89E9C /* inet_pton.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702931561E4E500A89E9C /* inet_pton.c */; };
+		CD4702A01561E4E500A89E9C /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702941561E4E500A89E9C /* memory.c */; };
+		CD4702A11561E4E500A89E9C /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702951561E4E500A89E9C /* base64.c */; };
+		CD4702A21561E4E500A89E9C /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702961561E4E500A89E9C /* util.c */; };
+		CD4702AF1561E60F00A89E9C /* VideoStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702AE1561E60F00A89E9C /* VideoStreamer.m */; };
+		CD4702C61561E79600A89E9C /* VideoStreamer.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702AD1561E60F00A89E9C /* VideoStreamer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4702CB1561F43C00A89E9C /* SIPDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702C71561F43C00A89E9C /* SIPDialog.h */; };
+		CD4702CC1561F43C00A89E9C /* SIPDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702C81561F43C00A89E9C /* SIPDialog.m */; };
+		CD4702CD1561F43C00A89E9C /* SIPClient.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702C91561F43C00A89E9C /* SIPClient.h */; };
+		CD4702CE1561F43C00A89E9C /* SIPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702CA1561F43C00A89E9C /* SIPClient.m */; };
+		CD4702D31561F44600A89E9C /* SDPParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702CF1561F44600A89E9C /* SDPParser.h */; };
+		CD4702D41561F44600A89E9C /* SDPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702D01561F44600A89E9C /* SDPParser.m */; };
+		CD4702D51561F44600A89E9C /* MediaDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702D11561F44600A89E9C /* MediaDescription.h */; };
+		CD4702D61561F44600A89E9C /* MediaDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702D21561F44600A89E9C /* MediaDescription.m */; };
+		CD5746261587FDA5008FC87B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD5746251587FDA5008FC87B /* libAVCEncoder.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CD4702481561E07400A89E9C /* VideoStreamer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VideoStreamer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD47024D1561E07500A89E9C /* VideoStreamer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VideoStreamer-Info.plist"; sourceTree = "<group>"; };
+		CD47024F1561E07500A89E9C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CD4702511561E07500A89E9C /* VideoStreamer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VideoStreamer-Prefix.pch"; sourceTree = "<group>"; };
+		CD47025F1561E43600A89E9C /* sm_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sm_math.h; sourceTree = "<group>"; };
+		CD4702601561E43600A89E9C /* sm_math.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sm_math.m; sourceTree = "<group>"; };
+		CD4702611561E43600A89E9C /* MyExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyExtensions.h; sourceTree = "<group>"; };
+		CD4702621561E43600A89E9C /* MyExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyExtensions.m; sourceTree = "<group>"; };
+		CD4702661561E45900A89E9C /* rtpenc_aac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpenc_aac.h; sourceTree = "<group>"; };
+		CD4702671561E45900A89E9C /* rtpenc_aac.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rtpenc_aac.m; sourceTree = "<group>"; };
+		CD4702681561E45900A89E9C /* rtpenc_h264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtpenc_h264.h; sourceTree = "<group>"; };
+		CD4702691561E45900A89E9C /* rtpenc_h264.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rtpenc_h264.m; sourceTree = "<group>"; };
+		CD47026C1561E46800A89E9C /* RTSPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTSPClient.h; sourceTree = "<group>"; };
+		CD47026D1561E46800A89E9C /* RTSPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTSPClient.m; sourceTree = "<group>"; };
+		CD47026E1561E46800A89E9C /* NetworkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkManager.h; sourceTree = "<group>"; };
+		CD47026F1561E46800A89E9C /* NetworkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkManager.m; sourceTree = "<group>"; };
+		CD4702731561E49E00A89E9C /* STUNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUNClient.h; sourceTree = "<group>"; };
+		CD4702741561E49E00A89E9C /* STUNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUNClient.m; sourceTree = "<group>"; };
+		CD47027E1561E4E500A89E9C /* rtp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtp.h; sourceTree = "<group>"; };
+		CD47027F1561E4E500A89E9C /* sdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdp.h; sourceTree = "<group>"; };
+		CD4702801561E4E500A89E9C /* net_udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = net_udp.h; sourceTree = "<group>"; };
+		CD4702811561E4E500A89E9C /* net_tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = net_tcp.h; sourceTree = "<group>"; };
+		CD4702821561E4E500A89E9C /* net_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = net_common.h; sourceTree = "<group>"; };
+		CD4702831561E4E500A89E9C /* ntp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntp.h; sourceTree = "<group>"; };
+		CD4702841561E4E500A89E9C /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		CD4702851561E4E500A89E9C /* drand48.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = drand48.h; sourceTree = "<group>"; };
+		CD4702861561E4E500A89E9C /* inet_pton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inet_pton.h; sourceTree = "<group>"; };
+		CD4702871561E4E500A89E9C /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
+		CD4702881561E4E500A89E9C /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
+		CD4702891561E4E500A89E9C /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		CD47028A1561E4E500A89E9C /* config_unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config_unix.h; sourceTree = "<group>"; };
+		CD47028B1561E4E500A89E9C /* rtp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rtp.c; sourceTree = "<group>"; };
+		CD47028C1561E4E500A89E9C /* sdp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sdp.c; sourceTree = "<group>"; };
+		CD47028D1561E4E500A89E9C /* net_udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = net_udp.c; sourceTree = "<group>"; };
+		CD47028E1561E4E500A89E9C /* net_tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = net_tcp.c; sourceTree = "<group>"; };
+		CD47028F1561E4E500A89E9C /* net_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = net_common.c; sourceTree = "<group>"; };
+		CD4702901561E4E500A89E9C /* ntp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ntp.c; sourceTree = "<group>"; };
+		CD4702911561E4E500A89E9C /* debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = debug.c; sourceTree = "<group>"; };
+		CD4702921561E4E500A89E9C /* drand48.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = drand48.c; sourceTree = "<group>"; };
+		CD4702931561E4E500A89E9C /* inet_pton.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inet_pton.c; sourceTree = "<group>"; };
+		CD4702941561E4E500A89E9C /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = memory.c; sourceTree = "<group>"; };
+		CD4702951561E4E500A89E9C /* base64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = base64.c; sourceTree = "<group>"; };
+		CD4702961561E4E500A89E9C /* util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = util.c; sourceTree = "<group>"; };
+		CD4702A51561E55F00A89E9C /* AVCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCEncoder.h; sourceTree = "<group>"; };
+		CD4702A61561E55F00A89E9C /* AVCParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCParameters.h; sourceTree = "<group>"; };
+		CD4702AD1561E60F00A89E9C /* VideoStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoStreamer.h; sourceTree = "<group>"; };
+		CD4702AE1561E60F00A89E9C /* VideoStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoStreamer.m; sourceTree = "<group>"; };
+		CD4702C71561F43C00A89E9C /* SIPDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPDialog.h; sourceTree = "<group>"; };
+		CD4702C81561F43C00A89E9C /* SIPDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPDialog.m; sourceTree = "<group>"; };
+		CD4702C91561F43C00A89E9C /* SIPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPClient.h; sourceTree = "<group>"; };
+		CD4702CA1561F43C00A89E9C /* SIPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPClient.m; sourceTree = "<group>"; };
+		CD4702CF1561F44600A89E9C /* SDPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDPParser.h; sourceTree = "<group>"; };
+		CD4702D01561F44600A89E9C /* SDPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDPParser.m; sourceTree = "<group>"; };
+		CD4702D11561F44600A89E9C /* MediaDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaDescription.h; sourceTree = "<group>"; };
+		CD4702D21561F44600A89E9C /* MediaDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaDescription.m; sourceTree = "<group>"; };
+		CD5746251587FDA5008FC87B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CD32EAAC1574679200A3BA7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD5746261587FDA5008FC87B /* libAVCEncoder.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CD4702291561DF5600A89E9C = {
+			isa = PBXGroup;
+			children = (
+				CD47024B1561E07400A89E9C /* VideoStreamer */,
+				CD4702361561DF5600A89E9C /* Frameworks */,
+				CD4702351561DF5600A89E9C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CD4702351561DF5600A89E9C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702481561E07400A89E9C /* VideoStreamer.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CD4702361561DF5600A89E9C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CD5746251587FDA5008FC87B /* libAVCEncoder.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CD47024B1561E07400A89E9C /* VideoStreamer */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702AD1561E60F00A89E9C /* VideoStreamer.h */,
+				CD4702AE1561E60F00A89E9C /* VideoStreamer.m */,
+				CD4702A41561E54F00A89E9C /* AVCEncoder */,
+				CD47025D1561E41800A89E9C /* Networking */,
+				CD47024C1561E07400A89E9C /* Supporting Files */,
+			);
+			path = VideoStreamer;
+			sourceTree = "<group>";
+		};
+		CD47024C1561E07400A89E9C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CD47024D1561E07500A89E9C /* VideoStreamer-Info.plist */,
+				CD47024E1561E07500A89E9C /* InfoPlist.strings */,
+				CD4702511561E07500A89E9C /* VideoStreamer-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CD47025D1561E41800A89E9C /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				CD47025E1561E42200A89E9C /* utilities */,
+				CD4702651561E43900A89E9C /* packetizers */,
+				CD4702A31561E4F600A89E9C /* SDP */,
+				CD47027D1561E4CE00A89E9C /* RTP */,
+				CD4702761561E4A700A89E9C /* SIP */,
+				CD4702721561E48F00A89E9C /* STUN */,
+				CD47026C1561E46800A89E9C /* RTSPClient.h */,
+				CD47026D1561E46800A89E9C /* RTSPClient.m */,
+				CD47026E1561E46800A89E9C /* NetworkManager.h */,
+				CD47026F1561E46800A89E9C /* NetworkManager.m */,
+			);
+			name = Networking;
+			sourceTree = "<group>";
+		};
+		CD47025E1561E42200A89E9C /* utilities */ = {
+			isa = PBXGroup;
+			children = (
+				CD47025F1561E43600A89E9C /* sm_math.h */,
+				CD4702601561E43600A89E9C /* sm_math.m */,
+				CD4702611561E43600A89E9C /* MyExtensions.h */,
+				CD4702621561E43600A89E9C /* MyExtensions.m */,
+			);
+			name = utilities;
+			sourceTree = "<group>";
+		};
+		CD4702651561E43900A89E9C /* packetizers */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702661561E45900A89E9C /* rtpenc_aac.h */,
+				CD4702671561E45900A89E9C /* rtpenc_aac.m */,
+				CD4702681561E45900A89E9C /* rtpenc_h264.h */,
+				CD4702691561E45900A89E9C /* rtpenc_h264.m */,
+			);
+			name = packetizers;
+			sourceTree = "<group>";
+		};
+		CD4702721561E48F00A89E9C /* STUN */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702731561E49E00A89E9C /* STUNClient.h */,
+				CD4702741561E49E00A89E9C /* STUNClient.m */,
+			);
+			name = STUN;
+			sourceTree = "<group>";
+		};
+		CD4702761561E4A700A89E9C /* SIP */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702C71561F43C00A89E9C /* SIPDialog.h */,
+				CD4702C81561F43C00A89E9C /* SIPDialog.m */,
+				CD4702C91561F43C00A89E9C /* SIPClient.h */,
+				CD4702CA1561F43C00A89E9C /* SIPClient.m */,
+			);
+			name = SIP;
+			sourceTree = "<group>";
+		};
+		CD47027D1561E4CE00A89E9C /* RTP */ = {
+			isa = PBXGroup;
+			children = (
+				CD47027E1561E4E500A89E9C /* rtp.h */,
+				CD47027F1561E4E500A89E9C /* sdp.h */,
+				CD4702801561E4E500A89E9C /* net_udp.h */,
+				CD4702811561E4E500A89E9C /* net_tcp.h */,
+				CD4702821561E4E500A89E9C /* net_common.h */,
+				CD4702831561E4E500A89E9C /* ntp.h */,
+				CD4702841561E4E500A89E9C /* debug.h */,
+				CD4702851561E4E500A89E9C /* drand48.h */,
+				CD4702861561E4E500A89E9C /* inet_pton.h */,
+				CD4702871561E4E500A89E9C /* memory.h */,
+				CD4702881561E4E500A89E9C /* base64.h */,
+				CD4702891561E4E500A89E9C /* util.h */,
+				CD47028A1561E4E500A89E9C /* config_unix.h */,
+				CD47028B1561E4E500A89E9C /* rtp.c */,
+				CD47028C1561E4E500A89E9C /* sdp.c */,
+				CD47028D1561E4E500A89E9C /* net_udp.c */,
+				CD47028E1561E4E500A89E9C /* net_tcp.c */,
+				CD47028F1561E4E500A89E9C /* net_common.c */,
+				CD4702901561E4E500A89E9C /* ntp.c */,
+				CD4702911561E4E500A89E9C /* debug.c */,
+				CD4702921561E4E500A89E9C /* drand48.c */,
+				CD4702931561E4E500A89E9C /* inet_pton.c */,
+				CD4702941561E4E500A89E9C /* memory.c */,
+				CD4702951561E4E500A89E9C /* base64.c */,
+				CD4702961561E4E500A89E9C /* util.c */,
+			);
+			name = RTP;
+			sourceTree = "<group>";
+		};
+		CD4702A31561E4F600A89E9C /* SDP */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702CF1561F44600A89E9C /* SDPParser.h */,
+				CD4702D01561F44600A89E9C /* SDPParser.m */,
+				CD4702D11561F44600A89E9C /* MediaDescription.h */,
+				CD4702D21561F44600A89E9C /* MediaDescription.m */,
+			);
+			name = SDP;
+			sourceTree = "<group>";
+		};
+		CD4702A41561E54F00A89E9C /* AVCEncoder */ = {
+			isa = PBXGroup;
+			children = (
+				CD4702A51561E55F00A89E9C /* AVCEncoder.h */,
+				CD4702A61561E55F00A89E9C /* AVCParameters.h */,
+			);
+			name = AVCEncoder;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		CD4702C51561E78800A89E9C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD4702C61561E79600A89E9C /* VideoStreamer.h in Headers */,
+				CD4702CB1561F43C00A89E9C /* SIPDialog.h in Headers */,
+				CD4702CD1561F43C00A89E9C /* SIPClient.h in Headers */,
+				CD4702D31561F44600A89E9C /* SDPParser.h in Headers */,
+				CD4702D51561F44600A89E9C /* MediaDescription.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		CD4702471561E07400A89E9C /* VideoStreamer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD4702521561E07500A89E9C /* Build configuration list for PBXNativeTarget "VideoStreamer" */;
+			buildPhases = (
+				CD4702441561E07400A89E9C /* Sources */,
+				CD4702461561E07400A89E9C /* Resources */,
+				CD4702C51561E78800A89E9C /* Headers */,
+				CD32EAAC1574679200A3BA7B /* Frameworks */,
+				44105D84158811A900633840 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VideoStreamer;
+			productName = VideoStreamer;
+			productReference = CD4702481561E07400A89E9C /* VideoStreamer.framework */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CD47022B1561DF5600A89E9C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = CD47022E1561DF5600A89E9C /* Build configuration list for PBXProject "VideoStreamerFramework" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = CD4702291561DF5600A89E9C;
+			productRefGroup = CD4702351561DF5600A89E9C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CD4702471561E07400A89E9C /* VideoStreamer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CD4702461561E07400A89E9C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD4702501561E07500A89E9C /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		44105D84158811A900633840 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -a \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\" \"${INSTALL_PATH}\"";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CD4702441561E07400A89E9C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD4702641561E43600A89E9C /* MyExtensions.m in Sources */,
+				CD4702631561E43600A89E9C /* sm_math.m in Sources */,
+				CD47026A1561E45900A89E9C /* rtpenc_aac.m in Sources */,
+				CD47026B1561E45900A89E9C /* rtpenc_h264.m in Sources */,
+				CD4702701561E46800A89E9C /* RTSPClient.m in Sources */,
+				CD4702711561E46800A89E9C /* NetworkManager.m in Sources */,
+				CD4702751561E49E00A89E9C /* STUNClient.m in Sources */,
+				CD4702971561E4E500A89E9C /* rtp.c in Sources */,
+				CD4702981561E4E500A89E9C /* sdp.c in Sources */,
+				CD4702991561E4E500A89E9C /* net_udp.c in Sources */,
+				CD47029A1561E4E500A89E9C /* net_tcp.c in Sources */,
+				CD47029B1561E4E500A89E9C /* net_common.c in Sources */,
+				CD47029C1561E4E500A89E9C /* ntp.c in Sources */,
+				CD47029D1561E4E500A89E9C /* debug.c in Sources */,
+				CD47029E1561E4E500A89E9C /* drand48.c in Sources */,
+				CD47029F1561E4E500A89E9C /* inet_pton.c in Sources */,
+				CD4702A01561E4E500A89E9C /* memory.c in Sources */,
+				CD4702A11561E4E500A89E9C /* base64.c in Sources */,
+				CD4702A21561E4E500A89E9C /* util.c in Sources */,
+				CD4702AF1561E60F00A89E9C /* VideoStreamer.m in Sources */,
+				CD4702CC1561F43C00A89E9C /* SIPDialog.m in Sources */,
+				CD4702CE1561F43C00A89E9C /* SIPClient.m in Sources */,
+				CD4702D41561F44600A89E9C /* SDPParser.m in Sources */,
+				CD4702D61561F44600A89E9C /* MediaDescription.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CD47024E1561E07500A89E9C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CD47024F1561E07500A89E9C /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		44A9CC8D158824AB00BBCE6F /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Distribution;
+		};
+		44A9CC8E158824AB00BBCE6F /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Distribution;
+		};
+		CD47023F1561DF5600A89E9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		CD4702401561DF5600A89E9C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		CD4702531561E07500A89E9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		CD4702541561E07500A89E9C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CD47022E1561DF5600A89E9C /* Build configuration list for PBXProject "VideoStreamerFramework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD47023F1561DF5600A89E9C /* Debug */,
+				CD4702401561DF5600A89E9C /* Release */,
+				44A9CC8D158824AB00BBCE6F /* Distribution */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Distribution;
+		};
+		CD4702521561E07500A89E9C /* Build configuration list for PBXNativeTarget "VideoStreamer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD4702531561E07500A89E9C /* Debug */,
+				CD4702541561E07500A89E9C /* Release */,
+				44A9CC8E158824AB00BBCE6F /* Distribution */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Distribution;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CD47022B1561DF5600A89E9C /* Project object */;
+}

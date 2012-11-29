@@ -1,6 +1,7 @@
 module clutter_container;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 
 #include "util.h"
@@ -17,55 +18,57 @@ void container_foreach_callback(ClutterActor*actor,lua_State*L)
 }
 ]]
 
-/*
+/***************************************
     Interface: Container
-    
+
     The Container defines a group of properties and functions that enable objects to store multiple <UIElement> objects within them. Containers may be nested, so a Container may contain another Container.
-    
+
     The TrickPlay <Group> data type and <screen> global variable both provide the properties and functions implemented by Container.
-    
 */
 
 interface container [[ClutterActor*]]
 {
-    
-    /*
-    	Property: count
-    	
-    	The count property specifies the number of UIElement children currently stored in the Container object.
-    	
-    	*Default Setting:* 0
-    	
-    	*See Also:* the <children> property
-    	
-    */
-    
+
+/***************************************
+   	Property: count
+
+   	The count property specifies the number of UIElement children currently stored in the Container object.
+
+   	*Default Setting:* 0
+
+   	*See Also:* the <children> property
+*/
+
     # This one is very wasteful - it has to create and free the list as well as
     # traverse it to determine the number of children. Should consider removing
     # it altogether
 
     readonly int count
 	[[
+#ifdef CLUTTER_VERSION_1_10
+        count = clutter_actor_get_n_children( self );
+#else
         GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
 	    count = g_list_length(list);
 	    g_list_free(list);
+#endif
 	]];
-	
-    /*
-		Property: children
-		
-		The children property is a table of the UIElement objects currently stored in the Container.
-		
-		When setting the children property, any UIElements already in the Container are first removed. To clear all objects from the Container, set the children property to an empty table or call the <clear> function. (Note: Calling the clear() function will provide the best performance.)  To add UIElements to the Container without clearing it, use the <add> function.
-		
-		The order of the UIElements in the table defines their Z-order, i.e., their order along the Z-axis, within the Container. The first entry in the table will be behind the other elements; the last table entry will be in the very front.
-		
-		When iterating through a Container's children, best performance will be achieved by retrieving the property's table a single time, storing the returned table in a local variable, and then accessing individual UIElement objects from the local variable. This technique is preferred over accessing each object from the children table directly. The two techniques are demonstrated in the Code Example below.
-		
-		*Default Setting:* an empty table, {}
-		
-		*Code Example:* Demonstrate two methods to iterate through the children property table
-		
+
+/***************************************
+	Property: children
+
+	The children property is a table of the UIElement objects currently stored in the Container.
+
+	When setting the children property, any UIElements already in the Container are first removed. To clear all objects from the Container, set the children property to an empty table or call the <clear> function. (Note: Calling the clear() function will provide the best performance.)  To add UIElements to the Container without clearing it, use the <add> function.
+
+	The order of the UIElements in the table defines their Z-order, i.e., their order along the Z-axis, within the Container. The first entry in the table will be behind the other elements; the last table entry will be in the very front.
+
+	When iterating through a Container's children, best performance will be achieved by retrieving the property's table a single time, storing the returned table in a local variable, and then accessing individual UIElement objects from the local variable. This technique is preferred over accessing each object from the children table directly. The two techniques are demonstrated in the Code Example below.
+
+	*Default Setting:* an empty table, { }
+
+	*Code Example:* Demonstrate two methods to iterate through the children property table
+
 		(code)
 		-- Method #1
 		-- Access Container's elements from children property directly
@@ -75,7 +78,7 @@ interface container [[ClutterActor*]]
 			-- something
 		end
 		(end)
-		
+
 		(code)
 		-- Method #2
 		-- Save Container's children property in local variable and access elements from variable
@@ -86,60 +89,85 @@ interface container [[ClutterActor*]]
 			-- something
 		end
 		(end)
-		
-		*See Also:* the <add> function
-	
-    */
-    
+
+	*See Also:* the <add> function
+*/
+
     table children
         [[
-            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
-	    
 		    lua_newtable(L);
 		    int n = 1;
+#ifdef CLUTTER_VERSION_1_10
+            ClutterActorIter iter;
+            ClutterActor *child;
+            clutter_actor_iter_init( &iter, self );
+            while(clutter_actor_iter_next( &iter, &child ))
+            {
+                ClutterUtil::wrap_concrete_actor(L,child);
+                lua_rawseti(L,-2,n++);
+            }
+#else
+            GList * list=clutter_container_get_children(CLUTTER_CONTAINER(self));
+
 		    for(GList*item=g_list_first(list);item;item=g_list_next(item),++n)
 		    {
 				ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(item->data));
 				lua_rawseti(L,-2,n);
 		    }
 		    g_list_free(list);
+#endif
         ]]
         [[
             luaL_checktype(L,2,LUA_TTABLE);
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_all_children( self );
+#else
             clutter_group_remove_all(CLUTTER_GROUP(self));
+#endif
             lua_pushnil(L);
             while(lua_next(L,2))
             {
                 ClutterActor* source=ClutterUtil::user_data_to_actor(L,-1);
                 if ( ClutterUtil::is_qualified_child( self , source ) )
                 {
+#ifdef CLUTTER_VERSION_1_10
+                    clutter_actor_add_child( self, source );
+#else
                     clutter_container_add_actor( CLUTTER_CONTAINER( self ), source );
+#endif
+                }
+                else
+                {
+                    g_warning("THIS HAPPENED AT: %s", Util::where_am_i_lua(L).c_str());
                 }
                 lua_pop(L,1);
             }
         ]];
-    
-    /*
-		Function: add
-	
-		The add() function adds one or more UIElement objects to the Container; the add() function accepts any number of arguments. The order that UIElements are added to a Container defines their Z-order, i.e., their order along the Z-axis, within the Container. When multiple elements occupy the same position on the Z-axis, their order is determined by when they were added to the Container; between any two elements, the more-recently-added element is placed in front.
-		
-		When a UIElement is stored in a Container, the Container is the parent of the element.
-		
-		A UIElement object may be stored in one, and only one, Container at any given time. If a UIElement is already a member of a Container, any attempt to store it in another Container will fail. You can remove a UIElement from its current Container by calling either the Container's <remove> function or the <UIElement.unparent> function.
-	
-		*Prototype:* add( uiElement, .. )
-		
-		*Arguments:*
-		
+
+/***************************************
+	Function: add
+
+	The add() function adds one or more UIElement objects to the Container; the add() function accepts any number of arguments. The order that UIElements are added to a Container defines their Z-order, i.e., their order along the Z-axis, within the Container. When multiple elements occupy the same position on the Z-axis, their order is determined by when they were added to the Container; between any two elements, the more-recently-added element is placed in front.
+
+	When a UIElement is stored in a Container, the Container is the parent of the element.
+
+	A UIElement object may be stored in one, and only one, Container at any given time. If a UIElement is already a member of a Container, any attempt to store it in another Container will fail. You can remove a UIElement from its current Container by calling either the Container's <remove> function or the <UIElement.unparent> function.
+
+	*Prototype:*
+
+		(code)
+		add( uiElement, .. )
+		(end)
+
+	*Arguments:*
+
 		uiElement - one or more UIElement objects
-		
-		*Return Value:* None
-		
-		*See Also:* the <children> property and the <UIElement.unparent> function
-	
-    */
-    
+
+	*Return Value:* None
+
+	*See Also:* the <children> property and the <UIElement.unparent> function
+*/
+
     add(...)
         [[
             for(int i=2;i<=lua_gettop(L);++i)
@@ -149,40 +177,47 @@ interface container [[ClutterActor*]]
                     ClutterActor * source=ClutterUtil::user_data_to_actor(L,i);
 
                     if ( ClutterUtil::is_qualified_child( self, source ) )
-                    {                   
+                    {
+#ifdef CLUTTER_VERSION_1_10
+                        clutter_actor_add_child( self, source );
+#else
                         clutter_container_add_actor( CLUTTER_CONTAINER( self ),source );
+#endif
                     }
                     else
                     {
-                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER" );
+                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
                     }
                 }
                 else
                 {
-                    g_warning( "ATTEMPT TO ADD NIL TO CONTAINER" );
+                    g_warning( "ATTEMPT TO ADD NIL TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
                 }
             }
         ]];
-	
-    /*
-		Function: remove
-		
-		The remove() function removes one or more UIElement objects from the Container; the remove() function accepts any number of arguments.
-		
-		Another method to remove a UIElement from a Container is to call the UIElement's unparent() function.
-		
-		*Prototype:* remove( uiElement, .. )
-		
-		*Arguments:*
-		
+
+/***************************************
+	Function: remove
+
+	The remove() function removes one or more UIElement objects from the Container; the remove() function accepts any number of arguments.
+
+	Another method to remove a UIElement from a Container is to call the UIElement's unparent() function.
+
+	*Prototype:*
+
+		(code)
+		remove( uiElement, .. )
+		(end)
+
+	*Arguments:*
+
 		uiElement - one or more UIElement objects. If a specified UIElement object is not in the Container, it is ignored.
-		
-		*Return Value:* None
-		
-		*See Also:* the <UIElement.unparent> function
-		
-    */
-    
+
+	*Return Value:* None
+
+	*See Also:* the <UIElement.unparent> function
+*/
+
     remove(...)
 	[[
             for(int i=2;i<=lua_gettop(L);++i)
@@ -191,129 +226,149 @@ interface container [[ClutterActor*]]
                 {
                     if (ClutterActor * actor=ClutterUtil::user_data_to_actor(L,i))
                     {
+#ifdef CLUTTER_VERSION_1_10
+                        clutter_actor_remove_child( self, actor );
+#else
                         clutter_container_remove_actor(CLUTTER_CONTAINER(self),actor);
+#endif
                     }
                 }
-            }	    
+            }
 	]];
-	
-    /*
-		Function: clear
-	
-		The clear() function removes all UIElements objects from the Container.
-		
-		*Return Value:* None
-		
-		*See Also:* the <children> property and the <remove> function
-	
-    */
-    
+
+/***************************************
+	Function: clear
+
+	The clear() function removes all UIElements objects from the Container.
+
+	*Return Value:* None
+
+	*See Also:* the <children> property and the <remove> function
+*/
+
     clear()
 	[[
-            clutter_group_remove_all(CLUTTER_GROUP(self));	    
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_all_children( self );
+#else
+            clutter_group_remove_all(CLUTTER_GROUP(self));
+#endif
 	]];
-	
-    /*
-		Function: foreach_child
-		
-		The foreach_child() function iterates through the UIElement objects in the Container and calls a specified function for each object, passing the object as the single argument on each call.
-		
-		*Arguments:*
-	
+
+/***************************************
+	Function: foreach_child
+
+	The foreach_child() function iterates through the UIElement objects in the Container and calls a specified function for each object, passing the object as the single argument on each call.
+
+	*Arguments:*
+
 		function - function to call for each UIElement in the Container. The function must accept a single UIElement argument.
-	
-		*Return Value:* None
-		
-		*Code Example:* Call a function with each UIElement in a Container
-		
+
+	*Return Value:* None
+
+	*Code Example:* Call a function with each UIElement in a Container
+
 		(code)
 		-- This is the function we will call with each UIElement in a Group
 		function showName( uiElement )
 			print( "This UIElement's name is ", uiElement.name )
 		end
-		
+
 		-- Define a Group variable
 	    local uiGroup = Group{ position = { 100, 100 },
-                               size = { 1400, 650 } }                                 
-    
+                               size     = { 1400, 650 } }
+
 		-- Assume a bunch of UIElements have already been created. Add them to the Group
 		uiGroup:add( ui1, ui2, ui3, ui4 )
-		
+
 		-- Call the showName() function with each UIElement in the Group
 		uiGroup:foreach_child( showName )
 		(end)
 
-		*See Also:* the <children> property
-		
-    */
-    
+	*See Also:* the <children> property
+*/
+
     foreach_child( function f )
 	[[
-	    clutter_container_foreach(CLUTTER_CONTAINER(self),(ClutterCallback)container_foreach_callback,L);    
+#ifdef CLUTTER_VERSION_1_10
+        ClutterActorIter iter;
+        ClutterActor *child;
+        clutter_actor_iter_init( &iter, self );
+        while(clutter_actor_iter_next( &iter, &child ))
+        {
+            container_foreach_callback( child, L );
+        }
+#else
+	    clutter_container_foreach(CLUTTER_CONTAINER(self),(ClutterCallback)container_foreach_callback,L);
+#endif
 	]];
-	
-    /*
-		Function: find_child
-	
-		The find_child() function retrieves from the Container the UIElement whose name property matches the function's argument. Any Container objects stored in the Container are also searched.
-	
-		*Arguments:*
-	
+
+/***************************************
+	Function: find_child
+
+	The find_child() function retrieves from the Container the UIElement whose name property matches the function's argument. Any Container objects stored in the Container are also searched.
+
+	*Arguments:*
+
 		name - string name of the UIElement object
-	
-		*Return Value:*
-		
+
+	*Return Value:*
+
 		uiElement - the UIElement object whose name property matches the function's argument. If no matching element was found, returns nil.
 
-		*See Also:* the <children> and the <UIElement.name> properties
-    */
-    
+	*See Also:* the <children> and the <UIElement.name> properties
+*/
+
     UIElement find_child( string name )
 	[[
-	    ClutterUtil::wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));    
+	    ClutterUtil::wrap_concrete_actor(L,clutter_container_find_child_by_name(CLUTTER_CONTAINER(self),name));
 	]];
-	
-    /*
-    	Function: raise_child
-    	
-    	The raise_child() function modifies a specified UIElement's Z-order, i.e., its order along the Z-axis, within the Container. The UIElement can be raised either to the top of the Container's Z-order or to immediately precede a specified UIElement.
-	
-		*Arguments:*
-	
+
+/***************************************
+   	Function: raise_child
+
+   	The raise_child() function modifies a specified UIElement's Z-order, i.e., its order along the Z-axis, within the Container. The UIElement can be raised either to the top of the Container's Z-order or to immediately precede a specified UIElement.
+
+	*Arguments:*
+
 		child - UIElement object to raise
 		sibling - optional UIElement object. If specified, the child argument is moved in the Container's Z-order to immediately precede the sibling argument. If not specified, the child UIElement is moved to the top of the Z-order.
-		
-		*Return Value:* None
-		
-		*See Also:* the <lower_child> function and the <UIElement.raise> and <UIElement.raise_to_top> functions
-    */
-    
+
+	*Return Value:* None
+
+	*See Also:* the <lower_child> function and the <UIElement.raise> and <UIElement.raise_to_top> functions
+*/
+
     raise_child( UIElement child, UIElement sibling = 0 )
 	[[
 	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
 	    ClutterActor * s = sibling?ClutterUtil::user_data_to_actor(L,sibling):NULL;
-	    
+
 	    if (c)
 	    {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( self, c, s );
+#else
 		clutter_container_raise_child(CLUTTER_CONTAINER(self),c,s);
+#endif
 	    }
 	]];
-	
-    /*
-		Function: lower_child
-		
-		The lower_child() function modifies a specified UIElement's Z-order, i.e., its order along the Z-axis, within the Container. The UIElement can be lowered either to the bottom of the Container's Z-order or to immediately below a specified UIElement.
-	
-		*Arguments:*
-	
+
+/***************************************
+	Function: lower_child
+
+	The lower_child() function modifies a specified UIElement's Z-order, i.e., its order along the Z-axis, within the Container. The UIElement can be lowered either to the bottom of the Container's Z-order or to immediately below a specified UIElement.
+
+	*Arguments:*
+
 		child - UIElement object to lower
 		sibling - optional UIElement object. If specified, the child argument is moved in the Container's Z-order to immediately follow the sibling argument. If not specified, the child UIElement is moved to the bottom of the Z-order.
-		
-		*Return Value:* None
-		
-		*See Also:* the <raise_child> function and the <UIElement.lower> and <UIElement.lower_to_bottom> functions
-    */
-    
+
+	*Return Value:* None
+
+	*See Also:* the <raise_child> function and the <UIElement.lower> and <UIElement.lower_to_bottom> functions
+*/
+
     lower_child( UIElement child, UIElement sibling = 0 )
 	[[
 	    ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
@@ -321,7 +376,16 @@ interface container [[ClutterActor*]]
 
 	    if (c)
 	    {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_below_sibling( self, c, s );
+#else
 		clutter_container_lower_child(CLUTTER_CONTAINER(self),c,s);
+#endif
 	    }
-	]];	
+	]];
+
+/***************************************
+
+*/
+
 }

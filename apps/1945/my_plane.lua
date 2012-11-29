@@ -56,7 +56,7 @@ impact = function(x,y)
         }
         add_to_render_list(imp)
     else
-        print(x,y)
+        --print(x,y)
         imp = table.remove(old_impacts)
         add_to_render_list(imp)
         for i =1,imp.num do
@@ -121,9 +121,9 @@ smoke = function(i,o)   return {
         end
         
         self.halted  = true
-        print("m")
+        --print("m")
         if type(o) == "table"  then
-                print("AMOK", o)
+                --print("AMOK", o)
                 recurse_and_apply(  self, o  )
         end
         
@@ -308,7 +308,7 @@ my_plane =
                 recurse_and_apply(  self, o  )
                 self.overwrite_vars = nil
             end
-            print("my_plane setup end")
+            --print("my_plane setup end")
         end,
         salvage = function( self, salvage_list )
             
@@ -690,7 +690,7 @@ my_plane =
                         end
                 }
             else
-            print(x,y)
+            --print(x,y)
                 local bullet = table.remove(old_bullets)
                 bullet.image.y = y
                 bullet.image.x = x
@@ -725,7 +725,7 @@ if state.hud.num_lives == 0 then
 	
     local index = 0
     for i=1,8 do
-        print(state.hud.curr_score, state.high_scores[i].score)
+        --print(state.hud.curr_score, state.high_scores[i].score)
         if state.hud.curr_score > tonumber(state.high_scores[i].score) then
             index = i
             break

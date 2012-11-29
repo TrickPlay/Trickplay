@@ -219,7 +219,7 @@ local branch_constructor = function(
 		
 	)
 	
-	print(dist_from_wall)
+	--print(dist_from_wall)
 	
 	assert(orientation == 1 or orientation == -1)
 	

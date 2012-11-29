@@ -11,7 +11,7 @@ local curr_max_dist = screen_h/5
 local idle_loop = function(_, dt, __ )
 	
 	for obj,func in pairs(to_be_deleted) do
-		print("del1", obj)
+		--print("del1", obj)
 		func(obj)
 		to_be_deleted[obj]  = nil
 		World:remove(obj)
