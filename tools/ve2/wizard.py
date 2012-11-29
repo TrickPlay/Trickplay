@@ -372,6 +372,7 @@ class Wizard():
                 os.mkdir(assets_path)
                 os.mkdir(str(os.path.join(assets_path, 'videos')))
                 os.mkdir(str(os.path.join(assets_path, 'images')))
+                os.mkdir(str(os.path.join(assets_path, 'skins')))
                 os.mkdir(str(os.path.join(assets_path, 'sounds')))
 
                 os.mkdir(str(os.path.join(str(path), 'screens')))

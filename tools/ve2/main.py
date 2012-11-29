@@ -241,15 +241,33 @@ class MainWindow(QMainWindow):
             print ("[VDBG] Import Asset Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
-                print("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                self.stitcher.start("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                #print("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                #self.stitcher.start("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                print("stitcher -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
+                self.stitcher.start("stitcher -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
             else:
-                print("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                self.stitcher.start("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                #print("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                #self.stitcher.start("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
+                print("stitcher -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
+                self.stitcher.start("stitcher -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
 
 
     def importSkins(self):
-        return true
+        path = -1 
+        while path == -1 :
+            if self.path is None:
+		        self.path = self.apath
+            path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
+
+        if path:
+            print ("[VDBG] Import Skin Images ...[%s]"%path)
+
+            if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
+                print("stitcher -j "+str(os.path.join(self.path, "assets/skins/skins.json"))+" -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
+                self.stitcher.start("stitcher -j "+str(os.path.join(self.path, "assets/skins/skins.json"))+" -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
+            else:
+                print("stitcher -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
+                self.stitcher.start("stitcher -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
 
     def newProject(self):
         orgPath = self.path
