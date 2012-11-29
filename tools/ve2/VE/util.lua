@@ -47,7 +47,8 @@ function util.addIntoLayer (uiInstance, group)
     uiInstance.selected = false
     uiInstance.is_in_group = false
 
-    devtools:gid(curLayerGid):add(uiInstance)
+    --devtools:gid(curLayerGid):add(uiInstance)
+    curLayer:add(uiInstance)
 
     if group == nil then
         _VE_.refresh()
@@ -617,7 +618,7 @@ end
 
 function util.getCurLayer(gid) 
 
-    curLayerGid = gid 
+    --curLayerGid = gid 
     curLayer = devtools:gid(gid)
 
 end 

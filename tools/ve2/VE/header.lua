@@ -116,7 +116,7 @@ uiNum = 0
 layerNum = 0
 
 -- current Layer 
-curLayerGid = nil
+--curLayerGid = nil
 curLayer= nil
 -- block report flag 
 blockReport= false
