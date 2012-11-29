@@ -1,4 +1,69 @@
+--[[
+dolater(
+dofile,"Button/test.lua"
+)
+--]]
+--[[
+dolater(
+dofile,"ToggleButton/test.lua"
+)
+dolater(
+dofile,"RadioButtonGroup/test.lua"
+)
+--]]
 
+--[[
+dolater(
+dofile,"DialogBox/test.lua"
+)
+--]]
+--[[
+dolater(
+dofile,"ProgressSpinner/test.lua"
+)
+--]]
+
+--[=[
+screen:show()
+
+if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
+if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
+if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
+if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
+if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
+if not STYLE             then dofile("__CORE/Style.lua")                  end
+if not WIDGET            then dofile("__CORE/Widget.lua")                 end
+if not BUTTON            then dofile("Button/Button.lua")                 end
+
+
+--------------------------------------------------------------------------------
+
+
+
+local color_scheme_json = '{"ColorScheme":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (10)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (11)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (12)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (13)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (14)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (15)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (16)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (17)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (18)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (20)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (21)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (22)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (4)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (5)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (6)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (7)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (8)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (9)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]}}'
+
+local styles_json = '{"Style (1)":{"arrow":"ArrowStyle (1)","border":"BorderStyle (1)","fill_colors":"ColorScheme (6)","text":"TextStyle (1)"},"Style (2)":{"arrow":"ArrowStyle (2)","border":"BorderStyle (2)","fill_colors":"ColorScheme (9)","text":"TextStyle (2)"},"Style (3)":{"arrow":"ArrowStyle (3)","border":"BorderStyle (3)","fill_colors":"ColorScheme (12)","text":"TextStyle (3)"},"Style (4)":{"arrow":"ArrowStyle (4)","border":"BorderStyle (6)","fill_colors":"ColorScheme (21)","text":"TextStyle (6)"},"Style (5)":{"arrow":"ArrowStyle (5)","border":"BorderStyle (5)","fill_colors":"ColorScheme (18)","text":"TextStyle (5)"},"Style (6)":{"arrow":"ArrowStyle (6)","border":"BorderStyle (4)","fill_colors":"ColorScheme (16)","text":"TextStyle (4)"}}'
+local arrow_json = '{"ArrowStyle (1)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (2)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (3)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (4)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (5)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (6)":{"colors":"ColorScheme (22)","offset":10,"size":20}}'
+local border_json = '{"BorderStyle (1)":{"colors":"ColorScheme","corner_radius":10,"width":2},"BorderStyle (2)":{"colors":"ColorScheme (4)","corner_radius":10,"width":2},"BorderStyle (3)":{"colors":"ColorScheme (7)","corner_radius":10,"width":2},"BorderStyle (4)":{"colors":"ColorScheme (14)","corner_radius":10,"width":10},"BorderStyle (5)":{"colors":"ColorScheme (13)","corner_radius":10,"width":10},"BorderStyle (6)":{"colors":"ColorScheme (10)","corner_radius":10,"width":2}}'
+local text_json = '{"TextStyle (1)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (5)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (2)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (8)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (3)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (11)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (4)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (15)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (5)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (17)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":200,"y_offset":-50},"TextStyle (6)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (20)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0}}'
+
+
+styles_json = '{"style":'..styles_json..',"arrow":'..arrow_json..',"border":'..border_json..',"text":'..text_json..'}'
+
+
+
+local screen_json = '['
+screen_json = screen_json.. '{"name":"b1","anchor_point":[0,0],"focused":false,"gid":22,"h":50,"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (3)","type":"Button","w":200,"x":0,"x_rotation":[0,0,0],"y":0,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
+screen_json = screen_json..',{"name":"b2","anchor_point":[0,0],"focused":false,"gid":17,"h":50,"label":"lAbel","opacity":255,"scale":[1,1,0,0],"style":"Style (5)","type":"Button","w":200,"x":100,"x_rotation":[0,0,0],"y":200,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
+screen_json = screen_json..',{"name":"b3","anchor_point":[0,0],"focused":false,"gid":29,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":400,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
+screen_json = screen_json..',{"name":"b4","anchor_point":[0,0],"focused":false,"gid":34,"h":150,"images":{"default":"Button\/button3.png","focus":"Button\/button-focus.png"},"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (4)","type":"Button","w":300,"x":200,"x_rotation":[0,0,0],"y":600,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
+screen_json = screen_json..',{"name":"b5","anchor_point":[0,0],"focused":false,"gid":35,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":700,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
+screen_json = screen_json..']'
+
+ 
+
+]=]
+--------------------------------------------------------------------------------
 local color_scheme_uri = 'app/color_schemes.json'
 local style_uri        = 'app/styles.json'
 local layer_dir        = 'app/'
@@ -236,3 +301,4 @@ function load_layer(str)
 
     return layer
 end
+

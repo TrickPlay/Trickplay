@@ -1,5 +1,6 @@
 LIBS=`pkg-config --libs gio-2.0 glib-2.0 json-glib-1.0 MagickCore`
 INCS=`pkg-config --cflags gio-2.0 glib-2.0 json-glib-1.0 MagickCore`
+CC=clang
 
 .c.o: item.h leaf.h main.h
 	$(CC) -g -Wall $(CFLAGS) $(INCS) -c $*.c
