@@ -144,8 +144,6 @@ function mme:make(sesh)
             
             print("IIIIIII LOST!!!!!!!")
             
-            sesh_ref.i_counted_score = true
-            
             logic:lost_against(self)
             
             sesh_ref:remove_view(self)
@@ -157,8 +155,6 @@ function mme:make(sesh)
         elseif sesh_ref.opponent_score == score_limit then
             
             print("IIIIIII WON!!!!!!!")
-            
-            sesh_ref.i_counted_score = true
             
             logic:won_against(self)
             
@@ -244,6 +240,7 @@ function mme:make(sesh)
     
     function entry:delete()
         
+        print("deleted")
         self:unparent()
         
         if sesh_ref ~= nil then   sesh_ref:remove_view(self)   end

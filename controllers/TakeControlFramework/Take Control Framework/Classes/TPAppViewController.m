@@ -18,7 +18,7 @@
 
 
 #import "TouchController.h"
-#import "AccelerometerController.h"
+#import "CoreMotionController.h"
 #import "AudioController.h"
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
@@ -28,11 +28,12 @@
 #import "Protocols.h"
 
 #import <uuid/uuid.h>
+#import <VideoStreamer/VideoStreamer.h>
 
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
-UINavigationControllerDelegate, VirtualRemoteDelegate> {
+UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 
 @private
     BOOL viewDidAppear;
@@ -99,19 +100,25 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // and editing the images to be sent Trickplay.
     CameraViewController *camera;
     
+    // This VideoStreamer object may be used to stream video via SIP from the iOS Device
+    // to an outside SIP server or client. The camera cannot be accessed while a video
+    // streamer exists and the video streamer is automatically destroyed when no longer
+    // needed.
+    VideoStreamer *videoStreamer;
+    
     // The UIViewController for the virtual remote used to control the Television.
     VirtualRemoteViewController *virtualRemote;
     
     // YES if static graphics have been added to Take Control's views, NO otherwise.
     BOOL graphics;
     
+    // The CoreMotionController is used to capture the motion of the device using the
+    // accelerometer, gyroscope, magnetometer, and the calculation of device motion.
+    CoreMotionController *coreMotionController;
+    
     // The TouchController. All touch events sent to this delegate
     // for proper handling.
     id <ViewControllerTouchDelegate> touchDelegate;
-    
-    // The AccelerometerController. All accelerometer events sent to this delegate
-    // for proper handling.
-    id <ViewControllerAccelerometerDelegate> accelDelegate;
     
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
@@ -132,7 +139,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 @property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
@@ -170,7 +176,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @synthesize backgroundView;
 
 @synthesize touchDelegate;
-@synthesize accelDelegate;
 @synthesize advancedUIDelegate;
 
 #pragma mark -
@@ -308,6 +313,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
             hasPictures = @"\tPS";
         }
         
+        // Figure out fi the device has video streaming
+        NSString *hasVideoStreaming = @"";
+        if ([AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]) {
+            hasVideoStreaming = @"\tSV";
+        }
+        
         // Retrieve the UUID or make a new one and save it
         NSData *deviceID;
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -326,7 +337,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"deviceID: %@", deviceID);
         
         // Tell the service what this device is capable of
-        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.4\t%@\tKY\tAX\tFM\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, hasVideoStreaming, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
         
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
@@ -334,13 +345,14 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
         camera = nil;
+        videoStreamer = nil;
         
         // For audio playback
         audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
         // Controls touches
         touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
-        // Controls Acceleration
-        accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
+        // Controls Core Motion (Accelerometer, gyroscope, magnetometer, device motion)
+        coreMotionController = [[CoreMotionController alloc] initWithSocketManager:socketManager];
         
         // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
         // from Trickplay
@@ -503,8 +515,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  */
 - (void)do_WM:(NSArray *)args {
     version = [[args objectAtIndex:0] retain];
-    if ([version floatValue] < 4.3) {
-        NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
+    if ([version floatValue] < 4.4) {
+        NSLog(@"WARNING: Protocol Version is less than 4.4, please update Trickplay.");
     }
     
     //[tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
@@ -833,7 +845,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 #pragma mark -
-#pragma mark Accelerometer Controller Commands
+#pragma mark CoreMotion Controller Commands
 
 /**
  * SA = Start Accelerometer
@@ -846,7 +858,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  *  1. Interval between events (in milliseconds)
  */
 - (void)do_SA:(NSArray *)args {
-    [accelDelegate startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
+    [coreMotionController startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
 }
 
 /**
@@ -856,7 +868,79 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * server.
  */
 - (void)do_PA:(NSArray *)args {
-    [accelDelegate pauseAccelerometer];
+    [coreMotionController pauseAccelerometer];
+}
+
+
+/**
+ * SG = Start Gyroscope
+ *
+ * Informs the GyroscopeController to begin sending gyroscope events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SGY:(NSArray *)args {
+    [coreMotionController startGyroscopeWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PG = Pause Gyroscope
+ *
+ * Tells the GyroscopeController to stop sending gyroscope events to the
+ * server.
+ */
+- (void)do_PGY:(NSArray *)args {
+    [coreMotionController pauseGyroscope];
+}
+
+
+/**
+ * SM = Start Magnetometer
+ *
+ * Informs the MagnetometerController to begin sending magnetometer events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SMM:(NSArray *)args {
+    [coreMotionController startMagnetometerWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PM = Pause Magnetometer
+ *
+ * Tells the MagnetometerController to stop sending magnetometer events to the
+ * server.
+ */
+- (void)do_PMM:(NSArray *)args {
+    [coreMotionController pauseMagnetometer];
+}
+
+
+/**
+ * SD = Start DeviceMotion
+ *
+ * Informs the DeviceMotionController to begin sending DeviceMotion events to the
+ * server at given intervals.
+ *
+ * Passes one argument:
+ *  0. Interval between events (in milliseconds)
+ */
+- (void)do_SAT:(NSArray *)args {
+    [coreMotionController startDeviceMotionWithInterval:[[args objectAtIndex:0] floatValue]];
+}
+
+/**
+ * PD = Pause DeviceMotion
+ *
+ * Tells the DeviceMotionController to stop sending DeviceMotion events to the
+ * server.
+ */
+- (void)do_PAT:(NSArray *)args {
+    [coreMotionController pauseDeviceMotion];
 }
 
 #pragma mark -
@@ -926,11 +1010,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  *  4. Resource name of a possible mask to use to cover the camera view port when
  *     taking or editing an image.
  *  5. A label to inform the user of how he or she should be using the camera
- *  6. A label pasted on any button that when pushed cancels taking a photo.
+ *  6. A label pasted on any button that when pushed cancels taking a photo
  */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
-    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName) {
+    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName || videoStreamer) {
         [self canceledPickingImage];
         return;
     }
@@ -1028,7 +1112,158 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 #pragma mark -
-#pragma mark - Modal Virtual Remote
+#pragma mark Video Streaming
+
+// Video Streaming Server->Controller
+
+/**
+ * SVSC = Streaming Video Start Call
+ *
+ * Begins a SIP call to a specific address.
+ *
+ * Passes 1 argument
+ *  0. The address to initiate a SIP call to
+ */
+- (void)do_SVSC:(NSArray *)args {
+    NSLog(@"Streaming Video Start Call");
+    if ([self.navigationController visibleViewController] != self) {
+        NSLog(@"Could not start Streaming Video Call, app is not visible on device");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video failed, app is not visible on device"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Check the arguments
+    if (args.count < 1) {
+        NSLog(@"Could not start Streaming Video Call, no address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t<NOTHING>\t%@\n", @"Streaming Video failed can not connect, invalid address provided"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Make sure that the camera is not in use first. (Camera should destroy itself when not in use)
+    if (camera) {
+        NSLog(@"Could not start Streaming Video Call, the Camera is currently in use!");
+        // Send Streaming Video Call Failed <address> <reason>
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, camera is currently in use"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Make sure there isn't already a Streaming Video session
+    if (videoStreamer) {
+        NSLog(@"Could not start Streaming Video Call, Streaming Video currently in session");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, call is currently in session"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteAddress:[args objectAtIndex:0] serverPort:5060 clientPort:50160] autorelease];
+    if (!context) {
+        NSLog(@"Could not start Streaming Video Call, invalid address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, invalid address provided"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    videoStreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    if (!videoStreamer) {
+        NSLog(@"Could not start Streaming Video Call, VideoStreamer failed to launch on Device");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video module failed to launch on device"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    videoStreamer.view.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:.5];
+    [videoStreamer startChat];
+    [delegate tpAppViewController:self wantsToPresentCamera:videoStreamer];
+}
+
+/**
+ * SVEC = Streaming Video End Call
+ *
+ * Ends a call in progress to a specific address, or abort the calline sequence
+ * if the call is not yet connected.
+ *
+ * Passes 1 argument
+ *  0. The address of the call the TV wants to end
+ */
+- (void)do_SVEC:(NSArray *)args {
+    NSLog(@"Streaming Video End Call");
+
+    [videoStreamer endChat];
+}
+
+/**
+ * SVSS = Streaming Video Send Status
+ *
+ * Sends a Streaming Video Call Status (SVCS) event ASAP to indicate the current state
+ * of the streaming video system.
+ */
+- (void)do_SVSS {
+    NSLog(@"Streaming Video Send Status");
+    NSString *sentData;
+    if (videoStreamer) {
+        if (videoStreamer.status == CONNECTED) {
+            sentData = [NSString stringWithFormat:@"SVCS\tCONNECTED\t%@\n", videoStreamer.streamerContext.fullAddress];
+        } else if(videoStreamer.status == INITIATING) {
+            sentData = @"SVCS\tWAIT\tWAIT\n";
+        } else {
+            sentData = @"SVCS\tREADY\tREADY\n";
+        }
+    } else {
+        sentData = @"SVCS\tREADY\tREADY\n";
+    }
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
+}
+
+// TODO: If in any way the video streamer is destroyed, pass cancel message back to TrickPlay
+
+- (void)videoStreamerInitiatingChat:(id)_videoStreamer {
+    
+}
+
+- (void)videoStreamerChatStarted:(id)_videoStreamer {
+    NSLog(@"Streaming Video Call Connected");
+    NSString *sentData = [NSString stringWithFormat:@"SVCC\t%@\n", videoStreamer.streamerContext.fullAddress];
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
+}
+
+- (void)videoStreamer:(VideoStreamer *)_videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code {
+    
+    NSLog(@"Streaming Video Call Ended: %@", reason);
+    
+    NSString *sentData;
+    switch (code) {
+        case CALL_ENDED_BY_CALLEE:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_ENDED_BY_CALLER:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLER\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_FAILED:
+            sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+        case CALL_DROPPED:
+            sentData = [NSString stringWithFormat:@"SVCD\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+            
+        default:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+    }
+    
+    [videoStreamer dismissViewControllerAnimated:YES completion:^(void){
+        NSLog(@"VideoStreamer dismissed");
+        [videoStreamer release];
+        videoStreamer = nil;
+    }];
+}
+
+#pragma mark -
+#pragma mark Modal Virtual Remote
 
 /**
  * SV = Show Virtual Remote
@@ -1078,7 +1313,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  */
 - (void)do_RT:(NSArray *)args {
     [audioController destroyAudioStreamer];
-    [accelDelegate pauseAccelerometer];
+    [coreMotionController pauseAccelerometer];
+    [coreMotionController pauseGyroscope];
+    [coreMotionController pauseMagnetometer];
+    [coreMotionController pauseDeviceMotion];
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [styleAlert release];
@@ -1143,6 +1381,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     if (camera) {
         [camera release];
         camera = nil;
+    }
+    
+    if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     
     /*
@@ -1419,8 +1664,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
-    if (accelDelegate) {
-        [(AccelerometerController *)accelDelegate release];
+    if (coreMotionController) {
+        [coreMotionController release];
     }
     if (styleAlert) {
         [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
@@ -1432,6 +1677,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     }
     if (camera) {
         [camera release];
+    }
+    if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     if (virtualRemote) {
         [virtualRemote release];

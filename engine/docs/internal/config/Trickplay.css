@@ -1,0 +1,201 @@
+@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("https://fonts.googleapis.com/css?family=Lato");
+
+body
+{
+    font-family: 'Lato',Arial,Helvetica,sans-serif;
+	/*font-weight: 500;*/
+}
+
+p 
+{
+   text-indent: 0;
+   margin-bottom: 1em;
+   margin-top: 1em;
+}
+
+.CBody pre.prettyprint
+{
+    font-family: Inconsolata, 'Courier New', Courier, monospace;
+    font-size: 10pt;
+    border-width: 1px 1px 1px 1em;
+    border-style: dashed dashed dashed solid;
+    border-color: #CBCBCB;
+    background: #F8F8F8F8;
+    padding: 0.5em 1em 0.5em 1em;
+    margin: 1em 5% 0 5%;
+}
+
+.CBody pre
+{
+    font-family: Inconsolata, 'Courier New', Courier, monospace;
+    font-size: 10pt;
+    border-width: 1px 1px 1px 1px;
+    border-style: dashed dashed dashed dashed;
+    border-color: #CBCBCB;
+    background: #F8F8F8F8;
+    padding: 0.5em 1em 0.5em 1em;
+    margin: 1em 5% 0 5%;
+}
+
+.CBody .Prototype
+{
+   margin: 0.5em 0.5em 0.5em 0.5em;
+}
+
+.SProperty, .SGroup .SIndent1 .SEntry, .SEntry, .SFunction, .SEvent, .SEventHandler, .SConstructor, .SVariable, .SType a
+{
+    font-family: Inconsolata, "Courier New", "Courier", monospace;
+    font-variant: normal;
+}
+
+.CDescriptionList
+{
+    width: 90%;
+    background-color: #F8F8F8F8;
+    border: 1px dashed #CBCBCB;
+    padding: 0.5em 1em 0.5em 1em;
+    margin: 1em 5% 0 5%;
+}
+
+.CDescriptionList .CDLEntry
+{
+    font-family: Inconsolata, "Courier New", "Courier", monospace;
+    vertical-align: text-bottom;
+    font-size: 12pt;
+    width: 15%;
+}
+
+.CDLDescription
+{
+    vertical-align: text-bottom;
+}
+
+.SDescription
+{
+   display: none;
+}
+
+.Summary
+{
+   margin-right: 30em;
+   margin-left: 1em;
+}
+
+.STable
+{
+    font-size: 10pt;
+}
+
+.SClass td, .SDatabase td, .SDatabaseTable td, .SSection td{
+    font-size: 14pt;
+}
+
+.SMain td
+{
+    display:none;
+}
+
+.SGroup .SEntry a
+{
+    color: #941300;
+}
+
+#MainTopic .CTitle
+{
+    background-color: #941300;
+    border-color: #4a0900;
+    /* Use a Data URL for trickplay logo: http://trickplay.com/images/logo-flat.png reduced and optimized */
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJEAAAA8CAMAAABRhKghAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABVQTFRF/vz8khMAVRAH0a+viWditRIbzV5kGDq1+wAAAnpJREFUeNrs2tuWqzAIANA0EP7/k4+XEALCqFWrax156LTW6m5CiKmTPk+L9IqcKC1yvldUFpEHUnqE5C5RWY1ficrmuFpUdsdlovJtnC4qR+NMUTklThSVV/SKXtErekX/pQh0mDOht5E3o2zojkA0HJrm51+JTIzX3v3CYArMRkR2Z3UMoFJ3uFBkSDifORANkiMiRAT+bkNHmHPDdyI6IhoOl4HbZwybM97WhWg+AhXwRTQl146xJiKojTU9dm00JnNtSFSi2q0soqUI+INjnvN+QyR5uhS1HMq68THzX1S5JqL6DXIoItWZVTTa3H5dFUHWskZqIn4/FIUZL7YtImjfvZ4RlUREoNtqKTKvSfoKnE6LReiLWpuwCFtxWBFJ1rSmSZeIWhNtF5EWlXNFSernTlES2QUikNLPA92KoNWplj+7RQg4VfANoqmgQ1SzaQyQ4c8iN7H/EuVaq62obl4RQV9tCPqCxK0G7izzt6ifadWsYUSwEFFZ1B15pyj5cRFO8TGZzSKY+qj0FZmnEBHBuSJvrKVurLWpNRpral6hq0QYi0DnVTfFuhcrR0VtsEuF3CKCsNOOi3KyM+3tIu69XSIK02i3iC/MFlcj3H+RqPXvvEOYRjtE2Vw2STVItty4Y03vAFGnOaJPJMqgSiKaD4Si4oloXTTXvdHBT1jUvZ5XjeNqpduvfXZY0UAvmheTspakfkUZpZFaZbcVh116yOvcIto+b1hdccRLp/N/Yd8GCzvtut/8O5hzWgg77fL7Ij4szuuf3TsysBQ30Y/vrzELp3IJj7jjp1rsUXdF49y/UeTDPveLLOzuu+sO7JH/E/FPgAEAYcxFp4AZXHUAAAAASUVORK5CYII=);
+    background-repeat:no-repeat;
+    background-position:right center;
+    font-size: 36pt;
+}
+
+.CClass .CTitle, .CInterface .CTitle, .CDatabase .CTitle, .CDatabaseTable .CTitle, .CSection .CTitle
+{
+    background-color: #941300;
+    border-color: #4a0900;
+    font-size: 36pt;
+}
+
+.CGroup .CTitle
+{
+    font-size: 24pt;
+}
+
+.CHeading
+{
+    font-variant: small-caps;
+    font-size: 14pt;
+}
+
+.CTitle
+{
+    font-variant: small-caps;
+	font-weight: 500;
+    background: c0c0c0;
+    font-size: 16pt;
+}
+
+.SBorder
+{
+    background-color: #F4F4FF;
+}
+
+.SMarked
+{
+    background-color: #E8E8FF;
+}
+
+.STitle
+{
+	font-weight: 500;
+    text-indent: 0;
+    margin-left: 0;
+    font-size: 24pt;
+}
+
+.MGroup
+{
+    border-style:  dashed  none  none dashed;
+    border-color: black;
+    border-width: 1px;
+    padding: 0.5em 0 0 0.5em;
+}
+
+
+.CConstant + * .CHeading + p, .CGroup + * .CHeading + p
+{
+    text-indent: 2em;
+}
+
+.MSubTitle
+{
+    font-style: italic;
+    font-variant: small-caps;
+}
+
+.CTopic
+{
+    margin-bottom: 1.5em;
+}
+
+/* Make Table of Contents menu wider than default */
+.ContentPage #Menu,
+.IndexPage #Menu {
+    width: 36ex;
+    }
+.ContentPage .Firefox #Menu,
+.IndexPage .Firefox #Menu {
+    width: 32ex;
+    }
+    
+/* Adjust left margin of content to accomodate wider menu */
+.ContentPage #Content {
+    margin-left: 36ex;
+    }
+.ContentPage .Firefox #Content {
+    margin-left: 32ex;
+    }
+

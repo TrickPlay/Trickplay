@@ -7,6 +7,7 @@
 #include "cairo/cairo-version.h"
 #include "pango/pango.h"
 #include "json-glib/json-glib.h"
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "ft2build.h"
 #include "freetype/freetype.h"
@@ -95,7 +96,11 @@ VersionMap get_versions()
 
     result[ "expat" ].push_back( XML_ExpatVersion() );
 
+#ifdef GIF_LIB_VERSION
     result[ "gif" ].push_back( clean_version( GIF_LIB_VERSION ) );
+#else
+    result[ "gif" ].push_back( Util::format( "%d.%d.%d", GIFLIB_MAJOR, GIFLIB_MINOR, GIFLIB_RELEASE ) );
+#endif
 
     result[ "tiff" ].push_back( clean_version( TIFFGetVersion() ) );
 

@@ -151,7 +151,7 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
      	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
 			g = next_grp
-			screen:add(g)
+			--screen:add(g)
 			screen:grab_key_focus()
 			prev_grp.opacity = 255
      	end 
@@ -202,7 +202,7 @@ Arguments:
 
 function ui_element.change_all_skin(skin_name)
     
-	for i = 1, table.getn(g.children), 1 do
+	for i = 1, #g.children, 1 do
 		if g.children[i].skin then 
 	     	g.children[i].skin = skin_name
 		end 
@@ -222,7 +222,7 @@ Arguments:
 
 function ui_element.change_button_skin(skin_name)
     
-	for i = 1, table.getn(g.children), 1 do
+	for i = 1, #g.children, 1 do
 		if g.children[i].extra.type == "Button" then 
 	     	g.children[i].skin = skin_name
 		end 
@@ -261,7 +261,7 @@ local function orderedNext(t, state)
     end
     -- fetch the next value
     key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
+    for i = 1,#t.__orderedIndex do
         if t.__orderedIndex[i] == state then
             key = t.__orderedIndex[i+1]
         end
@@ -1407,7 +1407,7 @@ function ui_element.timeline(t)
 			for l,k in pairs (attr_map[m.type]()) do 
 				 if type(m[k]) == "table" then 
 					local temptable = {}
-					for o = 1, table.getn(m[k]),1 do 
+					for o = 1, #m[k],1 do
 				      		local interval = Interval(m.extra.timeline[current_point][k][o], m.extra.timeline[next_point][k][o])
 						temptable[o] = interval:get_value(p)
 				        end 
@@ -1428,7 +1428,7 @@ function ui_element.timeline(t)
 			for l,k in pairs (attr_map[m.type]()) do 
 				if type(m[k]) == "table" then 
 				    local temptable = {}
-				    for o = 1, table.getn(m[k]),1 do 
+				    for o = 1, #m[k],1 do
 					temptable[o] = m.extra.timeline[next_point][k][o]
 				    end
 				    m[k] = temptable
@@ -3606,7 +3606,7 @@ function ui_element.checkBoxGroup(t)
     end
 
     function cb_group.extra.clear_focus()
-		for i=1, table.getn(boxes.children)/2 do 
+		for i=1, #boxes.children/2 do
 	    	boxes:find_child("box"..i).opacity = 255 
 	    	boxes:find_child("focus"..i).opacity = 0 
 		end 
@@ -3708,7 +3708,7 @@ function ui_element.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == next_key then 
-						if box_num < table.getn(boxes.children)/2 then 
+						if box_num < #boxes.children/2 then
 							next_num = box_num + 1
 	    					boxes:find_child("box"..box_num).opacity = 255 
 	    					boxes:find_child("focus"..box_num).opacity = 0 

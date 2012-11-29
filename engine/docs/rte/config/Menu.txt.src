@@ -22,22 +22,22 @@ Timestamp: mm.d.yyyy
 
 
 # --------------------------------------------------------------------------
-# 
+#
 # Cut and paste the lines below to change the order in which your files
 # appear on the menu.  Don't worry about adding or removing files, Natural
 # Docs will take care of that.
-# 
+#
 # You can further organize the menu by grouping the entries.  Add a
 # "Group: [name] {" line to start a group, and add a "}" to end it.
-# 
+#
 # You can add text and web links to the menu by adding "Text: [text]" and
 # "Link: [name] ([URL])" lines, respectively.
-# 
+#
 # The formatting and comments are auto-generated, so don't worry about
 # neatness when editing the file.  Natural Docs will clean it up the next
 # time it is run.  When working with groups, just deal with the braces and
 # forget about the indentation and comments.
-# 
+#
 # --------------------------------------------------------------------------
 
 Group: Development Options {
@@ -89,10 +89,10 @@ Group: Programmer's Guide {
 
 Group: Engine Reference {
 	File: Overview (no auto-title, docs/rte/reference/overview_rte.txt)
-	
+
 	Group: Animation {
 		File: Overview (no auto-title, docs/rte/reference/overview_animation.txt)
-		
+
 		Group: Classes {
 	        File: Animator (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState (no auto-title, bindings/clutter_state.lb)
@@ -103,23 +103,25 @@ Group: Engine Reference {
             File: Timeline (no auto-title, bindings/clutter_timeline.lb)
         }
 	}
-	
+
 	Group: External Connections {
 		File: Overview (no auto-title, docs/rte/reference/overview_external.txt)
-		
+
 		Group: Globals {
 			File: controllers (no auto-title, bindings/controllers.lb)
 			File: json (no auto-title, bindings/json.lb)
+			File: tuners (no auto-title, bindings/tuners.lb)
 			File: uri (no auto-title, bindings/uri.lb)
 		}
-		
+
 		Group: Classes {
 			File: URLRequest (no auto-title, bindings/url_request.lb)
 			File: XMLParser (no auto-title, bindings/xml.lb)
 		}
-		
+
 		Group: Interfaces {
 			File: Controller (no auto-title, bindings/controller.lb)
+			File: Tuner (no auto-title, bindings/tuner.lb)
 			File: URLRequestCancel (no auto-title, bindings/url_request_cancel.lb)
 			File: URLResponse (no auto-title, bindings/url_response.lb)
 		}
@@ -127,87 +129,91 @@ Group: Engine Reference {
 
 	Group: Media Playback {
 		File: Overview (no auto-title, docs/rte/reference/overview_media.txt)
-		
+
 		Group: Globals {
 			File: mediaplayer (no auto-title, bindings/mediaplayer.lb)
 		}
 	}
-	
-	Group: Physics Engine {
-		File: Overview* (no auto-title, docs/rte/reference/overview_physics.txt)
-		
-		Group: Classes {
-			File: Shape, Body and Physics* (no auto-title, bindings/physics.lb)
+
+	Group: 2D Physics Engine {
+		File: Overview (no auto-title, docs/rte/reference/overview_physics.txt)
+
+		Group: Globals {
+			File: physics Global Variable and Body Interface (no auto-title, bindings/physics.lb)
 		}
 	}
-	
+
 	Group: Profiles {
 		File: Overview (no auto-title, docs/rte/reference/overview_profile.txt)
-		
+
 		Group: Globals {
 			File: profile (no auto-title, bindings/profile.lb)
       		File: settings (no auto-title, bindings/settings.lb)
       	}
     }
-	
+
 	Group: System Information {
 		File: Overview (no auto-title, docs/rte/reference/overview_system.txt)
-		
+
 		Group: Globals {
 			File: app (no auto-title, bindings/app.lb)
+			File: devtools (no auto-title, bindings/devtools.lb)
 #			File: system* (no auto-title, bindings/system.lb)
 			File: trickplay (no auto-title, bindings/trickplay.lb)
 		}
 	}
-	
+
 	Group: Timers {
 		File: Overview (no auto-title, docs/rte/reference/overview_timers.txt)
-		
+
 		Group: Globals {
       		File: idle (no auto-title, bindings/idle.lb)
       	}
-      	
+
       	Group: Classes {
 			File: Stopwatch (no auto-title, bindings/stopwatch.lb)
 			File: Timer (no auto-title, bindings/timer.lb)
 		}
 	}
-	
+
 	Group: User Input {
 		File: Overview (no auto-title, docs/rte/reference/overview_input.txt)
-		
+
 		Group: Globals {
 			File: keyboard (no auto-title, bindings/keyboard.lb)
 			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
 		}
 	}
-	
+
 	Group: User Interface {
 		File: Overview (no auto-title, docs/rte/reference/overview_ui.txt)
-		
+
 		Group: Globals {
 			File: screen (no auto-title, bindings/clutter_screen.lb)
 		}
-		
+
 		Group: Classes {
 			File: Bitmap (no auto-title, bindings/bitmap.lb)
             File: Canvas (no auto-title, bindings/canvas.lb)
             File: Clone (no auto-title, bindings/clutter_clone.lb)
             File: Group (no auto-title, bindings/clutter_group.lb)
             File: Image (no auto-title, bindings/clutter_image.lb)
+		    File: NineSlice  (bindings/nineslice.lb)
             File: Rectangle (no auto-title, bindings/clutter_rectangle.lb)
+            File: Sprite  (bindings/sprite.lb)
+            File: SpriteSheet  (bindings/sprite_sheet.lb)
             File: Text (no auto-title, bindings/clutter_text.lb)
         }
-        
+
         Group: Interfaces {
          	File: UIElement (no auto-title, bindings/clutter_actor.lb)
             File: Container (no auto-title, bindings/clutter_container.lb)
         }
     }
-    
+
     Group: Utility Functions {
     	File: Overview (no auto-title, docs/rte/reference/overview_util.txt)
-    	
+
     	Group: Globals {
 			File: regex (no auto-title, bindings/regex.lb)
 			File: Misc. Utility Functions (no auto-title, bindings/globals.lb)
@@ -231,17 +237,17 @@ Group: Engine Reference {
 
 Group: Development Tools {
 	File: Overview (no auto-title, docs/devtools/overview_tools.txt)
-	
+
 	Group: TrickPlay IDE {
 		File: Overview (no auto-title, docs/devtools/ide/introduction.txt)
-		
+
 #		Group: Tutorial {
 #			File: Introduction* (no auto-title, docs/devtools/ide/tutorial/introduction.txt)
 #			File: Create New TrickPlay Application* (no auto-title, docs/devtools/ide/tutorial/editor.txt)
 #			File: Run the Application* (no auto-title, docs/devtools/ide/tutorial/runApp.txt)
 #			File: Debug the Application* (no auto-title, docs/devtools/ide/tutorial/debug.txt)
 #		}
-		
+
 		Group: Reference {
 			File: IDE User Interface (no auto-title, docs/devtools/ide/reference/ui.txt)
 			File: Editor Reference (no auto-title, docs/devtools/ide/reference/editor.txt)
@@ -249,10 +255,10 @@ Group: Development Tools {
 			File: Debugger Reference (no auto-title, docs/devtools/ide/reference/debugger.txt)
 		}
 	}
-	
+
 	Group: Visual Editor {
 		File: Overview (no auto-title, docs/devtools/editor/introduction.txt)
-		
+
 		Group: Tutorial {
 			File: Introduction  (no auto-title, docs/devtools/editor/tutorial/introduction.txt)
 			File: Create a New Project  (no auto-title, docs/devtools/editor/tutorial/createnewproject.txt)
@@ -268,7 +274,7 @@ Group: Development Tools {
       		File: CheckBox and RadioButton Elements  (no auto-title, docs/devtools/editor/tutorial/checkBoxRadioButton.txt)
       		File: ProgressBar and ProgressSpinner  (no auto-title, docs/devtools/editor/tutorial/progBarSpinner.txt)
 		}
-		
+
 		Group: Reference {
 			Group: User Interface {
 				File: Button  (no auto-title, docs/devtools/editor/reference/button.txt)
@@ -282,4 +288,3 @@ Group: Development Tools {
 	}
 }
 
-Text: (*) section docs not yet complete

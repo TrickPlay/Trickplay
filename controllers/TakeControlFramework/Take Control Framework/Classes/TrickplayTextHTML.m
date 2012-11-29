@@ -11,7 +11,6 @@
 
 @implementation TrickplayTextHTML
 
-@synthesize webview;
 @synthesize text;
 @synthesize origText;
 @synthesize fontFamily;
@@ -24,13 +23,11 @@
 
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:textID objectManager:objectManager])) {
-        //self.view = [[[UIView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
-        self.view = [[[UIWebView alloc] initWithFrame:CGRectMake(0.0, 0.0, 2000.0, 2000.0)] autorelease];
-        //[view addSubview:webview];
+        self.frame = [[UIScreen mainScreen] applicationFrame];
+        self.view = [[[UIWebView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
+        ((UIWebView *)self.view).delegate = self;
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         view.layer.position = CGPointMake(0.0, 0.0);
-        //webview.layer.anchorPoint = CGPointMake(0.0, 0.0);
-        //webview.layer.position = CGPointMake(0.0, 0.0);
         
         self.text = @"";
         self.origText = @"";
@@ -43,8 +40,6 @@
         
         view.backgroundColor = [UIColor clearColor];
         view.opaque = NO;
-        //webview.backgroundColor = [UIColor clearColor];
-        //webview.opaque = NO;
         
         maxLength = 0;
         
@@ -113,7 +108,7 @@
 #pragma mark Setters
 
 - (NSString *)getHtml {
-    NSString *html = [NSString stringWithFormat:@"<html><body><div style='vertical-align:baseline;"];
+    NSString *html = [NSString stringWithFormat:@"<html><body><div id='maintext' style='vertical-align:baseline;"];
     
     // .color property
     html = [NSString stringWithFormat:@"%@color:#%02x%02x%02x;", html, red, green, blue];
@@ -186,11 +181,32 @@
         html = [NSString stringWithFormat:@"%@</div></body></html>", html];
     } else {
         html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
-        // html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
     }
     
     return html;
-    //return [NSString stringWithFormat:@"<html><body><span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>%@</span></body></html>", html];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+  float new_h, new_w;
+  if(!(h_size > 0.0))
+  {
+    NSString *height = [(UIWebView *)webView stringByEvaluatingJavaScriptFromString:@"document.getElementById(\"maintext\").offsetHeight;"];
+    new_h = [height floatValue];
+  } else {
+    new_h = h_size;
+  }
+  
+  if(!(w_size > 0.0))
+  {
+    NSString *width = [(UIWebView *)webView stringByEvaluatingJavaScriptFromString:@"document.getElementById(\"maintext\").offsetWidth;"];
+    new_w = [width floatValue];
+  } else {
+    new_w = w_size;
+  }
+  CGRect frame = webView.frame;
+  frame.size.width = new_w;
+  frame.size.height = new_h;
+  webView.frame = frame;
 }
 
 - (void)setHTML {
@@ -249,28 +265,8 @@
         NSString *atext = [args objectForKey:@"text"];
         
         if (atext) {
-            self.origText = atext;
-            NSError *error = NULL;
-            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"<" options:NSRegularExpressionAnchorsMatchLines error:NULL];
-            self.origText = [regex stringByReplacingMatchesInString:self.origText options:NSMatchingWithTransparentBounds range:NSMakeRange(0, [self.origText length]) withTemplate:@"&lt;"];
-            regex = [NSRegularExpression regularExpressionWithPattern:@">" options:NSRegularExpressionAnchorsMatchLines error:NULL];
-            self.origText = [regex stringByReplacingMatchesInString:self.origText options:NSMatchingWithTransparentBounds range:NSMakeRange(0, [self.origText length]) withTemplate:@"&gt;"];
-            atext = self.origText;
-            if (maxLength) {
-                atext = [atext substringToIndex:maxLength];
-            }
-            self.text = atext;
-            
-            [self on_text_changed:atext];
-        }
-    }
-}
-
-- (void)do_set_text:(NSDictionary *)args {
-    if (args) {
-        NSString *atext = [args objectForKey:@"text"];
-        
-        if (atext) {
+          atext = [atext stringByReplacingOccurrencesOfString:@"<" withString:@"&lt;"];
+          atext = [atext stringByReplacingOccurrencesOfString:@">" withString:@"&gt;"];
             self.origText = atext;
             if (maxLength) {
                 atext = [atext substringToIndex:maxLength];
@@ -754,7 +750,6 @@
 - (void)dealloc {
     NSLog(@"TrickplayTextHTML dealloc");
     
-    self.webview = nil;
     self.text = nil;
     self.origText = nil;
     self.fontFamily = nil;

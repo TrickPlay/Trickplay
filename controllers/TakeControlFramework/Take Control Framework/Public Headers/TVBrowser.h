@@ -40,7 +40,7 @@
  * - (void)connectToService:(NSNetService *)service will tell the TVBrowser
  * to attempt to connect to the NSNetService object "service" provided that the
  * the service is broadcasted from a Trickplay enabled TV. If the connection is
- * established a TVConnection object is passed back to the delegate in a message,
+ * established, a TVConnection object is passed back to the delegate in a message,
  * else, the same NSNetService that the TVBrowser failed to connect to is passed to
  * the delegate.
  *

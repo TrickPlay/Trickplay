@@ -78,6 +78,7 @@ struct UserData
         // the Lua state - and therefore cannot push arguments.
 
         int invoke_callback( const char * name , int nresults = 0 );
+        int invoke_callbacks( const char * name , int nresults = 0 , int default_ret = 0 );
 
     private:
 
@@ -140,7 +141,7 @@ struct UserData
 
     inline gpointer get_client( ) const
     {
-    	return client;
+        return client;
     }
 
     //.........................................................................
@@ -174,12 +175,12 @@ struct UserData
 
         if ( ! lua_isuserdata( L , index ) )
         {
-        	return 0;
+            return 0;
         }
 
-        if ( sizeof( UserData ) != lua_objlen( L , index ) )
+        if ( sizeof( UserData ) != lua_rawlen( L , index ) )
         {
-        	return 0;
+            return 0;
         }
 
         UserData * result = ( UserData * ) lua_touserdata( L , index );
@@ -191,9 +192,9 @@ struct UserData
 
     inline static gpointer get_client_check( lua_State * L , int index = 1 )
     {
-    	UserData * ud = get_check( L , index );
+        UserData * ud = get_check( L , index );
 
-    	return ud ? ud->client : 0;
+        return ud ? ud->client : 0;
     }
 
     //.........................................................................
@@ -233,6 +234,41 @@ struct UserData
     static int set_callback( const char * name , lua_State * L , int index = -2 , int function_index = -1 );
 
     //.........................................................................
+    // Check if there is at least one callback of type 'name' on this user data
+
+    bool callback_attached( const char * name );
+
+    //.........................................................................
+    // Add callback with given name on this user data
+
+    int add_callback( char * name , lua_State * L );
+
+    //.........................................................................
+    // Sets last callback with given name on this user data
+
+    void set_last_callback( char * name , lua_State * L );
+
+    //.........................................................................
+    // Remove callback with given name and reference on this user data
+
+    void remove_callback( char * name, lua_State * L );
+
+    //.........................................................................
+    // Invoke all callbacks with given name on this user data
+
+    int invoke_callbacks( const char * name , int nargs , int nresults , int default_ret=0 );
+
+    //.........................................................................
+    // Get last callback in list
+
+    int get_last_callback( char* name , lua_State * L );
+
+    //.........................................................................
+    // Remove last callback in list
+
+    GSList * remove_last_callback( char* name , lua_State * L );
+
+    //.........................................................................
     // Retrieve a callback - will always push a value, nil or otherwise.
 
     static int get_callback( const char * name , lua_State * L , int index = -1 );
@@ -254,12 +290,14 @@ struct UserData
     // already. In any case, it pops nargs.
 
     static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
 
     //.........................................................................
     // Same as above, but can be used when you already know the master object,
     // so it skips the client lookup.
 
     static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
+    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
 
     //.........................................................................
     // If you already have the user data pointer, you can call this one.
@@ -269,6 +307,7 @@ struct UserData
     //.........................................................................
 
     static int invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults );
+    static int invoke_global_callbacks( lua_State * L , const char * global , const char * name , int nargs , int nresults , int default_ret = 0 );
 
     //.........................................................................
     // Connect a signal handler to the master. We do this so that we can
@@ -296,6 +335,8 @@ struct UserData
 private:
 
     friend struct Handle;
+
+    GSList * remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
 
     //.........................................................................
 
@@ -392,11 +433,16 @@ private:
 
     //.........................................................................
 
+    //.........................................................................
+    // maps callback names to lists of registered callbacks
+
+    GHashTable*     callback_lists;
+
 #ifdef TP_PROFILING
 
     class GCTag;
 
-    GCTag *			gctag;
+    GCTag *            gctag;
 
 #endif
 };

@@ -1,1 +1,1 @@
-../../lua/lua-5.1.4/src/lua.h
+../../lua/lua-5.2.0/src/lua.h

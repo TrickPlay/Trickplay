@@ -26,7 +26,7 @@ a=rtpmap:96 MPEG4-GENERIC/44100/1\r\n\
 a=fmtp:96 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=1208\r\n\
 a=control:streamid=0\r\n\
 m=video 0 RTP/AVP 97\r\n\
-b=AS:64\r\n\
+b=AS:1372\r\n\
 a=rtpmap:97 H264/90000\r\n\
 a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n\
 a=control:streamid=1"
@@ -305,7 +305,7 @@ def select_loop():
             
             #udp_rtp_sock.sendto("REXFENLEY", (rtp_dst_addr, rtp_dst_port))
             udp_rtp_sock.send(str(rtp_header) + "REXFENLEY")
-            sleep(.5)
+            sleep(.05)
 
             # print "\n\nREXFENLEY\n\n"
 

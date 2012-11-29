@@ -131,7 +131,7 @@ class Call(object):
         "m=video 9078 RTP/AVP 97\r\n" + \
         "b=AS:1372\r\n" + \
         "a=rtpmap:97 H264/90000\r\n" + \
-        "a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n"
+        "a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n" + \
         "mpeg4-esid:201\r\n"
  
         return sdp_header
@@ -146,7 +146,11 @@ class Call(object):
         "m=audio 7078 RTP/AVP 0\r\n" + \
         "a=rtpmap:0 PCMU/8000\r\n" + \
         "a=sendrecv\r\n" + \
-        "m=video 0 RTP/AVP 34 99\r\n"
+        "m=video 9078 RTP/AVP 97\r\n" + \
+        "b=AS:1372\r\n" + \
+        "a=rtpmap:97 H264/90000\r\n" + \
+        "a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n" + \
+        "mpeg4-esid:201\r\n"
 
         return sdp_header
 

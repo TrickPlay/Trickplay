@@ -3,11 +3,14 @@
 # Lua has to be built as C++ in order to get exceptions. Since most distributions
 # do not already do that, we include Lua directly into our engine.
 
-set( LUA_VERSION 5.1.4 )
+set( LUA_VERSION 5.2.0 )
 
 set( LUA_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lua-${LUA_VERSION} )
 
 add_definitions( -DLUA_USE_LINUX=1 )
+if( NOT TP_PROFILING )
+    add_definitions( -DLUA_USE_LONGJMP=1 )
+endif( NOT TP_PROFILING )
 
 include_directories( ${LUA_ROOT}/src )
 
@@ -41,6 +44,12 @@ set( LUA_SOURCE_FILES
     ${LUA_ROOT}/src/lstrlib.c
     ${LUA_ROOT}/src/loadlib.c
     ${LUA_ROOT}/src/liolib.c
+    ${LUA_ROOT}/src/lbitlib.c
+    ${LUA_ROOT}/src/lcorolib.c
+    ${LUA_ROOT}/src/lctype.c
+    ${LUA_ROOT}/src/ldblib.c
+    ${LUA_ROOT}/src/ltablib.c
+
 #    ${LUA_ROOT}/src/linit.c
 )
 

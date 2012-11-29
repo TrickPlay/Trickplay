@@ -187,7 +187,7 @@ function do_test (tests)
 			if console_display_option == console_display_option_choices["dump_screensum"] then
 				local dump_string = "\n"
 				for i=1, #dump_screensum do
-					dump_string = dump_string..string.format ("\{\n\"name\": \"%s\",\n\"checksum\": \"%s\",\n\"active\": \"%s" , dump_screensum[i][1],  dump_screensum[i][2],  dump_screensum[i][3].."\"\n\},\n")
+					dump_string = dump_string..string.format ("{\n\"name\": \"%s\",\n\"checksum\": \"%s\",\n\"active\": \"%s" , dump_screensum[i][1],  dump_screensum[i][2],  dump_screensum[i][3].."\"\n},\n")
 				end
 			print (dump_string)
 			end

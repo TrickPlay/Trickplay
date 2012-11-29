@@ -10,20 +10,20 @@ Key names can also be used to create function jump tables to provide efficient i
     local move_down_function = function ()
         -- Perform move-down functionality here
     end
-    
+
     -- Function to handle a move-up keystroke
     local move_up_function = function ()
         -- Perform move-up functionality here
     end
-    
+
     -- Define jump table to handle recognized keystrokes
     local key_handlers = {
         [keys.Down] = move_down_function,		-- When keys.Down is pressed, call move_down_function()
-        [keys.Up] = move_up_function,			-- When keys.Up   is pressed, call move_up_function()
+        [keys.Up]   = move_up_function,			-- When keys.Up   is pressed, call move_up_function()
     }
-    
-    -- The screen global variable's keystroke event handler using the jump table
-    screen:on_key_down = function( key )
+
+    -- Define a keystroke handler that uses the jump table
+    function handleKeyDown( key )
     	-- Is this key in the jump table?
         if( key_handlers[ key ] )then
         	-- Yes, call its associated function
@@ -32,6 +32,9 @@ Key names can also be used to create function jump tables to provide efficient i
         	-- No, do whatever is appropriate, possibly ignoring the keystroke
         end
     end
+
+    -- Register the handler with the screen global variable
+    screen:add_onkeydown_listener( handleKeyDown )
 	(end)
 
 Entries in the keys table can usually be accessed using syntax such as keys.Left, keys.BLUE or keys.PLAY. Some keynames, however, are not valid Lua identifiers because they begin with a digit; references to these keynames must use the alternative table syntax and their index strings must be surrounded by single or double quotation marks, as in keys[ "0" ] and keys[ '3270_Play' ].
@@ -2081,7 +2084,7 @@ There may be some overlap with the TV-related keynames; in such cases, applicati
         braille_dots_1345678 - .
         braille_dots_2345678 - .
         braille_dots_12345678 - .
-        
+
 
 
 Group: Key Modifiers
@@ -2095,18 +2098,18 @@ Modifier keys can be referenced by using the "dot" syntax, as in modifier.shift.
 Constants: Defined Modifier Keys
 
 	Note: The modifier keys are case-sensitive.
-	
+
 	shift - .
 	lock - .
 	control - .
 	super - .
 	meta - .
 	hyper - .
-	
-*Code Example:* Check for Control, Shift, and Control+Shift modifier keystrokes
+
+*Code Example:* Check for Control, Shift, and Control+Shift modifier keystrokes. Register the handler with the screen global variable.
 
 	(code)
-	function screen:on_button_down( x, y, buttonID, numClicks, modifiers )
+	function handleButtonDown( x, y, buttonID, numClicks, modifiers )
 		-- Was a modifier key pressed?
 		if( modifiers ~= nil ) then
 			-- Yes, was Control key pressed?
@@ -2125,5 +2128,6 @@ Constants: Defined Modifier Keys
 			end
 		end
 	end
+	screen:add_onbuttondown_listener( handleButtonDown )
 	(end)
 

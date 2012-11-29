@@ -1,5 +1,5 @@
 
 Title: System Information Overview
 
-A TrickPlay application can access information about itself, as well as the TrickPlay Engine. Information related to the application is stored in the <app> global variable, while the <trickplay> variable contains information about the TrickPlay Engine.
+A TrickPlay application can access information about itself, as well as the TrickPlay Engine. Information related to the application is stored in the <app> global variable, while the <trickplay> variable contains information about the TrickPlay Engine. In non-production versions of the TrickPlay SDK, the <devtools> global variable provides utility functions and information about internal Engine data structures.
 

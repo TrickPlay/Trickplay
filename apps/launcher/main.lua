@@ -65,7 +65,7 @@ local function main()
         end
         
     end
-    dumptable(launcher_icons)
+    --dumptable(launcher_icons)
     shop_icons = {
         Image{src="assets/app_shop_icons/1945.jpg"},
         Image{src="assets/app_shop_icons/aquaria.jpg"},

@@ -22,11 +22,12 @@ World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_met
     z_for_y( false ),
     global_callbacks( 0 ),
     L( _LS ),
-    world( b2Vec2( 0.0f , 10.0f ) , true ),
+    world( b2Vec2( 0.0f , 10.0f ) ),
     next_handle( 1 ),
     velocity_iterations( 6 ),
     position_iterations( 2 ),
     idle_source( 0 ),
+    repaint_source( 0 ),
     timer( g_timer_new() ),
     screen( CLUTTER_ACTOR( g_object_ref( _screen ) ) ),
     debug_draw( 0 )
@@ -76,7 +77,8 @@ void World::start( int _velocity_iterations , int _position_iterations )
         return;
     }
 
-    idle_source = clutter_threads_add_idle( on_idle , this );
+    repaint_source = clutter_threads_add_repaint_func( on_idle , this, NULL );
+    idle_source = clutter_threads_add_idle( on_idle, this );
 
     g_timer_start( timer );
 
@@ -93,17 +95,39 @@ void World::stop()
         return;
     }
 
+    clutter_threads_remove_repaint_func( repaint_source );
     g_source_remove( idle_source );
 
     idle_source = 0;
+    repaint_source = 0;
 }
 
 //.............................................................................
 
 void World::step( float32 time_step , int _velocity_iterations , int _position_iterations )
 {
-    // Bodies that we could not destroy during a callback are taken care of here.
+    // Bodies that we could not destroy/activate/de-activate during a callback are taken care of here.
     // We only destroy a few at a time.
+
+    if ( ! to_deactivate.empty() )
+    {
+        for( int i = 0; ! to_deactivate.empty() && i < 5; ++i )
+        {
+            to_deactivate.front()->SetActive( false );
+
+            to_deactivate.pop_front();
+        }
+    }
+
+    if ( ! to_activate.empty() )
+    {
+        for( int i = 0; ! to_activate.empty() && i < 5; ++i )
+        {
+            to_activate.front()->SetActive( true );
+
+            to_activate.pop_front();
+        }
+    }
 
     if ( ! to_destroy.empty() )
     {
@@ -143,22 +167,20 @@ void World::idle()
 
     int iterations = seconds / sixty;
 
-    seconds = seconds / ( seconds / sixty );
-
     g_timer_start( timer );
 
     UserData * ud = UserData::get_from_client( this );
 
     for( int i = 0; i < iterations; ++i )
     {
-        step( seconds , velocity_iterations , position_iterations );
+        step( sixty , velocity_iterations , position_iterations );
 
         if ( ud )
         {
-            lua_pushnumber( L , seconds );
+            lua_pushnumber( L , sixty );
             lua_pushinteger( L , i );
 
-            ud->invoke_callback( "on_step" , 2 , 0 );
+            ud->invoke_callbacks( "on_step" , 2 , 0 );
         }
     }
 }
@@ -374,11 +396,20 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat);
+                    } else {
+                        fd.filter.categoryBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
         }
+        // Guarantee that a fixture always has a non-zero category
+        if(0 == fd.filter.categoryBits) fd.filter.categoryBits = 1;
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "mask" );
@@ -398,7 +429,14 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.maskBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat);
+                    } else {
+                        fd.filter.maskBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
@@ -707,7 +745,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
         {
             lua_pushvalue( L , c );
 
-            UserData::invoke_callback( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
+            UserData::invoke_callbacks( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
 
             if ( callback == PRE_SOLVE_CONTACT )
             {
@@ -723,7 +761,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
     if ( global_callbacks & callback )
     {
         lua_pushvalue( L , c );
-        UserData::invoke_callback( this , name , 1 , 0 , L );
+        UserData::invoke_callbacks( this , name , 1 , 0 , L );
 
         if ( callback == PRE_SOLVE_CONTACT )
         {
@@ -743,6 +781,24 @@ void World::destroy_body_later( b2Body * body )
     g_assert( body );
 
     to_destroy.push_back( body );
+}
+
+//.............................................................................
+
+void World::deactivate_body_later( b2Body * body )
+{
+    g_assert( body );
+
+    to_deactivate.push_back( body );
+}
+
+//.............................................................................
+
+void World::activate_body_later( b2Body * body )
+{
+    g_assert( body );
+
+    to_activate.push_back( body );
 }
 
 //=============================================================================
@@ -874,15 +930,15 @@ void World::DrawTransform(const b2Transform& xf)
 gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world )
 {
     world->debug_cairo = cr;
-    
+
     cairo_scale( cr , world->ppm , world->ppm );
 
-    world->b2DebugDraw::SetFlags(
-            b2DebugDraw::e_shapeBit
-            | b2DebugDraw::e_aabbBit
-            | b2DebugDraw::e_centerOfMassBit
-            | b2DebugDraw::e_jointBit
-            | b2DebugDraw::e_pairBit
+    world->b2Draw::SetFlags(
+            b2Draw::e_shapeBit
+            | b2Draw::e_jointBit
+            | b2Draw::e_aabbBit
+            | b2Draw::e_pairBit
+            | b2Draw::e_centerOfMassBit
             );
 
     world->world.SetDebugDraw( world );
@@ -892,7 +948,7 @@ gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , Wo
     world->world.SetDebugDraw( 0 );
 
     world->debug_cairo = 0;
-    
+
     return TRUE;
 }
 
@@ -918,7 +974,11 @@ void World::draw_debug( int opacity )
 
         ClutterActor * parent = clutter_actor_get_parent( screen );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( parent, debug_draw );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , debug_draw );
+#endif
 
         g_object_ref( G_OBJECT( debug_draw ) );
     }
@@ -927,7 +987,11 @@ void World::draw_debug( int opacity )
         clutter_cairo_texture_clear( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
     }
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_set_child_above_sibling( clutter_actor_get_parent(screen), debug_draw, NULL );
+#else
     clutter_actor_raise_top( debug_draw );
+#endif
 
     clutter_actor_set_opacity( debug_draw , opacity );
 
@@ -935,20 +999,20 @@ void World::draw_debug( int opacity )
 
 
     gulong handler = g_signal_connect( debug_draw , "draw" , GCallback( on_debug_draw ) , this );
-    
+
     clutter_cairo_texture_invalidate( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
-    
+
     g_signal_handler_disconnect( debug_draw , handler );
 
 #else
 
     cairo_t * c = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
-    
+
     on_debug_draw( CLUTTER_CAIRO_TEXTURE( debug_draw ) , c , this );
-    
+
     cairo_destroy( c );
-    
-#endif    
+
+#endif
 
 }
 
@@ -967,7 +1031,11 @@ void World::clear_debug()
 
     if ( parent )
     {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_remove_child( parent, debug_draw );
+#else
         clutter_container_remove( CLUTTER_CONTAINER( parent ) , debug_draw , NULL );
+#endif
     }
 
     g_object_unref( G_OBJECT( debug_draw ) );
@@ -1027,8 +1095,6 @@ Body::~Body()
         // Nullify the body's user data
 
         body->SetUserData( 0 );
-
-        body->SetActive( false );
 
         // b2Bodies cannot be destroyed during callbacks. So, if an actor is
         // collected during a collision callback, for example, the call to destroy the
@@ -1183,7 +1249,18 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
     {
         bool mapped = CLUTTER_ACTOR_IS_MAPPED( self->actor );
 
-        self->body->SetActive( mapped );
+
+        if( !self->body->GetWorld()->IsLocked() )
+        {
+            self->body->SetActive( mapped );
+        } else {
+            if( mapped )
+            {
+                self->world->activate_body_later( self->body );
+            } else {
+                self->world->deactivate_body_later( self->body );
+            }
+        }
 
         // The actor is back on the screen, we update the body's position
 

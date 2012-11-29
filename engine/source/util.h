@@ -40,6 +40,17 @@ inline void g_info( const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 // If the expression is true, this throws a string exception
+#ifndef CLANG_ANALYZER_NORETURN
+#ifndef __has_feature         // Optional of course.
+  #define __has_feature(x) 0  // Compatibility with non-clang compilers.
+#endif
+#if __has_feature(attribute_analyzer_noreturn)
+#define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))
+#else
+#define CLANG_ANALYZER_NORETURN
+#endif
+#endif
+void failif( bool expression, const gchar * format, ... ) CLANG_ANALYZER_NORETURN;
 
 inline void failif( bool expression, const gchar * format, ... )
 {
@@ -322,6 +333,8 @@ namespace Util
 
     gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
 
+    String where_am_i_lua( lua_State *L );
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
@@ -351,13 +364,25 @@ namespace Util
     {
     public:
 
+#ifndef GLIB_VERSION_2_32
         GSRMutexLock( GStaticRecMutex * mutex ) : m( mutex )
+#else
+        GSRMutexLock( GRecMutex * mutex ) : m( mutex )
+#endif
         {
+#ifndef GLIB_VERSION_2_32
             g_static_rec_mutex_lock( m );
+#else
+            g_rec_mutex_lock( m );
+#endif
         }
         ~GSRMutexLock()
         {
+#ifndef GLIB_VERSION_2_32
             g_static_rec_mutex_unlock( m );
+#else
+            g_rec_mutex_unlock( m );
+#endif
         }
 
     private:
@@ -365,7 +390,11 @@ namespace Util
         GSRMutexLock() {}
         GSRMutexLock( const GSRMutexLock & ) {}
 
+#ifndef GLIB_VERSION_2_32
         GStaticRecMutex * m;
+#else
+        GRecMutex * m;
+#endif
     };
 
     //-----------------------------------------------------------------------------
@@ -468,6 +497,8 @@ namespace Util
 
 
 	String describe_lua_value( lua_State * L , int index );
+
+    void convert_bitmask_to_table( lua_State * L );
 }
 
 #endif // _TRICKPLAY_UTIL_H

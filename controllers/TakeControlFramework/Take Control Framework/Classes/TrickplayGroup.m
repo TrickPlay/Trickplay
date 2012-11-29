@@ -324,7 +324,7 @@
     BOOL result = NO;
     for (NSString *childID in childIDs) {
         TrickplayUIElement *child = [manager findObjectForID:childID];
-        [child removeFromSuperview];
+        [child do_unparent:args];
         [self.view addSubview:child];
         if (delegate) {
             [delegate advancedUIObjectAdded];

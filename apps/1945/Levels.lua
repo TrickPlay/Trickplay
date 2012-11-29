@@ -315,7 +315,7 @@ levels =
             if self.num_bosses == 0 then
                 remove_from_render_list( self)
                 --add_to_render_list( lvlcomplete )
-                print("me")
+                --print("me")
                 
                 --state.curr_mode = "LEVEL_END"
                 level_completed:animate_in(string.format("%06d",state.counters[state.curr_level].lvl_points))
@@ -1000,7 +1000,7 @@ levels =
         w_q_index      = {},
         
 		setup = function(self)
-        print("not me")
+        --print("not me")
             state.counters[3].lvl_points = 0
             my_plane.bombing_mode = true
             self.bg:append_to_queue(

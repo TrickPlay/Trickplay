@@ -69,13 +69,8 @@
 @interface AppBrowserContext : AppBrowser {
     
 @private
+    /// Truly private properties
     NSMutableArray *viewControllers;
-    
-    TVConnection *tvConnection;
-    // The available apps on the TV
-    NSMutableArray *availableApps;
-    // The current app running on Trickplay
-    AppInfo *currentApp;
     
     // Asynchronous URL connections for populating the table with
     // available apps and fetching information on the current
@@ -87,6 +82,13 @@
     NSMutableData *fetchAppsData;
     NSMutableData *currentAppData;
     
+    //// Publicly exposed properties:
+    TVConnection *tvConnection;
+    // The available apps on the TV
+    NSMutableArray *availableApps;
+    // The current app running on Trickplay
+    AppInfo *currentApp;
+    
     id <AppBrowserDelegate> delegate;
 }
 
@@ -96,9 +98,6 @@
 
 - (void)informOfCurrentApp:(AppInfo *)app;
 - (void)informOfAvailableApps:(NSArray *)apps;
-- (void)refreshCurrentApp;
-- (void)refreshAvailableApps;
-- (void)cancelRefresh;
 
 @end
 

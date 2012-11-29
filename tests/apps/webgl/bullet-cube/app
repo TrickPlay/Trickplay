@@ -1,0 +1,9 @@
+{
+    "id" : "com.trickplay.test.webgl-bullet-cube",
+    "release" : 1,
+    "version" : "1.0",
+    "name"    : "WebGL Bullet Cube",
+    "author"  : "Pablo Pissanetzky",
+    "copyright" : "© Trickplay Inc."
+}
+

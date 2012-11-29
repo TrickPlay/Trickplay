@@ -22,161 +22,183 @@ static int marker_gc( lua_State * L )
 class Graph
 {
 public:
-    
+
     static void toggle( TPContext * ctx )
     {
         static char key = 0;
-        
+
         Graph * graph = ( Graph * ) ctx->get_internal( & key );
-        
-        if ( graph ) 
+
+        if ( graph )
         {
             ctx->add_internal( & key , 0 , 0 );
         }
         else
         {
-            ctx->add_internal( & key , new Graph() , destroy );
+            ctx->add_internal( & key , new Graph(ctx->get_stage()) , destroy );
         }
     }
-    
+
 private:
 
-    static void destroy( gpointer me ) 
+    static void destroy( gpointer me )
     {
         delete ( Graph * ) me;
-    }    
-    
-    Graph()
+    }
+
+    ClutterActor *stage;
+
+    Graph(ClutterActor *stg) :
+    stage( stg )
     {
         texture = clutter_texture_new();
-        
+
         g_object_ref_sink( texture );
-        
-        ClutterActor * stage = clutter_stage_get_default();
-        
+
         width = clutter_actor_get_width( stage );
         height = clutter_actor_get_height( stage );
-        
+
         guchar * t = g_new0( guchar , 4 * width * height );
-        
+
         clutter_texture_set_from_rgb_data( CLUTTER_TEXTURE( texture ) , t , TRUE , width , height , 4 * width , 4 , CLUTTER_TEXTURE_NONE , 0 );
-        
+
         g_free( t );
-        
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, texture );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
-        
+#endif
+
         clutter_actor_set_name( texture , "graph" );
-        
+
         bar = g_new0( guchar , 4 * height );
-        
+
         white_bar = g_new( guchar , 4 * height );
-        
+
         memset( white_bar , 255 , 4 * height );
-        
+
         x = 0;
-        
+
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
-        
-        timer = g_timer_new(); 
-        
+
+        timer = g_timer_new();
+
         text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
-        
+
         g_object_ref_sink( text );
-        
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
-        
+#endif
+
         time = 0;
         frames = 0;
         min_fps = 60;
         max_fps = 0;
     }
-    
+
     ~Graph()
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
         {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, texture );
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
-            
+
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
         }
-        
+
         g_object_unref( texture );
         g_object_unref( text );
-        
+
         g_free( bar );
-        
+
         g_free( white_bar );
-        
+
         clutter_threads_remove_repaint_func( source );
-        
+
         g_timer_destroy( timer );
     }
-    
+
     static gboolean on_tick( gpointer me )
     {
         ( ( Graph *) me )->tick();
-        
-        return TRUE; 
+
+        return TRUE;
     }
-    
+
     void tick()
     {
-        gfloat t = g_timer_elapsed( timer , 0 ); 
-        
+        gfloat t = g_timer_elapsed( timer , 0 );
+
         gint y = t * height;
-        
+
         if ( y < 0 )
         {
             y = 0;
         }
-        else if ( y > height ) 
+        else if ( y > height )
         {
             y = height;
         }
-        
+
         guchar * p = bar;
-        
+
         for ( gint i = height - 1; i >= 0; --i )
         {
             *(p++) = i > y ? 0 : 255;
             *(p++) = 0;
             *(p++) = 0;
-            *(p++) = i > y ? 0 : 255; 
+            *(p++) = i > y ? 0 : 255;
         }
 
         clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
-        
+
         if ( ++x >= width )
         {
             x = 0;
-        }   
-        
+        }
+
         clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , white_bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
-        
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( stage, texture, NULL );
+#else
         clutter_actor_raise_top( texture );
-        
+#endif
+
         time += t;
         ++frames;
-        
+
         if ( time >= 0.5 )
         {
             gfloat fps = frames / time;
             min_fps = std::min( min_fps , fps );
             max_fps = std::max( max_fps , fps );
-            
+
             g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , min_fps , fps , max_fps );
-            
+
             clutter_text_set_text( text , buffer );
-            
+
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
             clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
-            
+#endif
+
             time = 0;
             frames = 0;
         }
-        
+
         g_timer_start( timer );
     }
-    
+
     gint            width;
     gint            height;
     guchar *        bar;
@@ -192,19 +214,86 @@ private:
     gfloat          max_fps;
     char            buffer[256];
 };
+
+static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
+{
+#ifdef CLUTTER_VERSION_1_10
+    ClutterActorIter iter;
+    ClutterActor *check;
+    clutter_actor_iter_init( &iter, parent );
+    while(clutter_actor_iter_next( &iter, &check ))
+    {
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+#else
+    GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
+
+    for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
+    {
+        ClutterActor *check = CLUTTER_ACTOR( item->data );
+
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+
+    g_list_free( list );
+#endif
+
+    // If nothing matched above, then return NULL
+    return NULL;
+}
+
+static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
+{
+    // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+    ClutterActor * actor = (ClutterActor *) g_ascii_strtoull( pointer_str, NULL, 16 );
+
+    // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
+    // attempt to de-ref actor, which could explode.  We have to walk the list manually.
+    if( check_children( first, actor ) )
+    {
+        return actor;
+    }
+
+    return NULL;
+}
+
 ]]
 
 /*
--------------------------------------------------------------------------------
-Undocumented developer tools that are only available in non-production builds
+	Global: devtools
+
+	The devtools global variable provides low-level capabilities that are useful during development of a TrickPlay application.
+
+	Note: The devtools variable is available only in TrickPlay Engine non-production builds; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
+
 */
 
 global devtools [[ void * ]]
 {
+	/* UndocumentedConstructor: devtools
+	 *
+	 * The devtools() constructor is called by the TrickPlay Engine during its initialization process. There is no need for a TrickPlay application to call this function.
+	 *
+	 */
+
     devtools()
         [[
             lb_construct_empty();
         ]];
+
+	/* UndocumentedFunction: debug
+	 *
+	 * The debug() function starts an interactive session of the Console Debugger. This is not a recommended method for debugging a TrickPlay application. Instead, use the TrickPlay IDE to debug your TrickPlay applications.
+	 *
+	 */
 
     debug()
         [[
@@ -214,14 +303,58 @@ global devtools [[ void * ]]
             }
         ]];
 
+	/* Function: registry
+
+		The registry() function retrieves the contents of the Engine Console's registry. The registry contains many TrickPlay Engine internal variables and their settings.
+
+	  	*Arguments:* None.
+
+	  	*Return Value:* A table containing the contents of the Engine Console registry.
+
+	  	*Code Example:* Display in the Engine Console the contents of the Engine registry.
+
+	 		(code)
+	 		-- Retrieve the Engine's registry contents
+	 		regContents = devtools:registry()
+
+	 		-- Output the registry contents to the screen
+	 		dumptable( regContents )
+	 		(end)
+	*/
+
     table registry()
         [[
             lua_pushvalue( L , LUA_REGISTRYINDEX );
         ]];
 
     /*
-        Marker is a thing that prints out its name when it is garbage collected. This
-        lets us attach it to stuff and see when it goes away.
+    	Function: marker
+
+    	The marker() function attaches a string to a table element; the string is output to the Engine Console when its associated table is garbage-collected.
+
+    	*Argument:*
+
+    		name - string to output on Console when the associated table is garbage-collected
+
+    	*Return Value:* Marker object assigned to table element
+
+    	*Code Example:* Demonstrate attaching a marker to a table element. The following code statements were entered in the Engine Console.
+
+    		(code)
+    		-- Create a table with a marker element
+    		t = {}
+    		table.insert( t, devtools:marker( "This is my marker" ) )
+
+    		-- Clear the t variable, making it available for garbage collection
+    		t = nil
+
+    		-- Perform a garbage collection operation, which causes the marker to display
+    		/gc
+    		[tp] 0x1a05250 00:07:47:593 INFO    - MARKER COLLECTED 'This is my marker'
+			[tp] 0x1a05250 00:07:47:593 INFO    - GC : 152 KB - 153 KB = -1 KB
+    		(end)
+
+		*See Also:* the <gctag> function
     */
 
     udata marker( lstring name )
@@ -234,6 +367,33 @@ global devtools [[ void * ]]
             lua_setfield( L , -2 , "__gc" );
             lua_setmetatable( L , -2 );
         ]];
+
+	/*
+		Function: udatatypes
+
+		The udatatypes() function retrieves a table containing a list of the userdata types used by a specified variable.
+
+		*Arguments:*
+
+			u - variable of type userdata
+
+		*Return Value:* Table of userdata types
+
+		*Code Example:* Display a table containing the userdata types used by the <screen> global variable
+
+		(code)
+		-- Enter this command in the Engine Console
+		dumptable( devtools:udatatypes( screen ) )
+
+		[tp] 0x1765250 00:56:50:336 MESSAGE - table: 0x1aa9b90
+		[tp] 0x1765250 00:56:50:336 MESSAGE - {
+		[tp] 0x1765250 00:56:50:336 MESSAGE -   "actor" = true
+		[tp] 0x1765250 00:56:50:336 MESSAGE -   "screen" = true
+		[tp] 0x1765250 00:56:50:336 MESSAGE -   "container" = true
+		[tp] 0x1765250 00:56:50:336 MESSAGE - }
+		(end)
+
+	*/
 
     table udatatypes( udata u )
         [[
@@ -254,14 +414,29 @@ global devtools [[ void * ]]
             LSG_CHECK(1);
         ]];
 
-    bool checkudatatype( udata u , string type )
+	/*
+		UndocumentedFunction: checkdatatype
+
+		The checkdatatype() function is not useful when developing a TrickPlay application.
+	*/
+
+    bool checkudatatype( udata u, string type )
         [[
             result = lb_check_udata_type( L , u , type , false );
         ]];
 
+	/*
+		UndocumentedFunction: screensum
+
+		The screensum() function calculates a checksum based upon the pixel values on the screen.
+
+		This function was intended to be used by QA to validate various tests. It was discovered, however, that the screensum() function or the QA tests did not mesh well or some situation prevented the screensum() function to be used for its intended purpose.
+
+	*/
+
     string screensum()
         [[
-            Image * image = Image::screenshot();
+            Image * image = Image::screenshot(App::get(L)->get_context()->get_stage());
 
             String checksum;
 
@@ -275,21 +450,65 @@ global devtools [[ void * ]]
             result = checksum.c_str();
         ]];
 
-    keypress( int key , int unicode = 0 )
+	/*
+		Function: keypress
+
+		The keypress() function injects a keystroke into a running TrickPlay application's input stream.
+
+		*Arguments:*
+
+			key - integer key value. This value can be an entry from the global <keys> table.
+			unicode - the key's Unicode representation, if any. This argument is optional; if not specified, the argument defaults to 0.
+
+		*Return Value:* None
+
+		*Code Example:* Inject the OK keystroke into the application's input stream.
+
+			(code)
+			devtools:keypress( keys.OK )
+			(end)
+
+	*/
+
+    keypress( int key, int unicode = 0 )
         [[
-            ClutterUtil::inject_key_down( key , unicode , 0 );
-            ClutterUtil::inject_key_up( key , unicode , 0 );
+            ClutterUtil::inject_key_down( App::get(L)->get_context()->get_stage(), key , unicode , 0 );
+            ClutterUtil::inject_key_up( App::get(L)->get_context()->get_stage(), key , unicode , 0 );
         ]];
 
-    udata gid( int gid )
+	/*
+		Function: gid
+
+		The gid() function retrieves the TrickPlay Engine object referenced by the specified global ID (gid) value.
+
+		*Arguments:*
+
+			gid - integer value specifying the object's global ID value
+
+		*Return Value:* userdata object referenced by the gid argument
+
+		*Code Example:* Reference an object by its global ID value
+
+			(code)
+			-- Assume a Text object exists with a global ID value of 15
+			-- Set the Text object's text string by referencing it through its gid
+			devtools:gid(15).text = "Steve"
+
+			-- Verify that the object's text property was set
+			print( devtools:gid(15).text )
+			[tp] 0x1765250 01:07:01:925 MESSAGE - Steve
+			(end)
+	*/
+
+    udata gid( string gid )
         [[
-            ClutterActor * actor = clutter_get_actor_by_gid( gid );
-            
-            // There is a bug in clutter 1.6.14 where free gids are
-            // set to this value but not checked later.
-             
-            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+            // but we can't trust the pointer, so we have to walk the list to find it
+            ClutterActor * actor = (ClutterActor *) validate_pointer( App::get(L)->get_context()->get_stage(), gid );
+
+            if( !actor )
             {
+                g_warning("Actor not found: %s", Util::where_am_i_lua(L).c_str());
                 lua_pushnil( L );
             }
             else
@@ -298,97 +517,195 @@ global devtools [[ void * ]]
             }
         ]];
 
+	/*
+		Function: sleep
+
+		The sleep() function forces a "hard" sleep on a running TrickPlay application.
+
+		The sleep() function can be used to forcibly slow down the execution of a program for testing purposes.
+
+		*Argument:*
+
+			ms - integer value specifying the number of milliseconds the application should sleep
+
+		*Return Value:* None
+
+		*Code Example:* Pause the application for one-tenth of a second (10 milliseconds)
+
+			(code)
+			devtools:sleep( 10 )
+			(end)
+	*/
+
     sleep( int ms )
         [[
             usleep( ms * 1000 );
         ]];
-        
+
+	/*
+		Function: screenshot
+
+		The screenshot() function saves an image of the current screen to a specified file.
+
+		The Engine Console also supports the /ss command, which performs the same operation using a default filename.
+
+		*Argument:*
+
+			filename - string specifying the filename of the saved image. The file does not have to be located in the application's bundle. If no filename is specified, a default filename and location are used; refer to the description of the /ss command in <The Engine Console> for further information.
+
+		*Return Value:* string specifying the filename of the saved image. If an error occurred, this will be an empty string.
+
+		*Code Example:* Save the current screen
+
+			(code)
+			devtools:screenshot( "SplashScreen" )
+			(end)
+	*/
+
     string screenshot( string filename = 0 )
         [[
             // WE ARE BREAKING THE RULES HERE BY ALLOWING THE APP TO SAVE
             // A FILE TO ITS BUNDLE, BUT THAT IS OK BECAUSE THIS IS DONE
             // IN DEVTOOLS WHICH IS NOT AVAILABLE ON PRODUCTION BUILDS.
-            
+
             result = 0;
-            
-            Image * image = Image::screenshot();
-            
+
+            Image * image = Image::screenshot(App::get(L)->get_context()->get_stage());
+
             if ( ! image )
             {
-                g_warning( "FAILED TO TAKE SCREENSHOT" );
+                g_warning( "FAILED TO TAKE SCREENSHOT: %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
                 String path;
                 String name;
-                
+
                 App * app = App::get( L );
-                
+
                 String app_path = app->get_metadata().get_root_native_path();
-                
+
                 if ( ! app_path.empty() )
                 {
                     if ( ! filename || ( filename && 0 == strlen( filename ) ) )
                     {
                         GTimeVal t;
-        
+
                         g_get_current_time( & t );
-        
+
                         gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
-        
+
                         gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
-        
+
                         name = ts;
                         path = fn;
-                        
+
                         g_free( ts );
                         g_free( fn );
                     }
                     else
                     {
                         gchar * ts = g_strdup_printf( "%s.png" , filename );
-                        
+
                         gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
-                        
+
                         name = ts;
                         path = fn;
-                        
+
                         g_free( ts );
                         g_free( fn );
                     }
-                    
+
                     if ( ! image->write_to_png( path.c_str() ) )
                     {
-                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s': %s" , path.c_str(), Util::where_am_i_lua(L).c_str() );
                     }
                     else
                     {
                         result = name.c_str();
                     }
-                }                
+                }
                 delete image;
-            }                   
+            }
         ]];
-        
-    graph( )
+
+	/*
+		Function: graph
+
+		The graph() function toggles a running graph at the bottom of the screen depicting the amount of CPU usage of the running application and, at the top of the screen, the application's fps (frames per second) rate is shown in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the graph() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the graph() function was last invoked.
+
+		Each call to the graph() function toggles the display graph off/on.
+
+		*Arguments:* None
+
+		*Return Value:* None
+
+		*Code Example:* Toggle graphing a running application
+
+			(code)
+			devtools:graph()
+			(end)
+
+	*/
+
+    graph()
         [[
-            Graph::toggle( App::get( L )->get_context() );    
+            Graph::toggle( App::get( L )->get_context() );
         ]];
-        
-    bool gctag( udata udata , string comment )
+
+	/*
+		Function: gctag
+
+		The gctag() function attaches a string to an object of type userdata, such as a Rectangle or Image; when the object is garbage-collected, the associated string is output to the Engine Console.
+
+		*Arguments:*
+
+			udata - object of type userdata on which to attach the string
+			comment - string to attach to udata object
+
+		*Return Value:* Boolean flag indicating whether or not the string was successfully attached to the object (true=success)
+
+		*Code Example:* Demonstrate attaching a string to a userdata object
+
+			(code)
+			-- Create a userdata-type object
+			rect = Rectangle()
+
+			-- Attach a string tag to the Rectangle object
+			devtools:gctag( rect, "This is the Rectangle tag" )
+
+			-- Release the object so it can be garbage collected
+			rect = nil
+
+			-- Perform garbage collecting to display the attached string
+			/gc all
+			[tp] 0x186f250 00:01:43:119 DEBUG   - [GCTAG] MASTER DESTROYED 0x1c4e0a8 (0x1baa830,0x1baa830,Rectangle) : This is the Rectangle tag
+			[tp] 0x186f250 00:01:43:119 DEBUG   - [GCTAG] USER DATA FINALIZED 0x1c4e0a8 (0x1baa830,0x1baa830,Rectangle) : This is the Rectangle tag
+			(end)
+
+		*See Also:* the <marker> function
+	*/
+
+    bool gctag( udata udata, string comment )
         [[
             result = false;
-            
+
             if ( UserData * u = UserData::get_check( L , udata ) )
             {
                 result = u->gc_tag( comment );
-            } 
-        ]];        
+            }
+        ]];
+
+	/*
+		UndocumentedFunction: path_test
+
+		The path_test() function does not perform a useful purpose, so it will remain unexposed.
+	*/
 
     multi path_test( string path , int flags = 0 , table schemes = 0 )
         [[
             StringSet allowed_schemes;
-            
+
             if ( schemes )
             {
                 lua_pushnil( L );
@@ -398,9 +715,9 @@ global devtools [[ void * ]]
                     lua_pop( L , 1 );
                 }
             }
-            
+
             AppResource p( L , path , flags , allowed_schemes );
-            
+
             if ( p )
             {
                 lua_pushboolean( L , true );
@@ -409,16 +726,34 @@ global devtools [[ void * ]]
             {
                 lua_pushboolean( L , false );
             }
-            
+
             lua_pushstring( L , p.get_native_path().c_str() );
             lua_pushstring( L , p.get_uri().c_str() );
-            
+
             return 3;
-        ]];                     
+        ]];
+
+	/*
+		Function: fs
+
+		The fs() function forces the TrickPlay display screen to full-screen or default mode.
+
+		*Argument:*
+
+			f - boolean flag specifying whether to set full-screen mode (true) or default mode (false)
+
+		*Return Value:* None
+
+		*Code Example:* Force the TrickPlay display to full-screen mode.
+
+			(code)
+			devtools:fs( true )
+			(end)
+	*/
 
     fs( bool f)
         [[
-            clutter_stage_set_fullscreen( CLUTTER_STAGE( clutter_stage_get_default() ) , f ? TRUE : FALSE );
+            clutter_stage_set_fullscreen( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) , f ? TRUE : FALSE );
         ]];
 }
 

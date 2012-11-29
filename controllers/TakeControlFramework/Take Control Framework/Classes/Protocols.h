@@ -50,24 +50,6 @@
 
 @end
 
-
-
-/**
- * The ViewControllerAccelerometerDelegate handles commands from Trickplay
- * to start or stop the devices accelerometer.
- *
- * Only the AccelerometerController class implements this protocol.
- */
-
-@protocol ViewControllerAccelerometerDelegate
-
-@required
-- (void)startAccelerometerWithFilter:(NSString *)filter interval:(float)interval;
-- (void)pauseAccelerometer;
-
-@end
-
-
 /**
  * The ViewControllerTouchDelegate handles commands from Trickplay to
  * enable/disable touch events. Likewise this delegate must inform

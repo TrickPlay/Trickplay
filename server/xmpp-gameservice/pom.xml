@@ -1,0 +1,16 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.trickplay.mug</groupId>
+	<artifactId>build-mug-service</artifactId>
+	<name>XMPP game service builder</name>
+	<version>0.1-SNAPSHOT</version>
+	<description>Builder of XMPP Game Service</description>
+	<packaging>pom</packaging>
+	<modules>
+		<module>mug-api</module>
+		<module>mug-core</module>
+		<module>mug-openfire</module>
+		<module>mug-guess-game</module>
+	</modules>
+</project>

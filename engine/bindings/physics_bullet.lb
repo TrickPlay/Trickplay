@@ -1,0 +1,1579 @@
+
+module physics_bullet;
+
+[[
+#include "BulletCollision/CollisionShapes/btTriangleShape.h"
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
+#include "BulletCollision/Gimpact/btGImpactShape.h"
+
+#include "physics_bullet.h"
+#include "clutter_util.h"
+
+#include "matrix.lb.h"
+#include "physics_bullet.lb.h"
+
+extern int new_Matrix( lua_State * L );
+
+//.............................................................................
+
+static btVector3 btVector3FromTable( lua_State * L , int t )
+{
+    if ( 0 == t )
+    {
+        return btVector3();
+    }
+
+    t = abs_index( L , t );
+
+    lua_rawgeti( L , t , 1 );
+    lua_rawgeti( L , t , 2 );
+    lua_rawgeti( L , t , 3 );
+
+    btVector3 result( lua_tonumber( L , -3 ) , lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
+
+    lua_pop( L , 3 );
+
+    return result;
+}
+
+static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
+{
+    if ( 0 == t )
+    {
+        lua_createtable( L , 3 , 0 );
+        t = lua_gettop( L );
+    }
+    else
+    {
+        t = abs_index( L , t );
+    }
+
+    g_assert( lua_istable( L , t ) );
+
+    lua_pushnumber( L , v.getX() );
+    lua_rawseti( L , t , 1 );
+    lua_pushnumber( L , v.getY() );
+    lua_rawseti( L , t , 2 );
+    lua_pushnumber( L , v.getZ() );
+    lua_rawseti( L , t , 3 );
+}
+
+static void TableFrombtQuaternion( lua_State * L , int t , const btQuaternion & v )
+{
+    if ( 0 == t )
+    {
+        lua_createtable( L , 4 , 0 );
+        t = lua_gettop( L );
+    }
+    else
+    {
+        t = abs_index( L , t );
+    }
+
+    g_assert( lua_istable( L , t ) );
+
+    lua_pushnumber( L , v.x() );
+    lua_rawseti( L , t , 1 );
+    lua_pushnumber( L , v.y() );
+    lua_rawseti( L , t , 2 );
+    lua_pushnumber( L , v.z() );
+    lua_rawseti( L , t , 3 );
+    lua_pushnumber( L , v.w() );
+    lua_rawseti( L , t , 4 );
+}
+
+static bool btTransformToMatrix( lua_State * L , const btTransform & transform , int matrix )
+{
+    if ( CoglMatrix * cm = LB_GET_MATRIX( L , matrix ) )
+    {
+        float m[16];
+        m[15] = 1;
+
+        transform.getOpenGLMatrix( m );
+
+        cogl_matrix_init_from_array( cm , m );
+
+        return true;
+    }
+    return false;
+}
+
+static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & transform )
+{
+    if ( CoglMatrix * cm = LB_GET_MATRIX( L , matrix ) )
+    {
+        transform.setFromOpenGLMatrix( & cm->xx );
+
+        return true;
+    }
+    return false;
+}
+
+static btRigidBody * get_rigid_body( lua_State * L , int body )
+{
+    if ( btCollisionObject * co = LB_GET_PBBODY3D( L , body ) )
+    {
+        return btRigidBody::upcast( co );
+    }
+
+    return 0;
+}
+
+]]
+
+interface PBBody [[ void * ]]
+{
+}
+
+interface PBShape [[ btCollisionShape * ]]
+{
+    PBShape()
+        [[
+            self = lb_construct( btCollisionShape , lua_touserdata( L , -2 ) );
+        ]];
+
+    ~PBShape()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+
+    readonly string name
+        [[
+            name = self->getName();
+        ]];
+
+    table local_scaling
+        [[
+            TableFrombtVector3( L , 0 , self->getLocalScaling() );
+        ]]
+        [[
+            self->setLocalScaling( btVector3FromTable( L , 2 ) );
+
+            if ( btGImpactMeshShape * ms = static_cast< btGImpactMeshShape * >( self ) )
+            {
+                ms->updateBound();
+            }
+        ]];
+
+    double margin
+        [[
+            margin = self->getMargin();
+        ]]
+        [[
+            self->setMargin( margin );
+        ]];
+
+    readonly table aabb
+        [[
+            btTransform t;
+            t.setIdentity();
+            btVector3 mi , ma;
+
+            self->getAabb( t , mi , ma );
+
+            lua_newtable( L );
+
+            TableFrombtVector3( L , 0 , mi );
+            lua_rawseti( L , -2 , 1 );
+            TableFrombtVector3( L , 0 , ma );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+}
+
+interface PBCompoundShape [[ btCollisionShape * ]] PBShape
+{
+    PBCompoundShape()
+        [[
+            self = lb_construct( btCollisionShape , lua_touserdata( L , -2 ) );
+        ]];
+
+    ~PBCompoundShape()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+
+    readonly int count
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            count = me->getNumChildShapes();
+        ]];
+
+    # Expects a table of tables with two elements, a matrix and a shape
+
+    table children
+        [[
+            float m[16];
+            m[15] = 1;
+
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            int count = me->getNumChildShapes();
+
+            lua_newtable( L );
+
+            int i = 1;
+
+            for ( btCompoundShapeChild * s = me->getChildList(); count; s++ , count-- , i++ )
+            {
+                lua_newtable( L );
+
+                new_Matrix( L );
+
+                (void) btTransformToMatrix( L , s->m_transform , -1 );
+
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushlightuserdata( L , s->m_childShape );
+
+                if ( s->m_childShapeType == COMPOUND_SHAPE_PROXYTYPE )
+                {
+                    new_PBCompoundShape( L );
+                }
+                else
+                {
+                    new_PBShape( L );
+                }
+                lua_remove( L , -2 );
+
+                lua_rawseti( L , -2 , 2 );
+
+                lua_rawseti( L , -2 , i );
+            }
+        ]]
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            // Clear all existing child shapes
+
+            while ( int count = me->getNumChildShapes() )
+            {
+                me->removeChildShapeByIndex( count - 1 );
+            }
+
+            lua_pushnil( L );
+
+            while( lua_next( L , 2 ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    int t = lua_gettop( L );
+
+                    // Get the matrix, from index 1 of this table and
+                    // convert it to a transform.
+
+                    lua_rawgeti( L , t , 1 );
+
+                    btTransform transform;
+
+                    if ( ! btTransformFromMatrix( L , -1 , transform ) )
+                    {
+                        return luaL_error( L , "Transform for shape is not a matrix." );
+                    }
+
+                    lua_pop( L , 1 );
+
+                    // Get the shape from index 2
+
+                    lua_rawgeti( L , t , 2 );
+
+                    btCollisionShape * shape = LB_GET_PBSHAPE( L , -1 );
+
+                    if ( ! shape )
+                    {
+                        return luaL_error( L , "Invalid shape for compound shape child" );
+                    }
+
+                    me->addChildShape( transform , shape );
+
+                    lua_pop( L , 1 );
+                }
+                lua_pop( L , 1 );
+            }
+        ]];
+
+    add( Matrix transform , PBShape shape )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            btTransform t;
+
+            if ( ! btTransformFromMatrix( L , transform , t ) )
+            {
+                return luaL_error( L , "Invalid matrix" );
+            }
+
+            btCollisionShape * s = LB_GET_PBSHAPE( L , shape );
+
+            if ( ! s )
+            {
+                return luaL_error( L , "Invalid shape" );
+            }
+
+            me->addChildShape( t , s );
+        ]];
+
+    remove( any shape_or_index )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            if ( lua_isnumber( L , shape_or_index ) )
+            {
+                me->removeChildShapeByIndex( lua_tonumber( L , shape_or_index ) );
+            }
+            else
+            {
+                btCollisionShape * s = LB_GET_PBSHAPE( L , shape_or_index );
+
+                if ( ! s )
+                {
+                    return luaL_error( L , "Invalid shape or index" );
+                }
+
+                me->removeChildShape( s );
+            }
+        ]];
+
+    clear()
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            // Clear all existing child shapes
+
+            while ( int count = me->getNumChildShapes() )
+            {
+                me->removeChildShapeByIndex( count - 1 );
+            }
+        ]];
+
+    update_child_transform( int child_index , Matrix transform )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            btTransform t;
+
+            if ( ! btTransformFromMatrix( L , transform , t ) )
+            {
+                luaL_error( L , "Invalid matrix" );
+            }
+
+            me->updateChildTransform( child_index , t );
+        ]];
+}
+
+
+interface PBPointToPointConstraint [[ btPoint2PointConstraint * ]]
+{
+    PBPointToPointConstraint( any world , PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
+        [[
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" );
+            }
+
+            btVector3 pa( btVector3FromTable( L , pivotA ) );
+
+            btPoint2PointConstraint * c = 0;
+
+            if ( 0 == bodyB )
+            {
+                c = new btPoint2PointConstraint( * ba , pa );
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+
+                btVector3 pb( btVector3FromTable( L , pivotB ) );
+
+                c = new btPoint2PointConstraint( * ba , * bb , pa , pb );
+            }
+
+            g_assert( c );
+
+            self = lb_construct( btPoint2PointConstraint , c );
+        ]];
+
+    ~PBPointToPointConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+}
+
+interface PBGeneric6DOFConstraint [[ btGeneric6DofConstraint * ]]
+{
+    PBGeneric6DOFConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" );
+            }
+
+            btTransform ta;
+
+            if ( ! btTransformFromMatrix( L , frameA , ta ) )
+            {
+                return luaL_error( L , "Invalid matrix for first frame" );
+            }
+
+            btGeneric6DofConstraint * c = 0;
+
+            if ( 0 == bodyB )
+            {
+                c = new btGeneric6DofConstraint( * ba , ta , use_linear_reference_frame );
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+
+                btTransform tb;
+
+                if ( ! btTransformFromMatrix( L , frameB , tb ) )
+                {
+                    return luaL_error( L , "Invalid matrix for second frame" );
+                }
+
+                c = new btGeneric6DofConstraint( * ba , * bb , ta , tb , use_linear_reference_frame );
+            }
+
+            g_assert( c );
+
+            self = lb_construct( btGeneric6DofConstraint , c );
+        ]];
+
+    ~PBGeneric6DOFConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+
+    set_linear_lower_limit( table limit )
+        [[
+            self->setLinearLowerLimit( btVector3FromTable( L , limit ) );
+        ]];
+
+    set_linear_upper_limit( table limit )
+        [[
+            self->setLinearUpperLimit( btVector3FromTable( L , limit ) );
+        ]];
+
+    set_angular_lower_limit( table limit )
+        [[
+            self->setAngularLowerLimit( btVector3FromTable( L , limit ) );
+        ]];
+
+    set_angular_upper_limit( table limit )
+        [[
+            self->setAngularUpperLimit( btVector3FromTable( L , limit ) );
+        ]];
+
+    get_frame_offsets( Matrix offsetA , Matrix offsetB )
+        [[
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetA() , offsetA ) )
+            {
+                luaL_error( L , "Invalid matrix for first offset" );
+            }
+
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetB() , offsetB ) )
+            {
+                luaL_error( L , "Invalid matrix for second offset" );
+            }
+        ]];
+}
+
+interface PBHingeConstraint [[ btHingeConstraint * ]]
+{
+    PBHingeConstraint( any world , PBBody3d bodyA , table pivotA , table axisA , bool use_reference_frame , PBBody3d bodyB = 0 , table pivotB = 0 , table axisB )
+        [[
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" );
+            }
+
+            btVector3 pa( btVector3FromTable( L , pivotA ) );
+            btVector3 aa( btVector3FromTable( L , axisA ) );
+
+            btHingeConstraint * c = 0;
+
+            if ( 0 == bodyB )
+            {
+                c = new btHingeConstraint( * ba , pa , aa , use_reference_frame );
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+
+                btVector3 pb( btVector3FromTable( L , pivotB ) );
+                btVector3 ab( btVector3FromTable( L , axisB ) );
+
+                c = new btHingeConstraint( * ba , * bb , pa , pb , aa , ab , use_reference_frame );
+            }
+
+            g_assert( c );
+
+            self = lb_construct( btHingeConstraint , c );
+        ]];
+
+    ~PBHingeConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+
+
+    bool angular_only
+        [[
+            angular_only = self->getAngularOnly();
+        ]]
+        [[
+            self->setAngularOnly( angular_only );
+        ]];
+
+    enable_angular_motor( bool enable , double target_velocity , double max_motor_impulse )
+        [[
+            self->enableAngularMotor( enable , target_velocity , max_motor_impulse );
+        ]];
+
+    enable_motor( bool enable )
+        [[
+            self->enableMotor( enable );
+        ]];
+
+    set_motor_target( double angle , double dt )
+        [[
+            self->setMotorTarget( angle , dt );
+        ]];
+
+    set_limit( double low , double high , double softness = 0.9 , double bias_factor = 0.3 , double relaxation_factor = 1.0 )
+        [[
+            self->setLimit( low , high , softness , bias_factor , relaxation_factor );
+        ]];
+}
+
+interface PBSliderConstraint [[ btSliderConstraint * ]]
+{
+    PBSliderConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" );
+            }
+
+            btTransform ta;
+
+            if ( ! btTransformFromMatrix( L , frameA , ta ) )
+            {
+                return luaL_error( L , "Invalid matrix for first frame" );
+            }
+
+            btSliderConstraint * c = 0;
+
+            if ( 0 == bodyB )
+            {
+                c = new btSliderConstraint( * ba , ta , use_linear_reference_frame );
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+
+                btTransform tb;
+
+                if ( ! btTransformFromMatrix( L , frameB , tb ) )
+                {
+                    return luaL_error( L , "Invalid matrix for second frame" );
+                }
+
+                c = new btSliderConstraint( * ba , * bb , ta , tb , use_linear_reference_frame );
+            }
+
+            g_assert( c );
+
+            self = lb_construct( btSliderConstraint , c );
+        ]];
+
+    ~PBSliderConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+
+    double linear_lower_limit
+        [[
+            linear_lower_limit = self->getLowerLinLimit();
+        ]]
+        [[
+            self->setLowerLinLimit( linear_lower_limit );
+        ]];
+
+    double linear_upper_limit
+        [[
+            linear_upper_limit = self->getUpperLinLimit();
+        ]]
+        [[
+            self->setUpperLinLimit( linear_upper_limit );
+        ]];
+
+    double angular_lower_limit
+        [[
+            angular_lower_limit = self->getLowerAngLimit();
+        ]]
+        [[
+            self->setLowerAngLimit( angular_lower_limit );
+        ]];
+
+    double angular_upper_limit
+        [[
+            angular_upper_limit = self->getUpperAngLimit();
+        ]]
+        [[
+            self->setUpperAngLimit( angular_upper_limit );
+        ]];
+
+
+    double softness_dir_linear
+        [[
+            softness_dir_linear = self->getSoftnessDirLin();
+        ]]
+        [[
+            self->setSoftnessDirLin( softness_dir_linear );
+        ]];
+
+    double softness_dir_angular
+        [[
+            softness_dir_angular = self->getSoftnessDirAng();
+        ]]
+        [[
+            self->setSoftnessDirAng( softness_dir_angular );
+        ]];
+
+    double softness_lim_linear
+        [[
+            softness_lim_linear = self->getSoftnessLimLin();
+        ]]
+        [[
+            self->setSoftnessLimLin( softness_lim_linear );
+        ]];
+
+    double softness_lim_angular
+        [[
+            softness_lim_angular = self->getSoftnessLimAng();
+        ]]
+        [[
+            self->setSoftnessLimAng( softness_lim_angular );
+        ]];
+
+    double softness_ortho_linear
+        [[
+            softness_ortho_linear = self->getSoftnessOrthoLin();
+        ]]
+        [[
+            self->setSoftnessOrthoLin( softness_ortho_linear );
+        ]];
+
+     double softness_ortho_angular
+        [[
+            softness_ortho_angular = self->getSoftnessOrthoAng();
+        ]]
+        [[
+            self->setSoftnessOrthoAng( softness_ortho_angular );
+        ]];
+
+
+    double restitution_dir_linear
+        [[
+            restitution_dir_linear = self->getRestitutionDirLin();
+        ]]
+        [[
+            self->setRestitutionDirLin( restitution_dir_linear );
+        ]];
+
+    double restitution_dir_angular
+        [[
+            restitution_dir_angular = self->getRestitutionDirAng();
+        ]]
+        [[
+            self->setRestitutionDirAng( restitution_dir_angular );
+        ]];
+
+    double restitution_lim_linear
+        [[
+            restitution_lim_linear = self->getRestitutionLimLin();
+        ]]
+        [[
+            self->setRestitutionLimLin( restitution_lim_linear );
+        ]];
+
+    double restitution_lim_angular
+        [[
+            restitution_lim_angular = self->getRestitutionLimAng();
+        ]]
+        [[
+            self->setRestitutionLimAng( restitution_lim_angular );
+        ]];
+
+    double restitution_ortho_linear
+        [[
+            restitution_ortho_linear = self->getRestitutionOrthoLin();
+        ]]
+        [[
+            self->setRestitutionOrthoLin( restitution_ortho_linear );
+        ]];
+
+     double restitution_ortho_angular
+        [[
+            restitution_ortho_angular = self->getRestitutionOrthoAng();
+        ]]
+        [[
+            self->setRestitutionOrthoAng( restitution_ortho_angular );
+        ]];
+
+
+    double damping_dir_linear
+        [[
+            damping_dir_linear = self->getDampingDirLin();
+        ]]
+        [[
+            self->setDampingDirLin( damping_dir_linear );
+        ]];
+
+    double damping_dir_angular
+        [[
+            damping_dir_angular = self->getDampingDirAng();
+        ]]
+        [[
+            self->setDampingDirAng( damping_dir_angular );
+        ]];
+
+    double damping_lim_linear
+        [[
+            damping_lim_linear = self->getDampingLimLin();
+        ]]
+        [[
+            self->setDampingLimLin( damping_lim_linear );
+        ]];
+
+    double damping_lim_angular
+        [[
+            damping_lim_angular = self->getDampingLimAng();
+        ]]
+        [[
+            self->setDampingLimAng( damping_lim_angular );
+        ]];
+
+    double damping_ortho_linear
+        [[
+            damping_ortho_linear = self->getDampingOrthoLin();
+        ]]
+        [[
+            self->setDampingOrthoLin( damping_ortho_linear );
+        ]];
+
+     double damping_ortho_angular
+        [[
+            damping_ortho_angular = self->getDampingOrthoAng();
+        ]]
+        [[
+            self->setDampingOrthoAng( damping_ortho_angular );
+        ]];
+
+    bool linear_motor_on
+        [[
+            linear_motor_on = self->getPoweredLinMotor();
+        ]]
+        [[
+            self->setPoweredLinMotor( linear_motor_on );
+        ]];
+
+    double linear_motor_target_velocity
+        [[
+            linear_motor_target_velocity = self->getTargetLinMotorVelocity();
+        ]]
+        [[
+            self->setTargetLinMotorVelocity( linear_motor_target_velocity );
+        ]];
+
+    double linear_motor_max_force
+        [[
+            linear_motor_max_force = self->getMaxLinMotorForce();
+        ]]
+        [[
+            self->setMaxLinMotorForce( linear_motor_max_force );
+        ]];
+
+
+
+    bool angular_motor_on
+        [[
+            angular_motor_on = self->getPoweredAngMotor();
+        ]]
+        [[
+            self->setPoweredAngMotor( angular_motor_on );
+        ]];
+
+    double angular_motor_target_velocity
+        [[
+            angular_motor_target_velocity = self->getTargetAngMotorVelocity();
+        ]]
+        [[
+            self->setTargetAngMotorVelocity( angular_motor_target_velocity );
+        ]];
+
+    double angular_motor_max_force
+        [[
+            angular_motor_max_force = self->getMaxAngMotorForce();
+        ]]
+        [[
+            self->setMaxAngMotorForce( angular_motor_max_force );
+        ]];
+
+
+    readonly double linear_position
+        [[
+            linear_position = self->getLinearPos();
+        ]];
+
+    readonly double linear_depth
+        [[
+            linear_depth = self->getLinDepth();
+        ]];
+
+    readonly double angular_depth
+        [[
+            angular_depth = self->getAngDepth();
+        ]];
+
+
+    get_frame_offsets( Matrix offsetA , Matrix offsetB )
+        [[
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetA() , offsetA ) )
+            {
+                luaL_error( L , "Invalid matrix for first offset" );
+            }
+
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetB() , offsetB ) )
+            {
+                luaL_error( L , "Invalid matrix for second offset" );
+            }
+        ]];
+}
+
+interface PBBody3d [[ btCollisionObject * ]]
+{
+    PBBody3d()
+        [[
+            self = lb_construct( btCollisionObject , lua_touserdata( L , -2 ) );
+        ]];
+
+    ~PBBody3d()
+        [[
+            Bullet::BodyData::destroy_object( self , true );
+        ]];
+
+    readonly int handle
+        [[
+            handle = Bullet::BodyData::get( self )->get_handle();
+        ]];
+
+    bool awake
+        [[
+            awake = self->isActive();
+        ]]
+        [[
+            self->activate( true );
+        ]];
+
+    bool collides
+        [[
+            collides = ( self->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE ) == 0;
+        ]]
+        [[
+            if ( collides )
+            {
+                self->setCollisionFlags( self->getCollisionFlags() & ! btCollisionObject::CF_NO_CONTACT_RESPONSE );
+            }
+            else
+            {
+                self->setCollisionFlags( self->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+            }
+        ]];
+
+    readonly bool in_world
+        [[
+            in_world = Bullet::BodyData::get( self )->is_in_world();
+        ]];
+
+    readonly table center_of_mass_position
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getCenterOfMassPosition() );
+            }
+        ]];
+
+    readonly table orientation
+        [[
+            lua_createtable( L , 4 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtQuaternion( L , -1 , body->getOrientation() );
+            }
+        ]];
+
+    table linear_velocity
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getLinearVelocity() );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setLinearVelocity( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    table angular_velocity
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getAngularVelocity() );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setAngularVelocity( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    double linear_damping
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                linear_damping = body->getLinearDamping();
+            }
+            else
+            {
+                linear_damping = 0;
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setDamping( linear_damping , body->getAngularDamping() );
+            }
+        ]];
+
+    double angular_damping
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                angular_damping = body->getAngularDamping();
+            }
+            else
+            {
+                angular_damping = 0;
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setDamping( body->getLinearDamping() , angular_damping );
+            }
+        ]];
+
+    table linear_factor
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getLinearFactor() );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setLinearFactor( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    table angular_factor
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getAngularFactor() );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setAngularFactor( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    table gravity
+        [[
+            lua_createtable( L , 3 , 0 );
+
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getGravity() );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setGravity( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    apply_force( table force , table point = 0 )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btVector3 f( btVector3FromTable( L , force ) );
+
+                if ( 0 == point )
+                {
+                    body->applyCentralForce( f );
+                }
+                else
+                {
+                    body->applyForce( f , btVector3FromTable( L , point ) );
+                }
+            }
+        ]];
+
+    apply_torque( table torque )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->applyTorque( btVector3FromTable( L , torque ) );
+            }
+        ]];
+
+    apply_linear_impulse( table force , table point = 0 )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btVector3 f( btVector3FromTable( L , force ) );
+
+                if ( 0 == point )
+                {
+                    body->applyCentralImpulse( f );
+                }
+                else
+                {
+                    body->applyImpulse( f , btVector3FromTable( L , point ) );
+                }
+            }
+        ]];
+
+    apply_angular_impulse( table torque )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->applyTorqueImpulse( btVector3FromTable( L , torque ) );
+            }
+        ]];
+
+    clear_forces()
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->clearForces();
+            }
+        ]];
+
+    /*
+        Copies its transform matrix into the one provided and returns it.
+
+        This is for performance reasons - instead of creating a new one every
+        time.
+    */
+
+    Matrix get_transform( Matrix matrix )
+        [[
+            btTransformToMatrix( L , self->getWorldTransform() , matrix );
+
+            lua_pushvalue( L , matrix );
+        ]];
+
+    Matrix set_transform( Matrix matrix )
+        [[
+            btTransform t;
+
+            if ( btTransformFromMatrix( L , matrix , t ) )
+            {
+                self->setWorldTransform( t );
+            }
+
+            lua_pushvalue( L , matrix );
+        ]];
+
+    Matrix get_center_of_mass_transform( Matrix matrix )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btTransformToMatrix( L , body->getCenterOfMassTransform() , matrix );
+            }
+
+            lua_pushvalue( L , matrix );
+        ]];
+
+
+    Matrix set_center_of_mass_transform( Matrix matrix )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btTransform t;
+
+                if ( btTransformFromMatrix( L , matrix , t ) )
+                {
+                    body->setCenterOfMassTransform( t );
+                }
+            }
+
+            lua_pushvalue( L , matrix );
+        ]];
+}
+
+global pb [[ Bullet::World * ]]
+{
+    pb()
+        [[
+            self = lb_construct( Bullet::World , new Bullet::World( L , 64 ) );
+        ]];
+
+    ~pb()
+        [[
+            delete self;
+        ]];
+
+    table gravity
+        [[
+            TableFrombtVector3( L , 0 , self->get_world()->getGravity() );
+        ]]
+        [[
+            self->get_world()->setGravity( btVector3FromTable( L , 2 ) );
+        ]];
+
+    step( double time_step = 1.0f/60.0f , int max_sub_steps = 1 , double fixed_time_step = 1.0f/60.0f )
+        [[
+            self->step( time_step , max_sub_steps , fixed_time_step );
+        ]];
+
+    table get_contacts( double max_distance = 0 , PBBody3d body1 = 0 , PBBody3d body2 = 0 )
+        [[
+            btCollisionObject * co1 = LB_GET_PBBODY3D( L , body1 );
+            btCollisionObject * co2 = LB_GET_PBBODY3D( L , body2 );
+
+            self->get_contacts( max_distance , co1 , co2 );
+        ]];
+
+    PBBody Body( UIElement element , table properties )
+        [[
+#if 0
+            lb_check_udata_type( L , element , "actor" );
+
+            int n = self->create_body( element , properties , PBBODY_METATABLE );
+
+            if ( ! n )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                ClutterUtil::set_props_from_table( L , properties );
+            }
+#else
+            lua_pushnil( L );
+#endif
+        ]];
+
+    PBBody3d Body3d( table properties )
+        [[
+            if ( ! self->create_body_3d( properties ) )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
+/*
+    PBBody3d Sensor3d( table properties )
+        [[
+            if ( ! self->create_sensor( properties ) )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+*/
+
+    # Takes any number of bodies
+
+    add( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( btCollisionObject * co = LB_GET_PBBODY3D( L , i ) )
+                {
+                    Bullet::BodyData::add_object( co );
+                }
+            }
+        ]];
+
+    remove( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( btCollisionObject * co = LB_GET_PBBODY3D( L , i ) )
+                {
+                    Bullet::BodyData::remove_object( co );
+                }
+            }
+        ]];
+
+    add_constraint( any constraint , bool disable_collisions_between_linked_bodies = false )
+        [[
+            if ( btTypedConstraint * c = static_cast<btTypedConstraint*>( UserData::get_client_check( L , constraint ) ) )
+            {
+                self->get_world()->addConstraint( c , disable_collisions_between_linked_bodies );
+            }
+        ]];
+
+    PBShape BoxShape( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btBoxShape( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+
+    PBShape StaticPlaneShape( double normal_x , double normal_y , double normal_z , double plane_constant )
+        [[
+            self->create_shape( new btStaticPlaneShape( btVector3( normal_x , normal_y , normal_z ) , plane_constant ) , new_PBShape );
+        ]];
+
+    PBShape SphereShape( double radius )
+        [[
+            self->create_shape( new btSphereShape( radius ) , new_PBShape );
+        ]];
+
+    PBShape CapsuleShapeX( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShapeX( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape CapsuleShapeY( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShape( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape CapsuleShapeZ( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShapeZ( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape ConeShapeX( double radius , double height )
+        [[
+            self->create_shape( new btConeShapeX( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape ConeShapeY( double radius , double height )
+        [[
+            self->create_shape( new btConeShape( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape ConeShapeZ( double radius , double height )
+        [[
+            self->create_shape( new btConeShapeZ( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape CylinderShapeX( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShapeX( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+
+    PBShape CylinderShapeY( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShape( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+
+    PBShape CylinderShapeZ( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShapeZ( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+
+    PBShape TriangleShape( table point0 , table point1 , table point2 )
+        [[
+            btVector3 p0( btVector3FromTable( L , point0 ) );
+            btVector3 p1( btVector3FromTable( L , point1 ) );
+            btVector3 p2( btVector3FromTable( L , point2 ) );
+
+            self->create_shape( new btTriangleShape( p0 , p1 , p2 ) , new_PBShape );
+        ]];
+
+    # Expects a table of tables with 3 elements each, for x,y and z
+
+    PBShape ConvexHullShape( table points )
+        [[
+            btConvexHullShape * shape = new btConvexHullShape();
+
+            lua_pushnil( L );
+
+            while( lua_next( L , points ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    shape->addPoint( btVector3FromTable( L , -1 ) );
+                }
+
+                lua_pop( L , 1 );
+            }
+
+            self->create_shape( shape , new_PBShape );
+        ]];
+
+    # Expects a table of tables with 4 elements each, for x,y,z and radius.
+
+    PBShape MultiSphereShape( table positions_and_radi )
+        [[
+            btAlignedObjectArray<btVector3> positions;
+            btAlignedObjectArray<btScalar>  radi;
+
+            lua_pushnil( L );
+
+            while( lua_next( L , positions_and_radi ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    positions.push_back( btVector3FromTable( L , -1 ) );
+                    lua_rawgeti( L , -1 , 4 );
+                    radi.push_back( lua_tonumber( L , -1 ) );
+                    lua_pop( L , 1 );
+                }
+                lua_pop( L , 1 );
+            }
+
+            if ( 0 == positions.size() )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                self->create_shape( new btMultiSphereShape( & positions[0] , & radi[0] , positions.size() ) , new_PBShape );
+            }
+        ]];
+
+    # Expects a table of tables with 2 elements each, a matrix and a shape
+
+    PBShape CompoundShape( table children = 0 )
+        [[
+            self->create_shape( new btCompoundShape() , new_PBCompoundShape );
+
+            if ( children )
+            {
+                lua_pushcfunction( L , set_PBCompoundShape_children );
+                lua_pushvalue( L , -2 );
+                lua_pushvalue( L , children );
+                lua_call( L , 2 , 0 );
+            }
+        ]];
+
+    PBShape TriangleMeshShape( table vertices , table indices , table scaling = 0 )
+        [[
+            btTriangleMesh * tm = new btTriangleMesh();
+
+            btVector3 v[3];
+
+            lua_pushnil( L );
+
+            int n = 0;
+            int c = 0;
+
+            while( lua_next( L , indices ) )
+            {
+                int i = lua_tonumber( L , -1 );
+
+                lua_rawgeti( L , vertices , ( 3 * i ) + 1 );
+                lua_rawgeti( L , vertices , ( 3 * i ) + 2 );
+                lua_rawgeti( L , vertices , ( 3 * i ) + 3 );
+
+                v[n].setX( lua_tonumber( L , -3 ) );
+                v[n].setY( lua_tonumber( L , -2 ) );
+                v[n].setZ( lua_tonumber( L , -1 ) );
+
+//                g_debug( "TRIANGLE %d.%d : %3.1f , %3.1f , %3.1f" , c , n , v[n].x() , v[n].y() , v[n].z() );
+
+                lua_pop( L , 4 );
+
+                n += 1;
+
+                if ( n == 3 )
+                {
+                    tm->addTriangle( v[0] , v[1] , v[2] );
+
+                    n = 0;
+                    ++c;
+                }
+            }
+
+            btGImpactMeshShape * ms = new btGImpactMeshShape( tm );
+
+            if ( scaling )
+            {
+                ms->setLocalScaling( btVector3FromTable( L , scaling ) );
+                ms->updateBound();
+            }
+
+            self->create_shape( ms , new_PBShape );
+        ]];
+
+    PBPointToPointConstraint PointToPointConstraint( PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBPointToPointConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , pivotA );
+
+            if ( 0 == bodyB || 0 == pivotB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , pivotB );
+            }
+
+            lua_call( L , 5 , 1 );
+        ]];
+
+    PBGeneric6DOFConstraint Generic6DOFConstraint( PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBGeneric6DOFConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , frameA );
+            lua_pushboolean( L , use_linear_reference_frame );
+
+            if ( 0 == bodyB || 0 == frameB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , frameB );
+            }
+
+            lua_call( L , 6 , 1 );
+        ]];
+
+    PBHingeConstraint HingeConstraint( PBBody3d bodyA , table pivotA , table axisA , bool use_reference_frame , PBBody3d bodyB = 0 , table pivotB = 0 , table axisB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBHingeConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , pivotA );
+            lua_pushvalue( L , axisA );
+            lua_pushboolean( L , use_reference_frame );
+
+            if ( 0 == bodyB || 0 == pivotB || 0 == axisB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , pivotB );
+                lua_pushvalue( L , axisB );
+            }
+
+            lua_call( L , 8 , 1 );
+        ]];
+
+    PBSliderConstraint SliderConstraint( PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBSliderConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , frameA );
+            lua_pushboolean( L , use_linear_reference_frame );
+
+            if ( 0 == bodyB || 0 == frameB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , frameB );
+            }
+
+            lua_call( L , 6 , 1 );
+        ]];
+
+    function on_step
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_step" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_step" , L );
+        ]];
+
+    int add_onstep_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_step" , L );
+        ]];
+
+    remove_onstep_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_step" , L );
+        ]];
+}

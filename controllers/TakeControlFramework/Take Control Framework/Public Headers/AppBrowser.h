@@ -75,8 +75,8 @@
  * AppBrowser objects are NOT automatically updated. Calls must be
  * made to - refresh to guarentee up-to-date information. However,
  * the information should rarely change. If an app launches successfully
- * via the method - launchApp the AppBrowser will update the value for
- * its currentApp property
+ * via the method - launchApp the AppBrowser will update the property
+ * currentApp to reflect this change.
  */
 
 @interface AppBrowser : NSObject

@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.trickplay.mug</groupId>
+		<artifactId>mug-service</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<relativePath />
+	</parent>
+	<artifactId>mug-openfire</artifactId>
+	<name>mug-openfire</name>
+	<description>A framework to support Multi-User Games on Openfire.</description>
+	<packaging>openfire-plugin</packaging>
+	<build>
+		<finalName>mug-service</finalName>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.reucon.maven.plugins</groupId>
+				<artifactId>maven-openfire-plugin</artifactId>
+				<version>1.0.2-SNAPSHOT</version>
+				<extensions>true</extensions>
+				<configuration>
+					<jspPackageName>org.frogx.service.openfire.jsp</jspPackageName>
+				</configuration>
+			</plugin>
+			<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <executions> 
+				<execution> <id>assemblies</id> <phase>package</phase> <goals> <goal>single</goal> 
+				</goals> <configuration> <finalName>${project.artifactId}</finalName> <descriptors> 
+				<descriptor>src/main/assemble/plugins.xml</descriptor> </descriptors> </configuration> 
+				</execution> </executions> </plugin> -->
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.igniterealtime.openfire</groupId>
+			<artifactId>openfire</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>org.igniterealtime</groupId>
+			<artifactId>tinder</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		 -->
+		<dependency>
+			<groupId>com.trickplay.mug</groupId>
+			<artifactId>mug-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.trickplay.mug</groupId>
+			<artifactId>mug-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+	<properties>
+		<author>Bhaskar Korlipara</author>
+	</properties>
+</project>

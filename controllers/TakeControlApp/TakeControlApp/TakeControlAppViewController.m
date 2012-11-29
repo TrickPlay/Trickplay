@@ -421,7 +421,7 @@
 }
 
 - (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera {
-    [self presentModalViewController:camera animated:YES];
+    [self presentViewController:camera animated:YES completion:nil];
 }
 
 - (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController {
@@ -442,44 +442,6 @@
     [self destroyTPAppViewController];
     
     [tvBrowserViewController.tvBrowser refreshServices];
-}
-
-/**
- * Generic operations to perform when the network fails. Includes deallocating
- * other view controllers and their resources and restarting the NetServiceManager
- * which will then begin browsing for advertised services.
- */
-- (void)handleSocketProblems {
-    if (pushingAppBrowser || pushingAppViewController) {
-        return;
-    }
-    
-    [self.navController popToRootViewControllerAnimated:YES];
-    
-    [self destroyTPAppViewController];
-    [self destroyAppBrowserViewController];
-    
-    [tvBrowserViewController refresh];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
- * when an error occurs over the network.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-    
-    [self handleSocketProblems];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
- * when the stream socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in Root");
-    
-    [self handleSocketProblems];
 }
 
 #pragma mark -

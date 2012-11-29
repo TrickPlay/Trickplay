@@ -247,29 +247,41 @@ function controller:init(t)
                 print("continue")
                 ls:light_down()
                 make_word:set_session(session)
+                
                 if session.my_score == 3 then
                     
                     session.viewing = false
                     
                     screen:grab_key_focus()
-                    controller:change_message("Saving...")
-                    game_server:update(
+                    
+                    controller:change_message("Ending Session...")
+                    
+                    game_server:end_session(
                         session,
                         function(t)
-                            session = nil
-                            controller:change_message("")
-                            print("successfully updated")
                             
-                            app_state.state = "MAIN_PAGE"
+                            print("Session Ended. Leaving....")
+                            
+                            game_server:leave_match(
+                                session,
+                                function(t)
+                                    print("left")
+                                    session = nil
+                                    controller:change_message("")
+                                    print("successfully updated")
+                                    
+                                    app_state.state = "MAIN_PAGE"
+                                end
+                            )
                         end
                     )
                     
                 else
                     app_state.state = "MAKE_WORD"
+                    session = nil
                 end
                 bg:fade_out_vic()
                 bg:slide_out_hangman()
-                session = nil
             end},
             {name = "Give Up", select = function()
                 
@@ -317,22 +329,52 @@ function controller:init(t)
                 bg:fade_out_vic()
                 
                 controller:change_message("Saving...")
-                game_server:update(
-                    session,
-                    function(t)
-                        session = nil
-                        controller:change_message("")
-                        print("successfully updated")
-                        if not guessing then 
-                            
-                            bg:slide_out_hangman()
-                            
-                        end
-                        
-                        app_state.state = "MAIN_PAGE"
-                    end
-                )
                 
+                
+                if session.my_score == 3 then
+                    
+                    
+                    controller:change_message("Ending Session...")
+                    
+                    game_server:end_session(
+                        session,
+                        function(t)
+                            
+                            print("Session Ended. Leaving....")
+                            
+                            game_server:leave_match(
+                                session,
+                                function(t)
+                                    print("left")
+                                    session = nil
+                                    controller:change_message("")
+                                    print("successfully updated")
+                                    
+                                    app_state.state = "MAIN_PAGE"
+                                end
+                            )
+                        end
+                    )
+                    
+                else
+                    
+                    game_server:update(
+                        session,
+                        function(t)
+                            session = nil
+                            controller:change_message("")
+                            print("successfully updated")
+                            if not guessing then 
+                                
+                                bg:slide_out_hangman()
+                                
+                            end
+                            
+                            app_state.state = "MAIN_PAGE"
+                        end
+                    )
+                    
+                end
             end},
             {name = "Quit", select = function()
                 list:set_state("UNFOCUSED")
