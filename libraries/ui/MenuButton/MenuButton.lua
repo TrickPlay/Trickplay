@@ -178,9 +178,9 @@ MenuButton = setmetatable(
                     end
                     if restyle_button then
                         restyle_button = false
-                        local t = instance.style.attributes
-                        t.name = nil
-                        button.style:set(t)
+                        --local t = instance.style.attributes
+                        --t.name = nil
+                        --button.style:set(t)
                     end
                     old_update()
                 end
