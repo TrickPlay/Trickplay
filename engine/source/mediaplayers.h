@@ -170,9 +170,14 @@ private:
 
     typedef std::set<Delegate *> DelegateSet;
 
+    TPContext *     context;
     Wrapper    *    wrapper;
     int             state;
+#ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
+#else
+    GRecMutex mutex;
+#endif
     GAsyncQueue  *  queue;
     DelegateSet     delegates;
     StringPairList  tags;

@@ -107,7 +107,7 @@ public:
         
         if (!key)
         {
-            g_warning("TRYING TO ADD SETTINGS WITH NON-STRING KEY");
+            g_warning("TRYING TO ADD SETTINGS WITH NON-STRING KEY: %s", Util::where_am_i_lua(L).c_str());
             return;
         }
         
@@ -139,7 +139,7 @@ public:
             
             if ( !insert.step_done() )
             {
-                g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s",key,value,insert.get_msg().c_str());
+                g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s (%s)",key,value,insert.get_msg().c_str(), Util::where_am_i_lua(L).c_str());
             }
             
 		    lua_pop(L,1);
@@ -165,7 +165,7 @@ public:
         
         if (!key)
         {
-            g_warning("TRYING TO GET SETTING WITH NON-STRING KEY");
+            g_warning("TRYING TO GET SETTING WITH NON-STRING KEY: %s", Util::where_am_i_lua(L).c_str());
             return false;
         }
         
@@ -183,7 +183,7 @@ public:
 		
 		if (luaL_dostring(L,statement.c_str())!=0)
 		{
-		    g_warning("FAILED TO EVALUATE SETTING VALUE");
+		    g_warning("FAILED TO EVALUATE SETTING VALUE: %s", Util::where_am_i_lua(L).c_str());
 		    // pop the error
 		    lua_pop( L, 1 );
 		    return false;

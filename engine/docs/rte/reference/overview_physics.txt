@@ -1,5 +1,5 @@
 
-Title: Physics Engine Overview
+Title: 2D Physics Engine Overview
 
-This is a placeholder for the Physics Engine:Overview section of the TrickPlay Runtime Engine Reference
+The TrickPlay SDK supports a two-dimensional physics environment in which UIElement-based objects, like Rectangles and Images, may participate. The UIElement objects can be subjected to typical physics actions, such as applied force and gravity, and collisions between objects can be detected automatically and responded to by the physics simulation.
 

@@ -1,6 +1,7 @@
 module clutter_screen;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "context.h"
 #include "clutter_util.h"
@@ -31,7 +32,7 @@ global screen [[ClutterActor*]] actor , container
         // Screen is a global and we don't want its reference toggling all the
         // time, so we take an extra one and hold on to it.
 
-        self=clutter_get_actor_by_gid(App::get(L)->get_screen_gid() );
+        self=App::get(L)->get_screen();
         self=lb_construct_gobject( ClutterActor , g_object_ref( self ) );
 
         ClutterUtil::initialize_actor(L,self,SCREEN_METATABLE);
@@ -80,7 +81,7 @@ global screen [[ClutterActor*]] actor , container
             gfloat w;
             gfloat h;
 
-            clutter_actor_get_size( clutter_stage_get_default(), &w, &h );
+            clutter_actor_get_size( App::get(L)->get_context()->get_stage(), &w, &h );
 
             lua_newtable( L );
             lua_pushnumber( L, w );
@@ -120,7 +121,7 @@ global screen [[ClutterActor*]] actor , container
         [[
             clutter_actor_show(self);
             // Show the stage as well
-            clutter_actor_show(clutter_stage_get_default());
+            clutter_actor_show(App::get(L)->get_context()->get_stage());
         ]];
 
     /*
@@ -135,9 +136,13 @@ global screen [[ClutterActor*]] actor , container
 
     show_all()
         [[
+#ifndef CLUTTER_VERSION_1_10
             clutter_actor_show_all(self);
+#else
+            clutter_actor_show(self);
+#endif
             // Show the stage as well
-            clutter_actor_show(clutter_stage_get_default());
+            clutter_actor_show(App::get(L)->get_context()->get_stage());
         ]];
 
     # I don't think parent and unparent need to be documented here. They are
@@ -178,13 +183,13 @@ global screen [[ClutterActor*]] actor , container
     /*
     udata key_focus
     [[
-        wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(clutter_stage_get_default())));
+        wrap_concrete_actor(L,clutter_stage_get_key_focus(CLUTTER_STAGE(App::get(L)->get_context()->get_stage())));
     ]]
     [[
         ClutterActor *k=user_data_to_actor(L,2);
         if (k)
         {
-        clutter_stage_set_key_focus(CLUTTER_STAGE(clutter_stage_get_default()),k);
+        clutter_stage_set_key_focus(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),k);
         }
     ]];
 
@@ -193,7 +198,7 @@ global screen [[ClutterActor*]] actor , container
 
     udata get_object_at( double x , double y )
     [[
-        wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(clutter_stage_get_default()),CLUTTER_PICK_ALL,x,y));
+        wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),CLUTTER_PICK_ALL,x,y));
     ]];
     */
 
@@ -205,19 +210,27 @@ global screen [[ClutterActor*]] actor , container
     table color
         [[
             ClutterColor color;
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_get_background_color( self, &color );
+#else
             clutter_stage_get_color(CLUTTER_STAGE(self),&color);
+#endif
             push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             to_clutter_color(L,2,&color);
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_background_color( self, &color );
+#else
             clutter_stage_set_color(CLUTTER_STAGE(self),&color);
+#endif
         ]];
 */
     table perspective
     [[
         ClutterPerspective p;
-        clutter_stage_get_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
+        clutter_stage_get_perspective(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),&p);
         lua_newtable(L);
         lua_pushnumber(L,p.fovy);
         lua_rawseti(L,-2,1);
@@ -236,7 +249,7 @@ global screen [[ClutterActor*]] actor , container
         lua_rawgeti(L,2,4);
         ClutterPerspective p = {lua_tonumber(L,-4),lua_tonumber(L,-3),
         lua_tonumber(L,-2),lua_tonumber(L,-1)};
-        clutter_stage_set_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
+        clutter_stage_set_perspective(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),&p);
         lua_pop(L,4);
     ]];
 
@@ -277,7 +290,7 @@ global screen [[ClutterActor*]] actor , container
         [[]];
 
     int add_onparentchanged_listener( function f )
-        [[]];
+        [[ result = 0; ]];
 
     remove_onparentchanged_listener( int ref )
         [[]];

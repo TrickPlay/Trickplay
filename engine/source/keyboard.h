@@ -38,7 +38,7 @@ private:
 
     // Recursively loads all the static images
 
-    static void load_static_images( ClutterActor * actor , gchar * assets_path );
+    static void load_static_images( ClutterActor * actor , const gchar * assets_path );
 
     // Finds an actor in the script and checks its type
 
@@ -93,6 +93,8 @@ private:
     void submit();
 
     void cancel();
+
+    TPContext * context;
 
     //-------------------------------------------------------------------------
     // Path to <resources>/keyboard

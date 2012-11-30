@@ -43,7 +43,7 @@ public:
         dismissed( false ),
         key_handler( 0 )
     {
-        if ( ClutterActor * stage = clutter_stage_get_default() )
+        if ( ClutterActor * stage = toast->context->get_stage() )
         {
             key_handler = g_signal_connect( G_OBJECT( stage  ) ,
                     "captured-event" ,
@@ -75,7 +75,7 @@ private:
 
     void disconnect_key_handler()
     {
-        if ( ClutterActor * stage = clutter_stage_get_default() )
+        if ( ClutterActor * stage = toast->context->get_stage() )
         {
             if ( key_handler && g_signal_handler_is_connected( G_OBJECT( stage ) , key_handler ) )
             {
@@ -197,8 +197,9 @@ void Toast::destroy( Toast * me )
 
 //-----------------------------------------------------------------------------
 
-Toast::Toast( TPContext * context )
+Toast::Toast( TPContext * c )
 :
+    context( c ),
     group( 0 ),
     background( 0 ),
     title( 0 ),
@@ -314,7 +315,7 @@ Toast::Toast( TPContext * context )
 
     // Get the stage and its dimensions
 
-    ClutterActor * stage = clutter_stage_get_default();
+    ClutterActor * stage = context->get_stage();
 
     gfloat stage_width;
     gfloat stage_height;
@@ -352,7 +353,11 @@ Toast::Toast( TPContext * context )
 
     // Add the group to the stage
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_add_child( stage, group );
+#else
     clutter_container_add( CLUTTER_CONTAINER( stage ) , group , NULL );
+#endif
 
 }
 
@@ -407,7 +412,11 @@ bool Toast::show_internal( lua_State * L , const char * _title , const char * _p
 
     clutter_actor_set_opacity( group , 0 );
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_set_child_above_sibling( clutter_actor_get_parent( group ), group, NULL );
+#else
     clutter_actor_raise_top( group );
+#endif
 
     clutter_actor_show( group );
 
@@ -526,10 +535,14 @@ void Toast::replace_background()
 
     ClutterActor * parent = clutter_actor_get_parent( background );
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_replace_child( parent, background, texture );
+#else
     clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , texture );
     clutter_actor_lower( texture , background );
 
     clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , background );
+#endif
 
     background = 0;
 }

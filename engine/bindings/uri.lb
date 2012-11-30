@@ -2,7 +2,7 @@
 [[
 #include "uriparser/Uri.h"
 
-#include "util.h"	
+#include "util.h"
 
 static void push_text_range( lua_State * L , const UriTextRangeA & range )
 {
@@ -20,7 +20,7 @@ static void push_text_range( lua_State * L , const UriTextRangeA & range )
 
 /*
 	Global: uri
-	
+
 	The uri global variable provides various functions for processing URI (Uniform Resource Identifier) strings.
 */
 
@@ -28,17 +28,17 @@ global uri [[void*]]
 {
 	/*
 		Function: parse
-		
+
 		The parse() function parses a URI (Uniform Resource Identifier) string to its component parts. The URI string should conform to the RFC 3986 specification. The string may contain ANSI characters, but not Unicode characters.
-		
+
 		*Argument:*
-		
+
 			uri_string - URI string to parse
-		
-		*Return Value:* table of parsed URI components. The table format consists of component/value pairs. The list of recognized components is described below. Some components are optional, such as "query" and "port". If a URI string does not include a particular component, no entry for that component will be in the returned table. If the URI string cannot be successfully parsed, the parse() function returns nil.
-		
+
+		*Return Value:* Table of parsed URI components. The table format consists of component/value pairs. The list of recognized components is described below. Some components are optional, such as "query" and "port". If a URI string does not include a particular component, no entry for that component will be in the returned table. If the URI string cannot be successfully parsed, the parse() function returns nil.
+
 		The possible URI components are described below. The descriptions parse the sample URI "http://John:Doe@trickplay.com:80/over/there.php?First=John&Second=Doe#Address" into its components.
-		
+
 			scheme - scheme name, such as "http"
 			user - user info, such as "John:Doe"
 			host - host text, such as "trickplay.com"
@@ -49,12 +49,12 @@ global uri [[void*]]
 			absolute - boolean flag indicating whether the path is absolute or relative (true=absolute, false=relative). The sample URI above would return an "absolute" value of false.
 
 		*Code Example:* Parse a sample URI string and display each component
-		
-		(code)		
+
+		(code)
 		dumptable( uri:parse( "http://foo:bar@trickplay.com:80/hello/goodbye.php?Greeting=Hello+World" ) )
-		
+
 		Displays:
-		
+
 		{
 		    "scheme"   = "http"
 		    "user"     = "foo:bar"
@@ -64,59 +64,59 @@ global uri [[void*]]
 		    "query"    = "Greeting=Hello+World"
 		    "absolute" = false
  		}
- 		(end)	
+ 		(end)
 
 		*See Also:* the <parse_query> function
 	*/
-	
+
 	table parse( string uri_string )
 		[[
 			UriParserStateA state;
 			UriUriA uri;
-			
+
 			state.uri = & uri;
-			
+
 			if ( uriParseUriA( & state , uri_string ) == URI_SUCCESS )
 			{
 				lua_newtable( L );
-				
+
 				int t = lua_gettop(L);
-				
+
 				lua_pushstring( L , "scheme" );
 				push_text_range( L , uri.scheme );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "user" );
 				push_text_range( L , uri.userInfo );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "host" );
 				push_text_range( L , uri.hostText );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "port" );
 				push_text_range( L , uri.portText );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "query" );
 				push_text_range( L , uri.query );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "fragment" );
 				push_text_range( L , uri.fragment );
 				lua_rawset( L , t );
-				
+
 				lua_pushstring( L , "absolute" );
 				lua_pushboolean( L , uri.absolutePath );
 				lua_rawset( L , t );
-				
+
 				if ( uri.pathHead )
 				{
 					int i = 1;
-					
+
 					lua_pushstring( L , "path" );
 					lua_newtable( L );
-					
+
 					for( UriPathSegmentA * segment = uri.pathHead; segment; segment = segment->next , ++i )
 					{
 						push_text_range( L , segment->text );
@@ -128,28 +128,28 @@ global uri [[void*]]
 			else
 			{
 				lua_pushnil( L );
-			}	
-			
+			}
+
 			uriFreeUriMembersA( & uri );
 		]];
-		
+
 	/*
 		Function: parse_query
-		
+
 		The parse_query() function parses the query portion of a URI string into its component key/value parts.
-		
+
 		*Arguments:*
-		
+
 			query_string - URI query string to parse
 			plus_to_space - boolean flag indicating whether or not to convert "+" characters to " " (space) characters (true=convert). Default=true/convert.
-			
-		*Return Value:* table of parsed URI query components formatted as key/value pairs. If string could not be successfully parsed, returns nil.
-		
+
+		*Return Value:* Table of parsed URI query components formatted as key/value pairs. If string could not be successfully parsed, returns nil.
+
 		*Code Example:* Parse and display a URI query string
-		
+
 			(code)
 			dumptable( uri:parse_query( "First=John&Middle&Second=Doe" ) )
-			
+
 			Displays:
 
 			{  { "First", "John" },
@@ -157,26 +157,26 @@ global uri [[void*]]
 			   { "Second", "Doe" }
 			}
 			(end)
-		
+
 		*See Also:* the <parse> function
 	*/
-	
+
 	table parse_query( lstring query_string, bool plus_to_space = true )
 		[[
 			UriQueryListA * q = 0;
-			
+
 			if ( uriDissectQueryMallocExA( & q , 0 , query_string , query_string + query_string_len , plus_to_space ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH ) == URI_SUCCESS )
 			{
 				lua_newtable( L );
 				int t = lua_gettop( L );
 				int i = 1;
-				
+
 				for( UriQueryListA * n = q; n ; n = n->next , ++i )
 				{
 					lua_newtable( L );
 					lua_pushstring( L , n->key );
 					lua_rawseti( L , -2 , 1 );
-					
+
 					if ( n->value )
 					{
 						lua_pushstring( L , n->value );
@@ -184,18 +184,18 @@ global uri [[void*]]
 					}
 					lua_rawseti( L , t , i );
 				}
-				
+
 				uriFreeQueryListA( q );
 			}
 			else
 			{
 				lua_pushnil( L );
 			}
-		]];		
-		
+		]];
+
 	/*
 		Function: escape
-		
+
 		The escape() function applies URL encoding to a string; for example, a space " " is URL-encoded to "%20".
 
 		*Arguments:*
@@ -204,27 +204,27 @@ global uri [[void*]]
 			space_to_plus - boolean flag indicating whether or not space characters should be converted to "+" (true=convert to "+", else convert to "%20"). Default is false/convert to "%20".
 
 		*Return Value:* URL-encoded string. If string could not be converted, returns 0.
-		
+
 		*Code Example:* URL-encode and display a simple string
-		
+
 		(code)
 		print( uri:escape( "This is my name: John Doe" ) )
-		
+
 		Displays: This%20is%20my%20name%3A%20John%20Doe
 		(end)
-		
+
 		*See Also:* the <unescape> function
 	*/
-	
+
 	lstring escape( lstring s, bool space_to_plus = false )
 		[[
 			gchar * out = g_new( gchar , s_len * 3 );
-			
+
 			FreeLater free_later( out );
-			
+
 			char * end = uriEscapeA( s , out , space_to_plus ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH );
-			
-			if ( end ) 
+
+			if ( end )
 			{
 				result = out;
 				result_len = end - out;
@@ -234,42 +234,42 @@ global uri [[void*]]
 				result = 0;
 				result_len = 0;
 			}
-		]]; 
-		
+		]];
+
 	/*
 		Function: unescape
-		
+
 		The unescape() function converts a URL-encoded string to its ANSI-character equivalent. For example, any "%20" characters are converted to " " (space) characters.
 
 		*Arguments:*
 
 			s - URL-encoded string to convert
 			plus_to_space - boolean flag indicating whether or not to convert "+" characters to " " (space) characters (true=convert "+" to space). Default is true/convert "+" to space.
-			
-		*Return Value:* converted string. If string could not be converted, returns 0.
-		
+
+		*Return Value:* Converted string. If string could not be converted, returns 0.
+
 		*Code Example:* Convert and display a URL-encoded string to its ANSI-character equivalent
-		
+
 		(code)
 		print( uri:unescape( "This%20is%20my%20name%3A%20John%20Doe" ) )
-		
+
 		Displays: This is my name: John Doe
 		(end)
-		
+
 		*See Also:* the <escape> function
 	*/
-	
+
 	lstring unescape( lstring s, bool plus_to_space = true )
 		[[
-			
+
 			gchar * out = g_new0( gchar , s_len + 1 );
-			
+
 			memmove( out , s , s_len );
-			
+
 			FreeLater free_later( out );
-			
+
 			const char * end = uriUnescapeInPlaceExA( out , plus_to_space ? URI_TRUE : URI_FALSE , URI_BR_DONT_TOUCH );
-			
+
 			if ( end )
 			{
 				result = out;

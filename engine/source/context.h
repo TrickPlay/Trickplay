@@ -8,6 +8,7 @@
 #include "notify.h"
 #include "mediaplayers.h"
 #include "controller_list.h"
+#include "tuner_list.h"
 #include "app.h"
 
 //-----------------------------------------------------------------------------
@@ -123,6 +124,11 @@ public:
     }
 
     //.........................................................................
+    // The clutter stage
+
+    ClutterActor * get_stage() const;
+
+    //.........................................................................
     // The system database
 
     SystemDatabase * get_db() const;
@@ -160,6 +166,10 @@ public:
     //.........................................................................
 
     ControllerList * get_controller_list();
+
+    //.........................................................................
+
+    TunerList * get_tuner_list();
 
     //.........................................................................
 
@@ -328,6 +338,9 @@ private:
     friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
 
+    friend TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, TPChannelChangeCallback cb, void *data );
+    friend void tp_context_remove_tuner( TPContext * context, TPTuner * tuner );
+
     friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
 
     static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
@@ -344,6 +357,8 @@ private:
 
     bool                        is_running;
 
+    ClutterActor *              stage;
+
     StringMap                   config;
 
     SystemDatabase *            sysdb;
@@ -351,6 +366,8 @@ private:
     ControllerServer *          controller_server;
 
     ControllerList              controller_list;
+
+    TunerList                   tuner_list;
 
     ControllerLIRC *            controller_lirc;
 
@@ -402,10 +419,10 @@ private:
     typedef std::map<gpointer,InternalPair>                     InternalMap;
 
     InternalMap                                                 internals;
-    
+
     typedef std::pair<TPResourceLoader,void *>					ResourceLoaderClosure;
     typedef std::map<unsigned int, ResourceLoaderClosure> 		ResourceLoaderMap;
-    
+
     ResourceLoaderMap                                           resource_loaders;
 };
 

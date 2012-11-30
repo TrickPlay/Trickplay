@@ -147,7 +147,7 @@ ProgressBar = setmetatable(
                     function(oldf,self,v)
                         
                         progress = v
-                        
+                        print(v)
                         if fill then expand_fill() end
                     end
                 end,
@@ -170,6 +170,7 @@ ProgressBar = setmetatable(
         private = {
             expand_fill = function(instance,_ENV)
                 return function() 
+                    print(progress)
                     scale_t[1] = progress
                     fill.scale = scale_t
                 end

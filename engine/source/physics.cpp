@@ -167,19 +167,17 @@ void World::idle()
 
     int iterations = seconds / sixty;
 
-    seconds = seconds / ( seconds / sixty );
-
     g_timer_start( timer );
 
     UserData * ud = UserData::get_from_client( this );
 
     for( int i = 0; i < iterations; ++i )
     {
-        step( seconds , velocity_iterations , position_iterations );
+        step( sixty , velocity_iterations , position_iterations );
 
         if ( ud )
         {
-            lua_pushnumber( L , seconds );
+            lua_pushnumber( L , sixty );
             lua_pushinteger( L , i );
 
             ud->invoke_callbacks( "on_step" , 2 , 0 );
@@ -398,11 +396,20 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.categoryBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat);
+                    } else {
+                        fd.filter.categoryBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
         }
+        // Guarantee that a fixture always has a non-zero category
+        if(0 == fd.filter.categoryBits) fd.filter.categoryBits = 1;
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "mask" );
@@ -422,7 +429,14 @@ b2FixtureDef World::create_fixture_def( int properties )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    fd.filter.maskBits |= 1 << lua_tointeger( L , -1 );
+                    // Check in range
+                    lua_Integer cat = lua_tointeger(L, -1);
+                    if(cat < 0 || cat > 15)
+                    {
+                        tpwarn("ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat);
+                    } else {
+                        fd.filter.maskBits |= 1 << cat;
+                    }
                 }
                 lua_pop( L , 1 );
             }
@@ -960,7 +974,11 @@ void World::draw_debug( int opacity )
 
         ClutterActor * parent = clutter_actor_get_parent( screen );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( parent, debug_draw );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , debug_draw );
+#endif
 
         g_object_ref( G_OBJECT( debug_draw ) );
     }
@@ -969,7 +987,11 @@ void World::draw_debug( int opacity )
         clutter_cairo_texture_clear( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
     }
 
+#ifdef CLUTTER_VERSION_1_10
+    clutter_actor_set_child_above_sibling( clutter_actor_get_parent(screen), debug_draw, NULL );
+#else
     clutter_actor_raise_top( debug_draw );
+#endif
 
     clutter_actor_set_opacity( debug_draw , opacity );
 
@@ -1009,7 +1031,11 @@ void World::clear_debug()
 
     if ( parent )
     {
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_remove_child( parent, debug_draw );
+#else
         clutter_container_remove( CLUTTER_CONTAINER( parent ) , debug_draw , NULL );
+#endif
     }
 
     g_object_unref( G_OBJECT( debug_draw ) );

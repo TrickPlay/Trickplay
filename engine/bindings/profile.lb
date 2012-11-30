@@ -6,7 +6,7 @@ void profile_changing_handler(TPContext *,const char *,void * l);
 void profile_changed_handler(TPContext *,const char *,void * l);
 ]]
 
-/*
+/***************************************
 	Global: profile
 
 	The profile global variable enables a TrickPlay application to retrieve information about the currently active profile. The profile variable also provides event handlers that can notify an application when the current profile changes.
@@ -49,49 +49,137 @@ global profile [[App*]]
             self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);
         ]];
 
-	/*
-		Property: id
+/***************************************
+	Property: id
 
-		The id property is the numeric ID of the currently active profile. Each profile has a unique numeric ID that is assigned by the TrickPlay Engine when the profile is created via the Console command "/profile new".
+	The id property is the numeric ID of the currently active profile. Each profile has a unique numeric ID that is assigned by the TrickPlay Engine when the profile is created via the Console command "/profile new".
 
-		*See Also:* <The Engine Console>
-	*/
+	*See Also:* <The Engine Console>
+*/
 
     readonly int id
         [[id=self->get_profile_id();]];
 
 
-    /*
-    	Property: name
+/***************************************
+    Property: name
 
-    	The name property is the string name of the currently active profile. A profile's name is not necessarily unique between different profiles. A profile's name is specified at the time it is created via the Console command "/profile new".
+    The name property is the string name of the currently active profile. A profile's name is not necessarily unique between different profiles. A profile's name is specified at the time it is created via the Console command "/profile new".
 
-    	*See Also:* <The Engine Console>
-    */
+    *See Also:* <The Engine Console>
+*/
 
     readonly string name
         [[name=self->get_context()->get(PROFILE_NAME);]];
 
+/***************************************
+	Function: add_onchanging_listener
 
-	/*
-		Event Handler: on_changing
+	The add_onchanging_listener() function registers a handler function for <on_changing> events.
 
-		The on_changing() event handler is invoked immediately before the current profile changes to another profile. At the time of its invocation, the profile variable's property values and the values stored in the <settings> variable are those of the soon-to-be-changed profile.
+	*Arguments:*
 
-		*Prototype:*
+		f - reference to handler function. The function prototype is described below.
 
-			(code)
-			on_changing( profile )
-			(end)
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onchanging_listener> function to unregister the handler.
 
-		*Arguments:*
+	*Handler Prototype:*
 
-			profile - reference to the profile global variable
+		(code)
+		f( profile )
+		(end)
 
-		*Return Value:* None
+	*Handler Arguments:*
 
-		*See Also:* the <on_changed> event handler
-	*/
+		profile - reference to the profile global variable
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_changing> event and the <remove_onchanging_listener> function
+*/
+
+    int add_onchanging_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_changing" , L );
+        ]];
+
+/***************************************
+	Function: remove_onchanging_listener
+
+	The remove_onchanging_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onchanging_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onchanging_listener> function
+*/
+
+    remove_onchanging_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_changing" , L );
+        ]];
+
+/***************************************
+	Function: add_onchanged_listener
+
+	The add_onchanged_listener() function registers a handler function for <on_changed> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onchanged_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( profile )
+		(end)
+
+	*Handler Arguments:*
+
+		profile - reference to the profile global variable
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_changed> event and the <remove_onchanged_listener> function
+*/
+
+    int add_onchanged_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_changed" , L );
+        ]];
+
+/***************************************
+	Function: remove_onchanged_listener
+
+	The remove_onchanged_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onchanged_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onchanged_listener> function
+*/
+
+    remove_onchanged_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_changed" , L );
+        ]];
+
+/***************************************
+	Event: on_changing
+
+	The on_changing event occurs immediately before the current profile changes to another profile. At the time of its invocation, the profile variable's property values and the values stored in the <settings> variable are those of the soon-to-be-changed profile.
+
+	*See Also:* the <add_onchanging_listener> function
+*/
+
     function on_changing
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_changing" , L );
@@ -100,36 +188,13 @@ global profile [[App*]]
             UserData::get( L )->set_last_callback( (char*) "on_changing" , L );
         ]];
 
-    int add_onchanging_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_changing" , L );
-        ]];
+/***************************************
+	Event: on_changed
 
-    remove_onchanging_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_changing" , L );
-        ]];
+	The on_changed event occurs after switching to another profile. The profile variable's property values and the <settings> variable's values are those of the switched-to profile.
 
-
-	/*
-		Event Handler: on_changed
-
-		The on_changed() event handler is invoked after switching to another profile. The profile variable's property values and the <settings> variable's values are those of the switched-to profile.
-
-		*Prototype:*
-
-			(code)
-			on_changed( profile )
-			(end)
-
-		*Arguments:*
-
-			profile - reference to the profile global variable
-
-		*Return Value:* None
-
-		*See Also:* the <on_changing> event handler
-	*/
+	*See Also:* the <add_onchanged_listener> function
+*/
 
     function on_changed
         [[
@@ -139,15 +204,10 @@ global profile [[App*]]
             UserData::get( L )->set_last_callback( (char*) "on_changed" , L );
         ]];
 
-    int add_onchanged_listener( function f )
-        [[
-            result = UserData::get( L )->add_callback( (char*) "on_changed" , L );
-        ]];
+/***************************************
 
-    remove_onchanged_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char*) "on_changed" , L );
-        ]];
+*/
+
 }
 
 [[
