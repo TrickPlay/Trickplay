@@ -28,7 +28,7 @@ make_rounded_corner = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="rounded_corner - "..state}
 end
 make_top_sliver = function(self,state)
     
@@ -51,7 +51,7 @@ make_top_sliver = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="top_sliver - "..state}
 end
 make_side_sliver = function(self,state)
     
@@ -74,7 +74,7 @@ make_side_sliver = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="side_sliver - "..state}
 end
 make_arrow = function(self,state)
     
@@ -89,7 +89,7 @@ make_arrow = function(self,state)
     
     c:fill(true)
 	
-	return c:Image()
+	return c:Image{name="arrow - "..state}
 	
 end
 make_box = function(self,state)
@@ -114,7 +114,7 @@ make_box = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="box - "..state}
 end
 make_x_box = function(self,state)
     --print("ccc")
@@ -144,7 +144,7 @@ make_x_box = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="x_box - "..state}
 end
 make_empty_radio_icon = function(self,state)
     --print("ccc")
@@ -169,7 +169,7 @@ make_empty_radio_icon = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="empty_radio_icon - "..state}
 end
 make_filled_radio_icon = function(self,state)
     --print("ccc")
@@ -206,7 +206,7 @@ make_filled_radio_icon = function(self,state)
     c:fill()
     
     
-    return c:Image()
+    return c:Image{name="filled_radio_icon - "..state}
 end
 --draws a rounded rectangle canvas path
 round_rectangle = function(c,r)
