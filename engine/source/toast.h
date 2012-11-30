@@ -35,6 +35,7 @@ private:
 
     friend class ToastUpAction;
 
+    TPContext *     context;
     ClutterActor *  group;
     ClutterActor *  background;
     ClutterActor *  title;

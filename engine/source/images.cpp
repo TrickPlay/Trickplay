@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "libexif/exif-data.h"
 
@@ -221,7 +222,12 @@ private:
 
 Image * Image::make( const TPImage & image )
 {
-    return new Image( g_slice_dup( TPImage,  &image ) );
+    Image *img = new Image( g_slice_dup( TPImage,  &image ) );
+
+    // This next line is superfluous but helps clang realize we're not leaking that buffer
+    img->image->pixels = image.pixels;
+
+    return img;
 }
 
 //-----------------------------------------------------------------------------
@@ -258,11 +264,9 @@ Image * Image::decode( const gchar * filename , bool read_tags )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::screenshot()
+Image * Image::screenshot( ClutterActor *stage )
 {
     TPImage image;
-
-    ClutterActor * stage = clutter_stage_get_default();
 
     if ( ! stage )
     {
@@ -1079,7 +1083,11 @@ Images::Images()
     external_decoder( 0 ),
     cache( 0 )
 {
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( & mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
@@ -1151,7 +1159,11 @@ Images::~Images()
     	delete cache;
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( & mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
 }
 
 //-----------------------------------------------------------------------------

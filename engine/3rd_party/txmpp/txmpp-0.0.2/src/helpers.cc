@@ -38,7 +38,7 @@
 #include "base64.h"
 #include "logging.h"
 #include "scoped_ptr.h"
-#include "time.h"
+#include "txmpptime.h"
 
 namespace txmpp {
 

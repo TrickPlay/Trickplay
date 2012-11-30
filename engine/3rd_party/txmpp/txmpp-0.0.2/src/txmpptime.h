@@ -33,7 +33,7 @@
 #endif
 
 #ifndef WIN32
-#include_next <time.h>
+#include <time.h>
 #endif
 
 #include "basictypes.h"

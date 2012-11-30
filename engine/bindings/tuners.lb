@@ -1,0 +1,50 @@
+
+[[
+#include "tuner_delegates.h"
+]]
+
+#==============================================================================
+/*
+	Global: tuners
+
+	The TrickPlay SDK libraries enable a program to control tuners on the device the TrickPlay engine runs on.
+
+	Access to available tuners is provided by the tuners global variable by accessing its <available> property.
+
+*/
+
+global tuners [[TunerListDelegate*]]
+{
+    tuners()
+        [[
+            self=lb_construct( TunerListDelegate , new TunerListDelegate(L) );
+        ]];
+
+    ~tuners()
+        [[
+            delete self;
+        ]];
+
+    /*
+    	Property: available
+
+    	The available property maintains a table of connected and controllable tuners. Each entry in the table is a <Tuner> object. The available table can be retrieved, but entries cannot be added or removed from it.
+
+    	*Code Example:* Output the name of each available tuner
+
+    	(code)
+    	-- Iterate through each connected external device
+    	print( "Connected tuners:" )
+    	for i, tuner in ipairs( tuners.available ) do
+    		print( "   ", tuner.name )
+    	end
+    	(end)
+
+    	*See Also:* the <Tuner> interface
+    */
+
+    readonly table available
+        [[
+            self->push_connected();
+        ]];
+}
