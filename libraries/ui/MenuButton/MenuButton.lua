@@ -193,8 +193,8 @@ MenuButton = setmetatable(
             
             local instance, _ENV = LayoutManager:declare()
             button = ToggleButton{
-                create_canvas=create_canvas,
-                style = false,
+                --create_canvas=create_canvas,
+                style = instance.style,
                 w=300,
                 reactive=true, 
                 selected = true
