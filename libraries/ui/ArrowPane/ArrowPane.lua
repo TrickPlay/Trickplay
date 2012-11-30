@@ -3,19 +3,7 @@ ARROWPANE = true
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
-local create_arrow = function(self,state)
-    mesg("ArrowPane",0,"ArrowPane:create_arrow()",self.gid,state)
-	local c = Canvas(self.w,self.h)
-	
-    c:move_to(0,   c.h/2)
-    c:line_to(c.w,     0)
-    c:line_to(c.w,   c.h)
-    c:line_to(0,   c.h/2)
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	return c:Image()
-	
-end
+local create_arrow = function(self,state) return Clone{source=self.style.triangle[state]} end
 
 ArrowPane = setmetatable(
     {},
@@ -151,6 +139,34 @@ ArrowPane = setmetatable(
                         pane.y_offset = v
                     end
                 end,
+                horizontal_arrows_are_visible = function(instance,_ENV)
+                    
+                    return function(oldf) return instance.number_of_cols == 3 end,
+                    
+                    function(oldf,self,v) 
+                        
+                        if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
+                        
+                        horizontal_arrows_are_visible = v
+                        
+                        new_w = (v == nil) and true or new_w
+                        
+                    end
+                end,
+                vertical_arrows_are_visible = function(instance,_ENV)
+                    
+                    return function(oldf) return instance.number_of_rows == 3 end,
+                    
+                    function(oldf,self,v) 
+                        
+                        if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
+                        
+                        vertical_arrows_are_visible = v
+                        
+                        new_h = (v == nil) and true or new_h
+                        
+                    end
+                end,
                 widget_type = function(instance,_ENV)
                     return function(oldf) return "ArrowPane" end
                 end,
@@ -241,7 +257,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = { 90,0,0} ,
                         on_released = function() pane.virtual_y = pane.virtual_y - move_by end,
@@ -256,7 +272,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = {270,0,0},
                         on_released = function() pane.virtual_y = pane.virtual_y + move_by end,
@@ -271,7 +287,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow,
                         on_released = function() pane.virtual_x = pane.virtual_x - move_by end,
                     }
@@ -285,7 +301,7 @@ ArrowPane = setmetatable(
                         },
                         reactive = true,
                         label = "", 
-                        style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                         create_canvas = create_arrow, 
                         z_rotation = {180,0,0},
                         on_released = function() pane.virtual_x = pane.virtual_x + move_by end,
@@ -302,7 +318,7 @@ ArrowPane = setmetatable(
                                     instance.style.arrow.size/2,
                                     instance.style.arrow.size/2
                                 },
-                                style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
+                                --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
                             }
                         end
                     end
@@ -322,17 +338,29 @@ ArrowPane = setmetatable(
                     end
                     if redraw_pane then
                         redraw_pane = false
-                        pane:set{
+                        pane:set{--[[
                             style = {
                                 name=false,
                                 fill_colors=instance.style.fill_colors.attributes,
                                 border={colors=instance.style.border.colors.attributes},
-                            }
+                            }--]]
                         }
                     end
                     lm_update()
                     
-                    if  new_w then
+                    
+                    if horizontal_arrows_are_visible == true and instance.number_of_cols == 1 then
+                        if instance.number_of_rows == 1 then
+                            instance.cells:insert_col(1,{left})
+                            instance.cells:insert_col(3,{right})
+                        elseif instance.number_of_rows == 3 then
+                            instance.cells:insert_col(1,{nil,left,nil})
+                            instance.cells:insert_col(3,{nil,right,nil})
+                        end
+                    elseif horizontal_arrows_are_visible == false and instance.number_of_cols == 3 then
+                        instance.cells:remove_col(3)
+                        instance.cells:remove_col(1)
+                    elseif new_w and horizontal_arrows_are_visible == nil then
                         new_w = false
                         
                         if pane.virtual_w <= pane.w then
@@ -353,7 +381,19 @@ ArrowPane = setmetatable(
                         end
                     end
                     
-                    if  new_h then
+                    if vertical_arrows_are_visible == true and instance.number_of_rows == 1 then
+                        if instance.number_of_cols == 1 then
+                            instance.cells:insert_row(1,{up})
+                            instance.cells:insert_row(3,{down})
+                        elseif instance.number_of_cols == 3 then
+                            instance.cells:insert_row(1,{nil,up,  nil})
+                            instance.cells:insert_row(3,{nil,down,nil})
+                        end
+                    elseif vertical_arrows_are_visible == false and instance.number_of_rows == 3 then
+                        instance.cells:remove_row(3)
+                        instance.cells:remove_row(1)
+                    elseif new_h and vertical_arrows_are_visible == nil then
+                        
                         new_h = false
                                     
                         if pane.virtual_h <= pane.h then
@@ -382,7 +422,7 @@ ArrowPane = setmetatable(
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
-            local l_pane  = ClippingRegion{style = false}
+            local l_pane  = ClippingRegion()
             local l_up    = Button:declare()
             local l_down  = Button:declare()
             local l_left  = Button:declare()
