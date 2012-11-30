@@ -265,7 +265,7 @@ ScrollPane = setmetatable(
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
-            local l_pane  = ClippingRegion{style = false}
+            local l_pane  = ClippingRegion()--{style = false}
             local l_horizontal = Slider()
             local l_vertical   = Slider{direction="vertical"}
             
