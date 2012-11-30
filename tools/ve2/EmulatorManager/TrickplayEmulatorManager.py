@@ -32,15 +32,15 @@ class TrickplayEmulatorManager(QWidget):
         self.run()
 
     def chgStyleName(self, gid, new_name, old_name):
-        self.setUIInfo(gid, "style", "Style('"+new_name+"'):set('"+old_name+"')")
+        self.setUIInfo(gid, "style", "WL.Style('"+new_name+"'):set('"+old_name+"')")
 
     def setStyleInfo(self, style_name, property1, property2, property3=None, value=None):
         if property1 == 'name':
-            inputCmd = str("Style('"+str(style_name)+"')."+str(property1)+" = '"+str(property2)+"'")
+            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property1)+" = '"+str(property2)+"'")
         elif property3 == "style":
-            inputCmd = str("Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
+            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
-            inputCmd = str("Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
+            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
