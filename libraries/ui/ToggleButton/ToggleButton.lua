@@ -242,7 +242,7 @@ ToggleButton = setmetatable(
                         if not hide_icon then add(instance,empty_icon) end
                         empty_icon.anchor_point = {0,empty_icon.h/2}
                         empty_icon.position     = {icon_x_offset,instance.h/2+icon_y_offset}
-                    elseif empty_icon and not hide_icon then
+                    elseif empty_icon and empty_icon.parent and not hide_icon then
                         empty_icon:raise_to_top()
                     end
                     if  new_filled_icon then
@@ -255,7 +255,7 @@ ToggleButton = setmetatable(
                         filled_icon[selected and"show"or"hide"](filled_icon)
                         filled_icon.anchor_point = {0,empty_icon.h/2}
                         filled_icon.position     = {icon_x_offset,instance.h/2+icon_y_offset}
-                    elseif filled_icon and not hide_icon then
+                    elseif filled_icon and filled_icon.parent and not hide_icon then
                         filled_icon:raise_to_top()
                     end
                     
