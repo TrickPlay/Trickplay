@@ -247,7 +247,6 @@ ToggleButton = setmetatable(
                     end
                     if  new_filled_icon then
                         new_filled_icon = false
-                        print("filled_icon",instance.style.empty_toggle_icon.default)
                         filled_icon = filled_icon or default_filled_icon()
                         
                         if filled_icon.parent then filled_icon:unparent() end
