@@ -789,7 +789,6 @@ end
 
 -- REPORT 
 _VE_.repUIInfo = function(uiInstance)
-    print("repUIInfo")
 
     if blockReport == true then 
         return
@@ -823,12 +822,12 @@ end
 _VE_.buildVF = function(path)
     local images_file = "assets/images/images.json"
     local images = readfile(images_file)
-    if #images > 0 then 
+    if images and #images > 0 then 
         images = string.gsub (images, "(\n+)", "")
         --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo"..images)
+        spriteSheet = SpriteSheet { map = images_file } 
     end
-    spriteSheet = SpriteSheet { map = images_file } 
 end
 
 _VE_.openFile = function(path)
@@ -951,6 +950,8 @@ _VE_.openFile = function(path)
     end
     
     _VE_.refresh()
+    blockReport = false
+
     _VE_.buildVF()
     --[[
     for i,j in ipairs(s.children) do
@@ -963,7 +964,6 @@ _VE_.openFile = function(path)
         end
     end
     -]]
-    blockReport = false
 end 
 
 
