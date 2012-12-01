@@ -17,7 +17,7 @@ image1.w = 100
 test_group:add(image1)
 
 
-image1:animate{duration=6000, loop=true, x=500, y=500,}
+image1:animate{duration=6000, x=500, y=500,}
 
 -- Tests --
 
