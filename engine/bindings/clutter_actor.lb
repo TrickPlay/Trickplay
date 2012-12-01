@@ -7,6 +7,13 @@ module clutter_actor;
 #include "util.h"
 #include "clutter_util.h"
 #include "context.h"
+
+#ifdef CLUTTER_VERSION_1_10
+static const char *animatable_properties[] = {
+    "x","y","depth","width","height","opacity","scale-x","scale-y","rotation-angle-x","rotation-angle-y","rotation-angle-z","clip"
+};
+#endif
+
 ]]
 
 [[
@@ -216,12 +223,24 @@ static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua
     return result;
 }
 
+#ifdef CLUTTER_VERSION_1_10
+static void transitions_completed(ClutterActor * actor, lua_State *L)
+{
+    ClutterUtil::wrap_concrete_actor(L, actor);
+
+    UserData::invoke_callback(G_OBJECT(actor), "on_completed",1,0,L);
+}
+
+#else
+
 static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
     ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
 
     UserData::invoke_callback(G_OBJECT(animation),"on_completed",1,0,L);
 }
+
+#endif
 
 ]]
 
@@ -1163,7 +1182,18 @@ interface actor [[ClutterActor*]]
 
     readonly bool is_animating
     [[
+#ifdef CLUTTER_VERSION_1_10
+        is_animating =  false;
+        for(size_t i=0; i<sizeof(animatable_properties)/sizeof(animatable_properties[0]); i++)
+        {
+            if(clutter_actor_get_transition(self, animatable_properties[i]))
+            {
+                is_animating = true;
+            }
+        }
+#else
         is_animating=clutter_actor_get_animation(self)!=NULL;
+#endif
     ]];
 
 /***************************************
@@ -1929,6 +1959,58 @@ interface actor [[ClutterActor*]]
         gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
         lua_pop(L,1);
 
+#ifdef CLUTTER_VERSION_1_10
+        lua_getfield(L, props, "loop");
+        if(lua_toboolean(L,-1))
+        {
+            return luaL_error(L, "Call to animate does not support \"loop\" property");
+        } else if(!lua_isnil(L,-1)) {
+            g_warning("ACTOR:ANIMATE(LOOP) USED");
+        }
+        lua_pop(L,1);
+
+        lua_getfield(L,props,"on_completed");
+
+        if (lua_type(L,-1)==LUA_TFUNCTION)
+        {
+            UserData * ud = UserData::get( L );
+
+            ud->push_proxy();
+
+            UserData::set_callback( "on_completed" , L , -1 , -2 );
+
+            ud->connect_signal( "on_completed" , "transitions-completed" , G_CALLBACK( transitions_completed ) , L , G_CONNECT_AFTER );
+        }
+        else
+        {
+            lua_pop(L,1);
+        }
+
+        clutter_actor_save_easing_state( self );
+        clutter_actor_set_easing_duration( self, duration );
+
+        lua_getfield(L,props,"delay");
+
+        if(!lua_isnil(L,-1))
+        {
+            if(!lua_isnumber(L,-1))
+            {
+                return luaL_error(L, "Call to animate has invalid delay: must be a number");
+            }
+            if(lua_tointeger(L,-1) <= 0)
+            {
+                return luaL_error(L, "Call to animate has invalid delay: must be positive non-zero number");
+            }
+        }
+        clutter_actor_set_easing_delay( self, lua_tointeger(L,-1) );
+        lua_pop(L,1);
+
+        clutter_actor_set_easing_mode( self, (ClutterAnimationMode)mode );
+
+        ClutterUtil::set_props_from_table(L,props);
+
+        clutter_actor_restore_easing_state( self );
+#else
         GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
 #ifndef GLIB_VERSION_2_32
         GValueArray * values=g_value_array_new(6);
@@ -2252,6 +2334,9 @@ interface actor [[ClutterActor*]]
         g_array_unref(values);
 #endif
         g_ptr_array_free(names,TRUE);
+
+#endif
+
     ]];
 
 
@@ -2269,6 +2354,35 @@ interface actor [[ClutterActor*]]
 
     bool complete_animation()
     [[
+#ifdef CLUTTER_VERSION_1_10
+        lua_newtable(L); // A table for all the final properties
+        int final_props = lua_gettop(L);
+
+        result =  false;
+        for(size_t i=0; i<sizeof(animatable_properties)/sizeof(animatable_properties[0]); i++)
+        {
+            const char *prop = animatable_properties[i];
+            ClutterTransition *transition = clutter_actor_get_transition(self, prop);
+            if(transition)
+            {
+                result = true;
+                ClutterInterval *interval = clutter_transition_get_interval(transition);
+
+                GValue *value = clutter_interval_peek_final_value(interval);
+
+                lua_pushnumber(L, g_value_get_float(value));
+                lua_setfield(L, final_props, prop);
+
+                clutter_actor_remove_transition(self, prop);
+            }
+        }
+
+        ClutterUtil::set_props_from_table(L, final_props);
+
+        lua_pop(L,1); // pop property table
+
+        transitions_completed(self, L);
+#else
         result = false;
 
         if ( ClutterAnimation * animation=clutter_actor_get_animation( self ) )
@@ -2280,6 +2394,7 @@ interface actor [[ClutterActor*]]
                 result=true;
             }
         }
+#endif
     ]];
 
 /***************************************
@@ -2296,6 +2411,17 @@ interface actor [[ClutterActor*]]
 
     bool stop_animation()
     [[
+#ifdef CLUTTER_VERSION_1_10
+        result =  false;
+        for(size_t i=0; i<sizeof(animatable_properties)/sizeof(animatable_properties[0]); i++)
+        {
+            if(clutter_actor_get_transition(self, animatable_properties[i]))
+            {
+                clutter_actor_remove_transition(self, animatable_properties[i]);
+                result = true;
+            }
+        }
+#else
         result = false;
 
         if ( ClutterAnimation *anim = clutter_actor_get_animation( self ) )
@@ -2306,6 +2432,7 @@ interface actor [[ClutterActor*]]
 
             result=true;
         }
+#endif
     ]];
 
 /***************************************
