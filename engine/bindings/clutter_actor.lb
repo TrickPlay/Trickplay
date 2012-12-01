@@ -1889,8 +1889,8 @@ interface actor [[ClutterActor*]]
     *Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 
 	    duration - length of animation in milliseconds. Required.
+        delay - length in milliseconds before animation begins. Default = 0.
     	mode - string specifying the Ease mode to apply to the animated property. For descriptions of the supported modes, refer to the <Ease> class. Default = "LINEAR"
-    	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <stop_animation> function.
     	on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
     	x - X coordinate at end of animation
     	y - Y coordinate at end of animation
