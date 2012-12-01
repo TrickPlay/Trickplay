@@ -639,7 +639,14 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_X_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+#endif
+
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -649,12 +656,37 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y,z;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                y = lua_tonumber(L,-2);
+                z = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_pivot_point_z(self, z);
+                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 /***************************************
@@ -679,7 +711,13 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Y_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -689,12 +727,37 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y,z;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                x = lua_tonumber(L,-2);
+                z = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_pivot_point_z(self, z);
+                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 /***************************************
@@ -719,7 +782,13 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Z_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -729,12 +798,36 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                x = lua_tonumber(L,-2);
+                y = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 
