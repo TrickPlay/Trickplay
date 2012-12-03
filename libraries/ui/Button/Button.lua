@@ -469,8 +469,10 @@ Button = setmetatable(
 
         --default create_canvas function
         create_canvas = function(self,state)
-            
+            --print(state)
+            --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
             return NineSlice{
+                name = state,
                 w = self.w,
                 h = self.h,
                 cells={
@@ -480,9 +482,9 @@ Button = setmetatable(
                         Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
                     },
                     {
-                        Widget_Clone{source =   self.style.side_edge[state]},
+                        Widget_Clone{source    = self.style.side_edge[state]},
                         Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
+                        Widget_Clone{source    = self.style.side_edge[state],z_rotation = {180,0,0}},
                     },
                     {
                         Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
