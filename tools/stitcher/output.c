@@ -58,16 +58,20 @@ void output_add_item ( Output * output, Item * item, Options * options )
     if ( item != NULL )
     {
         if ( item->w <= options->input_size_limit && item->h <= options->input_size_limit )
+        {
             g_sequence_insert_sorted( output->items, item, item_compare, NULL );
+            
+            output->item_area += item->area;
+            output->max_item_w = MAX( output->max_item_w, item->w );
+            output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
+        }
         else if ( options->copy_large_items &&
                   options->allow_multiple_sheets &&
                   item->w <= options->output_size_limit &&
                   item->h <= options->output_size_limit )
+        {
             g_ptr_array_add( output->large_items, item );
-
-        output->item_area += item->area;
-        output->max_item_w = MAX( output->max_item_w,   item->w );
-        output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
+        }
     }
 }
 
@@ -377,15 +381,20 @@ void output_export_files ( Output * output, Options * options )
     for ( unsigned i = output->large_items->len; i--; )
     {
         Item  * item = g_ptr_array_index( output->large_items, i );
-        GFile * dest = g_file_new_for_path( item->id );
-
+        char  * path = g_strdup_printf( "%s-%i-%s", options->output_path, i, g_path_get_basename( item->id ) );
+        
+        GFile * dest = g_file_new_for_path( path );
         g_file_copy( item->file, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL );
         g_object_unref( dest );
-
+        
+        fprintf( stdout, "Copied %s\n", item->id );
+        
         unsigned a = options->add_buffer_pixels ? 2 : 0;
         g_ptr_array_add( output->subsheets, g_strdup_printf( "{\n  \"sprites\": ["
             "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }"
-            "\n  ],\n  \"img\": \"%s\"\n}", item->w - a, item->h - a, item->id, item->id ) );
+            "\n  ],\n  \"img\": \"%s\"\n}", item->w - a, item->h - a, item->id, g_path_get_basename( path ) ) );
+        
+        free( path );
     }
 
     for ( unsigned i = output->images->len; i--; )
@@ -395,7 +404,7 @@ void output_export_files ( Output * output, Options * options )
     }
 
     char  * json;
-    g_ptr_array_set_size( output->subsheets, (gint)output->subsheets->len + 1 );
+    g_ptr_array_set_size( output->subsheets, (int) output->subsheets->len + 1 );
     json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
 
     if ( json )

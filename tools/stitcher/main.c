@@ -38,38 +38,41 @@ int main ( int argc, char ** argv )
     Output  * output  = output_new();
     output_load_inputs( output, options );
 
-    if ( options->allow_multiple_sheets )
+    if ( g_sequence_get_length( output->items ) )
     {
-        while ( TRUE )
+        if ( options->allow_multiple_sheets )
+        {
+            while ( TRUE )
+            {
+                Layout * best = layout_attempt( output, options );
+                
+                if ( best->items_placed == 0 )
+                {
+                    fprintf( stderr, "Failed to fit all of the images.\n" );
+                    exit( 1 );
+                }
+                
+                output_add_layout( output, best, options );
+                
+                if ( !best->items_skipped )
+                {
+                    break;
+                }
+            }
+        }
+        else
         {
             Layout * best = layout_attempt( output, options );
             
-            if ( best->items_placed == 0 )
+            if ( !best->items_placed || best->items_skipped )
             {
-                fprintf( stderr, "Failed to fit all of the images.\n" );
+                fprintf( stderr, "Can't fit all files within output dimensions (%i x %i).\n",
+                         options->output_size_limit, options->output_size_limit );
                 exit( 1 );
             }
             
             output_add_layout( output, best, options );
-            
-            if ( !best->items_skipped )
-            {
-                break;
-            }
         }
-    }
-    else
-    {
-        Layout * best = layout_attempt( output, options );
-        
-        if ( !best->items_placed || best->items_skipped )
-        {
-            fprintf( stderr, "Can't fit all files within output dimensions (%i x %i).\n",
-                     options->output_size_limit, options->output_size_limit );
-            exit( 1 );
-        }
-        
-        output_add_layout( output, best, options );
     }
 
     output_export_files( output, options );
