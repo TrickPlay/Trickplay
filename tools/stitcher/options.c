@@ -90,7 +90,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     GOptionEntry entries[] =
     {
         { G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK, 
-            & opt_input,                         NULL, "PATH ..." },
+            & opt_input,                         NULL, "INPUT ..." },
         { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
         { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
