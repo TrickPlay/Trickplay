@@ -215,18 +215,22 @@ class MainWindow(QMainWindow):
             self.errorMsg(errorMsg)
         return
     """
+
     def import_stderr(self):
         errorMsg = str(self.stitcher.readAllStandardError().data())
         if errorMsg[:5] == "Error" :
             self.errorMsg(errorMsg)
         elif errorMsg[:6] == "Output" :
-            #self.okMsg(errorMsg)
-            #build virtual file system ...
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
             pass
         return
 
     def import_finished(self, errorCode):
+        if errorCode == 0 : 
+            self.sendLuaCommand("buildVF", '_VE_.buildVF()')
+        else : 
+            errorMsg = str(self.stitcher.readAllStandardError().data())
+            self.errorMsg(errorMsg)
         return 
 
 
