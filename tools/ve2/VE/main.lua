@@ -1508,7 +1508,7 @@ end
 
     function screen:on_motion(x,y)
 
-	  	if control == true and mouse_state == hdr.BUTTON_DOWN then 
+	  	if control == true and mouse_state == hdr.BUTTON_DOWN and input_mode ~= hdr.S_RECTANGLE then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
 	 
