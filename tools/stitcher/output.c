@@ -91,7 +91,7 @@ void output_add_image( Output * output, const char * id, Image * image, Options 
             fprintf( stdout, "Segregated %s ", id );
             
             char * json = g_strdup_printf( "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
-                (int) image->rows, (int) image->columns, id );
+                (int) image->columns, (int) image->rows, id );
                  
             output_add_subsheet( output, json, image, options );
             free( json );
@@ -102,28 +102,7 @@ void output_add_image( Output * output, const char * id, Image * image, Options 
         }
     }
 }
-/*
-void output_add_item ( Output * output, Item * item, Options * options )
-{
-    if ( item != NULL )
-    {
-        if ( item->w <= options->input_size_limit && item->h <= options->input_size_limit )
-        {
-            g_sequence_insert_sorted( output->items, item, item_compare, NULL );
-            
-            output->item_area += item->area;
-            output->max_item_w = MAX( output->max_item_w, item->w );
-            output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
-        }
-        else if ( item->w <= options->output_size_limit && item->h <= options->output_size_limit )
-        {
-            output_add_image( output, item->id, item->source, options );
-            item->source = NULL;
-            item_free( item );
-        }
-    }
-}
-*/
+
 void output_add_file ( Output * output, GFile * file, GFile * root, const char * root_path, Options * options )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
@@ -217,7 +196,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
         if ( g_regex_match( output->url_regex, img, 0, NULL ) )
         {
-            GPtrArray * array = g_ptr_array_new();
+            GPtrArray * array = g_ptr_array_new_with_free_func( g_free );
 
             for ( guint j = lj; j--; )
             {
@@ -230,8 +209,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
                         json_object_get_int_member( sprite, "x" ),
                         json_object_get_int_member( sprite, "y" ),
                         json_object_get_int_member( sprite, "w" ),
-                        json_object_get_int_member( sprite, "h" ),
-                        json_object_get_string_member( sprite, "id" ) ) );
+                        json_object_get_int_member( sprite, "h" ), id ) );
                 }
             }
 
@@ -267,20 +245,28 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
                 if ( options_take_unique_id( options, id ) )
                 {
-                    RectangleInfo rect = {
-                        (size_t) json_object_get_int_member( sprite, "w" ),
-                        (size_t) json_object_get_int_member( sprite, "h" ),
-                        (size_t) json_object_get_int_member( sprite, "x" ),
-                        (size_t) json_object_get_int_member( sprite, "y" )
-                    };
+                    // add de-duplication handling
                     
-                    // add de-duplication and w == 0, h == 0 handling
-                    
-                    output_add_image( output, id, ExcerptImage( source_image, &rect, exception ), options );
+                    int w = json_object_get_int_member( sprite, "w" ),
+                        h = json_object_get_int_member( sprite, "h" ),
+                        x = json_object_get_int_member( sprite, "x" ),
+                        y = json_object_get_int_member( sprite, "y" );
+                        
+                    if ( x == 0 && y == 0 && w == source_image->columns && h == source_image->rows && lj == 1 )
+                    {
+                        output_add_image( output, id, source_image, options );
+                        source_image = NULL;
+                        break;
+                    }
+                    else
+                    {
+                        RectangleInfo rect = { (size_t) w, (size_t) h, (size_t) x, (size_t) y };
+                        output_add_image( output, id, ExcerptImage( source_image, &rect, exception ), options );
+                    }
                 }
             }
 
-            DestroyImage( source_image );
+            if ( source_image ) DestroyImage( source_image );
             DestroyImageInfo( source_info );
             DestroyExceptionInfo( exception );
         }
@@ -390,7 +376,7 @@ void output_add_layout ( Output * output, Layout * layout, Options * options )
     // composite output png
 
     unsigned int i = layout->places->len;
-    gchar ** sprites = calloc( i + 1, sizeof( gchar * ) );
+    char ** sprites = g_new0( char *, i + 1 ); //calloc( i + 1, sizeof( gchar * ) );
 
     while ( i-- )
     {
@@ -405,9 +391,11 @@ void output_add_layout ( Output * output, Layout * layout, Options * options )
 
     char * json = g_strjoinv( ",", sprites );
     output_add_subsheet( output, json, image, options );
-    free( json );
 
     // collect garbage
+    
+    free( json );
+    g_strfreev( sprites );
 
     DestroyExceptionInfo( exception );
 }
