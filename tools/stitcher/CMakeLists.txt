@@ -60,7 +60,7 @@ add_executable( stitcher
 
 target_link_libraries( stitcher ${STITCHER_LIBRARIES} )
 
-set_target_properties( tp-cmp
+set_target_properties( stitcher
     PROPERTIES
         LINKER_LANGUAGE C
         OUTPUT_NAME stitcher )
