@@ -419,19 +419,17 @@ void output_export_files ( Output * output, Options * options )
         WriteImage( (ImageInfo *) g_ptr_array_index( output->infos, i ),
                     (Image     *) g_ptr_array_index( output->images, i ) );
     }
-
-    char  * json;
+    
     g_ptr_array_set_size( output->subsheets, (int) output->subsheets->len + 1 );
-    json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
+    char * json = g_strdup_printf( "[%s]", g_strjoinv( ",\n", (char **) output->subsheets->pdata ) );
 
     if ( json )
     {
-        char  * path = g_strdup_printf( "%s.json", options->output_path );
-        GFile * file = g_file_new_for_path( path );
-        g_file_replace_contents( file, json, strlen( json ), NULL, FALSE,
-                                 G_FILE_CREATE_NONE, NULL, NULL, NULL );
+        char * path = g_strdup_printf( "%s.json", options->output_path );
+        g_file_set_contents( path, json, strlen( json ), NULL );
 
         fprintf( stdout, "Output map to %s\n", path );
-        g_object_unref( file );
+        free( path );
     }
+    free( json );
 }
