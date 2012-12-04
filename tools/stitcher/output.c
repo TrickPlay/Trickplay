@@ -53,6 +53,56 @@ unsigned int gcf( unsigned int a, unsigned int b )
     return a;
 }
 
+void output_add_subsheet( Output * output, const char * json, Image * image, Options * options )
+{
+    char * path = g_strdup_printf( "%s-%i.png", options->output_path, output->images->len ),
+         * base = g_path_get_basename( path );
+    
+    ImageInfo * info = AcquireImageInfo();
+    CopyMagickString( info->filename,  path,  MaxTextExtent );
+    CopyMagickString( info->magick,    "png", MaxTextExtent );
+    CopyMagickString( image->filename, path,  MaxTextExtent );
+    
+    g_ptr_array_add( output->images, image );
+    g_ptr_array_add( output->infos,  info );
+    g_ptr_array_add( output->subsheets, g_strdup_printf( "{\n  \"sprites\": [%s\n  ],\n  \"img\": \"%s\"\n}", json, base ) );
+    
+    fprintf( stdout, "-> %s\n", path );
+    
+    free( path );
+    free( base );
+}
+
+void output_add_image( Output * output, const char * id, Image * image, Options * options )
+{
+    if ( image )
+    {
+        if ( image->rows <= options->input_size_limit && image->columns <= options->input_size_limit )
+        {
+            Item * item = item_new_with_source( id, image, options );
+            g_sequence_insert_sorted( output->items, item, item_compare, NULL );
+            
+            output->item_area += item->area;
+            output->max_item_w = MAX( output->max_item_w, item->w );
+            output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
+        }
+        else if ( image->rows <= options->output_size_limit && image->columns <= options->output_size_limit )
+        {
+            fprintf( stdout, "Segregated %s ", id );
+            
+            char * json = g_strdup_printf( "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
+                (int) image->rows, (int) image->columns, id );
+                 
+            output_add_subsheet( output, json, image, options );
+            free( json );
+        }
+        else
+        {
+            fprintf( stderr, "Image %s is larger than maximum texture size.", id );
+        }
+    }
+}
+/*
 void output_add_item ( Output * output, Item * item, Options * options )
 {
     if ( item != NULL )
@@ -65,16 +115,15 @@ void output_add_item ( Output * output, Item * item, Options * options )
             output->max_item_w = MAX( output->max_item_w, item->w );
             output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
         }
-        else if ( options->copy_large_items &&
-                  options->allow_multiple_sheets &&
-                  item->w <= options->output_size_limit &&
-                  item->h <= options->output_size_limit )
+        else if ( item->w <= options->output_size_limit && item->h <= options->output_size_limit )
         {
-            g_ptr_array_add( output->large_items, item );
+            output_add_image( output, item->id, item->source, options );
+            item->source = NULL;
+            item_free( item );
         }
     }
 }
-
+*/
 void output_add_file ( Output * output, GFile * file, GFile * root, const char * root_path, Options * options )
 {
     GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
@@ -101,13 +150,12 @@ void output_add_file ( Output * output, GFile * file, GFile * root, const char *
                 GFile * child = g_file_get_child( file, g_file_info_get_name( child_info ) );
                 output_add_file( output, child, root, root_path, options );
                 g_object_unref( child_info );
+                g_object_unref( child );
             }
 
             g_file_enumerator_close( children, NULL, NULL );
             g_object_unref( children );
         }
-
-        g_object_unref( file );
     }
     else if ( type == G_FILE_TYPE_REGULAR )
     {
@@ -118,8 +166,20 @@ void output_add_file ( Output * output, GFile * file, GFile * root, const char *
         if ( file == root || options_allows_id( options, id ) )
             if ( options_take_unique_id( options, id ) )
             {
-                const char * dir = ( file != root ) ? root_path : NULL;
-                output_add_item( output, item_new_from_file( id, dir, file, options ), options );
+                const char * path = ( file != root ) ? g_build_filename( root_path, id, NULL ) : id;
+                
+                ExceptionInfo * exception = AcquireExceptionInfo();
+                ImageInfo * input_info = AcquireImageInfo();
+                CopyMagickString( input_info->filename, path, MaxTextExtent );
+                Image * source = ReadImage( input_info, exception );
+
+                if ( exception->severity == UndefinedException )
+                {
+                    output_add_image( output, id, source, options );
+                }
+                
+                DestroyImageInfo( input_info );
+                DestroyExceptionInfo( exception );
             }
     }
 
@@ -132,7 +192,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
     if ( !json_parser_load_from_file( json, path, NULL ) )
     {
-        fprintf( stderr, "Could not load/parse JSON file of spritesheet %s.\n", path );
+        fprintf( stderr, "Could not load JSON file of spritesheet %s.\n", path );
         exit( 1 );
     }
 
@@ -140,7 +200,7 @@ void output_merge_json ( Output * output, const char * path, Options * options )
 
     if ( !JSON_NODE_HOLDS_ARRAY( root ) )
     {
-        fprintf( stderr, "Could not load/parse JSON file of spritesheet %s.\n", path );
+        fprintf( stderr, "Could not parse JSON file of spritesheet %s.\n", path );
         exit( 1 );
     }
 
@@ -208,15 +268,15 @@ void output_merge_json ( Output * output, const char * path, Options * options )
                 if ( options_take_unique_id( options, id ) )
                 {
                     RectangleInfo rect = {
-                        (size_t)json_object_get_int_member( sprite, "w" ),
-                        (size_t)json_object_get_int_member( sprite, "h" ),
-                        (size_t)json_object_get_int_member( sprite, "x" ),
-                        (size_t)json_object_get_int_member( sprite, "y" )
+                        (size_t) json_object_get_int_member( sprite, "w" ),
+                        (size_t) json_object_get_int_member( sprite, "h" ),
+                        (size_t) json_object_get_int_member( sprite, "x" ),
+                        (size_t) json_object_get_int_member( sprite, "y" )
                     };
-
-                    Item * item = item_new( id );
-                    item_set_source( item, ExcerptImage( source_image, &rect, exception ), options );
-                    output_add_item( output, item, options );
+                    
+                    // add de-duplication and w == 0, h == 0 handling
+                    
+                    output_add_image( output, id, ExcerptImage( source_image, &rect, exception ), options );
                 }
             }
 
@@ -250,6 +310,7 @@ void output_load_inputs( Output * output, Options * options )
         {
             GFile * root = g_file_new_for_commandline_arg( path );
             output_add_file( output, root, root, path, options );
+            g_object_unref( root );
         }
     }
 
@@ -263,79 +324,67 @@ void output_load_inputs( Output * output, Options * options )
 
 void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
 {
-    ExceptionInfo * exception = AcquireExceptionInfo();
-    ImageInfo     * temp_info = AcquireImageInfo();
-    Image         * temp_image;
     Item * item = leaf->item;
-
-    if ( item->path )
+    
+    if ( !item->source )
     {
-        CopyMagickString( temp_info->filename, item->path, MaxTextExtent );
-        temp_image = ReadImage( temp_info, exception );
+        g_message( "!item->source");
     }
-    else
+    
+    unsigned int bp = options->add_buffer_pixels ? 1 : 0;
+    CompositeImage( dest, ReplaceCompositeOp , item->source, leaf->x + bp, leaf->y + bp );
+
+    // composite the sprite's buffer pixels onto image
+
+    if ( options->add_buffer_pixels )
     {
-        temp_image = item->source;
-    }
-
-    if ( temp_image )
-    {
-        unsigned int bp = options->add_buffer_pixels ? 1 : 0;
-        CompositeImage( dest, ReplaceCompositeOp , temp_image, leaf->x + bp, leaf->y + bp );
-
-        // composite the sprite's buffer pixels onto image
-
-        if ( options->add_buffer_pixels )
-        {
-            RectangleInfo rects[8] =
-                {
-                    { 1,            item->h - 2,            0,           0 },
-                    { 1,            item->h - 2,  item->w - 3,           0 },
-                    { item->w - 2,            1,            0,           0 },
-                    { item->w - 2,            1,            0, item->h - 3 },
-                    { 1,                      1,            0,           0 },
-                    { 1,                      1,  item->w - 3,           0 },
-                    { 1,                      1,            0, item->h - 3 },
-                    { 1,                      1,  item->w - 3, item->h - 3 }
-                };
-            int points[16] =
-                {
-                    0, 1,
-                    item->w - 1, 1,
-                    1, 0,
-                    1, item->h - 1,
-                    0, 0,
-                    item->w - 1, 0,
-                    0, item->h - 1,
-                    item->w - 1, item->h - 1
-                };
-
-            for (unsigned j = 0; j < 8; j++)
+        RectangleInfo rects[8] =
             {
-                Image * excerpt_image = ExcerptImage( temp_image, &rects[j], exception );
-                CompositeImage( dest, ReplaceCompositeOp, excerpt_image,
-                                leaf->x + points[j * 2],
-                                leaf->y + points[j * 2 + 1] );
-                DestroyImage( excerpt_image );
-            }
+                { 1,            item->h - 2,            0,           0 },
+                { 1,            item->h - 2,  item->w - 3,           0 },
+                { item->w - 2,            1,            0,           0 },
+                { item->w - 2,            1,            0, item->h - 3 },
+                { 1,                      1,            0,           0 },
+                { 1,                      1,  item->w - 3,           0 },
+                { 1,                      1,            0, item->h - 3 },
+                { 1,                      1,  item->w - 3, item->h - 3 }
+            };
+        int points[16] =
+            {
+                0, 1,
+                item->w - 1, 1,
+                1, 0,
+                1, item->h - 1,
+                0, 0,
+                item->w - 1, 0,
+                0, item->h - 1,
+                item->w - 1, item->h - 1
+            };
+            
+        ExceptionInfo * exception = AcquireExceptionInfo();
+
+        for (unsigned j = 0; j < 8; j++)
+        {
+            Image * excerpt_image = ExcerptImage( item->source, &rects[j], exception );
+            CompositeImage( dest, ReplaceCompositeOp, excerpt_image,
+                            leaf->x + points[j * 2],
+                            leaf->y + points[j * 2 + 1] );
+            DestroyImage( excerpt_image );
         }
+        
+        DestroyExceptionInfo( exception );
     }
 
-    if ( item->path )
-        DestroyImage( temp_image );
-    DestroyImageInfo( temp_info );
-    DestroyExceptionInfo( exception );
 }
 
 void output_add_layout ( Output * output, Layout * layout, Options * options )
 {
     ExceptionInfo * exception = AcquireExceptionInfo();
-    ImageInfo     * ss_info   = AcquireImageInfo();
-    Image         * ss_image  = AcquireImage( ss_info );
-    SetImageExtent ( ss_image, layout->width, layout->height );
-    SetImageOpacity( ss_image, QuantumRange );
-
-    fprintf( stdout,"Page match (%i x %i pixels, %.4g%% coverage): ",
+    Image         * image  = AcquireImage( NULL );
+    SetImageExtent ( image, layout->width, layout->height );
+    SetImageOpacity( image, QuantumRange );
+    
+    fprintf( stdout,"Page match (%i x %i pixels, %.4g%% coverage) ",
              layout->width, layout->height, 100.0f * layout->coverage );
 
     // composite output png
@@ -348,28 +397,15 @@ void output_add_layout ( Output * output, Layout * layout, Options * options )
         Leaf * leaf = (Leaf *) g_ptr_array_index( layout->places, i );
         sprites[i] = leaf_tostring( leaf, options );
 
-        image_composite_leaf( ss_image, leaf, options );
+        image_composite_leaf( image, leaf, options );
         g_sequence_remove_sorted( output->items, leaf->item, item_compare, NULL );
     }
 
     // append to json
 
-    char * path = g_strdup_printf( "%s-%i.png", options->output_path, output->images->len );
-
-    g_ptr_array_add( output->subsheets, g_strdup_printf(
-        "{\n  \"sprites\": [%s\n  ],\n  \"img\": \"%s\"\n}",
-        g_strjoinv( ",", sprites ), g_path_get_basename( path ) ) );
-
-    // tell the image where to save
-
-    CopyMagickString( ss_info->filename,  path,  MaxTextExtent );
-    CopyMagickString( ss_info->magick,    "png", MaxTextExtent );
-    CopyMagickString( ss_image->filename, path,  MaxTextExtent );
-
-    g_ptr_array_add( output->images, ss_image );
-    g_ptr_array_add( output->infos,  ss_info );
-
-    fprintf( stdout, "%s\n", path );
+    char * json = g_strjoinv( ",", sprites );
+    output_add_subsheet( output, json, image, options );
+    free( json );
 
     // collect garbage
 
@@ -378,25 +414,6 @@ void output_add_layout ( Output * output, Layout * layout, Options * options )
 
 void output_export_files ( Output * output, Options * options )
 {
-    for ( unsigned i = output->large_items->len; i--; )
-    {
-        Item  * item = g_ptr_array_index( output->large_items, i );
-        char  * path = g_strdup_printf( "%s-%i-%s", options->output_path, i, g_path_get_basename( item->id ) );
-        
-        GFile * dest = g_file_new_for_path( path );
-        g_file_copy( item->file, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL );
-        g_object_unref( dest );
-        
-        fprintf( stdout, "Copied %s\n", item->id );
-        
-        unsigned a = options->add_buffer_pixels ? 2 : 0;
-        g_ptr_array_add( output->subsheets, g_strdup_printf( "{\n  \"sprites\": ["
-            "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }"
-            "\n  ],\n  \"img\": \"%s\"\n}", item->w - a, item->h - a, item->id, g_path_get_basename( path ) ) );
-        
-        free( path );
-    }
-
     for ( unsigned i = output->images->len; i--; )
     {
         WriteImage( (ImageInfo *) g_ptr_array_index( output->infos, i ),

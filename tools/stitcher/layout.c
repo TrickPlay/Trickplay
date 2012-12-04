@@ -124,8 +124,7 @@ Layout * layout_new_from_output ( Output * output, unsigned int width, Options *
         return layout;
     }
 
-    Leaf * leaf = leaf_new( 0, 0, width,
-        options->output_size_limit * ( options->allow_multiple_sheets ? 1 : 2 ) );
+    Leaf * leaf = leaf_new( 0, 0, width, options->output_size_limit );
     g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
 
     g_sequence_foreach( output->items, (GFunc) layout_loop_item, layout );
@@ -143,8 +142,7 @@ Layout * layout_choose( Layout * a, Layout * b, Options * options )
     if(!a) return b;
     if(!b) return a;
 
-    if ( a->height <= options->output_size_limit
-        && ( options->allow_multiple_sheets ? a->items_placed > 0 : a->items_skipped == 0 )
+    if ( a->height <= options->output_size_limit && a->items_placed > 0
         && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
             return a;
 
