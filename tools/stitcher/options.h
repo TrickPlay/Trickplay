@@ -10,9 +10,8 @@ typedef struct Options {
     char * output_path;
 
     gboolean recursive,
-             add_buffer_pixels,
-             allow_multiple_sheets,
-             copy_large_items;
+             de_duplicate,
+             add_buffer_pixels;
 
     GPtrArray  * input_patterns,
                * input_paths,

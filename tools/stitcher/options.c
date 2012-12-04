@@ -11,10 +11,9 @@ Options * options_new()
     options->output_size_limit = 4096;
     options->output_path = NULL;
 
-    options->recursive = TRUE;
+    options->recursive = FALSE;
+    options->de_duplicate = FALSE;
     options->add_buffer_pixels = TRUE;
-    options->allow_multiple_sheets = TRUE;
-    options->copy_large_items = TRUE;
 
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
     options->input_paths    = g_ptr_array_new_with_free_func( g_free );
@@ -92,26 +91,24 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     {
         { G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK, 
             & opt_input,                         NULL, "PATH ..." },
-        { "no-buffer-pixels", 'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
+        { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
-        { "no-copy",        'C', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
-            & options->copy_large_items,         "Do not copy over files that fail the input size filter as stand-alone images", NULL },
-        { "forget",         'f', 0,                         G_OPTION_ARG_CALLBACK,
-            & opt_forget,                        "Id of a sprite to skip or forget", "ID" },
-        { "input-filter",   'i', 0,                         G_OPTION_ARG_CALLBACK, 
+        { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
+            & options->de_duplicate,             "Only include one copy of images that are the same.", NULL },
+        { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
+            & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
+        { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 
             & opt_filter,                        "Inclusive wildcard (?, *) filter for files within input directories (default: *)", "FILTER" },
-        { "merge-json",     'j', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
+        { "merge-json",        'm', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
             & opt_json,                          "Path to the JSON file of a spritesheet to merge into this one", "PATH" },
-        { "no-multiple",    'M', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
-            & options->allow_multiple_sheets,    "Do not allow the tool to output multiple images", NULL },
-        { "output-path",    'o', 0,                         G_OPTION_ARG_STRING, 
-            & options->output_path,              "Output path for the files *.json and *.png (default: first input path)", "PATH" },
-        { "no-recursive",   'R', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
-            & options->recursive,                "Do not recursively enter subdirectories", NULL },
-        { "input-size",     's', 0,                         G_OPTION_ARG_INT, 
-            & options->input_size_limit,         "Limit on the maximum size of input images (default 512)", "INT" },
-        { "output-size",    'S', 0,                         G_OPTION_ARG_INT, 
-            & options->output_size_limit,        "Limit on the maximum size of output images (default: 4096)", "INT" },
+        { "output-prefix",     'o', 0,                         G_OPTION_ARG_STRING, 
+            & options->output_path,              "Path and prefix for the spritesheet files created", "PATH" },
+        { "recursive",         'r', 0,                         G_OPTION_ARG_NONE, 
+            & options->recursive,                "Recursively enter subdirectories", NULL },
+        { "size-segregation",  's', 0,                         G_OPTION_ARG_INT, 
+            & options->input_size_limit,         "Size segregation threshhold (default 512)", "INT" },
+        { "max-texture-size",  't', 0,                         G_OPTION_ARG_INT, 
+            & options->output_size_limit,        "Maximum texture size the spritesheet will try to use (default: 4096)", "INT" },
         { NULL }
     };
     
@@ -132,11 +129,19 @@ Options * options_new_from_arguments ( int argc, char ** argv )
 
     if ( options->output_path == NULL )
     {
-        if ( options->input_paths->len > 0 )
+        if ( options->input_paths->len )
         {
-            options->output_path = g_ptr_array_index( options->input_paths, 0 );
-        //else if ( options->json_to_merge->len > 0 )
-        //    options->output_path = g_ptr_array_index( options->json_to_merge, 0 );
+            char * first_input = g_ptr_array_index( options->input_paths, 0 );
+            if ( g_file_test( first_input, G_FILE_TEST_IS_DIR ) )
+            {
+                options->output_path = first_input;
+                fprintf( stderr, "Assuming output prefix to be %s.\n", options->output_path );
+            }
+            else
+            {
+                fprintf( stderr, "Ambiguous output path.\n" );
+                exit( 1 );
+            }
         }
         else
         {
