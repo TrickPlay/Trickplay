@@ -7,9 +7,92 @@ module clutter_actor;
 #include "util.h"
 #include "clutter_util.h"
 #include "context.h"
-]]
 
-[[
+
+static const gchar *property_from_setter_name(const gchar *setter_name)
+{
+    static const gchar *property;
+    if(property)
+    {
+        g_free((gpointer)property);
+    }
+
+    // We call setters x_rotation, etc.  Clutter calls those properties rotation-angle-x, etc.
+    if(strstr(setter_name, "_rotation"))
+    {
+        property = g_strdup_printf("rotation-angle-%c", setter_name[0]);
+    }
+    else
+    {
+        property = g_strdup(setter_name);
+    }
+
+    return property;
+}
+
+typedef bool (* PropertyFunction) (ClutterActor *, const char *property, void *);
+
+static bool for_each_property(ClutterActor *actor, lua_State *L, PropertyFunction my_func, void *param)
+{
+    bool result = false;
+
+    // Get the table of setters from the user_data
+    if (luaL_getmetafield(L,1,"__setters__"))
+    {
+        int setters=lua_gettop(L);
+
+
+        lua_pushnil(L);
+        while(lua_next(L,setters))          // pops old key, pushes next key and value
+        {
+            lua_pop(L,1);                   // throw away the value (function)
+
+            const gchar * property = property_from_setter_name(lua_tostring(L, -1));
+
+            result |= my_func(actor, property, param);
+
+        }
+        lua_pop(L,1);                       // pop the setters table
+    }
+    else
+    {
+        luaL_error(L, "THERE WAS NO SETTERS TABLE FOUND");
+    }
+
+    return result;
+}
+
+static bool is_animating_check_function(ClutterActor *actor, const char *prop, void *)
+{
+    return (clutter_actor_get_transition(actor, prop) != NULL);
+}
+
+static bool complete_animation_function(ClutterActor *actor, const char *prop, void *)
+{
+    ClutterTimeline *transition = CLUTTER_TIMELINE(clutter_actor_get_transition(actor, prop));
+    if(transition)
+    {
+        clutter_timeline_advance( transition, clutter_timeline_get_duration( transition ) );
+
+        return true;
+    }
+
+    return false;
+}
+
+static bool stop_animation_function(ClutterActor *actor, const char *prop, void *)
+{
+    ClutterTimeline *transition = CLUTTER_TIMELINE(clutter_actor_get_transition(actor, prop));
+    if(transition)
+    {
+        clutter_timeline_pause( transition );
+
+        clutter_actor_remove_transition( actor, prop );
+        return true;
+    }
+
+    return false;
+}
 
 static void actor_on_show(ClutterActor*actor,lua_State*L)
 {
@@ -216,12 +299,24 @@ static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua
     return result;
 }
 
+#ifdef CLUTTER_VERSION_1_10
+static void transitions_completed(ClutterActor * actor, lua_State *L)
+{
+    ClutterUtil::wrap_concrete_actor(L, actor);
+
+    UserData::invoke_callback(G_OBJECT(actor), "on_completed",1,0,L);
+}
+
+#else
+
 static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
     ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
 
     UserData::invoke_callback(G_OBJECT(animation),"on_completed",1,0,L);
 }
+
+#endif
 
 ]]
 
@@ -482,7 +577,7 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Property: center
+    Property: center
 
     The center property is a table specifying the X and Y coordinates, respectively, of the object's center, relative to its parent, which is usually the screen.
 
@@ -527,9 +622,9 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Set the object's anchor point to the object's center
 
-	    (code)
-    	myObject.anchor_point = { myObject.width / 2, myObject.height / 2 }
-	    (end)
+        (code)
+        myObject.anchor_point = { myObject.width / 2, myObject.height / 2 }
+        (end)
 
     *See Also:* the <position> property and the <move_anchor_point> function
 */
@@ -626,10 +721,10 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Flip the object horizontally to display its mirror image.
 
-	    (code)
-	    -- Flip 180 degrees around object's horizontal center
-	    myObject.x_rotation = { 180, 0, 0 }
-	    (end)
+        (code)
+        -- Flip 180 degrees around object's horizontal center
+        myObject.x_rotation = { 180, 0, 0 }
+        (end)
 
     *See Also:* the <y_rotation> and <z_rotation> properties
 */
@@ -639,7 +734,14 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_X_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+#endif
+
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -649,12 +751,37 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y,z;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                y = lua_tonumber(L,-2);
+                z = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_pivot_point_z(self, z);
+                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 /***************************************
@@ -666,10 +793,10 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Flip the object vertically to display its mirror image.
 
-	    (code)
-	    -- Flip 180 degrees around object's vertical center
-	    myObject.y_rotation = { 180, 0, 0 }
-	    (end)
+        (code)
+        -- Flip 180 degrees around object's vertical center
+        myObject.y_rotation = { 180, 0, 0 }
+        (end)
 
     *See Also:* the <x_rotation> and <z_rotation> properties
 */
@@ -679,7 +806,13 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Y_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -689,12 +822,37 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y,z;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                x = lua_tonumber(L,-2);
+                z = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_pivot_point_z(self, z);
+                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 /***************************************
@@ -706,10 +864,10 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Rotate the object along the z-axis to display its image upside-down.
 
-	    (code)
-	    -- Rotate 180 degrees around object's horizontal and vertical centers
-	    myObject.z_rotation = { 180, 0, 0 }
-	    (end)
+        (code)
+        -- Rotate 180 degrees around object's horizontal and vertical centers
+        myObject.z_rotation = { 180, 0, 0 }
+        (end)
 
     *See Also:* the <x_rotation> and <y_rotation> properties
 */
@@ -719,7 +877,13 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
+#ifdef CLUTTER_VERSION_1_12
+            clutter_actor_get_pivot_point( self, &x, &y );
+            z = clutter_actor_get_pivot_point_z( self );
+            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Z_AXIS );
+#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -729,12 +893,36 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) != LUA_TTABLE)
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+#ifdef CLUTTER_VERSION_1_12
+                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L,2));
+#else
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
+#endif
+            }
+            else
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
+    #ifdef CLUTTER_VERSION_1_12
+                gfloat x,y;
+                clutter_actor_get_pivot_point(self, &x, &y);
+                x = lua_tonumber(L,-2);
+                y = lua_tonumber(L,-1);
+                clutter_actor_set_pivot_point(self, x, y);
+                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L, -3));
+    #else
             clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
+    #endif
             lua_pop(L,3);
+            }
         ]];
 
 
@@ -795,15 +983,15 @@ interface actor [[ClutterActor*]]
 
     *Code Examples:*
 
-	    (code)
-	    -- Define a clipping rectangle around the object's normal boundaries
-	    myObject.clip = { 0, 0, myObject.width, myObject.height }
-	    (end)
+        (code)
+        -- Define a clipping rectangle around the object's normal boundaries
+        myObject.clip = { 0, 0, myObject.width, myObject.height }
+        (end)
 
-	    (code)
-	    -- Clear the clipping rectangle and deactivate clipping
-	    myObject.clip = nil
-	    (end)
+        (code)
+        -- Clear the clipping rectangle and deactivate clipping
+        myObject.clip = nil
+        (end)
 
     *See Also:* the <has_clip> property
 */
@@ -973,7 +1161,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedProperty: min_size
+    UndocumentedProperty: min_size
 
     This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 
@@ -996,7 +1184,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedProperty: natural_size
+    UndocumentedProperty: natural_size
 
     This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 
@@ -1020,7 +1208,7 @@ interface actor [[ClutterActor*]]
 
 
 /***************************************
-	UndocumentedProperty: request_mode
+    UndocumentedProperty: request_mode
 
     This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 
@@ -1070,7 +1258,33 @@ interface actor [[ClutterActor*]]
 
     readonly bool is_animating
     [[
+#ifdef CLUTTER_VERSION_1_10
+        is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
+#else
         is_animating=clutter_actor_get_animation(self)!=NULL;
+#endif
+    ]];
+
+/***************************************
+    Property: is_property_animating
+
+    The is__property_animating function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
+
+    *Arguments:* property_name - the name of the property to check
+
+    *Return Value:* Returns true if the specified property is animating; false if it is not
+
+    *See Also:* the <animate> function and the <is_animating> property
+*/
+
+    bool is_property_animating(string property_name)
+    [[
+#ifdef CLUTTER_VERSION_1_10
+        result = (clutter_actor_get_transition(self, property_name) != NULL);
+#else
+        g_error("is_property_animating not supported with this version of the clutter library")
+        result = false
+#endif
     ]];
 
 /***************************************
@@ -1114,23 +1328,23 @@ interface actor [[ClutterActor*]]
 
     *Arguments:*
 
-	    props - table of properties and settings. One or more table entries can be specified. Each entry is separated by a comma. Table entries use the following syntax:
+        props - table of properties and settings. One or more table entries can be specified. Each entry is separated by a comma. Table entries use the following syntax:
 
-		    (code)
-		    propertyName = propertySetting
-		    (end)
+            (code)
+            propertyName = propertySetting
+            (end)
 
     *Return Value:*
 
-	    UIElement - returns the modified object
+        UIElement - returns the modified object
 
     *Code Examples:* Sample calls to the set() function
 
-	    (code)
-	    myObject:set( { name = "OkButton" } )
-	    myObject:set( { size = { 100, 100 }, position = { 10, 15 } } )
-	    myObject:set( { opacity = 255, x = 200, y = 300, size = { 100, 100 } } )
-	    (end)
+        (code)
+        myObject:set( { name = "OkButton" } )
+        myObject:set( { size = { 100, 100 }, position = { 10, 15 } } )
+        myObject:set( { opacity = 255, x = 200, y = 300, size = { 100, 100 } } )
+        (end)
 */
 
     UIElement set(table props)
@@ -1154,13 +1368,13 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Create a Rectangle object, add it to the screen, and then show it
 
-	    (code)
-	    myRect = Rectangle{ color    = { 255, 0, 0, 255 },
-	                        position = { 600, 100, 0 },
-	                        size     = { 100, 250 } }
-	    screen:add( myRect )
-	    myRect:show()
-	    (end)
+        (code)
+        myRect = Rectangle{ color    = { 255, 0, 0, 255 },
+                            position = { 600, 100, 0 },
+                            size     = { 100, 250 } }
+        screen:add( myRect )
+        myRect:show()
+        (end)
 
     *See Also:* the <is_visible> property and the <show_all> and <hide> functions
 */
@@ -1206,19 +1420,19 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Create a Rectangle object, show it on the screen, hide it, then show it again
 
-	    (code)
-	    myRect = Rectangle{ color    = { 255, 0, 0, 255 },
-	                        position = { 600, 100, 0 },
-	                        size     = { 100, 250 } }
-	    screen:add( myRect )
-	    myRect:show()
+        (code)
+        myRect = Rectangle{ color    = { 255, 0, 0, 255 },
+                            position = { 600, 100, 0 },
+                            size     = { 100, 250 } }
+        screen:add( myRect )
+        myRect:show()
 
-	    -- ... Do some operations, then hide the object
-	    myRect:hide()
+        -- ... Do some operations, then hide the object
+        myRect:hide()
 
-	    -- ... Do some more operations, then show the object again
-	    myRect:show()
-	    (end)
+        -- ... Do some more operations, then show the object again
+        myRect:show()
+        (end)
 
     *See Also:* the <is_visible> property and the <hide_all> and <show> functions
 */
@@ -1258,17 +1472,17 @@ interface actor [[ClutterActor*]]
 
     *Arguments:*
 
-	    dx - number of pixels to move along the x-axis. Value is relative to the object's current location.
-	    dy - number of pixels to move along the y-axis. Value is relative to the object's current location.
+        dx - number of pixels to move along the x-axis. Value is relative to the object's current location.
+        dy - number of pixels to move along the y-axis. Value is relative to the object's current location.
 
     *Return Value:* None
 
     *Code Example:* Move an object a few pixels along the x and y axes
 
-	    (code)
-	    -- Move object 10 pixels to the right (along x-axis) and 20 pixels up (along the y-axis)
-	    myObject.move_by( 10, -20 )
-	    (end)
+        (code)
+        -- Move object 10 pixels to the right (along x-axis) and 20 pixels up (along the y-axis)
+        myObject.move_by( 10, -20 )
+        (end)
 
     *See Also:* the <x>, <y>, <position> and <anchor_point> properties
 */
@@ -1311,7 +1525,7 @@ interface actor [[ClutterActor*]]
 
     *Argument:*
 
-	    above - a UIElement object in the group. The calling object will be placed immediately in front of this object.
+        above - a UIElement object in the group. The calling object will be placed immediately in front of this object.
 
     *Return Value:* None
 
@@ -1363,7 +1577,7 @@ interface actor [[ClutterActor*]]
 
     *Argument:*
 
-	    below - a UIElement object in the group. The calling object will be placed immediately behind this object.
+        below - a UIElement object in the group. The calling object will be placed immediately behind this object.
 
     *Return Value:* None
 
@@ -1470,9 +1684,9 @@ interface actor [[ClutterActor*]]
 
     *Code Example:* Set the object's anchor point to the object's center, adjusting the object's X and Y coordinates so the object does not move
 
-	    (code)
-	    myObject:move_anchor_point( myObject.width / 2, myObject.height / 2 )
-	    (end)
+        (code)
+        myObject:move_anchor_point( myObject.width / 2, myObject.height / 2 )
+        (end)
 
     *See Also:* the <x>, <y> and <anchor_point> properties
 */
@@ -1545,13 +1759,13 @@ interface actor [[ClutterActor*]]
     [[clutter_actor_grab_key_focus(self);]];
 
 /***************************************
-	UndocumentedFunction: blur
+    UndocumentedFunction: blur
 
     This function will apply a blur effect to the UI element.  Reversible with unblur()
 
     Returns:
 
-    	true - The effect was applied.
+        true - The effect was applied.
         false - If the effect is not available.
 */
 
@@ -1568,13 +1782,13 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: unblur
+    UndocumentedFunction: unblur
 
     Turn off a blur effect on the UI element.  The opposite of blur()
 
     Returns:
 
-		true - The effect was applied.
+        true - The effect was applied.
         false - If the effect is not available.
 */
 
@@ -1591,17 +1805,17 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: desaturate
+    UndocumentedFunction: desaturate
 
     How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
 
     Arguments:
 
-		desaturation - 0 for fully saturated, 1 for fully desaturated.
+        desaturation - 0 for fully saturated, 1 for fully desaturated.
 
     Returns:
 
- 		true - The effect was applied.
+        true - The effect was applied.
         false - If the effect is not available.
 */
 
@@ -1617,7 +1831,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: saturate
+    UndocumentedFunction: saturate
 
     Restore saturation to the UI element.  This undoes any call to <desaturate>.
 
@@ -1638,7 +1852,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: tint
+    UndocumentedFunction: tint
 
     Turn on a tint effect for the UI element.
 
@@ -1666,13 +1880,13 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: untint
+    UndocumentedFunction: untint
 
     Turn off any existing tint effect for the UI element.
 
      Returns:
 
-		true - The effect was applied.
+        true - The effect was applied.
         false - If the effect is not available.
 */
 
@@ -1687,7 +1901,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction: pageturn
+    UndocumentedFunction: pageturn
 
     Apply a "page turn" effect to the UIElement.
 
@@ -1728,7 +1942,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-	UndocumentedFunction; pageflatten
+    UndocumentedFunction; pageflatten
 
     Remove any "page turn" effect on the UIElement.
 
@@ -1761,50 +1975,50 @@ interface actor [[ClutterActor*]]
 
     *Arguments:*
 
-	    props - table of comma-separated properties and settings that define the animation. Supported properties and settings are listed below.
+        props - table of comma-separated properties and settings that define the animation. Supported properties and settings are listed below.
 
     *Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 
-	    duration - length of animation in milliseconds. Required.
-    	mode - string specifying the Ease mode to apply to the animated property. For descriptions of the supported modes, refer to the <Ease> class. Default = "LINEAR"
-    	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <stop_animation> function.
-    	on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
-    	x - X coordinate at end of animation
-    	y - Y coordinate at end of animation
-    	z - Z coordinate at end of animation
-    	depth - Z coordinate at end of animation. Another name for the z property
-    	w - width at end of animation
-    	width - width at end of animation. Another name for the w property
-    	h - height at end of animation
-    	height - height at end of animation. Another name for the h property
-    	opacity - opacity at end of animation. Possible values: 0 (completely transparent) to 255 (completely opaque), inclusive.
-    	position - X and Y coordinates at end of animation. Same as specifying x and y properties individually. The position property is specified as a table with two integers in the format { x, y }.
-    	size - width and height at end of animation. Same as specifying width and height properties individually. The size property is specified as a table with two floating point values in the format { width, height }.
-    	scale - object's scaling factor at end of animation. The scale property is specified as a table with two double values in the format { X_scale_factor, Y_scale_factor }.
-    	clip - object's clipping rectangle at end of animation. The clipping rectangle is specified as a table with four integer values in the format { X_origin, Y_origin, width, height }.
-    	x_rotation - object's rotation in degrees along the X-axis at end of animation
-    	y_rotation - object's rotation in degrees along the Y-axis at end of animation
-    	z_rotation - object's rotation in degrees along the Z-axis at end of animation
+        duration - length of animation in milliseconds. Required.
+        delay - length in milliseconds before animation begins. Default = 0.
+        mode - string specifying the Ease mode to apply to the animated property. For descriptions of the supported modes, refer to the <Ease> class. Default = "LINEAR"
+        on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
+        x - X coordinate at end of animation
+        y - Y coordinate at end of animation
+        z - Z coordinate at end of animation
+        depth - Z coordinate at end of animation. Another name for the z property
+        w - width at end of animation
+        width - width at end of animation. Another name for the w property
+        h - height at end of animation
+        height - height at end of animation. Another name for the h property
+        opacity - opacity at end of animation. Possible values: 0 (completely transparent) to 255 (completely opaque), inclusive.
+        position - X and Y coordinates at end of animation. Same as specifying x and y properties individually. The position property is specified as a table with two integers in the format { x, y }.
+        size - width and height at end of animation. Same as specifying width and height properties individually. The size property is specified as a table with two floating point values in the format { width, height }.
+        scale - object's scaling factor at end of animation. The scale property is specified as a table with two double values in the format { X_scale_factor, Y_scale_factor }.
+        clip - object's clipping rectangle at end of animation. The clipping rectangle is specified as a table with four integer values in the format { X_origin, Y_origin, width, height }.
+        x_rotation - object's rotation in degrees along the X-axis at end of animation
+        y_rotation - object's rotation in degrees along the Y-axis at end of animation
+        z_rotation - object's rotation in degrees along the Z-axis at end of animation
 
     *Return Value:* If the animation was started successfully, returns a reference to an Animation object. Else returns nil.
 
     *Code Example:* Create a simple rectangle and rotate it while moving it across the screen in an infinite loop
 
-    	(code)
-    	-- Create the rectangle
-    	movingRect = Rectangle{ position = { -100, 400 },
-    	                        size     = { 100, 100 },
-    	                        color    = { 225, 225, 0, 0 } }
-    	-- Show it on the screen
-    	screen:add( movingRect )
+        (code)
+        -- Create the rectangle
+        movingRect = Rectangle{ position = { -100, 400 },
+                                size     = { 100, 100 },
+                                color    = { 225, 225, 0, 0 } }
+        -- Show it on the screen
+        screen:add( movingRect )
 
-    	--Animate it
-    	movingRect:animate( { duration   = 5000,    -- 5 seconds
-    	                      loop       = true,    -- loop forever
-    	                      x          = 2020,	-- move to off-screen right
-    	                      x_rotation = 360,		-- flip all the way around
-    	} )
-    	(end)
+        --Animate it
+        movingRect:animate( { duration   = 5000,    -- 5 seconds
+                              loop       = true,    -- loop forever
+                              x          = 2020,    -- move to off-screen right
+                              x_rotation = 360,     -- flip all the way around
+        } )
+        (end)
 
     *See Also:* the <complete_animation> function and the <Timeline> class
 */
@@ -1836,6 +2050,87 @@ interface actor [[ClutterActor*]]
         gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
         lua_pop(L,1);
 
+#ifdef CLUTTER_VERSION_1_10
+        lua_getfield(L,props,"on_completed");
+
+        if (lua_type(L,-1)==LUA_TFUNCTION)
+        {
+            UserData * ud = UserData::get( L );
+
+            ud->push_proxy();
+
+            UserData::set_callback( "on_completed" , L , -1 , -2 );
+
+            ud->connect_signal( "on_completed" , "transitions-completed" , G_CALLBACK( transitions_completed ) , L , G_CONNECT_AFTER );
+        }
+        else
+        {
+            lua_pop(L,1);
+        }
+
+        clutter_actor_save_easing_state( self );
+        clutter_actor_set_easing_duration( self, duration );
+
+        lua_getfield(L,props,"delay");
+
+        if(!lua_isnil(L,-1))
+        {
+            if(!lua_isnumber(L,-1))
+            {
+                return luaL_error(L, "Call to animate has invalid delay: must be a number");
+            }
+            if(lua_tointeger(L,-1) <= 0)
+            {
+                return luaL_error(L, "Call to animate has invalid delay: must be positive non-zero number");
+            }
+        }
+        clutter_actor_set_easing_delay( self, lua_tointeger(L,-1) );
+        lua_pop(L,1);
+
+        clutter_actor_set_easing_mode( self, (ClutterAnimationMode)mode );
+
+        ClutterUtil::set_props_from_table(L,props);
+
+        lua_getfield(L, props, "loop");
+        int loop = lua_toboolean(L,-1);
+        lua_pop(L,1);
+
+        // We need to tell each property transition that was just set to loop if loop was true, or not loop if it was false or unspecified
+        // To determine which properties, we'll iterate through the "props" table and find every property with a setter
+        // Then retrieve the ClutterTransition for that property and tell it whether to loop
+
+        // Get the table of setters from the user_data
+        if (luaL_getmetafield(L,1,"__setters__"))
+        {
+            int setters=lua_gettop(L);
+
+            lua_pushnil(L);
+            while(lua_next(L,props))            // pops old key, pushes next key and value
+            {
+                lua_pop(L, 1);                  // discard the property value
+
+                lua_pushvalue(L,-1);            // push the key again
+                lua_rawget(L,setters);          // pops the key, check if that key is in the setters table
+                if (!lua_isnil(L,-1))
+                {
+                    // We found a property that has a setter, so retrieve its transition and loop it
+                    // The property name is underneath the value we just got from setters
+                    const gchar * property = property_from_setter_name(lua_tostring(L, -2));
+
+                    ClutterTransition *transition = clutter_actor_get_transition(self, property);
+                    if(transition)
+                    {
+                        clutter_timeline_set_repeat_count( CLUTTER_TIMELINE(transition), loop ? -1 : 0 );
+                    }
+                }
+                lua_pop(L,1);                   // Pop the setter function
+            }
+
+            lua_pop(L, 1);                      // Pop the setters table
+        }
+
+        clutter_actor_restore_easing_state( self );
+#else
         GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
 #ifndef GLIB_VERSION_2_32
         GValueArray * values=g_value_array_new(6);
@@ -2159,6 +2454,9 @@ interface actor [[ClutterActor*]]
         g_array_unref(values);
 #endif
         g_ptr_array_free(names,TRUE);
+
+#endif
+
     ]];
 
 
@@ -2167,16 +2465,53 @@ interface actor [[ClutterActor*]]
 
     The complete_animation() function terminates the current cycle of an animation started with a call to <animate>. All the properties that were being animated are forced immediately to their final values. If the animation specified an on_completed handler, it is invoked. If the animation is a looping animation, the next animation cycle begins. To terminate a looping animation, call the <stop_animation> function.
 
-    *Arguments:* None
+    *Arguments:*
 
-    *Return Value:* Boolean indicating whether or not an animation had been running (true = animation was running and was terminated).
+        property_names - Optional.  Can be a string, or a table of strings.  The passed strings, if any, will be treated as property names, and any animations on those properties will be completed.  Animations on other properties will continue.  If no argument is passed, then ALL properties' animations will be completed.
 
-    *See Also:* the <animate> function
+    *Return Value:* Boolean indicating whether or not an animation had been running for the specified propert(y|ies) (true = animation was running and was terminated).
+
+    *See Also:* the <animate> function and the <stop_animation> function
 */
 
-    bool complete_animation()
+    bool complete_animation(...)
     [[
-        result = false;
+        result =  false;
+
+#ifdef CLUTTER_VERSION_1_10
+        // Check for argument
+        if(lua_isstring(L,2))
+        {
+            result = complete_animation_function(self, lua_tostring(L, 2),NULL);
+        }
+        else if(lua_istable(L,2))
+        {
+            int complete_list = 2;
+
+            size_t num_props = lua_rawlen(L, complete_list);
+            for(size_t i=1; i <= num_props; i++)
+            {
+                lua_rawgeti(L, complete_list, i);
+                luaL_checkstring(L, -1);
+
+                result |= complete_animation_function(self, lua_tostring(L, -1), NULL);
+
+                lua_pop(L, 1);
+            }
+        }
+        else if(!lua_isuserdata(L,-1))
+        {
+            luaL_error(L, "ERROR: DID NOT SPECIFY STRING OR TABLE OF STRINGS IN CALL TO complete_animation()");
+        }
+        else
+        {
+            result = for_each_property(self, L, complete_animation_function, NULL);
+        }
+#else
+        if(!lua_isuserdata(L,-1))
+        {
+            g_error("This version of clutter does not support multiple animations on different properties.  Stopping all animations.");
+        }
 
         if ( ClutterAnimation * animation=clutter_actor_get_animation( self ) )
         {
@@ -2187,6 +2522,7 @@ interface actor [[ClutterActor*]]
                 result=true;
             }
         }
+#endif
     ]];
 
 /***************************************
@@ -2194,17 +2530,49 @@ interface actor [[ClutterActor*]]
 
     The stop_animation() function terminates the animation (including a looping animation) started with a call to <animate>. All the properties that were being animated remain at their stopped values. If the animation specified an on_completed handler, it is not called.
 
-    *Arguments:* None
+    *Arguments:*
+
+        property_names - Optional.  Can be a string, or a table of strings.  The passed strings, if any, will be treated as property names, and any animations on those properties will be stopped.  Animations on other properties will continue.  If no argument is passed, then ALL properties' animations will be stopped.
 
     *Return Value:* Boolean indicating whether or not an animation had been running (true = animation was running and was stopped).
 
-    *See Also:* the <animate> function
+    *See Also:* the <animate> function and <complete_animation> function
 */
 
-    bool stop_animation()
+    bool stop_animation(...)
     [[
         result = false;
 
+#ifdef CLUTTER_VERSION_1_10
+        // Check for argument
+        if(lua_isstring(L,-1))
+        {
+            result = stop_animation_function(self, lua_tostring(L,-1),NULL);
+        }
+        else if(lua_istable(L,-1))
+        {
+            int complete_list = lua_gettop(L);
+
+            size_t num_props = lua_rawlen(L, complete_list);
+            for(size_t i=1; i <= num_props; i++)
+            {
+                lua_rawgeti(L, complete_list, i);
+                luaL_checkstring(L, -1);
+
+                result |= stop_animation_function(self, lua_tostring(L, -1), NULL);
+
+                lua_pop(L, 1);
+            }
+        }
+        else if(!lua_isuserdata(L,-1))
+        {
+            luaL_error(L, "ERROR: DID NOT SPECIFY STRING OR TABLE OF STRINGS IN CALL TO stop_animation()");
+        }
+        else
+        {
+            result = for_each_property(self, L, stop_animation_function, NULL);
+        }
+#else
         if ( ClutterAnimation *anim = clutter_actor_get_animation( self ) )
         {
             ClutterTimeline *timeline = clutter_animation_get_timeline( anim );
@@ -2213,10 +2581,11 @@ interface actor [[ClutterActor*]]
 
             result=true;
         }
+#endif
     ]];
 
 /***************************************
-	UndocumentedProperty: constraints
+    UndocumentedProperty: constraints
 
 */
 
@@ -2260,7 +2629,7 @@ interface actor [[ClutterActor*]]
        ]];
 
 /***************************************
-	UndocumentedFunction: add_constraints
+    UndocumentedFunction: add_constraints
 
     Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint Align, Bind and Snap bindings in clutter_constraint.lb. They seem like they would be useful, but a comment in the Snap code states that the Clutter code seems to be broken. For the moment, these functions will remain undocumented.
 
@@ -2288,7 +2657,7 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: remove_contraints
+    UndocumentedFunction: remove_contraints
 
 */
 
@@ -2307,7 +2676,7 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: clear_constraints
+    UndocumentedFunction: clear_constraints
 
 */
 
@@ -2317,29 +2686,29 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onkeyfocusin_listener
+    Function: add_onkeyfocusin_listener
 
-	The add_onkeyfocusin_listener() function registers a handler function for <on_key_focus_in> events.
+    The add_onkeyfocusin_listener() function registers a handler function for <on_key_focus_in> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyfocusin_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyfocusin_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self )
-		(end)
+        (code)
+        int f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving key focus
+        self - reference to the object receiving key focus
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_key_focus_in> event and the <remove_onkeyfocusin_listener> function
+    *See Also:* the <on_key_focus_in> event and the <remove_onkeyfocusin_listener> function
 */
 
     int add_onkeyfocusin_listener( function f )
@@ -2353,17 +2722,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onkeyfocusin_listener
+    Function: remove_onkeyfocusin_listener
 
-	The remove_onkeyfocusin_listener() function unregisters the specified event handler.
+    The remove_onkeyfocusin_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeyfocusin_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeyfocusin_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeyfocusin_listener> function
+    *See Also:* the <add_onkeyfocusin_listener> function
 */
 
     remove_onkeyfocusin_listener( int ref )
@@ -2372,29 +2741,29 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onkeyfocusout_listener
+    Function: add_onkeyfocusout_listener
 
-	The add_onkeyfocusout_listener() function registers a handler function for <on_key_focus_out> events.
+    The add_onkeyfocusout_listener() function registers a handler function for <on_key_focus_out> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyfocusout_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyfocusout_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self )
-		(end)
+        (code)
+        int f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object losing key focus
+        self - reference to the object losing key focus
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_key_focus_out> event and the <remove_onkeyfocusout_listener> function
+    *See Also:* the <on_key_focus_out> event and the <remove_onkeyfocusout_listener> function
 */
 
     int add_onkeyfocusout_listener( function f )
@@ -2408,17 +2777,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onkeyfocusout_listener
+    Function: remove_onkeyfocusout_listener
 
-	The remove_onkeyfocusout_listener() function unregisters the specified event handler.
+    The remove_onkeyfocusout_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeyfocusout_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeyfocusout_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeyfocusout_listener> function
+    *See Also:* the <add_onkeyfocusout_listener> function
 */
 
     remove_onkeyfocusout_listener( int ref )
@@ -2427,25 +2796,25 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onkeydown_listener
+    Function: add_onkeydown_listener
 
-	The add_onkeydown_listener() function registers a handler function for <on_key_down> events.
+    The add_onkeydown_listener() function registers a handler function for <on_key_down> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeydown_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeydown_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, keyval, unicode, time, modifiers )
-		(end)
+        (code)
+        int f( self, keyval, unicode, time, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         keyval - integer key value. This value can be compared to the global <keys> variable.
         unicode - the key's Unicode representation, if any
         time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
@@ -2453,7 +2822,7 @@ interface actor [[ClutterActor*]]
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_key_down> event and the <remove_onkeydown_listener> function
+    *See Also:* the <on_key_down> event and the <remove_onkeydown_listener> function
 */
 
     int add_onkeydown_listener( function f )
@@ -2467,17 +2836,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onkeydown_listener
+    Function: remove_onkeydown_listener
 
-	The remove_onkeydown_listener() function unregisters the specified event handler.
+    The remove_onkeydown_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeydown_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeydown_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeydown_listener> function
+    *See Also:* the <add_onkeydown_listener> function
 */
 
     remove_onkeydown_listener( int ref )
@@ -2486,25 +2855,25 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onkeyup_listener
+    Function: add_onkeyup_listener
 
-	The add_onkeyup_listener() function registers a handler function for <on_key_up> events.
+    The add_onkeyup_listener() function registers a handler function for <on_key_up> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyup_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyup_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, keyval, unicode, time, modifiers )
-		(end)
+        (code)
+        int f( self, keyval, unicode, time, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         keyval - integer key value. This value can be compared to the global <keys> variable.
         unicode - the key's Unicode representation, if any
         time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
@@ -2512,7 +2881,7 @@ interface actor [[ClutterActor*]]
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_key_up> event and the <remove_onkeyup_listener> function
+    *See Also:* the <on_key_up> event and the <remove_onkeyup_listener> function
 */
 
     int add_onkeyup_listener( function f )
@@ -2526,17 +2895,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onkeyup_listener
+    Function: remove_onkeyup_listener
 
-	The remove_onkeyup_listener() function unregisters the specified event handler.
+    The remove_onkeyup_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeyup_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeyup_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeyup_listener> function
+    *See Also:* the <add_onkeyup_listener> function
 */
 
     remove_onkeyup_listener( int ref )
@@ -2545,25 +2914,25 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onbuttondown_listener
+    Function: add_onbuttondown_listener
 
-	The add_onbuttondown_listener() function registers a handler function for <on_button_down> events.
+    The add_onbuttondown_listener() function registers a handler function for <on_button_down> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onbuttondown_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onbuttondown_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y, button, num_clicks, modifiers )
-		(end)
+        (code)
+        int f( self, x, y, button, num_clicks, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         x - X coordinate position of the mouse pointer
         y - Y coordinate position of the mouse pointer
         button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
@@ -2572,7 +2941,7 @@ interface actor [[ClutterActor*]]
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_button_down> event and the <remove_onbuttondown_listener> function
+    *See Also:* the <on_button_down> event and the <remove_onbuttondown_listener> function
 */
 
     int add_onbuttondown_listener( function f )
@@ -2586,17 +2955,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onbuttondown_listener
+    Function: remove_onbuttondown_listener
 
-	The remove_onbuttondown_listener() function unregisters the specified event handler.
+    The remove_onbuttondown_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onbuttondown_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onbuttondown_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onbuttondown_listener> function
+    *See Also:* the <add_onbuttondown_listener> function
 */
 
     remove_onbuttondown_listener( int ref )
@@ -2605,25 +2974,25 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onbuttonup_listener
+    Function: add_onbuttonup_listener
 
-	The add_onbuttonup_listener() function registers a handler function for <on_button_up> events.
+    The add_onbuttonup_listener() function registers a handler function for <on_button_up> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onbuttonup_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onbuttonup_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y, button, num_clicks, modifiers )
-		(end)
+        (code)
+        int f( self, x, y, button, num_clicks, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         x - X coordinate position of the mouse pointer
         y - Y coordinate position of the mouse pointer
         button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
@@ -2632,7 +3001,7 @@ interface actor [[ClutterActor*]]
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_button_up> event and the <remove_onbuttonup_listener> function
+    *See Also:* the <on_button_up> event and the <remove_onbuttonup_listener> function
 */
 
     int add_onbuttonup_listener( function f )
@@ -2646,17 +3015,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onbuttonup_listener
+    Function: remove_onbuttonup_listener
 
-	The remove_onbuttonup_listener() function unregisters the specified event handler.
+    The remove_onbuttonup_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onbuttonup_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onbuttonup_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onbuttonup_listener> function
+    *See Also:* the <add_onbuttonup_listener> function
 */
 
     remove_onbuttonup_listener( int ref )
@@ -2665,32 +3034,32 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onmotion_listener
+    Function: add_onmotion_listener
 
-	The add_onmotion_listener() function registers a handler function for <on_motion> events.
+    The add_onmotion_listener() function registers a handler function for <on_motion> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmotion_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmotion_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y, modifiers )
-		(end)
+        (code)
+        int f( self, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         x - X coordinate position of the mouse pointer
         y - Y coordinate position of the mouse pointer
         modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_motion> event and the <remove_onmotion_listener> function
+    *See Also:* the <on_motion> event and the <remove_onmotion_listener> function
 */
 
     int add_onmotion_listener( function f )
@@ -2704,17 +3073,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onmotion_listener
+    Function: remove_onmotion_listener
 
-	The remove_onmotion_listener() function unregisters the specified event handler.
+    The remove_onmotion_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onmotion_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onmotion_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onmotion_listener> function
+    *See Also:* the <add_onmotion_listener> function
 */
 
     remove_onmotion_listener( int ref )
@@ -2723,25 +3092,25 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onscroll_listener
+    Function: add_onscroll_listener
 
-	The add_onscroll_listener() function registers a handler function for <on_scroll> events.
+    The add_onscroll_listener() function registers a handler function for <on_scroll> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onscroll_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onscroll_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y, scroll_direction, modifiers )
-		(end)
+        (code)
+        int f( self, x, y, scroll_direction, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
         x - X coordinate position of the pointer
         y - Y coordinate position of the pointer
         scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
@@ -2749,7 +3118,7 @@ interface actor [[ClutterActor*]]
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_scroll> event and the <remove_onscroll_listener> function
+    *See Also:* the <on_scroll> event and the <remove_onscroll_listener> function
 */
 
     int add_onscroll_listener( function f )
@@ -2763,17 +3132,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onscroll_listener
+    Function: remove_onscroll_listener
 
-	The remove_onscroll_listener() function unregisters the specified event handler.
+    The remove_onscroll_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onscroll_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onscroll_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onscroll_listener> function
+    *See Also:* the <add_onscroll_listener> function
 */
 
     remove_onscroll_listener( int ref )
@@ -2782,31 +3151,31 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onenter_listener
+    Function: add_onenter_listener
 
-	The add_onenter_listener() function registers a handler function for <on_enter> events.
+    The add_onenter_listener() function registers a handler function for <on_enter> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onenter_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onenter_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y )
-		(end)
+        (code)
+        int f( self, x, y )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
-	    x - X coordinate position of the mouse pointer
-	    y - Y coordinate position of the mouse pointer
+        self - reference to the object receiving the event
+        x - X coordinate position of the mouse pointer
+        y - Y coordinate position of the mouse pointer
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_enter> event and the <remove_onenter_listener> function
+    *See Also:* the <on_enter> event and the <remove_onenter_listener> function
 */
 
     int add_onenter_listener( function f )
@@ -2820,17 +3189,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onenter_listener
+    Function: remove_onenter_listener
 
-	The remove_onenter_listener() function unregisters the specified event handler.
+    The remove_onenter_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onenter_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onenter_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onenter_listener> function
+    *See Also:* the <add_onenter_listener> function
 */
 
     remove_onenter_listener( int ref )
@@ -2839,31 +3208,31 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onleave_listener
+    Function: add_onleave_listener
 
-	The add_onleave_listener() function registers a handler function for <on_leave> events.
+    The add_onleave_listener() function registers a handler function for <on_leave> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onleave_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onleave_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self, x, y )
-		(end)
+        (code)
+        int f( self, x, y )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
-	    x - X coordinate position of the mouse pointer
-	    y - Y coordinate position of the mouse pointer
+        self - reference to the object receiving the event
+        x - X coordinate position of the mouse pointer
+        y - Y coordinate position of the mouse pointer
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_leave> event and the <remove_onleave_listener> function
+    *See Also:* the <on_leave> event and the <remove_onleave_listener> function
 */
 
     int add_onleave_listener( function f )
@@ -2877,17 +3246,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onleave_listener
+    Function: remove_onleave_listener
 
-	The remove_onleave_listener() function unregisters the specified event handler.
+    The remove_onleave_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onleave_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onleave_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onleave_listener> function
+    *See Also:* the <add_onleave_listener> function
 */
 
     remove_onleave_listener( int ref )
@@ -2896,29 +3265,29 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onshow_listener
+    Function: add_onshow_listener
 
-	The add_onshow_listener() function registers a handler function for <on_show> events.
+    The add_onshow_listener() function registers a handler function for <on_show> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onshow_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onshow_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self )
-		(end)
+        (code)
+        int f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_show> event and the <remove_onshow_listener> function
+    *See Also:* the <on_show> event and the <remove_onshow_listener> function
 */
 
     int add_onshow_listener( function f )
@@ -2932,17 +3301,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onshow_listener
+    Function: remove_onshow_listener
 
-	The remove_onshow_listener() function unregisters the specified event handler.
+    The remove_onshow_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onshow_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onshow_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onshow_listener> function
+    *See Also:* the <add_onshow_listener> function
 */
 
     remove_onshow_listener( int ref )
@@ -2951,29 +3320,29 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onhide_listener
+    Function: add_onhide_listener
 
-	The add_onhide_listener() function registers a handler function for <on_hide> events.
+    The add_onhide_listener() function registers a handler function for <on_hide> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onhide_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onhide_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		int f( self )
-		(end)
+        (code)
+        int f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
+        self - reference to the object receiving the event
 
     *Handler Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	*See Also:* the <on_hide> event and the <remove_onhide_listener> function
+    *See Also:* the <on_hide> event and the <remove_onhide_listener> function
 */
 
     int add_onhide_listener( function f )
@@ -2987,17 +3356,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onhide_listener
+    Function: remove_onhide_listener
 
-	The remove_onhide_listener() function unregisters the specified event handler.
+    The remove_onhide_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onhide_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onhide_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onhide_listener> function
+    *See Also:* the <add_onhide_listener> function
 */
 
     remove_onhide_listener( int ref )
@@ -3006,30 +3375,30 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: add_onparentchanged_listener
+    Function: add_onparentchanged_listener
 
-	The add_onparentchanged_listener() function registers a handler function for <on_parent_changed> events.
+    The add_onparentchanged_listener() function registers a handler function for <on_parent_changed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onparentchanged_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onparentchanged_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( self, old_parent )
-		(end)
+        (code)
+        f( self, old_parent )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-	    self - reference to the object receiving the event
-	    old_parent - reference to the parent object (now unparented). If the object had no parent, this argument will be nil.
+        self - reference to the object receiving the event
+        old_parent - reference to the parent object (now unparented). If the object had no parent, this argument will be nil.
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_parent_changed> event and the <remove_onparentchanged_listener> function
+    *See Also:* the <on_parent_changed> event and the <remove_onparentchanged_listener> function
 */
 
     int add_onparentchanged_listener( function f )
@@ -3043,17 +3412,17 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	Function: remove_onparentchanged_listener
+    Function: remove_onparentchanged_listener
 
-	The remove_onparentchanged_listener() function unregisters the specified event handler.
+    The remove_onparentchanged_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onparentchanged_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onparentchanged_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onparentchanged_listener> function
+    *See Also:* the <add_onparentchanged_listener> function
 */
 
     remove_onparentchanged_listener( int ref )
@@ -3087,7 +3456,7 @@ interface actor [[ClutterActor*]]
 
     The on_key_focus_out event occurs whenever the object loses the key focus.
 
-	*See Also:* the <add_onkeyfocusout_listener> function
+    *See Also:* the <add_onkeyfocusout_listener> function
 */
 
     function on_key_focus_out
@@ -3108,7 +3477,7 @@ interface actor [[ClutterActor*]]
 
     The on_key_down event occurs whenever a key is pressed while the object has the key focus.
 
-	*See Also:* the <add_onkeydown_listener> function
+    *See Also:* the <add_onkeydown_listener> function
 */
 
     function on_key_down
@@ -3129,7 +3498,7 @@ interface actor [[ClutterActor*]]
 
     The on_key_up event occurs whenever a key is released while the object has the key focus.
 
-	*See Also:* the <add_onkeyup_listener> function
+    *See Also:* the <add_onkeyup_listener> function
 */
 
     function on_key_up
@@ -3150,7 +3519,7 @@ interface actor [[ClutterActor*]]
 
     The on_button_down event occurs whenever a mouse button is pressed. To receive on_button_down events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
 
-	*See Also:* the <add_onbuttondown_listener> function
+    *See Also:* the <add_onbuttondown_listener> function
 */
 
     function on_button_down
@@ -3171,7 +3540,7 @@ interface actor [[ClutterActor*]]
 
     The on_button_up event occurs whenever a mouse button is released. To receive on_button_up events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
 
-	*See Also:* the <add_onbuttonup_listener> function
+    *See Also:* the <add_onbuttonup_listener> function
 */
 
     function on_button_up
@@ -3213,7 +3582,7 @@ interface actor [[ClutterActor*]]
 
     The on_scroll event is fired whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well. To enable receiving scroll wheel events, the object's <reactive> property must be set to true.
 
-	*See Also:* the <add_onscroll_listener> function
+    *See Also:* the <add_onscroll_listener> function
 */
 
     function on_scroll
@@ -3234,7 +3603,7 @@ interface actor [[ClutterActor*]]
 
     The on_enter event occurs whenever the mouse pointer enters the object's display space. To receive on_enter events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
 
-	*See Also:* the <add_onenter_listener> function
+    *See Also:* the <add_onenter_listener> function
 */
 
     function on_enter
@@ -3297,7 +3666,7 @@ interface actor [[ClutterActor*]]
 
     The on_hide event occurs whenever the object's <hide> or <hide_all> function is called.
 
-	*See Also:* the <add_onhide_listener> function
+    *See Also:* the <add_onhide_listener> function
 */
 
     function on_hide
@@ -3335,9 +3704,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: grab_pointer
+    UndocumentedFunction: grab_pointer
 
-	Experimental. Clutter warns about using it.
+    Experimental. Clutter warns about using it.
 */
 
     grab_pointer()
@@ -3346,9 +3715,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: ungrab_pointer
+    UndocumentedFunction: ungrab_pointer
 
-	Experimental. Clutter warns about using it.
+    Experimental. Clutter warns about using it.
 */
 
     ungrab_pointer()
