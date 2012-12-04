@@ -1,8 +1,6 @@
 #ifndef __ITEM_H__
 #define __ITEM_H__
 
-//#include <glib.h>
-//#include <gio/gio.h>
 #include <magick/MagickCore.h>
 #include "options.h"
 
