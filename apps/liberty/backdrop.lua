@@ -141,12 +141,26 @@ local function make_zoom_zoom(group)
     
     
     local start_z = c_image.z
-    function group:stop_dots(t)
+    
+    local t = Timeline {
+                            duration = 1000*60*60,
+                            loop = true,
+                            on_new_frame = function ( tl, ms, p )
+                                ms = ms % 500
+                                p  = ms / 500
+                                c_image.y  = p*INTERVAL
+                            end,
+                        }
+    function group:stop_dots()
         
+        if not t.is_playing then return end
+        
+        t:stop()
+        --[[
         if not c_image.is_animating then return end
         
         c_image:complete_animation()
-        
+        --]]
     end
     function group:anim_x_rot(new)
         
@@ -156,7 +170,10 @@ local function make_zoom_zoom(group)
         
     end
     function group:animate_dots()
+        if t.is_playing then return end
         
+        t:start()
+        --[[
         if c_image.is_animating then return end
         
         c_image.z = start_z
@@ -165,9 +182,10 @@ local function make_zoom_zoom(group)
             loop = true,
             y = INTERVAL-1,
         }
+        --]]
     end
     
-    group:animate_dots()
+    t:start()--group:animate_dots()
     --[[
     local fly_anim = Timeline {
                                 duration = 180,
@@ -242,9 +260,12 @@ local function make_backdrop()
     backdrop_group:add(zoom_clip,horizonbacking,horizon)
     
     function backdrop_group:set_horizon(y)
+        backdrop_group:animate{duration=300,y=y-bd.h}
+        --[[
         horizon:animate{duration=300,y=y}
         bd:animate{duration=300,h=y}
         zoom_clip:animate{duration=300,y=y-700}
+        --]]
     end
     function backdrop_group:set_bulb_x(x)
         hb:animate{duration=300,x=x}

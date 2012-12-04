@@ -471,6 +471,9 @@ TabBar = setmetatable(
                     end
                 end
             }
+            
+            WL_parent_redirect[panes_obj] = instance
+            
             tab_w = 200
             tab_h = 50
             tab_images   = nil 
@@ -532,9 +535,9 @@ TabBar = setmetatable(
                     end
                     local pane = obj.contents
                     
-                    local style = instance.style.attributes
-                    style.name = style
-                    style.border.colors.selection = style.border.colors.selection or "ffffff"
+                    --local style = instance.style.attributes
+                    --style.name = style
+                    --style.border.colors.selection = style.border.colors.selection or "ffffff"
                     local clones
                     if tab_images then
                         clones = {}
@@ -549,7 +552,7 @@ TabBar = setmetatable(
                         label  = obj.label,
                         w      = tab_w,
                         h      = tab_h,
-                        style  = style,
+                        style  = instance.style,--style,
                         group  = rbg,
                         images = clones,
                         reactive = true,
@@ -606,7 +609,7 @@ TabBar = setmetatable(
             --TODO roll into a single set
             tab_pane = ArrowPane{
                 name = "ArrowPane",
-                style = false,
+                style = instance.style,
                 arrow_move_by = tab_w,
                 on_key_focus_in = function()
                     if tabs_lm.length > 0 then

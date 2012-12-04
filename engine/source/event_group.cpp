@@ -89,7 +89,7 @@ EventGroup::~EventGroup()
     g_mutex_free( mutex );
 #else
     g_mutex_clear(mutex);
-    free(mutex);
+    delete mutex;
 #endif
 }
 

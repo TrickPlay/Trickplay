@@ -127,6 +127,7 @@ ToastAlert = setmetatable(
                         
                         t.children = nil
                         
+                        t.icon                       = icon.src or json.null
                         t.message                    = instance.message
                         t.message_font               = instance.message_font
                         t.message_color              = instance.message_color

@@ -7,15 +7,14 @@ bckgndImage.name = "Background"
 screen:add( bckgndImage )
 
 -- Create a rectangular demo area
-demoArea = Rectangle {
-				color = { 100, 100, 100, 255 },
-				border_color = { 0, 0, 0, 255 },
-				border_width = 4,
-				name = "demoArea",
-				position = { 746, 96, 0 },
-				size = { 308, 308 },
-				opacity = 255,
-			}
+demoArea = Rectangle( { color        = { 100, 100, 100, 255 },
+				        border_color = { 0, 0, 0, 255 },
+        				border_width = 4,
+                        name         = "demoArea",
+        				position     = { 746, 96, 0 },
+                		size         = { 308, 308 },
+                		opacity      = 255,
+} )
 screen:add( demoArea )
 
 -- Create a sphere image using Canvas
@@ -35,21 +34,20 @@ screen:add( sphereImage )
 
 -- Define the animation
 local function do_animation()
-    sphereImage:animate({
-                            duration = 2000,
-                            opacity = 0,
-                            scale = { 0, 0 },
-                            mode = "EASE_IN_OUT_QUAD",
+    sphereImage:animate( {
+                            duration     = 2000,
+                            opacity      = 0,
+                            scale        = { 0, 0 },
+                            mode         = "EASE_IN_OUT_QUAD",
                             on_completed = function()
-                                sphereImage:animate({
-                                                        duration = 2000,
-                                                        opacity = 255,
-                                                        scale = { 2, 2 },
-                                                        mode = "EASE_IN_OUT_QUAD",
-                                                        on_completed = do_animation,
-                                                    })
+                                sphereImage:animate( { duration     = 2000,
+                                                       opacity      = 255,
+                                                       scale        = { 2, 2 },
+                                                       mode         = "EASE_IN_OUT_QUAD",
+                                                       on_completed = do_animation,
+                                } )
                             end,
-                        })
+    } )
 end
 
 -- Start the animation
