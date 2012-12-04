@@ -228,19 +228,19 @@ options.s:
 .PHONY : options.s
 
 # target to build an object file
-output.o:
-	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/output.o
-.PHONY : output.o
+state.o:
+	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/state.o
+.PHONY : state.o
 
 # target to preprocess a source file
-output.i:
-	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/output.i
-.PHONY : output.i
+state.i:
+	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/state.i
+.PHONY : state.i
 
 # target to generate assembly for a file
-output.s:
-	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/output.s
-.PHONY : output.s
+state.s:
+	$(MAKE) -f CMakeFiles/stitcher.dir/build.make CMakeFiles/stitcher.dir/state.s
+.PHONY : state.s
 
 # Help Target
 help:
@@ -270,9 +270,9 @@ help:
 	@echo "... options.o"
 	@echo "... options.i"
 	@echo "... options.s"
-	@echo "... output.o"
-	@echo "... output.i"
-	@echo "... output.s"
+	@echo "... state.o"
+	@echo "... state.i"
+	@echo "... state.s"
 .PHONY : help
 
 

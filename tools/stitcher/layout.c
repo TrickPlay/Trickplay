@@ -97,9 +97,9 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
         si = g_sequence_iter_next( si );
     }
 
-    if(best) return best;
-    if(close) return close;
-    if(fallback) return fallback;
+    if ( best )     return best;
+    if ( close )    return close;
+    if ( fallback ) return fallback;
     return NULL;
 }
 
@@ -129,10 +129,10 @@ void layout_loop_item( Item * item, Layout * layout )
     }
 }
 
-Layout * layout_new_from_output ( Output * output, unsigned int width, Options * options )
+Layout * layout_new_from_state ( State * state, unsigned int width, Options * options )
 {
     Layout * layout = layout_new( width );
-    g_sequence_foreach( output->items, (GFunc) layout_scan_item, layout );
+    g_sequence_foreach( state->items, (GFunc) layout_scan_item, layout );
 
     if ( width < layout->max_item_w )
     {
@@ -142,7 +142,7 @@ Layout * layout_new_from_output ( Output * output, unsigned int width, Options *
     Leaf * leaf = leaf_new( 0, 0, width, options->output_size_limit );
     g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
 
-    g_sequence_foreach( output->items, (GFunc) layout_loop_item, layout );
+    g_sequence_foreach( state->items, (GFunc) layout_loop_item, layout );
 
     return layout;
 }
