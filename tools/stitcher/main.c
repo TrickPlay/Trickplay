@@ -2,7 +2,7 @@
 #include <glib-object.h>
 #include <magick/MagickCore.h>
 #include "options.h"
-#include "output.h"
+#include "state.h"
 #include "layout.h"
 
 int main ( int argc, char ** argv )
@@ -12,16 +12,16 @@ int main ( int argc, char ** argv )
 
     Options * options = options_new_from_arguments( argc, argv );
 
-    Output  * output  = output_new();
-    output_load_inputs( output, options );
+    State  * state  = state_new();
+    state_load_inputs( state, options );
 
-    while ( g_sequence_get_length( output->items ) )
+    while ( g_sequence_get_length( state->items ) )
     {
         Layout * best = layout_new( 0 );
     
         for ( unsigned i = 0; i <= options->output_size_limit; i++ )
         {
-            Layout * layout = layout_new_from_output( output, i, options );
+            Layout * layout = layout_new_from_state( state, i, options );
             Layout * better = layout_choose( layout, best, options );
 
             if ( layout == better )
@@ -41,15 +41,15 @@ int main ( int argc, char ** argv )
             exit( 1 );
         }
         
-        output_add_layout( output, best, options );
+        state_add_layout( state, best, options );
     }
 
-    output_export_files( output, options );
+    state_export_files( state, options );
 
     // collect garbage
 
     options_free( options );
-    output_free( output );
+    state_free( state );
 
     MagickCoreTerminus();
 

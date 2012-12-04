@@ -32,7 +32,7 @@ add_executable( stitcher
                 layout.c
                 leaf.c
                 item.c
-                output.c
+                state.c
 )
 
 target_link_libraries( stitcher ${STITCHER_LIBRARY_NAMES} )

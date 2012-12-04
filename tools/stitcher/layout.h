@@ -11,6 +11,7 @@ typedef struct Layout {
                  min_item_h,
                  max_item_w,
                  item_area;
+                 
     float        coverage;
     GSequence *  leaves;
     GPtrArray *  places;
@@ -19,10 +20,10 @@ typedef struct Layout {
 #define __LAYOUT_H__
 
 #include "options.h"
-#include "output.h"
+#include "state.h"
 
 Layout * layout_new ( unsigned int width );
-Layout * layout_new_from_output ( Output * output, unsigned int width, Options * options );
+Layout * layout_new_from_state ( State * state, unsigned int width, Options * options );
 Layout * layout_choose ( Layout * a, Layout * b, Options * options );
 void layout_free ( Layout * layout );
 
