@@ -10,16 +10,13 @@ Output * output_new()
 {
     Output * output      = malloc( sizeof( Output ) );
 
-    output->size_step = 0;
-    output->max_item_w = 0;
-    output->item_area = 0;
-
     output->large_items  = g_ptr_array_new_with_free_func( g_free );
     output->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
     output->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
     output->subsheets    = g_ptr_array_new_with_free_func( g_free );
     output->items        = g_sequence_new( (GDestroyNotify) item_free );
     output->url_regex    = g_regex_new( "^(https?|ftp)://", G_REGEX_CASELESS, 0, NULL );
+    
     return output;
 }
 
@@ -33,24 +30,6 @@ void output_free( Output * output )
     g_regex_unref( output->url_regex );
 
     free( output );
-}
-
-unsigned int gcf( unsigned int a, unsigned int b )
-{
-    unsigned int t;
-    if ( b > a )
-    {
-        t = b;
-        b = a;
-        a = t;
-    }
-    while ( b != 0 )
-    {
-        t = b;
-        b = a % b;
-        a = t;
-    }
-    return a;
 }
 
 void output_add_subsheet( Output * output, const char * json, Image * image, Options * options )
@@ -81,10 +60,6 @@ void output_add_image( Output * output, const char * id, Image * image, Options 
         {
             Item * item = item_new_with_source( id, image, options );
             g_sequence_insert_sorted( output->items, item, item_compare, NULL );
-            
-            output->item_area += item->area;
-            output->max_item_w = MAX( output->max_item_w, item->w );
-            output->size_step  = output->size_step ? gcf( item->w, output->size_step ) : item->w;
         }
         else if ( image->rows <= options->output_size_limit && image->columns <= options->output_size_limit )
         {

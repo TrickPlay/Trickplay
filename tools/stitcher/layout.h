@@ -7,7 +7,6 @@ typedef struct Layout {
                  height,
                  area,
                  items_placed,
-                 items_skipped,
                  min_item_w,
                  min_item_h,
                  max_item_w,

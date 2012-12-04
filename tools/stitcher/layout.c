@@ -12,7 +12,6 @@ Layout * layout_new ( unsigned int width )
     layout->area = 0;
     layout->coverage = 0.0f;
     layout->items_placed = 0;
-    layout->items_skipped = 0;
     layout->min_item_w = 256;
     layout->min_item_h = 256;
     layout->max_item_w = 0;
@@ -31,6 +30,26 @@ void layout_free ( Layout * layout )
     g_sequence_free( layout->leaves );
     free( layout );
 }
+
+/*
+unsigned int gcf( unsigned int a, unsigned int b )
+{
+    unsigned int t;
+    if ( b > a )
+    {
+        t = b;
+        b = a;
+        a = t;
+    }
+    while ( b != 0 )
+    {
+        t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+*/
 
 Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
 {
@@ -107,10 +126,6 @@ void layout_loop_item( Item * item, Layout * layout )
         g_ptr_array_add( layout->places, leaf );
         leaf_cut( leaf, item->w, item->h, layout );
         layout->items_placed += 1;
-    }
-    else
-    {
-        layout->items_skipped += 1;
     }
 }
 
