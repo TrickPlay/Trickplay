@@ -145,7 +145,7 @@ void output_add_file ( Output * output, GFile * file, GFile * root, const char *
         if ( file == root || options_allows_id( options, id ) )
             if ( options_take_unique_id( options, id ) )
             {
-                const char * path = ( file != root ) ? g_build_filename( root_path, id, NULL ) : id;
+                char * path = ( file != root ) ? g_build_filename( root_path, id, NULL ) : strdup( id );
                 
                 ExceptionInfo * exception = AcquireExceptionInfo();
                 ImageInfo * input_info = AcquireImageInfo();
@@ -159,7 +159,10 @@ void output_add_file ( Output * output, GFile * file, GFile * root, const char *
                 
                 DestroyImageInfo( input_info );
                 DestroyExceptionInfo( exception );
+                free( path );
             }
+            
+        free( id );
     }
 
     g_object_unref( info );
@@ -225,18 +228,20 @@ void output_merge_json ( Output * output, const char * path, Options * options )
         }
         else
         {
-            img = g_build_filename( g_path_get_dirname( path ), img, NULL );
+            char * source = g_build_filename( g_path_get_dirname( path ), img, NULL );
 
             ExceptionInfo * exception = AcquireExceptionInfo();
             ImageInfo * source_info = AcquireImageInfo();
-            CopyMagickString( source_info->filename, img, MaxTextExtent );
+            CopyMagickString( source_info->filename, source, MaxTextExtent );
             Image * source_image = ReadImage( source_info, exception );
 
             if ( exception->severity != UndefinedException )
             {
-                fprintf( stderr, "Could not load source image %s in spritesheet %s.\n", img, path );
+                fprintf( stderr, "Could not load source image %s in spritesheet %s.\n", source, path );
                 exit( 1 );
             }
+            
+            free( source );
 
             for ( guint j = 0; j < lj; j++ )
             {
@@ -291,6 +296,8 @@ void output_load_inputs( Output * output, Options * options )
                     "\n    { \"x\": 0, \"y\": 0, \"w\": -1, \"h\": -1, \"id\": \"%s\" }"
                     "\n  ],\n  \"img\": \"%s\"\n}", id, path ) );
             }
+            
+            free( id );
         }
         else
         {
@@ -349,7 +356,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
             
         ExceptionInfo * exception = AcquireExceptionInfo();
 
-        for (unsigned j = 0; j < 8; j++)
+        for ( unsigned j = 0; j < 8; j++ )
         {
             Image * excerpt_image = ExcerptImage( item->source, &rects[j], exception );
             CompositeImage( dest, ReplaceCompositeOp, excerpt_image,
@@ -419,5 +426,6 @@ void output_export_files ( Output * output, Options * options )
         fprintf( stdout, "Output map to %s\n", path );
         free( path );
     }
+    
     free( json );
 }
