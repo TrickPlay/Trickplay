@@ -23,7 +23,7 @@ module webgl;
 //=============================================================================
 
 #define _GET_CONTEXT_   WebGL::Context * _ctx_ = WebGL::Context::get( self ); \
-                        if ( ! _ctx_->is_current() ) luaL_error( L , "You must call 'acquire' first" )     
+                        if ( ! _ctx_->is_current() ) luaL_error( L , "You must call 'acquire' first" )
 ]]
 
 interface WebGLRenderingContext [[ ClutterActor * ]]
@@ -482,9 +482,9 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
         [[
             gint w;
             gint h;
-            
+
             clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
-            
+
             drawingBufferWidth = w;
         ]];
 
@@ -492,9 +492,9 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
         [[
             gint w;
             gint h;
-            
+
             clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
-            
+
             drawingBufferHeight = h;
         ]];
 
@@ -503,22 +503,22 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             _GET_CONTEXT_;
 
             lua_newtable( L );
-            
+
             lua_pushboolean( L , true );
             lua_setfield( L , -2 , "alpha" );
-            
+
             lua_pushboolean( L , _ctx_->have_depth );
             lua_setfield( L , -2 , "depth" );
-            
+
             lua_pushboolean( L , _ctx_->have_stencil );
             lua_setfield( L , -2 , "stencil" );
-            
+
             lua_pushboolean( L , false );
             lua_setfield( L , -2 , "antialias" );
-            
+
             lua_pushboolean( L , true );
             lua_setfield( L , -2 , "premultipliedAlpha" );
-            
+
             lua_pushboolean( L , true );
             lua_setfield( L , -2 , "preserveDrawingBuffer" );
         ]];
@@ -1363,7 +1363,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
         [[
             _GET_CONTEXT_;
             GLint length = 0;
-            
+
             FreeLater free_later;
 
             glGetShaderiv( shader , GL_INFO_LOG_LENGTH , & length );
@@ -1390,7 +1390,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             GLint length = 0;
 
             glGetShaderiv( shader , GL_SHADER_SOURCE_LENGTH , & length );
-            
+
             FreeLater free_later;
 
             if ( length <= 0 )
@@ -1869,7 +1869,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
     void texImage2D(GLenum target , GLint level , GLenum internalformat , ... )
         [[
             _GET_CONTEXT_;
-            
+
             FreeLater free_later;
 
             GLsizei width = 0;
@@ -1989,7 +1989,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
                 // unsigned byte and RGB or RGBA, we ignore the format/type passed in
                 // and use that. I suppose this could waste some memory...
 
-                type = luaL_checkint( L , 6 );
+                // type = luaL_checkint( L , 6 );
 
                 if ( Image * image = Bitmap::get_image( L , 7 ) )
                 {
@@ -2371,51 +2371,51 @@ class WebGLCanvas [[ ClutterActor * ]] actor WebGLRenderingContext
     WebGLCanvas( table props = 0 )
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( trickplay_webgl_canvas_new ) );
- 
+
             ClutterUtil::initialize_actor( L, self, WEBGLCANVAS_METATABLE );
 
             ClutterUtil::set_props_from_table( L, props );
 
             gfloat width;
             gfloat height;
-            
+
             clutter_actor_get_size( self , & width , & height );
-            
-            CoglHandle t = cogl_texture_new_with_size( 
-                width , 
-                height , ( CoglTextureFlags ) ( COGL_TEXTURE_NO_AUTO_MIPMAP | COGL_TEXTURE_NO_SLICING | COGL_TEXTURE_NO_ATLAS ) , 
+
+            CoglHandle t = cogl_texture_new_with_size(
+                width ,
+                height , ( CoglTextureFlags ) ( COGL_TEXTURE_NO_AUTO_MIPMAP | COGL_TEXTURE_NO_SLICING | COGL_TEXTURE_NO_ATLAS ) ,
                 COGL_PIXEL_FORMAT_RGBA_8888 );
-                
-            if ( COGL_INVALID_HANDLE == t ) 
+
+            if ( COGL_INVALID_HANDLE == t )
             {
                 tpwarn( "FAILED TO CREATE TEXTURE" );
-            }   
+            }
             else
             {
                 clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( self ) , t );
-                
+
                 cogl_handle_unref( t );
             }
 
             // Creates and attaches the webgl context
-            
+
             WebGL::Context::get( self );
-            
-            g_object_unref( self );         
+
+            g_object_unref( self );
         ]];
-    
+
     ~WebGLCanvas()
         [[
         ]];
-        
+
     acquire()
         [[
             WebGL::Context::get( self )->acquire();
         ]];
-        
+
     release()
         [[
-            WebGL::Context::get( self )->release();                        
+            WebGL::Context::get( self )->release();
         ]];
 }
 

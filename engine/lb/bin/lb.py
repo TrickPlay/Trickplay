@@ -129,7 +129,7 @@ def parse( source ):
 
             j = source.find( "*/" , i )
 
-            for c in token:
+            for c in source[ i : j ]:
                 if c == "\n":
                     line += 1
 

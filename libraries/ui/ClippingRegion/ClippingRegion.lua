@@ -231,6 +231,9 @@ ClippingRegion = setmetatable(
             }
             
             contents = Group{     name="Contents"  }
+            
+            WL_parent_redirect[contents] = instance
+            
             new_w = true
             new_h = true
             reclip = true

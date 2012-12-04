@@ -28,7 +28,7 @@ make_rounded_corner = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="rounded_corner - "..state}
 end
 make_top_sliver = function(self,state)
     
@@ -51,7 +51,7 @@ make_top_sliver = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="top_sliver - "..state}
 end
 make_side_sliver = function(self,state)
     
@@ -74,10 +74,26 @@ make_side_sliver = function(self,state)
     c:set_source_color( self.border.colors[state] )   
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="side_sliver - "..state}
+end
+make_arrow = function(self,state)
+    
+	local c = Canvas(self.arrow.size,self.arrow.size)
+	
+    c:move_to(0,   c.h/2)
+    c:line_to(c.w,     0)
+    c:line_to(c.w,   c.h)
+    c:line_to(0,   c.h/2)
+	
+    c:set_source_color( self.arrow.colors[state] )
+    
+    c:fill(true)
+	
+	return c:Image{name="arrow - "..state}
+	
 end
 make_box = function(self,state)
-    print("ccc")
+    --print("ccc")
     local c = Canvas(self.toggle_icon_w,self.toggle_icon_h)
     
     c.op = "SOURCE"
@@ -98,10 +114,10 @@ make_box = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="box - "..state}
 end
 make_x_box = function(self,state)
-    print("ccc")
+    --print("ccc")
     local c = Canvas(self.toggle_icon_w,self.toggle_icon_h)
     
     c.op = "SOURCE"
@@ -128,10 +144,10 @@ make_x_box = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="x_box - "..state}
 end
 make_empty_radio_icon = function(self,state)
-    print("ccc")
+    --print("ccc")
     local c = Canvas(2*self.radio_icon_r,2*self.radio_icon_r)
     
     c.op = "SOURCE"
@@ -153,10 +169,10 @@ make_empty_radio_icon = function(self,state)
     
     c:stroke(true)
     
-    return c:Image()
+    return c:Image{name="empty_radio_icon - "..state}
 end
 make_filled_radio_icon = function(self,state)
-    print("ccc")
+    --print("ccc")
     local c = Canvas(2*self.radio_icon_r,2*self.radio_icon_r)
     
     c.op = "SOURCE"
@@ -190,7 +206,7 @@ make_filled_radio_icon = function(self,state)
     c:fill()
     
     
-    return c:Image()
+    return c:Image{name="filled_radio_icon - "..state}
 end
 --draws a rounded rectangle canvas path
 round_rectangle = function(c,r)

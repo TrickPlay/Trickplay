@@ -305,7 +305,7 @@ local style = {
 screen:show()
 
 b0 = WL.RadioButton{ label="b0", x = 1400,         group = "Radio",reactive = true}
-b1 = WL.RadioButton{ label="b1", x = 1400, y= 100, group = "Radio",reactive = true}
+b1 = WL.RadioButton{ label="b1", x = 1400, y= 100, group = "Radio",reactive = true,icon_x_offset = -200}
 
 
 b2 = WL.RadioButton{ label="b2",reactive = true,  x = 1600,         }

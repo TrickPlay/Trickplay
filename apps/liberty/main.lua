@@ -530,7 +530,7 @@ main = function()
         "sb6",         
         "sport1", 
     }
-    channel_menu.x = 200
+    channel_menu.x = 100
     --------------------------------------------------------------------
     
     trick_play_menu = dofile("TrickPlayMenu.lua")
@@ -717,8 +717,8 @@ main = function()
     screen:add(menu_layer)
     
     main_menu:grab_key_focus()
-    --[[
-    mediaplayer:load("glee-1.mp4")
+    ---[[
+    mediaplayer:load("glee.mp4")
     
     function mediaplayer:on_loaded()
         

@@ -312,6 +312,8 @@ void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
 
 const gchar * ClutterUtil::get_actor_type( ClutterActor * actor )
 {
+    g_assert( actor );
+
     const gchar *metatable = get_actor_metatable( actor );
     static gchar the_type[64];
     if( metatable )
