@@ -123,9 +123,28 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     }
     
     g_option_context_free( context );
+    
+    gboolean errors = FALSE;
+    
+    if ( options->input_size_limit > 65536 )
+    {
+        fprintf( stderr, "Segregation size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        errors = TRUE;
+    }
+    
+    if ( options->output_size_limit > 65536 )
+    {
+        fprintf( stderr, "Maximum texture size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        errors = TRUE;
+    }
+    
+    options->input_size_limit = MIN( options->input_size_limit, options->output_size_limit );
 
     if ( options->input_paths->len + options->json_to_merge->len == 0 )
+    {
         fprintf( stderr, "No inputs given.\n" );
+        errors = TRUE;
+    }
 
     if ( options->output_path == NULL )
     {
@@ -140,14 +159,19 @@ Options * options_new_from_arguments ( int argc, char ** argv )
             else
             {
                 fprintf( stderr, "Ambiguous output path.\n" );
-                exit( 1 );
+                errors = TRUE;
             }
         }
         else
         {
             fprintf( stderr, "Ambiguous output path.\n" );
-            exit( 1 );
+            errors = TRUE;
         }
+    }
+    
+    if ( errors )
+    {
+        exit( 1 );
     }
 
     return options;
