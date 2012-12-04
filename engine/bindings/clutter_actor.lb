@@ -87,6 +87,7 @@ static bool stop_animation_function(ClutterActor *actor, const char *prop, void 
     {
         clutter_timeline_pause( transition );
 
+        clutter_actor_remove_transition( actor, prop );
         return true;
     }
 
