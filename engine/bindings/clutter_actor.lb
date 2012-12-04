@@ -1960,15 +1960,6 @@ interface actor [[ClutterActor*]]
         lua_pop(L,1);
 
 #ifdef CLUTTER_VERSION_1_10
-        lua_getfield(L, props, "loop");
-        if(lua_toboolean(L,-1))
-        {
-            return luaL_error(L, "Call to animate does not support \"loop\" property");
-        } else if(!lua_isnil(L,-1)) {
-            g_warning("ACTOR:ANIMATE(LOOP) USED");
-        }
-        lua_pop(L,1);
-
         lua_getfield(L,props,"on_completed");
 
         if (lua_type(L,-1)==LUA_TFUNCTION)
@@ -2008,6 +1999,56 @@ interface actor [[ClutterActor*]]
         clutter_actor_set_easing_mode( self, (ClutterAnimationMode)mode );
 
         ClutterUtil::set_props_from_table(L,props);
+
+        lua_getfield(L, props, "loop");
+        int loop = lua_toboolean(L,-1);
+        lua_pop(L,1);
+
+        // We need to tell each property transition that was just set to loop if loop was true, or not loop if it was false or unspecified
+        // To determine which properties, we'll iterate through the "props" table and find every property with a setter
+        // Then retrieve the ClutterTransition for that property and tell it whether to loop
+
+        // Get the table of setters from the user_data
+        if (luaL_getmetafield(L,1,"__setters__"))
+        {
+            int setters=lua_gettop(L);
+
+            lua_pushnil(L);
+            while(lua_next(L,props))     // pops old key, pushes next key and value
+            {
+                lua_pushvalue(L,-2);            // push the key again
+                lua_rawget(L,setters);          // pops the key, pushes the value of that key in the setters table
+                if (lua_isnil(L,-1))
+                {
+                    // There is no setter for this property, so iterate on to the next property
+                    lua_pop(L,2);               // Pop the nil setter function and value
+                }
+                else
+                {
+                    // We found a property that has a setter, so retrieve its transition and loop it
+                    lua_pop(L,2);               // Throw away the setter function and value
+                    const gchar * property = lua_tostring(L, -1);
+                    ClutterTransition *transition = clutter_actor_get_transition(self, property);
+                    if(transition)
+                    {
+                        clutter_timeline_set_repeat_count( CLUTTER_TIMELINE(transition), loop ? -1 : 0 );
+                    } else {
+                        // Rotation properties aren't named the same.  Setter name is "x_rotation" for property "rotation-angle-x", etc.
+                        if(strstr(property,"_rotation"))
+                        {                            // 0123456789012345
+                            const gchar *rotation_property = g_strdup_printf("rotation-angle-%c", property[0]);
+                            transition = clutter_actor_get_transition(self, (const gchar *)rotation_property);
+                            if(transition)
+                            {
+                                clutter_timeline_set_repeat_count( CLUTTER_TIMELINE(transition), loop ? -1 : 0 );
+                            }
+                            g_free((gpointer)rotation_property);
+                        }
+                    }
+                }
+            }
+            lua_pop(L,1);                       // pop the setters table
+        }
 
         clutter_actor_restore_easing_state( self );
 #else
