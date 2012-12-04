@@ -14,6 +14,7 @@ Options * options_new()
     options->recursive = FALSE;
     options->de_duplicate = FALSE;
     options->add_buffer_pixels = TRUE;
+    options->log_level = 1;
 
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
     options->input_paths    = g_ptr_array_new_with_free_func( g_free );
@@ -94,11 +95,13 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
         { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
-            & options->de_duplicate,             "Only include one copy of images that are the same.", NULL },
+            & options->de_duplicate,             "Only include one copy of images that are the same (not currently implemented)", NULL },
         { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
             & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
         { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 
-            & opt_filter,                        "Inclusive wildcard (?, *) filter for files within input directories (default: *)", "FILTER" },
+            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: *)", "FILTER" },
+        { "log-level",         'l', 0,                         G_OPTION_ARG_INT, 
+            & options->log_level,                "Granularity of message logging, 0-3 (default: 1)", "LEVEL" },
         { "merge-json",        'm', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
             & opt_json,                          "Path to the JSON file of a spritesheet to merge into this one", "PATH" },
         { "output-prefix",     'o', 0,                         G_OPTION_ARG_STRING, 
@@ -106,7 +109,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "recursive",         'r', 0,                         G_OPTION_ARG_NONE, 
             & options->recursive,                "Recursively enter subdirectories", NULL },
         { "size-segregation",  's', 0,                         G_OPTION_ARG_INT, 
-            & options->input_size_limit,         "Size segregation threshhold (default 512)", "INT" },
+            & options->input_size_limit,         "Size segregation threshhold (default: 512)", "INT" },
         { "max-texture-size",  't', 0,                         G_OPTION_ARG_INT, 
             & options->output_size_limit,        "Maximum texture size the spritesheet will try to use (default: 4096)", "INT" },
         { NULL }

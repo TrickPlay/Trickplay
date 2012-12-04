@@ -8,7 +8,6 @@ typedef struct Item {
   unsigned int w, h, area;
   const char * id;
   Image * source;
-  gboolean placed;
 } Item;
 
 Item * item_new ( const char * id );

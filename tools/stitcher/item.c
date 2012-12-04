@@ -13,7 +13,6 @@ Item * item_new ( const char * id )
 
     item->id = id;
     item->source = NULL;
-    item->placed = FALSE;
 
     return item;
 }

@@ -5,7 +5,8 @@
 
 typedef struct Options {
     unsigned int input_size_limit,
-                 output_size_limit;
+                 output_size_limit,
+                 log_level;
 
     char * output_path;
 
