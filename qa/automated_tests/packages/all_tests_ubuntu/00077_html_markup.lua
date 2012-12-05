@@ -10,9 +10,9 @@ function generate_test_image ()
 	local myText_markup = Text ()
 	myText_markup.font = "DejaVu Sans 38px"
 	myText_markup.color = "FFFFFFAA"
-	textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
-	local myText_no_markup = Text ()	
-myText_markup.text = string.format( "%s" , textString ) 
+	textString = "<span foreground=\"blue\" size=\"x-large\">Trickplay</span> rizzocks the <i>hizzouse</i>!"
+	local myText_no_markup = Text ()
+myText_markup.text = string.format( "%s" , textString )
 	myText_no_markup.position = { 100, 200 }
 	myText_markup.use_markup = true
 	screen:add(myText_markup)
@@ -20,8 +20,8 @@ myText_markup.text = string.format( "%s" , textString )
 	local myText_no_markup = Text ()
 	myText_no_markup.font = "DejaVu Sans 38px"
 	myText_no_markup.color = "FFFFFFAA"
-	textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
-	myText_no_markup.text = string.format( "%s" , textString ) 
+	textString = "<span foreground=\"blue\" size=\"x-large\">Trickplay</span> rizzocks the <i>hizzouse</i>!"
+	myText_no_markup.text = string.format( "%s" , textString )
 	myText_no_markup.use_markup = false
 	myText_no_markup.position = { 100, 500 }
 	screen:add(myText_no_markup)
