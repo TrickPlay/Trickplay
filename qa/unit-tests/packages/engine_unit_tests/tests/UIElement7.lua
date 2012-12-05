@@ -29,15 +29,15 @@ image1:animate{duration=1000, loop=false, x=400, y=400,h=400, w=400}
 -- Verify the transformed size changes after the animation completes
 function test_UIElement_image_transformed_size ()
     local ts = image1.transformed_size
-	assert_equal( math.floor(ts[1]), math.floor(400 * screen.display_size[1]/screen.w), "image1.transformed_size[1] failed" )
-	assert_equal( math.floor(ts[2]), math.floor(400 * screen.display_size[2]/screen.h), "image1.transformed_size[2] failed" )
+	assert_equal( math.floor(ts[1]), math.floor(400 * screen.display_size[1]/screen.w), "image1.transformed_size[1] failed.  Got "..math.floor(ts[1]).." expected "..math.floor(400 * screen.display_size[1]/screen.w) )
+	assert_equal( math.floor(ts[2]), math.floor(400 * screen.display_size[2]/screen.h), "image1.transformed_size[2] failed.  Got "..math.floor(ts[2]).." expected "..math.floor(400 * screen.display_size[2]/screen.w) )
 end
 
 -- Verify the transformed position changes after the animation completes
 function test_UIElement_image_transformed_position ()
     local tp = image1.transformed_position
-	assert_equal( math.floor(tp[1]), math.floor(400 * screen.display_size[1]/screen.w) , "image1.transformed_position[1] failed" )
-	assert_equal( math.floor(tp[2]), math.floor(400 * screen.display_size[2]/screen.h) , "image1.transformed_position[2] failed" )
+	assert_equal( math.floor(tp[1]), math.floor(400 * screen.display_size[1]/screen.w) , "image1.transformed_position[1] failed.  Got "..math.floor(tp[1]).." expected "..math.floor(400 * screen.display_size[1]/screen.w) )
+	assert_equal( math.floor(tp[2]), math.floor(400 * screen.display_size[2]/screen.h) , "image1.transformed_position[2] failed.  Got "..math.floor(tp[1]).." expected "..math.floor(400 * screen.display_size[1]/screen.w) )
 end
 
 -- Test Tear down --
