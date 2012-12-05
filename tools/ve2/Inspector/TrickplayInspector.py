@@ -362,6 +362,7 @@ class PickerItemTable(QWidget):
             self.insp = parent
 
         self.gid = gid
+        self.tableSet = False
         self.ui = Ui_PickerItemTable()
         self.ui.setupUi(self)
         self.ui.itemTable = DnDTableWidget(self.ui.itemTable, self)
@@ -369,6 +370,8 @@ class PickerItemTable(QWidget):
         self.resize(200,100)
         self.setMinimumSize(200,100)
 
+        self.ui.itemTable.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
+        self.ui.itemTable.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.ui.itemTable.setColumnCount(1)
         
         self.ui.itemTable.horizontalHeader().setStretchLastSection(True)
@@ -376,10 +379,16 @@ class PickerItemTable(QWidget):
         self.ui.itemTable.verticalHeader().setVisible(False)
         self.ui.itemTable.setShowGrid(False)
 
+        QObject.connect(self.ui.itemTable, SIGNAL("itemChanged(QTableWidgetItem*)"), self.pickerItemChanged)
         QObject.connect(self.ui.deleteItem, SIGNAL("pressed()"), self.deleteItemHandler)
         QObject.connect(self.ui.addItem, SIGNAL("pressed()"), self.addItemHandler)
 
         #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', "{'AA','BB'}") 
+
+    def pickerItemChanged(self, item):
+        if self.tableSet == True:
+            self.sendItemsData()
+        return 
 
     def sendItemsData(self):
         itemList = []
@@ -424,6 +433,8 @@ class PickerItemTable(QWidget):
         #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', self.getItemList())
         
     def populateItemTable(self, itemList):
+        
+        self.tableSet = False
         idx = 0
         for iStr in itemList:
             self.ui.itemTable.setRowCount(idx + 1)
@@ -433,6 +444,7 @@ class PickerItemTable(QWidget):
             vh.setDefaultSectionSize(18)
             self.ui.itemTable.setItem(0, idx, newitem)
             idx = idx + 1
+        self.tableSet = True
 
 class TrickplayInspector(QWidget):
     
