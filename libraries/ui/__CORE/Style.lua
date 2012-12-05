@@ -364,7 +364,7 @@ Style = setmetatable({},
         end,
 
         __call = function(self,parameters)
-            
+            --print("Style(",parameters,")")
             if type(parameters) == "string" then
                 
                 if all_styles[parameters] then
@@ -378,7 +378,11 @@ Style = setmetatable({},
                 end
                 
             end
+            print("new style",parameters.name)
             
+            local style_sources = Group{name=tostring(parameters.name)}
+            clone_sources:add(style_sources)
+            --if parameters.name == false then error("no",4) end
             parameters = is_table_or_nil("Style",parameters)
             
             local instance = { 
@@ -394,18 +398,27 @@ Style = setmetatable({},
             local text        = TextStyle()
             local fill_colors = ColorScheme(default_fill_colors)
             
+            local last_built = nil
+            
             local rounded_corner_getter,rounded_corner_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_rounded_corner(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
@@ -414,15 +427,22 @@ Style = setmetatable({},
             local top_edge_getter,top_edge_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_top_sliver(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
@@ -431,32 +451,70 @@ Style = setmetatable({},
             local side_edge_getter,side_edge_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_side_sliver(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
             local side_edge 
             
-            local empty_toggle_icon_getter,empty_toggle_icon_setter = 
+            local arrow_getter,arrow_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
-                        t[state] = make_box(instance,state) 
+                        t[state] = make_arrow(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
+                    end
+                end
+            )
+            local triangle 
+            
+            local empty_toggle_icon_getter,empty_toggle_icon_setter = 
+                image_set_interface(function() 
+                    local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
+                    for _,state in ipairs(states) do
+                        t[state] = make_box(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
+                    end
+                    last_built = t[states[1]]
+                    return t
+                end, function(old, new) 
+                    if old then old:unparent() end
+                    if new then 
+                        if new.parent then new:unparent() end
+                        style_sources:add(new)
                     end
                 end
             )
@@ -465,15 +523,22 @@ Style = setmetatable({},
             local filled_toggle_icon_getter,filled_toggle_icon_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_x_box(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
@@ -482,15 +547,22 @@ Style = setmetatable({},
             local empty_radio_icon_getter,empty_radio_icon_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_empty_radio_icon(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
@@ -499,15 +571,22 @@ Style = setmetatable({},
             local filled_radio_icon_getter,filled_radio_icon_setter = 
                 image_set_interface(function() 
                     local t = {}
+                    local x = 0
+                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
                     for _,state in ipairs(states) do
                         t[state] = make_filled_radio_icon(instance,state) 
+                        t[state].scale = 2
+                        t[state].x = x
+                        x = x + t[state].w*2 + 5
+                        t[state].y = y
                     end
+                    last_built = t[states[1]]
                     return t
                 end, function(old, new) 
                     if old then old:unparent() end
                     if new then 
                         if new.parent then new:unparent() end
-                        clone_sources:add(new)
+                        style_sources:add(new)
                     end
                 end
             )
@@ -520,18 +599,19 @@ Style = setmetatable({},
             local meta_setters = {
                 toggle_icon_w = function(v) toggle_icon_w = v end,
                 toggle_icon_h = function(v) toggle_icon_h = v end,
-                radio_icon_r = function(v) radio_icon_r = v end,
-                arrow       = function(v) arrow:set(      v or {}) end,
-                border      = function(v) border:set(     v or {}) end,
-                text        = function(v) text:set(       v or {}) end,
-                fill_colors = function(v) fill_colors:set(v or {}) end,
-                rounded_corner = rounded_corner_setter,
-                top_edge = top_edge_setter,
-                side_edge = side_edge_setter,
-                empty_toggle_icon = empty_toggle_icon_setter,
+                radio_icon_r  = function(v) radio_icon_r = v end,
+                arrow         = function(v) arrow:set(      v or {}) end,
+                border        = function(v) border:set(     v or {}) end,
+                text          = function(v) text:set(       v or {}) end,
+                fill_colors   = function(v) fill_colors:set(v or {}) end,
+                rounded_corner     = rounded_corner_setter,
+                top_edge           = top_edge_setter,
+                side_edge          = side_edge_setter,
+                empty_toggle_icon  = empty_toggle_icon_setter,
                 filled_toggle_icon = filled_toggle_icon_setter,
-                empty_radio_icon = empty_radio_icon_setter,
-                filled_radio_icon = filled_radio_icon_setter,
+                empty_radio_icon   = empty_radio_icon_setter,
+                filled_radio_icon  = filled_radio_icon_setter,
+                arrow              = arrow_setter,
                 name        = function(v)
                     
                     if v ~= false then
@@ -549,20 +629,21 @@ Style = setmetatable({},
             local meta_getters = {
                 toggle_icon_w = function() return toggle_icon_w end,
                 toggle_icon_h = function() return toggle_icon_h end,
-                radio_icon_r = function() return radio_icon_r end,
-                name        = function() return name        end,
-                arrow       = function() return arrow       end,
-                border      = function() return border      end,
-                text        = function() return text        end,
-                fill_colors = function() return fill_colors end,
-                type        = function() return "STYLE"     end,
-                rounded_corner = rounded_corner_getter,
-                top_edge = top_edge_getter,
-                side_edge = side_edge_getter,
-                empty_toggle_icon = empty_toggle_icon_getter,
+                radio_icon_r  = function() return radio_icon_r end,
+                name          = function() return name        end,
+                arrow         = function() return arrow       end,
+                border        = function() return border      end,
+                text          = function() return text        end,
+                fill_colors   = function() return fill_colors end,
+                type          = function() return "STYLE"     end,
+                rounded_corner     = rounded_corner_getter,
+                top_edge           = top_edge_getter,
+                side_edge          = side_edge_getter,
+                empty_toggle_icon  = empty_toggle_icon_getter,
                 filled_toggle_icon = filled_toggle_icon_getter,
-                empty_radio_icon = empty_radio_icon_getter,
-                filled_radio_icon = filled_radio_icon_getter,
+                empty_radio_icon   = empty_radio_icon_getter,
+                filled_radio_icon  = filled_radio_icon_getter,
+                triangle              = arrow_getter,
                 attributes  = function() 
                     return {
                         name        = instance.name,
@@ -618,13 +699,16 @@ Style = setmetatable({},
             instance.text        = parameters.text
             instance.fill_colors = parameters.fill_colors
             --clone_sources
-            instance.rounded_corner = parameters.rounded_corner
-            instance.top_edge       = parameters.top_edge
-            instance.side_edge      = parameters.side_edge
-            instance.empty_toggle_icon = parameters.empty_toggle_icon
+            instance.rounded_corner     = parameters.rounded_corner
+            instance.top_edge           = parameters.top_edge
+            instance.side_edge          = parameters.side_edge
+            instance.empty_toggle_icon  = parameters.empty_toggle_icon
             instance.filled_toggle_icon = parameters.filled_toggle_icon
-            instance.empty_radio_icon = parameters.empty_radio_icon
-            instance.filled_radio_icon = parameters.filled_radio_icon
+            instance.empty_radio_icon   = parameters.empty_radio_icon
+            instance.filled_radio_icon  = parameters.filled_radio_icon
+            instance.triangle           = parameters.triangle
+            
+            
             ---[[
             -- if a substyle was modified, notify my subscribers
             print(instance.name,"Style object is subscribing to sub-styles")

@@ -55,15 +55,15 @@ return function(dur)
         { source = "*", target = "EXPANDED",   keys = {} },
         { source = "*", target = "CONTRACTED", keys = {} },
     }
-    
+    local time_slot=1/#intervals
     for i,c in ipairs(instance.children) do
         table.insert(
             state[1].keys,
-            {c,'x',intervals[#intervals - i+1]:get_value(1)}
+            {c,'x',"LINEAR",intervals[#intervals - i+1]:get_value(1),time_slot*((#intervals+1)/2-math.abs((#intervals+1)/2 -i)),0}--,time_slot*i}
         )
         table.insert(
             state[2].keys,
-            {c,'x',intervals[#intervals - i+1]:get_value(0)}
+            {c,'x',"LINEAR",intervals[#intervals - i+1]:get_value(0),time_slot*((#intervals+1)/2-math.abs((#intervals+1)/2 -i)),0}--time_slot*i}
         )
     end
     state = AnimationState{ duration = 200, transitions = state}
