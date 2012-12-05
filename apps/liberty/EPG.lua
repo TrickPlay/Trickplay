@@ -1,6 +1,6 @@
 
 local dur = 200
-local curr_time = os.date('*t')
+local curr_time = os.date('!*t')
 
 local make_row = function()
     
@@ -111,7 +111,7 @@ local months_r = {
 
 
 local update_curr_time_disp__on_timer = function(self)
-    local t = os.date('*t')
+    local t = os.date('!*t')
     curr_time_disp.text = 
         string.format("%02d",t.hour) ..":"..
         string.format("%02d",t.min)  
@@ -196,7 +196,8 @@ end
 local zone_offset = -4
 
 local setup_curr_time = function(t)
-    curr_time = os.date('*t',t)
+    
+    curr_time = os.date('!*t',(t - 8*60*60))
     start_at_0 = curr_time.min < 30
     curr_time.min = start_at_0 and 0 or 30
     curr_time.sec = 0
@@ -910,7 +911,7 @@ function instance:setup_icons(t)
         
         show_grid_icons:add(rows[i].icon)
     end
-    rows[middle_row].icon.scale = {sel_scale,sel_scale}
+    rows[middle_row].icon.scale = rows[middle_row].icon.base_scale*sel_scale--{sel_scale,sel_scale}
     if scheduling ~= nil then
         integrate_schedule()
     end
@@ -1001,6 +1002,9 @@ local keypresses = {
         if  not finished_integrating_schedule or #channel_list == 0 or 
             animating_show_grid or show_grid__left_edge <= -half_hour_len then 
             
+            --print(not finished_integrating_schedule, #channel_list == 0,
+            --animating_show_grid, show_grid__left_edge <= -half_hour_len)
+            
             return 
         end
         animating_show_grid = true
@@ -1011,7 +1015,7 @@ local keypresses = {
             dx = (show_grid__left_edge >= (-2*half_hour_len)) and 
                 (2*half_hour_len) or 
                 (-show_grid__left_edge)
-            print("hehehe",dx,show_grid__left_edge,-2*half_hour_len,(show_grid__left_edge <= (-2*half_hour_len)))
+            --print("hehehe",dx,show_grid__left_edge,-2*half_hour_len,(show_grid__left_edge <= (-2*half_hour_len)))
             push_out_left_to(show_grid__left_edge - dx)
             --move_left_vis_x(show_grid__left_edge - half_hour_len )
             show_grid_text:animate{
@@ -1228,7 +1232,7 @@ local keypresses = {
                 animating_show_grid = false
                 show_grid.y = heading_h
                 --consolidated all the other on_completed's
-                if rows[middle_row-1].is_animating   then rows[middle_row-1]:stop_animation()   end
+                if rows[middle_row-1].is_animating      then rows[middle_row-1]:stop_animation()   end
                 if rows[middle_row-1].icon.is_animating then rows[middle_row-1].icon:stop_animation() end
                 if rows[middle_row].is_animating        then rows[middle_row]:stop_animation()        end
                 if rows[middle_row].icon.is_animating   then rows[middle_row].icon:stop_animation()   end
@@ -1278,13 +1282,13 @@ local keypresses = {
         rows[middle_row-1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row-1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         rows[middle_row-1]:animate{   duration = dur, scale = {1,1}}--{1,2*1080/720}, }
-        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {sel_scale,sel_scale} }
+        rows[middle_row-1].icon:animate{ duration = dur, y = (middle_row-2)*row_h, scale = {rows[middle_row-1].icon.base_scale*sel_scale,rows[middle_row-1].icon.base_scale*sel_scale} }
         rows[middle_row-1].shows:animate{ duration = dur, y = (middle_row-2)*row_h, }
         --rows[middle_row-1].icon:animate{ duration = dur, y = rows[middle_row-1].icon.y+row_h/2, }
         --contract the previously selected column
         --rows[middle_row]:animate{      duration = dur, y = (middle_row-1)*row_h, }
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}, y = (middle_row-1)*row_h,}
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, scale = {1,1} }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, scale = {rows[middle_row].icon.base_scale,rows[middle_row].icon.base_scale} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }
@@ -1406,12 +1410,12 @@ local keypresses = {
         rows[middle_row+1].shows:add(rows[middle_row+1].icon.show_times)
         rows[middle_row+1].icon.show_times:animate{   duration = dur, opacity = 255,mode="EASE_IN_QUAD" }
         rows[middle_row+1]:animate{   duration = dur, scale = {1,1}, y = (middle_row-1)*row_h}
-        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {sel_scale,sel_scale} }
+        rows[middle_row+1].icon:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, scale = {rows[middle_row+1].icon.base_scale*sel_scale,rows[middle_row+1].icon.base_scale*sel_scale} }
         rows[middle_row+1].shows:animate{ duration = dur, y = (middle_row-1)*row_h+row_h, }
         rows[middle_row+1].icon.separators:animate{   duration = dur,scale={1,2*row_h/sep_src.h} }
         --contract the previously selected column
         rows[middle_row]:animate{   duration = dur, scale = {1,.5}}--{1,1080/720}, }
-        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, scale = {1,1} }
+        rows[middle_row].icon:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, scale = {rows[middle_row].icon.base_scale,rows[middle_row].icon.base_scale} }
         rows[middle_row].shows:animate{ duration = dur, y = (middle_row-2)*row_h+row_h/2, }
         rows[middle_row].icon.show_times:animate{   duration = dur, opacity = 0,mode="EASE_OUT_QUAD" }
         rows[middle_row].icon.separators:animate{   duration = dur,scale={1,row_h/sep_src.h} }

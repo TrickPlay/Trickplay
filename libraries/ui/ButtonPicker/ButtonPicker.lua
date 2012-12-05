@@ -4,7 +4,7 @@ local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
 local create_bg = function(self)
-	
+	--[[
 	local c = Canvas(self.window_w,self.window_h)
 	
 	c.line_width = self.style.border.width
@@ -14,10 +14,34 @@ local create_bg = function(self)
 	c:set_source_color( self.style.fill_colors.default )     c:fill(true)
 	
 	return c:Image{name="bg"}
+    --]]
+    print("self.style.fill_colors.default",self.style.fill_colors.default)
+    --dumptable(self.style.fill_colors.default)
+    return NineSlice{
+        w = self.window_w,
+        h = self.window_h,
+        cells={
+            {
+                Widget_Clone{source = self.style.rounded_corner.default},
+                Widget_Clone{source = self.style.top_edge.default},
+                Widget_Clone{source = self.style.rounded_corner.default,z_rotation = {90,0,0}},
+            },
+            {
+                Widget_Clone{source =   self.style.side_edge.default},
+                Widget_Rectangle{color = self.style.fill_colors.default },
+                Widget_Clone{source = self.style.side_edge.default,z_rotation = {180,0,0}},
+            },
+            {
+                Widget_Clone{source = self.style.rounded_corner.default,z_rotation = {270,0,0}},
+                Widget_Clone{source = self.style.top_edge.default, z_rotation = {180,0,0}},
+                Widget_Clone{source = self.style.rounded_corner.default,z_rotation = {180,0,0}},
+            },
+        }
+    }
 	
 end
-local create_fg = function(self)
-	
+--local create_fg = function(self)
+	--[[
 	local c = Canvas(self.window_w,self.window_h)
 	
 	c.line_width = self.style.border.width
@@ -27,22 +51,10 @@ local create_fg = function(self)
 	c:set_source_color( self.style.border.colors.default )   c:stroke(true)
 	
 	return c:Image{name="fg"}
-	
-end
-local create_arrow = function(self,state)
-	
-	local c = Canvas(self.w,self.h)
-	
-    c:move_to(0,   c.h/2)
-    c:line_to(c.w,     0)
-    c:line_to(c.w,   c.h)
-    c:line_to(0,   c.h/2)
-    
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	return c:Image()
-	
-end
+	--]]
+    --return Clone()
+--end
+local create_arrow = function(self,state) return Clone{source=self.style.triangle[state]} end
 
 
 
@@ -161,8 +173,8 @@ ButtonPicker = setmetatable(
                     end
                     if recolor_arrows then
                         recolor_arrows = false
-                        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
-                        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+                        --prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+                        --next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
                     end
                     if restyle_arrows then
                         restyle_arrows = false
@@ -184,15 +196,15 @@ ButtonPicker = setmetatable(
                         }
                         instance.spacing = instance.style.arrow.offset
                     end
-                    if flag_for_redraw then
+                    if flag_for_redraw or new_window_sz then
                         flag_for_redraw = false
-                        redo_fg()
+                        --redo_fg()
                         redo_bg()
                     end
                     if new_window_sz then
                         new_window_sz = false
-                        redo_bg()
-                        redo_fg()
+                        --redo_bg()
+                        --redo_fg()
                         window.w = window_w
                         window.h = window_h
                         window.clip = {
@@ -266,14 +278,14 @@ ButtonPicker = setmetatable(
                     window:add(bg)
                     bg:lower_to_bottom()
                 end
-            end,
+            end,--[[
             redo_fg = function(instance,_ENV)
                 return function() 
                     if fg and fg.parent then fg:unparent() end
                     fg = create_fg(instance)
                     window:add(fg)
                 end
-            end,
+            end,--]]
         },
         declare = function(self,parameters)
             
@@ -284,14 +296,14 @@ ButtonPicker = setmetatable(
             
             local prev_arrow = Button{
                 name = "prev",
-                style = false,
+                --style = false,
                 label = "",
                 create_canvas = create_arrow,
                 reactive = true,
             }
             local next_arrow = Button{
                 name = "next",
-                style = false,
+                --style = false,
                 label = "",
                 create_canvas = create_arrow,
                 reactive = true,
@@ -329,7 +341,7 @@ ButtonPicker = setmetatable(
             window_h   = 70
             
             bg = false
-            fg = false
+            --fg = false
             
             list_entries = false
             animating = false

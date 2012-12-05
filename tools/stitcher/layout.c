@@ -12,7 +12,6 @@ Layout * layout_new ( unsigned int width )
     layout->area = 0;
     layout->coverage = 0.0f;
     layout->items_placed = 0;
-    layout->items_skipped = 0;
     layout->min_item_w = 256;
     layout->min_item_h = 256;
     layout->max_item_w = 0;
@@ -31,6 +30,26 @@ void layout_free ( Layout * layout )
     g_sequence_free( layout->leaves );
     free( layout );
 }
+
+/*
+unsigned int gcf( unsigned int a, unsigned int b )
+{
+    unsigned int t;
+    if ( b > a )
+    {
+        t = b;
+        b = a;
+        a = t;
+    }
+    while ( b != 0 )
+    {
+        t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+*/
 
 Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
 {
@@ -78,9 +97,9 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
         si = g_sequence_iter_next( si );
     }
 
-    if(best) return best;
-    if(close) return close;
-    if(fallback) return fallback;
+    if ( best )     return best;
+    if ( close )    return close;
+    if ( fallback ) return fallback;
     return NULL;
 }
 
@@ -108,27 +127,22 @@ void layout_loop_item( Item * item, Layout * layout )
         leaf_cut( leaf, item->w, item->h, layout );
         layout->items_placed += 1;
     }
-    else
-    {
-        layout->items_skipped += 1;
-    }
 }
 
-Layout * layout_new_from_output ( Output * output, unsigned int width, Options * options )
+Layout * layout_new_from_state ( State * state, unsigned int width, Options * options )
 {
     Layout * layout = layout_new( width );
-    g_sequence_foreach( output->items, (GFunc) layout_scan_item, layout );
+    g_sequence_foreach( state->items, (GFunc) layout_scan_item, layout );
 
     if ( width < layout->max_item_w )
     {
         return layout;
     }
 
-    Leaf * leaf = leaf_new( 0, 0, width,
-        options->output_size_limit * ( options->allow_multiple_sheets ? 1 : 2 ) );
+    Leaf * leaf = leaf_new( 0, 0, width, options->output_size_limit );
     g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
 
-    g_sequence_foreach( output->items, (GFunc) layout_loop_item, layout );
+    g_sequence_foreach( state->items, (GFunc) layout_loop_item, layout );
 
     return layout;
 }
@@ -143,8 +157,7 @@ Layout * layout_choose( Layout * a, Layout * b, Options * options )
     if(!a) return b;
     if(!b) return a;
 
-    if ( a->height <= options->output_size_limit
-        && ( options->allow_multiple_sheets ? a->items_placed > 0 : a->items_skipped == 0 )
+    if ( a->height <= options->output_size_limit && a->items_placed > 0
         && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
             return a;
 

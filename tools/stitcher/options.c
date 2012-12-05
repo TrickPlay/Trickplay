@@ -11,14 +11,14 @@ Options * options_new()
     options->output_size_limit = 4096;
     options->output_path = NULL;
 
-    options->recursive = TRUE;
+    options->recursive = FALSE;
+    options->de_duplicate = FALSE;
     options->add_buffer_pixels = TRUE;
-    options->allow_multiple_sheets = TRUE;
-    options->copy_large_items = TRUE;
+    options->log_level = 1;
 
     options->input_patterns = g_ptr_array_new_with_free_func( (GDestroyNotify) g_pattern_spec_free );
-    options->input_paths    = g_ptr_array_new();
-    options->json_to_merge  = g_ptr_array_new();
+    options->input_paths    = g_ptr_array_new_with_free_func( g_free );
+    options->json_to_merge  = g_ptr_array_new_with_free_func( g_free );
     options->input_ids      = g_hash_table_new_full( g_str_hash, g_str_equal, g_free, NULL );
 
     return options;
@@ -57,122 +57,124 @@ gboolean options_take_unique_id ( Options * options, const char * id )
     return TRUE;
 }
 
-enum {
-    INPUT_PATHS,
-    SET_FORGET = 'f',
-    SET_INPUT  = 'i',
-    SET_JSON_MERGE = 'j',
-    SET_OUTPUT = 'o',
-    NO_ARGS,
-};
+gboolean opt_forget( const gchar * opt, const gchar * value, Options * options, GError ** error )
+{
+    options_take_unique_id( options, value );
+    return TRUE;
+}
+
+gboolean opt_filter( const gchar * opt, const gchar * value, Options * options, GError ** error )
+{
+    g_ptr_array_add( options->input_patterns, g_pattern_spec_new( value ) );
+    return TRUE;
+}
+
+gboolean opt_json( const gchar * opt, const gchar * value, Options * options, GError ** error )
+{
+    g_ptr_array_add( options->json_to_merge, strdup( value ) );
+    return TRUE;
+}
+
+gboolean opt_input( const gchar * opt, const gchar * value, Options * options, GError ** error )
+{
+    g_ptr_array_add( options->input_paths, strdup( value ) );
+    return TRUE;
+}
 
 Options * options_new_from_arguments ( int argc, char ** argv )
 {
     Options * options = options_new();
+    
+    GOptionContext * context = g_option_context_new( "- stitch together many source sprites into a single spritesheet");
+    g_option_context_set_summary( context, "stitcher will accept a list of directories and/or images, and things that might be convertible to images (ie. SVG). Experiment to see what input formats work for your case." );
 
-    int state = INPUT_PATHS;
-
-    for ( int i = 1; i < argc; i++ )
+    GOptionEntry entries[] =
     {
-        char * arg = argv[i];
-        size_t l = strlen( arg );
-        if ( (char) arg[0] == '-' )
-            for ( size_t j = 1; j < l; j++ )
-                switch( (char) arg[j] )
-                {
-                    case 'f':
-                    case 'i':
-                    case 'j':
-                    case 'o':
-                        state = arg[j];
-                        break;
-
-                    case 'b':
-                        options->add_buffer_pixels = TRUE;
-                        state = NO_ARGS;
-                        break;
-
-                    case 'c':
-                        options->copy_large_items = TRUE;
-                        state = NO_ARGS;
-                        break;
-
-                    case 'm':
-                        options->allow_multiple_sheets = TRUE;
-                        state = NO_ARGS;
-                        break;
-
-                    case 'r':
-                        options->recursive = TRUE;
-                        state = NO_ARGS;
-                        break;
-
-                    case 'h':
-                        system( g_strdup_printf( "man -l %s.man", argv[0] ) );
-                        exit(0);
-
-                    default:
-                        fprintf( stderr, "Unknown flag '-%s'.\n", (char *) &arg[j] );
-                        break;
-                }
-        else
-        {
-            gboolean arg_is_int = TRUE;
-            for ( size_t j = 0; j < l; j++ )
-                if ( !g_ascii_isdigit( arg[j] ) )
-                    arg_is_int = FALSE;
-
-            switch( state )
-            {
-                case SET_FORGET:
-                    options_take_unique_id( options, arg );
-                    break;
-
-                case SET_INPUT:
-                    if ( arg_is_int )
-                        options->input_size_limit = strtoul( arg, NULL, 0 );
-                    else
-                        g_ptr_array_add( options->input_patterns, g_pattern_spec_new( arg ) );
-                    break;
-
-                case SET_OUTPUT:
-                    if ( arg_is_int )
-                        options->output_size_limit = strtoul( arg, NULL, 0 );
-                    else
-                        options->output_path = arg;
-                    break;
-
-                case SET_JSON_MERGE:
-                    g_ptr_array_add( options->json_to_merge, arg );
-                    break;
-
-                case INPUT_PATHS:
-                {
-                    char * lc = &arg[ strlen( arg ) - 1 ];
-                    if ( * lc == '/' )
-                         * lc = '\0';
-                    g_ptr_array_add( options->input_paths, arg );
-                    break;
-                }
-
-                default:
-                    fprintf( stderr, "Ambiguous argument %s.\n", arg );
-                    break;
-            }
-        }
+        { G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK, 
+            & opt_input,                         NULL, "INPUT ..." },
+        { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
+            & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
+        { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
+            & options->de_duplicate,             "Only include one copy of images that are the same (not currently implemented)", NULL },
+        { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
+            & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
+        { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 
+            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: *)", "FILTER" },
+        { "log-level",         'l', 0,                         G_OPTION_ARG_INT, 
+            & options->log_level,                "Granularity of message logging, 0-3 (default: 1)", "LEVEL" },
+        { "merge-json",        'm', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
+            & opt_json,                          "Path to the JSON file of a spritesheet to merge into this one", "PATH" },
+        { "output-prefix",     'o', 0,                         G_OPTION_ARG_STRING, 
+            & options->output_path,              "Path and prefix for the spritesheet files created", "PATH" },
+        { "recursive",         'r', 0,                         G_OPTION_ARG_NONE, 
+            & options->recursive,                "Recursively enter subdirectories", NULL },
+        { "size-segregation",  's', 0,                         G_OPTION_ARG_INT, 
+            & options->input_size_limit,         "Size segregation threshhold (default: 512)", "INT" },
+        { "max-texture-size",  't', 0,                         G_OPTION_ARG_INT, 
+            & options->output_size_limit,        "Maximum texture size the spritesheet will try to use (default: 4096)", "INT" },
+        { NULL }
+    };
+    
+    GOptionGroup * group = g_option_group_new( "all", NULL, NULL, options, NULL );
+    g_option_group_add_entries( group, entries );
+    g_option_context_set_main_group( context, group );
+    
+    if ( !g_option_context_parse( context, &argc, &argv, NULL ) )
+    {
+        fprintf( stderr, "Could not parse arguments.\n" );
+        exit( 1 );
     }
+    
+    g_option_context_free( context );
+    
+    gboolean errors = FALSE;
+    
+    if ( options->input_size_limit > 65536 )
+    {
+        fprintf( stderr, "Segregation size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        errors = TRUE;
+    }
+    
+    if ( options->output_size_limit > 65536 )
+    {
+        fprintf( stderr, "Maximum texture size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        errors = TRUE;
+    }
+    
+    options->input_size_limit = MIN( options->input_size_limit, options->output_size_limit );
 
     if ( options->input_paths->len + options->json_to_merge->len == 0 )
+    {
         fprintf( stderr, "No inputs given.\n" );
+        errors = TRUE;
+    }
 
     if ( options->output_path == NULL )
     {
-        if ( options->input_paths->len > 0 )
-            options->output_path = g_ptr_array_index( options->input_paths, 0 );
-        //else if ( options->json_to_merge->len > 0 )
-        //    options->output_path = g_ptr_array_index( options->json_to_merge, 0 );
+        if ( options->input_paths->len )
+        {
+            char * first_input = g_ptr_array_index( options->input_paths, 0 );
+            if ( g_file_test( first_input, G_FILE_TEST_IS_DIR ) )
+            {
+                options->output_path = first_input;
+                fprintf( stderr, "Assuming output prefix to be %s.\n", options->output_path );
+            }
+            else
+            {
+                fprintf( stderr, "Ambiguous output path.\n" );
+                errors = TRUE;
+            }
+        }
         else
+        {
             fprintf( stderr, "Ambiguous output path.\n" );
+            errors = TRUE;
+        }
+    }
+    
+    if ( errors )
+    {
+        exit( 1 );
     }
 
     return options;
