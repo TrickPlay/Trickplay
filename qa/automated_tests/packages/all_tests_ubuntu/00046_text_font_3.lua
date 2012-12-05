@@ -9,7 +9,7 @@ function generate_test_image ()
 
 	local font_list = {
 		"UnBatang",
-		"UnBatangBold",
+		"UnBatang Bold",
 		"UnDotum",
 		"UnDotum Bold",
 		"UnGungseo"
