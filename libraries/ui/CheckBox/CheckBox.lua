@@ -243,16 +243,17 @@ CheckBox = setmetatable(
         }
     },
     private = {
-        default_empty_icon = function(instance,_ENV)
-            return function()
-                return Clone{source=instance.style.empty_toggle_icon.default}
-            end
-        end,
-        default_filled_icon = function(instance,_ENV)
-            return function()
-                return Clone{source=instance.style.filled_toggle_icon.default}
-            end
-        end,
+            default_empty_icon = function(instance,_ENV)
+                return function()
+                    return Sprite{sheet = instance.style.spritesheet, id = "CheckBox/box-default.png"}--Clone{source=instance.style.empty_radio_icon.default}
+                end
+            end,
+            default_filled_icon = function(instance,_ENV)
+                return function()
+                    return Sprite{sheet = instance.style.spritesheet, id = "CheckBox/box-selected.png"}--Clone{source=instance.style.filled_radio_icon.default}
+                end
+            end,
+        
     },
     declare = function(self,parameters)
         local instance, _ENV = ToggleButton:declare()
