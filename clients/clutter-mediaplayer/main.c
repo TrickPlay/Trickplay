@@ -502,6 +502,7 @@ static int mp_get_audio_volume(TPMediaPlayer * mp,double * volume)
     {
         *volume=clutter_media_get_audio_volume(cm);
     }
+
     return 0;
 }
 
@@ -510,14 +511,12 @@ static int mp_set_audio_volume(TPMediaPlayer * mp,double volume)
     USERDATA(mp);
     CM(ud);
 
-    if ( ud->mute )
-    {
-        ud->volume = volume;
-    }
-    else
+    ud->volume = volume;
+    if ( !ud->mute )
     {
         clutter_media_set_audio_volume(cm,volume);
     }
+
     return 0;
 }
 
@@ -544,13 +543,11 @@ static int mp_set_audio_mute(TPMediaPlayer * mp,int mute)
     {
         if ( ud->mute )
         {
-            ud->volume = clutter_media_get_audio_volume(cm);
             clutter_media_set_audio_volume(cm,0);
         }
         else
         {
             clutter_media_set_audio_volume(cm,ud->volume);
-            ud->volume = 0;
         }
     }
 
@@ -622,7 +619,7 @@ static int mp_constructor(TPMediaPlayer * mp)
     if (!init)
     {
         init=1;
-        gst_init(NULL,NULL);
+        clutter_gst_init(NULL,NULL);
     }
 
     ClutterActor * video_texture=clutter_gst_video_texture_new();
@@ -688,6 +685,9 @@ static int mp_constructor(TPMediaPlayer * mp)
     mp->set_audio_mute=mp_set_audio_mute;
     mp->play_sound=mp_play_sound;
     mp->get_viewport_texture=mp_get_viewport_texture;
+
+    // Initialize volume
+    mp_set_audio_volume(mp, 0.5);
 
     return 0;
 }
