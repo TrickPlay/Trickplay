@@ -36,6 +36,7 @@ end
 image3.on_loaded = image3_on_loaded
 
 image3.async = true
+print("UNIT-TEST: WE SHOULD GET WARNING ABOUT MISSING IMAGE")
 image3.src = "packages/engine_unit_tests/tests/assets/does_not_exist.png"
 
 
