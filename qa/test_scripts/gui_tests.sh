@@ -88,7 +88,7 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
 				R_ARRAY[test_count]="pass"
 		   	 }
 		   	elif [ $imgdiff_fuzz -gt 400 ]; then 
-				echo Major fail: "$f"
+				echo MAJOR FAIL: "$f"
 				major_fail=$(($major_fail+1))
 				N_ARRAY[test_count]=$png_file
 				D_ARRAY[test_count]=$test_duration
@@ -118,6 +118,8 @@ done
 
 trickplay_version=1.0
 XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
+
+[ -r $XML_FILE ] || exit 1
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
