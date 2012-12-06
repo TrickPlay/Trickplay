@@ -49,7 +49,7 @@ ToastAlert = setmetatable(
                         
                         if v == nil then
                             
-                            icon = Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
+                            icon = Sprite{sheet=self.style.spritesheet,id="ToastAlert/error.png"}--Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
                             
                         elseif type(v) == "string" then
                             
