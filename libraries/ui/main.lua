@@ -7,7 +7,7 @@ dofile("load_json.lua")
 --add_verbosity("ArrayManager")
 
 
-dofile("LayoutManager/test.lua")
+dofile("ButtonPicker/test.lua")
 --[[
 wg = WL.Widget_Group{name='wg'}
 
