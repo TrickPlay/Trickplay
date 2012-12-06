@@ -132,8 +132,7 @@ class NineSlice [[ClutterActor*]] actor
     ~NineSlice()
         [[
             int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
-            lb_strong_unref( L, * sheet_ref );
-            g_object_unref( G_OBJECT( get_effect( self ) ) );
+            if(sheet_ref) lb_strong_unref( L, * sheet_ref );
         ]];
 
     /*
