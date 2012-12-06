@@ -249,79 +249,52 @@ ArrowPane = setmetatable(
                 return function()
                     up:set{
                         name = "Up Button",
-                        w = instance.style.arrow.size,
-                        h = instance.style.arrow.size,
-                        anchor_point = {
-                            instance.style.arrow.size/2,
-                            instance.style.arrow.size/2
+                        images = {
+                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/default.png"    },
+                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/focus.png"      },
+                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/activation.png" },
                         },
                         reactive = true,
                         label = "", 
-                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                        create_canvas = create_arrow, 
-                        z_rotation = { 90,0,0} ,
                         on_released = function() pane.virtual_y = pane.virtual_y - move_by end,
                     }
+                    up.anchor_point = { up.w/2, up.h/2 }
                     down:set{ 
                         name = "Down Button",
-                        w = instance.style.arrow.size,
-                        h = instance.style.arrow.size,
-                        anchor_point = {
-                            instance.style.arrow.size/2,
-                            instance.style.arrow.size/2
+                        images = {
+                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/default.png"    },
+                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/focus.png"      },
+                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/activation.png" },
                         },
                         reactive = true,
                         label = "", 
-                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                        create_canvas = create_arrow, 
-                        z_rotation = {270,0,0},
                         on_released = function() pane.virtual_y = pane.virtual_y + move_by end,
                     }
+                    down.anchor_point = { down.w/2, down.h/2 }
                     left:set{ 
                         name = "Left Button",
-                        w = instance.style.arrow.size,
-                        h = instance.style.arrow.size,
-                        anchor_point = {
-                            instance.style.arrow.size/2,
-                            instance.style.arrow.size/2
+                        images = {
+                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/default.png"    },
+                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/focus.png"      },
+                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/activation.png" },
                         },
                         reactive = true,
                         label = "", 
-                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                        create_canvas = create_arrow,
                         on_released = function() pane.virtual_x = pane.virtual_x - move_by end,
                     }
+                    left.anchor_point = { left.w/2, left.h/2 }
                     right:set{ 
                         name = "Right Button",
-                        w = instance.style.arrow.size,
-                        h = instance.style.arrow.size,
-                        anchor_point = {
-                            instance.style.arrow.size/2,
-                            instance.style.arrow.size/2
+                        images = {
+                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/default.png"    },
+                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/focus.png"      },
+                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/activation.png" },
                         },
                         reactive = true,
                         label = "", 
-                        --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                        create_canvas = create_arrow, 
-                        z_rotation = {180,0,0},
-                        on_released = function() pane.virtual_x = pane.virtual_x + move_by end,
+                        on_released = function() print("d") pane.virtual_x = pane.virtual_x + move_by end,
                     }
-                    
-                    --redefine function
-                    style_buttons = function()
-                        mesg("ArrowPane",0,"ArrowPane Restyling Buttons")
-                        for _,arrow in pairs(arrows) do
-                            arrow:set{
-                                w = instance.style.arrow.size,
-                                h = instance.style.arrow.size,
-                                anchor_point = {
-                                    instance.style.arrow.size/2,
-                                    instance.style.arrow.size/2
-                                },
-                                --style = {name=false,fill_colors=instance.style.arrow.colors.attributes}, 
-                            }
-                        end
-                    end
+                    right.anchor_point = { right.w/2, right.h/2 }
                 end
             end,
             update = function(instance,_ENV)
@@ -333,11 +306,12 @@ ArrowPane = setmetatable(
                     end
                     if respace_buttons then
                         respace_buttons = false
-                        instance.horizontal_spacing = instance.style.arrow.offset
-                        instance.vertical_spacing   = instance.style.arrow.offset
+                        --instance.horizontal_spacing = instance.style.arrow.offset
+                        --instance.vertical_spacing   = instance.style.arrow.offset
                     end
                     if redraw_pane then
                         redraw_pane = false
+                        print("balls")
                         pane:set{--[[
                             style = {
                                 name=false,
@@ -487,7 +461,7 @@ ArrowPane = setmetatable(
                 left  = left,
                 right = right,
             }
-            
+            redraw_pane = true
             lm_update = update
             new_w = true
             new_h = true
