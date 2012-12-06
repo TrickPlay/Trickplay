@@ -1272,11 +1272,13 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-    Property: is_property_animating
+    Function: is_property_animating
 
-    The is__property_animating function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
+    The is_property_animating() function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
 
-    *Arguments:* property_name - the name of the property to check
+    *Arguments:*
+
+        property_name - the name of the property to check
 
     *Return Value:* Returns true if the specified property is animating; false if it is not
 
