@@ -5,14 +5,14 @@
 
 typedef struct Options {
     unsigned int input_size_limit,
-                 output_size_limit;
+                 output_size_limit,
+                 log_level;
 
     char * output_path;
 
     gboolean recursive,
-             add_buffer_pixels,
-             allow_multiple_sheets,
-             copy_large_items;
+             de_duplicate,
+             add_buffer_pixels;
 
     GPtrArray  * input_patterns,
                * input_paths,
