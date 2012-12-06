@@ -11,6 +11,7 @@ Description:  Engine hangs when adding reciprocal groups
 	local g1=Group{}
 	local g2=Group{}
 
+    print("UNIT-TEST: WE SHOULD GET A WARNING ABOUT BADLY NESTED CONTAINERS")
 	g1:add(g2)
 	g2:add(g1)
 
