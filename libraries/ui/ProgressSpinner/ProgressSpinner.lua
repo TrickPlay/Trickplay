@@ -4,7 +4,7 @@ local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
 
-local canvas_dot = function(self)
+local canvas_dot = function(self)--[[
 	print(self.w,self.h)
 	local c = Canvas(self.w,self.h)
 	
@@ -30,8 +30,8 @@ local canvas_dot = function(self)
 	c:line_to(c.w/2,c.h/2)
 	c:line_to(c.w/2,c.h - c.line_width/2)
 	c:fill()
-	
-	return c:Image()
+	--]]
+	return Sprite{w=self.w,h=self.h,sheet = self.style.spritesheet,id="ProgressSpinner/icon.png"}--c:Image()
 	
 end
 
