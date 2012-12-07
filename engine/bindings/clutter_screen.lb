@@ -3,10 +3,46 @@ module clutter_screen;
 [[
 #define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
+#if defined(CLUTTER_WINDOWING_GLX)
+#include "clutter/x11/clutter-x11.h"
+#elif defined(CLUTTER_WINDOWING_OSX)
+#include "clutter/osx/clutter-osx.h"
+#endif
 #include "context.h"
 #include "clutter_util.h"
 #include "toast.h"
 #include "bitmap.h"
+
+#ifdef CLUTTER_WINDOWING_GLX
+void get_window_offsets(Display *dpy, Window w, int *top, int *left)
+{
+    long *extents;
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    unsigned char *data = NULL;
+    int result;
+
+    *top = 0;
+
+    result = XGetWindowProperty(
+        dpy, w, XInternAtom(dpy, "_NET_FRAME_EXTENTS", False),
+        0, 4, False, AnyPropertyType,
+        &actual_type, &actual_format,
+        &nitems, &bytes_after, &data);
+
+    if (result == Success)
+    {
+        if ((nitems == 4) && (bytes_after == 0))
+        {
+            extents = (long *)data;
+            *top = (int) *(extents + 2);
+            *left = (int) *(extents);
+        }
+        XFree(data);
+    }
+}
+#endif
 
 ]]
 
@@ -252,6 +288,193 @@ global screen [[ClutterActor*]] actor , container
         clutter_stage_set_perspective(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),&p);
         lua_pop(L,4);
     ]];
+
+    /***************************************
+    Property: x
+
+    We override x for the screen to allow positioning of the window if that is possible on the platform
+
+    *See Also:* the <y> and <position> properties
+    */
+
+    double x
+        [[
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO LOCATE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            XWindowAttributes attribs;
+            XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            x = dst_x;
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so origin X is good
+            x = frame.origin.x;
+#else
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER THIS WINDOWING METHOD: LOCATE THE NATIVE WINDOW YOURSELF: %s", CLUTTER_WINDOWING_OSX);
+#endif
+        ]]
+        [[
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO MOVE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            XWindowAttributes attribs;
+            XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, x - left, dst_y - top );
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
+            NSRect screen_frame = [[stage_window screen] frame];
+            frame.origin.x = x;
+            [stage_window setFrameOrigin:frame.origin];
+#else
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER THIS WINDOWING METHOD: MOVE THE NATIVE WINDOW YOURSELF");
+#endif
+        ]];
+
+    /***************************************
+    Property: y
+
+    We override y for the screen to allow positioning of the window if that is possible on the platform
+
+    *See Also:* the <x> and <position> properties
+    */
+
+    double y
+        [[
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO LOCATE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            XWindowAttributes attribs;
+            XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            y = dst_y;
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so origin Y needs adjustment
+            NSRect screen_frame = [[stage_window screen] frame];
+            y = screen_frame.size.height - (frame.origin.y + frame.size.height);
+#else
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER THIS WINDOWING METHOD: LOCATE THE NATIVE WINDOW YOURSELF");
+#endif
+        ]]
+        [[
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO MOVE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            XWindowAttributes attribs;
+            XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, attribs.x - left, y - top );
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
+            NSRect screen_frame = [[stage_window screen] frame];
+            frame.origin.y = screen_frame.size.height - (y + frame.size.height);
+            [stage_window setFrameOrigin:frame.origin];
+#else
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER THIS WINDOWING METHOD: MOVE THE NATIVE WINDOW YOURSELF");
+#endif
+        ]];
+
+    /***************************************
+    Property: position
+
+    We override position for the screen to allow positioning of the window if that is possible on the platform
+
+    *Format:* { x-coordinate, y-coodinate, z-coordinate (ignored) }
+
+    *See Also:* the <x> and <y> properties
+    */
+
+    table position
+        [[
+            lua_newtable(L);
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO LOCATE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            XWindowAttributes attribs;
+            XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            lua_pushnumber(L, dst_x);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L, dst_y);
+            lua_rawseti(L,-2,2);
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so origin X is fine but origin Y needs adjustment
+            lua_pushnumber(L, frame.origin.x);
+            lua_rawseti(L,-2,1);
+            NSRect screen_frame = [[stage_window screen] frame];
+            lua_pushnumber(L, screen_frame.size.height - (frame.origin.y + frame.size.height));
+            lua_rawseti(L,-2,2);
+#else
+            luaL_error(L, "CANNOT DETERMINE POSITION OF STAGE UNDER THIS WINDOWING METHOD: LOCATE THE NATIVE WINDOW YOURSELF");
+#endif
+            // Z-coordinate of the native window is always 0 (until someone invents a real 3D display I guess)
+            lua_pushnumber(L, 0);
+            lua_rawseti(L,-2,3);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+#if defined(CLUTTER_WINDOWING_EGL)
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER EGL: USE EGL METHODS TO MOVE THE NATIVE WINDOW");
+#elif defined(CLUTTER_WINDOWING_GLX)
+            Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            Display *stage_display = clutter_x11_get_default_display();
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, lua_tonumber(L, -3) - left, lua_tonumber(L, -2) - top );
+#elif defined(CLUTTER_WINDOWING_OSX)
+            NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
+            NSRect frame = [stage_window frame];
+            // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
+            NSRect screen_frame = [[stage_window screen] frame];
+            frame.origin.x = lua_tonumber(L, -3);
+            frame.origin.y = screen_frame.size.height - (lua_tonumber(L, -2) + frame.size.height);
+            [stage_window setFrameOrigin:frame.origin];
+#else
+            luaL_error(L, "CANNOT CHANGE POSITION OF STAGE UNDER THIS WINDOWING METHOD: MOVE THE NATIVE WINDOW YOURSELF");
+#endif
+
+            // We ignore the Z-coordinate
+
+            lua_pop(L,3);
+        ]];
+
 
 
     bool toast( string title , string prompt , Bitmap bitmap = 0 )
