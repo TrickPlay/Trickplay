@@ -875,6 +875,8 @@ _VE_.openFile = function(path)
     s = load_layer(layer)
     print (s, #s.children)
 
+    _VE_.buildVF()
+
     for i,j in ipairs(s.children) do
         --if string.find(j.name, "Layer") ~= nil then 
         if string.find(j.name, "Layer") ~= nil and 
@@ -936,7 +938,9 @@ _VE_.openFile = function(path)
                     end 
                 end 
 
-                if uiTypeStr == "Widget_Sprite" or uiTypeStr == "Image" then 
+                if uiTypeStr == "Widget_Sprite" then 
+                    m.sheet = spriteSheet
+                elseif uiTypeStr == "Image" then 
                     m.src = image_path..m.src
                 end 
                 m.reactive = true 
@@ -952,7 +956,7 @@ _VE_.openFile = function(path)
     _VE_.refresh()
     blockReport = false
 
-    _VE_.buildVF()
+    --_VE_.buildVF()
     --[[
     for i,j in ipairs(s.children) do
         if string.find(j.name, "Layer") ~= nil then 
