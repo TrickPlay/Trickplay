@@ -322,10 +322,11 @@ get_all_styles = function()
         
         t[name]         = {
             name        = obj.name,
-            arrow       = obj.arrow.attributes,
-            border      = obj.border.attributes,
+            --arrow       = obj.arrow.attributes,
+            --border      = obj.border.attributes,
             text        = obj.text.attributes,
-            fill_colors = obj.fill_colors.attributes,
+            --fill_colors = obj.fill_colors.attributes,
+            spritesheet_map = obj.spritesheet_map
         }
     end
     
@@ -1006,7 +1007,7 @@ Style = setmetatable({},
             local radio_icon_r = parameters.radio_icon_r or 15
             --]=]
             local spritesheet
-            
+            local spritesheet_map
             local meta_getters
             local recursive_fallbacks
             recursive_fallbacks = function(id)
@@ -1014,11 +1015,12 @@ Style = setmetatable({},
             end
             local setup_meta_getters = function()
                 meta_getters = {
-                    spritesheet = function() return spritesheet end,
-                    name        = function() return name        end,
-                    type        = function() return "STYLE"     end,
-                    text        = function() return text        end,
-                    attributes  = function() 
+                    spritesheet     = function() return spritesheet     end,
+                    spritesheet_map = function() return spritesheet_map end,
+                    name            = function() return name            end,
+                    type            = function() return "STYLE"         end,
+                    text            = function() return text            end,
+                    attributes      = function() 
                         return {
                             spritesheet = instance.spritesheet,
                             name        = instance.name,
@@ -1028,7 +1030,7 @@ Style = setmetatable({},
                 }
                 getmetatable(instance).__index    = __index(meta_getters)
                 
-                for _,id in pairs(default_spritesheet:get_ids()) do
+                for _,id in pairs(spritesheet:get_ids()) do
                     meta_getters[id] = function()
                         return id--Sprite{ sheet = default_spritesheet, id = id }
                     end
@@ -1038,8 +1040,11 @@ Style = setmetatable({},
                 end
             end
             local meta_setters = {
-                spritesheet   = function(v) 
-                    spritesheet   = v or default_spritesheet 
+                spritesheet_map   = function(v) 
+                    
+                    spritesheet_map = v or default_spritesheet 
+                    
+                    spritesheet   = SpriteSheet{ map = spritesheet_map }
                     
                     setup_meta_getters()
                     
@@ -1159,16 +1164,16 @@ Style = setmetatable({},
             instance.triangle           = parameters.triangle
             
             --]]
-            instance.name        = parameters.name 
-            instance.spritesheet = parameters.spritesheet
-            instance.text        = parameters.text
+            instance.name            = parameters.name 
+            instance.spritesheet_map = parameters.spritesheet_map
+            instance.text            = parameters.text
             ---[[
             -- if a substyle was modified, notify my subscribers
             print(instance.name,"Style object is subscribing to sub-styles")
-            arrow:subscribe_to(       nil, function(t) instance:notify({arrow       = t}) end )
-            border:subscribe_to(      nil, function(t) instance:notify({border      = t}) end )
+            --arrow:subscribe_to(       nil, function(t) instance:notify({arrow       = t}) end )
+            --border:subscribe_to(      nil, function(t) instance:notify({border      = t}) end )
             text:subscribe_to(        nil, function(t) instance:notify({text        = t}) end )
-            fill_colors:subscribe_to( nil, function(t) instance:notify({fill_colors = t}) end )
+            --fill_colors:subscribe_to( nil, function(t) instance:notify({fill_colors = t}) end )
             --]]
             for f,_ in pairs(global_style_subscriptions) do
                 instance:subscribe_to(nil,f)
