@@ -13,6 +13,37 @@ module clutter_screen;
 #include "toast.h"
 #include "bitmap.h"
 
+#ifdef CLUTTER_WINDOWING_GLX
+void get_window_offsets(Display *dpy, Window w, int *top, int *left)
+{
+    long *extents;
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    unsigned char *data = NULL;
+    int result;
+
+    *top = 0;
+
+    result = XGetWindowProperty(
+        dpy, w, XInternAtom(dpy, "_NET_FRAME_EXTENTS", False),
+        0, 4, False, AnyPropertyType,
+        &actual_type, &actual_format,
+        &nitems, &bytes_after, &data);
+
+    if (result == Success)
+    {
+        if ((nitems == 4) && (bytes_after == 0))
+        {
+            extents = (long *)data;
+            *top = (int) *(extents + 2);
+            *left = (int) *(extents);
+        }
+        XFree(data);
+    }
+}
+#endif
+
 ]]
 
 /*
@@ -275,7 +306,10 @@ global screen [[ClutterActor*]] actor , container
             Display *stage_display = clutter_x11_get_default_display();
             XWindowAttributes attribs;
             XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
-            x = attribs->x;
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            x = dst_x;
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
@@ -293,14 +327,17 @@ global screen [[ClutterActor*]] actor , container
             Display *stage_display = clutter_x11_get_default_display();
             XWindowAttributes attribs;
             XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
-            g_debug("Previous position: (%d,%d)", attribs->x, attribs->y );
-            XMoveWindow( stage_display, stage_xwindow, x, attribs->y );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, x - left, dst_y - top );
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
             // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
             NSRect screen_frame = [[stage_window screen] frame];
-            g_debug("Previous position: (%f,%f)", frame.origin.x, screen_frame.size.height - (frame.origin.y + frame.size.height));
             frame.origin.x = x;
             [stage_window setFrameOrigin:frame.origin];
 #else
@@ -325,7 +362,10 @@ global screen [[ClutterActor*]] actor , container
             Display *stage_display = clutter_x11_get_default_display();
             XWindowAttributes attribs;
             XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
-            y = attribs->y;
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            y = dst_y;
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
@@ -344,14 +384,17 @@ global screen [[ClutterActor*]] actor , container
             Display *stage_display = clutter_x11_get_default_display();
             XWindowAttributes attribs;
             XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
-            g_debug("Previous position: (%d,%d)", attribs->x, attribs->y );
-            XMoveWindow( stage_display, stage_xwindow, attribs->x, y );
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, attribs.x - left, y - top );
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
             // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
             NSRect screen_frame = [[stage_window screen] frame];
-            g_debug("Previous position: (%f,%f)", frame.origin.x, screen_frame.size.height - (frame.origin.y + frame.size.height));
             frame.origin.y = screen_frame.size.height - (y + frame.size.height);
             [stage_window setFrameOrigin:frame.origin];
 #else
@@ -379,9 +422,12 @@ global screen [[ClutterActor*]] actor , container
             Display *stage_display = clutter_x11_get_default_display();
             XWindowAttributes attribs;
             XGetWindowAttributes( stage_display, stage_xwindow, &attribs );
-            lua_pushnumber(L, attribs->x);
+            int dst_x,dst_y;
+            Window child;
+            XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
+            lua_pushnumber(L, dst_x);
             lua_rawseti(L,-2,1);
-            lua_pushnumber(L, attribs->y);
+            lua_pushnumber(L, dst_y);
             lua_rawseti(L,-2,2);
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
@@ -409,13 +455,14 @@ global screen [[ClutterActor*]] actor , container
 #elif defined(CLUTTER_WINDOWING_GLX)
             Window stage_xwindow = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             Display *stage_display = clutter_x11_get_default_display();
-            XMoveWindow( stage_display, stage_xwindow, lua_tonumber(L, -3), lua_tonumber(L, -2) );
+            int top,left;
+            get_window_offsets( stage_display, stage_xwindow, &top, &left );
+            XMoveWindow( stage_display, stage_xwindow, lua_tonumber(L, -3) - left, lua_tonumber(L, -2) - top );
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
             // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
             NSRect screen_frame = [[stage_window screen] frame];
-            g_debug("Previous position: (%f,%f)", frame.origin.x, screen_frame.size.height - (frame.origin.y + frame.size.height));
             frame.origin.x = lua_tonumber(L, -3);
             frame.origin.y = screen_frame.size.height - (lua_tonumber(L, -2) + frame.size.height);
             [stage_window setFrameOrigin:frame.origin];
