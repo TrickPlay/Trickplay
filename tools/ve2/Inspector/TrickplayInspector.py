@@ -1295,19 +1295,16 @@ class TrickplayInspector(QWidget):
             self.ui.screenCombo.setEditable (True)
 
     def screenEditTextChanged(self, str):
-        print("screenEditTextChanged", str, self.currentScreenName)
         if self.screen_textChanged == False :
             self.old_screen_name = self.currentScreenName
         self.screen_textChanged = True
 
     def screenChanged(self, index):
-        print("screenChanged")
 
         if index < 0 or self.addItemToScreens is True:
             return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
-        print(" currentScreenName : %s"%self.currentScreenName)
 
         if self.screens.has_key(self.currentScreenName) == False :
             if self.old_screen_name == "":
@@ -1337,7 +1334,6 @@ class TrickplayInspector(QWidget):
             self.curLayerGid = theItem['gid'] 
             self.ui.inspector.setCurrentIndex(theItem.index())
 
-        print "SCREENS", self.screens
 
                     
     def styleActivated(self, index):
