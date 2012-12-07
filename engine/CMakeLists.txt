@@ -443,7 +443,6 @@ list( APPEND LB_FILES
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
-    ${BINDINGS_SRC}/clutter_screen.lb
     ${BINDINGS_SRC}/clutter_rectangle.lb
     ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_clone.lb
@@ -453,6 +452,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_animator.lb
     ${BINDINGS_SRC}/clutter_state.lb
     ${BINDINGS_SRC}/clutter_score.lb
+# clutter_screen.lb has mac-specific code in it, so needs to be treated specially -- see below
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb
     ${BINDINGS_SRC}/clutter_path.lb
@@ -460,6 +460,7 @@ list( APPEND LB_FILES
 
     ${BINDINGS_SRC}/sprite_sheet.lb
     ${BINDINGS_SRC}/sprite.lb
+    ${BINDINGS_SRC}/nineslice.lb
 
     ${BINDINGS_SRC}/socket.lb
 
@@ -476,6 +477,14 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/physics_bullet.lb
 
 )
+
+# Deal with clutter_screen.lb which has Objective-C code in it for OSX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list( APPEND LB_SPECIAL_MAC_FILES ${BINDINGS_SRC}/clutter_screen.lb )
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list( APPEND LB_FILES ${BINDINGS_SRC}/clutter_screen.lb )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 
 if (TP_WITH_GAMESERVICE)
     list ( APPEND LB_FILES
@@ -545,6 +554,7 @@ list( APPEND
     ${ENGINE_SRC}/source/clutter_util.cpp
 
     ${ENGINE_SRC}/source/spritesheet.cpp
+    ${ENGINE_SRC}/source/nineslice.cpp
 
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp

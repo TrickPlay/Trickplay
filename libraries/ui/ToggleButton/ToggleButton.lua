@@ -86,6 +86,30 @@ ToggleButton = setmetatable(
                 return function(oldf) return on_deselection end,
                 function(oldf,self,v) on_deselection = v end
             end,
+            icon_x_offset = function(instance,_ENV)
+                return function(oldf) return icon_x_offset end,
+                function(oldf,self,v) 
+                    icon_x_offset = v 
+                    if empty_icon then
+                        empty_icon.position = {icon_x_offset,instance.h/2+icon_y_offset}
+                    end
+                    if filled_icon then
+                        filled_icon.position = {icon_x_offset,instance.h/2+icon_y_offset}
+                    end
+                end
+            end,
+            icon_y_offset = function(instance,_ENV)
+                return function(oldf) return icon_y_offset end,
+                function(oldf,self,v) 
+                    icon_y_offset = v 
+                    if empty_icon then
+                        empty_icon.position = {icon_x_offset,instance.h/2+icon_y_offset}
+                    end
+                    if filled_icon then
+                        filled_icon.position = {icon_x_offset,instance.h/2+icon_y_offset}
+                    end
+                end
+            end,
             type = function(instance,_ENV)
                 return function() return "TOGGLEBUTTON" end
             end,
@@ -217,21 +241,20 @@ ToggleButton = setmetatable(
                         if empty_icon.parent then empty_icon:unparent() end
                         if not hide_icon then add(instance,empty_icon) end
                         empty_icon.anchor_point = {0,empty_icon.h/2}
-                        empty_icon.position     = {0,instance.h/2}
-                    elseif empty_icon and not hide_icon then
+                        empty_icon.position     = {icon_x_offset,instance.h/2+icon_y_offset}
+                    elseif empty_icon and empty_icon.parent and not hide_icon then
                         empty_icon:raise_to_top()
                     end
                     if  new_filled_icon then
                         new_filled_icon = false
-                        print("filled_icon",instance.style.empty_toggle_icon.default)
                         filled_icon = filled_icon or default_filled_icon()
                         
                         if filled_icon.parent then filled_icon:unparent() end
                         if not hide_icon then add(instance,filled_icon) end
                         filled_icon[selected and"show"or"hide"](filled_icon)
                         filled_icon.anchor_point = {0,empty_icon.h/2}
-                        filled_icon.position     = {0,instance.h/2}
-                    elseif filled_icon and not hide_icon then
+                        filled_icon.position     = {icon_x_offset,instance.h/2+icon_y_offset}
+                    elseif filled_icon and filled_icon.parent and not hide_icon then
                         filled_icon:raise_to_top()
                     end
                     
@@ -247,6 +270,8 @@ ToggleButton = setmetatable(
         hide_icon = false
         new_empty_icon  = true
         new_filled_icon = true
+        icon_x_offset = 0
+        icon_y_offset = 0
         button_update = update
         --[[
         new_filled_icons = true

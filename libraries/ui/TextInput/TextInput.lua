@@ -56,7 +56,7 @@ TextInput = setmetatable(
                     end
                 end,
                 text = function(instance,_ENV)
-                    return function(oldf) return orientation end,
+                    return function(oldf) return text.text end,
                     function(oldf,self,v) 
             
                         text.text = v
@@ -66,7 +66,17 @@ TextInput = setmetatable(
                 widget_type = function(instance,_ENV)
                     return function() return "TextInput" end
                 end,
-    
+                attributes = function(instance,_ENV)
+                    return function(oldf,self) 
+                        local t = oldf(self)
+                        
+                        t.text = self.text
+                        
+                        t.type = "TextInput"
+                        
+                        return t
+                    end
+                end,
             },
             functions = {
             },
@@ -85,14 +95,27 @@ TextInput = setmetatable(
                     if  restyle_backing then
                         restyle_backing = false
                         print("restyle_backing")
-                        backing.style:set(instance.style.attributes)
+                        local style = instance.style
+                        backing:set{sheet = style.spritesheet, ids = {
+                                nw   = style["TextInput/default/nw.png"],
+                                n    = style["TextInput/default/n.png"],
+                                ne   = style["TextInput/default/ne.png"],
+                                w    = style["TextInput/default/w.png"],
+                                c    = style["TextInput/default/c.png"],
+                                e    = style["TextInput/default/e.png"],
+                                sw   = style["TextInput/default/sw.png"],
+                                s    = style["TextInput/default/s.png"],
+                                se   = style["TextInput/default/se.png"],
+                            }
+                        }
+                        borders = backing.borders
                     end
                     if  resize then
-                        print("resizing",w, instance.style.border.corner_radius*2)
+                        --print("resizing",w, instance.style.border.corner_radius*2)
                         resize    = false
-                        text.w    = w - instance.style.border.corner_radius*2
-                        text.h    = h - instance.style.border.corner_radius*2
-                        print("resizing2",w, instance.style.border.corner_radius*2)
+                        text.w    = w - borders[1] - borders[2]
+                        text.h    = h - borders[3] - borders[4]
+                        --print("resizing2",w, instance.style.border.corner_radius*2)
                         backing.w = w 
                         backing.h = h 
                         print("resizing3",backing.w)
@@ -112,12 +135,12 @@ TextInput = setmetatable(
                         }
                         text.position = {
                             horizontal_alignment == "center" and w/2 or 
-                            horizontal_alignment == "right"  and w - instance.style.border.corner_radius or 
-                            horizontal_alignment == "left"   and instance.style.border.corner_radius or
+                            horizontal_alignment == "right"  and w - borders[2] or 
+                            horizontal_alignment == "left"   and borders[1] or
                             error("bad horizontal_alignment: "..tostring(horizontal_alignment),2),
                             vertical_alignment == "center" and h/2 or 
-                            vertical_alignment == "bottom" and h - instance.style.border.corner_radius or 
-                            vertical_alignment == "top"    and instance.border.style.corner_radius or
+                            vertical_alignment == "bottom" and h - borders[4] or 
+                            vertical_alignment == "top"    and borders[3] or
                             error("bad vertical_alignment: "..tostring(vertical_alignment),2),
                         }
                     end
@@ -153,7 +176,7 @@ TextInput = setmetatable(
                 },
                 fill_colors = "restyle_backing"
             }
-            
+            restyle_backing = true
             setup_object(self,instance,_ENV)
             
             updating = true

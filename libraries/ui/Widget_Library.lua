@@ -18,6 +18,8 @@ local WL_ENV = setmetatable({},{__index = _G})
 --This table will hold everything that will be exposed to users
 local WL_EXT = {}
 
+WL_ENV.default_spritesheet = "skin.json"
+
 local core_dependencies = {
     "__UTILITIES/AppVerbosity.lua",
     "__UTILITIES/OverrideMetatable.lua",
@@ -50,7 +52,7 @@ for i,dep in ipairs(core_dependencies) do    load(pwd..dep)    end
 
 local widget_dependencies = {
     ArrowPane        = {"Button","ClippingRegion","LayoutManager","ArrowPane"},
-    Button           = {"NineSlice","Button"},
+    Button           = {"Button"},
     ButtonPicker     = {"Button","LayoutManager","ButtonPicker"},
     CheckBox         = {"Button","ToggleButton","CheckBox"},
     CheckBoxGroup    = {"ToggleButton","CheckBox"},
@@ -59,16 +61,16 @@ local widget_dependencies = {
     ListManager      = {"LayoutManager"},
     LayoutManager    = {"LayoutManager"},
     MenuButton       = {"ToggleButton","LayoutManager","MenuButton"},
-    NineSlice        = {"LayoutManager","NineSlice"},
+    --NineSlice        = {"LayoutManager","NineSlice"},
     OrbittingDots    = {"OrbittingDots"},
     ProgressBar      = {"ProgressBar"},
     ProgressSpinner  = {"ProgressSpinner"},
     RadioButton      = {"Button","ToggleButton","RadioButton"},
     RadioButtonGroup = {"ToggleButton","RadioButton"},
     ScrollPane       = {"Slider","ClippingRegion","LayoutManager","ScrollPane"},
-    Slider           = {"NineSlice","Slider"},
+    Slider           = {"Slider"},
     TabBar           = {"RadioButton","ArrowPane","TabBar"},
-    TextInput        = {"NineSlice","TextInput"},
+    TextInput        = {"TextInput"},
     ToastAlert       = {"DialogBox","ToastAlert"},
     ToggleButton     = {"Button","ToggleButton","RadioButton"},
 }

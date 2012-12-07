@@ -149,22 +149,50 @@ Slider = setmetatable(
             end,
             update = function(instance,_ENV)
                 return function()
-                    print("\n\nupdate\n\n")
+                    --print("\n\nupdate\n\n")
+                    if restyle then
+                        restyle = false
+                        local style  = instance.style
+                        grip:set{sheet = style.spritesheet, ids = {
+                                nw   = style["Slider/grip/default/nw.png"],
+                                n    = style["Slider/grip/default/n.png"],
+                                ne   = style["Slider/grip/default/ne.png"],
+                                w    = style["Slider/grip/default/w.png"],
+                                c    = style["Slider/grip/default/c.png"],
+                                e    = style["Slider/grip/default/e.png"],
+                                sw   = style["Slider/grip/default/sw.png"],
+                                s    = style["Slider/grip/default/s.png"],
+                                se   = style["Slider/grip/default/se.png"],
+                            }
+                        }
+                        track:set{sheet = style.spritesheet, ids = {
+                                nw   = style["Slider/track/nw.png"],
+                                n    = style["Slider/track/n.png"],
+                                ne   = style["Slider/track/ne.png"],
+                                w    = style["Slider/track/w.png"],
+                                c    = style["Slider/track/c.png"],
+                                e    = style["Slider/track/e.png"],
+                                sw   = style["Slider/track/sw.png"],
+                                s    = style["Slider/track/s.png"],
+                                se   = style["Slider/track/se.png"],
+                            }
+                        }
+                    end
                     if resized then
                         resized = false
-                        print("grip sz1",grip.w,grip.h)
+                        --print("grip sz1",grip.w,grip.h)
                         grip.x = grip.x
-                        print("grip sz1.5",grip.w,grip.h)
+                        --print("grip sz1.5",grip.w,grip.h)
                         grip.anchor_point = {
                             grip.w/2,
                             grip.h/2
                         }
-                        print("grip ap",grip.w,grip.h)
+                        --print("grip ap",grip.w,grip.h)
                         if direction == "horizontal" then
                             local w = grip.w/2
-                            print("settin x",w*2,grip.h)
+                            --print("settin x",w*2,grip.h)
                             grip.x = w
-                            print("set x",grip.w,grip.h)
+                            --print("set x",grip.w,grip.h)
                             grip.y = track.h/2
                         elseif direction == "vertical" then
                             grip.x = track.w/2
@@ -172,6 +200,9 @@ Slider = setmetatable(
                         else
                             error("invalid direction",2)
                         end
+                        
+                        instance.w = grip.w > track.w and grip.w or track.w
+                        instance.h = grip.h > track.h and grip.h or track.h
                     end
                 end
             end,
@@ -180,7 +211,7 @@ Slider = setmetatable(
         
         declare = function(self,parameters)
             local instance, _ENV = Widget(parameters)
-            
+            restyle = true
             grip  = NineSlice{
                 name = "grip",
                 reactive = true,
@@ -206,6 +237,7 @@ Slider = setmetatable(
                     p = instance.progress
                 end,
             }
+            --]]
             track = NineSlice{
                 name =  "track", 
                 reactive = true,
@@ -224,6 +256,7 @@ Slider = setmetatable(
                     _ENV["drag_"..direction](...)
                 end,
             }
+            --]]
             
             p = 0
             progress = 0

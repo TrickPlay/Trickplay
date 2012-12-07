@@ -312,12 +312,12 @@ RadioButton = setmetatable(
     private = {
             default_empty_icon = function(instance,_ENV)
                 return function()
-                    return Clone{source=instance.style.empty_radio_icon.default}
+                    return Sprite{sheet = instance.style.spritesheet, id = "RadioButton/radio-default.png"}--Clone{source=instance.style.empty_radio_icon.default}
                 end
             end,
             default_filled_icon = function(instance,_ENV)
                 return function()
-                    return Clone{source=instance.style.filled_radio_icon.default}
+                    return Sprite{sheet = instance.style.spritesheet, id = "RadioButton/radio-selected.png"}--Clone{source=instance.style.filled_radio_icon.default}
                 end
             end,
         

@@ -1,6 +1,21 @@
 
 local channels = {}
 
+local max_h = 70
+
+local size_image = function(obj,orig_size)
+    local scale = max_h / orig_size[2]
+    
+    if scale > 1 then
+        obj.base_scale = 1
+        return
+    end
+    --obj.w = obj.w * scale
+    --obj.h = obj.h * scale
+    obj.scale = scale
+    obj.base_scale = scale
+end
+
 return function(name,src)
     
     local t = Text{
@@ -17,14 +32,21 @@ return function(name,src)
         on_loaded = function(self,failed)
             if failed then 
                 --error("loading "..src.." failed",2)
+                self:unparent()
                 return
             end
             
+            local ap_x, ap_y
             for i,c in ipairs(channels[name].clones) do
                 
-                c.source = self
-                c.anchor_point = {self.w/2,self.h/2}
+                ap_x = c.anchor_point[1] / c.w
+                ap_y = c.anchor_point[2] / c.h
                 
+                c.source = self
+                size_image(c,self.size)
+                
+                
+                c.anchor_point = {ap_x*c.w,ap_y*c.h}
             end
             t:unparent()
             channels[name].text = nil
@@ -46,6 +68,11 @@ end, function(name)
             channels[name].image or 
             channels[name].text
     }
+    if channels[name].image.loaded then 
+        size_image(c,channels[name].image.size) 
+    else
+        c.base_scale = 1
+    end
     
     c.anchor_point = channels[name].image.loaded and {c.w/2,c.h/2} or {c.w-50,c.h/2}
     
