@@ -3,24 +3,7 @@ SCROLLPANE = true
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
-
-local create_arrow = function(old_function,self,state)
-	
-	local c = Canvas(self.w,self.h)
-	
-    c:move_to(0,   c.h/2)
-    c:line_to(c.w,     0)
-    c:line_to(c.w,   c.h)
-    c:line_to(0,   c.h/2)
-    
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	return c:Image()
-	
-end
-
 local default_parameters = {pane_w = 450, pane_h = 600,virtual_w=1000,virtual_h=1000, slider_thickness = 30}
-
 
 ScrollPane = setmetatable(
     {},
@@ -63,42 +46,42 @@ ScrollPane = setmetatable(
                     end
                 end,
                 w = function(instance,_ENV)
-                    return function(oldf,self) return w     end,
+                    return nil,--function(oldf,self) return w     end,
                     function(oldf,self,v) 
-                        w = v
+                        oldf(self,v)--w = v
                         reclip = true
                         new_w  = true
                     end
                 end,
                 width = function(instance,_ENV)
-                    return function(oldf,self) return w     end,
+                    return nil,--function(oldf,self) return w     end,
                     function(oldf,self,v) 
-                        w = v
+                        oldf(self,v)--w = v
                         reclip = true
                         new_w  = true
                     end
                 end,
                 h = function(instance,_ENV)
-                    return function(oldf,self) return h     end,
+                    return nil,--function(oldf,self) return h     end,
                     function(oldf,self,v) 
-                        h = v
+                        oldf(self,v)--h = v
                         reclip = true
                         new_h  = true
                     end
                 end,
                 height = function(instance,_ENV)
-                    return function(oldf,self) return h     end,
+                    return nil,--function(oldf,self) return h     end,
                     function(oldf,self,v) 
-                        h = v
+                        oldf(self,v)--h = v
                         reclip = true
                         new_h  = true
                     end
                 end,
                 size = function(instance,_ENV)
-                    return function(oldf,self) return {w,h} end,
+                    return nil,--function(oldf,self) return {w,h} end,
                     function(oldf,self,v) 
-                        w = v[1]
-                        h = v[2]
+                        oldf(self,v)--w = v[1]
+                        --h = v[2]
                         reclip = true
                         new_w  = true
                         new_h  = true
@@ -153,6 +136,8 @@ ScrollPane = setmetatable(
                         vertical.track_w   = v
                         vertical.grip_w    = v
                         slider_thickness   = v 
+                        find_width         = true
+                        find_height        = true
                         --TODO - set a flag like this: new_h = true 
                     end
                 end,
@@ -263,7 +248,7 @@ ScrollPane = setmetatable(
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
-            local l_pane  = ClippingRegion{style = false}
+            local l_pane  = ClippingRegion()--{style = false}
             local l_horizontal = Slider()
             local l_vertical   = Slider{direction="vertical"}
             
@@ -276,6 +261,9 @@ ScrollPane = setmetatable(
                     { l_horizontal,        nil },
                 },
             }
+            
+            WL_parent_redirect[l_pane] = instance
+            
             local getter, setter
             
             pane       = l_pane

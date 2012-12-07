@@ -3,7 +3,7 @@
     [
         {
             "path": ".",
-            "folder_exclude_patterns": ["build","certificates","controllers","libraries","pdk","qa","sdk","tests"],
+            "folder_exclude_patterns": ["build","certificates","controllers","libraries","pdk"],
             "file_exclude_patterns": ["TrickPlay.sublime-workspace", "cached_options.txt"]
         }
     ],

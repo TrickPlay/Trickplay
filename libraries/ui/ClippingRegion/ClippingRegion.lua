@@ -86,7 +86,7 @@ ClippingRegion = setmetatable(
                     end
                 end,
                 virtual_y = function(instance,_ENV)
-                    return function(oldf) return -contents.y - y_offset     end,
+                    return function(oldf) return -contents.y - y_offset end,
                     function(oldf,self,v) 
                         contents.y = bound_to(-(virtual_h - instance.h),y_offset - v,0)
                         reclip = true
@@ -172,16 +172,32 @@ ClippingRegion = setmetatable(
                     if  restyle then
                         restyle = false
                         
-                        border.border_width = instance.style.border.width 
-                        border.border_color = instance.style.border.colors.default 
-                        bg.color            = instance.style.fill_colors.default 
-                        
+                        --border.border_width = instance.style.border.width 
+                        --border.border_color = instance.style.border.colors.default 
+                        --bg.color            = instance.style.fill_colors.default 
+                        local style  = instance.style
+                        bg:set{sheet = style.spritesheet, ids = {
+                                nw   = style["ClippingRegion/default/nw.png"],
+                                n    = style["ClippingRegion/default/n.png"],
+                                ne   = style["ClippingRegion/default/ne.png"],
+                                w    = style["ClippingRegion/default/w.png"],
+                                c    = style["ClippingRegion/default/c.png"],
+                                e    = style["ClippingRegion/default/e.png"],
+                                sw   = style["ClippingRegion/default/sw.png"],
+                                s    = style["ClippingRegion/default/s.png"],
+                                se   = style["ClippingRegion/default/se.png"],
+                            }
+                        }
+                        borders = bg.borders
+                        contents.anchor_point = {
+                            -borders[1],-borders[3]
+                        }
+                        reclip = true
                     end
                     if  new_w then
                         new_w = false
                         
                         bg.w     = w
-                        border.w = w
                         
                         instance.virtual_w = instance.virtual_w --virtual_w must be <= w
                         instance.virtual_x = instance.virtual_x --virtual_x must be <= virtual_w - w
@@ -192,7 +208,6 @@ ClippingRegion = setmetatable(
                         new_h = false
                         
                         bg.h     = h
-                        border.h = h
                         
                         instance.virtual_h = instance.virtual_h --virtual_h must be <= h
                         instance.virtual_y = instance.virtual_y --virtual_y must be <= virtual_h - h
@@ -204,11 +219,17 @@ ClippingRegion = setmetatable(
                         contents.clip = {
                             instance.virtual_x,
                             instance.virtual_y,
-                            instance.w,
-                            instance.h,
+                            instance.w - borders[1] - borders[2],
+                            instance.h - borders[3] - borders[4],
                         }
+                        print(
+                            instance.virtual_x,
+                            instance.virtual_y,
+                            instance.w - borders[1] - borders[2],
+                            instance.h - borders[3] - borders[4]
+                        )
                     end
-                    
+                    --dumptable(bg.borders)
                 end
             end,
         },
@@ -219,18 +240,13 @@ ClippingRegion = setmetatable(
             
             style_flags = "restyle"
             
-            bg       = Rectangle{ 
-                name  = "Background",
-                color = instance.style.fill_colors.default,
-            }
-            border   = Rectangle{ 
-                name="Border",
-                color = "00000000",
-                border_color = instance.style.border.colors.default,
-                border_width = instance.style.border.width,
-            }
-            
+            bg       = NineSlice()
+            borders = {0,0,0,0}
             contents = Group{     name="Contents"  }
+            
+            WL_parent_redirect[contents] = instance
+            
+            restyle = true
             new_w = true
             new_h = true
             reclip = true
@@ -244,7 +260,7 @@ ClippingRegion = setmetatable(
             x_offset  =    0
             y_offset  =    0
             
-            add( instance, bg, contents, border )
+            add( instance, bg, contents )
             
             instance.reactive = true
             

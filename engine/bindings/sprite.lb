@@ -8,6 +8,8 @@ module sprite;
 #include "spritesheet.h"
 #include <glib.h>
 
+#include "sprite_sheet.lb.h"
+
 #ifdef CLUTTER_VERSION_1_10
 #define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
 #define TP_CoglTexture CoglTexture *
@@ -42,12 +44,12 @@ SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
 
     SpriteSheet * sheet = 0;
 
-    int * sheet_ref = (int*) g_object_get_data( sprite , "tp-sheet-ref" );
+    int * sheet_ref = (int *) g_object_get_data( sprite , "tp-sheet-ref" );
 
     if ( sheet_ref )
     {
-        lb_strong_deref( L , *sheet_ref );
-        sheet = (SpriteSheet*) UserData::get_client( L , -1 );
+        lb_strong_deref( L , * sheet_ref );
+        sheet = (SpriteSheet *) UserData::get_client( L , -1 );
         lua_pop( L , 1 );
     }
 
@@ -56,42 +58,50 @@ SpriteSheet * get_sheet( lua_State * L , GObject * sprite )
     return sheet;
 }
 
-int refresh_texture( lua_State * L , GObject * sprite , int check_validity , char ** error_message )
+void refresh_texture( GObject * g_self, SpriteSheet * sheet, const char * new_id )
 {
-    char * id = (char*) g_object_get_data( sprite , "tp-id" );
-
-    SpriteSheet * sheet = get_sheet( L , sprite );
-
-    if ( id && sheet )
+    const char * id = new_id;
+    SpriteSheet::Sprite * sprite = (SpriteSheet::Sprite *) g_object_get_data( g_self, "tp-sprite" );
+    
+    if ( sprite )
     {
-        CoglHandle sprite_texture = sheet->get_subtexture( id );
-        if ( cogl_is_texture( sprite_texture ) )
+        if ( !id )
         {
-            if ( sprite_texture != clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( sprite ) ) )
-            {
-                clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( sprite ) , TP_COGL_TEXTURE( sprite_texture ) );
-
-                char * sheet_src = (char*) g_object_get_data( sheet->extra , "tp-src" );
-
-                char * sprite_src = (char*) malloc( snprintf( NULL, 0, "(Sprite) \"%s\"", sheet_src ) + 1 );
-                sprintf( sprite_src , "(Sprite) \"%s\"", sheet_src );
-
-                g_object_set_data_full( sprite , "tp-src" , strdup( sprite_src ) , g_free );
-            }
+            id = sprite->get_id();
         }
-        else if ( check_validity )
+        sprite->deref_texture();
+        g_object_set_data( g_self, "tp-sprite", NULL );
+    }
+    
+    if ( id )
+    {
+        g_object_set_data_full( g_self, "tp-id", strdup( id ), g_free );
+    }
+    else
+    {
+        id = (char *) g_object_get_data( g_self, "tp-id" );
+    }
+    
+    if ( sheet )
+    {
+        if (( sprite = sheet->get_sprite( id ) ))
         {
-            *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
-            return 0;
+            g_object_set_data( g_self, "tp-sprite", sprite );
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), sprite->ref_texture() );
+        }
+        else if ( new_id )
+        {
+            g_warning( "Sprite's sheet does not contain the id '%s' (If you are trying to change both, change the sheet first).", id );
+        }
+        else
+        {
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( g_self ), cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ) );
         }
     }
-    else if ( check_validity )
+    else if ( new_id )
     {
-        *error_message = (char*) "Invalid sheet/id combination.  (If you are trying to change both, change the sheet first)";
-        return 0;
+        g_warning( "Trying to set the id '%s' on a Sprite without first specifying a SpriteSheet.", id );
     }
-
-    return 1;
 }
 
 void set_sheet_first( lua_State * L , int table )
@@ -117,8 +127,29 @@ void set_sheet_first( lua_State * L , int table )
 
 ]]
 
+/*
+    Class: Sprite
+    
+    The Sprite class will draw a single sprite from a <SpriteSheet> as if it were an Image that had been loaded seperately. Instead of a 'src' property, Sprite objects have 'sheet' and 'id' properties, indicating what SpriteSheet to draw from and which sprite in that sheet to draw.
+    
+    In addition to the properties and functions described on this page, the Image data type also supports all the properties and functions defined in the <UIElement> interface.
+*/
+
 class Sprite [[ClutterActor*]] actor
 {
+
+    /*
+        Constructor: Sprite
+        
+        The Sprite() constructor creates a new Sprite object.
+        
+        *Arguments:*
+        
+        props - table defining the object's construction
+        
+        *Return Value:* new Sprite object
+    */
+    
     Sprite(table props = 0 )
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
@@ -134,12 +165,18 @@ class Sprite [[ClutterActor*]] actor
 
     ~Sprite()
         [[
-            int *sheet_ref = (int *)g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
-            lb_strong_unref( L , *sheet_ref );
+            int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
+            lb_strong_unref( L , * sheet_ref );
         ]];
 
     /*
-        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+        Property: sheet
+        
+        The sheet property is a SpriteSheet object from which the Sprite will be drawn. The sheet property can be changed even if the current id does not exist in the sheet; in this case, the Sprite will simply draw nothing.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <id> property
     */
 
     SpriteSheet sheet
@@ -147,60 +184,53 @@ class Sprite [[ClutterActor*]] actor
             push_lua_sheet( L , G_OBJECT( self ) );
         ]]
         [[
-            luaL_checkudata(L,2,"SPRITESHEET_METATABLE");
-            GObject * g_self = G_OBJECT( self );
-
-            SpriteSheet * old_sheet = get_sheet( L , g_self );
-            SpriteSheet * new_sheet = (SpriteSheet*) UserData::get_client( L , -1 );
-
-            if ( old_sheet != new_sheet )
+            SpriteSheet * new_sheet;
+            if (( new_sheet = LB_GET_SPRITESHEET( L, 2 ) ))
             {
-                if ( new_sheet->is_initialized() )
+                GObject * g_self = G_OBJECT( self );
+                
+                SpriteSheet * old_sheet = get_sheet( L, g_self );
+                
+                if ( old_sheet != new_sheet )
                 {
-                    int * new_sheet_ref = g_new( int , 1 );
-                    *new_sheet_ref = lb_strong_ref( L );
-
-                    g_object_set_data_full( g_self , "tp-sheet-ref" , new_sheet_ref , (GDestroyNotify)g_free );
-
-                    refresh_texture( L , g_self , 0 , 0 );
+                    int * new_sheet_ref = g_new( int, 1 );
+                    * new_sheet_ref = lb_strong_ref( L );
+                        
+                    g_object_set_data_full( g_self, "tp-sheet-ref", new_sheet_ref, (GDestroyNotify) g_free );
+                    
+                    refresh_texture( g_self, new_sheet, NULL );
                 }
-                else
-                {
-                    luaL_error( L , "SpriteSheet not initialized." );
-                }
+            }
+            else
+            {
+                g_warning( "Failed to set 'sheet': not a SpriteSheet." );
             }
         ]];
 
     /*
-        Error is thrown when setting id results in an invalid id/sheet combination. No error is thrown when sheet is set.
+        Property: id
+        
+        The id property is a string specfifying which sprite to draw from the current sheet. Specifying an id that does not exist in the current sheet will throw an error.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <sheet> property
     */
 
     string id
         [[
-            id = (char*) g_object_get_data( G_OBJECT( self ) , "tp-id" );
+            id = (char *) ((SpriteSheet::Sprite *) g_object_get_data( G_OBJECT( self ), "tp-sprite" ))->get_id();
         ]]
         [[
             GObject * g_self = G_OBJECT( self );
-
-            char * old_id = (char*) g_object_get_data( g_self , "tp-id" );
-            char * new_id = (char*) lua_tostring( L , -1 );
-
-            if ( ! old_id || strcmp( old_id , new_id ) != 0 )
+            SpriteSheet::Sprite * sprite = (SpriteSheet::Sprite *) g_object_get_data( g_self, "tp-sprite" );
+            
+            char * new_id = (char *) lua_tostring( L , -1 );
+            
+            if ( !sprite || strcmp( new_id, sprite->get_id() ) != 0 )
             {
-                char * error_message;
-                char * old_id_copy = old_id ? strdup( old_id ) : 0;
-
-                g_object_set_data_full( g_self , "tp-id" , strdup( id ) , g_free );
-
-                if ( ! refresh_texture( L , g_self , 1 , &error_message ) )
-                {
-                    if ( old_id_copy ) g_object_set_data_full( g_self , "tp-id" , old_id_copy , g_free );
-                    luaL_error( L , error_message );
-                }
-                else if ( old_id_copy )
-                {
-                    g_free( old_id_copy );
-                }
+                g_object_set_data_full( g_self , "tp-src" , g_strdup_printf( "(Sprite) \"%s\"", new_id ) , g_free );
+                refresh_texture( g_self, get_sheet( L, g_self ), new_id );
             }
         ]];
 
@@ -210,13 +240,13 @@ class Sprite [[ClutterActor*]] actor
 
     UIElement set(table props)
         [[
-            luaL_checktype(L,-1,LUA_TTABLE);
+            luaL_checktype( L, -1, LUA_TTABLE );
 
-            lua_pushvalue( L , -2 );
-            set_sheet_first( L , props );
-            lua_pop( L , 1 );
+            lua_pushvalue( L, -2 );
+            set_sheet_first( L, props );
+            lua_pop( L, 1 );
 
-            ClutterUtil::set_props_from_table(L,props);
-            lua_pushvalue(L,1);
+            ClutterUtil::set_props_from_table( L, props );
+            lua_pushvalue( L, 1 );
         ]];
 }

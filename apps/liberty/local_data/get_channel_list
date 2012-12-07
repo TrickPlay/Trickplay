@@ -9,7 +9,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VTMHD.png",
+              "Value": "local_data/logos/vtm_hd.png",
               "type": "Logo"
             }
           ]
@@ -22,7 +22,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/eenHD.png",
+              "Value": "local_data/logos/een_hd.png",
               "type": "Logo"
             }
           ]
@@ -35,7 +35,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VT4.png",
+              "Value": "local_data/logos/vt4.png",
               "type": "Logo"
             }
           ]
@@ -48,7 +48,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/2BE.png",
+              "Value": "local_data/logos/2be.png",
               "type": "Logo"
             }
           ]
@@ -61,7 +61,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/vijfTV.png",
+              "Value": "local_data/logos/vijftv.png",
               "type": "Logo"
             }
           ]
@@ -74,7 +74,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Vitaya.png",
+              "Value": "local_data/logos/vitaya.png",
               "type": "Logo"
             }
           ]
@@ -87,7 +87,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RTV.png",
+              "Value": "local_data/logos/rtv.png",
               "type": "Logo"
             }
           ]
@@ -100,7 +100,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Acht.png",
+              "Value": "local_data/logos/acht.png",
               "type": "Logo"
             }
           ]
@@ -113,7 +113,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/KANAALZ.png",
+              "Value": "local_data/logos/kanaalZ_logo_nl.png",
               "type": "Logo"
             }
           ]
@@ -126,7 +126,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Telenet.png",
+              "Value": "local_data/logos/infokanaal.png",
               "type": "Logo"
             }
           ]
@@ -139,7 +139,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Discovery.png",
+              "Value": "local_data/logos/Discovery.png",
               "type": "Logo"
             }
           ]
@@ -152,7 +152,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCEntertainment.png",
+              "Value": "local_data/logos/BBCEntertainment.png",
               "type": "Logo"
             }
           ]
@@ -165,7 +165,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DisneyChannel.png",
+              "Value": "local_data/logos/DisneyChannel.png",
               "type": "Logo"
             }
           ]
@@ -178,7 +178,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Jim.png",
+              "Value": "local_data/logos/Jim.png",
               "type": "Logo"
             }
           ]
@@ -191,7 +191,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ExqiSportCult.png",
+              "Value": "local_data/logos/ExqiSportCult.png",
               "type": "Logo"
             }
           ]
@@ -204,7 +204,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BeShopTV.png",
+              "Value": "local_data/logos/BeShopTV.png",
               "type": "Logo"
             }
           ]
@@ -217,7 +217,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/EXQICultHd1.png",
+              "Value": "local_data/logos/EXQICultHd1.png",
               "type": "Logo"
             }
           ]
@@ -230,7 +230,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DiscoveryHD.png",
+              "Value": "local_data/logos/DiscoveryHD.png",
               "type": "Logo"
             }
           ]
@@ -243,7 +243,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/AnimPlanetHD.png",
+              "Value": "local_data/logos/AnimPlanetHD.png",
               "type": "Logo"
             }
           ]
@@ -256,7 +256,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCHD.png",
+              "Value": "local_data/logos/BBCHD.png",
               "type": "Logo"
             }
           ]
@@ -269,7 +269,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/FoxlifeHD.png",
+              "Value": "local_data/logos/FoxlifeHD.png",
               "type": "Logo"
             }
           ]
@@ -282,7 +282,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/EuroSportHD.png",
+              "Value": "local_data/logos/EuroSportHD.png",
               "type": "Logo"
             }
           ]
@@ -295,7 +295,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCONE.png",
+              "Value": "local_data/logos/BBCONE.png",
               "type": "Logo"
             }
           ]
@@ -308,7 +308,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCTWO.png",
+              "Value": "local_data/logos/BBCTWO.png",
               "type": "Logo"
             }
           ]
@@ -321,7 +321,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/AB3.png",
+              "Value": "local_data/logos/AB3.png",
               "type": "Logo"
             }
           ]
@@ -334,7 +334,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/France2.png",
+              "Value": "local_data/logos/France2.png",
               "type": "Logo"
             }
           ]
@@ -347,7 +347,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/France3.png",
+              "Value": "local_data/logos/France3.png",
               "type": "Logo"
             }
           ]
@@ -360,7 +360,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/France4.png",
+              "Value": "local_data/logos/France4.png",
               "type": "Logo"
             }
           ]
@@ -373,7 +373,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/France5.png",
+              "Value": "local_data/logos/France5.png",
               "type": "Logo"
             }
           ]
@@ -386,7 +386,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Arte.png",
+              "Value": "local_data/logos/Arte.png",
               "type": "Logo"
             }
           ]
@@ -399,7 +399,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/France0.png",
+              "Value": "local_data/logos/France0.png",
               "type": "Logo"
             }
           ]
@@ -412,7 +412,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ARD.png",
+              "Value": "local_data/logos/ARD.png",
               "type": "Logo"
             }
           ]
@@ -425,7 +425,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Eurosport.png",
+              "Value": "local_data/logos/Eurosport.png",
               "type": "Logo"
             }
           ]
@@ -438,7 +438,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Eurosport2.png",
+              "Value": "local_data/logos/Eurosport2.png",
               "type": "Logo"
             }
           ]
@@ -451,7 +451,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ESPN.png",
+              "Value": "local_data/logos/ESPN.png",
               "type": "Logo"
             }
           ]
@@ -464,7 +464,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ExtremeSports.png",
+              "Value": "local_data/logos/ExtremeSports.png",
               "type": "Logo"
             }
           ]
@@ -477,7 +477,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ESPNAmerica.png",
+              "Value": "local_data/logos/ESPNAmerica.png",
               "type": "Logo"
             }
           ]
@@ -490,7 +490,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Eurosport.png",
+              "Value": "local_data/logos/Eurosport.png",
               "type": "Logo"
             }
           ]
@@ -503,7 +503,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ActuaTV.png",
+              "Value": "local_data/logos/ActuaTV.png",
               "type": "Logo"
             }
           ]
@@ -516,7 +516,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/CNN.png",
+              "Value": "local_data/logos/CNN.png",
               "type": "Logo"
             }
           ]
@@ -529,7 +529,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCWorld.png",
+              "Value": "local_data/logos/BBCWorld.png",
               "type": "Logo"
             }
           ]
@@ -542,7 +542,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Aljazeera.png",
+              "Value": "local_data/logos/Aljazeera.png",
               "type": "Logo"
             }
           ]
@@ -555,7 +555,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Euronews.png",
+              "Value": "local_data/logos/Euronews.png",
               "type": "Logo"
             }
           ]
@@ -568,7 +568,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Cctv.png",
+              "Value": "local_data/logos/Cctv.png",
               "type": "Logo"
             }
           ]
@@ -581,7 +581,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DiscWorld.png",
+              "Value": "local_data/logos/DiscWorld.png",
               "type": "Logo"
             }
           ]
@@ -594,7 +594,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DiscoveryID.png",
+              "Value": "local_data/logos/DiscoveryID.png",
               "type": "Logo"
             }
           ]
@@ -607,7 +607,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DiscScience.png",
+              "Value": "local_data/logos/DiscScience.png",
               "type": "Logo"
             }
           ]
@@ -620,7 +620,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/HistoryChannel.png",
+              "Value": "local_data/logos/HistoryChannel.png",
               "type": "Logo"
             }
           ]
@@ -633,7 +633,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/AnimalPlanet.png",
+              "Value": "local_data/logos/AnimalPlanet.png",
               "type": "Logo"
             }
           ]
@@ -646,7 +646,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Discovery.png",
+              "Value": "local_data/logos/Discovery.png",
               "type": "Logo"
             }
           ]
@@ -659,7 +659,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/FashionTV.png",
+              "Value": "local_data/logos/FashionTV.png",
               "type": "Logo"
             }
           ]
@@ -672,7 +672,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/FoodNetwork.png",
+              "Value": "local_data/logos/FoodNetwork.png",
               "type": "Logo"
             }
           ]
@@ -685,7 +685,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/E.png",
+              "Value": "local_data/logos/E.png",
               "type": "Logo"
             }
           ]
@@ -698,7 +698,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/13th_Street.png",
+              "Value": "local_data/logos/13th_Street.png",
               "type": "Logo"
             }
           ]
@@ -711,7 +711,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCTHREE.png",
+              "Value": "local_data/logos/BBCTHREE.png",
               "type": "Logo"
             }
           ]
@@ -724,7 +724,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BBCFour.png",
+              "Value": "local_data/logos/BBCFour.png",
               "type": "Logo"
             }
           ]
@@ -737,7 +737,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/CartoonNetwork.png",
+              "Value": "local_data/logos/CartoonNetwork.png",
               "type": "Logo"
             }
           ]
@@ -750,7 +750,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DisneyXD.png",
+              "Value": "local_data/logos/DisneyXD.png",
               "type": "Logo"
             }
           ]
@@ -763,7 +763,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Boomerang.png",
+              "Value": "local_data/logos/Boomerang.png",
               "type": "Logo"
             }
           ]
@@ -776,7 +776,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Cbeebies.png",
+              "Value": "local_data/logos/Cbeebies.png",
               "type": "Logo"
             }
           ]
@@ -789,7 +789,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/CBBC.png",
+              "Value": "local_data/logos/CBBC.png",
               "type": "Logo"
             }
           ]
@@ -802,7 +802,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/JimJam.png",
+              "Value": "local_data/logos/JimJam.png",
               "type": "Logo"
             }
           ]
@@ -815,7 +815,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/CanalJ.png",
+              "Value": "local_data/logos/CanalJ.png",
               "type": "Logo"
             }
           ]
@@ -827,7 +827,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/KetnetPlusCanvasPlus.png",
+              "Value": "local_data/logos/KetnetPlusCanvasPlus.png",
               "type": "Logo"
             }
           ]
@@ -839,7 +839,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/KetnetCanvas.png",
+              "Value": "local_data/logos/KetnetCanvas.png",
               "type": "Logo"
             }
           ]
@@ -851,7 +851,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/KetnetCanvas.png",
+              "Value": "local_data/logos/KetnetCanvas.png",
               "type": "Logo"
             }
           ]
@@ -864,7 +864,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/NationalGeographic.png",
+              "Value": "local_data/logos/NationalGeographic.png",
               "type": "Logo"
             }
           ]
@@ -877,7 +877,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Njam.png",
+              "Value": "local_data/logos/Njam.png",
               "type": "Logo"
             }
           ]
@@ -890,7 +890,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Nickelodeon.png",
+              "Value": "local_data/logos/Nickelodeon.png",
               "type": "Logo"
             }
           ]
@@ -903,7 +903,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/NickJunior.png",
+              "Value": "local_data/logos/NickJunior.png",
               "type": "Logo"
             }
           ]
@@ -916,7 +916,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Studio100TV.png",
+              "Value": "local_data/logos/Studio100TV.png",
               "type": "Logo"
             }
           ]
@@ -929,7 +929,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VTMKZoom.png",
+              "Value": "local_data/logos/VTMKZoom.png",
               "type": "Logo"
             }
           ]
@@ -942,7 +942,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MTVNHD.png",
+              "Value": "local_data/logos/MTVNHD.png",
               "type": "Logo"
             }
           ]
@@ -955,7 +955,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TMF.png",
+              "Value": "local_data/logos/TMF.png",
               "type": "Logo"
             }
           ]
@@ -968,7 +968,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MentTv.png",
+              "Value": "local_data/logos/MentTv.png",
               "type": "Logo"
             }
           ]
@@ -981,7 +981,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Q-music.png",
+              "Value": "local_data/logos/Q-music.png",
               "type": "Logo"
             }
           ]
@@ -994,7 +994,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Stories.png",
+              "Value": "local_data/logos/Stories.png",
               "type": "Logo"
             }
           ]
@@ -1007,7 +1007,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Lifetv.png",
+              "Value": "local_data/logos/Lifetv.png",
               "type": "Logo"
             }
           ]
@@ -1019,7 +1019,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -1032,7 +1032,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Xite.png",
+              "Value": "local_data/logos/Xite.png",
               "type": "Logo"
             }
           ]
@@ -1045,7 +1045,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/NationalGeographicHD.png",
+              "Value": "local_data/logos/NationalGeographicHD.png",
               "type": "Logo"
             }
           ]
@@ -1058,7 +1058,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Sundance.png",
+              "Value": "local_data/logos/Sundance.png",
               "type": "Logo"
             }
           ]
@@ -1071,7 +1071,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VTM.png",
+              "Value": "local_data/logos/VTM.png",
               "type": "Logo"
             }
           ]
@@ -1084,7 +1084,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/een.png",
+              "Value": "local_data/logos/een.png",
               "type": "Logo"
             }
           ]
@@ -1097,7 +1097,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Ned1.png",
+              "Value": "local_data/logos/Ned1.png",
               "type": "Logo"
             }
           ]
@@ -1110,7 +1110,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Ned2.png",
+              "Value": "local_data/logos/Ned2.png",
               "type": "Logo"
             }
           ]
@@ -1123,7 +1123,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Ned3.png",
+              "Value": "local_data/logos/Ned3.png",
               "type": "Logo"
             }
           ]
@@ -1136,7 +1136,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PlugTV.png",
+              "Value": "local_data/logos/PlugTV.png",
               "type": "Logo"
             }
           ]
@@ -1149,7 +1149,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Contact.png",
+              "Value": "local_data/logos/Contact.png",
               "type": "Logo"
             }
           ]
@@ -1162,7 +1162,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/LaTrois.png",
+              "Value": "local_data/logos/LaTrois.png",
               "type": "Logo"
             }
           ]
@@ -1175,7 +1175,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TF1HD.png",
+              "Value": "local_data/logos/TF1HD.png",
               "type": "Logo"
             }
           ]
@@ -1188,7 +1188,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TVBreizh.png",
+              "Value": "local_data/logos/TVBreizh.png",
               "type": "Logo"
             }
           ]
@@ -1201,7 +1201,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ZDF.png",
+              "Value": "local_data/logos/ZDF.png",
               "type": "Logo"
             }
           ]
@@ -1214,7 +1214,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Prosieben.png",
+              "Value": "local_data/logos/Prosieben.png",
               "type": "Logo"
             }
           ]
@@ -1227,7 +1227,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/WDR.png",
+              "Value": "local_data/logos/WDR.png",
               "type": "Logo"
             }
           ]
@@ -1240,7 +1240,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/SAT1.png",
+              "Value": "local_data/logos/SAT1.png",
               "type": "Logo"
             }
           ]
@@ -1253,7 +1253,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RTLTELE.png",
+              "Value": "local_data/logos/RTLTELE.png",
               "type": "Logo"
             }
           ]
@@ -1266,7 +1266,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RaiUno.png",
+              "Value": "local_data/logos/RaiUno.png",
               "type": "Logo"
             }
           ]
@@ -1279,7 +1279,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TVE.png",
+              "Value": "local_data/logos/TVE.png",
               "type": "Logo"
             }
           ]
@@ -1292,7 +1292,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TRT.png",
+              "Value": "local_data/logos/TRT.png",
               "type": "Logo"
             }
           ]
@@ -1305,7 +1305,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MediasetItalia.png",
+              "Value": "local_data/logos/MediasetItalia.png",
               "type": "Logo"
             }
           ]
@@ -1318,7 +1318,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Dummy.png",
+              "Value": "local_data/logos/Dummy.png",
               "type": "Logo"
             }
           ]
@@ -1331,7 +1331,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/SportingHd2.png",
+              "Value": "local_data/logos/SportingHd2.png",
               "type": "Logo"
             }
           ]
@@ -1344,7 +1344,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Sporting3.png",
+              "Value": "local_data/logos/Sporting3.png",
               "type": "Logo"
             }
           ]
@@ -1357,7 +1357,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Dummy.png",
+              "Value": "local_data/logos/Dummy.png",
               "type": "Logo"
             }
           ]
@@ -1370,7 +1370,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Dummy.png",
+              "Value": "local_data/logos/Dummy.png",
               "type": "Logo"
             }
           ]
@@ -1383,7 +1383,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MotorsTV.png",
+              "Value": "local_data/logos/MotorsTV.png",
               "type": "Logo"
             }
           ]
@@ -1396,7 +1396,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeStarHD.png",
+              "Value": "local_data/logos/PrimeStarHD.png",
               "type": "Logo"
             }
           ]
@@ -1409,7 +1409,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeStar1.png",
+              "Value": "local_data/logos/PrimeStar1.png",
               "type": "Logo"
             }
           ]
@@ -1422,7 +1422,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeAction.png",
+              "Value": "local_data/logos/PrimeAction.png",
               "type": "Logo"
             }
           ]
@@ -1435,7 +1435,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeFamily.png",
+              "Value": "local_data/logos/PrimeFamily.png",
               "type": "Logo"
             }
           ]
@@ -1448,7 +1448,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeFezztival.png",
+              "Value": "local_data/logos/PrimeFezztival.png",
               "type": "Logo"
             }
           ]
@@ -1461,7 +1461,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeSeries.png",
+              "Value": "local_data/logos/PrimeSeries.png",
               "type": "Logo"
             }
           ]
@@ -1474,7 +1474,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PrimeStar.png",
+              "Value": "local_data/logos/PrimeStar.png",
               "type": "Logo"
             }
           ]
@@ -1487,7 +1487,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Telenet3Demo.png",
+              "Value": "local_data/logos/Telenet3Demo.png",
               "type": "Logo"
             }
           ]
@@ -1500,7 +1500,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/LCI1.png",
+              "Value": "local_data/logos/LCI1.png",
               "type": "Logo"
             }
           ]
@@ -1513,7 +1513,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/OnzeTV.png",
+              "Value": "local_data/logos/OnzeTV.png",
               "type": "Logo"
             }
           ]
@@ -1526,7 +1526,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RT.png",
+              "Value": "local_data/logos/RT.png",
               "type": "Logo"
             }
           ]
@@ -1539,7 +1539,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/NationalGeographic.png",
+              "Value": "local_data/logos/NationalGeographic.png",
               "type": "Logo"
             }
           ]
@@ -1552,7 +1552,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/OutTV.png",
+              "Value": "local_data/logos/OutTV.png",
               "type": "Logo"
             }
           ]
@@ -1565,7 +1565,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TravelChannel.png",
+              "Value": "local_data/logos/TravelChannel.png",
               "type": "Logo"
             }
           ]
@@ -1578,7 +1578,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TCM.png",
+              "Value": "local_data/logos/TCM.png",
               "type": "Logo"
             }
           ]
@@ -1591,7 +1591,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MGM_Movie_Channel.png",
+              "Value": "local_data/logos/MGM_Movie_Channel.png",
               "type": "Logo"
             }
           ]
@@ -1604,7 +1604,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/SYFYUniversal.png",
+              "Value": "local_data/logos/SYFYUniversal.png",
               "type": "Logo"
             }
           ]
@@ -1617,7 +1617,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Nicktoons.png",
+              "Value": "local_data/logos/Nicktoons.png",
               "type": "Logo"
             }
           ]
@@ -1630,7 +1630,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VTMKZoomPlus.png",
+              "Value": "local_data/logos/VTMKZoomPlus.png",
               "type": "Logo"
             }
           ]
@@ -1643,7 +1643,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PebbleTV.png",
+              "Value": "local_data/logos/PebbleTV.png",
               "type": "Logo"
             }
           ]
@@ -1656,7 +1656,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VH1.png",
+              "Value": "local_data/logos/VH1.png",
               "type": "Logo"
             }
           ]
@@ -1669,7 +1669,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MtvRocks.png",
+              "Value": "local_data/logos/MtvRocks.png",
               "type": "Logo"
             }
           ]
@@ -1682,7 +1682,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Litetv.png",
+              "Value": "local_data/logos/Litetv.png",
               "type": "Logo"
             }
           ]
@@ -1695,7 +1695,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Mezzo.png",
+              "Value": "local_data/logos/Mezzo.png",
               "type": "Logo"
             }
           ]
@@ -1708,7 +1708,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/TraceTropical.png",
+              "Value": "local_data/logos/TraceTropical.png",
               "type": "Logo"
             }
           ]
@@ -1721,7 +1721,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MTVNHD.png",
+              "Value": "local_data/logos/MTVNHD.png",
               "type": "Logo"
             }
           ]
@@ -1734,7 +1734,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Be1.png",
+              "Value": "local_data/logos/Be1.png",
               "type": "Logo"
             }
           ]
@@ -1747,7 +1747,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BeCine.png",
+              "Value": "local_data/logos/BeCine.png",
               "type": "Logo"
             }
           ]
@@ -1760,7 +1760,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BeSeries.png",
+              "Value": "local_data/logos/BeSeries.png",
               "type": "Logo"
             }
           ]
@@ -1773,7 +1773,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BeSport1.png",
+              "Value": "local_data/logos/BeSport1.png",
               "type": "Logo"
             }
           ]
@@ -1786,7 +1786,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BeSport2.png",
+              "Value": "local_data/logos/BeSport2.png",
               "type": "Logo"
             }
           ]
@@ -1799,7 +1799,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Be1.png",
+              "Value": "local_data/logos/Be1.png",
               "type": "Logo"
             }
           ]
@@ -1812,7 +1812,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VooFoot.png",
+              "Value": "local_data/logos/VooFoot.png",
               "type": "Logo"
             }
           ]
@@ -1825,7 +1825,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/LaUne.png",
+              "Value": "local_data/logos/LaUne.png",
               "type": "Logo"
             }
           ]
@@ -1838,7 +1838,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/LaDeux.png",
+              "Value": "local_data/logos/LaDeux.png",
               "type": "Logo"
             }
           ]
@@ -1851,7 +1851,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RTLTVI.png",
+              "Value": "local_data/logos/RTLTVI.png",
               "type": "Logo"
             }
           ]
@@ -1864,7 +1864,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/ClubRTL.png",
+              "Value": "local_data/logos/ClubRTL.png",
               "type": "Logo"
             }
           ]
@@ -1877,7 +1877,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/PlayboyTV.png",
+              "Value": "local_data/logos/PlayboyTV.png",
               "type": "Logo"
             }
           ]
@@ -1890,7 +1890,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/AdultChannel.png",
+              "Value": "local_data/logos/AdultChannel.png",
               "type": "Logo"
             }
           ]
@@ -1903,7 +1903,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/X-zone.png",
+              "Value": "local_data/logos/X-zone.png",
               "type": "Logo"
             }
           ]
@@ -1916,7 +1916,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio1.png",
+              "Value": "local_data/logos/Radio1.png",
               "type": "Logo"
             }
           ]
@@ -1929,7 +1929,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio2.png",
+              "Value": "local_data/logos/Radio2.png",
               "type": "Logo"
             }
           ]
@@ -1942,7 +1942,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MNM.png",
+              "Value": "local_data/logos/MNM.png",
               "type": "Logo"
             }
           ]
@@ -1955,7 +1955,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/StuBru.png",
+              "Value": "local_data/logos/StuBru.png",
               "type": "Logo"
             }
           ]
@@ -1968,7 +1968,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Klara.png",
+              "Value": "local_data/logos/Klara.png",
               "type": "Logo"
             }
           ]
@@ -1981,7 +1981,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/KlaraCont.png",
+              "Value": "local_data/logos/KlaraCont.png",
               "type": "Logo"
             }
           ]
@@ -1994,7 +1994,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MNMHits.png",
+              "Value": "local_data/logos/MNMHits.png",
               "type": "Logo"
             }
           ]
@@ -2007,7 +2007,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/NieuwsPlus.png",
+              "Value": "local_data/logos/NieuwsPlus.png",
               "type": "Logo"
             }
           ]
@@ -2020,7 +2020,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Sporza.png",
+              "Value": "local_data/logos/Sporza.png",
               "type": "Logo"
             }
           ]
@@ -2033,7 +2033,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Q-music.png",
+              "Value": "local_data/logos/Q-music.png",
               "type": "Logo"
             }
           ]
@@ -2046,7 +2046,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/joefm.png",
+              "Value": "local_data/logos/joefm.png",
               "type": "Logo"
             }
           ]
@@ -2059,7 +2059,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Topradio.png",
+              "Value": "local_data/logos/Topradio.png",
               "type": "Logo"
             }
           ]
@@ -2072,7 +2072,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio2.png",
+              "Value": "local_data/logos/Radio2.png",
               "type": "Logo"
             }
           ]
@@ -2085,7 +2085,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio2.png",
+              "Value": "local_data/logos/Radio2.png",
               "type": "Logo"
             }
           ]
@@ -2098,7 +2098,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio2.png",
+              "Value": "local_data/logos/Radio2.png",
               "type": "Logo"
             }
           ]
@@ -2111,7 +2111,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio2.png",
+              "Value": "local_data/logos/Radio2.png",
               "type": "Logo"
             }
           ]
@@ -2124,7 +2124,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Nostalgie.png",
+              "Value": "local_data/logos/Nostalgie.png",
               "type": "Logo"
             }
           ]
@@ -2137,7 +2137,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/LaPremiere.png",
+              "Value": "local_data/logos/LaPremiere.png",
               "type": "Logo"
             }
           ]
@@ -2150,7 +2150,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/VivaCite.png",
+              "Value": "local_data/logos/VivaCite.png",
               "type": "Logo"
             }
           ]
@@ -2163,7 +2163,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Musiq3.png",
+              "Value": "local_data/logos/Musiq3.png",
               "type": "Logo"
             }
           ]
@@ -2176,7 +2176,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Radio1.png",
+              "Value": "local_data/logos/Radio1.png",
               "type": "Logo"
             }
           ]
@@ -2189,7 +2189,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Classic21.png",
+              "Value": "local_data/logos/Classic21.png",
               "type": "Logo"
             }
           ]
@@ -2202,7 +2202,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BelRTL.png",
+              "Value": "local_data/logos/BelRTL.png",
               "type": "Logo"
             }
           ]
@@ -2215,7 +2215,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Contact.png",
+              "Value": "local_data/logos/Contact.png",
               "type": "Logo"
             }
           ]
@@ -2228,7 +2228,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Mint.png",
+              "Value": "local_data/logos/Mint.png",
               "type": "Logo"
             }
           ]
@@ -2241,7 +2241,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/RFI.png",
+              "Value": "local_data/logos/RFI.png",
               "type": "Logo"
             }
           ]
@@ -2254,7 +2254,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/BRF1.png",
+              "Value": "local_data/logos/BRF1.png",
               "type": "Logo"
             }
           ]
@@ -2267,7 +2267,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2280,7 +2280,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2293,7 +2293,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2306,7 +2306,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2319,7 +2319,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2332,7 +2332,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2345,7 +2345,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2358,7 +2358,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2371,7 +2371,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2384,7 +2384,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2397,7 +2397,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2410,7 +2410,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2423,7 +2423,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2436,7 +2436,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2449,7 +2449,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2462,7 +2462,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2475,7 +2475,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2488,7 +2488,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2501,7 +2501,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2514,7 +2514,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2527,7 +2527,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2540,7 +2540,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2553,7 +2553,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2566,7 +2566,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2579,7 +2579,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2592,7 +2592,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2605,7 +2605,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2618,7 +2618,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2631,7 +2631,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2644,7 +2644,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2657,7 +2657,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2670,7 +2670,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2683,7 +2683,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2696,7 +2696,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2709,7 +2709,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2722,7 +2722,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2735,7 +2735,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2748,7 +2748,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2761,7 +2761,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2774,7 +2774,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2787,7 +2787,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/MCBelpop.png",
+              "Value": "local_data/logos/MCBelpop.png",
               "type": "Logo"
             }
           ]
@@ -2799,7 +2799,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/DisneyPlayhouse.png",
+              "Value": "local_data/logos/DisneyPlayhouse.png",
               "type": "Logo"
             }
           ]
@@ -2811,7 +2811,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/Vitaliteit.png",
+              "Value": "local_data/logos/Vitaliteit.png",
               "type": "Logo"
             }
           ]
@@ -2823,7 +2823,7 @@
         "Pictures": {
           "Picture": [
             {
-              "Value": "http://217.149.130.199/logos/eenplus.png",
+              "Value": "local_data/logos/eenplus.png",
               "type": "Logo"
             }
           ]

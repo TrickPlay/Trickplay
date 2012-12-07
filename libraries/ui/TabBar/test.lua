@@ -38,6 +38,7 @@ tb1 = WL.TabBar{
         focus   = WL.Widget_Image{src="Button/button-focus.png"},
     }
 }
+
 print("\n\n\n inject new tab")
 tb1.tabs:insert(2,{label="New",   contents = WL.Widget_Group{children={Rectangle{w=400,h=400,color="30f0f0"}}}})
 

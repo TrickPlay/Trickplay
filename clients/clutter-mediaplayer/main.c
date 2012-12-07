@@ -33,6 +33,8 @@ UserData;
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
 
+static TPContext * context = 0;
+
 //-----------------------------------------------------------------------------
 // Signal handlers
 
@@ -502,6 +504,7 @@ static int mp_get_audio_volume(TPMediaPlayer * mp,double * volume)
     {
         *volume=clutter_media_get_audio_volume(cm);
     }
+
     return 0;
 }
 
@@ -510,14 +513,12 @@ static int mp_set_audio_volume(TPMediaPlayer * mp,double volume)
     USERDATA(mp);
     CM(ud);
 
-    if ( ud->mute )
-    {
-        ud->volume = volume;
-    }
-    else
+    ud->volume = volume;
+    if ( !ud->mute )
     {
         clutter_media_set_audio_volume(cm,volume);
     }
+
     return 0;
 }
 
@@ -544,13 +545,11 @@ static int mp_set_audio_mute(TPMediaPlayer * mp,int mute)
     {
         if ( ud->mute )
         {
-            ud->volume = clutter_media_get_audio_volume(cm);
             clutter_media_set_audio_volume(cm,0);
         }
         else
         {
             clutter_media_set_audio_volume(cm,ud->volume);
-            ud->volume = 0;
         }
     }
 
@@ -602,7 +601,8 @@ static void stage_allocation_notify( GObject * actor , GParamSpec * p , gpointer
 
     if ( vt )
     {
-        ClutterActor * stage = clutter_stage_get_default();
+        // HACK ALERT
+        ClutterActor * stage = (ClutterActor *)tp_context_get(context,"sekrit-stage");
 
         gfloat width;
         gfloat height;
@@ -622,7 +622,7 @@ static int mp_constructor(TPMediaPlayer * mp)
     if (!init)
     {
         init=1;
-        gst_init(NULL,NULL);
+        clutter_gst_init(NULL,NULL);
     }
 
     ClutterActor * video_texture=clutter_gst_video_texture_new();
@@ -641,7 +641,9 @@ static int mp_constructor(TPMediaPlayer * mp)
 
     clutter_actor_hide(video_texture);
 
-    ClutterActor * stage=clutter_stage_get_default();
+    // This is a total hack, but there's no clean way to leak the ClutterStage out of the context
+    // and clutter_stage_get_default() might give us the wrong stage in a multi-stage enviroment (like Ubuntu or OSX)
+    ClutterActor * stage=(ClutterActor *)tp_context_get(context, "sekrit-stage");
 
     gfloat width,height;
 
@@ -689,6 +691,9 @@ static int mp_constructor(TPMediaPlayer * mp)
     mp->play_sound=mp_play_sound;
     mp->get_viewport_texture=mp_get_viewport_texture;
 
+    // Initialize volume
+    mp_set_audio_volume(mp, 0.5);
+
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -709,8 +714,6 @@ static void trickplay_exiting( TPContext * context , const char * subject , void
 }
 
 //-----------------------------------------------------------------------------
-
-static TPContext * context = 0;
 
 static void quit( int sig )
 {

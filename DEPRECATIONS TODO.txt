@@ -1,0 +1,10 @@
+DEPRECATIONS
+============
+
+ClutterAnimator
+ClutterCairoTexture
+ClutterRectangle
+ClutterScore
+ClutterState
+
+ClutterTexture

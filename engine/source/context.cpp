@@ -2719,6 +2719,8 @@ const char * tp_context_get( TPContext * context, const char * key )
 {
     g_assert( context );
 
+    if(!strcmp(key, "sekrit-stage")) return (const char *)context->get_stage();
+
     return context->get( key );
 }
 

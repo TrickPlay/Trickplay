@@ -1,18 +1,25 @@
-#include "main.h"
+#include <math.h>
+#include "layout.h"
 #include "leaf.h"
 #include "item.h"
 
 Layout * layout_new ( unsigned int width )
 {
     Layout * layout = malloc( sizeof( Layout ) );
+
     layout->width = width;
     layout->height = 0;
     layout->area = 0;
     layout->coverage = 0.0f;
-    layout->status = LAYOUT_FOUND_NONE;
+    layout->items_placed = 0;
+    layout->min_item_w = 256;
+    layout->min_item_h = 256;
+    layout->max_item_w = 0;
+    layout->item_area  = 0;
+
     layout->leaves = g_sequence_new( NULL );
     layout->places = g_ptr_array_new_with_free_func( g_free );
-    
+
     return layout;
 }
 
@@ -23,6 +30,26 @@ void layout_free ( Layout * layout )
     g_sequence_free( layout->leaves );
     free( layout );
 }
+
+/*
+unsigned int gcf( unsigned int a, unsigned int b )
+{
+    unsigned int t;
+    if ( b > a )
+    {
+        t = b;
+        b = a;
+        a = t;
+    }
+    while ( b != 0 )
+    {
+        t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+*/
 
 Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
 {
@@ -38,7 +65,8 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
     while ( !g_sequence_iter_is_end( si ) )
     {
         leaf = g_sequence_get( si );
-        if ( leaf->w >= item->w && leaf->h >= item->h ) {
+        if ( leaf->w >= item->w && leaf->h >= item->h )
+        {
             growth = MAX( layout->height, leaf->y + item->h ) - layout->height;
             if ( leaf->w == item->w || leaf->h == item->h )
             {
@@ -65,73 +93,73 @@ Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
                 }
             }
         }
+
         si = g_sequence_iter_next( si );
     }
 
-    return best ?: close ?: fallback ?: NULL;
+    if ( best )     return best;
+    if ( close )    return close;
+    if ( fallback ) return fallback;
+    return NULL;
 }
 
-void layout_assign_item ( Layout * layout, Item * item, Leaf * leaf, Output * output )
+void layout_scan_item( Item * item, Layout * layout )
 {
-    unsigned int covered = (unsigned int) ( layout->coverage * (float) layout->area );
-    layout->height = MAX( layout->height, leaf->y + item->h );
-    layout->area = layout->width * layout->height;
-    layout->coverage = (float) ( covered + item->w * item->h ) / (float) layout->area;
-    
-    leaf->item = item;
-    g_ptr_array_add( layout->places, leaf );
-    leaf_cut( leaf, item->w, item->h, layout->leaves, output );
+    layout->min_item_w = MIN( layout->min_item_w, item->w );
+    layout->min_item_h = MIN( layout->min_item_h, item->h );
+    layout->max_item_w = MAX( layout->max_item_w, item->w );
+    layout->item_area += item->area;
 }
 
-Layout * layout_new_from_output ( Output * output, unsigned int width, Options * options )
+void layout_loop_item( Item * item, Layout * layout )
+{
+    Leaf * leaf = layout_leaf_for_item( layout, item );
+
+    if ( leaf )
+    {
+        unsigned int covered = (unsigned int) ( layout->coverage * (float) layout->area );
+        layout->height = MAX( layout->height, leaf->y + item->h );
+        layout->area = layout->width * layout->height;
+        layout->coverage = (float) ( covered + item->w * item->h ) / (float) layout->area;
+
+        leaf->item = item;
+        g_ptr_array_add( layout->places, leaf );
+        leaf_cut( leaf, item->w, item->h, layout );
+        layout->items_placed += 1;
+    }
+}
+
+Layout * layout_new_from_state ( State * state, unsigned int width, Options * options )
 {
     Layout * layout = layout_new( width );
-    
-    gboolean f = FALSE, nf = FALSE;
-    g_sequence_insert_sorted( layout->leaves, leaf_new( 0, 0, MAX( width, output->minimum.width ), options->output_size_limit * ( options->allow_multiple_sheets ? 1 : 2 ) ), leaf_compare, NULL );
+    g_sequence_foreach( state->items, (GFunc) layout_scan_item, layout );
 
-    // iterate through all items
-
-    GSequenceIter * i = g_sequence_get_begin_iter( output->items );
-    while ( !g_sequence_iter_is_end( i ) )
+    if ( width < layout->max_item_w )
     {
-        Item * item = (Item *) g_sequence_get( i );
-        if ( !item->placed )
-        {
-            Leaf * leaf = layout_leaf_for_item( layout, item );
-            if ( leaf )
-            {
-                f = TRUE;
-                layout_assign_item( layout, item, leaf, output );
-            }
-            else
-            {
-                nf = TRUE;
-                if ( !options->allow_multiple_sheets )
-                    break;
-            }
-        }
-
-        i = g_sequence_iter_next( i );
+        return layout;
     }
 
-    layout->status = f ? ( !nf ? LAYOUT_FOUND_ALL : LAYOUT_FOUND_SOME ) : LAYOUT_FOUND_NONE;
+    Leaf * leaf = leaf_new( 0, 0, width, options->output_size_limit );
+    g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
+
+    g_sequence_foreach( state->items, (GFunc) layout_loop_item, layout );
+
     return layout;
+}
+
+float layout_heuristic( Layout * layout )
+{
+    return pow( layout->coverage, 4.0 ) * ( layout->area + layout->width + layout->height );
 }
 
 Layout * layout_choose( Layout * a, Layout * b, Options * options )
 {
-	if ( !a || !b )
-        return a ?: b;
-    
-    if ( a->height <= options->output_size_limit ) {
-        if ( options->allow_multiple_sheets )
-        {
-            if ( b->coverage == 0 || pow( a->coverage, 4.0 ) * a->area > pow( b->coverage, 4.0 ) * b->area )
-                return a;
-        }
-        else if ( b->area == 0 || a->area < b->area || ( a->area == b->area && a->width + a->height <= b->width + b->height ) )
+    if(!a) return b;
+    if(!b) return a;
+
+    if ( a->height <= options->output_size_limit && a->items_placed > 0
+        && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
             return a;
-    }
+
     return b;
 }

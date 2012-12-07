@@ -461,34 +461,31 @@ Button = setmetatable(
         on_focus_out  = false
         on_pressed    = false
         on_released   = false
-        images        = false
+        --images        = false
         label         = Text{text = "Button"}
         label_state   = {state = "DEFAULT"}
         --create_canvas = create_canvas
         states = {"default","focus","activation"}
-
         --default create_canvas function
         create_canvas = function(self,state)
+            --print(state)
+            --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
             
             return NineSlice{
-                w = self.w,
-                h = self.h,
-                cells={
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
-                    },
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
-                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {180,0,0}},
-                    },
+                name   = state,
+                w      = self.w,
+                h      = self.h,
+                sheet  = self.style.spritesheet,
+                ids    = {
+                    nw = self.style[self.widget_type.."/"..state.."/nw.png"],
+                    n  = self.style[self.widget_type.."/"..state.."/n.png"],
+                    ne = self.style[self.widget_type.."/"..state.."/ne.png"],
+                    w  = self.style[self.widget_type.."/"..state.."/w.png"],
+                    c  = self.style[self.widget_type.."/"..state.."/c.png"],
+                    e  = self.style[self.widget_type.."/"..state.."/e.png"],
+                    sw = self.style[self.widget_type.."/"..state.."/sw.png"],
+                    s  = self.style[self.widget_type.."/"..state.."/s.png"],
+                    se = self.style[self.widget_type.."/"..state.."/se.png"],
                 }
             }
             

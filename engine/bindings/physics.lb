@@ -1756,6 +1756,11 @@ interface Body [[ ClutterActor * ]]
     ...
     (end)
 
+	The illustrations below show the actions that occur when two objects collide.
+	
+(see physics2dCollision1.png)
+(see physics2dCollision2.png)
+
     *See Also:* the <on_begin_contact> event, the <remove_onbegincontact_listener> function and the <physics.contacts> property
 */
 
