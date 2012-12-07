@@ -15,7 +15,7 @@ function generate_test_image ()
 myText_markup.text = string.format( "%s" , textString )
 	myText_no_markup.position = { 100, 200 }
 	myText_markup.use_markup = true
-	screen:add(myText_markup)
+	g:add(myText_markup)
 
 	local myText_no_markup = Text ()
 	myText_no_markup.font = "DejaVu Sans 38px"
@@ -24,7 +24,7 @@ myText_markup.text = string.format( "%s" , textString )
 	myText_no_markup.text = string.format( "%s" , textString )
 	myText_no_markup.use_markup = false
 	myText_no_markup.position = { 100, 500 }
-	screen:add(myText_no_markup)
+	g:add(myText_no_markup)
 
 	return g
 end
