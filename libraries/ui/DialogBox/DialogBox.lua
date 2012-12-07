@@ -5,7 +5,7 @@ local _ENV     = ({...})[2] or _ENV
 
 local function default_bg(self,w,h)
 	
-	
+	--[[
 	local c = Canvas(w,h)
 	
 	c.line_width = self.style.border.width
@@ -18,9 +18,23 @@ local function default_bg(self,w,h)
 	c:line_to( c.w - c.line_width/2, self.separator_y or 0 )
 	
 	c:set_source_color( self.style.border.colors.default )   c:stroke(true)
-	
-	return c:Image()
-	
+	--]]
+    local style = self.style
+	return  Group{children={NineSlice{name="backing",w=w,h=h,sheet = style.spritesheet, ids = {
+                                nw   = style[self.widget_type.."/default/nw.png"],
+                                n    = style[self.widget_type.."/default/n.png"],
+                                ne   = style[self.widget_type.."/default/ne.png"],
+                                w    = style[self.widget_type.."/default/w.png"],
+                                c    = style[self.widget_type.."/default/c.png"],
+                                e    = style[self.widget_type.."/default/e.png"],
+                                sw   = style[self.widget_type.."/default/sw.png"],
+                                s    = style[self.widget_type.."/default/s.png"],
+                                se   = style[self.widget_type.."/default/se.png"],
+                            }
+                        },
+            Sprite{sheet=style.spritesheet,id=self.widget_type.."/seperator-h.png",w=w,y=self.separator_y}
+        }
+	}
 end
 
 local default_parameters = {

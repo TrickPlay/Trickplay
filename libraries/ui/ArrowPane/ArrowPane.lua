@@ -247,52 +247,28 @@ ArrowPane = setmetatable(
             --]]
             style_buttons = function(instance,_ENV)
                 return function()
-                    up:set{
-                        name = "Up Button",
-                        images = {
-                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/default.png"    },
-                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/focus.png"      },
-                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/activation.png" },
-                        },
-                        reactive = true,
-                        label = "", 
-                        on_released = function() pane.virtual_y = pane.virtual_y - move_by end,
+                    up.images = {
+                        default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/default.png"    },
+                        focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/focus.png"      },
+                        activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-up/activation.png" },
                     }
                     up.anchor_point = { up.w/2, up.h/2 }
-                    down:set{ 
-                        name = "Down Button",
-                        images = {
-                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/default.png"    },
-                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/focus.png"      },
-                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/activation.png" },
-                        },
-                        reactive = true,
-                        label = "", 
-                        on_released = function() pane.virtual_y = pane.virtual_y + move_by end,
+                    down.images = {
+                        default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/default.png"    },
+                        focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/focus.png"      },
+                        activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-down/activation.png" },
                     }
                     down.anchor_point = { down.w/2, down.h/2 }
-                    left:set{ 
-                        name = "Left Button",
-                        images = {
-                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/default.png"    },
-                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/focus.png"      },
-                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/activation.png" },
-                        },
-                        reactive = true,
-                        label = "", 
-                        on_released = function() pane.virtual_x = pane.virtual_x - move_by end,
+                    left.images = {
+                        default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/default.png"    },
+                        focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/focus.png"      },
+                        activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-left/activation.png" },
                     }
                     left.anchor_point = { left.w/2, left.h/2 }
-                    right:set{ 
-                        name = "Right Button",
-                        images = {
-                            default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/default.png"    },
-                            focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/focus.png"      },
-                            activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/activation.png" },
-                        },
-                        reactive = true,
-                        label = "", 
-                        on_released = function() print("d") pane.virtual_x = pane.virtual_x + move_by end,
+                    right.images = {
+                        default    = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/default.png"    },
+                        focus      = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/focus.png"      },
+                        activation = Sprite{sheet=instance.style.spritesheet,id="ArrowPane/arrow-right/activation.png" },
                     }
                     right.anchor_point = { right.w/2, right.h/2 }
                 end
@@ -396,11 +372,32 @@ ArrowPane = setmetatable(
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
             
+            move_by = 10
             local l_pane  = ClippingRegion()
-            local l_up    = Button:declare()
-            local l_down  = Button:declare()
-            local l_left  = Button:declare()
-            local l_right = Button:declare()
+            local l_up    = Button:declare{
+                name = "Up Button",
+                label="",
+                reactive = true,
+                on_released = function() l_pane.virtual_y = l_pane.virtual_y - move_by end,
+            }
+            local l_down  = Button:declare{
+                name = "Down Button",
+                label="",
+                reactive = true,
+                on_released = function() l_pane.virtual_y = l_pane.virtual_y + move_by end,
+            }
+            local l_left  = Button:declare{
+                name = "Left Button",
+                label="",
+                reactive = true,
+                on_released = function() l_pane.virtual_x = l_pane.virtual_x - move_by end,
+            }
+            local l_right = Button:declare{
+                name = "Right Button",
+                label="",
+                reactive = true,
+                on_released = function() l_pane.virtual_x = l_pane.virtual_x + move_by end,
+            }
             
             local instance, _ENV = LayoutManager:declare{
                 children_want_focus = false,
@@ -432,6 +429,7 @@ ArrowPane = setmetatable(
             down  = l_down
             left  = l_left
             right = l_right
+            _ENV.move_by = move_by
             redraw_buttons = true
             
             instance:add_key_handler(keys.Up,       up.click)
