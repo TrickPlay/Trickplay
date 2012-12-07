@@ -68,7 +68,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         return 
     end 
 
-    uiInstance:add_mouse_handler("on_motion",function(self,self2, x,y)
+    uiInstance:add_mouse_handler("on_motion",function(self, x,y)
         
         --if control == true and mouse_state == hdr.BUTTON_DOWN then 
         if control == true then 
@@ -91,7 +91,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         end
     end,true)
 
-    uiInstance:add_mouse_handler("on_button_down",function(self, self2, x , y , button, num_clicks, m, ...)
+    uiInstance:add_mouse_handler("on_button_down",function(self,  x , y , button, num_clicks, m, ...)
 
         if input_mode == hdr.S_FOCUS then 
             local selObjName, selGid = screen_ui.getSelectedName()
@@ -227,7 +227,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         return true
     end,true)
 
-    uiInstance:add_mouse_handler("on_button_up",function(self, self2, x,y,button)
+    uiInstance:add_mouse_handler("on_button_up",function(self,  x,y,button)
         
         if input_mode == hdr.S_FOCUS then 
             local selObjName, selObjGid = screen_ui.getSelectedName()
