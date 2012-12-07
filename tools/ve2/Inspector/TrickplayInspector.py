@@ -1295,16 +1295,19 @@ class TrickplayInspector(QWidget):
             self.ui.screenCombo.setEditable (True)
 
     def screenEditTextChanged(self, str):
+        print("screenEditTextChanged", str, self.currentScreenName)
         if self.screen_textChanged == False :
             self.old_screen_name = self.currentScreenName
         self.screen_textChanged = True
 
     def screenChanged(self, index):
+        print("screenChanged")
 
         if index < 0 or self.addItemToScreens is True:
             return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
+        print(" currentScreenName : %s"%self.currentScreenName)
 
         if self.screens.has_key(self.currentScreenName) == False :
             if self.old_screen_name == "":
@@ -1321,19 +1324,20 @@ class TrickplayInspector(QWidget):
             for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked 
                 theItem = self.search(theLayer, 'name')
-                if theItem is None:
-                    return
+                if theItem is not None:
 
-                if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
-                    self.sendData(theItem['gid'], "is_visible", True)
-                    theItem.setCheckState(Qt.Checked)
-                # the layer is not in this selected screen and if it is checked 
-                elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
-                    self.sendData(theItem['gid'], "is_visible", False)
-                    theItem.setCheckState(Qt.Unchecked)
+                    if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
+                        self.sendData(theItem['gid'], "is_visible", True)
+                        theItem.setCheckState(Qt.Checked)
+                    # the layer is not in this selected screen and if it is checked 
+                    elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
+                        self.sendData(theItem['gid'], "is_visible", False)
+                        theItem.setCheckState(Qt.Unchecked)
 
             self.curLayerGid = theItem['gid'] 
             self.ui.inspector.setCurrentIndex(theItem.index())
+
+        print "SCREENS", self.screens
 
                     
     def styleActivated(self, index):
