@@ -513,7 +513,7 @@ _VE_.bringForward = function(gid)
 
     tmp_g = util.get_reverse_t(tmp_g)
 
-    while(table.getn(tmp_g) ~= 0) do
+    while(#tmp_g ~= 0) do
     	v = table.remove(tmp_g)
 	    curLayer:add(v)
     end 
@@ -547,7 +547,7 @@ _VE_.sendToBack = function(gid)
     tmp_g = util.get_reverse_t(tmp_g) 
     while #tmp_g ~= 0 do
 	    v = table.remove(tmp_g)
-	    g:add(v)	
+	    curLayer:add(v)	
     end 
 	
     editor.arrange_end(gid)
