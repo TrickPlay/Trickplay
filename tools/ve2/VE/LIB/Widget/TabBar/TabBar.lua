@@ -5,27 +5,22 @@ local _ENV     = ({...})[2] or _ENV
 
 
 local top_tabs = function(self,state)
-    
+            local style = self.style
             return NineSlice{
                 w = self.w,
                 h = self.h,
-                cells={
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {90,0,0}},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Clone{source = self.style.side_edge[state],z_rotation = {180,0,0}},
-                    },
-                }
+                sheet = style.spritesheet,
+                ids = {
+                                nw   = style["TabBar/default/nw.png"],
+                                n    = style["TabBar/default/n.png"],
+                                ne   = style["TabBar/default/ne.png"],
+                                w    = style["TabBar/default/w.png"],
+                                c    = style["TabBar/default/c.png"],
+                                e    = style["TabBar/default/e.png"],
+                                --sw   = style["TabBar/default/sw.png"],
+                                --s    = style["TabBar/default/s.png"],
+                                --se   = style["TabBar/default/se.png"],
+                            }
             }
     --[[
 	local c = Canvas(self.w,self.h)
@@ -63,28 +58,24 @@ local top_tabs = function(self,state)
 end
 
 local side_tabs = function(self,state)
-    
+            local style = self.style
             return NineSlice{
                 w = self.w,
                 h = self.h,
-                cells={
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                        Widget_Clone{source = self.style.top_edge[state]},
-                    },
-                    {
-                        Widget_Clone{source =   self.style.side_edge[state]},
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                        Widget_Rectangle{color = self.style.fill_colors[state] },
-                    },
-                    {
-                        Widget_Clone{source = self.style.rounded_corner[state],z_rotation = {270,0,0}},
-                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-                        Widget_Clone{source = self.style.top_edge[state], z_rotation = {180,0,0}},
-                    },
-                }
+                sheet = style.spritesheet,
+                ids = {
+                                nw   = style["TabBar/default/nw.png"],
+                                n    = style["TabBar/default/n.png"],
+                                --ne   = style["TabBar/default/ne.png"],
+                                w    = style["TabBar/default/w.png"],
+                                c    = style["TabBar/default/c.png"],
+                                --e    = style["TabBar/default/e.png"],
+                                sw   = style["TabBar/default/sw.png"],
+                                s    = style["TabBar/default/s.png"],
+                                --se   = style["TabBar/default/se.png"],
+                            }
             }
+    
             
     --[[
 	local c = Canvas(self.w,self.h)
@@ -535,9 +526,9 @@ TabBar = setmetatable(
                     end
                     local pane = obj.contents
                     
-                    local style = instance.style.attributes
-                    style.name = style
-                    style.border.colors.selection = style.border.colors.selection or "ffffff"
+                    --local style = instance.style.attributes
+                    --style.name = style
+                    --style.border.colors.selection = style.border.colors.selection or "ffffff"
                     local clones
                     if tab_images then
                         clones = {}
@@ -552,7 +543,7 @@ TabBar = setmetatable(
                         label  = obj.label,
                         w      = tab_w,
                         h      = tab_h,
-                        style  = style,
+                        style  = instance.style,--style,
                         group  = rbg,
                         images = clones,
                         reactive = true,
@@ -609,7 +600,7 @@ TabBar = setmetatable(
             --TODO roll into a single set
             tab_pane = ArrowPane{
                 name = "ArrowPane",
-                style = false,
+                style = instance.style,
                 arrow_move_by = tab_w,
                 on_key_focus_in = function()
                     if tabs_lm.length > 0 then
@@ -617,9 +608,9 @@ TabBar = setmetatable(
                     end
                 end
             }
-            tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
-            tab_pane.style.border.colors.default = "00000000"
-            tab_pane.style.fill_colors.default   = "00000000"
+            --tab_pane.style.arrow.offset = -tab_pane.style.arrow.size
+            --tab_pane.style.border.colors.default = "00000000"
+            --tab_pane.style.fill_colors.default   = "00000000"
             tab_pane:add(tabs_lm)
             
             instance.cells = {tab_pane,panes_obj}

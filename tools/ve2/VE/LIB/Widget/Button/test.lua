@@ -277,14 +277,15 @@ screen:show()
 
 
 ---[[
-b1 = WL.Button()
+b1 = WL.Button{w=200,h=50}
 b1.reactive = true
+print(screen.z)
 --]]
 ---[[
 --------------------------------------------------------------------------------
 b2 = WL.Button{x = 100,y = 200, label = "LABEL"}--,style = style}
 print("b2")
-b2.style = style
+--b2.style = style
 print("b2")
 b2.style.text.x_offset = 200
 b2.style.text.y_offset = -50
@@ -293,7 +294,7 @@ b2.reactive = true
 --------------------------------------------------------------------------------
 --]]
 ---[[
-b3 = WL.Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
+b3 = WL.Button{x = 100,y = 400, label = "new_label", h = 100}
 
 b3.w = 400
 b3.reactive = true
