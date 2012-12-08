@@ -18,7 +18,7 @@ local WL_ENV = setmetatable({},{__index = _G})
 --This table will hold everything that will be exposed to users
 local WL_EXT = {}
 
-WL_ENV.default_spritesheet = "skin.json"
+WL_ENV.default_spritesheet = pwd.."skin.json"
 
 local core_dependencies = {
     "__UTILITIES/AppVerbosity.lua",
