@@ -36,6 +36,7 @@ target_link_libraries( stitcher
         ${GOBJECT2_LIBRARIES}
         ${JSON_GLIB_LIBRARIES}
         ${MAGICKCORE_LIBRARIES}
+		-lm
 )
 
 set_target_properties( stitcher
