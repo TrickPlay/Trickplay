@@ -5,7 +5,7 @@ local _ENV     = ({...})[2] or _ENV
 
 
 local canvas_dot = function(self)
-	
+	--[[
 	local c = Canvas(self.dot_size,self.dot_size)
 	
 	c.line_width = self.style.border.width
@@ -18,8 +18,8 @@ local canvas_dot = function(self)
 	c:set_source_color(c1)
 	c:stroke()
 	
-	
-	return c:Image()
+	--]]
+	return Sprite{w=self.dot_size,h=self.dot_size,sheet = self.style.spritesheet,id="OrbitingDots/icon.png"}--c:Image()
 	
 end
 

@@ -237,7 +237,7 @@ local function Widgetize(instance)
             
             if enabled_upval or ignore_enabled then 
                 
-                retval = f(instance,...) or retval
+                retval = f(...) or retval
                 
             end
         end
