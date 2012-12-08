@@ -166,7 +166,7 @@ class Sprite [[ClutterActor*]] actor
     ~Sprite()
         [[
             int * sheet_ref = (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" );
-            lb_strong_unref( L , * sheet_ref );
+            if(sheet_ref) lb_strong_unref( L , * sheet_ref );
         ]];
 
     /*
@@ -219,7 +219,16 @@ class Sprite [[ClutterActor*]] actor
 
     string id
         [[
-            id = (char *) ((SpriteSheet::Sprite *) g_object_get_data( G_OBJECT( self ), "tp-sprite" ))->get_id();
+            SpriteSheet::Sprite *sprite = (SpriteSheet::Sprite *)g_object_get_data( G_OBJECT( self ), "tp-sprite" );
+            if(sprite)
+            {
+                id = (char *)sprite->get_id();
+            }
+            else
+            {
+                id = NULL;
+                g_warning("SPRITE HAS NO ID AT: %s", Util::where_am_i_lua(L).c_str());
+            }
         ]]
         [[
             GObject * g_self = G_OBJECT( self );
