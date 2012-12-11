@@ -87,6 +87,8 @@ public:
     
     Sprite * get_sprite( const char * id );
     std::list< std::string > * get_ids();
+    
+    bool has_id( const char * id );
 
     App * app;
     GObject * extra;
