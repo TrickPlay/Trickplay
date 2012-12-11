@@ -111,7 +111,7 @@ struct NineSliceBinding
     {
         g_assert( i < 9 );
         ids[i] = new_id;
-        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL );
+        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
     
     void set_sheet( SpriteSheet * _sheet )
@@ -120,7 +120,7 @@ struct NineSliceBinding
         
         for ( unsigned i = 0; i < 9; ++i )
         {
-            nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL );
+            nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
         }
     }
     

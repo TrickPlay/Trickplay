@@ -19,10 +19,11 @@ struct Slice
     Slice() : effect( NULL ), material( NULL ), sprite( NULL ) {};
     ~Slice() { if ( material ) cogl_handle_unref( material ); }
     
-    void set_sprite( Sprite * _sprite )
+    void set_sprite( Sprite * _sprite, bool async )
     {
         sprite = _sprite;
-        ping.set( sprite, Slice::on_ping, this, true );
+        g_message( "set_sprite %i", async );
+        ping.set( sprite, Slice::on_ping, this, async );
         update();
     }
     
@@ -62,10 +63,10 @@ ClutterEffect * nineslice_effect_new()
     return (ClutterEffect *) g_object_new( TYPE_NINESLICE_EFFECT, NULL );
 }
 
-void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite * sprite )
+void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite * sprite, bool async )
 {
     g_assert( i < 9 );
-    effect->priv->slices[i].set_sprite( sprite );
+    effect->priv->slices[i].set_sprite( sprite, async );
 }
 
 bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i )
