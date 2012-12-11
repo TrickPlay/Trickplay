@@ -33,7 +33,6 @@ struct SpriteData
             
             update_sprite();
         }
-        g_message( "finished set id" );
     }
     
     void set_sheet( SpriteSheet * _sheet )
@@ -56,7 +55,6 @@ struct SpriteData
             {
                 int tw = 0, th = 0;
                 sprite->get_dimensions( & tw, & th );
-                g_message( "sprite size is %i %i", tw, th);
             }
         }
     }
@@ -143,7 +141,7 @@ class Sprite [[ClutterActor*]] actor
         [[
             self = lb_construct_gobject( ClutterActor, ClutterUtil::make_actor( clutter_texture_new ) );
             ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
-            g_message( "new sprite" );
+            
             g_object_set_data( G_OBJECT( self ), "tp-data", new SpriteData( CLUTTER_TEXTURE( self ) ) );
             SpriteData * data = get_data( self );
             
@@ -155,7 +153,6 @@ class Sprite [[ClutterActor*]] actor
             ClutterUtil::set_props_from_table( L, props );
             data->stop_updates = false;
             data->update();
-            g_message( "end new sprite" );
             
             g_object_unref( self );
         ]];
@@ -163,7 +160,7 @@ class Sprite [[ClutterActor*]] actor
     ~Sprite()
         [[
             SpriteData * data = get_data( self );
-            lb_strong_unref( L, data->ref );
+            if ( data->ref ) lb_strong_unref( L, data->ref );
             delete data;
         ]];
 
@@ -182,7 +179,6 @@ class Sprite [[ClutterActor*]] actor
             lb_strong_deref( L, get_data( self )->ref );
         ]]
         [[
-            g_message( "set sheet" );
             SpriteData * data = get_data( self );
             lb_strong_unref( L, data->ref );
             
@@ -201,7 +197,6 @@ class Sprite [[ClutterActor*]] actor
             }
             
             data->update();
-            g_message( "finished set sheet" );
         ]];
 
     /*

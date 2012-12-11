@@ -17,6 +17,7 @@ local create_bg = function(self)
     --]]
     print("self.style.fill_colors.default",self.style.fill_colors.default)
     --dumptable(self.style.fill_colors.default)
+    --[[
     return NineSlice{
         w = self.window_w,
         h = self.window_h,
@@ -36,6 +37,24 @@ local create_bg = function(self)
                 Widget_Clone{source = self.style.top_edge.default, z_rotation = {180,0,0}},
                 Widget_Clone{source = self.style.rounded_corner.default,z_rotation = {180,0,0}},
             },
+        }
+    }
+    --]]
+    return NineSlice{
+        name   = state,
+        w      = self.w,
+        h      = self.h,
+        sheet  = self.style.spritesheet,
+        ids    = {
+            nw = self.style[self.widget_type.."/default/nw.png"],
+            n  = self.style[self.widget_type.."/default/n.png"],
+            ne = self.style[self.widget_type.."/default/ne.png"],
+            w  = self.style[self.widget_type.."/default/w.png"],
+            c  = self.style[self.widget_type.."/default/c.png"],
+            e  = self.style[self.widget_type.."/default/e.png"],
+            sw = self.style[self.widget_type.."/default/sw.png"],
+            s  = self.style[self.widget_type.."/default/s.png"],
+            se = self.style[self.widget_type.."/default/se.png"],
         }
     }
 	
@@ -176,30 +195,67 @@ ButtonPicker = setmetatable(
                         --prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
                         --next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
                     end
-                    if restyle_arrows then
-                        restyle_arrows = false
-                        prev_arrow:set{
-                            w = instance.style.arrow.size,
-                            h = instance.style.arrow.size,
-                            anchor_point = {
-                                instance.style.arrow.size/2,
-                                instance.style.arrow.size/2
+                    if restyle then
+                        restyle = false
+                        local style = instance.style
+                        local sheet = style.spritesheet
+                        local widget_type = instance.widget_type
+                        print("gurp",window_w,window_h,style[widget_type.."/default/nw.png"],widget_type.."/default/nw.png")
+                        bg:set{
+                            name   = state,
+                            w      = window_w,
+                            h      = window_h,
+                            sheet  = sheet,
+                            ids    = {
+                                nw = style[widget_type.."/default/nw.png"],
+                                n  = style[widget_type.."/default/n.png"],
+                                ne = style[widget_type.."/default/ne.png"],
+                                w  = style[widget_type.."/default/w.png"],
+                                c  = style[widget_type.."/default/c.png"],
+                                e  = style[widget_type.."/default/e.png"],
+                                sw = style[widget_type.."/default/sw.png"],
+                                s  = style[widget_type.."/default/s.png"],
+                                se = style[widget_type.."/default/se.png"],
+                            }
+                        }
+                        print(bg.w,bg.h)
+                        prev_arrow.images = {
+                            default    = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/default.png"] or 
+                                    style[widget_type.."/arrow-up/default.png"]
+                            },
+                            focus      = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/focus.png"] or 
+                                    style[widget_type.."/arrow-up/focus.png"]
+                            },
+                            activation = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/activation.png"] or 
+                                    style[widget_type.."/arrow-up/activation.png"]
                             },
                         }
-                        next_arrow:set{
-                            w = instance.style.arrow.size,
-                            h = instance.style.arrow.size,
-                            anchor_point = {
-                                instance.style.arrow.size/2,
-                                instance.style.arrow.size/2
+                        next_arrow.images = {
+                            default    = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/default.png"] or 
+                                    style[widget_type.."/arrow-down/default.png"]
+                            },
+                            focus      = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/focus.png"] or 
+                                    style[widget_type.."/arrow-down/focus.png"]
+                            },
+                            activation = Sprite{sheet = sheet, id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/activation.png"] or 
+                                    style[widget_type.."/arrow-down/activation.png"]
                             },
                         }
-                        instance.spacing = instance.style.arrow.offset
+                        
+                        prev_arrow.anchor_point = { prev_arrow.w/2, prev_arrow.h/2 }
+                        next_arrow.anchor_point = { next_arrow.w/2, next_arrow.h/2 }
+                        
                     end
                     if flag_for_redraw or new_window_sz then
                         flag_for_redraw = false
                         --redo_fg()
-                        redo_bg()
+                        --redo_bg()
                     end
                     if new_window_sz then
                         new_window_sz = false
@@ -207,6 +263,8 @@ ButtonPicker = setmetatable(
                         --redo_fg()
                         window.w = window_w
                         window.h = window_h
+                        bg.w = window_w
+                        bg.h = window_h
                         window.clip = {
                             0,-- -window_w/2,
                             0,-- -window_h/2,
@@ -223,7 +281,36 @@ ButtonPicker = setmetatable(
                         new_orientation = false
                         if undo_prev_function then undo_prev_function() end
                         if undo_next_function then undo_next_function() end
+                        local style = instance.style
+                        local widget_type = instance.widget_type
+                        prev_arrow.images.default.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/default.png"] or 
+                                    style[widget_type.."/arrow-up/default.png"]
+                        prev_arrow.images.focus.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/focus.png"] or 
+                                    style[widget_type.."/arrow-up/focus.png"]
+                        prev_arrow.images.activation.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-left/activation.png"] or 
+                                    style[widget_type.."/arrow-up/activation.png"]
                         
+                        next_arrow.images.default.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/default.png"] or 
+                                    style[widget_type.."/arrow-down/default.png"]
+                        next_arrow.images.focus.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/focus.png"] or 
+                                    style[widget_type.."/arrow-down/focus.png"]
+                        next_arrow.images.activation.id = orientation == "horizontal" and 
+                                    style[widget_type.."/arrow-right/activation.png"] or 
+                                    style[widget_type.."/arrow-down/activation.png"]
+                        --[[
+                        prev_arrow.images.default.id = orientation == "horizontal" and 
+                                instance.style[instance.widget_type.."/arrow-left/default.png"] or 
+                                instance.style[instance.widget_type.."/arrow-up/default.png"]
+                        next_arrow.images.default.id = orientation == "horizontal" and 
+                                instance.style[instance.widget_type.."/arrow-right/default.png"] or 
+                                instance.style[instance.widget_type.."/arrow-down/default.png"]
+                                --]]
+                                --[[
                         if orientation == "horizontal" then
                             prev_arrow:set{z_rotation={  0,0,0}}
                             next_arrow:set{z_rotation={180,0,0}}
@@ -239,9 +326,12 @@ ButtonPicker = setmetatable(
                             error("ButtonPicker.orientation expects 'horizontal' or 'vertical as its value. Received: "..orientation,2)
                             
                         end
+                        --]]
                         instance.direction = orientation
                     end
                     lm_update()
+                    print(4)
+                        print(bg.name,bg,bg.w,bg.h)
                 end
             end,
             prev_i = function(instance,_ENV)
@@ -291,23 +381,26 @@ ButtonPicker = setmetatable(
             
             parameters = parameters or {}
             
+            local bg = NineSlice{name="backing"}
             local text = Group{name="text"}
-            local window = Widget_Group{name="window",children={text}}
-            
-            local prev_arrow = Button{
+            local window = Widget_Group{name="window",children={bg,text}}
+            print(1)
+            local prev_arrow = Button:declare{
                 name = "prev",
                 --style = false,
                 label = "",
-                create_canvas = create_arrow,
+                --create_canvas = create_arrow,
                 reactive = true,
             }
-            local next_arrow = Button{
+            print(2)
+            local next_arrow = Button:declare{
                 name = "next",
                 --style = false,
                 label = "",
-                create_canvas = create_arrow,
+                --create_canvas = create_arrow,
                 reactive = true,
             }
+            print(3)
             local instance, _ENV  = ListManager:declare{
                 cells = {
                     prev_arrow,
@@ -318,7 +411,7 @@ ButtonPicker = setmetatable(
             orientation = "horizontal"
             lm_update = update
             flag_for_redraw = true
-            restyle_arrows  = true
+            restyle  = true
             recolor_arrows  = true
             restyle_label   = true
             new_orientation = true
@@ -337,10 +430,13 @@ ButtonPicker = setmetatable(
             _ENV.prev_arrow = prev_arrow
             _ENV.text       = text
             _ENV.window     = window
+            _ENV.bg     = bg
             window_w   = 200
             window_h   = 70
             
-            bg = false
+            print(3.25)
+            bg =  NineSlice()--{name   = "Background"}
+            print(3.75)
             --fg = false
             
             list_entries = false

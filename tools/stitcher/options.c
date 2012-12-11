@@ -87,6 +87,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     
     GOptionContext * context = g_option_context_new( "- stitch together many source sprites into a single spritesheet");
     g_option_context_set_summary( context, "stitcher will accept a list of directories and/or images, and things that might be convertible to images (ie. SVG). Experiment to see what input formats work for your case." );
+    g_option_context_set_description( context, TP_GIT_VERSION );
 
     GOptionEntry entries[] =
     {

@@ -5,6 +5,7 @@ local _ENV     = ({...})[2] or _ENV
 
 local create_fill = function(self)
     
+    --[[
     if self.style.fill_colors.focus_upper and self.style.fill_colors.focus_lower then
         
         local h = self.h-2*self.style.border.width
@@ -29,10 +30,24 @@ local create_fill = function(self)
         
     end
     
+    --]]
+    local style = self.style
+    return NineSlice{name="shell",w=self.w,h=self.h,sheet = style.spritesheet, ids = {
+                                nw   = style[self.widget_type.."/filled/nw.png"],
+                                n    = style[self.widget_type.."/filled/n.png"],
+                                ne   = style[self.widget_type.."/filled/ne.png"],
+                                w    = style[self.widget_type.."/filled/w.png"],
+                                c    = style[self.widget_type.."/filled/c.png"],
+                                e    = style[self.widget_type.."/filled/e.png"],
+                                sw   = style[self.widget_type.."/filled/sw.png"],
+                                s    = style[self.widget_type.."/filled/s.png"],
+                                se   = style[self.widget_type.."/filled/se.png"],
+                            }
+                        }
 end
 
 local create_shell = function(self)
-    
+    --[[
 	local c = Canvas(self.w,self.h)
 	
 	c.line_width = self.style.border.width
@@ -79,7 +94,20 @@ local create_shell = function(self)
     local rv = c:Image{name = "shell"} 
     print("rv",rv)
     return rv
-    
+    --]]
+    local style = self.style
+    return NineSlice{name="shell",w=self.w,h=self.h,sheet = style.spritesheet, ids = {
+                                nw   = style[self.widget_type.."/empty/nw.png"],
+                                n    = style[self.widget_type.."/empty/n.png"],
+                                ne   = style[self.widget_type.."/empty/ne.png"],
+                                w    = style[self.widget_type.."/empty/w.png"],
+                                c    = style[self.widget_type.."/empty/c.png"],
+                                e    = style[self.widget_type.."/empty/e.png"],
+                                sw   = style[self.widget_type.."/empty/sw.png"],
+                                s    = style[self.widget_type.."/empty/s.png"],
+                                se   = style[self.widget_type.."/empty/se.png"],
+                            }
+                        }
 end
 
 local default_parameters = {
@@ -194,12 +222,12 @@ ProgressBar = setmetatable(
                         if fill then fill:unparent() end
                         fill = create_fill(instance)
                         print(fill)
-                        fill.w = shell.w-2*instance.style.border.width
+                        fill.w = shell.w---2*instance.style.border.width
                         fill.scale = scale_t
                         add(instance,fill)
                         
-                        fill.x = instance.style.border.width
-                        fill.y = instance.style.border.width
+                        --fill.x = instance.style.border.width
+                        --fill.y = instance.style.border.width
                         
                         expand_fill()
                     end

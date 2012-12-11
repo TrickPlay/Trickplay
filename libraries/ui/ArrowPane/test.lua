@@ -18,13 +18,13 @@ if not ARROWPANE         then dofile("ArrowPane/ArrowPane.lua")             end
 ap1 = WL.ArrowPane()
 ---[[
 print("here\n\n\n")
-ap1.style.arrow.size = 40
-ap1.style.arrow.colors.default = "009999"
+--ap1.style.arrow.size = 40
+--ap1.style.arrow.colors.default = "009999"
 ---[[
 s = ap1:to_json()
 ap1 = WL.ArrowPane()
 ap1:from_json(s)
-ap2 = WL.ArrowPane{x = 500,virtual_w = 400}
+ap2 = WL.ArrowPane{x = 500,virtual_w = 1000}
 ap2.horizontal_arrows_are_visible = true
 ap2.vertical_arrows_are_visible = false
 ap2.arrow_move_by = 40
@@ -33,8 +33,8 @@ ap2:add(WL.Widget_Rectangle{w=1000,h=1000,color="ffff00"},WL.Widget_Rectangle{w=
 ---[[
 ap3 = WL.ArrowPane{style = "new style",x = 1000,virtual_w = 400,virtual_h = 400}
 print("\n\n\nhhh\n\n\n")
-ap3.style.border.colors.default = "00000000"
-ap3.style.arrow.colors.default = "009999"
+--ap3.style.border.colors.default = "00000000"
+--ap3.style.arrow.colors.default = "009999"
 --]]
 --[[
 ap3.style.arrow.size = 40
