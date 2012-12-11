@@ -30,7 +30,7 @@ struct _NineSliceEffectClass
 
 ClutterEffect * nineslice_effect_new();
 
-void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, SpriteSheet::Sprite * sprite );
+void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, SpriteSheet::Sprite * sprite, bool async );
 
 bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i );
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );
