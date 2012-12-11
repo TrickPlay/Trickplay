@@ -156,6 +156,7 @@ class NineSlice [[ClutterActor*]] actor
                 lua_pushnil( L );
         ]]
         [[
+            g_message( "set sheet" );
             if ( SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 ) )
             {
                 const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
@@ -191,6 +192,7 @@ class NineSlice [[ClutterActor*]] actor
                 nineslice_effect_set_sprites( get_effect( self ), TRUE, NULL, NULL );
                 clutter_actor_queue_redraw( self );
             }
+            g_message( "finished set sheet" );
         ]];
 
     /*
@@ -231,6 +233,7 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]]
         [[
+            g_message( "set ids" );
             if ( lua_istable( L, 2 ) )
             {
                 const char ** list = (const char **) g_object_get_data( G_OBJECT( self ), "tp-ids" );
@@ -255,6 +258,7 @@ class NineSlice [[ClutterActor*]] actor
             {
                 g_warning( "Trying to set IDs on a nineslice with a thing that wasn't a table. Bad." );
             }
+            g_message( "finished set ids" );
         ]];
 
     /*
@@ -290,6 +294,7 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]]
         [[
+            g_message( "set tile" );
             gboolean * tile = (gboolean *) g_object_get_data( G_OBJECT( self ), "tp-tile" );
             int i;
 
@@ -320,6 +325,7 @@ class NineSlice [[ClutterActor*]] actor
 
             nineslice_effect_set_tile( get_effect( self ), tile );
             clutter_actor_queue_redraw( self );
+            g_message( "finished set tile" );
         ]];
 
     /*
