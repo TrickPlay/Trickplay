@@ -85,16 +85,16 @@ module nineslice;
         imgButton = Group { children = { button, image } }
         (end)
 
-        In addition to the properties and functions described on this page, the Image data type also supports all the properties and functions defined in the <UIElement> interface.
+        In addition to the properties and functions described on this page, the NineSlice type also supports all the properties and functions defined in the <UIElement> interface.
     */
 
 [[
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
-struct NineSliceData
+struct NineSliceBinding
 {
-    NineSliceData( NineSliceEffect * _effect ) : ref( LUA_REFNIL ), effect( _effect ) {};
+    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ) {};
     
     NineSliceEffect * get_effect() { return effect; };
     
@@ -111,15 +111,7 @@ struct NineSliceData
     {
         g_assert( i < 9 );
         ids[i] = new_id;
-        
-        if ( sheet )
-        {
-            nineslice_effect_set_sprite( effect, i, sheet->get_sprite( ids[i].c_str() ) );
-        }
-        else
-        {
-            g_warning( "Trying to set id '%s' = '%s' on a NineSlice with no sprite sheet.", keys[i], new_id.c_str() );
-        }
+        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL );
     }
     
     void set_sheet( SpriteSheet * _sheet )
@@ -132,7 +124,7 @@ struct NineSliceData
         }
     }
     
-    int ref;
+    bool async;
     
 private:
     NineSliceEffect * effect;
@@ -140,7 +132,8 @@ private:
     std::string ids[9];
 };
 
-#define get_data( self ) ( (NineSliceData *) g_object_get_data( G_OBJECT( self ), "tp-data" ) )
+#define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
+#define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
 
 ]]
 
@@ -167,17 +160,19 @@ class NineSlice [[ClutterActor*]] actor
             clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
             clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
             
-            g_object_set_data( G_OBJECT( self ), "tp-data", new NineSliceData( NINESLICE_EFFECT( effect ) ) );
-
+            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_EFFECT( effect ) ) );
+            g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
+            * get_ref( self ) = LUA_REFNIL;
+            
             ClutterUtil::set_props_from_table( L, props );
+            
             g_object_unref( self );
         ]];
 
     ~NineSlice()
         [[
-            NineSliceData * data = get_data( self );
-            if ( data->ref ) lb_strong_unref( L, data->ref );
-            delete data;
+            if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
+            delete get_binding( self );
         ]];
 
     /*
@@ -192,24 +187,24 @@ class NineSlice [[ClutterActor*]] actor
 
     SpriteSheet sheet
         [[
-            lb_strong_deref( L, get_data( self )->ref );
+            lb_strong_deref( L, * get_ref( self ) );
         ]]
         [[
-            NineSliceData * data = get_data( self );
-            if ( data->ref ) lb_strong_unref( L, data->ref );
+            NineSliceBinding * binding = get_binding( self );
+            if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
             
             SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 );
             
             if ( new_sheet )
             {
-                data->set_sheet( new_sheet );
-                data->ref = lb_strong_ref( L );
+                binding->set_sheet( new_sheet );
+                * get_ref( self ) = lb_strong_ref( L );
             }
             else
             {
                 g_warning( "Failed to set 'sheet': not a SpriteSheet." );
-                data->set_sheet( NULL );
-                data->ref = LUA_REFNIL;
+                binding->set_sheet( NULL );
+                * get_ref( self ) = LUA_REFNIL;
             }
         ]];
 
@@ -237,29 +232,27 @@ class NineSlice [[ClutterActor*]] actor
 
     table ids
         [[
-            NineSliceData * data = get_data( self );
+            NineSliceBinding * binding = get_binding( self );
 
             lua_newtable( L );
 
             for ( unsigned i = 0; i < 9; i++ )
             {
                 lua_pushstring( L, keys[i] );
-                lua_pushstring( L, data->get_id( i ).c_str() );
+                lua_pushstring( L, binding->get_id( i ).c_str() );
                 lua_rawset( L, -3 );
             }
         ]]
         [[
-            g_message( "set ids" );
-            
             if ( lua_istable( L, 2 ) )
             {
-                NineSliceData * data = get_data( self );
+                NineSliceBinding * binding = get_binding( self );
 
                 for ( unsigned i = 0; i < 9; i++ )
                 {
                     lua_getfield( L, 2, keys[i] );
                     const char * id = lua_tostring( L, -1 );
-                    data->set_id( i, std::string( id != NULL ? id : "" ) );
+                    binding->set_id( i, std::string( id != NULL ? id : "" ) );
                     lua_pop(L, 1);
                 }
             }
@@ -290,26 +283,25 @@ class NineSlice [[ClutterActor*]] actor
 
     table tile
         [[
-            NineSliceData * data = get_data( self );
+            NineSliceBinding * binding = get_binding( self );
             
             lua_newtable( L );
 
             for ( unsigned i = 0; i < 6; i++ )
             {
-                lua_pushboolean( L, data->get_tile( i ) );
+                lua_pushboolean( L, binding->get_tile( i ) );
                 lua_rawseti( L, -2, i + 1 );
             }
         ]]
         [[
-            g_message( "set tile" );
-            NineSliceData * data = get_data( self );
+            NineSliceBinding * binding = get_binding( self );
 
             if ( lua_istable( L, 2 ) )
             {
                 for ( unsigned i = 0; i < 6; ++i )
                 {
                     lua_rawgeti( L, 2, i + 1 );
-                    data->set_tile( i, lua_toboolean( L, -1 ), lua_isnil( L, -1 ) );
+                    binding->set_tile( i, lua_toboolean( L, -1 ), lua_isnil( L, -1 ) );
                     lua_pop( L, 1 );
                 }
             }
@@ -317,13 +309,21 @@ class NineSlice [[ClutterActor*]] actor
             {
                 for ( unsigned i = 0; i < 6; i++ )
                 {
-                    data->set_tile( i, lua_toboolean( L, 2 ), false );
+                    binding->set_tile( i, lua_toboolean( L, 2 ), false );
                 }
             }
             else
             {
                 g_warning( "Trying to set tile on a nineslice with a thing that wasn't a table or a boolean. Bad." );
             }
+        ]];
+        
+    bool async
+        [[
+            async = get_binding( self )->async;
+        ]]
+        [[
+            get_binding( self )->async = async;
         ]];
 
     /*
@@ -340,7 +340,7 @@ class NineSlice [[ClutterActor*]] actor
     readonly table borders
         [[
             int list[4] = { 0, 0, 0, 0 };
-            nineslice_effect_get_borders( get_data( self )->get_effect(), list );
+            nineslice_effect_get_borders( get_binding( self )->get_effect(), list );
 
             lua_newtable( L );
 

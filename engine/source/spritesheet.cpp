@@ -12,7 +12,6 @@ typedef SpriteSheet::Sprite Sprite;
 
 CoglHandle ref_texture_from_image( Image * image )
 {
-    g_message( "ref_texture_from_image" );
     g_assert( image );
     
     ClutterActor * actor = clutter_texture_new();
@@ -22,7 +21,6 @@ CoglHandle ref_texture_from_image( Image * image )
     cogl_handle_ref( texture );
     
     clutter_actor_destroy( actor );
-    g_message( "end ref_texture_from_image" );
     
     return texture;
 }
@@ -83,7 +81,6 @@ void Source::make_texture()
 
 void Source::set_source( const char * _uri )
 {
-    g_message("setting source");
     if ( sheet->native_json_path )
     {
         char * json = g_path_get_dirname( sheet->native_json_path );
@@ -95,9 +92,7 @@ void Source::set_source( const char * _uri )
         uri = strdup( _uri );
     }
     
-    g_message("setting cache_key");
     cache_key = sheet->app->get_id() + ':' + uri;
-    g_message("done");
 }
 
 void Source::set_source( Image * image )
@@ -186,8 +181,6 @@ void SpriteSheet::emit_signal( const char * msg )
 
 void SpriteSheet::parse_json ( const JSON::Value & root )
 {
-    
-    g_message( "parsing json" );
     if ( root.is<JSON::Array>() )
     {
         JSON::Array & maps = (JSON::Array &) root.as<JSON::Array>();
@@ -216,7 +209,6 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
     {
         emit_signal( "Could not parse JSON map" );
     }
-    g_message( "parsed json" );
 }
 
 void async_map_callback ( const Network::Response & response, SpriteSheet * self )
@@ -314,4 +306,9 @@ std::list< std::string > * SpriteSheet::get_ids()
     }
     
     return ids;
+}
+
+bool SpriteSheet::has_id( const char * id )
+{
+    return id && sprites.count( id );
 }

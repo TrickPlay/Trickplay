@@ -88,7 +88,6 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, Source * source )
 
 void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
 {
-    g_message( "adding lua map" );
     if ( !lua_istable( L, index ) )
     {
         g_warning( "Map subsheet is not a table" );
@@ -97,7 +96,6 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
 
     Bitmap * bitmap;
     Source * source = self->add_source();
-    g_message( "adding lua source" );
     
     
     lua_getfield( L, index, "img" );
@@ -117,7 +115,6 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
     }
     
     lua_pop( L, 1 );
-    g_message( "adding lua img" );
     
     
     lua_getfield( L, index, "sprites" );
@@ -131,7 +128,6 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
     {
         g_warning( "List of sprites is not a table" );
     }
-    g_message( "added lua map" );
 
     lua_pop( L, 1 );
 }
@@ -215,11 +211,9 @@ class SpriteSheet [[SpriteSheet*]]
             g_signal_connect_data( self->extra, "load-finished",
                 (GCallback) Sprite_Sheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
-
-            //g_object_set_data( G_OBJECT( self->extra ), "tp-app",  );
+            
             self->app = App::get( L );
-
-            g_message( "SpriteSheet::new()" );
+            
             if ( props )
             {
                 ClutterUtil::set_props_from_table( L, props );
@@ -248,7 +242,6 @@ class SpriteSheet [[SpriteSheet*]]
             {
                 luaL_error( L, "Must pass a table to SpriteSheet constructor." );
             }
-            g_message( "end SpriteSheet::new()" );
 
             LSG_END( 0 );
         ]];

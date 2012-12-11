@@ -68,7 +68,6 @@ void PushTexture::get_dimensions( int * w, int * h )
 
 CoglHandle PushTexture::get_texture()
 {
-    g_message( "get_texture" );
     static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
     return texture ? texture : null_texture;
 }
@@ -83,7 +82,6 @@ void PushTexture::set_texture( CoglHandle _texture )
 
 void PushTexture::ping_all()
 {
-    g_message( "ping all" );
     for ( std::set< PingMe * >::iterator it = pings.begin(); it != pings.end(); ++it )
     {
         (* it)->ping();
@@ -94,7 +92,6 @@ void PushTexture::ping_all()
 
 void PingMe::set( PushTexture * _source, Callback * _callback, void * _target, bool _async )
 {
-    g_message( "PingMe::Set %p %p", source, _source );
     if ( source ) source->unsubscribe( this );
     
     callback = _callback;
@@ -113,6 +110,5 @@ PingMe::~PingMe()
 
 void PingMe::ping()
 {
-    g_message( "PingMe::ping" );
     if ( callback ) callback( source, target );
 }
