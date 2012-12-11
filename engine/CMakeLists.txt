@@ -545,6 +545,7 @@ list( APPEND
     ${ENGINE_SRC}/source/images.cpp
     ${ENGINE_SRC}/source/clutter_util.cpp
 
+    ${ENGINE_SRC}/source/pushtexture.cpp
     ${ENGINE_SRC}/source/spritesheet.cpp
     ${ENGINE_SRC}/source/nineslice.cpp
 
