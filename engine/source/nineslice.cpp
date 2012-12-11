@@ -22,7 +22,6 @@ struct Slice
     void set_sprite( Sprite * _sprite, bool async )
     {
         sprite = _sprite;
-        g_message( "set_sprite %i", async );
         ping.set( sprite, Slice::on_ping, this, async );
         update();
     }

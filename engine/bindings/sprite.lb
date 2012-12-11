@@ -14,7 +14,7 @@ module sprite;
 
 struct SpriteBinding
 {
-    SpriteBinding( ClutterActor * _actor ) : actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+    SpriteBinding( ClutterActor * _actor ) : async( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
     
     ~SpriteBinding()
     {
@@ -53,6 +53,8 @@ struct SpriteBinding
         clutter_actor_queue_redraw( actor );
     }
     
+    bool async;
+    
 private:
     static void on_ping( PushTexture * source, void * target ) { ((SpriteBinding *) target)->update(); };
 
@@ -68,7 +70,7 @@ private:
             g_warning( "Trying to set the id '%s' on a Sprite without first specifying a SpriteSheet.", id );
         }
         
-        ping.set( sprite, SpriteBinding::on_ping, this, true );
+        ping.set( sprite, SpriteBinding::on_ping, this, async );
         update();
     }
 
@@ -199,6 +201,14 @@ class Sprite [[ClutterActor*]] actor
                 g_strdup_printf( "(Sprite) \"%s\"", new_id ), g_free );
                 
             binding->set_id( new_id );
+        ]];
+        
+    bool async
+        [[
+            async = get_binding( self )->async;
+        ]]
+        [[
+            get_binding( self )->async = async;
         ]];
 
     /*
