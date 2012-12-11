@@ -3,24 +3,7 @@ SCROLLPANE = true
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
-
-local create_arrow = function(old_function,self,state)
-	
-	local c = Canvas(self.w,self.h)
-	
-    c:move_to(0,   c.h/2)
-    c:line_to(c.w,     0)
-    c:line_to(c.w,   c.h)
-    c:line_to(0,   c.h/2)
-    
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	return c:Image()
-	
-end
-
 local default_parameters = {pane_w = 450, pane_h = 600,virtual_w=1000,virtual_h=1000, slider_thickness = 30}
-
 
 ScrollPane = setmetatable(
     {},
