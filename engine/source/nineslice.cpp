@@ -23,11 +23,11 @@ struct Slice
     {
         sprite = _sprite;
         ping.set( sprite, Slice::on_ping, this, true );
+        update();
     }
     
     void update()
     {
-        g_message( "Slice::update" );
         static ClutterActor * texture = clutter_texture_new();
         
         if ( material )
@@ -44,7 +44,7 @@ struct Slice
         
         clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
         
-        //g_message( "finished Slice::update" );
+        g_message( "slice updated, %i", !!material );
     }
     
     NineSliceEffect * effect;
@@ -53,10 +53,9 @@ struct Slice
     PingMe ping;
 };
 
-
 struct _NineSliceEffectPrivate {
     SpriteSheet  * sheet;
-    Slice slices[9];
+    Slice * slices;
     gboolean tile[6];
 };
 
@@ -71,7 +70,6 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
     
     if ( w <= 0 || h <= 0 )
     {
-        //g_message( "return FALSE; in nineslice_effect_pre_paint" );
         return FALSE;
     }
     
@@ -111,7 +109,9 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
           ys[] = { 0.0, t, h - b, h };
     
     for ( unsigned i = 0; i < 3; i++ )
+    {
         for ( unsigned j = 0; j < 3; j++ )
+        {
             if ( slices[i*3 + j].material )
             {
                 cogl_set_source( slices[i*3 + j].material );
@@ -121,25 +121,17 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect * self )
                          tx ? ( xs[j+1] - xs[j] ) / (float) width[i*3 + j] : 1.0,
                          ty ? ( ys[i+1] - ys[i] ) / (float) height[i*3 + j] : 1.0 );
             }
-    //g_message( "finished nineslice_effect_pre_paint" );
+        }
+    }
 
     return FALSE;
 }
 
-static void nineslice_effect_dispose( GObject * gobject )
+void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite * sprite )
 {
-    /*
-    NineSliceEffectPrivate * priv = NINESLICE_EFFECT( gobject )->priv;
-    for ( unsigned i = 0; i < 9; i++ )
-    {
-        if ( priv->slices[i].material )
-        {
-            cogl_handle_unref( priv->material[i] );
-            priv->material[i] = NULL;
-        }
-    }
-    */
-    G_OBJECT_CLASS( nineslice_effect_parent_class )->dispose( gobject );
+    g_message( "nineslice_effect_set_sprite" );
+    g_assert( i < 9 );
+    effect->priv->slices[i].set_sprite( sprite );
 }
 
 void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet, SpriteSheet * sheet, const gchar * ids[] )
@@ -157,22 +149,40 @@ void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet,
         for ( unsigned i = 0; i < 9; ++i )
         {
             priv->slices[i].set_sprite( priv->sheet->get_sprite( ids[i] ) );
-            priv->slices[i].update();
         }
     }
     g_message( "finished nineslice_effect_set_sprites" );
 }
 
-void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] )
+bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i )
 {
-    for ( unsigned i = 0; i < 6; i++ )
-        effect->priv->tile[i] = tile[i];
+    g_assert( i < 6 );
+    return effect->priv->tile[i];
 }
 
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] )
 {
     for ( unsigned i = 0; i < 6; i++ )
+    {
         tile[i] = effect->priv->tile[i];
+    }
+}
+
+void nineslice_effect_set_tile( NineSliceEffect * effect, unsigned i, bool t, bool guess )
+{
+    effect->priv->tile[i] = guess ? ( i ? effect->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
+    
+    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+}
+
+void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] )
+{
+    for ( unsigned i = 0; i < 6; i++ )
+    {
+        effect->priv->tile[i] = tile[i];
+    }
+    
+    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
 }
 
 void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] )
@@ -200,6 +210,14 @@ void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] )
     borders[3] = MAX( MAX( height[6], height[7] ), height[8] );
 }
 
+/* GObject housekeeping */
+
+static void nineslice_effect_dispose( GObject * gobject )
+{
+    delete[] NINESLICE_EFFECT( gobject )->priv->slices;
+    G_OBJECT_CLASS( nineslice_effect_parent_class )->dispose( gobject );
+}
+
 static void nineslice_effect_class_init( NineSliceEffectClass * klass )
 {
     g_type_class_add_private( klass, sizeof( NineSliceEffectPrivate ) );
@@ -214,6 +232,8 @@ static void nineslice_effect_class_init( NineSliceEffectClass * klass )
 static void nineslice_effect_init ( NineSliceEffect * self )
 {
     self->priv = NINESLICE_EFFECT_GET_PRIVATE( self );
+    
+    self->priv->slices = new Slice[9];
     
     for ( unsigned i = 0; i < 9; ++i )
     {

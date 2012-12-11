@@ -29,10 +29,13 @@ struct _NineSliceEffectClass {
 ClutterEffect * nineslice_effect_new();
 ClutterEffect * nineslice_effect_new_from_ids( const gchar * ids[], SpriteSheet * sheet, gboolean tile[6] );
 
+void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, SpriteSheet::Sprite * sprite );
 void nineslice_effect_set_sprites( NineSliceEffect * effect, gboolean set_sheet, SpriteSheet * sheet, const gchar * ids[] );
 
-void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] );
+bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i );
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );
+void nineslice_effect_set_tile( NineSliceEffect * effect, unsigned i, bool t, bool guess );
+void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] );
 
 void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] );
 

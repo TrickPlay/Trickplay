@@ -83,6 +83,7 @@ void Source::make_texture()
 
 void Source::set_source( const char * _uri )
 {
+    g_message("setting source");
     if ( sheet->native_json_path )
     {
         char * json = g_path_get_dirname( sheet->native_json_path );
@@ -94,7 +95,9 @@ void Source::set_source( const char * _uri )
         uri = strdup( _uri );
     }
     
+    g_message("setting cache_key");
     cache_key = sheet->app->get_id() + ':' + uri;
+    g_message("done");
 }
 
 void Source::set_source( Image * image )
@@ -150,7 +153,7 @@ void Sprite::lost_texture()
 
 /* SpriteSheet */
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), native_json_path( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 

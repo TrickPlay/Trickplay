@@ -14,7 +14,7 @@ module sprite;
 
 struct SpriteData
 {
-    SpriteData( ClutterTexture * _texture ) : ref( LUA_REFNIL ), stop_updates( false ), texture( _texture ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+    SpriteData( ClutterActor * _actor ) : ref( LUA_REFNIL ), stop_updates( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
     
     ~SpriteData()
     {
@@ -48,14 +48,8 @@ struct SpriteData
         
         if ( !stop_updates )
         {
-            clutter_texture_set_cogl_texture( texture, sprite ? sprite->get_texture() : null_texture );
-            clutter_actor_queue_redraw( CLUTTER_ACTOR( texture ) );
-            
-            if ( sprite )
-            {
-                int tw = 0, th = 0;
-                sprite->get_dimensions( & tw, & th );
-            }
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), sprite ? sprite->get_texture() : null_texture );
+            clutter_actor_queue_redraw( actor );
         }
     }
     
@@ -82,7 +76,7 @@ private:
     }
 
     PushTexture::PingMe   ping;
-    ClutterTexture      * texture;
+    ClutterActor        * actor;
     
     SpriteSheet::Sprite * sprite;
     SpriteSheet         * sheet;
@@ -142,7 +136,7 @@ class Sprite [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor, ClutterUtil::make_actor( clutter_texture_new ) );
             ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
             
-            g_object_set_data( G_OBJECT( self ), "tp-data", new SpriteData( CLUTTER_TEXTURE( self ) ) );
+            g_object_set_data( G_OBJECT( self ), "tp-data", new SpriteData( self ) );
             SpriteData * data = get_data( self );
             
             //lua_pushvalue( L, -1 );
@@ -180,7 +174,7 @@ class Sprite [[ClutterActor*]] actor
         ]]
         [[
             SpriteData * data = get_data( self );
-            lb_strong_unref( L, data->ref );
+            if ( data->ref ) lb_strong_unref( L, data->ref );
             
             SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 );
             
