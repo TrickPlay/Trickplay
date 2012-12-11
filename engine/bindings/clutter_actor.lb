@@ -1121,7 +1121,7 @@ interface actor [[ClutterActor*]]
 
     If the object has been rotated on its X and/or Y axes, the resulting object will be a quadrangle with sides of unequal lengths. In such cases, the values in the transformed_size property specify a rectangle large enough to contain the entire quadrangle. One side effect of this is that the X, Y position of the rectangle, as specified in the <transformed_position> property, may not contain the actual coordinates of the quadrangle.
 
-    *Note:* The transformed_size property's values are undefined until the object has been added to the global <screen> variable.
+    *Note:* The transformed_size property is nil until the object has been added to the global <screen> variable.
 
     *Format:* { transformed_width, transformed_height }
 
@@ -1130,6 +1130,8 @@ interface actor [[ClutterActor*]]
 
     readonly table transformed_size
     [[
+        if(CLUTTER_ACTOR_IS_REALIZED(self))
+        {
         gfloat w;
         gfloat h;
         clutter_actor_get_transformed_size(self,&w,&h);
@@ -1138,6 +1140,11 @@ interface actor [[ClutterActor*]]
         lua_rawseti(L,-2,1);
         lua_pushnumber(L,h);
         lua_rawseti(L,-2,2);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
     ]];
 
 /***************************************
@@ -1147,7 +1154,7 @@ interface actor [[ClutterActor*]]
 
     If the object has been rotated on its X and/or Y axes, the resulting object will be a quadrangle with sides of unequal lengths. The transformed_position property specifies the X, Y coordinates of a rectangle large enough to contain the entire quadrangle. Depending upon the nature of the quadrangle, its X, Y position coordinates may not be identical to those of the enclosing rectangle.
 
-    *Note:* The transformed_position property's values are undefined until the object has been added to the global <screen> variable.
+    *Note:* The transformed_position property is nil until the object has been added to the global <screen> variable.
 
     *Format:* { transformed_X, transformed_Y }
 
@@ -1156,6 +1163,8 @@ interface actor [[ClutterActor*]]
 
     readonly table transformed_position
     [[
+        if(CLUTTER_ACTOR_IS_REALIZED(self))
+        {
         gfloat x;
         gfloat y;
         clutter_actor_get_transformed_position(self,&x,&y);
@@ -1164,6 +1173,11 @@ interface actor [[ClutterActor*]]
         lua_rawseti(L,-2,1);
         lua_pushnumber(L,y);
         lua_rawseti(L,-2,2);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
     ]];
 
 /***************************************
