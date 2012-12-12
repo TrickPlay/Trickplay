@@ -738,6 +738,30 @@ Widget_Clone = function(parameters)
     
 end
 
+local SpriteSheet_lookup   = {}
+local SpriteSheet_lookup_r = {}
+
+Widget_SpriteSheet = function(parameters)
+    
+    if type(parameters) ~= "table" or type(parameters.map) ~= "string" then
+        
+        error("Widget_SpriteSheet expects to receive a json file uri for its map",2)
+        
+    elseif SpriteSheet_lookup[parameters.map] then
+    
+        return SpriteSheet_lookup[parameters.map]
+        
+    end
+    
+    local instance = Widgetize(  SpriteSheet(parameters)  )
+    
+    SpriteSheet_lookup[parameters.map] = instance
+    SpriteSheet_lookup_r[    instance] = parameters.map
+    
+    return instance
+    
+end
+
 local sprite_properties = { 
     "id","sheet"
 }
@@ -748,6 +772,20 @@ Widget_Sprite = function(parameters)
 	override_property(instance,"widget_type",
         function(oldf,self) return "Widget_Sprite" end
     )
+	override_property(instance,"sheet",
+        function(oldf,self)  return oldf(self)  end,
+        function(oldf,self,v)
+            
+            if type(v) == "string" then 
+                
+                v = Widget_SpriteSheet{map=v}
+                
+            end
+            
+            oldf(self,v)
+            
+        end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -755,6 +793,8 @@ Widget_Sprite = function(parameters)
             local t = oldf(self)
             
             t.style = nil
+            
+            t.sheet = self.sheet and SpriteSheet_lookup_r[self.sheet]
             
             for _,k in pairs(sprite_properties) do
                 
