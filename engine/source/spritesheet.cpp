@@ -33,20 +33,18 @@ void Source::handle_async_img( Image * image )
         set_texture( texture );
         delete image;
         
-        std::string key = sheet->app->get_id() + ':' + uri;
-        Images::cache_put( sheet->app->get_context(), key, texture, JSON::Object() );
+        Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
         
-        // signal later
+        ping_all();
     }
     else
     {
-        // signal later
+        g_warning( "Could not download image %s", uri );
     }
 }
 
 void Source::make_texture()
 {
-    g_message("make_texture");
     g_assert( uri );
     
     JSON::Object * jo = new JSON::Object();
@@ -62,7 +60,7 @@ void Source::make_texture()
         }
         else
         {
-            // signal later
+            ping_all_later();
         }
     }
     else
@@ -78,7 +76,6 @@ void Source::make_texture()
     }
     
     set_texture( texture );
-    g_message("~make_texture");
 }
 
 void Source::set_source( const char * _uri )
@@ -150,22 +147,21 @@ void Sprite::lost_texture()
 
 /* SpriteSheet */
 
-class AsyncSignal : public Action
+class AsyncCallback : public Action
 {
     SpriteSheet * self;
     bool failed;
     
-    public: AsyncSignal( SpriteSheet * self, bool failed ) : self( self ), failed( failed ) {}
+    public: AsyncCallback( SpriteSheet * self, bool failed ) : self( self ), failed( failed ) {}
     
     protected: bool run()
     {
-        g_message( "run signal, self = %p, failed = %i, async = %i", self, failed, self->async );
         g_signal_emit_by_name( self->extra, "load-finished", GINT_TO_POINTER( failed ) );
         return false;
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), native_json_path( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), native_json_path( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -186,13 +182,11 @@ SpriteSheet::~SpriteSheet()
 
 void SpriteSheet::emit_signal( const char * msg )
 {
-    g_message( "emit_signal, async = %i", async );
-    
     if ( async )
     {
-        g_signal_emit_by_name( this, "load-finished", msg );
+        Action::post( new AsyncCallback( this, msg != NULL ) );
     }
-    else
+    else if ( msg )
     {
         g_warning( "SpriteSheet: %s", msg );
     }
@@ -223,6 +217,9 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
                     (int) sprite.at( "h" ).as<long long>() );
             }
         }
+        
+        loaded = true;
+        emit_signal( NULL );
     }
     else
     {
@@ -232,15 +229,13 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
 
 void async_map_callback ( const Network::Response & response, SpriteSheet * self )
 {
-        g_message( "async_map_callback" );
     if ( !response.failed && response.body->len )
     {
         self->parse_json( JSON::Parser::parse( (char *) response.body->data, response.body->len ) );
-        self->emit_signal( "msg" );
     }
     else
     {
-        self->emit_signal( "FAILED_MAP_LOAD" );
+        self->emit_signal( "Could not download JSON map." );
     }
 }
 
@@ -290,13 +285,6 @@ void SpriteSheet::load_json( const char * json )
     if ( map && length )
     {
         parse_json( JSON::Parser::parse( map, length ) );
-        
-        g_message( "Action::post, async = %i", async );
-        
-        if ( async )
-        {
-            Action::post( new AsyncSignal( this, false ) );
-        }
     }
 }
 

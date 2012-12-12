@@ -93,6 +93,7 @@ public:
     App * app;
     GObject * extra;
     bool async;
+    bool loaded;
     
     friend class Source;
 

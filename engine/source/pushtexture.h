@@ -20,15 +20,28 @@ class PushTexture
 {
 public:
     
-    class Signal : public Action
+    class ReleaseLater : public Action
     {
         PushTexture * self;
         
-        public: Signal( PushTexture * self ) : self( self ) {}
+        public: ReleaseLater( PushTexture * self ) : self( self ) {};
         
         protected: bool run()
         {
-            self->unsubscribe_signal();
+            self->release_texture();
+            return false;
+        }
+    };
+    
+    class PingAllLater : public Action
+    {
+        PushTexture * self;
+        
+        public: PingAllLater( PushTexture * self ) : self( self ) {};
+        
+        protected: bool run()
+        {
+            self->ping_all();
             return false;
         }
     };
@@ -61,6 +74,7 @@ public:
     void set_texture( CoglHandle texture );
     void get_dimensions( int * w, int * h );
     void ping_all();
+    void ping_all_later() { Action::post( new PingAllLater( this ) ); };
     
     friend class Subscription;
     
@@ -75,7 +89,7 @@ protected:
 private:
     void subscribe( PingMe * ping );
     void unsubscribe( PingMe * ping );
-    void unsubscribe_signal();
+    void release_texture();
     
     std::set< PingMe * > pings;
     CoglHandle texture;
