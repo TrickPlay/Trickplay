@@ -734,16 +734,7 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
-#ifdef CLUTTER_VERSION_1_12
-            clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
-            z = clutter_actor_get_pivot_point_z( self );
-            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_X_AXIS );
-#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
-#endif
-
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -753,36 +744,22 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            if(lua_type(L,2) != LUA_TTABLE)
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
+            lua_pop(L,3);
+            }
+            else
             {
                 luaL_checktype(L,2,LUA_TNUMBER);
-#ifdef CLUTTER_VERSION_1_12
-                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L,2));
-#else
                 gfloat x;
                 gfloat y;
                 gfloat z;
                 gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
-#endif
-            }
-            else
-            {
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);
-            lua_rawgeti(L,2,3);
-    #ifdef CLUTTER_VERSION_1_12
-                gfloat x,y,z;
-                clutter_actor_get_pivot_point(self, &x, &y);
-                y = lua_tonumber(L,-2) / clutter_actor_get_height(self);
-                z = lua_tonumber(L,-1);
-                clutter_actor_set_pivot_point(self, x, y);
-                clutter_actor_set_pivot_point_z(self, z);
-                clutter_actor_set_rotation_angle(self, CLUTTER_X_AXIS, lua_tonumber(L, -3));
-    #else
-            clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
-    #endif
-            lua_pop(L,3);
             }
         ]];
 
@@ -808,15 +785,7 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
-#ifdef CLUTTER_VERSION_1_12
-            clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
-            z = clutter_actor_get_pivot_point_z( self );
-            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Y_AXIS );
-#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
-#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -826,36 +795,22 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            if(lua_type(L,2) != LUA_TTABLE)
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
+            lua_pop(L,3);
+            }
+            else
             {
                 luaL_checktype(L,2,LUA_TNUMBER);
-#ifdef CLUTTER_VERSION_1_12
-                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L,2));
-#else
                 gfloat x;
                 gfloat y;
                 gfloat z;
                 gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
-#endif
-            }
-            else
-            {
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);
-            lua_rawgeti(L,2,3);
-    #ifdef CLUTTER_VERSION_1_12
-                gfloat x,y,z;
-                clutter_actor_get_pivot_point(self, &x, &y);
-                x = lua_tonumber(L,-2) / clutter_actor_get_width( self );
-                z = lua_tonumber(L,-1);
-                clutter_actor_set_pivot_point(self, x, y);
-                clutter_actor_set_pivot_point_z(self, z);
-                clutter_actor_set_rotation_angle(self, CLUTTER_Y_AXIS, lua_tonumber(L, -3));
-    #else
-            clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
-    #endif
-            lua_pop(L,3);
             }
         ]];
 
@@ -881,15 +836,7 @@ interface actor [[ClutterActor*]]
             gfloat x;
             gfloat y;
             gfloat z;
-#ifdef CLUTTER_VERSION_1_12
-            clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
-            z = clutter_actor_get_pivot_point_z( self );
-            gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Z_AXIS );
-#else
             gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
-#endif
             lua_newtable(L);
             lua_pushnumber(L,angle);
             lua_rawseti(L,-2,1);
@@ -899,35 +846,22 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            if(lua_type(L,2) != LUA_TTABLE)
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            lua_rawgeti(L,2,3);
+            clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
+            lua_pop(L,3);
+            }
+            else
             {
                 luaL_checktype(L,2,LUA_TNUMBER);
-#ifdef CLUTTER_VERSION_1_12
-                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L,2));
-#else
                 gfloat x;
                 gfloat y;
                 gfloat z;
                 gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
-#endif
-            }
-            else
-            {
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);
-            lua_rawgeti(L,2,3);
-    #ifdef CLUTTER_VERSION_1_12
-                gfloat x,y;
-                clutter_actor_get_pivot_point(self, &x, &y);
-                x = lua_tonumber(L,-2) / clutter_actor_get_width(self);
-                y = lua_tonumber(L,-1) / clutter_actor_get_height(self);
-                clutter_actor_set_pivot_point(self, x, y);
-                clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L, -3));
-    #else
-            clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
-    #endif
-            lua_pop(L,3);
             }
         ]];
 
@@ -1121,7 +1055,7 @@ interface actor [[ClutterActor*]]
 
     If the object has been rotated on its X and/or Y axes, the resulting object will be a quadrangle with sides of unequal lengths. In such cases, the values in the transformed_size property specify a rectangle large enough to contain the entire quadrangle. One side effect of this is that the X, Y position of the rectangle, as specified in the <transformed_position> property, may not contain the actual coordinates of the quadrangle.
 
-    *Note:* The transformed_size property's values are undefined until the object has been added to the global <screen> variable.
+    *Note:* The transformed_size property is nil until the object has been added to the global <screen> variable.
 
     *Format:* { transformed_width, transformed_height }
 
@@ -1130,6 +1064,8 @@ interface actor [[ClutterActor*]]
 
     readonly table transformed_size
     [[
+        if(CLUTTER_ACTOR_IS_REALIZED(self))
+        {
         gfloat w;
         gfloat h;
         clutter_actor_get_transformed_size(self,&w,&h);
@@ -1138,6 +1074,11 @@ interface actor [[ClutterActor*]]
         lua_rawseti(L,-2,1);
         lua_pushnumber(L,h);
         lua_rawseti(L,-2,2);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
     ]];
 
 /***************************************
@@ -1147,7 +1088,7 @@ interface actor [[ClutterActor*]]
 
     If the object has been rotated on its X and/or Y axes, the resulting object will be a quadrangle with sides of unequal lengths. The transformed_position property specifies the X, Y coordinates of a rectangle large enough to contain the entire quadrangle. Depending upon the nature of the quadrangle, its X, Y position coordinates may not be identical to those of the enclosing rectangle.
 
-    *Note:* The transformed_position property's values are undefined until the object has been added to the global <screen> variable.
+    *Note:* The transformed_position property is nil until the object has been added to the global <screen> variable.
 
     *Format:* { transformed_X, transformed_Y }
 
@@ -1156,6 +1097,8 @@ interface actor [[ClutterActor*]]
 
     readonly table transformed_position
     [[
+        if(CLUTTER_ACTOR_IS_REALIZED(self))
+        {
         gfloat x;
         gfloat y;
         clutter_actor_get_transformed_position(self,&x,&y);
@@ -1164,6 +1107,11 @@ interface actor [[ClutterActor*]]
         lua_rawseti(L,-2,1);
         lua_pushnumber(L,y);
         lua_rawseti(L,-2,2);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
     ]];
 
 /***************************************

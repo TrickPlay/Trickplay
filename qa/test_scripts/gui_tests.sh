@@ -50,20 +50,13 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
     png_file=${f##*/}
     if test -e "$AUTOMATED_TESTS/$png_file" ; then
             test_count=$((test_count+1))
-        compare_cmd="compare -metric AE '$f' '$AUTOMATED_TESTS/$png_file' /dev/null 2>&1"
-#       echo $compare_cmd
         imgdiff=$(compare -metric AE "$f" "$AUTOMATED_TESTS/$png_file" /dev/null 2>&1)
-#           echo original imgdiff = $imgdiff
         status2=$?
-            imgdiff=`echo $imgdiff|awk '{print($1)}'`
-     #  echo
-#           echo new imgdiff = $imgdiff
-         #  echo `expr "$imgdiff" : ''`
-     #  echo
+        imgdiff=$(perl -e "print ${imgdiff}")
         if [ $status2 -eq 0 ]; then {
             if [ $imgdiff -eq 0 ]; then {
-                end_test_time=$(date +%s.%N)
-                test_duration=$(echo "$end_test_time - $start_test_time" | bc)
+            end_test_time=$(date +%s.%N)
+            test_duration=$(echo "$end_test_time - $start_test_time" | bc)
             test_duration=${test_duration:0:5}
             pass=$(($pass+1))
             N_ARRAY[test_count]=$png_file
@@ -73,11 +66,10 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
             else {
 
             imgdiff_fuzz=$(compare -metric AE -fuzz $fuzz "$f" "$AUTOMATED_TESTS"/$png_file /dev/null 2>&1)
-            #echo compare -metric AE -fuzz $fuzz "$f" "$AUTOMATED_TESTS"/$png_file /dev/null 2>&1
-            #echo imgdiff_fuzz=$imgdiff_fuzz
+            imgdiff_fuzz=$(perl -e "print ${imgdiff_fuzz}")
 
-                end_test_time=$(date +%s.%N)
-                test_duration=$(echo "$end_test_time - $start_test_time" | bc)
+            end_test_time=$(date +%s.%N)
+            test_duration=$(echo "$end_test_time - $start_test_time" | bc)
             test_duration=${test_duration:0:5}
 
             if [ $imgdiff_fuzz -ge 0 -a $imgdiff_fuzz -lt 401 ]; then {
@@ -99,8 +91,6 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
             fi
          }
              else
-        #echo "Compare error when running:"
-        #echo "$compare_cmd"
         major_fail=$(($major_fail+1))
         N_ARRAY[test_count]=$png_file
         D_ARRAY[test_count]=$test_duration
@@ -119,7 +109,7 @@ done
 trickplay_version=1.0
 XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
 
-[ -r "$XML_FILE" ] || exit 1
+[ -r "$XML_FILE" ] || exit 0
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
