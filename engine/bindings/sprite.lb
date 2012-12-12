@@ -14,7 +14,7 @@ module sprite;
 
 struct SpriteBinding
 {
-    SpriteBinding( ClutterActor * _actor ) : async( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
     
     ~SpriteBinding()
     {
@@ -54,12 +54,14 @@ struct SpriteBinding
     }
     
     bool async;
+    bool loaded;
     
 private:
     static void on_ping( PushTexture * source, void * target )
     {
         SpriteBinding * self = (SpriteBinding *) target;
         self->update();
+        self->loaded = true;
         g_signal_emit_by_name( G_OBJECT( self->actor ), "load-finished", 0 );
     };
 
@@ -216,6 +218,11 @@ class Sprite [[ClutterActor*]] actor
         ]]
         [[
             get_binding( self )->async = async;
+        ]];
+        
+    readonly bool loaded
+        [[
+            loaded = get_binding( self )->loaded;
         ]];
         
     int add_onloaded_listener( function f )

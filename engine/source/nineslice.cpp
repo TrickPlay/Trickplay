@@ -13,10 +13,17 @@ struct Slice
 {
     static void on_ping( PushTexture * source, void * target )
     {
-        ((Slice *) target)->update();
+        Slice * self = (Slice *) target;
+        self->update();
+        self->loaded = true;
+        
+        if ( nineslice_effect_is_loaded( self->effect ) )
+        {
+            g_signal_emit_by_name( G_OBJECT( self->effect ), "load-finished", 0 );
+        }
     }
     
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ) {};
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ) {};
     ~Slice() { if ( material ) cogl_handle_unref( material ); }
     
     void set_sprite( Sprite * _sprite, bool async )
@@ -49,10 +56,10 @@ struct Slice
     CoglMaterial * material;
     Sprite * sprite;
     PingMe ping;
+    bool loaded;
 };
 
 struct _NineSliceEffectPrivate {
-    SpriteSheet  * sheet;
     Slice * slices;
     gboolean tile[6];
 };
@@ -66,6 +73,22 @@ void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite *
 {
     g_assert( i < 9 );
     effect->priv->slices[i].set_sprite( sprite, async );
+}
+
+bool nineslice_effect_is_loaded( NineSliceEffect * effect )
+{
+    Slice * slices = effect->priv->slices;
+    bool loaded = true;
+    
+    for ( unsigned i = 0; i < 9; ++i )
+    {
+        if ( slices[i].sprite && !slices[i].loaded )
+        {
+            loaded = false;
+        }
+    }
+    
+    return loaded;
 }
 
 bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i )
