@@ -736,8 +736,6 @@ interface actor [[ClutterActor*]]
             gfloat z;
 #ifdef CLUTTER_VERSION_1_12
             clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
             z = clutter_actor_get_pivot_point_z( self );
             gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_X_AXIS );
 #else
@@ -774,7 +772,7 @@ interface actor [[ClutterActor*]]
     #ifdef CLUTTER_VERSION_1_12
                 gfloat x,y,z;
                 clutter_actor_get_pivot_point(self, &x, &y);
-                y = lua_tonumber(L,-2) / clutter_actor_get_height(self);
+                y = lua_tonumber(L,-2);
                 z = lua_tonumber(L,-1);
                 clutter_actor_set_pivot_point(self, x, y);
                 clutter_actor_set_pivot_point_z(self, z);
@@ -810,8 +808,6 @@ interface actor [[ClutterActor*]]
             gfloat z;
 #ifdef CLUTTER_VERSION_1_12
             clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
             z = clutter_actor_get_pivot_point_z( self );
             gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Y_AXIS );
 #else
@@ -847,7 +843,7 @@ interface actor [[ClutterActor*]]
     #ifdef CLUTTER_VERSION_1_12
                 gfloat x,y,z;
                 clutter_actor_get_pivot_point(self, &x, &y);
-                x = lua_tonumber(L,-2) / clutter_actor_get_width( self );
+                x = lua_tonumber(L,-2);
                 z = lua_tonumber(L,-1);
                 clutter_actor_set_pivot_point(self, x, y);
                 clutter_actor_set_pivot_point_z(self, z);
@@ -883,8 +879,6 @@ interface actor [[ClutterActor*]]
             gfloat z;
 #ifdef CLUTTER_VERSION_1_12
             clutter_actor_get_pivot_point( self, &x, &y );
-            x = x * clutter_actor_get_width( self );
-            y = y * clutter_actor_get_height( self );
             z = clutter_actor_get_pivot_point_z( self );
             gdouble angle = clutter_actor_get_rotation_angle( self, CLUTTER_Z_AXIS );
 #else
@@ -920,8 +914,8 @@ interface actor [[ClutterActor*]]
     #ifdef CLUTTER_VERSION_1_12
                 gfloat x,y;
                 clutter_actor_get_pivot_point(self, &x, &y);
-                x = lua_tonumber(L,-2) / clutter_actor_get_width(self);
-                y = lua_tonumber(L,-1) / clutter_actor_get_height(self);
+                x = lua_tonumber(L,-2);
+                y = lua_tonumber(L,-1);
                 clutter_actor_set_pivot_point(self, x, y);
                 clutter_actor_set_rotation_angle(self, CLUTTER_Z_AXIS, lua_tonumber(L, -3));
     #else
