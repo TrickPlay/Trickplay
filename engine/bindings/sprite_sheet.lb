@@ -229,6 +229,8 @@ class SpriteSheet [[SpriteSheet*]]
                 else if ( lua_istable( L, -1 ) )
                 {
                     foreach_in_table( L, -1, (LFunc) spritesheet_add_lua_map, self );
+                    self->loaded = true;
+                    self->emit_signal( NULL );
                 }
                 else
                 {
@@ -288,17 +290,15 @@ class SpriteSheet [[SpriteSheet*]]
         FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
         nil - Successfully loaded a source image (remote or local)
     */
-    /*
+    
     readonly bool loaded
         [[
             loaded = self->loaded;
         ]];
-      */  
+    
     int add_onloaded_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
-            //UserData::get( L )->connect_signal( "on_loaded",
-             //   "load-finished", (GCallback) SpriteSheet_on_loaded, L );
         ]];
 
     remove_onloaded_listener( int ref )
@@ -312,8 +312,6 @@ class SpriteSheet [[SpriteSheet*]]
         ]]
         [[
             UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
-            //UserData::get( L )->connect_signal( "on_loaded",
-            //    "load-finished", (GCallback) SpriteSheet_on_loaded, L );
         ]];
 }
 
@@ -321,14 +319,12 @@ class SpriteSheet [[SpriteSheet*]]
 
 void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L )
 {
-    //g_message( "here" );
-    
     SpriteSheet * self = (SpriteSheet *) g_object_get_data( extra, "tp-sheet" );
-    g_message( "SpriteSheet_on_loaded, self = %p, async = %i", self, self->async );
+    
     if ( self->async )
     {
         lua_pushboolean( L, error ? 1 : 0 );
-        UserData::invoke_callback( self, "on_loaded", 1, 0, L);
+        UserData::invoke_callbacks( self, "on_loaded", 1, 0, L);
     }
 }
 

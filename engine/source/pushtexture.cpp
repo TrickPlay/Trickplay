@@ -1,6 +1,5 @@
 #include "pushtexture.h"
 
-typedef PushTexture::Signal Signal;
 typedef PushTexture::PingMe PingMe;
 
 PushTexture::~PushTexture()
@@ -42,12 +41,12 @@ void PushTexture::unsubscribe( PingMe * ping )
     
     if ( can_signal && !cache && pings.empty() )
     {
-        Action::post( new Signal( this ) );
+        Action::post( new PushTexture::ReleaseLater( this ) );
         can_signal = false;
     }
 }
 
-void PushTexture::unsubscribe_signal()
+void PushTexture::release_texture()
 {
     if ( texture && !cache && pings.empty() )
     {
