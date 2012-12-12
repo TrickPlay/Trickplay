@@ -19,7 +19,7 @@ function generate_test_image ()
 			 height = 300,
 			 wrap = false
 			}
-	screen:add(text_txt)
+	g:add(text_txt)
 
 	-- wrap = true, word_wrap = CHAR
 	text1_txt = Text {font="DejaVu Sans 30px",

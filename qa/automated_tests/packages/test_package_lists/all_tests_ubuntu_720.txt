@@ -292,7 +292,7 @@
 {
 "name": "00061_image_tile.lua",
 "checksum": "88c59f14d63c8fee3f6560a235cbefa3",
-"active": "false"
+"active": "true"
 },
 {
 "name": "00062_image_tile_sync.lua",
@@ -367,7 +367,7 @@
 {
 "name": "00076_text_font_3_jp_fonts.lua",
 "checksum": "2fe07fd0173bc08ebc51ebf4be322841",
-"active": "true"
+"active": "false"
 },
 {
 "name": "00077_html_markup.lua",
