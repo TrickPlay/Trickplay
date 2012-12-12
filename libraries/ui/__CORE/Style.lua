@@ -340,7 +340,7 @@ local global_style_subscriptions = {}
 clone_sources = 
     screen:find_child("Widget Library Clone Sources - DO NOT REMOVE or SHOW") or 
     Group{       name="Widget Library Clone Sources - DO NOT REMOVE or SHOW"}
-screen:add(clone_sources)
+if clone_sources.parent == nil then screen:add(clone_sources) end
 clone_sources:hide()
 states = {"default","focus","activation","selection"}
 
@@ -788,7 +788,7 @@ Style = setmetatable({},
                 end
                 
             end
-            print("new style",parameters.name)
+            --print("new style",parameters.name)
             
             local style_sources = Group{name=tostring(parameters.name)}
             clone_sources:add(style_sources)
@@ -1169,7 +1169,7 @@ Style = setmetatable({},
             instance.text            = parameters.text
             ---[[
             -- if a substyle was modified, notify my subscribers
-            print(instance.name,"Style object is subscribing to sub-styles")
+            --print(instance.name,"Style object is subscribing to sub-styles")
             --arrow:subscribe_to(       nil, function(t) instance:notify({arrow       = t}) end )
             --border:subscribe_to(      nil, function(t) instance:notify({border      = t}) end )
             text:subscribe_to(        nil, function(t) instance:notify({text        = t}) end )
