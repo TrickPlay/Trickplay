@@ -763,7 +763,7 @@ Widget_SpriteSheet = function(parameters)
 end
 
 local sprite_properties = { 
-    "id","sheet"
+    "id",--"sheet"
 }
 Widget_Sprite = function(parameters)
     
@@ -794,13 +794,13 @@ Widget_Sprite = function(parameters)
             
             t.style = nil
             
-            t.sheet = self.sheet and SpriteSheet_lookup_r[self.sheet]
-            
             for _,k in pairs(sprite_properties) do
                 
                 t[k] = self[k]
                 
             end
+            
+            t.sheet = self.sheet and SpriteSheet_lookup_r[self.sheet]
             
             t.type = "Widget_Sprite"
             
