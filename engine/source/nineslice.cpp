@@ -100,7 +100,7 @@ void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] )
     clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
 }
 
-void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] )
+std::vector< int > * nineslice_effect_get_borders( NineSliceEffect * effect )
 {
     Slice * slices = effect->priv->slices;
     
@@ -119,10 +119,14 @@ void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] )
         }
     }
     
-    borders[0] = MAX( MAX( width[0],  width[3]  ), width[6]  );
-    borders[1] = MAX( MAX( width[2],  width[5]  ), width[8]  );
-    borders[2] = MAX( MAX( height[0], height[1] ), height[2] );
-    borders[3] = MAX( MAX( height[6], height[7] ), height[8] );
+    std::vector< int > * borders = new std::vector< int >( 4, 0 );
+    
+    borders->at( 0 ) = MAX( MAX( width[0],  width[3]  ), width[6]  );
+    borders->at( 1 ) = MAX( MAX( width[2],  width[5]  ), width[8]  );
+    borders->at( 2 ) = MAX( MAX( height[0], height[1] ), height[2] );
+    borders->at( 3 ) = MAX( MAX( height[6], height[7] ), height[8] );
+    
+    return borders;
 }
 
 /* GObject housekeeping */

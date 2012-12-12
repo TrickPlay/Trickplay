@@ -94,12 +94,13 @@ static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" 
 
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ) {};
+    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
     
     NineSliceEffect * get_effect() { return effect; };
     
     bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
     void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
+    std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
     
     std::string & get_id( unsigned i )
     {
@@ -236,7 +237,7 @@ class NineSlice [[ClutterActor*]] actor
 
             lua_newtable( L );
 
-            for ( unsigned i = 0; i < 9; i++ )
+            for ( unsigned i = 0; i < 9; ++i )
             {
                 lua_pushstring( L, keys[i] );
                 lua_pushstring( L, binding->get_id( i ).c_str() );
@@ -247,13 +248,13 @@ class NineSlice [[ClutterActor*]] actor
             if ( lua_istable( L, 2 ) )
             {
                 NineSliceBinding * binding = get_binding( self );
-
-                for ( unsigned i = 0; i < 9; i++ )
+                
+                for ( unsigned i = 0; i < 9; ++i )
                 {
                     lua_getfield( L, 2, keys[i] );
                     const char * id = lua_tostring( L, -1 );
                     binding->set_id( i, std::string( id != NULL ? id : "" ) );
-                    lua_pop(L, 1);
+                    lua_pop( L, 1 );
                 }
             }
             else
@@ -287,7 +288,7 @@ class NineSlice [[ClutterActor*]] actor
             
             lua_newtable( L );
 
-            for ( unsigned i = 0; i < 6; i++ )
+            for ( unsigned i = 0; i < 6; ++i )
             {
                 lua_pushboolean( L, binding->get_tile( i ) );
                 lua_rawseti( L, -2, i + 1 );
@@ -307,7 +308,7 @@ class NineSlice [[ClutterActor*]] actor
             }
             else if lua_isboolean( L, 2 )
             {
-                for ( unsigned i = 0; i < 6; i++ )
+                for ( unsigned i = 0; i < 6; ++i )
                 {
                     binding->set_tile( i, lua_toboolean( L, 2 ), false );
                 }
@@ -339,15 +340,16 @@ class NineSlice [[ClutterActor*]] actor
 
     readonly table borders
         [[
-            int list[4] = { 0, 0, 0, 0 };
-            nineslice_effect_get_borders( get_binding( self )->get_effect(), list );
+            std::vector< int > * list = get_binding( self )->get_borders();
 
-            lua_newtable( L );
+            lua_createtable( L, 0, 4 );
 
-            for ( unsigned i = 0; i < 4; i++ )
+            for ( unsigned i = 0; i < 4; ++i )
             {
-                lua_pushnumber( L, list[i] );
+                lua_pushnumber( L, list->at( i ) );
                 lua_rawseti( L, -2, i + 1 );
             }
+            
+            delete list;
         ]];
 }
