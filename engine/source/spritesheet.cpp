@@ -249,41 +249,45 @@ void SpriteSheet::load_json( const char * json )
 
     char * map = NULL;
     gsize length;
-    AppResource resource( app, json );
+    
 
-    if ( resource.is_native() )
-    {
-        if ( ! g_file_get_contents( resource.get_native_path().c_str(), &map, &length, NULL ) )
-        {
-            emit_signal( g_strdup_printf( "Could not open map %s", json ) );
-        }
-    }
-    else if ( resource.is_http() )
-    {
-        Network::Request request( app->get_user_agent(), resource.get_uri() );
-
-        if ( async )
-        {
-            app->get_network()->perform_request_async( request, app->get_cookie_jar(),
-                (Network::ResponseCallback) async_map_callback, this, 0 );
-        }
-        else
-        {
-            Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
-
-            if ( response.failed || response.body->len == 0 )
-            {
-                emit_signal( g_strdup_printf( "Could not download map %s", json ) );
-            }
-
-            map = (char *) response.body->data;
-            length = response.body->len;
-        }
-    }
-    else
+    if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
         map = (char *) json;
         length = strlen( map );
+    }
+    else
+    {
+        AppResource resource( app, json );
+        if ( resource.is_native() )
+        {
+            if ( ! g_file_get_contents( resource.get_native_path().c_str(), &map, &length, NULL ) )
+            {
+                emit_signal( g_strdup_printf( "Could not open map %s", json ) );
+            }
+        }
+        else if ( resource.is_http() )
+        {
+            Network::Request request( app->get_user_agent(), resource.get_uri() );
+
+            if ( async )
+            {
+                app->get_network()->perform_request_async( request, app->get_cookie_jar(),
+                    (Network::ResponseCallback) async_map_callback, this, 0 );
+            }
+            else
+            {
+                Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+
+                if ( response.failed || response.body->len == 0 )
+                {
+                    emit_signal( g_strdup_printf( "Could not download map %s", json ) );
+                }
+
+                map = (char *) response.body->data;
+                length = response.body->len;
+            }
+        }
     }
 
     if ( map && length )

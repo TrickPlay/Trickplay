@@ -212,7 +212,6 @@ class NineSlice [[ClutterActor*]] actor
             }
             else
             {
-                g_warning( "Failed to set 'sheet': not a SpriteSheet." );
                 binding->set_sheet( NULL );
                 * get_ref( self ) = LUA_REFNIL;
             }
