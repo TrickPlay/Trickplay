@@ -46,6 +46,7 @@ void Source::handle_async_img( Image * image )
 
 void Source::make_texture()
 {
+    g_message("make_texture");
     g_assert( uri );
     
     JSON::Object * jo = new JSON::Object();
@@ -77,6 +78,7 @@ void Source::make_texture()
     }
     
     set_texture( texture );
+    g_message("~make_texture");
 }
 
 void Source::set_source( const char * _uri )
@@ -148,6 +150,21 @@ void Sprite::lost_texture()
 
 /* SpriteSheet */
 
+class AsyncSignal : public Action
+{
+    SpriteSheet * self;
+    bool failed;
+    
+    public: AsyncSignal( SpriteSheet * self, bool failed ) : self( self ), failed( failed ) {}
+    
+    protected: bool run()
+    {
+        g_message( "run signal, self = %p, failed = %i, async = %i", self, failed, self->async );
+        g_signal_emit_by_name( self->extra, "load-finished", GINT_TO_POINTER( failed ) );
+        return false;
+    }
+};
+
 SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), native_json_path( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
@@ -169,9 +186,11 @@ SpriteSheet::~SpriteSheet()
 
 void SpriteSheet::emit_signal( const char * msg )
 {
+    g_message( "emit_signal, async = %i", async );
+    
     if ( async )
     {
-        g_signal_emit_by_name( extra, "load-finished", msg );
+        g_signal_emit_by_name( this, "load-finished", msg );
     }
     else
     {
@@ -213,9 +232,11 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
 
 void async_map_callback ( const Network::Response & response, SpriteSheet * self )
 {
+        g_message( "async_map_callback" );
     if ( !response.failed && response.body->len )
     {
         self->parse_json( JSON::Parser::parse( (char *) response.body->data, response.body->len ) );
+        self->emit_signal( "msg" );
     }
     else
     {
@@ -269,6 +290,13 @@ void SpriteSheet::load_json( const char * json )
     if ( map && length )
     {
         parse_json( JSON::Parser::parse( map, length ) );
+        
+        g_message( "Action::post, async = %i", async );
+        
+        if ( async )
+        {
+            Action::post( new AsyncSignal( this, false ) );
+        }
     }
 }
 

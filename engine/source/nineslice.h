@@ -37,6 +37,6 @@ void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );
 void nineslice_effect_set_tile( NineSliceEffect * effect, unsigned i, bool t, bool guess );
 void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] );
 
-void nineslice_effect_get_borders( NineSliceEffect * effect, int borders[4] );
+std::vector< int > * nineslice_effect_get_borders( NineSliceEffect * effect );
 
 #endif

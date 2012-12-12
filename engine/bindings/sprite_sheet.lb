@@ -93,7 +93,7 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
         g_warning( "Map subsheet is not a table" );
         return;
     }
-
+    
     Bitmap * bitmap;
     Source * source = self->add_source();
     
@@ -128,11 +128,10 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
     {
         g_warning( "List of sprites is not a table" );
     }
-
+    
     lua_pop( L, 1 );
 }
-
-void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L );
+void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L );
 
 ]]
 
@@ -203,13 +202,13 @@ class SpriteSheet [[SpriteSheet*]]
         *Return Value:* new NineSlice object
     */
 
-    SpriteSheet(table props = 0 )
+    SpriteSheet( table props = 0 )
         [[
             LSG;
             self = lb_construct( SpriteSheet, new SpriteSheet() );
-
+            
             g_signal_connect_data( self->extra, "load-finished",
-                (GCallback) Sprite_Sheet_on_loaded,
+                (GCallback) SpriteSheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
             
             self->app = App::get( L );
@@ -217,12 +216,12 @@ class SpriteSheet [[SpriteSheet*]]
             if ( props )
             {
                 ClutterUtil::set_props_from_table( L, props );
-
+                
                 lua_getfield( L, 1, "async" );
                 lua_getfield( L, 1, "map" );
-
+                
                 self->async = lua_toboolean( L, -2 );
-
+                
                 if ( lua_isstring( L, -1 ) )
                 {
                     self->load_json( lua_tostring( L, -1 ) );
@@ -235,14 +234,14 @@ class SpriteSheet [[SpriteSheet*]]
                 {
                     luaL_error( L, "Key 'map' was not a table or URI string." );
                 }
-
+                
                 lua_pop( L, 2 );
             }
             else
             {
                 luaL_error( L, "Must pass a table to SpriteSheet constructor." );
             }
-
+            
             LSG_END( 0 );
         ]];
 
@@ -289,30 +288,48 @@ class SpriteSheet [[SpriteSheet*]]
         FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
         nil - Successfully loaded a source image (remote or local)
     */
-
-    callback on_loaded
+    /*
+    readonly bool loaded
         [[
+            loaded = self->loaded;
+        ]];
+      */  
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
+            //UserData::get( L )->connect_signal( "on_loaded",
+             //   "load-finished", (GCallback) SpriteSheet_on_loaded, L );
+        ]];
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
+        ]];
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
+            //UserData::get( L )->connect_signal( "on_loaded",
+            //    "load-finished", (GCallback) SpriteSheet_on_loaded, L );
         ]];
 }
 
 [[
-void Sprite_Sheet_on_loaded( GObject * extra, char * error, lua_State * L )
+
+void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L )
 {
-    lua_pushboolean( L, !error );
-
-    if ( error )
-    {
-        lua_pushstring( L, error );
-    }
-    else
-    {
-        lua_pushnil( L );
-    }
-
+    //g_message( "here" );
+    
     SpriteSheet * self = (SpriteSheet *) g_object_get_data( extra, "tp-sheet" );
-
-    UserData::invoke_callback( self, "on_loaded", 2, 0, L);
+    g_message( "SpriteSheet_on_loaded, self = %p, async = %i", self, self->async );
+    if ( self->async )
+    {
+        lua_pushboolean( L, error ? 1 : 0 );
+        UserData::invoke_callback( self, "on_loaded", 1, 0, L);
+    }
 }
 
-#undef LUA_CALLBACK
 ]]
