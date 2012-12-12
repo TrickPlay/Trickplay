@@ -17,7 +17,9 @@
 #include "jpeglib.h"
 #include "sndfile.h"
 #include "upnp/upnp.h"
+#ifdef TP_HAS_READLINE
 #include "readline/readline.h"
+#endif
 
 #define PNG_SKIP_SETJMP_CHECK 1
 #include "png.h"
@@ -139,8 +141,10 @@ VersionMap get_versions()
 
     result[ "upnp" ].push_back( UPNP_VERSION_STRING );
 
+#ifdef TP_HAS_READLINE
     result[ "readline" ].push_back( rl_library_version );
     result[ "readline" ].push_back( Util::format( "%d.%d", RL_VERSION_MAJOR, RL_VERSION_MINOR ) );
+#endif
 
     // Fix it up
 

@@ -389,7 +389,7 @@ global screen [[ClutterActor*]] actor , container
             XTranslateCoordinates( stage_display, stage_xwindow, attribs.root, attribs.x, attribs.y, &dst_x, &dst_y, &child);
             int top,left;
             get_window_offsets( stage_display, stage_xwindow, &top, &left );
-            XMoveWindow( stage_display, stage_xwindow, attribs.x - left, y - top );
+            XMoveWindow( stage_display, stage_xwindow, dst_x - left, y - top );
 #elif defined(CLUTTER_WINDOWING_OSX)
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
