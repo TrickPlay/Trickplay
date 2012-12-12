@@ -76,7 +76,6 @@ void PushTexture::set_texture( CoglHandle _texture )
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
     if ( texture ) cogl_handle_ref( texture );
-    ping_all();
 }
 
 void PushTexture::ping_all()

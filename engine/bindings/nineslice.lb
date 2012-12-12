@@ -100,6 +100,9 @@ struct NineSliceBinding
     
     bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
     void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
+    
+    bool is_loaded() { return nineslice_effect_is_loaded( effect ); };
+    
     std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
     
     std::string & get_id( unsigned i )
@@ -136,6 +139,8 @@ private:
 #define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
 #define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
 
+void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L );
+
 ]]
 
 class NineSlice [[ClutterActor*]] actor
@@ -160,6 +165,10 @@ class NineSlice [[ClutterActor*]] actor
             ClutterEffect * effect = nineslice_effect_new();
             clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
             clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
+            
+            g_signal_connect_data( G_OBJECT( effect ), "load-finished",
+                (GCallback) NineSlice_on_loaded,
+                L, 0, GConnectFlags( 0 ) );
             
             g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_EFFECT( effect ) ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
@@ -326,6 +335,29 @@ class NineSlice [[ClutterActor*]] actor
         [[
             get_binding( self )->async = async;
         ]];
+        
+    readonly bool loaded
+        [[
+            loaded = get_binding( self )->is_loaded();
+        ]];
+        
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
+        ]];
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
+        ]];
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
+        ]];
 
     /*
         Property: borders
@@ -353,3 +385,18 @@ class NineSlice [[ClutterActor*]] actor
             delete list;
         ]];
 }
+
+[[
+
+void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L )
+{
+    ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) );
+    
+    if ( get_binding( self )->async )
+    {
+        lua_pushboolean( L, error ? 1 : 0 );
+        UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+    }
+}
+
+]]

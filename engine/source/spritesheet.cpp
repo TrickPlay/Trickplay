@@ -62,6 +62,8 @@ void Source::make_texture()
         {
             ping_all_later();
         }
+        
+        set_texture( texture );
     }
     else
     {
@@ -73,9 +75,10 @@ void Source::make_texture()
             
             Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
         }
+        
+        set_texture( texture );
+        ping_all();
     }
-    
-    set_texture( texture );
 }
 
 void Source::set_source( const char * _uri )
@@ -120,6 +123,7 @@ void Sprite::update()
     th = MIN( h < 0 ? th : ty + h, th ) - ty;
     
     set_texture( cogl_handle_ref( source->get_subtexture( tx, ty, tw, th ) ) );
+    ping_all();
 }
 
 void on_ping( PushTexture * source, void * target )
