@@ -56,7 +56,12 @@ struct SpriteBinding
     bool async;
     
 private:
-    static void on_ping( PushTexture * source, void * target ) { ((SpriteBinding *) target)->update(); };
+    static void on_ping( PushTexture * source, void * target )
+    {
+        SpriteBinding * self = (SpriteBinding *) target;
+        self->update();
+        g_signal_emit_by_name( G_OBJECT( self->actor ), "load-finished", 0 );
+    };
 
     void update_sprite()
     {
@@ -97,6 +102,8 @@ void set_sheet_first( lua_State * L , int table )
 
 #define get_binding( self ) ( (SpriteBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
 #define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
+
+void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L );
 
 ]]
 
@@ -210,6 +217,28 @@ class Sprite [[ClutterActor*]] actor
         [[
             get_binding( self )->async = async;
         ]];
+        
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
+            UserData::get( L )->connect_signal( "on_loaded",
+                "load-finished", (GCallback) Sprite_on_loaded, L );
+        ]];
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
+        ]];
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
+            UserData::get( L )->connect_signal( "on_loaded",
+                "load-finished", (GCallback) Sprite_on_loaded, L );
+        ]];
 
     /*
         This makes sure sheet is set first.
@@ -225,3 +254,16 @@ class Sprite [[ClutterActor*]] actor
             lua_pushvalue( L, 1 );
         ]];
 }
+
+[[
+
+void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L )
+{
+    if ( get_binding( self )->async )
+    {
+        lua_pushboolean( L, error ? 1 : 0 );
+        UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+    }
+}
+
+]]
