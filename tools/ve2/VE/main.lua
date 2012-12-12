@@ -66,7 +66,7 @@
     
     -- Style JSON 
     local sjson_head = '[{"anchor_point":[0,0], "children":'  
-    local sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
+    local sjson_tail = ',"gid":"'..screen.gid..'","is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
 
 ---------------------------------------------------------------------------
 ---                 Local Editor Functions                              ---
@@ -98,26 +98,17 @@ end
 _VE_.getUIInfo = function()
     local t = {}
     for m,n in ipairs (screen.children) do
-    --[[
-        if string.find(n.name, "Layer") then  
-            fake_layer = fake_layer_name..n.name..fake_layer_gid..n.gid..fake_layer_children
-            for i,j in ipairs(n.children) do 
-                if j.to_json then 
-                    if i > 1 then
-                        fake_layer = fake_layer..','..j:to_json()
-                    else 
-                        fake_layer = fake_layer..j:to_json()
-                    end
-                end 
-            end 
-            fake_layer = fake_layer..fake_layer_end
-            table.insert(t, json:parse(fake_layer))
-        else]]
         if n.to_json then -- s1.b1
+            dumptable(n.transformed_position)
             table.insert(t, json:parse(n:to_json()))
+            print("&&&&&&&&&&&&&&&&&&&&&")
+            print(n:to_json())
+            print(n.to_json)
+            print(n.name)
         end
     end
     
+    dumptable(t)
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 
@@ -850,6 +841,7 @@ _VE_.openFile = function(path)
     --the first time this function is called, styles will get set up
     --if not styles then load_styles() end
     
+    _VE_.buildVF()
     --load the json
     local style = readfile(styles_file)
     style = string.sub(style, 2, string.len(style)-1)
@@ -870,12 +862,11 @@ _VE_.openFile = function(path)
     -- Library 
     WL = dofile("LIB/Widget/Widget_Library.lua")
 
-    print(layer)
-
+    --print(layer)
     s = load_layer(layer)
-    print (s, #s.children)
+    --print (s, #s.children)
 
-    _VE_.buildVF()
+    --_VE_.buildVF()
 
     for i,j in ipairs(s.children) do
         --if string.find(j.name, "Layer") ~= nil then 
@@ -884,6 +875,7 @@ _VE_.openFile = function(path)
          string.find(j.name, "border") == nil 
         then 
             for l,m in ipairs(j.children) do 
+
                 m.created = false
                 if m.subscribe_to then  
                     m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
@@ -948,7 +940,7 @@ _VE_.openFile = function(path)
                 m.selected = false
                 m.is_in_group = false
             end
-        end 
+        end     
         j:unparent()
         screen:add(j)
     end
@@ -1381,7 +1373,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     util.assign_right_name(uiInstance, uiTypeStr)
 
     if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
-        --uiInstance.src = path
         uiInstance.sheet = spriteSheet
         uiInstance.id = path
     elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
