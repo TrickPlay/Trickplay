@@ -744,12 +744,23 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
             clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,-3),0,lua_tonumber(L,-2),lua_tonumber(L,-1));
             lua_pop(L,3);
+            }
+            else
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
+            }
         ]];
 
 /***************************************
@@ -784,12 +795,23 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
             clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),0,lua_tonumber(L,-1));
             lua_pop(L,3);
+            }
+            else
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
+            }
         ]];
 
 /***************************************
@@ -824,12 +846,23 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,3);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
+            if(lua_type(L,2) == LUA_TTABLE)
+            {
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
             lua_rawgeti(L,2,3);
             clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1),0);
             lua_pop(L,3);
+            }
+            else
+            {
+                luaL_checktype(L,2,LUA_TNUMBER);
+                gfloat x;
+                gfloat y;
+                gfloat z;
+                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+                clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
+            }
         ]];
 
 
