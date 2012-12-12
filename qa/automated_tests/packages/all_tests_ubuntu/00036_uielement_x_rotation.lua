@@ -44,22 +44,7 @@ function generate_test_image ()
 	myImg3.x_rotation = { 60, 200, 0 }
 
 
-g:add (myImg, myImg1, myImg2, myImg3)
-
--- Check that is_rotated is returning true	
-	local result
-	if myImg2.is_rotated == true then
-		result = "true"
-	else
-		result = "false"
-	end
-	
-	local is_rotated_txt = Text()
---	is_rotated_txt.font="DejaVu Sans 30px"
-	is_rotated_txt.position={screen.w - 300, 100}
---	is_rotated_txt.text = "is_rotated = "..result
-	is_rotated_txt.color = "000000"
-	g:add(is_rotated_txt)
+    g:add (myImg, myImg1, myImg2, myImg3)
 
 	return g
 end
