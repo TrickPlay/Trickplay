@@ -4,7 +4,8 @@
 FUZZ=60%
 LIMIT=400
 
-REF_IMG="${2}"
+FAILURES_DIR="${2}"
+REF_IMG="${3}"
 TEST_NAME=$(basename "${REF_IMG}")
 TEST_IMG="${1}/${TEST_NAME}"
 if test -e "${TEST_IMG}"; then
@@ -26,6 +27,10 @@ if test -e "${TEST_IMG}"; then
                 echo ${TEST_NAME%.png}:$test_duration:pass:$imgdiff fuzz
             else
                 echo ${TEST_NAME%.png}:$test_duration:failure:Image diff "&gt;" ${LIMIT}px - ${imgdiff}px
+                # Log results to failures dir for embedding in test results
+                compare -metric AE -fuzz $FUZZ "${REF_IMG}" "${TEST_IMG}" "${FAILURES_DIR}/diff-${TEST_NAME}" 2>/dev/null 1>/dev/null
+                cp "${REF_IMG}" "${FAILURES_DIR}/ref-${TEST_NAME}"
+                cp "${TEST_IMG}" "${FAILURES_DIR}/test-${TEST_NAME}"
             fi
         fi
     else

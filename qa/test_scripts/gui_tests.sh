@@ -4,9 +4,21 @@
 
 THE_PATH=$1
 AUTOMATED_TESTS=$2
+FAILURES_DIR="${1}"/automated-test-failures
 
 echo THE_PATH=$THE_PATH
 echo AUTOMATED_TESTS=$AUTOMATED_TESTS
+
+
+mkdir -p "${FAILURES_DIR}"
+
+if [ `uname` == 'Darwin' ]; then
+    NUM_CPUS=`sysctl -n hw.ncpu`
+elif [ `uname` == 'Linux' ]; then
+    NUM_CPUS=`awk '/processor/{num_procs+=1} END {print num_procs}' /proc/cpuinfo`
+else
+    NUM_CPUS=2
+fi
 
 ##Set Fuzz %
 fuzz=60%
@@ -37,7 +49,7 @@ fi
 
 
 # Parallelize image comparisons
-RESULTS=$(find "${THE_PATH}/qa/test_scripts/baselines/${test_resolution}" -maxdepth 1 -name '*.png' -print0 | xargs -0 -n1 -P2 "${THE_PATH}/qa/test_scripts/compare_images.sh" "${AUTOMATED_TESTS}")
+RESULTS=$(find "${THE_PATH}/qa/test_scripts/baselines/${test_resolution}" -maxdepth 1 -name '*.png' -print0 | xargs -0 -n1 -P${NUM_CPUS} "${THE_PATH}/qa/test_scripts/compare_images.sh" "${AUTOMATED_TESTS}" "${FAILURES_DIR}")
 PASSES=$(fgrep -c :pass: <<< "${RESULTS}")
 FAILS=$(fgrep -c :failure: <<< "${RESULTS}")
 ERRORS=$(fgrep -c :error: <<< "${RESULTS}")
@@ -67,7 +79,7 @@ for RESULT in $RESULTS; do
     elif [ ${PARSED_RESULT[2]} == 'error' ]; then
         >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><error type='error' message='${PARSED_RESULT[3]}'>${PARSED_RESULT[3]}</error></testcase>"
     else
-        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><failure type='failure' message='${PARSED_RESULT[3]}'>${PARSED_RESULT[3]}</failure></testcase>"
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><failure type='failure' message='Reference: <img src=\"../../../../artifact/automated-test-failures/ref-${PARSED_RESULT[0]}.png\" /><br />Test: <img src=\"../../../../artifact/automated-test-failures/test-${PARSED_RESULT[0]}.png\" /><br />Differences: <img src=\"../../../../artifact/automated-test-failures/diff-${PARSED_RESULT[0]}.png\" />'>${PARSED_RESULT[3]}</failure></testcase>"
     fi
 done
 
