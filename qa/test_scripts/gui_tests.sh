@@ -37,7 +37,7 @@ fi
 
 
 # Parallelize image comparisons
-RESULTS=$(\ls -1 "${THE_PATH}/qa/test_scripts/baselines/${test_resolution}/"*.png | xargs -n1 -P4 "${THE_PATH}/qa/test_scripts/compare_images.sh" "${AUTOMATED_TESTS}")
+RESULTS=$(find "${THE_PATH}/qa/test_scripts/baselines/${test_resolution}" -maxdepth 1 -name '*.png' -print0 | xargs -0 -n1 -P4 "${THE_PATH}/qa/test_scripts/compare_images.sh" "${AUTOMATED_TESTS}")
 PASSES=$(fgrep -c :pass: <<< "${RESULTS}")
 FAILS=$(fgrep -c :failure: <<< "${RESULTS}")
 ERRORS=$(fgrep -c :error: <<< "${RESULTS}")
