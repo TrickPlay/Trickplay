@@ -65,7 +65,7 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         end
         
         return function()
-            print("unsubscribing")
+            --print("unsubscribing")
             if type(subscription) == "nil" then
                 
                 subscriptions_all[f] = nil
