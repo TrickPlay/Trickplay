@@ -727,6 +727,14 @@ LayoutManager = setmetatable(
                         reposition = true
                     end
                 end,
+                individual_duration = function(instance,_ENV)
+                    return function(oldf) return individual_duration     end,
+                    function(oldf,self,v)        individual_duration = v end
+                end,
+                cascade_delay = function(instance,_ENV)
+                    return function(oldf) return cascade_delay     end,
+                    function(oldf,self,v)        cascade_delay = v end
+                end,
                 placeholder = function(instance,_ENV)
                     return function(oldf) return placeholder     end,
                     function(oldf,self,v) 
@@ -813,6 +821,66 @@ LayoutManager = setmetatable(
                         return self:r_c_from_x_y(
                             x - self.transformed_position[1]/screen.scale[1],
                             y - self.transformed_position[2]/screen.scale[2]
+                        )
+                    end
+                end,
+                prep_animate_in = function(instance,_ENV)
+                    return function(old_function,self)
+                        for r = 1, cells.number_of_rows do
+                            for c = 1, cells.number_of_cols do
+                                if cells[r][c] then
+                                    cells[r][c]:set{ opacity=0, y_rotation={-90,0,0} }
+                                end
+                            end
+                        end
+                    end
+                end,
+                animate_in = function(instance,_ENV)
+                    local animating = false
+                    return function(old_function,self)
+                        
+                        if animating then return end
+                        animating = true
+                        
+                        for r = 1, cells.number_of_rows do
+                            for c = 1, cells.number_of_cols do
+                                if cells[r][c] then
+                                    cells[r][c]:set{ opacity=0, y_rotation={-90,0,0} }
+                                end
+                            end
+                        end
+                        for r = 1, cells.number_of_rows do
+                            for c = 1, cells.number_of_cols do
+                                if cells[r][c] then
+                                    dolater(
+                                        (r+c-2)*cascade_delay,
+                                        cells[r][c].animate,
+                                        cells[r][c],
+                                        {
+                                            duration   = individual_duration,
+                                            opacity    = 255,
+                                            y_rotation = 0,
+                                            on_completed = 
+                                                (r == cells.number_of_rows) and 
+                                                (c == cells.number_of_cols) and 
+                                                function() animating = false end
+                                        }
+                                    )
+                                end
+                            end
+                        end
+                        local r = cells.number_of_rows
+                        local c = cells.number_of_cols
+                        dolater(
+                            (r+c-2)*cascade_delay,
+                            cells[r][c].animate,
+                            cells[r][c],
+                            {
+                                duration   = individual_duration,
+                                opacity    = 255,
+                                y_rotation = 0,
+                                on_completed = function() animating = false end
+                            }
                         )
                     end
                 end,
@@ -1031,6 +1099,9 @@ LayoutManager = setmetatable(
             parameters = parameters or {}
             
             local instance,_ENV = Widget()
+            
+            individual_duration = 100
+            cascade_delay       = 100
             
             instance.w = 0
             instance.h = 0

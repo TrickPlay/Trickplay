@@ -820,7 +820,5 @@ external.Widget_Text      = Widget_Text
 external.Widget_Rectangle = Widget_Rectangle
 external.Widget_Sprite    = Widget_Sprite
 
-external.Widget_SpriteSheet    = Widget_SpriteSheet
-
 
 
