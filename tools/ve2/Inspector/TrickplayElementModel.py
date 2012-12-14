@@ -238,9 +238,11 @@ class TrickplayElementModel(QStandardItemModel):
         if '' != value:   
             gs = str(gid)
             l = len(gs)
-            value =  gs + ' ' * 2 * (6 - l) + value 
+            #value =  gs + ' ' * 2 * (6 - l) + value 
+            value =  value 
         else:    
-            value = str(gid)
+            #value = str(gid)
+            value = ""
         
         node = TrickplayElement(title)
         self.node = node
