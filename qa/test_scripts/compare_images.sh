@@ -31,7 +31,7 @@ if test -e "${TEST_IMG}"; then
             fi
         fi
     else
-        echo ${TEST_NAME%.png}:$test_duration:error:Major failure when trying to compare images ${REF_IMG} and ${TEST_IMG}
+        echo ${TEST_NAME%.png}:$test_duration:error:Failure when trying to compare images ${REF_IMG} and ${TEST_IMG} - ${imgdiff}
     fi
 else
     echo ${TEST_NAME%.png}:$test_duration:skip:Missing test image target ${TEST_IMG}
