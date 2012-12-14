@@ -90,11 +90,13 @@ hdr.neighberKey_map =
 editor_lb = editor
 --editor_use = false
 
---current_dir 	   = ""
+current_dir 	   = ""
 --current_inspector  = nil 
 --current_fn  	   = ""
 --restore_fn  	   = ""
+debugger_script = "trickplay-debugger"
 current_focus 	   = nil
+current_screen 	   = ""
 --prev_tab 		   = nil
 selected_container = nil
 selected_content   = nil

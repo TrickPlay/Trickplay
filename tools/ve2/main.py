@@ -119,6 +119,7 @@ class MainWindow(QMainWindow):
 
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
+        QObject.connect(self.ui.action_Debugger, SIGNAL("triggered()"),  self.debug)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
 		
         # Restore sizes/positions of docks
@@ -504,6 +505,9 @@ class MainWindow(QMainWindow):
         if self._emulatorManager.trickplay.state() == QProcess.Running:
             # Local Debugging / Run 
             self._emulatorManager.trickplay.close()
+
+    def debug(self):
+        self.sendLuaCommand("exeDebugger", "_VE_.exeDebugger()")
 
     def run(self):
         self.inspector.clearTree()

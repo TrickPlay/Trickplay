@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>672</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="font">
@@ -84,6 +84,7 @@
      <string>Run</string>
     </property>
     <addaction name="action_Run"/>
+    <addaction name="action_Debugger"/>
     <addaction name="action_Stop"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -955,6 +956,11 @@
   <action name="actionImport_Skins">
    <property name="text">
     <string>Import Skins...</string>
+   </property>
+  </action>
+  <action name="action_Debugger">
+   <property name="text">
+    <string>Debug</string>
    </property>
   </action>
  </widget>
