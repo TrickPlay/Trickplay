@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Nov 20 14:15:15 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Fri Dec 14 12:05:37 2012
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,14 +25,14 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMinimumSize(QtCore.QSize(200, 200))
-        MainWindow.setCursor(QtCore.Qt.ArrowCursor)
+        MainWindow.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         MainWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setMinimumSize(QtCore.QSize(0, 0))
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 672, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 672, 25))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.menubar.setFont(font)
@@ -371,6 +371,8 @@ class Ui_MainWindow(object):
         self.action_Reoptimize.setObjectName(_fromUtf8("action_Reoptimize"))
         self.actionImport_Skins = QtGui.QAction(MainWindow)
         self.actionImport_Skins.setObjectName(_fromUtf8("actionImport_Skins"))
+        self.action_Debugger = QtGui.QAction(MainWindow)
+        self.action_Debugger.setObjectName(_fromUtf8("action_Debugger"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -382,6 +384,7 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.action_Exit)
         self.menuRun.addAction(self.action_Run)
+        self.menuRun.addAction(self.action_Debugger)
         self.menuRun.addAction(self.action_Stop)
         self.menuInsert_UI_Element.addAction(self.actionArrowPane)
         self.menuInsert_UI_Element.addAction(self.action_Button)
@@ -448,7 +451,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay Visual Editor ", None, QtGui.QApplication.UnicodeUTF8))
-        MainWindow.setProperty(_fromUtf8("aaa"), QtGui.QApplication.translate("MainWindow", "sdfsf", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setProperty("aaa", QtGui.QApplication.translate("MainWindow", "sdfsf", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
@@ -584,4 +587,5 @@ class Ui_MainWindow(object):
         self.actionImport_Assets.setText(QtGui.QApplication.translate("MainWindow", "Import Assets...", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Reoptimize.setText(QtGui.QApplication.translate("MainWindow", "Reoptimize", None, QtGui.QApplication.UnicodeUTF8))
         self.actionImport_Skins.setText(QtGui.QApplication.translate("MainWindow", "Import Skins...", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Debugger.setText(QtGui.QApplication.translate("MainWindow", "Debug", None, QtGui.QApplication.UnicodeUTF8))
 

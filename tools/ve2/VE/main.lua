@@ -101,15 +101,15 @@ _VE_.getUIInfo = function()
         if n.to_json then -- s1.b1
             dumptable(n.transformed_position)
             table.insert(t, json:parse(n:to_json()))
-            print("&&&&&&&&&&&&&&&&&&&&&")
-            print(n:to_json())
-            print(n.to_json)
-            print(n.name)
         end
     end
     
-    dumptable(t)
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
+end 
+
+-- Execute Debugger 
+_VE_.exeDebugger = function()
+    editor_lb:execute(debugger_script.." "..current_dir)
 end 
 
 -- Print Object Name
@@ -805,6 +805,7 @@ _VE_.openInspector = function(gid, multi)
 end 
 
 _VE_.setAppPath = function(path)
+    current_dir = path
     editor_lb:change_app_path(path)
     WL = dofile("LIB/Widget/Widget_Library.lua")
     currentProjectPath = path 
@@ -817,7 +818,7 @@ _VE_.buildVF = function(path)
         images = string.gsub (images, "(\n+)", "")
         --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo"..images)
-        spriteSheet = SpriteSheet { map = images_file } 
+        spriteSheet = WL.Widget_SpriteSheet { map = images_file } 
     end
 end
 
@@ -826,6 +827,7 @@ _VE_.openFile = function(path)
     blockReport = true
     screen:clear()
 
+    current_dir = path
     -- Set current app path 
 
     editor_lb:change_app_path(path)
@@ -841,7 +843,7 @@ _VE_.openFile = function(path)
     --the first time this function is called, styles will get set up
     --if not styles then load_styles() end
     
-    _VE_.buildVF()
+    --_VE_.buildVF()
     --load the json
     local style = readfile(styles_file)
     style = string.sub(style, 2, string.len(style)-1)
@@ -861,6 +863,7 @@ _VE_.openFile = function(path)
 
     -- Library 
     WL = dofile("LIB/Widget/Widget_Library.lua")
+    _VE_.buildVF()
 
     --print(layer)
     s = load_layer(layer)
@@ -931,7 +934,7 @@ _VE_.openFile = function(path)
                 end 
 
                 if uiTypeStr == "Widget_Sprite" then 
-                    m.sheet = spriteSheet
+                    --m.sheet = spriteSheet
                 elseif uiTypeStr == "Image" then 
                     m.src = image_path..m.src
                 end 
@@ -1136,6 +1139,7 @@ _VE_.saveFile = function(scrJson)
     table.insert(style_t, json:parse(WL.get_all_styles()))
 
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
+    --editor_lb:writefile("/screens/layers.json", '['..json:stringify(layer_t)..']', true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
