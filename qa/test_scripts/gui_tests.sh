@@ -8,12 +8,6 @@ AUTOMATED_TESTS=$2
 echo THE_PATH=$THE_PATH
 echo AUTOMATED_TESTS=$AUTOMATED_TESTS
 
-## Global variables
-test_count=0
-minor_fail=0
-major_fail=0
-pass=0
-
 ##Set Fuzz %
 fuzz=60%
 
@@ -42,105 +36,42 @@ elif `echo ${test_info} | grep "540" 1>/dev/null 2>&1`
 fi
 
 
-##  For each baseline image, run ImageMagick Compare. Run first with no fuzzy. If they don't match
-##  then run a second time with fuzzy in case there are minor color differences. Save test results in an array.
-
-for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
-    start_test_time=$(date +%s.%N)
-    png_file=${f##*/}
-    if test -e "$AUTOMATED_TESTS/$png_file" ; then
-            test_count=$((test_count+1))
-        imgdiff=$(compare -metric AE "$f" "$AUTOMATED_TESTS/$png_file" /dev/null 2>&1)
-        status2=$?
-        imgdiff=$(perl -e "print ${imgdiff}")
-        if [ $status2 -eq 0 ]; then {
-            if [ $imgdiff -eq 0 ]; then {
-            end_test_time=$(date +%s.%N)
-            test_duration=$(echo "$end_test_time - $start_test_time" | bc)
-            test_duration=${test_duration:0:5}
-            pass=$(($pass+1))
-            N_ARRAY[test_count]=$png_file
-            D_ARRAY[test_count]=$test_duration
-            R_ARRAY[test_count]="pass"
-            }
-            else {
-
-            imgdiff_fuzz=$(compare -metric AE -fuzz $fuzz "$f" "$AUTOMATED_TESTS"/$png_file /dev/null 2>&1)
-            imgdiff_fuzz=$(perl -e "print ${imgdiff_fuzz}")
-
-            end_test_time=$(date +%s.%N)
-            test_duration=$(echo "$end_test_time - $start_test_time" | bc)
-            test_duration=${test_duration:0:5}
-
-            if [ $imgdiff_fuzz -ge 0 -a $imgdiff_fuzz -lt 401 ]; then {
-                echo Minor fail: "$f"
-                minor_fail=$(($minor_fail+1))
-                N_ARRAY[test_count]=$png_file
-                D_ARRAY[test_count]=$test_duration
-                R_ARRAY[test_count]="pass"
-             }
-            elif [ $imgdiff_fuzz -gt 400 ]; then
-                echo MAJOR FAIL: "$f"
-                major_fail=$(($major_fail+1))
-                N_ARRAY[test_count]=$png_file
-                D_ARRAY[test_count]=$test_duration
-                R_ARRAY[test_count]="fail"
-                M_ARRAY[test_count]="Image diff > 400 px even with $fuzz difference: $imgdiff_fuzz"
-            fi
-            }
-            fi
-         }
-             else
-        major_fail=$(($major_fail+1))
-        N_ARRAY[test_count]=$png_file
-        D_ARRAY[test_count]=$test_duration
-        R_ARRAY[test_count]="fail"
-        M_ARRAY[test_count]="Major fail when trying to do comparison."
-         fi
-
-     else
-    echo "Skipping $png_file. Test generated png does not exist."
-     fi
-
-done
+# Parallelize image comparisons
+RESULTS=$(\ls -1 "${THE_PATH}/qa/test_scripts/baselines/${test_resolution}/"*.png | xargs -n1 -P4 "${THE_PATH}/qa/test_scripts/compare_images.sh" "${AUTOMATED_TESTS}")
+PASSES=$(fgrep -c :pass: <<< "${RESULTS}")
+FAILS=$(fgrep -c :failure: <<< "${RESULTS}")
+ERRORS=$(fgrep -c :error: <<< "${RESULTS}")
+SKIP=$(fgrep -c :skip: <<< "${RESULTS}")
+TOTAL=$(wc -l <<< "${RESULTS}")
 
 ## Create the XML results file ##
 
 trickplay_version=1.0
+mkdir -p "${THE_PATH}/gui-test-results"
 XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
-
-[ -r "$XML_FILE" ] || exit 0
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
 total_test_time=${total_test_time:0:6}
 
-xml_open_tag_to_add="<testsuite name='com.trickplay.gui-test.engine' errors='$minor_fail' failures='$major_fail' tests='$test_count' time='$total_test_time'><properties><property name='trickplay.version' value='$trickplay_version' /></properties>"
-xml_close_tag_to_add="</testsuite>"
+>"${XML_FILE}" echo "<testsuite name='com.trickplay.gui-test.engine' errors='$ERRORS' failures='$FAILS' skipped='$SKIP' tests='$TOTAL' time='$total_test_time'><properties><property name='trickplay.version' value='$trickplay_version' /></properties>"
 
-echo $xml_open_tag_to_add 1>"$XML_FILE"
+IFS=$'\n'
+for RESULT in $RESULTS; do
+    IFS=':' read -a PARSED_RESULT <<< "$RESULT"
 
-i=1
-while [ $i -le $test_count ]; do
-    if [ ${R_ARRAY[$i]} == 'pass' ]; then
-        xml_pass_to_add="<testcase classname='com.trickplay.gui-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'/>"
-        echo $xml_pass_to_add 1>>"$XML_FILE"
+    if [ ${PARSED_RESULT[2]} == 'pass' ]; then
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}' />"
+    elif [ ${PARSED_RESULT[2]} == 'skip' ]; then
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><skipped /></testcase>"
+    elif [ ${PARSED_RESULT[2]} == 'error' ]; then
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><error type='error' message='${PARSED_RESULT[3]}'>${PARSED_RESULT[3]}</error></testcase>"
     else
-    echo fail_test=$i
-        xml_failure_to_add="<testcase classname='com.trickplay.unit-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'><failure type='failure'>'${M_ARRAY[$i]}'</failure></testcase>"
-        echo $xml_failure_to_add 1>>"$XML_FILE"
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><failure type='failure' message='${PARSED_RESULT[3]}'>${PARSED_RESULT[3]}</failure></testcase>"
     fi
-    let i=i+1
 done
 
 ## Dump Results to Console  ##
 echo GUI Automated Tests Completed
-echo
-echo -e "PASS \t\t$pass"
-echo -e "FAIL \t\t$major_fail"
-echo -e "ERRORS  \t$minor_fail"
-echo -e "TOTAL TESTS \t$test_count"
-echo
 
-echo $xml_close_tag_to_add 1>>"$XML_FILE"
-exit 0
+>>"$XML_FILE" echo '</testsuite>'
