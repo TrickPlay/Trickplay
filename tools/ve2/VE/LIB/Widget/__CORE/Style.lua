@@ -1030,7 +1030,7 @@ Style = setmetatable({},
                 }
                 getmetatable(instance).__index    = __index(meta_getters)
                 
-                for _,id in pairs(spritesheet:get_ids()) do
+                for id,_ in pairs(spritesheet:get_ids()) do
                     meta_getters[id] = function()
                         return id--Sprite{ sheet = default_spritesheet, id = id }
                     end
