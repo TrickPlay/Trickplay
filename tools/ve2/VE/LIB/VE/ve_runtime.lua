@@ -219,7 +219,7 @@ construct = function(t)
 
 
             t.children[i] = construct(v)
-            print ( t.children[i] )
+            --print ( t.children[i] )
             elements[t.children[i].name] = t.children[i]
             elements = concat_elements(elements,obj_to_elements_map[t.children[i]])
 
@@ -301,4 +301,67 @@ function load_layer(str)
 
     return layer
 end
+
+
+
+function transit_to (screens, nextScreen, effect)
+	
+    local img_t = {}
+    table.insert(img_t, json:parse(screens))
+
+    if nextScreen == nil then
+        currentScreen = img_t[1]["currentScreenName"]
+        for i, j in ipairs (img_t[1][currentScreen]) do
+            screen:find_child(j):show()
+        end 
+        return
+    end
+        
+	if effect == "fade" then 
+
+    	local fade_timeline = Timeline ()
+
+    	fade_timeline.duration = 1000 -- progress duration 
+    	fade_timeline.direction = "FORWARD"
+    	fade_timeline.loop = false
+
+        for i, j in ipairs (img_t[1][nextScreen]) do
+            screen:find_child(j).opacity = 0
+            screen:find_child(j):show()
+        end 
+
+     	function fade_timeline.on_new_frame(t, m, p)
+            for i, j in ipairs (img_t[1][currentScreen]) do
+                screen:find_child(j).opacity = (1-p) * 255 
+            end 
+            for i, j in ipairs (img_t[1][nextScreen]) do
+                screen:find_child(j).opacity = p * 255
+            end 
+     	end  
+
+     	function fade_timeline.on_completed()
+            for i, j in ipairs (img_t[1][currentScreen]) do
+                screen:find_child(j):hide()
+            end 
+            for i, j in ipairs (img_t[1][nextScreen]) do
+                screen:find_child(j):show()
+                screen:find_child(j).opacity = 255
+            end 
+            currentScreen = nextScreen
+     	end 
+
+		fade_timeline:start()
+
+	else 
+        for i, j in ipairs (img_t[1][currentScreen]) do
+            screen:find_child(j):hide()
+        end 
+        for i, j in ipairs (img_t[1][nextScreen]) do
+            screen:find_child(j):show()
+        end 
+        currentScreen = nextScreen
+	end 
+	screen:grab_key_focus()
+end 
+
 
