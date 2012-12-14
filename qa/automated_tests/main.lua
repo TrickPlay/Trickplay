@@ -74,8 +74,6 @@ local function do_test (tests)
     local g
     local i = 1
 
-    idle.limit=1/60
-
     local next_test
 
     next_test = function()
