@@ -343,7 +343,11 @@ void TPContext::setup_fonts()
 
 gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
-    if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
+    if ( event && (
+             ( event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) ) ||
+             event->any.type == CLUTTER_DELETE
+         )
+       )
     {
         // In production builds, the ESCAPE key is not used - it just passes through
 
@@ -732,6 +736,7 @@ int TPContext::run()
 #endif
 
     g_signal_connect( stage, "captured-event", ( GCallback ) escape_handler, this );
+    g_signal_connect( stage, "delete-event", ( GCallback ) escape_handler, this );
 
 #ifndef TP_PRODUCTION
 
@@ -2718,6 +2723,8 @@ void tp_context_set_int( TPContext * context, const char * key, int value )
 const char * tp_context_get( TPContext * context, const char * key )
 {
     g_assert( context );
+
+    if(!strcmp(key, "sekrit-stage")) return (const char *)context->get_stage();
 
     return context->get( key );
 }

@@ -145,9 +145,9 @@ print("ssssssssssssssssssssssssssssssssss")
 b0 = WL.ToggleButton()
 b0.x = 400
 
-b1 = WL.ToggleButton{x=400,y=100,style = style,selected = false, label = "text",reactive=true}
+b1 = WL.ToggleButton{x=400,y=100,selected = false, label = "text",reactive=true}
 
-b2 = WL.ToggleButton{x=400,y=200,style = style,selected = true,enabled = false,reactive=true}
+b2 = WL.ToggleButton{x=400,y=200,selected = true,enabled = false,reactive=true}
 
 --]]
 b3 = WL.ToggleButton{

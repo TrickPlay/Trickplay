@@ -1,4 +1,4 @@
-local img = Image{src='duck.png'}
+local img = Image{src='packages/engine_unit_tests/tests/assets/logo.png'}
 screen:add( img )
 
 local as = AnimationState( {
