@@ -192,7 +192,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
     else
 
-        if newParent.widget_type ~= "MenuButton" then 
+        if newParent.widget_type ~= "MenuButton" and newParent.widget_type ~= "LayoutManager" then 
             newChild.reactive = true
         end 
 
@@ -895,7 +895,7 @@ _VE_.openFile = function(path)
                     for o, p in ipairs(m.children) do
                         p.extra.mouse_handler = false
                         util.create_mouse_event_handler(p, p.widget_type)
-                        p.reactive = true 
+                        p.reactive = false 
                         p.is_in_group = true
                         p.parent_group = m 
                     end 
@@ -906,7 +906,7 @@ _VE_.openFile = function(path)
                         for o, p in ipairs(m.tabs[idx].contents.children) do 
                             p.extra.mouse_handler = false
                             util.create_mouse_event_handler(p, p.widget_type)
-                            p.reactive = true 
+                            p.reactive = false 
                             p.is_in_group = true
                             p.parent_group = m 
                         end 
@@ -916,7 +916,7 @@ _VE_.openFile = function(path)
                         for c = 1, m.number_of_cols, 1 do 
                             m.cells[r][c].extra.mouse_handler = false
                             util.create_mouse_event_handler( m.cells[r][c], m.cells[r][c].widget_type)
-                            m.cells[r][c].reactive = true 
+                            m.cells[r][c].reactive = false 
                             m.cells[r][c].is_in_group = true
                             m.cells[r][c].parent_group = m 
                         end 
@@ -927,7 +927,7 @@ _VE_.openFile = function(path)
                         idx = idx + 1
                         m.items[idx].extra.mouse_handler = false
                         util.create_mouse_event_handler(m.items[idx], m.items[idx].widget_type)
-                        m.items[idx].reactive = true 
+                        m.items[idx].reactive = false 
                         m.items[idx].is_in_group = true
                         m.items[idx].parent_group = m 
                     end 
