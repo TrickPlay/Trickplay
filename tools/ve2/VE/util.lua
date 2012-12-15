@@ -311,7 +311,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
 				     		    local row , col=  c:r_c_from_abs_x_y(x,y)
                                 if col and row then 
-                                    uiInstance.reactive = true
+                                    uiInstance.reactive = false
                                     uiInstance.is_in_group = true
                                     uiInstance.parent_group = c
 		                            uiInstance.group_position = c.position
