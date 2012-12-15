@@ -1,3 +1,4 @@
+#include "ossp/uuid.h"
 #include "sqlite3.h"
 #include "openssl/opensslv.h"
 #include "zlib.h"
@@ -14,6 +15,11 @@
 #include "gif_lib.h"
 #include "tiffio.h"
 #include "jpeglib.h"
+#include "sndfile.h"
+#include "upnp/upnp.h"
+#ifdef TP_HAS_READLINE
+#include "readline/readline.h"
+#endif
 
 #define PNG_SKIP_SETJMP_CHECK 1
 #include "png.h"
@@ -106,7 +112,7 @@ VersionMap get_versions()
 
     result[ "jpeg" ].push_back( Util::format( "%d" , JPEG_LIB_VERSION ) );
 
-    result[ "png" ].push_back( Util::format( "%lu" , png_access_version_number() ) );
+    result[ "png" ].push_back( png_get_libpng_ver(NULL) );
     result[ "png" ].push_back( PNG_LIBPNG_VER_STRING );
 
     result[ "freetype" ].push_back( Util::format( "%d.%d.%d" , FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH ) );
@@ -120,9 +126,25 @@ VersionMap get_versions()
 
     result[ "clutter" ].push_back( Util::format( "%d.%d.%d" , clutter_major_version , clutter_minor_version , clutter_micro_version ) );
     result[ "clutter" ].push_back( CLUTTER_VERSION_S );
+#ifdef CLUTTER_VERSION_1_10
+    result[ "clutter" ].push_back( Util::format( "%s" , g_type_name(G_TYPE_FROM_INSTANCE(clutter_get_default_backend())) ) );
+#else
     result[ "clutter" ].push_back( Util::format( "%s-%s" , CLUTTER_FLAVOUR, CLUTTER_COGL ) );
+#endif
+
+    result[ "sndfile" ].push_back( sf_version_string() );
+
+    result[ "uuid" ].push_back( Util::format( "0x%08x", uuid_version() ) );
+    result[ "uuid" ].push_back( Util::format( "0x%08x", UUID_VERSION ) );
 
     result[ "json" ].push_back( JSON_VERSION_S );
+
+    result[ "upnp" ].push_back( UPNP_VERSION_STRING );
+
+#ifdef TP_HAS_READLINE
+    result[ "readline" ].push_back( rl_library_version );
+    result[ "readline" ].push_back( Util::format( "%d.%d", RL_VERSION_MAJOR, RL_VERSION_MINOR ) );
+#endif
 
     // Fix it up
 

@@ -289,7 +289,11 @@ class Score [[ClutterScore*]]
     append(Timeline parent=0, Timeline timeline)
 	[[
 	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
-	    ClutterTimeline *p = ClutterUtil::user_data_to_timeline(L,parent);
+	    ClutterTimeline *p = NULL;
+        if(parent != 0)
+        {
+            p = ClutterUtil::user_data_to_timeline(L,parent);
+        }
 
         if(tl) clutter_score_append(self,p,tl);
     ]];

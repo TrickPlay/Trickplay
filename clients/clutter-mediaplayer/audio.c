@@ -344,7 +344,7 @@ void * connect_audio_sampler( TPContext * context )
         return NULL;
     }
 
-    gst_init( 0 , 0 );
+    clutter_gst_init( 0 , 0 );
 
     //.........................................................................
     // Create a pipeline

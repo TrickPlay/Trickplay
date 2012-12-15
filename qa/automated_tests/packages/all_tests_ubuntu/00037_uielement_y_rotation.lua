@@ -44,7 +44,7 @@ function generate_test_image ()
 	myImg3.y_rotation = { 60, 0, 0 }
 
 
-g:add (myImg, myImg1, myImg2, myImg3)
+    g:add (myImg, myImg1, myImg2, myImg3)
 
 	return g
 end
