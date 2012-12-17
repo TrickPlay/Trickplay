@@ -29,7 +29,6 @@ Button = setmetatable(
                     oldf(self,v)
                     if not v then
                         --image
-                        dumptable(image_states)
                         if image_states.focus then   image_states.focus.state = "OFF"   end
                         --text
                         label_state.state = "DEFAULT"
@@ -59,28 +58,12 @@ Button = setmetatable(
                     end
                 end
             end,
-            images = function(instance,_ENV)
-                return function(oldf)
-                    
-                    return images
-                    
-                end,
-                function(oldf,self,v)
-                    
-                    return v == nil and make_canvases() or
-                        
-                        type(v) == "table" and setup_images(v) or
-                        
-                        error("Button.images expected type 'table'. Received "..type(v),2)
-                    
-                end
-            end,
             widget_type = function(instance,_ENV)
                 return function() return "Button" end
             end,
             label = function(instance,_ENV)
                 return function(oldf) return label.text     end,
-                function(oldf,self,v) label.text = v end
+                function(oldf,self,v) label.text = v flag_for_resize = true end
             end,
             on_pressed =  function(instance,_ENV)
                 return function(oldf) return on_pressed     end,
@@ -96,19 +79,6 @@ Button = setmetatable(
                         
                     t.label = self.label
                     
-                    if not canvas then
-                        
-                        t.images = {}
-                        
-                        for state, img in pairs(self.images) do
-                            
-                            while img.source do img = img.source end
-                            
-                            if img.src and img.src ~= "[canvas]" then t.images[state] = img.src end
-                        end
-                        
-                    end
-                    
                     t.type = "Button"
                     
                     return t
@@ -119,34 +89,32 @@ Button = setmetatable(
                 function(oldf,self,v) 
                     
                     create_canvas = v 
-                    if canvas then
-                        flag_for_redraw = true 
-                    end
+                    flag_for_redraw = true
                 end
             end,
             w = function(instance,_ENV)
-                return function(oldf) return w     end,
-                function(oldf,self,v) flag_for_redraw = true size_is_set = true w = v end
+                return function(oldf,self) return w_set_to or oldf(self)    end,
+                function(oldf,self,v) flag_for_resize = true w_set_to = v oldf(self,v) end
             end,
             width = function(instance,_ENV)
-                return function(oldf) return w     end,
-                function(oldf,self,v) flag_for_redraw = true size_is_set = true w = v end
+                return function(oldf,self) return w_set_to or oldf(self)    end,
+                function(oldf,self,v) flag_for_resize = true w_set_to = v oldf(self,v) end
             end,
             h = function(instance,_ENV)
-                return function(oldf) return h     end,
-                function(oldf,self,v) flag_for_redraw = true size_is_set = true h = v end
+                return function(oldf,self) return h_set_to or oldf(self)    end,
+                function(oldf,self,v) flag_for_resize = true h_set_to = v oldf(self,v) end
             end,
             height = function(instance,_ENV)
-                return function(oldf) return h     end,
-                function(oldf,self,v) flag_for_redraw = true size_is_set = true h = v end
+                return function(oldf,self) return h_set_to or oldf(self)    end,
+                function(oldf,self,v) flag_for_resize = true h_set_to = v oldf(self,v) end
             end,
             size = function(instance,_ENV)
-                return function(oldf) return {w,h}     end,
+                return function(oldf,self) return {self.w,self.h}     end,
                 function(oldf,self,v) 
-                    flag_for_redraw = true 
-                    size_is_set = true 
-                    w = v[1]
-                    h = v[2]
+                    flag_for_resize = true 
+                    w_set_to = v[1]
+                    h_set_to = v[2]
+                    oldf(self,v)
                 end
             end,
         },
@@ -202,27 +170,54 @@ Button = setmetatable(
                 return function()
                     
                     if flag_for_redraw then
-                        
                         flag_for_redraw = false
-                        if canvas then
-                            make_canvases()
-                        else
-                            resize_images()
-                        end
                         
-                        if not text_style_changed then
-                            center_label()
+                        
+                        images = {}
+                        clear(instance)
+                        for _,state in pairs(states) do
+                            images[state] = create_canvas(instance,state)
+                            add(instance,images[state])
+                            if state ~= "default" then
+                                image_states[state] = define_image_animation(images[state],state)
+                            end
                         end
+                        add(instance, label )
+                        
+                        flag_for_resize = true
                     end
-                    
                     if text_style_changed then
                         text_style_changed = false
-                        update_label()
+                        label:set(   instance.style.text:get_table()   )
                         center_label()
                     end
                     if text_color_changed then
                         text_color_changed = false
                         define_label_animation()
+                    end
+                    if flag_for_resize then
+                        flag_for_resize = false
+                        if w_set_to then
+                            label.w = w_set_to
+                            for state,image in pairs(images) do
+                                image.w = w_set_to
+                            end
+                        else
+                            for state,image in pairs(images) do
+                                image.w = label.w + (image.borders and image.borders[1]+image.borders[2] or 0)
+                            end
+                        end
+                        if h_set_to then
+                            label.h = h_set_to
+                            for state,image in pairs(images) do
+                                image.h = h_set_to
+                            end
+                        else
+                            for state,image in pairs(images) do
+                                image.h = label.h + (image.borders and image.borders[3]+image.borders[4] or 0)
+                            end
+                        end
+                        center_label()
                     end
                 end
             end,
@@ -288,126 +283,19 @@ Button = setmetatable(
             center_label = function(instance,_ENV)
                 return function()
                     
-                    label.w = w
-                    label.y = instance.style.text.y_offset + h/2
-                end
-            end,
-            resize_images = function(instance,_ENV)
-                return function()
-                    
-                    if not size_is_set then return end
-                    
-                    for k,img in pairs(images) do img.w = w end
-                    for k,img in pairs(images) do img.h = h end
-                    
-                    center_label()
-                end
-            end,
-            
-            make_canvases = function(instance,_ENV)
-                return function()
-                    images = {}
-                    clear(instance)
-                    for _,state in pairs(states) do
-                        images[state] = create_canvas(instance,state)
-                        add(instance,images[state])
-                        if state ~= "default" then
-                            image_states[state] = define_image_animation(images[state],state)
-                        end
-                    end
-                    add(instance, label )
-                    return true
-                    --[[
-                    flag_for_redraw = false
-                    
-                    canvas = true
-                    
-                    images = {}
-                    
-                    clear(instance)
-                    
-                    for _,state in pairs(states) do
-                        
-                        images[state] = create_canvas(instance,state)
-                        add(instance,images[state])
-                        if state ~= "default" then
-                            image_states[state] = define_image_animation(images[state],state)
-                        end
+                    label.anchor_point = {0,0}
+                    if w_set_to then 
+                        label.w = w_set_to 
                     end
                     
-                    add(instance, label )
+                    print("center label",label.text,w_set_to,h_set_to)
+                    label.x = instance.style.text.x_offset + (w_set_to and (w_set_to/2) or 
+                        (label.w/2 + (images.default.borders and images.default.borders[1] or 0)))
                     
-                    return true
-                    --]]
-                end
-            end,
-            
-            setup_images = function(instance,_ENV)
-                return function(new_images)
+                    label.y = instance.style.text.y_offset + (h_set_to and (h_set_to/2) or 
+                        (label.h/2 + (images.default.borders and images.default.borders[3] or 0)))
                     
-                    canvas = false
-                    
-                    clear(instance)
-                    
-                    for _,state in pairs(states) do
-                        
-                        if new_images[state] then
-                            new_images[state] = type(new_images[state] ) == "string" and
-                                Image{src=new_images[state]} or new_images[state]
-                            
-                            add(instance,new_images[state])
-                            
-                            if state ~= "default" then
-                                image_states[state] = define_image_animation(new_images[state],state)
-                            end
-                            
-                        else
-                            image_states[state] = {state = "OFF"}
-                        end
-                        
-                    end
-                    
-                    images = new_images
-                    
-                    add(instance,label )
-                    
-                    if size_is_set then
-                        
-                        resize_images()
-                        
-                    else
-                        --so that the label centers properly
-                        instance.size = new_images.default.size
-                        
-                        instance:reset_size_flag()
-                        
-                        center_label()
-                        
-                    end
-                    
-                    return true
-                end
-            end,
-            
-            canvas_callback  = function(instance,_ENV)
-                return function()
-                    if canvas then
-                        make_canvases()
-                    end
-                end
-            end,
-            
-            update_label  = function(instance,_ENV)
-                return function()
-                    
-                    text_style = instance.style.text
-                    
-                    label:set(   text_style:get_table()   )
-                    
-                    label.anchor_point = {0,label.h/2}
-                    label.x            = text_style.x_offset
-                    label.y            = text_style.y_offset + instance.h/2
-                    label.w            = instance.w
+                    label.anchor_point = {label.w/2,label.h/2}
                 end
             end,
     },
@@ -418,7 +306,7 @@ Button = setmetatable(
         parameters = parameters or {}
         
         local instance, _ENV = Widget()
-        print("button",_ENV)
+        
         ----------------------------------------------------------------------------
         --Key events
         function instance:on_key_focus_in()    instance.focused = true  end 
@@ -446,17 +334,14 @@ Button = setmetatable(
             fill_colors = "flag_for_redraw"
         }
         
-        
-        canvas = true
-        --states = states
         pressed = false
-        size_is_set = false
+        flag_for_resize = true
         flag_for_redraw = true
         text_color_changed = true
         text_style_changed = true
         --public attributes, set to false if there is no default
-        w = 200
-        h = 50
+        w_set_to = false
+        h_set_to = false
         on_focus_in   = false
         on_focus_out  = false
         on_pressed    = false
@@ -470,7 +355,19 @@ Button = setmetatable(
         create_canvas = function(self,state)
             --print(state)
             --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
-            
+            --[[
+            print( state,"\n",
+                    self.style[self.widget_type.."/"..state.."/nw.png"],
+                    self.style[self.widget_type.."/"..state.."/n.png"],
+                    self.style[self.widget_type.."/"..state.."/ne.png"],
+                    self.style[self.widget_type.."/"..state.."/w.png"],
+                    self.style[self.widget_type.."/"..state.."/c.png"],
+                    self.style[self.widget_type.."/"..state.."/e.png"],
+                    self.style[self.widget_type.."/"..state.."/sw.png"],
+                    self.style[self.widget_type.."/"..state.."/s.png"],
+                    self.style[self.widget_type.."/"..state.."/se.png"]
+            )
+            --]]
             return NineSlice{
                 name   = state,
                 w      = self.w,
