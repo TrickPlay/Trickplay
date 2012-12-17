@@ -676,7 +676,7 @@ LayoutManager = setmetatable(
                     function(oldf,self,v) 
                         v = type(v) == "number" and v or false
                         cell_w = v 
-                        --for_each(cells,function(cell) cell.w = v end)
+                        for_each(cells,function(cell) cell.w = v end)
                         find_col_widths    = true
                         find_col_heights   = true
                         reposition         = true
@@ -689,7 +689,7 @@ LayoutManager = setmetatable(
                     function(oldf,self,v) 
                         v = type(v) == "number" and v or false
                         cell_h = v 
-                        --for_each(cells,function(cell) cell.h = v end)
+                        for_each(cells,function(cell) cell.h = v end)
                         find_col_widths    = true
                         find_col_heights   = true
                         reposition         = true
@@ -889,14 +889,18 @@ LayoutManager = setmetatable(
         private = {
             widths_of_cols = function(instance,_ENV)
                 return function(cell,r,c)
-                    if cell.w  >= (col_widths[c] or 0) then 
+                    if cell_w then
+                        col_widths[c] = cell_w
+                    elseif cell.w  >= (col_widths[c] or 0) then 
                         col_widths[c] = cell.w
                     end
                 end
             end,
             heights_of_rows = function(instance,_ENV)
                 return function(cell,r,c)
-                    if cell.h  >= (row_heights[r] or 0) then 
+                    if cell_h then
+                        row_heights[r] = cell_h
+                    elseif cell.h  >= (row_heights[r] or 0) then 
                         row_heights[r] = cell.h
                     end
                 end
