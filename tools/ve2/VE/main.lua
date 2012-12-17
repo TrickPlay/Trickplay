@@ -184,7 +184,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 		newChild.group_position = {0,0,0}
         newChild.is_in_group = false
         newChild.parent_group = nil
-        newChild.reactive = true
+        newChild.reactive = false
         util.create_mouse_event_handler(newChild, newChild.widget_type)
         newParent:add(newChild)
 
@@ -196,6 +196,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
             newChild.reactive = true
         end 
 
+        newChild.reactive = false
         newChild.position = {0,0,0}
         newChild.is_in_group = true
         newChild.parent_group = newParent
