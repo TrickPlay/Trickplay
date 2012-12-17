@@ -889,18 +889,18 @@ LayoutManager = setmetatable(
         private = {
             widths_of_cols = function(instance,_ENV)
                 return function(cell,r,c)
-                    if cell_w then
+                    --[[if cell_w then
                         col_widths[c] = cell_w
-                    elseif cell.w  >= (col_widths[c] or 0) then 
+                    else--]]if cell.w  >= (col_widths[c] or 0) then 
                         col_widths[c] = cell.w
                     end
                 end
             end,
             heights_of_rows = function(instance,_ENV)
                 return function(cell,r,c)
-                    if cell_h then
+                    --[[if cell_h then
                         row_heights[r] = cell_h
-                    elseif cell.h  >= (row_heights[r] or 0) then 
+                    else--]]if cell.h  >= (row_heights[r] or 0) then 
                         row_heights[r] = cell.h
                     end
                 end
