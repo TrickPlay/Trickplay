@@ -122,7 +122,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     
     if ( !g_option_context_parse( context, &argc, &argv, NULL ) )
     {
-        fprintf( stderr, "Could not parse arguments.\n" );
+        fprintf( stderr, "Could not parse arguments\n" );
         exit( 1 );
     }
     
@@ -132,13 +132,13 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     
     if ( options->input_size_limit > 65536 )
     {
-        fprintf( stderr, "Segregation size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        fprintf( stderr, "Segregation size (see --help) cannot be larger than 65,536 x 65,536\n" );
         errors = TRUE;
     }
     
     if ( options->output_size_limit > 65536 )
     {
-        fprintf( stderr, "Maximum texture size (see --help) cannot be larger than 65,536 x 65,536.\n" );
+        fprintf( stderr, "Maximum texture size (see --help) cannot be larger than 65,536 x 65,536\n" );
         errors = TRUE;
     }
     
@@ -146,7 +146,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
 
     if ( options->input_paths->len + options->json_to_merge->len == 0 )
     {
-        fprintf( stderr, "No inputs given.\n" );
+        fprintf( stderr, "No inputs given\n" );
         errors = TRUE;
     }
 
@@ -158,17 +158,17 @@ Options * options_new_from_arguments ( int argc, char ** argv )
             if ( g_file_test( first_input, G_FILE_TEST_IS_DIR ) )
             {
                 options->output_path = first_input;
-                fprintf( stderr, "Assuming output prefix to be %s.\n", options->output_path );
+                fprintf( stderr, "Assuming output prefix to be %s\n", options->output_path );
             }
             else
             {
-                fprintf( stderr, "Ambiguous output path.\n" );
+                fprintf( stderr, "Ambiguous output path\n" );
                 errors = TRUE;
             }
         }
         else
         {
-            fprintf( stderr, "Ambiguous output path.\n" );
+            fprintf( stderr, "Ambiguous output path\n" );
             errors = TRUE;
         }
     }

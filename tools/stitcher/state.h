@@ -9,6 +9,8 @@ typedef struct State {
                * subsheets;
 
     GSequence  * items;
+    
+    GHashTable * unique;
 
     GRegex * url_regex;
 } State;

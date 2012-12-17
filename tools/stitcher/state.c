@@ -15,6 +15,7 @@ State * state_new()
     state->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
     state->subsheets    = g_ptr_array_new_with_free_func( g_free );
     state->items        = g_sequence_new( (GDestroyNotify) item_free );
+    state->unique       = g_hash_table_new_full( g_str_hash, g_str_equal, g_free, NULL );
     state->url_regex    = g_regex_new( "^(https?|ftp)://", G_REGEX_CASELESS, 0, NULL );
     
     return state;
@@ -27,6 +28,7 @@ void state_free( State * state )
     g_ptr_array_free( state->large_items, TRUE );
     g_ptr_array_free( state->subsheets, TRUE );
     g_sequence_free ( state->items );
+    g_hash_table_destroy( state->unique );
     g_regex_unref( state->url_regex );
 
     free( state );
@@ -58,8 +60,18 @@ void state_add_image( State * state, const char * id, Image * image, Options * o
     {
         if ( image->rows <= options->input_size_limit && image->columns <= options->input_size_limit )
         {
-            Item * item = item_new_with_source( id, image, options );
-            g_sequence_insert_sorted( state->items, item, item_compare, NULL );
+            Item * item = item_new_with_source( id, image );
+            Item * parent = g_hash_table_lookup( state->unique, item->checksum );
+            
+            if ( parent )
+            {
+                item_add_child( parent, item );
+            }
+            else
+            {
+                g_hash_table_insert( state->unique, item->checksum, item );
+                g_sequence_insert_sorted( state->items, item, item_compare, NULL );
+            }
         }
         else if ( image->rows <= options->output_size_limit && image->columns <= options->output_size_limit )
         {
@@ -299,7 +311,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
         g_message( "!item->source");
     }
     
-    unsigned int bp = options->add_buffer_pixels ? 1 : 0;
+    unsigned bp = options->add_buffer_pixels ? 1 : 0;
     CompositeImage( dest, ReplaceCompositeOp , item->source, leaf->x + bp, leaf->y + bp );
 
     // composite the sprite's buffer pixels onto image
@@ -308,25 +320,25 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
     {
         RectangleInfo rects[8] =
             {
-                { 1,            item->h - 2,            0,           0 },
-                { 1,            item->h - 2,  item->w - 3,           0 },
-                { item->w - 2,            1,            0,           0 },
-                { item->w - 2,            1,            0, item->h - 3 },
+                { 1,            item->h - 0,            0,           0 },
+                { 1,            item->h - 0,  item->w - 1,           0 },
+                { item->w - 0,            1,            0,           0 },
+                { item->w - 0,            1,            0, item->h - 1 },
                 { 1,                      1,            0,           0 },
-                { 1,                      1,  item->w - 3,           0 },
-                { 1,                      1,            0, item->h - 3 },
-                { 1,                      1,  item->w - 3, item->h - 3 }
+                { 1,                      1,  item->w - 1,           0 },
+                { 1,                      1,            0, item->h - 1 },
+                { 1,                      1,  item->w - 1, item->h - 1 }
             };
         int points[16] =
             {
                 0, 1,
-                item->w - 1, 1,
+                item->w + 1, 1,
                 1, 0,
-                1, item->h - 1,
+                1, item->h + 1,
                 0, 0,
-                item->w - 1, 0,
-                0, item->h - 1,
-                item->w - 1, item->h - 1
+                item->w + 1, 0,
+                0, item->h + 1,
+                item->w + 1, item->h + 1
             };
             
         ExceptionInfo * exception = AcquireExceptionInfo();
@@ -357,13 +369,14 @@ void state_add_layout ( State * state, Layout * layout, Options * options )
 
     // composite state png
 
-    unsigned int i = layout->places->len;
-    char ** sprites = g_new0( char *, i + 1 ); //calloc( i + 1, sizeof( gchar * ) );
+    unsigned bp = options->add_buffer_pixels ? 1 : 0;
+    unsigned i = layout->places->len;
+    char ** sprites = g_new0( char *, i + 1 );
 
     while ( i-- )
     {
         Leaf * leaf = (Leaf *) g_ptr_array_index( layout->places, i );
-        sprites[i] = leaf_tostring( leaf, options );
+        sprites[i] = item_to_string( leaf->item, leaf->x + bp, leaf->y + bp, 0 );
 
         image_composite_leaf( image, leaf, options );
         g_sequence_remove_sorted( state->items, leaf->item, item_compare, NULL );

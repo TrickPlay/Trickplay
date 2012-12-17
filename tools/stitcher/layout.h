@@ -3,14 +3,14 @@
 #include <glib.h>
 
 typedef struct Layout {
-    unsigned int width,
-                 height,
-                 area,
-                 items_placed,
-                 min_item_w,
-                 min_item_h,
-                 max_item_w,
-                 item_area;
+    unsigned buffer_pixels,
+             width,
+             height,
+             area,
+             min_item_w,
+             min_item_h,
+             max_item_w,
+             item_area;
                  
     float        coverage;
     GSequence *  leaves;
@@ -22,8 +22,8 @@ typedef struct Layout {
 #include "options.h"
 #include "state.h"
 
-Layout * layout_new ( unsigned int width );
-Layout * layout_new_from_state ( State * state, unsigned int width, Options * options );
+Layout * layout_new ( unsigned width, unsigned buffer_pixels );
+Layout * layout_new_from_state ( State * state, unsigned width, Options * options );
 Layout * layout_choose ( Layout * a, Layout * b, Options * options );
 void layout_free ( Layout * layout );
 
