@@ -157,7 +157,7 @@ class SlotItem(QGraphicsRectItem):
 
     #def hoverEnterEvent(self, event):
     def mousePressEvent(self, event):
-        if self.brush().color() != Qt.red :
+        if self.brush().color() != Qt.red and str(self.parent.insp.ppp[:6]) != 'screen' :
             self.parent.resetAnchorPoint()
             self.parent.sendAnchorPointSetCommand(self.name)
             self.setBrush(Qt.red)
@@ -234,6 +234,9 @@ class DiagramScene(QGraphicsScene):
             self.v_pos = 1
 
     def sendAnchorPointSetCommand(self, name):
+        print self.insp.editable, "&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+        if self.insp.editable == False :
+            return
         if name == "tl" :
             anchorStr = '{0,0,0}'
         elif name == "ml" : 
@@ -252,6 +255,7 @@ class DiagramScene(QGraphicsScene):
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1]/2)+'}'
         elif name == "br" : 
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1])+'}'
+
         self.insp.main._emulatorManager.setUIInfo(self.gid, 'anchor_point', anchorStr)
 
     def setCurrentAnchorPoint(self):
@@ -507,6 +511,7 @@ class TrickplayInspector(QWidget):
         self.ui.property.setIndentation(10)
         
         self.itemWidget = None
+        self.editable = True
         self.selectedItemCount = 1
 
         # QTreeView selectionChanged signal doesn't seem to work here...
@@ -700,6 +705,11 @@ class TrickplayInspector(QWidget):
 
     def propertyFill(self, data, styleIndex=None):
         
+        if str(data['name']) == 'screen':
+            self.editable = False
+
+        self.ppp = str(data['name'])
+
         # Clear Property Inspector 
         self.ui.property.clear()
         self.ui.property.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
@@ -729,7 +739,7 @@ class TrickplayInspector(QWidget):
                     i = QTreeWidgetItem() 
                     i.setText (0, p)  # first col : property name
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
-                    if p == 'label':
+                    if p == 'label' and self.editable == True:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
                     items.append(i)
                 else:
@@ -1005,7 +1015,7 @@ class TrickplayInspector(QWidget):
                 #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
                 if p in TEXT_PROP or p in READ_ONLY :
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
-                    if not  p in READ_ONLY :
+                    if not  p in READ_ONLY and self.editable is True:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 if p in READ_ONLY:
@@ -1129,7 +1139,7 @@ class TrickplayInspector(QWidget):
                             #j.setText (0, sp[:1].upper()+sp[1:])
                             j.setText (1, str(z[idx]))
                             #if p ~= "base_size": #read_only r: 'color
-                            if not p in READ_ONLY :
+                            if not p in READ_ONLY and self.editable is True :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
                     elif not str(data["type"]) in NO_STYLE_WIDGET and self.cbStyle is not None:
@@ -1162,7 +1172,8 @@ class TrickplayInspector(QWidget):
                                             colorPropertyFill(colNames, colNums, r, (data['gid'])) 
                                         else:
                                             m.setText(1,str(r[sssp]))
-                                            m.setFlags(k.flags() ^Qt.ItemIsEditable)
+                                            if self.editable == True:
+                                                m.setFlags(k.flags() ^Qt.ItemIsEditable)
                                         c3 = c3 + 1
                                 else:
                                     l = QTreeWidgetItem(j)
@@ -1179,7 +1190,8 @@ class TrickplayInspector(QWidget):
                                         boolPropertyFill(colNames, colNums, q, (data['gid'])) 
                                     else:
                                         l.setText(1,str(q[ssp]))
-                                        l.setFlags(l.flags() ^Qt.ItemIsEditable)
+                                        if self.editable == True:
+                                            l.setFlags(l.flags() ^Qt.ItemIsEditable)
                                 c2 = c2 + 1 
                             c1 = c1 + 1 
  
@@ -1423,6 +1435,7 @@ class TrickplayInspector(QWidget):
                         tempdata['index'] = item.tabIndex
                         #tempdata['neighbors'] = item.tabdata['tabs'][item.tabIndex]['contents']['neighbors']
                         self.propertyFill(tempdata)
+                        self.editable = True
                         self.curLayerName = self.layerName[(item.tabdata['gid'])] 
                         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                     self.preventChanges = False
@@ -1462,6 +1475,7 @@ class TrickplayInspector(QWidget):
                 else :
                     self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
                     self.propertyFill(self.curData)
+                    self.editable = True
 
             
             self.preventChanges = False
