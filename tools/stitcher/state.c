@@ -10,7 +10,7 @@ State * state_new()
 {
     State * state      = malloc( sizeof( State ) );
 
-    state->large_items  = g_ptr_array_new_with_free_func( g_free );
+    state->segregated   = g_ptr_array_new_with_free_func( (GDestroyNotify) item_free );
     state->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
     state->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
     state->subsheets    = g_ptr_array_new_with_free_func( g_free );
@@ -25,7 +25,7 @@ void state_free( State * state )
 {
     g_ptr_array_free( state->images, TRUE );
     g_ptr_array_free( state->infos, TRUE );
-    g_ptr_array_free( state->large_items, TRUE );
+    g_ptr_array_free( state->segregated, TRUE );
     g_ptr_array_free( state->subsheets, TRUE );
     g_sequence_free ( state->items );
     g_hash_table_destroy( state->unique );
@@ -48,46 +48,51 @@ void state_add_subsheet( State * state, const char * json, Image * image, Option
     g_ptr_array_add( state->infos,  info );
     g_ptr_array_add( state->subsheets, g_strdup_printf( "{\n  \"sprites\": [%s\n  ],\n  \"img\": \"%s\"\n}", json, base ) );
     
-    fprintf( stdout, "-> %s\n", path );
-    
     free( path );
     free( base );
 }
 
-void state_add_image( State * state, const char * id, Image * image, Options * options )
+Item * state_add_image( State * state, const char * id, Image * image, Options * options )
 {
     if ( image )
     {
-        if ( image->rows <= options->input_size_limit && image->columns <= options->input_size_limit )
+        if ( image->columns <= options->output_size_limit && image->rows <= options->output_size_limit )
         {
-            Item * item = item_new_with_source( id, image );
-            Item * parent = g_hash_table_lookup( state->unique, item->checksum );
-            
-            if ( parent )
+            Item * item = item_new_with_source( id, image ),
+                 * parent = g_hash_table_lookup( state->unique, item->checksum );
+                 
+            if ( options->de_duplicate && parent )
             {
+                fprintf( stdout, "De-duplicating %s", id );
                 item_add_child( parent, item );
             }
             else
             {
+                fprintf( stdout, "%s %s\n", id, item->checksum );
+                
+                if ( image->columns <= options->input_size_limit && image->rows <= options->input_size_limit )
+                {
+                    g_sequence_insert_sorted( state->items, item, item_compare, NULL );
+                }
+                else
+                {
+                    fprintf( stdout, "Segregated %s\n", id );
+                    g_ptr_array_add( state->segregated, item );
+                }
+                
                 g_hash_table_insert( state->unique, item->checksum, item );
-                g_sequence_insert_sorted( state->items, item, item_compare, NULL );
             }
-        }
-        else if ( image->rows <= options->output_size_limit && image->columns <= options->output_size_limit )
-        {
-            fprintf( stdout, "Segregated %s ", id );
             
-            char * json = g_strdup_printf( "\n    { \"x\": 0, \"y\": 0, \"w\": %i, \"h\": %i, \"id\": \"%s\" }",
-                (int) image->columns, (int) image->rows, id );
-                 
-            state_add_subsheet( state, json, image, options );
-            free( json );
+            return item;
         }
         else
         {
-            fprintf( stderr, "Image %s is larger than maximum texture size.", id );
+            fprintf( stderr, "Image %s (%i x %i) is larger than the maximum texture size (%i x %i).",
+                id, (int) image->columns, (int) image->rows, options->output_size_limit, options->output_size_limit );
         }
     }
+    
+    return NULL;
 }
 
 void state_add_file ( State * state, GFile * file, GFile * root, const char * root_path, Options * options )
@@ -229,6 +234,9 @@ void state_merge_json ( State * state, const char * path, Options * options )
             }
             
             free( source );
+            
+            gboolean destroy_source_image = TRUE;
+            GQueue * queue = g_queue_new();
 
             for ( guint j = 0; j < lj; j++ )
             {
@@ -237,28 +245,47 @@ void state_merge_json ( State * state, const char * path, Options * options )
 
                 if ( options_take_unique_id( options, id ) )
                 {
-                    // add de-duplication handling
-                    
                     int w = json_object_get_int_member( sprite, "w" ),
                         h = json_object_get_int_member( sprite, "h" ),
                         x = json_object_get_int_member( sprite, "x" ),
                         y = json_object_get_int_member( sprite, "y" );
-                        
-                    if ( x == 0 && y == 0 && w == source_image->columns && h == source_image->rows && lj == 1 )
+                       
+                    Leaf * parent;
+                    
+                    while ( ( parent = g_queue_peek_head( queue ) ) && (
+                        x < parent->x || parent->x + parent->w < x + w ||
+                        y < parent->y || parent->y + parent->h < y + h ) )
                     {
-                        state_add_image( state, id, source_image, options );
-                        source_image = NULL;
-                        break;
+                        free( parent );
+                        g_queue_pop_head( queue );
+                    }
+                    
+                    Leaf * leaf = leaf_new( (unsigned) x, (unsigned) y, (unsigned) w, (unsigned) h );
+                    g_queue_push_head( queue, leaf );
+                    
+                    if ( parent )
+                    {
+                        leaf->item = item_add_child_new( parent->item, id, x - parent->x, y - parent->y, w, h );
                     }
                     else
                     {
-                        RectangleInfo rect = { (size_t) w, (size_t) h, (size_t) x, (size_t) y };
-                        state_add_image( state, id, ExcerptImage( source_image, &rect, exception ), options );
+                        if ( x == 0 && y == 0 && w == source_image->columns && h == source_image->rows )
+                        {
+                            destroy_source_image = FALSE;
+                            leaf->item = state_add_image( state, id, source_image, options );
+                        }
+                        else
+                        {
+                            RectangleInfo rect = { (size_t) w, (size_t) h, (size_t) x, (size_t) y };
+                            leaf->item = state_add_image( state, id, ExcerptImage( source_image, &rect, exception ), options );
+                        }
                     }
                 }
             }
 
-            if ( source_image ) DestroyImage( source_image );
+            g_queue_free( queue );
+
+            if ( destroy_source_image ) DestroyImage( source_image );
             DestroyImageInfo( source_info );
             DestroyExceptionInfo( exception );
         }
@@ -306,11 +333,6 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
 {
     Item * item = leaf->item;
     
-    if ( !item->source )
-    {
-        g_message( "!item->source");
-    }
-    
     unsigned bp = options->add_buffer_pixels ? 1 : 0;
     CompositeImage( dest, ReplaceCompositeOp , item->source, leaf->x + bp, leaf->y + bp );
 
@@ -329,6 +351,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
                 { 1,                      1,            0, item->h - 1 },
                 { 1,                      1,  item->w - 1, item->h - 1 }
             };
+        
         int points[16] =
             {
                 0, 1,
@@ -364,10 +387,10 @@ void state_add_layout ( State * state, Layout * layout, Options * options )
     SetImageExtent ( image, layout->width, layout->height );
     SetImageOpacity( image, QuantumRange );
     
-    fprintf( stdout,"Page match (%i x %i pixels, %.4g%% coverage) ",
+    fprintf( stdout,"Page match (%i x %i pixels, %.4g%% coverage)\n",
              layout->width, layout->height, 100.0f * layout->coverage );
 
-    // composite state png
+    // composite output png
 
     unsigned bp = options->add_buffer_pixels ? 1 : 0;
     unsigned i = layout->places->len;
@@ -397,6 +420,16 @@ void state_add_layout ( State * state, Layout * layout, Options * options )
 
 void state_export_files ( State * state, Options * options )
 {
+    for ( unsigned i = state->segregated->len; i--; )
+    {
+        Item * item = (Item *) g_ptr_array_index( state->segregated, i );
+        char * json = item_to_string( item, 0, 0, 0 );
+        state_add_subsheet( state, json, item->source, options );
+        item->source = NULL;
+        
+        free( json );
+    }
+    
     for ( unsigned i = state->images->len; i--; )
     {
         WriteImage( (ImageInfo *) g_ptr_array_index( state->infos, i ),
