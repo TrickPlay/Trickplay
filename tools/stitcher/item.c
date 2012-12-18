@@ -60,6 +60,19 @@ void item_add_child( Item * item, Item * child )
     g_ptr_array_add( item->children, child );
 }
 
+Item * item_add_child_new( Item * item, const char * id, unsigned x_offset, unsigned y_offset, unsigned w, unsigned h )
+{
+    Item * child = item_new( id );
+    item_add_child( item, child );
+    
+    child->x_offset = x_offset;
+    child->y_offset = y_offset;
+    child->w = w;
+    child->h = h;
+    
+    return child;
+}
+
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
@@ -84,7 +97,7 @@ char * item_to_string( Item * item, int x, int y, unsigned indent )
         strings[i+1] = item_to_string( g_ptr_array_index( item->children, i ), x, y, indent + 1 );
     }
     
-    char * string = g_strjoinv( NULL, strings );
+    char * string = g_strjoinv( ",", strings );
     g_strfreev( strings );
     
     return string;

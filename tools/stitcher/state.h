@@ -3,7 +3,7 @@
 #include <glib.h>
 
 typedef struct State {
-    GPtrArray  * large_items,
+    GPtrArray  * segregated,
                * images,
                * infos,
                * subsheets;
