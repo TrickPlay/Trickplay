@@ -996,6 +996,11 @@ _VE_.openLuaFile = function()
 end 
 ]]
 
+_VE_.setScreenLoc = function()
+    screen.y = 200
+    screen.x = 300
+end 
+
 _VE_.newLayer = function()
     
     for m,n in ipairs (screen.children) do

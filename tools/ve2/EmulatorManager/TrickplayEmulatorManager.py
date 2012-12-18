@@ -110,6 +110,7 @@ class TrickplayEmulatorManager(QWidget):
 				try:
 					#self.main.open() # load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
+					self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
                     
 					if self.main and self.main.currentProject is None: 
 					     return
