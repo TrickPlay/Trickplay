@@ -67,7 +67,7 @@ public:
             bool async;
     };
 
-    PushTexture() : cache( false ), all_pings_async( false ), texture( NULL ), can_signal( true ) {};
+    PushTexture() : cache( false ), all_pings_async( true ), texture( NULL ), can_signal( true ) {};
     ~PushTexture();
 
     CoglHandle get_texture();
@@ -84,7 +84,7 @@ protected:
     virtual void lost_texture() = 0;
 
     bool cache;
-    bool all_pings_async;
+    bool all_pings_async; // loading will be done asynchronously only if all current ping requests are asynchronous
 
 private:
     void subscribe( PingMe * ping );
