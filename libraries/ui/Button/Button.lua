@@ -202,7 +202,7 @@ Button = setmetatable(
                             for state,image in pairs(images) do
                                 image.w = w_set_to
                             end
-                        else
+                        elseif label.text ~= "" then
                             for state,image in pairs(images) do
                                 image.w = label.w + (image.borders and image.borders[1]+image.borders[2] or 0)
                             end
@@ -212,7 +212,7 @@ Button = setmetatable(
                             for state,image in pairs(images) do
                                 image.h = h_set_to
                             end
-                        else
+                        elseif label.text ~= "" then
                             for state,image in pairs(images) do
                                 image.h = label.h + (image.borders and image.borders[3]+image.borders[4] or 0)
                             end
