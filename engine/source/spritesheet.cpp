@@ -105,6 +105,17 @@ void Source::set_source( Image * image )
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 {
+    int tw, th;
+    get_dimensions( &tw, &th );
+    
+    if ( w < 0 ) tw = MAX( tw - x, 0 );
+    if ( h < 0 ) th = MAX( th - y, 0 );
+    
+    if ( tw < x + w || th < y + h )
+    {
+        return cogl_texture_new_with_size( MAX( w, 1 ), MAX( h, 1 ), COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+    }
+    
     return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
 }
 
@@ -113,16 +124,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Sprite::update()
 {
     g_assert( source );
-    
-    int tx, ty, tw, th;
-    source->get_dimensions( &tw, &th );
-    
-    tx = MIN( x, tw - 1 );
-    ty = MIN( y, th - 1 );
-    tw = MIN( w < 0 ? tw : tx + w, tw ) - tx;
-    th = MIN( h < 0 ? th : ty + h, th ) - ty;
-    
-    set_texture( cogl_handle_ref( source->get_subtexture( tx, ty, tw, th ) ) );
+    set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ) );
     ping_all();
 }
 
