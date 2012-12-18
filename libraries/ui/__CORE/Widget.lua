@@ -812,13 +812,15 @@ Widget_Sprite = function(parameters)
     
 end
 
-external.Widget           = Widget
-external.Widget_Group     = Widget_Group
-external.Widget_Clone     = Widget_Clone
-external.Widget_Image     = Widget_Image
-external.Widget_Text      = Widget_Text
-external.Widget_Rectangle = Widget_Rectangle
-external.Widget_Sprite    = Widget_Sprite
+external.Widget             = Widget
+external.Widget_Group       = Widget_Group
+external.Widget_Clone       = Widget_Clone
+external.Widget_Image       = Widget_Image
+external.Widget_Text        = Widget_Text
+external.Widget_Rectangle   = Widget_Rectangle
+external.Widget_Sprite      = Widget_Sprite
+external.Widget_SpriteSheet = Widget_SpriteSheet
+
 
 
 

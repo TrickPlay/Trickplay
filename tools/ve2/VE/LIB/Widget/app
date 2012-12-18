@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.widget_library",
+    release     = "1",
+    version     = "0.1",
+    name        = "Widget Test App",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}

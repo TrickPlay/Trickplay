@@ -344,7 +344,7 @@ void TPContext::setup_fonts()
 gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
     if ( event && (
-             event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) ||
+             ( event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) ) ||
              event->any.type == CLUTTER_DELETE
          )
        )
