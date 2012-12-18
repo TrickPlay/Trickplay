@@ -141,8 +141,11 @@ class Sprite [[ClutterActor*]] actor
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
             
-            set_sheet_first( L, props );
-            ClutterUtil::set_props_from_table( L, props );
+            if ( props )
+            {
+                set_sheet_first( L, props );
+                ClutterUtil::set_props_from_table( L, props );
+            }
             
             g_object_unref( self );
         ]];
