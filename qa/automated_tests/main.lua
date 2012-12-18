@@ -74,8 +74,6 @@ local function do_test (tests)
     local g
     local i = 1
 
-    idle.limit=1/60
-
     local next_test
 
     next_test = function()
@@ -88,21 +86,30 @@ local function do_test (tests)
             view_generated = false
         end
 
-        -- Generate the view
-        if checksum_done == false and view_generated == false  then
-            filename = tests [i]["name"]
-            master_screensum = tests[i]["checksum"]
+        test_active = tests[i]["active"]
+        while(i <= #tests and test_active == "false") do
+            print("Skipping test ",tests[i]["name"],"marked as inactive")
+            disabled_count = disabled_count + 1
+            i=i+1
             test_active = tests[i]["active"]
-            dofile("packages/"..test_folder.."/"..filename)
+        end
 
-            -- Load the generated test image
-            g = generate_test_image()
-            screen:add(g)
 
-            view_generated = true
-        elseif view_generated == true then
-        -- do a checksum and compare to master then save results in a table.
-            if test_active == "true" then
+        -- Generate the view
+        if test_active == "true" then
+            if checksum_done == false and view_generated == false  then
+                filename = tests [i]["name"]
+                master_screensum = tests[i]["checksum"]
+
+                dofile("packages/"..test_folder.."/"..filename)
+                -- Load the generated test image
+                g = generate_test_image()
+                screen:add(g)
+
+                view_generated = true
+
+            elseif view_generated == true then
+            -- do a checksum and compare to master then save results in a table.
                 local screenshot = devtools:screenshot(string.sub(filename,1, (string.len(filename)-4)))
                 checksumValue = devtools:screensum()
 
@@ -117,13 +124,12 @@ local function do_test (tests)
                     print ("Master checksum = \t", master_screensum)
                     print ("---------------------------------------------")
                 end
-            else
-                disabled_count = disabled_count + 1
-            end
 
-            table.insert (dump_screensum, {filename, checksumValue, test_active})
-            i = i + 1
-            checksum_done = true
+                table.insert (dump_screensum, {filename, checksumValue, test_active})
+                i = i + 1
+
+                checksum_done = true
+            end
         end
 
         if i > #tests then

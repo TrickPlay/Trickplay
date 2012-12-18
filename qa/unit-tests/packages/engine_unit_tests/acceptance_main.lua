@@ -94,6 +94,9 @@ dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap3.lua")
 dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 
+dofile( "packages/engine_unit_tests/tests/SpriteSheet1.lua" )
+
+
 screen:add (test_group)
 
 -- setup steps
