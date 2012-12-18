@@ -9,16 +9,16 @@ PushTexture::~PushTexture()
 
 void PushTexture::subscribe( PingMe * ping )
 {
-    if ( !texture ) make_texture();
-    g_assert( texture );
+    pings.insert( ping );
     
     if ( all_pings_async && !ping->async )
     {
         all_pings_async = false;
-        on_sync_change();
+        if ( texture ) on_sync_change();
     }
     
-    pings.insert( ping );
+    if ( !texture ) make_texture();
+    g_assert( texture );
 }
 
 void PushTexture::unsubscribe( PingMe * ping )
@@ -92,8 +92,8 @@ void PingMe::set( PushTexture * _source, Callback * _callback, void * _target, b
 {
     if ( source ) source->unsubscribe( this );
     
-    callback = _callback;
     source = _source;
+    callback = _callback;
     target = _target;
     async = _async;
     
