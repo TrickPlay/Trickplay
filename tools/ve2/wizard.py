@@ -243,7 +243,7 @@ class Wizard():
         	directory = dir
         
 
-        path = QFileDialog.getExistingDirectory(None, 'Create an app directory', directory, QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(None, 'Choose a directory for your app', directory, QFileDialog.ShowDirsOnly)
         apath = os.path.dirname(str(path))
         
         result = self.adjustDialog(path, directory)
