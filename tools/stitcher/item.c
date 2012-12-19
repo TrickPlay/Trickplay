@@ -41,16 +41,9 @@ Item * item_new_with_source( const char * id, Image * source )
     item->h = (unsigned) source->rows;
     item->area = item->w * item->h;
     
-    size_t length;
-    ImageInfo * info = AcquireImageInfo();
-    ExceptionInfo * exception = AcquireExceptionInfo();
-    unsigned char * data = ImageToBlob( info, source, &length, exception );
-    
-    item->checksum = g_compute_checksum_for_data( G_CHECKSUM_MD5, data, length );
-    
-    DestroyImageInfo( info );
-    DestroyExceptionInfo( exception );
-    free( data );
+    g_assert( source );
+    SignatureImage( source );
+    item->checksum = strdup( GetImageProperty( source, "signature" ) );
     
     return item;
 }
