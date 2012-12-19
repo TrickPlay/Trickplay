@@ -1,0 +1,969 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>672</width>
+    <height>644</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>200</height>
+   </size>
+  </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
+  </property>
+  <property name="windowTitle">
+   <string>TrickPlay Visual Editor </string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="aaa" stdset="0">
+   <string>sdfsf</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>672</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Project"/>
+    <addaction name="actionOpen_Project"/>
+    <addaction name="actionSave_Project"/>
+    <addaction name="separator"/>
+    <addaction name="actionNew_Layer"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Assets"/>
+    <addaction name="actionImport_Skins"/>
+    <addaction name="separator"/>
+    <addaction name="action_Exit"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Windows</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="action_Run"/>
+    <addaction name="action_Debugger"/>
+    <addaction name="action_Stop"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <widget class="QMenu" name="menuInsert_UI_Element">
+     <property name="title">
+      <string>Insert UI Element</string>
+     </property>
+     <addaction name="actionArrowPane"/>
+     <addaction name="action_Button"/>
+     <addaction name="actionButtonPicker"/>
+     <addaction name="actionCheckBox"/>
+     <addaction name="actionDialog_Box"/>
+     <addaction name="actionLayoutManager"/>
+     <addaction name="actionMenuButton"/>
+     <addaction name="actionOrbitting_Dots"/>
+     <addaction name="actionProgressBar"/>
+     <addaction name="actionProgressSpinner"/>
+     <addaction name="actionRadioButton"/>
+     <addaction name="actionWidgetRectangle"/>
+     <addaction name="actionScrollPane"/>
+     <addaction name="actionSlider"/>
+     <addaction name="actionTabBar"/>
+     <addaction name="actionWidgetText"/>
+     <addaction name="actionTextInput"/>
+     <addaction name="actionToastAlert"/>
+    </widget>
+    <addaction name="menuInsert_UI_Element"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionDuplicate"/>
+    <addaction name="actionClone"/>
+    <addaction name="actionGroup"/>
+    <addaction name="actionUngroup"/>
+   </widget>
+   <widget class="QMenu" name="menuArrange">
+    <property name="title">
+     <string>Arrange</string>
+    </property>
+    <widget class="QMenu" name="menu_align">
+     <property name="title">
+      <string>Align</string>
+     </property>
+     <addaction name="action_left"/>
+     <addaction name="action_right"/>
+     <addaction name="action_top"/>
+     <addaction name="action_bottom"/>
+     <addaction name="action_horizontalCenter"/>
+     <addaction name="action_verticalCenter"/>
+    </widget>
+    <widget class="QMenu" name="menu_distribute">
+     <property name="title">
+      <string>Distribute</string>
+     </property>
+     <addaction name="action_distributeHorizontally"/>
+     <addaction name="action_distributeVertically"/>
+    </widget>
+    <widget class="QMenu" name="menu_arrange">
+     <property name="title">
+      <string>Arrange</string>
+     </property>
+     <addaction name="action_bring_to_front"/>
+     <addaction name="action_bring_to_forward"/>
+     <addaction name="action_send_to_back"/>
+     <addaction name="action_send_backward"/>
+    </widget>
+    <addaction name="menu_align"/>
+    <addaction name="menu_distribute"/>
+    <addaction name="menu_arrange"/>
+   </widget>
+   <widget class="QMenu" name="menuView_2">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuBackground">
+     <property name="title">
+      <string>Background</string>
+     </property>
+     <addaction name="actionImage"/>
+     <addaction name="actionSmall_Grid"/>
+     <addaction name="actionMedium_Grid"/>
+     <addaction name="actionLarge_Grid"/>
+     <addaction name="actionWhite"/>
+     <addaction name="actionBlack"/>
+    </widget>
+    <addaction name="menuBackground"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_Horizontal_Guide"/>
+    <addaction name="actionAdd_Vertical_Guide"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Guides"/>
+    <addaction name="actionSnap_to_Guides"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuArrange"/>
+   <addaction name="menuView_2"/>
+   <addaction name="menuRun"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QDockWidget" name="InspectorDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>330</width>
+     <height>81</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Inspector : </string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="InspectorContainer">
+    <layout class="QGridLayout" name="gridLayout_7" rowstretch="0" columnstretch="0">
+     <property name="margin">
+      <number>1</number>
+     </property>
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="InspectorLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="fileSystemDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>330</width>
+     <height>81</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Images File System</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="fileSystemContainer">
+    <layout class="QGridLayout" name="gridLayout_8" rowstretch="0" columnstretch="0">
+     <property name="margin">
+      <number>1</number>
+     </property>
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="fileSystemLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="action_Exit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="text">
+    <string>Save file</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_New">
+   <property name="text">
+    <string>Create new  app...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="action_Cut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Copy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_Paste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_Delete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="action_Close">
+   <property name="text">
+    <string>Close file</string>
+   </property>
+   <property name="iconText">
+    <string notr="true">Close file</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="action_Save_As">
+   <property name="text">
+    <string>Save file as...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionStep_into">
+   <property name="text">
+    <string>Step Into</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionStep_over">
+   <property name="text">
+    <string>Step over</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="actionDebug_View">
+   <property name="text">
+    <string>Debug View</string>
+   </property>
+  </action>
+  <action name="actionRun_View">
+   <property name="text">
+    <string>Run View</string>
+   </property>
+  </action>
+  <action name="actionSave_All">
+   <property name="text">
+    <string>Save all files</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>Search...</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionSearch_Replace">
+   <property name="text">
+    <string>Find/Replace...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionGo_to_line">
+   <property name="text">
+    <string>Go to line...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
+  </action>
+  <action name="actionSearch_in_Files">
+   <property name="text">
+    <string>Search in Files...</string>
+   </property>
+  </action>
+  <action name="actionBeutify_Selection">
+   <property name="text">
+    <string>Beutify Selection</string>
+   </property>
+  </action>
+  <action name="actionStrip_Whitespace">
+   <property name="text">
+    <string>Strip Whitespace</string>
+   </property>
+  </action>
+  <action name="actionStep_out">
+   <property name="text">
+    <string>Step out</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="text">
+    <string>Pause</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionContinue">
+   <property name="text">
+    <string>Continue</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionNew_File">
+   <property name="text">
+    <string>Create new file...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionNew_Folder">
+   <property name="text">
+    <string>New Folder</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionOpen_App">
+   <property name="text">
+    <string>Open existing app...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNew_App">
+   <property name="text">
+    <string>New App</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="action_Run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="action_Debug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="action_Stop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionPreference">
+   <property name="text">
+    <string>Preference...</string>
+   </property>
+  </action>
+  <action name="action_Button">
+   <property name="text">
+    <string>Button</string>
+   </property>
+  </action>
+  <action name="action_Save_2">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionDialog_Box">
+   <property name="text">
+    <string>Dialog Box</string>
+   </property>
+  </action>
+  <action name="actionToastAlert">
+   <property name="text">
+    <string>ToastAlert</string>
+   </property>
+  </action>
+  <action name="actionProgressSpinner">
+   <property name="text">
+    <string>ProgressSpinner</string>
+   </property>
+  </action>
+  <action name="actionOrbitting_Dots">
+   <property name="text">
+    <string>Orbitting Dots</string>
+   </property>
+  </action>
+  <action name="actionTextInput">
+   <property name="text">
+    <string>TextInput</string>
+   </property>
+  </action>
+  <action name="actionOpen_Engine_Group">
+   <property name="text">
+    <string>Open Engine Group</string>
+   </property>
+  </action>
+  <action name="actionLua_File_Engine_UI_Elements">
+   <property name="text">
+    <string>Lua File (Engine UI Elements)</string>
+   </property>
+  </action>
+  <action name="actionJSON_New_UI_Elements">
+   <property name="text">
+    <string>JSON (New UI Elements)</string>
+   </property>
+  </action>
+  <action name="actionNew_Layer">
+   <property name="text">
+    <string>New Layer</string>
+   </property>
+  </action>
+  <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Project">
+   <property name="text">
+    <string>Open Project...</string>
+   </property>
+  </action>
+  <action name="actionSave_Project">
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionSlider">
+   <property name="text">
+    <string>Slider</string>
+   </property>
+  </action>
+  <action name="actionLayoutManager">
+   <property name="text">
+    <string>LayoutManager</string>
+   </property>
+  </action>
+  <action name="actionScrollPane">
+   <property name="text">
+    <string>ScrollPane</string>
+   </property>
+  </action>
+  <action name="actionTabBar">
+   <property name="text">
+    <string>TabBar</string>
+   </property>
+  </action>
+  <action name="actionArrowPane">
+   <property name="text">
+    <string>ArrowPane</string>
+   </property>
+  </action>
+  <action name="actionButtonPicker">
+   <property name="text">
+    <string>ButtonPicker</string>
+   </property>
+  </action>
+  <action name="actionMenuButton">
+   <property name="text">
+    <string>MenuButton</string>
+   </property>
+  </action>
+  <action name="actionWidgetText">
+   <property name="text">
+    <string>Text</string>
+   </property>
+  </action>
+  <action name="actionWidgetImage">
+   <property name="text">
+    <string>WidgetImage</string>
+   </property>
+  </action>
+  <action name="actionWidgetRectangle">
+   <property name="text">
+    <string>Rectangle</string>
+   </property>
+  </action>
+  <action name="actionWidgetGroup">
+   <property name="text">
+    <string>WidgetGroup</string>
+   </property>
+  </action>
+  <action name="actionWidgetClone">
+   <property name="text">
+    <string>WidgetClone</string>
+   </property>
+  </action>
+  <action name="actionUngroup">
+   <property name="text">
+    <string>Ungroup</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionClone">
+   <property name="text">
+    <string>Clone</string>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="text">
+    <string>Group</string>
+   </property>
+  </action>
+  <action name="actionDuplicate">
+   <property name="text">
+    <string>Duplicate</string>
+   </property>
+  </action>
+  <action name="actionLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="action_left">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="action_right">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="action_top">
+   <property name="text">
+    <string>Top</string>
+   </property>
+  </action>
+  <action name="action_bottom">
+   <property name="text">
+    <string>Bottom</string>
+   </property>
+  </action>
+  <action name="action_horizontalCenter">
+   <property name="text">
+    <string>Horizontal Center</string>
+   </property>
+  </action>
+  <action name="action_verticalCenter">
+   <property name="text">
+    <string>Vertical Center</string>
+   </property>
+  </action>
+  <action name="action_distributeHorizontally">
+   <property name="text">
+    <string>Horizontally</string>
+   </property>
+  </action>
+  <action name="action_distributeVertically">
+   <property name="text">
+    <string>Vertically</string>
+   </property>
+  </action>
+  <action name="action_bring_to_front">
+   <property name="text">
+    <string>Bring to Front</string>
+   </property>
+  </action>
+  <action name="action_bring_to_forward">
+   <property name="text">
+    <string>Bring to Forward</string>
+   </property>
+  </action>
+  <action name="action_send_to_back">
+   <property name="text">
+    <string>Send to Back</string>
+   </property>
+  </action>
+  <action name="action_send_backward">
+   <property name="text">
+    <string>Send Backward</string>
+   </property>
+  </action>
+  <action name="actionToggleButton">
+   <property name="text">
+    <string>ToggleButton</string>
+   </property>
+  </action>
+  <action name="actionAdd_Horizontal_Guide">
+   <property name="text">
+    <string>Add Horizontal Guide</string>
+   </property>
+  </action>
+  <action name="actionAdd_Vertical_Guide">
+   <property name="text">
+    <string>Add Vertical Guide</string>
+   </property>
+  </action>
+  <action name="actionShow_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Guides</string>
+   </property>
+  </action>
+  <action name="actionSnap_to_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to Guides</string>
+   </property>
+  </action>
+  <action name="actionImage">
+   <property name="text">
+    <string>Image...</string>
+   </property>
+  </action>
+  <action name="actionSmall_Grid">
+   <property name="text">
+    <string>Small Grid</string>
+   </property>
+  </action>
+  <action name="actionMedium_Grid">
+   <property name="text">
+    <string>Medium Grid</string>
+   </property>
+  </action>
+  <action name="actionLarge_Grid">
+   <property name="text">
+    <string>Large Grid</string>
+   </property>
+  </action>
+  <action name="actionWhite">
+   <property name="text">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionBlack">
+   <property name="text">
+    <string>Black</string>
+   </property>
+  </action>
+  <action name="actionProgressBar">
+   <property name="text">
+    <string>ProgressBar</string>
+   </property>
+  </action>
+  <action name="actionRadioButton">
+   <property name="text">
+    <string>RadioButton</string>
+   </property>
+  </action>
+  <action name="actionCheckBox">
+   <property name="text">
+    <string>CheckBox</string>
+   </property>
+  </action>
+  <action name="actionImport_Assets">
+   <property name="text">
+    <string>Import Assets...</string>
+   </property>
+  </action>
+  <action name="action_Reoptimize">
+   <property name="text">
+    <string>Reoptimize</string>
+   </property>
+  </action>
+  <action name="actionImport_Skins">
+   <property name="text">
+    <string>Import Skins...</string>
+   </property>
+  </action>
+  <action name="action_Debugger">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

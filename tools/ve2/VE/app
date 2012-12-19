@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.editor",
+    release     = "1",
+    version     = "0.1",
+    name        = "Visual Editor2",
+    author      = "Heejung Kim",
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
+}
