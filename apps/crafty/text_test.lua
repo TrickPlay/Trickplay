@@ -1,4 +1,4 @@
-local text_test = Group {}
+local text_test = Group { y = screen.h - 960 }
 
 text_test:add(Rectangle{size={screen.w,screen.h}, color="white"})
 
