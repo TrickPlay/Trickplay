@@ -3,12 +3,14 @@
 #include <glib.h>
 
 typedef struct State {
-    GPtrArray  * large_items,
+    GPtrArray  * segregated,
                * images,
                * infos,
                * subsheets;
 
     GSequence  * items;
+    
+    GHashTable * unique;
 
     GRegex * url_regex;
 } State;
