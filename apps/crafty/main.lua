@@ -24,12 +24,110 @@ screen:add(FPS,FPS_num)
 frame_ticker:start()
 
 
---[[
-local text_test = dofile("test_text.lua")
-screen:add(text_test)
-text_test:start()
-]]--
 
-local text_test2 = dofile("test_text2.lua")
-screen:add(text_test2)
-text_test2:start()
+local contents = app.contents
+local menu_group = Group{}
+screen:add(menu_group)
+
+local H = 60
+local COLS = 3
+local top = 120
+local left = 30
+
+local tests = {}
+local tests_per_column = 0
+
+local last_run = settings.last
+
+local focused = nil
+
+local files = {}
+
+for i = 1 , #contents do
+    local file = contents[ i ]
+    local name = string.match( file , "benchmarks/(.*)%.lua" )
+    if name then
+        table.insert( files , file )
+    end
+end
+
+table.sort( files )
+
+for i = 1 , #files do
+    local file = files[ i ]
+    local name = string.match( file , "benchmarks/(.*)%.lua" )
+    if name then
+        name = string.gsub( name , "_" , " " )
+        local text = Text
+        {
+            font = "Comfortaa Thin "..tostring( H - 14 ).."px",
+            color = "white",
+            text = name,
+            x = left,
+            y = top,
+            extra = { file = file }
+        }
+
+        menu_group:add( text )
+
+        table.insert( tests , text )
+
+        top = top + H
+        if top + H > screen.h then
+            tests_per_column = #tests-1
+            --print("tests_per_column",tests_per_column)
+            top = 10
+            left = left + screen.w / COLS
+        end
+
+        if last_run == file then
+            focused = # tests
+        end
+
+    end
+end
+
+if # tests > 0 then
+
+    focused = focused or 1
+
+    local focus = Rectangle
+    {
+        color = "964e20" ,
+        size = { screen.w / COLS , H } ,
+        position = { tests[ focused ].x - 10, tests[ focused ].y }
+    }
+
+    menu_group:add( focus )
+
+    focus:lower_to_bottom()
+
+    function screen.on_key_down( screen , key )
+
+        if key == keys.Up and focused > 1 then
+            focused = focused - 1
+        elseif key == keys.Down and focused < # tests then
+            focused = focused + 1
+        elseif key == keys.Left and focused > tests_per_column then
+            focused = focused - (tests_per_column+1)
+        elseif key == keys.Right and focused < #tests-tests_per_column then
+            focused = focused + (tests_per_column+1)
+        elseif key == keys.Return then
+            local file = tests[ focused ].extra.file
+            settings.last = file
+            menu_group:unparent()
+            screen.on_key_down = function(screen, key)
+                if(key == keys.BACK) then
+                    reload()
+                end
+            end
+            local test = dofile( file )
+            screen:add(test)
+            test:start()
+        end
+
+        focus.position = { tests[ focused ].x - 10, tests[ focused ].y }
+    end
+
+end
+
