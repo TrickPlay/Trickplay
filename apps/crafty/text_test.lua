@@ -13,8 +13,8 @@ local textblock4, border4
 local textblock5, border5
 
 local function concatStr(str, num)
-    out = str
-    i=0
+    local out = str
+    local i=0
     while(i < num) do
         out = out..str
         i=i+1
