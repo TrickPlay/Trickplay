@@ -63,13 +63,10 @@ Item * state_add_image( State * state, const char * id, Image * image, Options *
                  
             if ( options->de_duplicate && parent )
             {
-                fprintf( stdout, "De-duplicating %s", id );
                 item_add_child( parent, item );
             }
             else
             {
-                fprintf( stdout, "%s %s\n", id, item->checksum );
-                
                 if ( image->columns <= options->input_size_limit && image->rows <= options->input_size_limit )
                 {
                     g_sequence_insert_sorted( state->items, item, item_compare, NULL );
