@@ -291,6 +291,11 @@ class SpriteSheet [[SpriteSheet*]]
         nil - Successfully loaded a source image (remote or local)
     */
     
+    readonly string map_uri
+        [[
+            map_uri = self->get_json_path();
+        ]];
+    
     readonly bool loaded
         [[
             loaded = self->loaded;
