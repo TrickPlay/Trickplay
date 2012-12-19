@@ -88,7 +88,7 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::set( PushTexture * _source, Callback * _callback, void * _target, bool _async )
+void PingMe::set( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool _async )
 {
     if ( source ) source->unsubscribe( this );
     
