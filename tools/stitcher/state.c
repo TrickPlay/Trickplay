@@ -8,8 +8,13 @@
 
 State * state_new()
 {
-    State * state      = malloc( sizeof( State ) );
+    State * state       = malloc( sizeof( State ) );
 
+    state->progress     = progress_new();
+    state->import_chunk = progress_new_chunk( state->progress, 20.0 );
+    state->layout_chunk = progress_new_chunk( state->progress, 40.0 );
+    state->export_chunk = progress_new_chunk( state->progress, 40.0 );
+    
     state->segregated   = g_ptr_array_new_with_free_func( (GDestroyNotify) item_free );
     state->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
     state->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
@@ -30,6 +35,8 @@ void state_free( State * state )
     g_sequence_free ( state->items );
     g_hash_table_destroy( state->unique );
     g_regex_unref( state->url_regex );
+    
+    progress_free( state->progress );
 
     free( state );
 }

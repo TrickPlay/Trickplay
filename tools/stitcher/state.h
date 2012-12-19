@@ -1,8 +1,14 @@
 #ifndef __STATE_H__
 
 #include <glib.h>
+#include "progress.h"
 
 typedef struct State {
+    Progress * progress;
+    ProgressChunk * import_chunk,
+                  * layout_chunk,
+                  * export_chunk;
+    
     GPtrArray  * segregated,
                * images,
                * infos,

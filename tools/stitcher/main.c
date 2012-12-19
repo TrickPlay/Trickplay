@@ -14,7 +14,7 @@ int main ( int argc, char ** argv )
 
     State  * state  = state_new();
     state_load_inputs( state, options );
-
+    
     while ( g_sequence_get_length( state->items ) )
     {
         Layout * best = layout_new( 0, 0 );
