@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
 
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
-        QObject.connect(self.ui.action_Debugger, SIGNAL("triggered()"),  self.debug)
+        QObject.connect(self.ui.action_CodeEditor, SIGNAL("triggered()"),  self.debug)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
 		
         # Restore sizes/positions of docks
