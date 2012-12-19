@@ -25,11 +25,11 @@ frame_ticker:start()
 
 
 --[[
-local text_test = dofile("text_test.lua")
+local text_test = dofile("test_text.lua")
 screen:add(text_test)
 text_test:start()
 ]]--
 
-local text_test2 = dofile("text_test2.lua")
+local text_test2 = dofile("test_text2.lua")
 screen:add(text_test2)
 text_test2:start()
