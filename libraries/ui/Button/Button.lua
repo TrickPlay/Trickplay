@@ -63,7 +63,15 @@ Button = setmetatable(
             end,
             label = function(instance,_ENV)
                 return function(oldf) return label.text     end,
-                function(oldf,self,v) label.text = v flag_for_resize = true end
+                function(oldf,self,v) 
+                    label.text = v 
+                    flag_for_resize = true 
+                    if v ~= "" and label.parent == nil then
+                        add(instance,label)
+                    elseif v == "" and label.parent ~= nil then
+                        v:unparent()
+                    end
+                end
             end,
             on_pressed =  function(instance,_ENV)
                 return function(oldf) return on_pressed     end,
@@ -182,7 +190,9 @@ Button = setmetatable(
                                 image_states[state] = define_image_animation(images[state],state)
                             end
                         end
-                        add(instance, label )
+                        if label.text ~= "" then
+                            add(instance, label )
+                        end
                         
                         flag_for_resize = true
                     end
@@ -219,6 +229,7 @@ Button = setmetatable(
                         end
                         center_label()
                     end
+                    print("set to",w_set_to,h_set_to)
                 end
             end,
             define_image_animation = function(instance,_ENV)
