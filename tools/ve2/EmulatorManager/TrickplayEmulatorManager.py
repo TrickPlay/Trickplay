@@ -110,7 +110,6 @@ class TrickplayEmulatorManager(QWidget):
 				try:
 					#self.main.open() # load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
-					self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
                     
 					if self.main and self.main.currentProject is None: 
 					     return
@@ -127,6 +126,7 @@ class TrickplayEmulatorManager(QWidget):
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
 					self.trickplay.close()
+				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
 			else:
 				# Output the log line
 				sdata = None
