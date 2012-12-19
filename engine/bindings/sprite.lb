@@ -21,7 +21,7 @@ struct SpriteBinding
         if ( id ) free( id );
     }
     
-    const char * get_id() { return strdup( id ); }
+    const char * get_id() { return id ? strdup( id ) : NULL; }
     
     void set_id( const char * new_id )
     {
