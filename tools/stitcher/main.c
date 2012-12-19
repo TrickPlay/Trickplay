@@ -17,7 +17,7 @@ int main ( int argc, char ** argv )
 
     while ( g_sequence_get_length( state->items ) )
     {
-        Layout * best = layout_new( 0 );
+        Layout * best = layout_new( 0, 0 );
     
         for ( unsigned i = 0; i <= options->output_size_limit; i++ )
         {
@@ -35,7 +35,7 @@ int main ( int argc, char ** argv )
             }
         }
         
-        if ( !best->items_placed )
+        if ( !best->places->len )
         {
             fprintf( stderr, "Failed to fit all of the images.\n" );
             exit( 1 );

@@ -1,5 +1,5 @@
 
-add_definitions( -DG_LOG_DOMAIN="stitcher" )
+add_definitions( -DG_LOG_DOMAIN="\\"stitcher\\"" )
 
 include( FindPkgConfig )
 
