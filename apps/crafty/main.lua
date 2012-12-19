@@ -24,7 +24,12 @@ screen:add(FPS,FPS_num)
 frame_ticker:start()
 
 
-
+--[[
 local text_test = dofile("text_test.lua")
 screen:add(text_test)
 text_test:start()
+]]--
+
+local text_test2 = dofile("text_test2.lua")
+screen:add(text_test2)
+text_test2:start()
