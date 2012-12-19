@@ -73,7 +73,18 @@ end
 	--]]
     --return Clone()
 --end
-local create_arrow = function(self,state) return Clone{source=self.style.triangle[state]} end
+--local create_arrow = function(self,state) return Clone{source=self.style.triangle[state]} end
+local create_arrow = function(dir)
+    return function(self,state) 
+        local s = Sprite{
+            async = false,
+            sheet=self.style.spritesheet,
+            id = self.style["ButtonPicker/arrow-"..dir.."/"..state..".png"],
+        } --]]
+        print("new sprite",s.w,s.h, s.id)
+        return s
+    end
+end
 
 
 
@@ -219,37 +230,10 @@ ButtonPicker = setmetatable(
                             }
                         }
                         print(bg.w,bg.h)
-                        prev_arrow.images = {
-                            default    = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/default.png"] or 
-                                    style[widget_type.."/arrow-up/default.png"]
-                            },
-                            focus      = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/focus.png"] or 
-                                    style[widget_type.."/arrow-up/focus.png"]
-                            },
-                            activation = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/activation.png"] or 
-                                    style[widget_type.."/arrow-up/activation.png"]
-                            },
-                        }
-                        next_arrow.images = {
-                            default    = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/default.png"] or 
-                                    style[widget_type.."/arrow-down/default.png"]
-                            },
-                            focus      = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/focus.png"] or 
-                                    style[widget_type.."/arrow-down/focus.png"]
-                            },
-                            activation = Sprite{sheet = sheet, id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/activation.png"] or 
-                                    style[widget_type.."/arrow-down/activation.png"]
-                            },
-                        }
-                        
-                        prev_arrow.anchor_point = { prev_arrow.w/2, prev_arrow.h/2 }
-                        next_arrow.anchor_point = { next_arrow.w/2, next_arrow.h/2 }
+                        prev_arrow.create_canvas = orientation == "horizontal" and 
+                            create_arrow("right") or create_arrow("up")
+                        next_arrow.create_canvas = orientation == "horizontal" and 
+                            create_arrow("left")  or create_arrow("down")
                         
                     end
                     if flag_for_redraw or new_window_sz then
@@ -283,50 +267,10 @@ ButtonPicker = setmetatable(
                         if undo_next_function then undo_next_function() end
                         local style = instance.style
                         local widget_type = instance.widget_type
-                        prev_arrow.images.default.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/default.png"] or 
-                                    style[widget_type.."/arrow-up/default.png"]
-                        prev_arrow.images.focus.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/focus.png"] or 
-                                    style[widget_type.."/arrow-up/focus.png"]
-                        prev_arrow.images.activation.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-left/activation.png"] or 
-                                    style[widget_type.."/arrow-up/activation.png"]
-                        
-                        next_arrow.images.default.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/default.png"] or 
-                                    style[widget_type.."/arrow-down/default.png"]
-                        next_arrow.images.focus.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/focus.png"] or 
-                                    style[widget_type.."/arrow-down/focus.png"]
-                        next_arrow.images.activation.id = orientation == "horizontal" and 
-                                    style[widget_type.."/arrow-right/activation.png"] or 
-                                    style[widget_type.."/arrow-down/activation.png"]
-                        --[[
-                        prev_arrow.images.default.id = orientation == "horizontal" and 
-                                instance.style[instance.widget_type.."/arrow-left/default.png"] or 
-                                instance.style[instance.widget_type.."/arrow-up/default.png"]
-                        next_arrow.images.default.id = orientation == "horizontal" and 
-                                instance.style[instance.widget_type.."/arrow-right/default.png"] or 
-                                instance.style[instance.widget_type.."/arrow-down/default.png"]
-                                --]]
-                                --[[
-                        if orientation == "horizontal" then
-                            prev_arrow:set{z_rotation={  0,0,0}}
-                            next_arrow:set{z_rotation={180,0,0}}
-                            undo_prev_function = instance:add_key_handler(keys.Left, prev_i)
-                            undo_next_function = instance:add_key_handler(keys.Right,next_i)
-                        elseif orientation == "vertical" then
-                            prev_arrow:set{z_rotation={ 90,0,0}}
-                            next_arrow:set{z_rotation={270,0,0}}
-                            undo_prev_function = instance:add_key_handler(keys.Up,  prev_i)
-                            undo_next_function = instance:add_key_handler(keys.Down,next_i)
-                        else
-                            
-                            error("ButtonPicker.orientation expects 'horizontal' or 'vertical as its value. Received: "..orientation,2)
-                            
-                        end
-                        --]]
+                        prev_arrow.create_canvas = orientation == "horizontal" and 
+                            create_arrow("right") or create_arrow("up")
+                        next_arrow.create_canvas = orientation == "horizontal" and 
+                            create_arrow("left")  or create_arrow("down")
                         instance.direction = orientation
                     end
                     lm_update()
@@ -389,7 +333,7 @@ ButtonPicker = setmetatable(
                 name = "prev",
                 --style = false,
                 label = "",
-                --create_canvas = create_arrow,
+                create_canvas = create_arrow("right"),
                 reactive = true,
             }
             print(2)
@@ -397,7 +341,7 @@ ButtonPicker = setmetatable(
                 name = "next",
                 --style = false,
                 label = "",
-                --create_canvas = create_arrow,
+                create_canvas = create_arrow("left"),
                 reactive = true,
             }
             print(3)
