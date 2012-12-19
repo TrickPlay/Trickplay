@@ -475,6 +475,22 @@ global screen [[ClutterActor*]] actor , container
             lua_pop(L,3);
         ]];
 
+    /***************************************
+    Property: name
+
+    The name property of the screen will be used for the window title if this is running in a windowed enviroment.  The name of the UIElement will not be changed though; it'll always remain as "screen"
+
+    The name property is used by the <Container.find_child> function when searching for a particular UIElement object stored in a Container.
+
+    *Default Setting:* screen
+
+    *See Also:* the <Container.find_child> function
+    */
+
+    string name
+        [[name=clutter_actor_get_name(self);]]
+        [[clutter_stage_set_title(CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ), name);]];
+
 
 
     bool toast( string title , string prompt , Bitmap bitmap = 0 )
