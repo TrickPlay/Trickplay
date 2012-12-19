@@ -72,19 +72,21 @@
     <addaction name="actionImport_Assets"/>
     <addaction name="actionImport_Skins"/>
     <addaction name="separator"/>
+    <addaction name="action_CodeEditor"/>
+    <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>Windows</string>
     </property>
+    <addaction name="actionEditor"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
      <string>Run</string>
     </property>
     <addaction name="action_Run"/>
-    <addaction name="action_Debugger"/>
     <addaction name="action_Stop"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -266,7 +268,7 @@
     <set>QDockWidget::DockWidgetClosable</set>
    </property>
    <property name="windowTitle">
-    <string>Images File System</string>
+    <string>Images</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -961,6 +963,19 @@
   <action name="action_Debugger">
    <property name="text">
     <string>Debug</string>
+   </property>
+  </action>
+  <action name="action_CodeEditor">
+   <property name="text">
+    <string>Code Editor...</string>
+   </property>
+  </action>
+  <action name="actionEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Editor</string>
    </property>
   </action>
  </widget>

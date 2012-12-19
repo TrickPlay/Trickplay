@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Dec 14 12:05:37 2012
+# Created: Wed Dec 19 15:16:55 2012
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -373,6 +373,11 @@ class Ui_MainWindow(object):
         self.actionImport_Skins.setObjectName(_fromUtf8("actionImport_Skins"))
         self.action_Debugger = QtGui.QAction(MainWindow)
         self.action_Debugger.setObjectName(_fromUtf8("action_Debugger"))
+        self.action_CodeEditor = QtGui.QAction(MainWindow)
+        self.action_CodeEditor.setObjectName(_fromUtf8("action_CodeEditor"))
+        self.actionEditor = QtGui.QAction(MainWindow)
+        self.actionEditor.setCheckable(True)
+        self.actionEditor.setObjectName(_fromUtf8("actionEditor"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)
         self.menuFile.addAction(self.actionSave_Project)
@@ -382,9 +387,11 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionImport_Assets)
         self.menuFile.addAction(self.actionImport_Skins)
         self.menuFile.addSeparator()
+        self.menuFile.addAction(self.action_CodeEditor)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.action_Exit)
+        self.menuView.addAction(self.actionEditor)
         self.menuRun.addAction(self.action_Run)
-        self.menuRun.addAction(self.action_Debugger)
         self.menuRun.addAction(self.action_Stop)
         self.menuInsert_UI_Element.addAction(self.actionArrowPane)
         self.menuInsert_UI_Element.addAction(self.action_Button)
@@ -464,7 +471,7 @@ class Ui_MainWindow(object):
         self.menuView_2.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBackground.setTitle(QtGui.QApplication.translate("MainWindow", "Background", None, QtGui.QApplication.UnicodeUTF8))
         self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector : ", None, QtGui.QApplication.UnicodeUTF8))
-        self.fileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Images File System", None, QtGui.QApplication.UnicodeUTF8))
+        self.fileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Images", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
@@ -588,4 +595,6 @@ class Ui_MainWindow(object):
         self.action_Reoptimize.setText(QtGui.QApplication.translate("MainWindow", "Reoptimize", None, QtGui.QApplication.UnicodeUTF8))
         self.actionImport_Skins.setText(QtGui.QApplication.translate("MainWindow", "Import Skins...", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Debugger.setText(QtGui.QApplication.translate("MainWindow", "Debug", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_CodeEditor.setText(QtGui.QApplication.translate("MainWindow", "Code Editor...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEditor.setText(QtGui.QApplication.translate("MainWindow", "Editor", None, QtGui.QApplication.UnicodeUTF8))
 
