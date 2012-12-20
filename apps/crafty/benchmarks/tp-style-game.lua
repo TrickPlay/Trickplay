@@ -43,7 +43,7 @@ local function init()
 
     -- Create monsters
     for i = 1,600 do
-        local speed = 60+math.random()*60
+        local speed = 120+math.random()*120
         local angle = math.random()*360
         local scale = 0.5+math.random()*0.7
 
@@ -61,7 +61,7 @@ local function init()
         monster.frame = math.random(3)
         monster.id = monster.prefix..monster.frame
         monster.xMove = math.cos(angle*R)*speed
-        monster.yMove = math.cos(angle*R)*speed
+        monster.yMove = math.sin(angle*R)*speed
 
         monsters:add(monster)
         table.insert(monster_table, monster)
@@ -84,7 +84,7 @@ local tower = Sprite { sheet = sprites, id = "lighthouse", position = { 880, 360
 local tower_top = Sprite { sheet = sprites, id = "lighthousetop", position = { 900, 384 } }
 local laser = Rectangle{ size = { 320, 3 }, color = "red", position = { 944, 424 } }
 
-game_test:add(ground_tile,tower,monsters,laser,explosions,tower_top)
+game_test:add(ground_tile,monsters,tower,laser,explosions,tower_top)
 
 local monster_animate
 monster_animate = function(monster)
