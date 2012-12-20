@@ -32,11 +32,11 @@ local function makeBorder(text)
 end
 
 text_test.extra.start = function()
-    textblock1 = Text { wrap = true, color="black", position = {0,      0}, size = {320,  480}, text = concatStr(english, 4),  font = "Champignon 26px" }
-    textblock2 = Text { wrap = true, color="black", position = {0,    480}, size = {320,  480}, text = concatStr(english, 3),  font = "Starjedi 26px"   }
-    textblock3 = Text { wrap = true, color="black", position = {320,    0}, size = {1280, 960}, text = concatStr(english, 10),  font = "FreeSerif 26px"  }
-    textblock4 = Text { wrap = true, color="black", position = {1600,   0}, size = {320,  480}, text = concatStr(russian, 3),  font = "FreeSerif 26px"  }
-    textblock5 = Text { wrap = true, color="black", position = {1600, 480}, size = {320,  480}, text = concatStr(japanese, 3), font = "Sazanami Mincho Regular 26px"  }
+    textblock1 = Text { wrap = true, color="black", position = {0,      0}, size = {320,  480}, text = concatStr(english, 12),  font = "Champignon 16px" }
+    textblock2 = Text { wrap = true, color="black", position = {0,    480}, size = {320,  480}, text = concatStr(english, 4),  font = "Starjedi 16px"   }
+    textblock3 = Text { wrap = true, color="black", position = {320,    0}, size = {1280, 960}, text = concatStr(english, 25),  font = "FreeSerif 16px"  }
+    textblock4 = Text { wrap = true, color="black", position = {1600,   0}, size = {320,  480}, text = concatStr(russian, 6),  font = "FreeSerif 16px"  }
+    textblock5 = Text { wrap = true, color="black", position = {1600, 480}, size = {320,  480}, text = concatStr(japanese, 4), font = "Sazanami Mincho Regular 16px"  }
 
     border1=makeBorder(textblock1)
     border2=makeBorder(textblock2)
