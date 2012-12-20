@@ -3,7 +3,9 @@ local game_test = Group { y = screen.h - 960 }
 local sprites = SpriteSheet { map = "assets/game-sprites.json" }
 
 local monsters = Group{}
+local monster_table = {}
 local explosions = Group{}
+local explosion_table = {}
 local R = math.pi/180
 
 local function init()
@@ -28,9 +30,10 @@ local function init()
         monster.frame = math.random(3)
         monster.id = monster.prefix..monster.frame
         monster.xMove = math.cos(angle*R)*speed
-        monster.yMove = math.cos(angle*R)*speed
+        monster.yMove = math.sin(angle*R)*speed
 
         monsters:add(monster)
+        table.insert(monster_table, monster)
     end
 
     -- Create explosions
@@ -41,6 +44,7 @@ local function init()
         explosion.prefix = "explosion/e_f0"
 
         explosions:add(explosion)
+        table.insert(explosion_table, explosion)
     end
 end
 
@@ -54,13 +58,12 @@ game_test:add(ground_tile,tower,monsters,laser,explosions,tower_top)
 game_test.start = function()
     init()
 
-    local t = Timeline
+    local t = Timer
     {
-        duration = 1000,
-        loop = true,
-        on_new_frame = function()
+        duration = 17,
+        on_timer = function()
             -- position monsters
-            for _,monster in ipairs(monsters.children) do
+            for _,monster in ipairs(monster_table) do
                 monster.x = monster.x + monster.xMove
                 monster.y = monster.y + monster.yMove
                 if(monster.x < -40) then
@@ -80,7 +83,7 @@ game_test.start = function()
             end
 
             -- draw laser and explosions
-            for _,explosion in ipairs(explosions.children) do
+            for _,explosion in ipairs(explosion_table) do
                 if(explosion.frame == 1) then
                     local angle = math.random()*360
                     local delta_x = 320*math.cos(angle*R)
