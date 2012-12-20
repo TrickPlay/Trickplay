@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Dec 19 15:16:55 2012
+# Created: Wed Dec 19 15:30:06 2012
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -377,6 +377,7 @@ class Ui_MainWindow(object):
         self.action_CodeEditor.setObjectName(_fromUtf8("action_CodeEditor"))
         self.actionEditor = QtGui.QAction(MainWindow)
         self.actionEditor.setCheckable(True)
+        self.actionEditor.setChecked(True)
         self.actionEditor.setObjectName(_fromUtf8("actionEditor"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen_Project)

@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.windows = {"inspector":False}
+        self.windows = {"inspector":False, "images":False}
         self.inspectorWindowClicked()
 
         # Create Inspector
@@ -39,10 +39,15 @@ class MainWindow(QMainWindow):
         self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create Image File System
+        self.ui.fileSystemDock.toggleViewAction().setText("Images")
+        self.ui.menuView.addAction(self.ui.fileSystemDock.toggleViewAction())
+        self.ui.fileSystemDock.toggleViewAction().triggered.connect(self.imagesWindowClicked)
+
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
 
         # Create EmulatorManager
+        self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
         self._emulatorManager = TrickplayEmulatorManager(self) 
         self._inspector.emulatorManager = self._emulatorManager
 
@@ -516,6 +521,20 @@ class MainWindow(QMainWindow):
         self.stop(False, True)
         #self._emulatorManager.stop()
         self.close()
+
+    def editorWindowClicked(self) :
+        if self.ui.actionEditor.isChecked() == True :
+            self.sendLuaCommand("screenShow", "_VE_.screenShow()")
+        else :
+            self.sendLuaCommand("screenHide", "_VE_.screenHide()")
+
+    def imagesWindowClicked(self) :
+    	if self.windows['images'] == True:
+    		self.ui.fileSystemDock.hide()
+    		self.windows['images'] = False
+    	else :
+    		self.ui.fileSystemDock.show()
+    		self.windows['images'] = True
 
     def inspectorWindowClicked(self) :
     	if self.windows['inspector'] == True:

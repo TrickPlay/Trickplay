@@ -996,6 +996,12 @@ _VE_.openLuaFile = function()
 end 
 ]]
 
+_VE_.screenHide = function()
+    screen:hide()
+end 
+_VE_.screenShow = function()
+    screen:show()
+end 
 _VE_.setScreenLoc = function()
     screen.y = 200
     screen.x = 300
