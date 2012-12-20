@@ -2,37 +2,6 @@ local game_test = Group { y = screen.h - 960 }
 
 local sprites = SpriteSheet { map = "assets/game-sprites.json" }
 
-local southWalk = {
-    Sprite { sheet = sprites, id = "monster/s1" },
-    Sprite { sheet = sprites, id = "monster/s2" },
-    Sprite { sheet = sprites, id = "monster/s3" },
-}
-local eastWalk = {
-    Sprite { sheet = sprites, id = "monster/e1" },
-    Sprite { sheet = sprites, id = "monster/e2" },
-    Sprite { sheet = sprites, id = "monster/e3" },
-}
-local westWalk = {
-    Sprite { sheet = sprites, id = "monster/w1" },
-    Sprite { sheet = sprites, id = "monster/w2" },
-    Sprite { sheet = sprites, id = "monster/w3" },
-}
-local northWalk = {
-    Sprite { sheet = sprites, id = "monster/n1" },
-    Sprite { sheet = sprites, id = "monster/n2" },
-    Sprite { sheet = sprites, id = "monster/n3" },
-}
-local explosionSequence = {
-    Sprite { sheet = sprites, id = "explosion/e_f01" },
-    Sprite { sheet = sprites, id = "explosion/e_f02" },
-    Sprite { sheet = sprites, id = "explosion/e_f03" },
-    Sprite { sheet = sprites, id = "explosion/e_f04" },
-    Sprite { sheet = sprites, id = "explosion/e_f05" },
-    Sprite { sheet = sprites, id = "explosion/e_f06" },
-    Sprite { sheet = sprites, id = "explosion/e_f07" },
-    Sprite { sheet = sprites, id = "explosion/e_f08" },
-}
-
 local monsters = Group{}
 local monster_table = {}
 local explosions = Group{}
