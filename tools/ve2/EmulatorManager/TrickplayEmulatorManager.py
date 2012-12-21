@@ -50,7 +50,6 @@ class TrickplayEmulatorManager(QWidget):
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
-        print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -250,7 +249,8 @@ class TrickplayEmulatorManager(QWidget):
                             # open Property Tab 
 					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
-					        print("UI Element not found")
+					        print(gid, "---UI Element not found")
+					        return
 
 					except:
 					    print("error :(")
@@ -287,9 +287,11 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
+				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
+
 
 				elif s is not None:
 				    pass

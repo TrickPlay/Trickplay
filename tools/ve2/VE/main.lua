@@ -586,10 +586,16 @@ _VE_.sendBackward = function(gid)
 
 end
 
+_VE_.refreshDone = function()
+    buildInsp = false
+end 
 _VE_.refresh = function()
 
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
+    if buildInsp == false then
+        _VE_.getUIInfo()
+        _VE_.getStInfo()
+        buildInsp = true
+    end
 
 end 
 
@@ -797,7 +803,9 @@ _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
 _VE_.openInspector = function(gid, multi)
-    if shift == true or multi then 
+    if buildInsp == true then
+        return
+    elseif shift == true or multi then 
         print("openInspc".."t"..gid)
     else
         print("openInspc".."f"..gid)

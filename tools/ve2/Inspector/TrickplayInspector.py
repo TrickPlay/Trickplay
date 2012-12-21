@@ -1343,8 +1343,9 @@ class TrickplayInspector(QWidget):
                         self.sendData(theItem['gid'], "is_visible", False)
                         theItem.setCheckState(Qt.Unchecked)
 
-            self.curLayerGid = theItem['gid'] 
-            self.ui.inspector.setCurrentIndex(theItem.index())
+            if theItem :
+                self.curLayerGid = theItem['gid'] 
+                self.ui.inspector.setCurrentIndex(theItem.index())
 
 
                     

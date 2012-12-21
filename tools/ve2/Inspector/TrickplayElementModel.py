@@ -142,14 +142,23 @@ class TrickplayElementModel(QStandardItemModel):
             for c in pdata["children"]:
                 if c["name"] == "screen":
                     child = c
+                    self.theBigestGid = 2
                     break
                 
+            for c in child["children"]:
+                if c["name"][:5] == "Layer":
+                    layer = c 
+                    self.tpData = pdata
+                    self.insertElement(root, layer, pdata, True)
+
+            """
             if child is None:
                 print( "Could not find screen element." )
             else:
                 self.tpData = pdata
                 self.theBigestGid = 2
                 self.insertElement(root, child, pdata, True)
+            """
 
             self.inspector.ui.inspector.expandAll()
 
