@@ -493,6 +493,7 @@ class TrickplayInspector(QWidget):
         self.inspectorModel = TrickplayElementModel(self)
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
+        #self.ui.inspector.setRowHidden(1, self.inspectorModel.root, True)
 
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
@@ -1005,7 +1006,7 @@ class TrickplayInspector(QWidget):
             if str(data["type"]) in NO_STYLE_WIDGET and p == "style" :
                 pass
 
-            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton"): 
+            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") and p is not 'gid': 
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
