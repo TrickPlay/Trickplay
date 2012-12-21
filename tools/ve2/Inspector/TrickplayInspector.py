@@ -498,7 +498,7 @@ class TrickplayInspector(QWidget):
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
         self.currentScreenName = "Default"
-        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;}")
+        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
         self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
         QObject.connect(self.ui.deleteScreen, SIGNAL('clicked()'), self.removeScreen)
         QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
