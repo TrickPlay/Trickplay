@@ -242,13 +242,14 @@ class TrickplayElementModel(QStandardItemModel):
 
         if "Texture" == title:
             title = "Image"
-            
+        elif "Widget_" == title[:7]:
+            title = title[7:]
+
         # Set the name node to gid + name
         if '' != value:   
             gs = str(gid)
             l = len(gs)
             #value =  gs + ' ' * 2 * (6 - l) + value 
-            value =  value 
         else:    
             #value = str(gid)
             value = ""

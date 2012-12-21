@@ -468,6 +468,7 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.setDragDropMode(QAbstractItemView.InternalMove)
         self.ui.inspector.setDefaultDropAction(Qt.MoveAction)
         self.ui.inspector.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.ui.inspector.setIndentation(10)
         #self.ui.inspector.setSelectionMode(QAbstractItemView.MultiSelection)
 
         self.ui.gridLayout_3.addWidget(self.ui.inspector, 2, 0, 1, 1)
@@ -492,7 +493,6 @@ class TrickplayInspector(QWidget):
         self.inspectorModel = TrickplayElementModel(self)
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
-        self.ui.inspector.setIndentation(10)
 
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
