@@ -15,6 +15,7 @@ Layout * layout_new ( unsigned width, unsigned buffer_pixels )
     layout->min_item_w = 256;
     layout->min_item_h = 256;
     layout->max_item_w = 0;
+    layout->max_item_h = 0;
     layout->item_area  = 0;
     
     layout->leaves = g_sequence_new( NULL );
@@ -112,6 +113,7 @@ void layout_scan_item( Item * item, Layout * layout )
     layout->min_item_w = MIN( layout->min_item_w, W( item ) );
     layout->min_item_h = MIN( layout->min_item_h, H( item ) );
     layout->max_item_w = MAX( layout->max_item_w, W( item ) );
+    layout->max_item_h = MAX( layout->max_item_h, H( item ) );
     layout->item_area += AREA( item );
 }
 
