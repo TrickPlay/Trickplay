@@ -12,7 +12,8 @@ typedef struct Options {
 
     gboolean recursive,
              de_duplicate,
-             add_buffer_pixels;
+             add_buffer_pixels,
+             print_progress;
 
     GPtrArray  * input_patterns,
                * input_paths,

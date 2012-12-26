@@ -10,6 +10,7 @@ typedef struct Layout {
              min_item_w,
              min_item_h,
              max_item_w,
+             max_item_h,
              item_area;
                  
     float        coverage;

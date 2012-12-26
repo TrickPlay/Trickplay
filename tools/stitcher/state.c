@@ -9,11 +9,6 @@
 State * state_new()
 {
     State * state       = malloc( sizeof( State ) );
-
-    state->progress     = progress_new();
-    state->import_chunk = progress_new_chunk( state->progress, 20.0 );
-    state->layout_chunk = progress_new_chunk( state->progress, 40.0 );
-    state->export_chunk = progress_new_chunk( state->progress, 40.0 );
     
     state->segregated   = g_ptr_array_new_with_free_func( (GDestroyNotify) item_free );
     state->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
@@ -35,8 +30,6 @@ void state_free( State * state )
     g_sequence_free ( state->items );
     g_hash_table_destroy( state->unique );
     g_regex_unref( state->url_regex );
-    
-    progress_free( state->progress );
 
     free( state );
 }
@@ -297,7 +290,91 @@ void state_merge_json ( State * state, const char * path, Options * options )
 
     g_object_unref( json );
 }
+/*
+void state_estimate_file( State * state, GFile * file, GFile * root, Options * options )
+{
+    GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
 
+    if ( !info )
+    {
+        return;
+    }
+
+    GFileType type = g_file_info_get_file_type( info );
+
+    if ( type == G_FILE_TYPE_DIRECTORY )
+    {
+        if ( file == root || options->recursive )
+        {
+            /*
+            GDir * dir = g_dir_open( path, 0, NULL );
+            g_message( "%s, %p", path, dir );
+            const char * name;
+            while (( name = g_dir_read_name( dir ) ))
+            {
+                char * full = g_build_filename( path, name, NULL );
+                GFile * child = g_file_new_for_path( full );
+                state_estimate_file( state, child, root, full, options );
+                g_object_unref( child );
+                free( full );
+            }
+            
+            g_dir_close( dir );
+            * /
+            
+            GFileEnumerator * children = g_file_enumerate_children( file,
+                        "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
+
+            GFileInfo * child_info;
+            while (( child_info = g_file_enumerator_next_file( children, NULL, NULL ) ))
+            {
+                GFile * child = g_file_get_child( file, g_file_info_get_name( child_info ) );
+                state_estimate_file( state, child, root, options );
+                g_object_unref( child_info );
+                g_object_unref( child );
+            }
+
+            g_file_enumerator_close( children, NULL, NULL );
+            g_object_unref( children );
+            
+        }
+    }
+    else if ( type == G_FILE_TYPE_REGULAR )
+    {
+        state->estimated_files += 1;
+    }
+
+    g_object_unref( info );
+}
+
+void state_estimate_inputs( State * state, Options * options )
+{
+    for ( unsigned i = 0; i < options->input_paths->len; i++ )
+    {
+        char * path = (char *) g_ptr_array_index( options->input_paths, i );
+        if ( !g_regex_match( state->url_regex, path, 0, NULL ) )
+        {
+            GFile * root = g_file_new_for_commandline_arg( path );
+            state_estimate_file( state, root, root, options );
+            g_object_unref( root );
+        }
+    }
+
+    for ( unsigned i = 0; i < options->json_to_merge->len; i++ )
+    {
+        GFile * file = g_file_new_for_path( (char *) g_ptr_array_index( options->json_to_merge, i ) );
+        GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, NULL );
+        state->estimated_files += g_file_info_get_size( info ) / 80;
+        g_object_unref( info );
+        g_object_unref( file );
+    }
+        
+    state->import_chunk->estimate = (float) state->estimated_files / 1000.0f;
+    state->layout_chunk->estimate =  state->import_chunk->estimate * options->output_size_limit / 2048.0f;
+    state->export_chunk->estimate = (float) state->estimated_files / 100000.0f;
+        //progress_recalculate( state->progress );
+}
+*/
 void state_load_inputs( State * state, Options * options )
 {
     // load regular inputs
@@ -384,7 +461,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
 
 }
 
-void state_add_layout ( State * state, Layout * layout, Options * options )
+void state_add_layout ( State * state, Layout * layout, ProgressChunk * chunk, Options * options )
 {
     ExceptionInfo * exception = AcquireExceptionInfo();
     Image         * image  = AcquireImage( NULL );
@@ -407,6 +484,12 @@ void state_add_layout ( State * state, Layout * layout, Options * options )
 
         image_composite_leaf( image, leaf, options );
         g_sequence_remove_sorted( state->items, leaf->item, item_compare, NULL );
+        
+        if ( chunk )
+        {
+            chunk->progress = 1.0 - (float) i / (float) layout->places->len;
+            progress_recalculate( chunk->parent );
+        }
     }
 
     // append to json
