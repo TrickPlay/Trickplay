@@ -586,9 +586,14 @@ _VE_.sendBackward = function(gid)
 
 end
 
+_VE_.setCurrentProject = function(path)
+    screen.name = path 
+end 
+
 _VE_.refreshDone = function()
     buildInsp = false
 end 
+
 _VE_.refresh = function()
 
     if buildInsp == false then
