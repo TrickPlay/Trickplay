@@ -126,6 +126,8 @@ class TrickplayEmulatorManager(QWidget):
 					# Close the process
 					self.trickplay.close()
 				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
+				self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
+
 			else:
 				# Output the log line
 				sdata = None
