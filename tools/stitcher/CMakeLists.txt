@@ -31,6 +31,8 @@ add_executable( stitcher
                 state.c
 )
 
+add_definitions("-std=gnu99")
+
 target_link_libraries( stitcher
         ${GLIB2_LIBRARIES}
         ${GOBJECT2_LIBRARIES}
