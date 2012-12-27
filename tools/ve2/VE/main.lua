@@ -1168,8 +1168,8 @@ _VE_.saveFile = function(scrJson)
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
-    screen:clear()
-    _VE_.openFile(currentProjectPath)
+    --screen:clear()
+    --_VE_.openFile(currentProjectPath)
 
     codeGen()
 
