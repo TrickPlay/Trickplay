@@ -233,6 +233,7 @@ class MainWindow(QMainWindow):
 
     def import_finished(self, errorCode):
         if errorCode == 0 : 
+            print("JOSH ~~~ ?")
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
         else : 
             errorMsg = str(self.stitcher.readAllStandardError().data())
