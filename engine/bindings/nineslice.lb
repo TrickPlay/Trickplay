@@ -128,6 +128,14 @@ struct NineSliceBinding
         }
     }
     
+    void check_loaded()
+    {
+        if ( async )
+        {
+            nineslice_effect_check_loaded( effect );
+        }
+    }
+    
     bool async;
     
 private:
@@ -215,6 +223,8 @@ class NineSlice [[ClutterActor*]] actor
                 binding->set_sheet( NULL );
                 * get_ref( self ) = LUA_REFNIL;
             }
+            
+            get_binding( self )->check_loaded();
         ]];
 
     /*
@@ -264,6 +274,8 @@ class NineSlice [[ClutterActor*]] actor
                     binding->set_id( i, std::string( id != NULL ? id : "" ) );
                     lua_pop( L, 1 );
                 }
+                
+                get_binding( self )->check_loaded();
             }
             else
             {
