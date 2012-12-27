@@ -120,7 +120,7 @@ class TrickplayEmulatorManager(QWidget):
 					     else:
 					        self.main.open() 
 
-					self.inspector.refresh() 
+					#self.inspector.refresh() 
 				except:
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
