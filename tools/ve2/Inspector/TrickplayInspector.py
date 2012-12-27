@@ -1006,7 +1006,15 @@ class TrickplayInspector(QWidget):
             if str(data["type"]) in NO_STYLE_WIDGET and p == "style" :
                 pass
 
-            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") and p is not 'gid': 
+            elif p is 'gid': 
+                i = QTreeWidgetItem() 
+                i.setText (0, p)  # first col : property name
+                i.setText (1, str(data[p])) # second col : property value (text input field) 
+                items.append(i)
+                n = n + 1
+                gidItem  = i
+
+            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") : # and p is not 'gid': 
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
@@ -1201,6 +1209,7 @@ class TrickplayInspector(QWidget):
                 n = n + 1
 
         self.ui.property.addTopLevelItems(items)
+        self.ui.property.setItemHidden(gidItem, True)
 
         #if self.neighbors :
         if neighbors_n > 0 :
