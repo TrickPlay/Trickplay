@@ -15,11 +15,6 @@ void Animator_started( ClutterTimeline * timeline , gpointer anim )
     g_object_ref( anim );
 }
 
-void Animator_paused( ClutterTimeline * timeline , gpointer anim )
-{
-    g_object_unref( anim );
-}
-
 void Animator_completed( ClutterTimeline * timeline , gpointer anim )
 {
 #ifdef CLUTTER_VERSION_1_10
@@ -35,7 +30,6 @@ void Animator_completed( ClutterTimeline * timeline , gpointer anim )
 void Animator_attach_signals( ClutterTimeline * timeline, gpointer anim )
 {
     g_signal_connect( timeline , "started" , ( GCallback ) Animator_started , anim );
-    g_signal_connect( timeline , "paused" , ( GCallback ) Animator_paused , anim );
     g_signal_connect( timeline , "completed" , ( GCallback ) Animator_completed , anim );
     if(clutter_timeline_is_playing(timeline))
     {
@@ -53,15 +47,6 @@ void Animator_detach_signals( ClutterTimeline *timeline, gpointer anim )
                                     g_quark_from_string("started"),
                                     0,
                                     (gpointer)Animator_started,
-                                    anim );
-    if(handle) g_signal_handler_disconnect(timeline, handle);
-    handle = g_signal_handler_find(
-                                    timeline,
-                                    (GSignalMatchType)(G_SIGNAL_MATCH_DETAIL | G_SIGNAL_MATCH_FUNC | G_SIGNAL_MATCH_DATA),
-                                    0,
-                                    g_quark_from_string("paused"),
-                                    0,
-                                    (gpointer)Animator_paused,
                                     anim );
     if(handle) g_signal_handler_disconnect(timeline, handle);
     handle = g_signal_handler_find(
