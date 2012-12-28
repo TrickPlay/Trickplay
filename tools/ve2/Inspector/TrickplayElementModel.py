@@ -142,9 +142,10 @@ class TrickplayElementModel(QStandardItemModel):
             for c in pdata["children"]:
                 if c["name"] == "screen":
                     child = c
-                    self.theBigestGid = 2
+                    #self.theBigestGid = 2
                     break
                 
+            """
             for c in child["children"]:
                 if c["name"][:5] == "Layer":
                     layer = c 
@@ -152,15 +153,16 @@ class TrickplayElementModel(QStandardItemModel):
                     self.insertElement(root, layer, pdata, True)
 
             """
+
             if child is None:
                 print( "Could not find screen element." )
             else:
                 self.tpData = pdata
                 self.theBigestGid = 2
                 self.insertElement(root, child, pdata, True)
-            """
 
             self.inspector.ui.inspector.expandAll()
+            #self.inspector.ui.inspector.setRowHidden(0, root.index(), True)
 
             gid = None
 
@@ -275,6 +277,7 @@ class TrickplayElementModel(QStandardItemModel):
         # causes problems with key presses in the app
         else:    
             del(data['is_visible'])
+            node.setSelectable(False)
         
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
