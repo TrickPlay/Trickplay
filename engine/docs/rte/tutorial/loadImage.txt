@@ -2,20 +2,20 @@ Topic: Loading an Image
 
 Images are a common resource, so the TrickPlay SDK provides an <Image> class to load and process bitmapped image files, such as PNG and JPEG. Image files can be loaded synchronously or asynchronously from the file system or from a URL.
 
-The Tutorial application will load two images from the TrickPlay Developer website and place them in the two demo areas.
+The Tutorial application will load two images and place them in the two demo areas.
 
-We'll place the code for the image loading and positioning in a new file called loadImages.txt and have the main.lua file process the file using dofile(). The code shown below loads the TrickPlay logo file. It verifies that the load succeeded and aborts if an error occurred. A new global variable called "logoImage" is defined to hold the loaded image file. This variable will be accessible from main.lua and other source files. Additional global variables will be defined when the second image is loaded later in this section.
+We'll place the code for the image loading and positioning in a new file called loadImages.lua and have the main.lua file process the file using dofile(). The code shown below loads the TrickPlay logo file. It verifies that the load succeeded and aborts if an error occurred. A new global variable called "logoImage" is defined to hold the loaded image file. This variable will be accessible from main.lua and other source files. Additional global variables will be defined when the second image is loaded later in this section.
 
 	(code)
 	-- *** loadImages.lua ***
-	
+
 	--[[ Creates the following global variables
-	
+
 			logoImage   - Image object with loaded TrickPlay logo image
 			sphereImage - Image object with loaded Red Sphere image
 			sphereClone - Clone object of Red Sphere image
 	--]]
-	
+
 	-- Load the TrickPlay logo image
 	logoImage = Image( { src = "tpLogo.png" } )
 	if( logoImage.loaded == false ) then
@@ -37,7 +37,7 @@ The image will be added to the demoArea1 group and positioned in the center of t
 	-- Set the image's position in the middle of demoArea1's display space (demoSpace1)
 	logoImage.position = { (demoSpace1.width  / 2) + demoSpace1.x,
 	                       (demoSpace1.height / 2) + demoSpace1.y - 20 }
-	
+
 	-- Add the image to the demoArea1 group
 	demoArea1:add( logoImage )
 	(end)
@@ -51,10 +51,10 @@ For the second demo area, an image of a red sphere will be loaded. The operation
 		print( "Could not load sphere image" )
 		return
 	end
-	
+
 	-- Set the image's anchor point to its center
 	sphereImage.anchor_point = { sphereImage.width / 2, sphereImage.height / 2 }
-	
+
 	-- Position the image in the left-center of the demoArea2's display space (demoSpace2)
 	sphereImage.position = {  demoSpace2.x + 75,
 	                         (demoSpace2.height / 2) + demoSpace2.y }
@@ -71,7 +71,7 @@ The code shown below clones the Red Sphere image and then sets its anchor point 
 	(code)
 	-- Create a clone of the sphere
 	sphereClone = Clone( { source = sphereImage } )
-	
+
 	-- Set Clone's anchor point and position it in the center of the display space
 	sphereClone.anchor_point = { sphereClone.width  / 2, sphereClone.height / 2 }
 	sphereClone.position     = { (demoSpace2.width  / 2) + demoSpace2.x,
@@ -89,7 +89,7 @@ To load and run the loadImages.lua source file, the main.lua file processes it w
 
 	(code)
 	-- *** main.lua ***
-	
+
 	-- Load images
 	-- Creates global variables called logoImage, sphereImage, and sphereClone
 	dofile( "loadImage.lua" )
