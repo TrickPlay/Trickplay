@@ -25,21 +25,24 @@ void progress_recalculate( Progress * progress )
     for ( unsigned i = 0; i < progress->chunks->len; ++i )
     {
         ProgressChunk * chunk = (ProgressChunk *) g_ptr_array_index( progress->chunks, i );
-        if ( chunk->estimate )
+        if ( chunk->estimate > 0.0 )
         {
             p += chunk->progress * chunk->estimate;
             t += chunk->estimate;
         }
     }
     
-    p = 100.0 * p / t ;
-    
-    if ( progress->percent < (int) p )
+    if ( t > 0.0 )
     {
-        progress->percent = MIN( 100, (int) p );
-        if ( progress->print )
+        p = 100.0 * p / t ;
+        
+        if ( progress->percent < (int) p )
         {
-            fprintf( stdout, "%i\n", progress->percent );
+            progress->percent = MIN( 100, (int) p );
+            if ( progress->print )
+            {
+                fprintf( stdout, "%i\n", progress->percent );
+            }
         }
     }
 }
