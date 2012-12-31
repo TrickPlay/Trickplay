@@ -66,6 +66,7 @@ int main ( int argc, char ** argv )
         
         state_add_layout( state, best, comp_chunk, options );
         
+        layout_chunk->progress = 1.0;
         comp_chunk->estimate = sqrt( log10( (float) best->area ) * (float) best->places->len );
         comp_chunk->progress = 1.0;
         progress_recalculate( progress );
@@ -75,6 +76,7 @@ int main ( int argc, char ** argv )
 
     // collect garbage
 
+    progress_free( progress );
     options_free( options );
     state_free( state );
 
