@@ -124,10 +124,6 @@ function editor.clone()
 
 	for i, v in pairs(curLayer.children) do
 		if(v.selected == true) then
-            print (v.name)
-            print (v.name)
-            print (v.name)
-            print (v.name)
 		    screen_ui.n_selected(v)
 		    uiClone = WL.Widget_Clone {
 		        source = v,
@@ -320,6 +316,14 @@ function editor.duplicate(gid)
 
             if uiTypeStr == "Widget_Group" then 
                 duplicate_child(uiDuplicate, v)
+            elseif uiTypeStr == "LayoutManager" then 
+                for r = 1, uiDuplicate.number_of_rows, 1 do 
+                    for c = 1, uiDuplicate.number_of_cols, 1 do 
+                        local item = uiDuplicate.cells[r][c]
+                        local itemType = util.getTypeNameStr(item) 
+                        util.assign_right_name(item, itemType)
+                    end 
+                end 
             end 
 
             util.addIntoLayer(uiDuplicate)

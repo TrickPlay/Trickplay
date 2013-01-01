@@ -881,6 +881,7 @@ _VE_.openFile = function(path)
 
     --print(layer)
     s = load_layer(layer)
+    objectsNames = s.objects
     --print (s, #s.children)
 
     --_VE_.buildVF()
