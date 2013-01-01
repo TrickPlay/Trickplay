@@ -178,6 +178,9 @@ function screen_ui.selected(obj)
         obj_border.z_rotation = obj.z_rotation
         obj_border.size = obj.size
         obj_border.position = obj.position
+        if obj.is_in_group == true then
+            obj_border.scale = obj.parent_group.scale
+        end
 
         screen:add(obj_border)
         return 
