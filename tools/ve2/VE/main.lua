@@ -1424,7 +1424,7 @@ _VE_.selectUIElement = function(gid, multiSel)
     if multiSel == true then
         shift = multiSel
     end
-    if gid ~= 2 then
+    if gid ~= screen.gid then
         screen_ui.selected(devtools:gid(gid))
     end 
     shift = org_shift
@@ -1439,7 +1439,7 @@ _VE_.deselectUIElement = function(gid, multiSel)
     if multiSel == true then
         shift = multiSel
     end 
-    if gid ~= 2 then
+    if gid ~= screen.gid then
         screen_ui.n_selected(devtools:gid(gid))
     end
     shift = org_shift
