@@ -1382,8 +1382,8 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
         
-        if self.preventChanges:
-            return
+        #if self.preventChanges:
+            #return
             
         selectedList = selected.indexes()
         for selIdx in selectedList : 
