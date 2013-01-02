@@ -37,8 +37,7 @@ public:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }
             void handle_async_img( Image * image );
             
-            void on_sync_change() {};
-            void make_texture();
+            void make_texture( bool immediately );
             void lost_texture() {};
             
             std::string cache_key;
@@ -62,8 +61,7 @@ public:
             const char * get_id() { return id; }
             
         private:
-            void on_sync_change();
-            void make_texture();
+            void make_texture( bool immediately );
             void lost_texture();
             
             PushTexture::PingMe ping;
