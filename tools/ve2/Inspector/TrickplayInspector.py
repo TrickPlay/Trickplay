@@ -234,7 +234,6 @@ class DiagramScene(QGraphicsScene):
             self.v_pos = 1
 
     def sendAnchorPointSetCommand(self, name):
-        print self.insp.editable, "&&&&&&&&&&&&&&&&&&&&&&&&&&&"
         if self.insp.editable == False :
             return
         if name == "tl" :
@@ -1383,6 +1382,9 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
         
+        if self.preventChanges:
+            return
+            
         selectedList = selected.indexes()
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)

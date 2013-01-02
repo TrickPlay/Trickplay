@@ -50,6 +50,9 @@ class TrickplayEmulatorManager(QWidget):
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
+        
+        print inputCmd
+        self.inspector.preventChanges = True
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -290,6 +293,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
+				        self.inspector.preventChanges = False
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
