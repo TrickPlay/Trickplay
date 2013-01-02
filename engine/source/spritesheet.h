@@ -90,6 +90,8 @@ public:
     
     bool has_id( const char * id );
 
+    char * get_json_path() { return json_path ? json_path : (char *) ""; }
+
     App * app;
     GObject * extra;
     bool async;
@@ -98,7 +100,7 @@ public:
     friend class Source;
 
 private:
-    char * native_json_path;
+    char * json_path;
     std::map < std::string, Sprite > sprites;
     std::list < Source > sources;
 };

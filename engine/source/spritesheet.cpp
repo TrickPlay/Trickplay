@@ -83,9 +83,9 @@ void Source::make_texture()
 
 void Source::set_source( const char * _uri )
 {
-    if ( sheet->native_json_path )
+    if ( sheet->json_path )
     {
-        char * json = g_path_get_dirname( sheet->native_json_path );
+        char * json = g_path_get_dirname( sheet->json_path );
         uri = g_build_filename( json, _uri, NULL );
         free( json );
     }
@@ -167,7 +167,7 @@ class AsyncCallback : public Action
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), native_json_path( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_path( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -183,7 +183,7 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 SpriteSheet::~SpriteSheet()
 {
     g_free( extra );
-    if ( native_json_path ) g_free( native_json_path );
+    if ( json_path ) g_free( json_path );
 }
 
 void SpriteSheet::emit_signal( const char * msg )
@@ -247,11 +247,8 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
 
 void SpriteSheet::load_json( const char * json )
 {
-    native_json_path = strdup( json );
-
     char * map = NULL;
     gsize length;
-    
 
     if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
@@ -260,6 +257,8 @@ void SpriteSheet::load_json( const char * json )
     }
     else
     {
+        json_path = strdup( json );
+        
         AppResource resource( app, json );
         if ( resource.is_native() )
         {
