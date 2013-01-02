@@ -30,12 +30,10 @@ void Source::handle_async_img( Image * image )
     if ( image )
     {
         CoglHandle texture = ref_texture_from_image( image );
-        set_texture( texture );
+        set_texture( texture, true );
         delete image;
         
         Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
-        
-        ping_all();
     }
     else
     {
@@ -43,7 +41,7 @@ void Source::handle_async_img( Image * image )
     }
 }
 
-void Source::make_texture()
+void Source::make_texture( bool immediately )
 {
     g_assert( uri );
     
@@ -51,21 +49,7 @@ void Source::make_texture()
     CoglHandle texture = Images::cache_get( cache_key, * jo );
     delete jo;
     
-    if ( all_pings_async )
-    {
-        if ( texture == COGL_INVALID_HANDLE )
-        {
-            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-        }
-        else
-        {
-            ping_all_later();
-        }
-        
-        set_texture( texture );
-    }
-    else
+    if ( immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
@@ -76,8 +60,21 @@ void Source::make_texture()
             Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
         }
         
-        set_texture( texture );
-        ping_all();
+        set_texture( texture, true );
+    }
+    else
+    {
+        if ( texture == COGL_INVALID_HANDLE )
+        {
+            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+            set_texture( texture, false );
+        }
+        else
+        {
+            set_texture( texture, true );
+            ping_all_later();
+        }
     }
 }
 
@@ -99,8 +96,8 @@ void Source::set_source( const char * _uri )
 
 void Source::set_source( Image * image )
 {
-    set_texture( ref_texture_from_image( image ) );
     cache = true;
+    set_texture( ref_texture_from_image( image ), true );
 }
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
@@ -124,7 +121,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Sprite::update()
 {
     g_assert( source );
-    set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ) );
+    set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
     ping_all();
 }
 
@@ -133,22 +130,14 @@ void on_ping( PushTexture * source, void * target )
     ((Sprite *) target)->update();
 }
 
-void Sprite::on_sync_change()
+void Sprite::make_texture( bool immediately )
 {
-    g_assert( source );
-    
-    ping.set( source, * on_ping, this, all_pings_async );
-}
-
-void Sprite::make_texture()
-{
-    on_sync_change();
-    update();
+    ping.set( source, * on_ping, this, immediately );
 }
 
 void Sprite::lost_texture()
 {
-    ping.set( NULL, NULL, NULL, true );
+    ping.set( NULL, NULL, NULL, false );
 }
 
 /* SpriteSheet */

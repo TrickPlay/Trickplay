@@ -68,8 +68,7 @@ private:
     void update_sprite()
     {
         sprite = sheet ? sheet->get_sprite( id ) : NULL;
-        ping.set( sprite, SpriteBinding::on_ping, this, async );
-        update();
+        ping.set( sprite, SpriteBinding::on_ping, this, !async );
     }
 
     PushTexture::PingMe   ping;
