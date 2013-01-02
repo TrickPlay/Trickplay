@@ -5,11 +5,11 @@
 Progress * progress_new( Options * options )
 {
     Progress * progress = malloc( sizeof( Progress ) );
-    
+
     progress->chunks = g_ptr_array_new_with_free_func( g_free );
     progress->percent = 0;
     progress->print = options->print_progress;
-    
+
     return progress;
 }
 
@@ -31,17 +31,18 @@ void progress_recalculate( Progress * progress )
             t += chunk->estimate;
         }
     }
-    
+
     if ( t > 0.0 )
     {
         p = 100.0 * p / t ;
-        
+
         if ( progress->percent < (int) p )
         {
             progress->percent = MIN( 100, (int) p );
             if ( progress->print )
             {
-                fprintf( stdout, "%i\n", progress->percent );
+                fprintf( stderr, "%i\n", progress->percent );
+                fflush(stderr);
             }
         }
     }
@@ -53,7 +54,7 @@ ProgressChunk * progress_new_chunk( Progress * progress, float estimate )
     chunk->estimate = estimate;
     chunk->progress = 0.0;
     chunk->parent = progress;
-    
+
     g_ptr_array_add( progress->chunks, chunk );
     return chunk;
 }
