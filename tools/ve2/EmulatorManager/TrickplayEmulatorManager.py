@@ -301,12 +301,13 @@ class TrickplayEmulatorManager(QWidget):
 				            if result: 
 				                self.inspector.ui.inspector.selectionModel().clear()
 				                self.inspector.selectItem(result, "f")
+				            g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
+				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
+				            self.inspector.ui.property.setExpanded(g_index, True)
 				        except : 
-				            print ("couldn't find setGid")
+				            #print ("couldn't find setGid")
 				            pass
-				        g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
-				        g_index = self.inspector.ui.property.indexFromItem(g_item[0])
-				        self.inspector.ui.property.setExpanded(g_index, True)
+                        
 				        ##self.inspector.preventChanges = False
 
 				        if self.main.command == "openFile":
