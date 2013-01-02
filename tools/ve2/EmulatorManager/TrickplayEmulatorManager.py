@@ -52,7 +52,10 @@ class TrickplayEmulatorManager(QWidget):
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
         
         print inputCmd
-        self.inspector.preventChanges = True
+        self.inspector.setGid = gid
+        self.inspector.setProp = property
+
+        #self.inspector.preventChanges = True
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -293,7 +296,18 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
-				        self.inspector.preventChanges = False
+				        try:
+				            result = self.inspector.search(self.inspector.setGid, 'gid')
+				            if result: 
+				                self.inspector.ui.inspector.selectionModel().clear()
+				                self.inspector.selectItem(result, "f")
+				        except : 
+                            print ("couldn't find setGid")
+				            pass
+				        g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
+				        g_index = self.inspector.ui.property.indexFromItem(g_item[0])
+				        self.inspector.ui.property.setExpanded(g_index, True)
+				        ##self.inspector.preventChanges = False
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
