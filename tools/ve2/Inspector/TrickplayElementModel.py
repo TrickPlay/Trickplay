@@ -116,9 +116,15 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
-                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    if str(self.lmParentGid) != 'nil' : 
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    else:
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 else:
-                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    if str(self.lmParentGid) != 'nil' : 
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    else:
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 print inputCmd
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
