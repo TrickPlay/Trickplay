@@ -1417,6 +1417,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
+    _VE_.selectUIElement(uiInstance.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiInstance.gid, false)
+
 end
 
 _VE_.selectUIElement = function(gid, multiSel)

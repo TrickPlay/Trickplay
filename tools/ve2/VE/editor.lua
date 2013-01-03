@@ -66,6 +66,9 @@ function editor.rectangle_done(x,y)
 
     _VE_.refresh()
     blockReport = false
+    _VE_.selectUIElement(uiRectangle.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiRectangle.gid, false)
     screen.grab_key_focus(screen)
 
 end 
@@ -146,6 +149,9 @@ function editor.clone()
 
     _VE_.refresh()
     blockReport = false
+    _VE_.selectUIElement(uiClone.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiClone.gid, false)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
@@ -187,6 +193,9 @@ function editor.group()
 
     _VE_.refresh()
     blockReport = false
+    --_VE_.selectUIElement(uiGroup.gid)
+    --_VE_.refreshDone()
+    --_VE_.openInspector(uiGroup.gid, false)
 
     screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
@@ -332,6 +341,9 @@ function editor.duplicate(gid)
     end -- for 
 
     blockReport = false
+    _VE_.selectUIElement(uiDuplicate.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiDuplicate.gid, false)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
