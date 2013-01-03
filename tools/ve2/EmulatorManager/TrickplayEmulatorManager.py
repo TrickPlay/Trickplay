@@ -85,6 +85,7 @@ class TrickplayEmulatorManager(QWidget):
     
     def app_started(self):
 		print "[VE] APP Started"
+		self.main.ui.actionEditor.setEnabled(True)
 
     def deleteClicked(self) :
         inputCmd = str("_VE_.deleteGuideLine()")
@@ -324,6 +325,7 @@ class TrickplayEmulatorManager(QWidget):
 			print "[VE] Trickplay APP is finished"
 			self.inspector.clearTree()
 			self.main.stop()
+			self.main.ui.actionEditor.setEnabled(False)
 	
     def run(self):
         # Run on local trickplay
