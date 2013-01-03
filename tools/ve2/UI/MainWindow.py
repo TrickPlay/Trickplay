@@ -131,7 +131,7 @@ class Ui_MainWindow(object):
         self.mainMenuContainer.setFont(font)
         self.mainMenuContainer.setObjectName(_fromUtf8("mainMenuContainer"))
         self.gridLayoutWidget = QtGui.QWidget(self.mainMenuContainer)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(4, 0, 665, 31))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 665, 31))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.mainMenuLayout = QtGui.QGridLayout(self.gridLayoutWidget)
         self.mainMenuLayout.setSpacing(0)

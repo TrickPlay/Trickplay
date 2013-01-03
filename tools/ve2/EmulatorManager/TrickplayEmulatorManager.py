@@ -290,6 +290,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
+				        self.inspector.preventChanges = True
 				        self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
@@ -308,7 +309,7 @@ class TrickplayEmulatorManager(QWidget):
 				            #print ("couldn't find setGid")
 				            pass
                         
-				        ##self.inspector.preventChanges = False
+				        self.inspector.preventChanges = False
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
