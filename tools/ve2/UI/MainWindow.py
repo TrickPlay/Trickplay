@@ -129,7 +129,7 @@ class Ui_MainWindow(object):
         self.mainMenuDock.setObjectName(_fromUtf8("mainMenuDock"))
         mmtitleWidget = QtGui.QWidget()
         self.mainMenuDock.setTitleBarWidget(mmtitleWidget)
-        self.mainMenuDock.setGeometry(300,100,670,71)
+        self.mainMenuDock.setGeometry(400,238,670,71)
         
         self.mainMenuContainer = QtGui.QWidget()
         self.mainMenuContainer.setMaximumSize(QtCore.QSize(672, 25))
@@ -507,12 +507,12 @@ class Ui_MainWindow(object):
         self.menuView_2.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBackground.setTitle(QtGui.QApplication.translate("MainWindow", "Background", None, QtGui.QApplication.UnicodeUTF8))
         self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector : ", None, QtGui.QApplication.UnicodeUTF8))
-        ititleWidget = QtGui.QWidget()
-        self.InspectorDock.setTitleBarWidget(ititleWidget)
-        self.InspectorDock.setGeometry(1100,200,330,570)
+        #ititleWidget = QtGui.QWidget()
+        #self.InspectorDock.setTitleBarWidget(ititleWidget)
+        self.InspectorDock.setGeometry(1365,275,330,570)
 
         self.fileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Images", None, QtGui.QApplication.UnicodeUTF8))
-        self.fileSystemDock.setGeometry(50,200,330,570)
+        self.fileSystemDock.setGeometry(50,275,330,570)
 
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
