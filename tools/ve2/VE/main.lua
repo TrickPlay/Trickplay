@@ -1017,8 +1017,8 @@ _VE_.screenShow = function()
     screen:show()
 end 
 _VE_.setScreenLoc = function()
-    screen.y = 200
-    screen.x = 300
+    screen.y = 300
+    screen.x = 400
 end 
 
 _VE_.newLayer = function()
