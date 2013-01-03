@@ -21,8 +21,9 @@ class MainWindow(QMainWindow):
 
         QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
         QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
-        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stderr)
-        QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stderr)
+        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stdError)
+        #QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stdOut)
+        QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -212,6 +213,13 @@ class MainWindow(QMainWindow):
             return 
 
     def import_started(self):
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 100)
+        self.bar.setValue(0)
+        self.bar.setWindowTitle("Import Assets...")
+        self.bar.setGeometry(600, 400, 300, 20)
+        self.bar.show()
+
         return 
 
     """
@@ -222,22 +230,62 @@ class MainWindow(QMainWindow):
         return
     """
 
-    def import_stderr(self):
-        errorMsg = str(self.stitcher.readAllStandardError().data())
-        if errorMsg[:5] == "Error" :
-            self.errorMsg(errorMsg)
-        elif errorMsg[:6] == "Output" :
-            self.sendLuaCommand("buildVF", '_VE_.buildVF()')
-            pass
+    def import_readyRead(self):
+        print("import_readyRead")
+        while True:
+            # Read one line
+            if not self.stitcher.canReadLine():
+                break
+            # Read one line
+            s = self.stitcher.readLine()
+            if s.isNull():
+                break
+            s = str( s ).rstrip()
+            print s
+
+
         return
+
+    def import_stdError(self):
+        s = self.stitcher.readAllStandardError()
+        if s.contains('\r') or s.contains('\n') :
+            l = s.split('\n') 
+            newVal = 0
+            try : 
+                if s[len(s)-1:] in ['\r', '\n'] : 
+                    newVal = int(l[len(l) - 2])
+                    self.lastNumber = None
+                else :
+                    if len(l) > 2 :
+                        newVal = int(l[len(l) - 2])
+                    elif self.lastNum is not None:
+                        newVal = int(self.lastNum+l[0])
+                    else : 
+                        newVal = int(l[0])
+                    self.lastNumber = l[len(l) - 1]
+                        
+                #s = str( s ).rstrip()
+                #print s+"...."
+                #print l 
+                self.bar.setValue(newVal)
+                print "[ progressBar.setValue : %s ] "%str(newVal)
+            except : 
+                pass
+
+        else:
+            print str(s.data())
 
     def import_finished(self, errorCode):
         if errorCode == 0 : 
-            print("JOSH ~~~ ?")
+            print "[ progressBar.setValue : %s ] "%'100'
+            self.bar.setValue(100)
+            self.bar.hide()
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
         else : 
+            self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
-            self.errorMsg(errorMsg)
+            print errorMsg
+            self.errorMsg("Import Failed.")
         return 
 
 
@@ -252,11 +300,11 @@ class MainWindow(QMainWindow):
             print ("[VDBG] Import Asset Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
-                print("stitcher -r -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
-                self.stitcher.start("stitcher -r -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                print("stitcher -rp -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                self.stitcher.start("stitcher -rp -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
             else:
-                print("stitcher -r -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
-                self.stitcher.start("stitcher -r -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                print("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                self.stitcher.start("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
 
 
     def importSkins(self):
