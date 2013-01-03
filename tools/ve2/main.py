@@ -558,6 +558,14 @@ class MainWindow(QMainWindow):
 
     def debug(self):
         self.sendLuaCommand("exeDebugger", "_VE_.exeDebugger()")
+        """
+        self.ui.fileSystemDock.hide()
+        self.windows['images'] = False
+        self.ui.InspectorDock.hide()
+        self.windows['inspector'] = False
+        self.ui.mainMenuDock.hide()
+        self.sendLuaCommand("screenHide", "_VE_.screenHide()")
+        """
 
     def run(self):
         self.inspector.clearTree()
