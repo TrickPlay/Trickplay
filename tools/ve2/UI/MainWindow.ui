@@ -82,13 +82,6 @@
     </property>
     <addaction name="actionEditor"/>
    </widget>
-   <widget class="QMenu" name="menuRun">
-    <property name="title">
-     <string>Run</string>
-    </property>
-    <addaction name="action_Run"/>
-    <addaction name="action_Stop"/>
-   </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
@@ -186,7 +179,6 @@
    <addaction name="menuEdit"/>
    <addaction name="menuArrange"/>
    <addaction name="menuView_2"/>
-   <addaction name="menuRun"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QDockWidget" name="InspectorDock">
@@ -201,8 +193,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>0</width>
-     <height>0</height>
+     <width>79</width>
+     <height>41</height>
     </size>
    </property>
    <property name="font">
@@ -220,7 +212,7 @@
     <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>Inspector : </string>
+    <string>Inspector</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -255,8 +247,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>0</width>
-     <height>0</height>
+     <width>79</width>
+     <height>41</height>
     </size>
    </property>
    <property name="font">
@@ -306,8 +298,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>0</width>
-     <height>0</height>
+     <width>56</width>
+     <height>41</height>
     </size>
    </property>
    <property name="maximumSize">
