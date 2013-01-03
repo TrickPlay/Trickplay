@@ -30,7 +30,7 @@ struct SpriteBinding
             if ( id ) free( id );
             id = new_id ? strdup( new_id ) : NULL;
             
-            if ( id && !sheet->has_id( id ) )
+            if ( id && sheet && !sheet->has_id( id ) )
             {
                 g_warning( "Spritesheet does not contain the id '%s'", id );
             }
@@ -67,18 +67,8 @@ private:
 
     void update_sprite()
     {
-        if ( sheet )
-        {
-            sprite = sheet->get_sprite( id );
-        }
-        else
-        {
-            sprite = NULL;
-            g_warning( "Trying to set the id '%s' on a Sprite without first specifying a SpriteSheet.", id );
-        }
-        
-        ping.set( sprite, SpriteBinding::on_ping, this, async );
-        update();
+        sprite = sheet ? sheet->get_sprite( id ) : NULL;
+        ping.set( sprite, SpriteBinding::on_ping, this, !async );
     }
 
     PushTexture::PingMe   ping;
@@ -92,7 +82,6 @@ private:
 void set_sheet_first( lua_State * L , int table )
 {
     assert( table );
-    
     lua_newtable( L );
     lua_getfield( L , table , "sheet" );
     lua_setfield( L , -2, "sheet" );
@@ -187,8 +176,6 @@ class Sprite [[ClutterActor*]] actor
                 binding->set_sheet( NULL );
                 * get_ref( self ) = LUA_REFNIL;
             }
-            
-            binding->update();
         ]];
 
     /*
@@ -210,7 +197,7 @@ class Sprite [[ClutterActor*]] actor
             const char * new_id = lua_tostring( L , -1 );
             
             g_object_set_data_full( G_OBJECT( self ), "tp-src",
-                g_strdup_printf( "(Sprite) \"%s\"", new_id ), g_free );
+                g_strdup_printf( "(Sprite) \"%s\"", new_id ? new_id : "" ), g_free );
                 
             binding->set_id( new_id );
         ]];
