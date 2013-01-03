@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWindow-1.ui'
+# Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Jan  2 01:16:46 2013
+# Created: Thu Jan  3 12:26:03 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,6 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        #MainWindow.resize(688, 200)
         MainWindow.resize(0, 0)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -42,8 +41,6 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
-        self.menuRun = QtGui.QMenu(self.menubar)
-        self.menuRun.setObjectName(_fromUtf8("menuRun"))
         self.menuEdit = QtGui.QMenu(self.menubar)
         self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         self.menuInsert_UI_Element = QtGui.QMenu(self.menuEdit)
@@ -60,7 +57,6 @@ class Ui_MainWindow(object):
         self.menuView_2.setObjectName(_fromUtf8("menuView_2"))
         self.menuBackground = QtGui.QMenu(self.menuView_2)
         self.menuBackground.setObjectName(_fromUtf8("menuBackground"))
-        #MainWindow.setMenuBar(self.menubar)
         self.InspectorDock = QtGui.QDockWidget(MainWindow)
         self.InspectorDock.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -68,7 +64,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.InspectorDock.sizePolicy().hasHeightForWidth())
         self.InspectorDock.setSizePolicy(sizePolicy)
-        self.InspectorDock.setMinimumSize(QtCore.QSize(0, 0))
+        self.InspectorDock.setMinimumSize(QtCore.QSize(79, 41))
         font = QtGui.QFont()
         font.setPointSize(9)
         self.InspectorDock.setFont(font)
@@ -95,7 +91,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.fileSystemDock.sizePolicy().hasHeightForWidth())
         self.fileSystemDock.setSizePolicy(sizePolicy)
-        self.fileSystemDock.setMinimumSize(QtCore.QSize(0, 0))
+        self.fileSystemDock.setMinimumSize(QtCore.QSize(79, 41))
         font = QtGui.QFont()
         font.setPointSize(9)
         self.fileSystemDock.setFont(font)
@@ -121,16 +117,13 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.mainMenuDock.sizePolicy().hasHeightForWidth())
         self.mainMenuDock.setSizePolicy(sizePolicy)
-        self.mainMenuDock.setMinimumSize(QtCore.QSize(0, 0))
-        self.mainMenuDock.setMaximumSize(QtCore.QSize(672, 50))
+        self.mainMenuDock.setMinimumSize(QtCore.QSize(56, 41))
+        self.mainMenuDock.setMaximumSize(QtCore.QSize(672, 60))
         self.mainMenuDock.setFloating(True)
         self.mainMenuDock.setFeatures(QtGui.QDockWidget.DockWidgetFloatable|QtGui.QDockWidget.DockWidgetMovable)
         self.mainMenuDock.setWindowTitle(_fromUtf8(""))
         self.mainMenuDock.setObjectName(_fromUtf8("mainMenuDock"))
-        mmtitleWidget = QtGui.QWidget()
-        self.mainMenuDock.setTitleBarWidget(mmtitleWidget)
-        self.mainMenuDock.setGeometry(400,238,670,71)
-        
+        self.mainMenuDock.setGeometry(400,215,670,100)
         self.mainMenuContainer = QtGui.QWidget()
         self.mainMenuContainer.setMaximumSize(QtCore.QSize(672, 25))
         font = QtGui.QFont()
@@ -138,7 +131,7 @@ class Ui_MainWindow(object):
         self.mainMenuContainer.setFont(font)
         self.mainMenuContainer.setObjectName(_fromUtf8("mainMenuContainer"))
         self.gridLayoutWidget = QtGui.QWidget(self.mainMenuContainer)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 665, 31))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(4, 0, 665, 31))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.mainMenuLayout = QtGui.QGridLayout(self.gridLayoutWidget)
         self.mainMenuLayout.setSpacing(0)
@@ -146,7 +139,7 @@ class Ui_MainWindow(object):
         self.mainMenuLayout.setObjectName(_fromUtf8("mainMenuLayout"))
         self.mainMenuLayout.addWidget(self.menubar)
         self.mainMenuDock.setWidget(self.mainMenuContainer)
-        #MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(4), self.mainMenuDock)
+        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(4), self.mainMenuDock)
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
         self.action_Exit = QtGui.QAction(MainWindow)
@@ -427,8 +420,6 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.action_Exit)
         self.menuView.addAction(self.actionEditor)
-        self.menuRun.addAction(self.action_Run)
-        self.menuRun.addAction(self.action_Stop)
         self.menuInsert_UI_Element.addAction(self.actionArrowPane)
         self.menuInsert_UI_Element.addAction(self.action_Button)
         self.menuInsert_UI_Element.addAction(self.actionButtonPicker)
@@ -486,7 +477,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuArrange.menuAction())
         self.menubar.addAction(self.menuView_2.menuAction())
-        self.menubar.addAction(self.menuRun.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -497,7 +487,6 @@ class Ui_MainWindow(object):
         MainWindow.setProperty("aaa", QtGui.QApplication.translate("MainWindow", "sdfsf", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "Windows", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuInsert_UI_Element.setTitle(QtGui.QApplication.translate("MainWindow", "Insert UI Element", None, QtGui.QApplication.UnicodeUTF8))
         self.menuArrange.setTitle(QtGui.QApplication.translate("MainWindow", "Arrange", None, QtGui.QApplication.UnicodeUTF8))
@@ -506,14 +495,10 @@ class Ui_MainWindow(object):
         self.menu_arrange.setTitle(QtGui.QApplication.translate("MainWindow", "Arrange", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView_2.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBackground.setTitle(QtGui.QApplication.translate("MainWindow", "Background", None, QtGui.QApplication.UnicodeUTF8))
-        self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector : ", None, QtGui.QApplication.UnicodeUTF8))
-        #ititleWidget = QtGui.QWidget()
-        #self.InspectorDock.setTitleBarWidget(ititleWidget)
+        self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.InspectorDock.setGeometry(1365,275,330,570)
-
         self.fileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Images", None, QtGui.QApplication.UnicodeUTF8))
         self.fileSystemDock.setGeometry(50,275,330,570)
-
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
