@@ -2,7 +2,6 @@
 proxy_screen = Group{
 	size = screen.size,
 	name = "proxy_screen",
-	display_size = screen.display_size,
 }
 screen:add(proxy_screen)
 
@@ -453,7 +452,7 @@ local function make_ball( i )
             text = tostring( i ),
             position = { 14 , 10 },
             color = "000000D0",
-            font = "DejaVu Mono bold 70px",
+            font = "DejaVu Sans Mono bold 50px",
         }
 
     local result =
@@ -726,7 +725,7 @@ proxy_screen:add( out_sensor , in_sensor )
 --[[
 local count_text = Text
 {
-    font = "DejaVu Mono bold 90px",
+    font = "DejaVu Mono Sans bold 90px",
     color = "FFFFFF",
     text = "0",
     position = { 1540 , 922 }
@@ -946,10 +945,10 @@ function controllers.on_controller_connected(controllers,controller)
 
             if(dy > 0) then
                 proxy_screen.z = dy*2
-                proxy_screen.x = proxy_screen.display_size[1]/2 + dx
+                proxy_screen.x = screen.display_size[1]/2 + dx
             else
                 proxy_screen.z = dy*10
-                proxy_screen.x = proxy_screen.display_size[1]/2 - dx*dy/50
+                proxy_screen.x = screen.display_size[1]/2 - dx*dy/50
             end
         end
 
@@ -985,7 +984,7 @@ function controllers.on_controller_connected(controllers,controller)
                     end
                 end
             end
-            proxy_screen:animate({duration = 400, x=proxy_screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
+            proxy_screen:animate({duration = 400, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
         end
 
         controller:start_touches()
