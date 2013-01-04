@@ -1,11 +1,17 @@
 
+proxy_screen = Group{
+	size = screen.size,
+	name = "proxy_screen",
+}
+screen:add(proxy_screen)
+
 local SENSOR_COLOR = "FF000000"
 
 -------------------------------------------------------------------------------
 -- Start with the hopper. We create a single static body that is invisible
 -- and add edge fixtures for its outline
 
-screen:add( Image{ src = "lottery/assets/background.jpg" , scale = { 2 , 2 } , position = { 0 , 0 } } )
+proxy_screen:add( Image{ src = "lottery/assets/background.jpg" , scale = { 2 , 2 } , position = { 0 , 0 } } )
 
 local outside_points =
 {
@@ -43,7 +49,7 @@ local hopper = physics:Body(
     Group
     {
         position = { 0 , 0 } ,
-        size = screen.size
+        size = proxy_screen.size
     }
     ,
     {
@@ -53,7 +59,7 @@ local hopper = physics:Body(
 
 hopper:remove_all_fixtures()
 
-screen:add( hopper )
+proxy_screen:add( hopper )
 
 local xo = - hopper.w / 2
 local yo = - hopper.h / 2
@@ -172,7 +178,7 @@ end
 
 table.insert( step_functions , fan_blow )
 
-screen:add( fan )
+proxy_screen:add( fan )
 
 -------------------------------------------------------------------------------
 -- The sucker is a static sensor that sits at the mouth of the outgoing tube
@@ -237,7 +243,7 @@ end
 
 table.insert( step_functions , sucker_suck )
 
-screen:add( sucker )
+proxy_screen:add( sucker )
 
 -------------------------------------------------------------------------------
 -- The pusher has two parts, a sensor that detects when a ball has reached the
@@ -303,7 +309,7 @@ local pusher_floor = physics:Body(
     }
 )
 
-screen:add( pusher_floor )
+proxy_screen:add( pusher_floor )
 
 local push_it = false
 
@@ -372,7 +378,7 @@ end
 
 table.insert( step_functions , pusher_push )
 
-screen:add( pusher_sensor , pusher )
+proxy_screen:add( pusher_sensor , pusher )
 
 -------------------------------------------------------------------------------
 --[[
@@ -422,7 +428,7 @@ end
 
 table.insert( step_functions , hold_gate )
 
-screen:add( gate )
+proxy_screen:add( gate )
 
 ]]
 
@@ -431,7 +437,7 @@ screen:add( gate )
 
 local ball_image = Image{ src = "lottery/assets/ball.png" }
 
-screen:add( ball_image )
+proxy_screen:add( ball_image )
 ball_image:hide()
 
 local BALL_COUNT = 18 -- Too many balls may need a stronger fan
@@ -446,7 +452,7 @@ local function make_ball( i )
             text = tostring( i ),
             position = { 14 , 10 },
             color = "000000D0",
-            font = "DejaVu Mono bold 70px",
+            font = "DejaVu Sans Mono bold 50px",
         }
 
     local result =
@@ -508,7 +514,7 @@ for i = 1 , BALL_COUNT do
         }
     )
 
-    screen:add( ball )
+    proxy_screen:add( ball )
 
     ball:show()
 
@@ -526,7 +532,7 @@ local ELEVATOR_COUNT    = 4
 local ELEVATOR_INTERVAL = 1 -- seconds
 
 local elevator_image = Image{ src = "lottery/assets/elevator.png" }
-screen:add( elevator_image )
+proxy_screen:add( elevator_image )
 elevator_image:hide()
 
 local elevators = {}
@@ -552,7 +558,7 @@ for i = 1 , ELEVATOR_COUNT do
         }
     )
 
-    screen:add( elevator )
+    proxy_screen:add( elevator )
 
     elevator:hide()
 
@@ -584,7 +590,7 @@ local elevator_sensor = physics:Body(
     }
 )
 
-screen:add( elevator_sensor )
+proxy_screen:add( elevator_sensor )
 
 local elevator_sensor_time = Stopwatch()
 elevator_sensor_time:stop()
@@ -714,18 +720,18 @@ local in_sensor = physics:Body(
 
 in_sensor.angle = -45
 
-screen:add( out_sensor , in_sensor )
+proxy_screen:add( out_sensor , in_sensor )
 
 --[[
 local count_text = Text
 {
-    font = "DejaVu Mono bold 90px",
+    font = "DejaVu Mono Sans bold 90px",
     color = "FFFFFF",
     text = "0",
     position = { 1540 , 922 }
 }
 
-screen:add( count_text )
+proxy_screen:add( count_text )
 ]]
 
 local balls_out = 0
@@ -777,7 +783,7 @@ function out_sensor:on_begin_contact( contact )
 
 end
 
-screen:add( chosen_group )
+proxy_screen:add( chosen_group )
 
 
 function in_sensor:on_begin_contact( contact )
@@ -823,14 +829,14 @@ end
 
 
 -------------------------------------------------------------------------------
--- Set up some stuff for fullscreen rotation
+-- Set up some stuff for fullproxy_screen rotation
 -- We move the anchor point to the center of the logo so it'll spin in place when we rotate it below
-screen.anchor_point = {screen.w/2, screen.h/2}
+proxy_screen.anchor_point = {proxy_screen.w/2, proxy_screen.h/2}
 
--- And now position the anchor point (and image) in the middle of the screen
-screen.position = { screen.display_size[1]/2, screen.display_size[2]/2 }
+-- And now position the anchor point (and image) in the middle of the proxy_screen
+proxy_screen.position = { proxy_screen.w/2, proxy_screen.h/2 }
 
-screen:show()
+proxy_screen:show()
 
 local step = 1 / 60
 
@@ -858,19 +864,19 @@ end
 
 local BACK_KEY = keys.BACK
 
-function screen:on_key_down( key )
+function proxy_screen:on_key_down( key )
 
     if key == BACK_KEY then
         idle.on_idle = nil
-        screen.on_key_down = nil
-        screen:clear()
+        proxy_screen.on_key_down = nil
+        proxy_screen:clear()
         collectgarbage("collect")
         dofile("main.lua")
     end
 end
 
 local finger_places = {}
-local screen_z_target = 0
+local proxy_screen_z_target = 0
 function controllers.on_controller_connected(controllers,controller)
     -- Track this controller's fingers
     finger_places[controller] = {}
@@ -878,9 +884,9 @@ function controllers.on_controller_connected(controllers,controller)
     if(controller.has_fullmotion) then
         print("Using full motion")
         function controller.on_attitude(controller, roll, pitch, yaw)
-			screen.y_rotation = { roll*180/math.pi, 0, 0 }
-			screen.x_rotation = { -pitch*180/math.pi, 0, 0 }
---			screen.z_rotation = { -yaw*180/math.pi, 0, 0 }
+			proxy_screen.y_rotation = { roll*180/math.pi, 0, 0 }
+			proxy_screen.x_rotation = { -pitch*180/math.pi, 0, 0 }
+--			proxy_screen.z_rotation = { -yaw*180/math.pi, 0, 0 }
         end
 
         controller:start_attitude(0.01)
@@ -913,9 +919,9 @@ function controllers.on_controller_connected(controllers,controller)
 
 
 			-- And now do the rotations!
-			screen.y_rotation = { theta_to_xz_plane, 0, 0 }
-			screen.x_rotation = { theta_to_negative_y_axis-90, 0, 0 }
-			screen.z_rotation = { theta_for_tilt, 0, 0 }
+			proxy_screen.y_rotation = { theta_to_xz_plane, 0, 0 }
+			proxy_screen.x_rotation = { theta_to_negative_y_axis-90, 0, 0 }
+			proxy_screen.z_rotation = { theta_for_tilt, 0, 0 }
     	end
 
     	controller:start_accelerometer("L",0.01)
@@ -938,11 +944,11 @@ function controllers.on_controller_connected(controllers,controller)
             local delta = math.sqrt( dx^2 + dy^2 )
 
             if(dy > 0) then
-                screen.z = dy*2
-                screen.x = screen.display_size[1]/2 + dx
+                proxy_screen.z = dy*2
+                proxy_screen.x = screen.display_size[1]/2 + dx
             else
-                screen.z = dy*10
-                screen.x = screen.display_size[1]/2 - dx*dy/50
+                proxy_screen.z = dy*10
+                proxy_screen.x = screen.display_size[1]/2 - dx*dy/50
             end
         end
 
@@ -978,7 +984,7 @@ function controllers.on_controller_connected(controllers,controller)
                     end
                 end
             end
-            screen:animate({duration = 400, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
+            proxy_screen:animate({duration = 400, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
         end
 
         controller:start_touches()

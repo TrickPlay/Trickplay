@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "libexif/exif-data.h"
 
@@ -221,7 +222,12 @@ private:
 
 Image * Image::make( const TPImage & image )
 {
-    return new Image( g_slice_dup( TPImage,  &image ) );
+    Image *img = new Image( g_slice_dup( TPImage,  &image ) );
+
+    // This next line is superfluous but helps clang realize we're not leaking that buffer
+    img->image->pixels = image.pixels;
+
+    return img;
 }
 
 //-----------------------------------------------------------------------------
@@ -258,11 +264,9 @@ Image * Image::decode( const gchar * filename , bool read_tags )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::screenshot()
+Image * Image::screenshot( ClutterActor *stage )
 {
     TPImage image;
-
-    ClutterActor * stage = clutter_stage_get_default();
 
     if ( ! stage )
     {
@@ -1079,7 +1083,11 @@ Images::Images()
     external_decoder( 0 ),
     cache( 0 )
 {
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( & mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 
     Decoder * png  = ImageDecoders::make_png_decoder();
     Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
@@ -1151,7 +1159,11 @@ Images::~Images()
     	delete cache;
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( & mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1435,11 +1447,25 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
 
 //-----------------------------------------------------------------------------
 
-void Images::add_to_image_list( ClutterTexture * texture )
+void Images::add_to_image_list( ClutterTexture * texture , bool cached )
 {
 #ifndef TP_PRODUCTION
 
 	g_assert( texture );
+
+        if ( cached )
+        {
+            gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( texture ), "tp-src" );
+            const gchar * prepend = "* ";
+
+            gint new_length = strlen( source ) + strlen( prepend ) + 2 ;
+
+            gchar * new_source = g_new( gchar , new_length );
+
+            snprintf( new_source , new_length , "%s%s" , prepend , source );\
+
+            g_object_set_data_full( G_OBJECT( texture ) , "tp-src" , new_source , g_free );
+        }
 
 	add_to_image_list( texture , ImageInfo( texture ) );
 
@@ -1796,7 +1822,7 @@ void Images::Cache::prune()
 
 	// Set our target cache size
 
-	double target_size = size * 0.70;
+	double target_size = limit * 0.70;
 
 	// Now, get rid of each one, until we reach our target size
 

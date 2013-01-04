@@ -86,7 +86,7 @@ if (NATURAL_DOCS)
 		internal-docs
 		COMMENT "Generating Internal docs"
 		VERBATIM
-		COMMAND $(CMAKE_COMMAND) -E make_directory ${PROJECT_BINARY_DIR}/docs/internal
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/internal
 		COMMAND ${NATURAL_DOCS}
 			-r
 			--highlight Off

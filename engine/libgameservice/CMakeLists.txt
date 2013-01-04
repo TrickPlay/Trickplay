@@ -1,11 +1,25 @@
 
 include(../../util.cmake)
 
+include( FindPkgConfig )
+
+IF( PKG_CONFIG_FOUND )
+
+
+    pkg_check_modules(EXPAT                     expat)
+
+    if( NOT(EXPAT_FOUND) )
+        # expat only doesn't exist on broken version of shitty Ubuntu
+        TP_FIND_INCLUDE( expat.h EXPAT_INCLUDE_DIRS )
+    endif( NOT(EXPAT_FOUND) )
+ENDIF( PKG_CONFIG_FOUND )
+
 
 include_directories(
     AFTER
 	${CMAKE_BINARY_DIR}/engine/3rd_party/txmpp/include/txmpp
 	${ENGINE_SRC}/3rd_party/txmpp/txmpp-0.0.2/src
+	${EXPAT_INCLUDE_DIRS}
 
 )
 

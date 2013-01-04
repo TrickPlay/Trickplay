@@ -118,7 +118,7 @@ function test_Text_delete_text_past_end_of_strong()
 end
 
 
-test_group:add(myText1, myTest2, myText3, myText4, myText5, myText6)
+test_group:add(myText1, myText2, myText3, myText4, myText5, myText6)
 
 
 

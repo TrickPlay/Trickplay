@@ -44,7 +44,7 @@
 #include "scoped_ptr.h"
 #include "sigslot.h"
 #include "socketserver.h"
-#include "time.h"
+#include "txmpptime.h"
 
 namespace txmpp {
 

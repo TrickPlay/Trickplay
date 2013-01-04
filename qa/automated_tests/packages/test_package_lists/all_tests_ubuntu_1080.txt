@@ -292,7 +292,7 @@
 {
 "name": "00061_image_tile.lua",
 "checksum": "7b3ed611d28c6fa3a10891b88a4f2a3f",
-"active": "false"
+"active": "true"
 },
 {
 "name": "00062_image_tile_sync.lua",
@@ -367,7 +367,7 @@
 {
 "name": "00076_text_font_3_jp_fonts.lua",
 "checksum": "18fc8be084de639d586c2491ddb59204",
-"active": "true"
+"active": "false"
 },
 {
 "name": "00077_html_markup.lua",
@@ -456,6 +456,11 @@
 },
 {
 "name": "10017_container_children.lua",
+"checksum": "079f8ad6b4545016392b41106591b174",
+"active": "true"
+},
+{
+"name": "10100_sprites.lua",
 "checksum": "079f8ad6b4545016392b41106591b174",
 "active": "true"
 }

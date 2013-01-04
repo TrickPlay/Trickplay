@@ -49,7 +49,7 @@ displayMainScreen()
 	                                   color = backgroundColor,
 	} )
 	screen:add( scrBackground )
-	
+
 	-- Divide the screen vertically in half
 	local dividerHeight = 10
 	local divider = Rectangle( { name = "scrDivider",
@@ -66,14 +66,14 @@ displayMainScreen()
 	                             position = { linearLabelX, linearLabelY, 0 },
 	} )
 	screen:add( controlLabel )
-	
+
 	local noiseLabel = Text( { text = "Noise (calls Noise plug-in)",
 	                           font = labelFont,
 	                           color = labelColor,
 	                           position = { noiseLabelX, noiseLabelY, 0 },
 	} )
 	screen:add( noiseLabel )
-		
+
 end -- displayMainScreen()
 
 -- ****************************************************************************
@@ -85,15 +85,13 @@ animationHandler( timeline, msecs, progress )
 
 	-- Apply noise factor to noise-adjusted rectangle's path
 	local prog = noisePath:get_value( progress )  -- get current X coordinate
-	
-	-- Call the Perlin Noise plug-in to get a noise value
-	-- Syntax to call the plug-in function:
-	--		LuaRegisteredTableName.LuaInterfaceFunctionName( args )
-	local noiseValue = (noiseAPI.getPerlinNoise( prog, noiseStartY, 0.0 )) * noiseFactorY
+
+	-- Call the Noise plug-in to get a noise value
+	local noiseValue = getPerlinNoise( prog, noiseStartY, 0.0 ) * noiseFactorY
 
 	noiseOffset = noiseOffset + noiseValue   -- accumulate noiseValue for animation cycle
-	noise.x = prog                           -- set unmodified X coordinate
-	noise.y = noiseStartY + noiseOffset      -- adjust Y coordinate with accumulated noiseValue
+	noise.x     = prog                       -- set unmodified X coordinate
+	noise.y     = noiseStartY + noiseOffset  -- adjust Y coordinate with accumulated noiseValue
 
 end -- animationHandler()
 
@@ -117,21 +115,21 @@ setupAnimation()
 	                       position = { noNoiseStartX, noNoiseStartY, 0 },
 	} )
 	screen:add( noNoise )
-	
+
 	noise = Rectangle( { name = "noisyRect",
 	                     size = { noiseSize, noiseSize },
 	                     color = rectColor,
 	                     position = { noiseStartX, noiseStartY, 0 },
 	} )
 	screen:add( noise )
-	
+
 	-- Setup the Timeline
 	animationTL = Timeline( { duration = 2000,
 	                          loop = true,
 	                          on_new_frame = animationHandler,
 	                          on_completed = completionHandler,
 	} )
-	
+
 end -- setupAnimation()
 
 -- ****************************************************************************

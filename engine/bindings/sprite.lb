@@ -1,0 +1,266 @@
+module sprite;
+
+[[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
+#include "clutter/clutter.h"
+#include "cogl/cogl.h"
+#include "clutter_util.h"
+#include "spritesheet.h"
+#include "sprite_sheet.lb.h"
+#include <glib.h>
+]]
+
+[[
+
+struct SpriteBinding
+{
+    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+    
+    ~SpriteBinding()
+    {
+        if ( id ) free( id );
+    }
+    
+    const char * get_id() { return id ? strdup( id ) : NULL; }
+    
+    void set_id( const char * new_id )
+    {
+        if ( !id || !new_id || strcmp( id, new_id ) )
+        {
+            if ( id ) free( id );
+            id = new_id ? strdup( new_id ) : NULL;
+            
+            if ( id && sheet && !sheet->has_id( id ) )
+            {
+                g_warning( "Spritesheet does not contain the id '%s'", id );
+            }
+            
+            update_sprite();
+        }
+    }
+    
+    void set_sheet( SpriteSheet * _sheet )
+    {
+        sheet = _sheet;
+        update_sprite();
+    };
+    
+    void update()
+    {
+        static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+        
+        clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), sprite ? sprite->get_texture() : null_texture );
+        clutter_actor_queue_redraw( actor );
+    }
+    
+    bool async;
+    bool loaded;
+    
+private:
+    static void on_ping( PushTexture * source, void * target )
+    {
+        SpriteBinding * self = (SpriteBinding *) target;
+        self->update();
+        self->loaded = true;
+        g_signal_emit_by_name( G_OBJECT( self->actor ), "load-finished", 0 );
+    };
+
+    void update_sprite()
+    {
+        sprite = sheet ? sheet->get_sprite( id ) : NULL;
+        ping.set( sprite, SpriteBinding::on_ping, this, !async );
+    }
+
+    PushTexture::PingMe   ping;
+    ClutterActor        * actor;
+    
+    SpriteSheet::Sprite * sprite;
+    SpriteSheet         * sheet;
+    char * id;
+};
+
+void set_sheet_first( lua_State * L , int table )
+{
+    assert( table );
+    lua_newtable( L );
+    lua_getfield( L , table , "sheet" );
+    lua_setfield( L , -2, "sheet" );
+    
+    ClutterUtil::set_props_from_table( L , lua_gettop( L ) );
+    
+    lua_pop( L, 1 );
+}
+
+#define get_binding( self ) ( (SpriteBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
+#define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
+
+void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L );
+
+]]
+
+/*
+    Class: Sprite
+    
+    The Sprite class will draw a single sprite from a <SpriteSheet> as if it were an Image that had been loaded seperately. Instead of a 'src' property, Sprite objects have 'sheet' and 'id' properties, indicating what SpriteSheet to draw from and which sprite in that sheet to draw.
+    
+    In addition to the properties and functions described on this page, the Sprite type also supports all the properties and functions defined in the <UIElement> interface.
+*/
+
+class Sprite [[ClutterActor*]] actor
+{
+
+    /*
+        Constructor: Sprite
+        
+        The Sprite() constructor creates a new Sprite object.
+        
+        *Arguments:*
+        
+        props - table defining the object's construction
+        
+        *Return Value:* new Sprite object
+    */
+    
+    Sprite( table props = 0 )
+        [[
+            self = lb_construct_gobject( ClutterActor, ClutterUtil::make_actor( clutter_texture_new ) );
+            ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
+            
+            g_object_set_data( G_OBJECT( self ), "tp-binding", new SpriteBinding( self ) );
+            g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
+            * get_ref( self ) = LUA_REFNIL;
+            
+            if ( props )
+            {
+                set_sheet_first( L, props );
+                ClutterUtil::set_props_from_table( L, props );
+            }
+            
+            g_object_unref( self );
+        ]];
+
+    ~Sprite()
+        [[
+            if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
+            delete get_binding( self );
+        ]];
+
+    /*
+        Property: sheet
+        
+        The sheet property is a SpriteSheet object from which the Sprite will be drawn. The sheet property can be changed even if the current id does not exist in the sheet; in this case, the Sprite will simply draw nothing.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <id> property
+    */
+
+    SpriteSheet sheet
+        [[
+            lb_strong_deref( L, * get_ref( self ) );
+        ]]
+        [[
+            SpriteBinding * binding = get_binding( self );
+            if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
+            
+            SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 );
+            
+            if ( new_sheet )
+            {
+                binding->set_sheet( new_sheet );
+                * get_ref( self ) = lb_strong_ref( L );
+            }
+            else
+            {
+                g_warning( "Failed to set 'sheet': not a SpriteSheet." );
+                binding->set_sheet( NULL );
+                * get_ref( self ) = LUA_REFNIL;
+            }
+        ]];
+
+    /*
+        Property: id
+        
+        The id property is a string specfifying which sprite to draw from the current sheet. Specifying an id that does not exist in the current sheet will throw an error.
+        
+        When both the sheet and id need to be changed at once, the sheet should be set first and then the id.
+        
+        *See Also:* <sheet> property
+    */
+
+    string id
+        [[
+            id = get_binding( self )->get_id();
+        ]]
+        [[
+            SpriteBinding * binding = get_binding( self );
+            const char * new_id = lua_tostring( L , -1 );
+            
+            g_object_set_data_full( G_OBJECT( self ), "tp-src",
+                g_strdup_printf( "(Sprite) \"%s\"", new_id ? new_id : "" ), g_free );
+                
+            binding->set_id( new_id );
+        ]];
+        
+    bool async
+        [[
+            async = get_binding( self )->async;
+        ]]
+        [[
+            get_binding( self )->async = async;
+        ]];
+        
+    readonly bool loaded
+        [[
+            loaded = get_binding( self )->loaded;
+        ]];
+        
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
+            UserData::get( L )->connect_signal( "on_loaded",
+                "load-finished", (GCallback) Sprite_on_loaded, L );
+        ]];
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
+        ]];
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
+            UserData::get( L )->connect_signal( "on_loaded",
+                "load-finished", (GCallback) Sprite_on_loaded, L );
+        ]];
+
+    /*
+        This makes sure sheet is set first.
+    */
+
+    UIElement set( table props )
+        [[
+            luaL_checktype( L, -1, LUA_TTABLE );
+            
+            set_sheet_first( L, props );
+            ClutterUtil::set_props_from_table( L, props );
+            
+            lua_pushvalue( L, 1 );
+        ]];
+}
+
+[[
+
+void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L )
+{
+    if ( get_binding( self )->async )
+    {
+        lua_pushboolean( L, error ? 1 : 0 );
+        UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+    }
+}
+
+]]

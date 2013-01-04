@@ -781,7 +781,7 @@ void Controller::key_down( unsigned int key_code, unsigned long int unicode , un
 
     if ( inject )
     {
-        ClutterUtil::inject_key_down( key_code, unicode , modifiers );
+        ClutterUtil::inject_key_down( context->get_stage(), key_code, unicode , modifiers );
     }
 }
 
@@ -808,7 +808,7 @@ void Controller::key_up( unsigned int key_code, unsigned long int unicode , unsi
 
     if ( inject )
     {
-        ClutterUtil::inject_key_up( key_code, unicode , modifiers );
+        ClutterUtil::inject_key_up( context->get_stage(), key_code, unicode , modifiers );
     }
 }
 
@@ -886,7 +886,7 @@ void Controller::pointer_move( int x, int y , unsigned long int modifiers )
     gdouble sx = x;
     gdouble sy = y;
 
-    ClutterUtil::stage_coordinates_to_screen_coordinates( & sx , & sy );
+    ClutterUtil::stage_coordinates_to_screen_coordinates( context->get_stage(), & sx , & sy );
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
@@ -898,7 +898,7 @@ void Controller::pointer_move( int x, int y , unsigned long int modifiers )
 
     if ( inject )
     {
-        ClutterUtil::inject_motion( x , y , modifiers );
+        ClutterUtil::inject_motion( context->get_stage(), x , y , modifiers );
     }
 }
 
@@ -916,7 +916,7 @@ void Controller::pointer_button_down( int button, int x, int y , unsigned long i
     gdouble sx = x;
     gdouble sy = y;
 
-    ClutterUtil::stage_coordinates_to_screen_coordinates( & sx , & sy );
+    ClutterUtil::stage_coordinates_to_screen_coordinates( context->get_stage(), & sx , & sy );
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
@@ -928,7 +928,7 @@ void Controller::pointer_button_down( int button, int x, int y , unsigned long i
 
     if ( inject )
     {
-        ClutterUtil::inject_button_press( button , x , y , modifiers );
+        ClutterUtil::inject_button_press( context->get_stage(), button , x , y , modifiers );
     }
 }
 
@@ -946,7 +946,7 @@ void Controller::pointer_button_up( int button, int x, int y , unsigned long int
     gdouble sx = x;
     gdouble sy = y;
 
-    ClutterUtil::stage_coordinates_to_screen_coordinates( & sx , & sy );
+    ClutterUtil::stage_coordinates_to_screen_coordinates( context->get_stage(), & sx , & sy );
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
@@ -958,7 +958,7 @@ void Controller::pointer_button_up( int button, int x, int y , unsigned long int
 
     if ( inject )
     {
-        ClutterUtil::inject_button_release( button , x , y , modifiers );
+        ClutterUtil::inject_button_release( context->get_stage(), button , x , y , modifiers );
     }
 }
 
@@ -1058,7 +1058,7 @@ void Controller::scroll( int direction , unsigned long int modifiers )
 
     if ( inject )
     {
-        ClutterUtil::inject_scroll( direction , modifiers );
+        ClutterUtil::inject_scroll( context->get_stage(), direction , modifiers );
     }
 }
 
@@ -1901,7 +1901,11 @@ ControllerList::ControllerList()
     queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
     stopped( 0 )
 {
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
+#else
+    g_rec_mutex_init( &mutex );
+#endif
 }
 
 //.............................................................................
@@ -1913,7 +1917,11 @@ ControllerList::~ControllerList()
         ( *it )->controller->unref();
     }
 
+#ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_free( &mutex );
+#else
+    g_rec_mutex_clear( &mutex );
+#endif
     g_async_queue_unref( queue );
 }
 
