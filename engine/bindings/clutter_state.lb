@@ -1,13 +1,14 @@
 module clutter_state;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "util.h"
 #include "clutter_util.h"
 
 void AnimationState_on_completed(ClutterState *state, lua_State*L);
 
-int set_state_value(lua_State * L, int index, ClutterState* state, const String & source, 
+int set_state_value(lua_State * L, int index, ClutterState* state, const String & source,
 				    const String & target ,ClutterActor *object, const String & name, const String & mode)
 {
 	GValue gvalue={0};
@@ -17,7 +18,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	double pre_delay;
     double post_delay;
     const char *source_name;
-    
+
     if(source.compare("*") != 0)
     {
         source_name = source.c_str();
@@ -28,21 +29,21 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
     // Check if there are pre/post arguments
     if (!lua_isnoneornil(L, index+1))
     {
-        if (lua_type(L, index+1) == LUA_TNUMBER) 
+        if (lua_type(L, index+1) == LUA_TNUMBER)
         {
             pre_delay = lua_tonumber(L, index + 1);
-        } 
-        else 
+        }
+        else
         {
 			pre_delay = 0;
             /*return luaL_error(L, "Incorrect argument, failed to set the fifth argument of keys : number expected");*/
         }
-    
-        if (lua_type(L, index+2) == LUA_TNUMBER) 
+
+        if (lua_type(L, index+2) == LUA_TNUMBER)
         {
             post_delay = lua_tonumber(L, index + 2);
         }
-        else 
+        else
         {
 			post_delay = 0;
             /*return luaL_error(L, "Incorrect argument, failed to set the sixth argument of keys : number expected");*/
@@ -57,7 +58,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("width",k)||!strcmp("height",k)||!strcmp("depth",k))
 	{
-		if (lua_type(L, index) == LUA_TNUMBER) 
+		if (lua_type(L, index) == LUA_TNUMBER)
 		{
 			value = lua_tonumber(L, index);
             g_value_init(&gvalue,G_TYPE_FLOAT);
@@ -65,15 +66,15 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
-		} 
-		else 
+		}
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
 		}
 	}
 	else if (!strcmp("z",k)||!strcmp("w",k)||!strcmp("h",k))
 	{
-		if (lua_type(L, index) == LUA_TNUMBER) 
+		if (lua_type(L, index) == LUA_TNUMBER)
 		{
 			value = lua_tonumber(L, index);
             g_value_init(&gvalue,G_TYPE_FLOAT);
@@ -89,20 +90,20 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 				clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "width", nmode, &gvalue, pre_delay, post_delay);
 			}
 			else if (!strcmp("h",k))
-			{	
+			{
 				clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
 			}
 
             g_value_unset(&gvalue);
-		} 
-		else 
+		}
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
 		}
 	}
 	else if (!strcmp("opacity", k))
 	{
-		if (lua_type(L, index) == LUA_TNUMBER) 
+		if (lua_type(L, index) == LUA_TNUMBER)
 		{
 			value = lua_tointeger(L, index);
 
@@ -111,8 +112,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
-		} 
-		else 
+		}
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
 		}
@@ -128,7 +129,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue, value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "x", nmode, &gvalue, pre_delay, post_delay);
-			    
+
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
 			g_value_unset(&gvalue);
@@ -138,11 +139,11 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "y", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}
-		else 
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
-	} 
+	}
 	else if (!strcmp("size",k))
 	{
 		if (lua_type(L,index)==LUA_TTABLE)
@@ -154,7 +155,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue, value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "width", nmode, &gvalue, pre_delay, post_delay);
-			    
+
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
 			g_value_unset(&gvalue);
@@ -163,8 +164,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			lua_pop(L,1);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
-		}			
-		else 
+		}
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
@@ -180,7 +181,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_double(&gvalue, value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "scale-x", nmode, &gvalue, pre_delay, post_delay);
-			    
+
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
 			g_value_unset(&gvalue);
@@ -189,8 +190,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			lua_pop(L,1);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "scale-y", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
-		}			
-		else 
+		}
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
 		}
@@ -199,7 +200,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	{
 		if (lua_type(L,index)==LUA_TTABLE)
 		{
-			    
+
 		}
 		else
 		{
@@ -214,7 +215,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	{
 		if (lua_type(L,index)==LUA_TTABLE)
 		{
-		
+
 		}
 		else
 		{
@@ -229,7 +230,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	{
 		if (lua_type(L,index)==LUA_TTABLE)
 		{
-			    
+
 		}
 		else
 		{
@@ -252,9 +253,9 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
-            g_value_unset(&gvalue);			    
+            g_value_unset(&gvalue);
 		}
-		else 
+		else
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
@@ -284,7 +285,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 int populate_state( lua_State * L, int index, ClutterState* state )
 {
 
-    if (lua_type(L, index) != LUA_TTABLE) 
+    if (lua_type(L, index) != LUA_TTABLE)
 		return luaL_error(L, "Incorrect argument, table expected");
 
 	guint duration=1000;
@@ -294,16 +295,16 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	lua_getfield(L, index, "duration");
 
-	if(!lua_isnil(L, -1)) 
+	if(!lua_isnil(L, -1))
 	{
 		if(!lua_isnumber(L, -1))
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
 		if ( lua_tointeger(L, -1) <= 0 )
-		{	
+		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
-		} 
+		}
 		duration =  lua_tointeger(L, -1);
 	}
     lua_pop(L, 1);
@@ -321,18 +322,18 @@ int populate_state( lua_State * L, int index, ClutterState* state )
     }
     lua_pop(L, 1);
 
-	//transitions 
+	//transitions
 	lua_getfield(L, index, "transitions");
 	if (!lua_istable(L, -1))
 	{
 		return luaL_error(L, "Incorrect argument, fail to set \'transitions\' : table expected");
 	}
-			
+
 	int pt = lua_gettop(L);
 
 	lua_pushnil(L);
 	while(lua_next(L, pt) != 0) {
-		if (!lua_istable(L, -1)) 
+		if (!lua_istable(L, -1))
 		{
 			return luaL_error(L, "Incorrect argument, fail to set \'transitions\' elements : table expected");
 		}
@@ -352,17 +353,17 @@ int populate_state( lua_State * L, int index, ClutterState* state )
         }
         lua_pop(L,1);
 
-		// source 
+		// source
 		lua_getfield(L, -1, "source");
 		const char * csource = lua_tostring(L,-1);
-		if (!csource) 
+		if (!csource)
 		{
 			return luaL_error(L, "Incorrect argument, fail to set \'source\' : string expected");
 		}
 		String source = csource;
 
         const char *source_name;
-        
+
         if(source.compare("*") != 0)
         {
             source_name = source.c_str();
@@ -372,19 +373,19 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	    lua_pop(L,1);
 
-		// target 
+		// target
 		lua_getfield(L, -1, "target");
 		const char * ctarget = lua_tostring(L,-1);
-		if (!ctarget) 
+		if (!ctarget)
 		{
 			return luaL_error(L, "Incorrect argument, fail to set \'target\' : string expected");
 		}
-		String target = ctarget; 
+		String target = ctarget;
 	    lua_pop(L,1);
 
-		// duration 
+		// duration
 		lua_getfield(L, -1, "duration");
-		
+
 		int sduration = 0;
 
 		if(!lua_isnil(L, -1))
@@ -401,7 +402,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		}
     	lua_pop(L, 1);
 
-		// keys 
+		// keys
 		lua_getfield(L, -1, "keys");
 		if (!lua_isnil(L, -1))
 		{
@@ -412,8 +413,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 			int kt = lua_gettop(L);
 
-			lua_pushnil(L); 
-			while(lua_next(L, kt) != 0) 
+			lua_pushnil(L);
+			while(lua_next(L, kt) != 0)
 			{
 				if (!lua_istable(L,-1))
 				{
@@ -421,8 +422,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 				}
 
 				// default parameter
-    	    	String mode = transition_mode; 
-	
+    	    	String mode = transition_mode;
+
 		 		lua_rawgeti(L,-1,1);
 		 		lua_rawgeti(L,-2,2);
 		 		lua_rawgeti(L,-3,3);
@@ -430,29 +431,29 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		 		lua_rawgeti(L,-5,5);
 		 		lua_rawgeti(L,-6,6);
 
-				// object 
+				// object
 				ClutterActor * object = ClutterUtil::user_data_to_actor(L, -6);
 				if(!object)
 				{
 					return luaL_error(L, "Incorrect argument, failed to set the first argument of keys : userdata expected");
 				}
 
-				// property-name 
+				// property-name
 				const char * cname = lua_tostring(L,-5);
-				if (!cname) 
+				if (!cname)
 				{
 					return luaL_error(L, "Incorrect argument, failed to set the second argument of keys: string expected");
 				}
-				String name = cname; 
-				
+				String name = cname;
+
 				if (!lua_isnil(L, -3))
 				{
 					if (lua_isstring(L, -4) &&  lua_isnumber(L, -3))
 					{
-						if (!lua_isnil(L, -1)) 
+						if (!lua_isnil(L, -1))
 						{
 							// object, property-name, mode(string), value(number), value(number), value (number)
-							const char* cmode = lua_tostring(L,-4); 
+							const char* cmode = lua_tostring(L,-4);
 							if (cmode)
 							{
 								mode  = cmode;
@@ -461,68 +462,68 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 						}
 						else if (!strcmp(name.c_str(), "color"))
 						{
-							// object, property-name, value(string), pre-delay(number) , post-delay(number), null 
+							// object, property-name, value(string), pre-delay(number) , post-delay(number), null
 							set_state_value(L, -4, state, source, target, object, name , mode);
 						}
-						else  
+						else
 						{
-							// object, property-name, mode(string), value(number), pre-delay, null 
-							const char* cmode = lua_tostring(L,-4); 
+							// object, property-name, mode(string), value(number), pre-delay, null
+							const char* cmode = lua_tostring(L,-4);
 							if (cmode)
 							{
 								mode  = cmode;
 							}
 							set_state_value(L, -3, state, source, target, object, name , mode);
-						} 
+						}
 					}
 					else if ((lua_isstring(L, -4) && lua_isstring(L, -3)) || (lua_isstring(L, -4) && (lua_type(L, -3) == LUA_TTABLE)))
 					{
-						// object, property-name, mode, value 
-						const char* cmode = lua_tostring(L,-4); 
+						// object, property-name, mode, value
+						const char* cmode = lua_tostring(L,-4);
 						if (cmode)
 						{
 							mode  = cmode;
 						}
 						set_state_value(L, -3, state, source, target, object, name , mode);
 					}
-					else if (((lua_type(L, -4) == LUA_TNUMBER) && (lua_type(L, -3) == LUA_TNUMBER)) || 
+					else if (((lua_type(L, -4) == LUA_TNUMBER) && (lua_type(L, -3) == LUA_TNUMBER)) ||
 							((lua_type(L, -4) == LUA_TTABLE) && (lua_type(L, -3) == LUA_TNUMBER)))
 					{
 						// object, property-name, value, pre-delay
 						set_state_value(L, -4, state, source, target, object, name , mode);
 					}
-					else 
+					else
 					{
-						return luaL_error (L, "Incorrect argument, failed to set keys value"); 
+						return luaL_error (L, "Incorrect argument, failed to set keys value");
 					}
 				}
-				else 
+				else
 				{
-					// object, property-name, value 
+					// object, property-name, value
 					set_state_value(L, -4, state, source, target, object, name , mode);
 				}
 
 /*
-				// mode, value  
+				// mode, value
 				if ((lua_type(L, -4) == LUA_TNUMBER)||(lua_type(L, -4) == LUA_TTABLE))
 				{
 					set_state_value(L, -4, state, source, target, object, name , mode);
 				}
-				else if(lua_isstring(L, -4)) 
+				else if(lua_isstring(L, -4))
 				{
-					const char* cmode = lua_tostring(L,-4); 
+					const char* cmode = lua_tostring(L,-4);
 					if (cmode)
 					{
 						mode  = cmode;
 					}
-			    	if((lua_isnumber(L, -3))||(lua_istable(L, -3))) 
+			    	if((lua_isnumber(L, -3))||(lua_istable(L, -3)))
 					{
 						set_state_value(L, -3, state, source, target, object, name , mode);
 					}
-				} 
-				else 
+				}
+				else
 				{
-					return luaL_error (L, "Incorrect argument, failed to set keys value"); 
+					return luaL_error (L, "Incorrect argument, failed to set keys value");
 				}
 */
 				lua_pop(L,7);
@@ -531,18 +532,18 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		 else
 		 {
 			lua_pop(L, 1);
-			// animator 
+			// animator
 			lua_getfield(L, -1, "animator");
 			ClutterAnimator* animator = ClutterUtil::user_data_to_animator(L, -1);
 			if(!animator)
 			{
 				return luaL_error(L, "Incorrect argument, failed to set \'animator\' : Animator expected");
 			}
-			clutter_state_set_animator (state, source_name, target.c_str(), animator);  
+			clutter_state_set_animator (state, source_name, target.c_str(), animator);
 		 }
 	     lua_pop(L,2);
 
-         if (sduration) 
+         if (sduration)
          {
             clutter_state_set_duration(state,source_name,target.c_str(),sduration);
          }
@@ -560,15 +561,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 ]]
 
-/*
+/***************************************
     Class: AnimationState
-    
+
 	The AnimationState class provides a method of organizing an animation as a group of different states and transitions from one state to another. Each state transition defines one or more objects to animate, their properties to modify, and the final property values they should transition to. During the transition from one state to another, the object's properties gradually change, and the animation results. When the target state is eventually reached, the program receives notification by having the AnimationState object's on_completed() event handler invoked. Upon arriving at the target state, the animation may continue by immediately transitioning to a new target state, but this is not a requirement. In fact, one strength of AnimationState-based animations is that they can transition from one state to another at different points in a running program, with transitions being determined by any number of factors, including user input. For example, the user clicking on a menu header may cause an animation to transition to a state that expands the menu and then waits for further user input. Subsequent user actions may cause the animation to transition to a different state which closes the menu. An indeterminate amount of time and program activity may pass before movement to any particular state occurs.
-	
+
 	The animation may be controlled by key frames defined in the AnimationState object itself or, alternatively, the animation may be driven by an external Animator object. For simple animations, it may be most convenient to have everything handled by the AnimationState object. For complex animations, it usually makes sense to have an Animator object perform the processing. By dividing responsibilities between the two objects--with the AnimationState object handling the state transitions and the Animator object performing the complex animation--each object performs the task it is most efficiently suited for.
-	
+
 	All the states and state-transitions are defined in the AnimationState's constructor. Also in the constructor, the default duration and Ease mode used by all the transition animations can optionally be specified. The skeleton structure for an AnimationState constructor is shown below.
-	
+
 	(code)
 	aStates = AnimationState( {
 					duration = 2000,           -- default duration for each transition animation. Optional. If not specified, defaults to 1000.
@@ -577,20 +578,20 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 						{ -- Transition #1
 							...
 						},
-						
+
 						{ -- Transition #2
 							...
 						}
 					}  -- end of transitions table
 			  } )
 	(end)
-	
+
 	The duration property shown above specifies the default duration in milliseconds for any transition animation that does not set its duration explicitly. The duration property is optional. If it is not set, a default duration of 1000 milliseconds will be assigned to any transition that does not define its own duration.
-	
+
 	The mode property specifies the default Ease mode for any transition animation that does not set its Ease mode explicitly. The mode property is optional. If it is not set, a default mode of "LINEAR" is used.  Supported Ease modes are described in the <Ease> class.
-	
+
 	The remainder of the constructor definition consists of a table of transitions. Each transition includes the following components.
-	
+
 	source - unique string identifying a particular beginning state. Can also be an asterisk character ("*") which acts as a wildcard state.
 	target - unique string identifying a particular ending state
 	duration - Optional. Positive numeric value specifying the time in milliseconds required to transition from the source state to the target state. If not specified, the value specified in the constructor's duration property is used. If the constructor's duration property is not specified, a value of 1000 is used. The maximum duration value is 86,400,000 (24 hours).
@@ -619,19 +620,19 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	(end)
 
 	The transition's source and target properties specify the starting and ending states, respectively. During processing of an AnimationState, one state is always current. Setting a new state causes a transition to occur between the current, source state and the new, target state. When a new state is set, the AnimationState object selects the appropriate transition to perform based on these source and target states. If the object contains a transition that explicitly specifies the current source and new target states, that transition is selected and the associated animation is executed. If no matching transition is found, the AnimationState searches for a transition with the specified target state and a source state with a wildcard value of "*", which matches all states.
-	
+
 	For example, assume an AnimationState that defines the following state transitions: (#1) State1 to State3 and (#2) "*" to State3. If the current state is State1 and the state is changed to State3 then the AnimationState object performs the animation associated with transition (#1) which explicitly matches the move from State1 to State3. If the current state is State2 and the state is changed to State3, the AnimationState does not have a transition that explicitly matches a move from State2 to State3. But transition (#2) matches moving to State3 from any state that does not have an explicitly defined source state, so the animation associated with transition (#2) is performed.
-	
+
 	The duration property specifies the length of time in milliseconds of the transition to the target state. This instance of duration applies only to the current transition.
-	
+
 	The mode property specifies the Ease mode to use in the transition's animation. This instance of mode applies only to the current transition.
-	
+
 	Finally, each entry in the transitions table must contain either an animator property or a keys property, but not both. Both properties specify the animation to perform when the state changes from the source to the target.
-	
+
 	The animator property specifies an <Animator> object that defines the associated animation. When using an Animator-based animation, the duration and mode properties defined in the AnimationState object are ignored. Instead, these properties should be set in the Animator object.
-	
+
 	The keys property specifies a table of key frame entries that defines the associated animation. Each key frame is itself a table containing the following components.
-	
+
 	(code)
 	{ AnimatedObject, AnimatedProperty, [EaseMode,] FinalValue [, PreDelay, PostDelay] }
 	(end)
@@ -642,11 +643,11 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	FinalValue - a table or numeric value specifying the final value of the animated property at the conclusion of the animation
 	PreDelay - Optional. Numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified. If not specified then no predelay is used. Note: If the PostDelay property is set then PreDelay must also be set, even if it is set to 0.0.
 	PostDelay - Optional. Numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified. If not specified then no postdelay is used. Note: If the PreDelay property is set then PostDelay must also be set, even if it is set to 0.0.
-	
+
 	By setting the PreDelay and PostDelay fields, the animation can be divided into sections. For example, one key frame can set a PostDelay value of .5 so that it will run in the first half of the animation. A second key frame can set its PreDelay to .5 so it runs in the animation's second half, after the first key frame has completed. An example using this technique is shown later in this section.
-	
+
 	The recognized properties that can be specified in the AnimatedProperty field and their associated FinalValue data types and formats are listed below.
-	
+
 	"x", "y", "z", "depth" - float
 	"width", "w", "height", "h" - float
 	"opacity" - unsigned integer
@@ -658,18 +659,18 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	"y_rotation" - double specifying rotation angle
 	"z_rotation" - double specifying rotation angle
 	"color" - table or string specifying color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
-	
+
 	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definition is valid.
-	
+
 	(code)
 	keys = {
 		{ Obj,  "position", { 100, 100 } },  -- animate Obj's position
 		{ Obj2, "position", { 300, 300 } }   -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
 	}
 	(end)
-	
+
 	The following definition is not valid because the animated object's "position" property is modified more than once in the same keys table.
-	
+
 	(code)
 	keys = {
 		{ Obj, "position", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
@@ -677,11 +678,11 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		                                              -- Cannot modify same property for same object in same keys table
 	}
 	(end)
-	
+
 	To animate the same property for the same object as part of a transition animation, you must break up the animation into two separate states and have the object's on_completed() event handler transition from the first part to the second. (Note: In the preceding example, you could employ a trick by replacing the second modification of the "position" property with two additional key frames that modify the "x" and "y" properties.)
-		
+
 	Some sample transition table entries are shown below. The first transition uses an Animator object to control the animation, while the second transition defines the animation in a keys table.
-	
+
 	(code)
 	menuStates = AnimationState( {
 					mode = "EASE_IN_OUT_QUAD",  -- default Ease mode for all transitions
@@ -692,7 +693,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 							-- An Animator object will handle this transition's animation, including its duration and Ease mode
 							animator = OpenMenuAnimator
 						},
-						
+
 						{ -- Transition #2 - From opened to closed
 							source = "MenuOpened",
 							target = "MenuClosed",
@@ -711,17 +712,17 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			  } )
 
 	(end)
-	
+
 	An AnimationState object's current state is stored in its <state> property. Initially, the object's state is nil. Setting the state property changes the current state and potentially performs a transition animation if one is defined for the two states. Notice that because an object's initial state is nil, the first time the state property is explicitly set, if a transition definition has a target of that state and a wildcard source of "*", its associated animation will run.
-	
+
 	It is possible to change the current state and bypass any associated transition animation by calling the object's <warp> function.
-	
-	When the animation has completed, the program is notified by calling the object's <on_completed> event handler. This enables the program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
-	
+
+	When the animation has finished, an <on_completed> event is fired. Hooking this event enables a program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
+
 	*Code Example:* Animate a sphere in two states: (1) from wildcard-source State to Disappear State and (2) from Disappear State to Appear State. For demonstration purposes, the program loops from one state to the other; in a real application, some activity, such as user input, would commonly cause the state transitions. All the AnimationState code is located in the bottom portion of the code sample.
-	
+
 	An additional code example is described in the <AnimationState Sample Application> section.
-	
+
 	(code)
 	-- Create a screen background
 	bckgnd = Canvas( 1920, 1080 )
@@ -732,15 +733,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	screen:add( bckgndImage )
 
 	-- Create a rectangular demo area
-	demoArea = Rectangle {
-					color = { 100, 100, 100, 255 },
-					border_color = { 0, 0, 0, 255 },
-					border_width = 4,
-					name = "demoArea",
-					position = { 746, 96, 0 },
-					size = { 308, 308 },
-					opacity = 255,
-				}
+	demoArea = Rectangle( { color        = { 100, 100, 100, 255 },
+							border_color = { 0, 0, 0, 255 },
+							border_width = 4,
+							name         = "demoArea",
+							position     = { 746, 96, 0 },
+							size         = { 308, 308 },
+							opacity      = 255,
+	} )
 	screen:add( demoArea )
 
 	-- Create a sphere image using Canvas
@@ -781,8 +781,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			}
 	} )
 
-	-- Define an on_completed() event handler for the sphere's AnimationState so we can daisy-chain states
-	function sphereAnimationState:on_completed()
+	-- Define an on_completed event handler for the sphere's AnimationState so we can daisy-chain states
+	function reverseDirection()
 		-- Depending on completed state, toggle to other state
 		if( sphereAnimationState.state == "disappear" )then
 			sphereAnimationState.state = "appear"
@@ -791,12 +791,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		end
 	end
 
+	-- Register the reverseDirection() handler with the on_completed event
+	sphereAnimationState:add_oncompleted_listener( reverseDirection )
+
 	-- Start the animation
 	sphereAnimationState.state = "disappear"  -- Matches the wildcard "*" source transition
 	(end)
-	
+
 	The animation generated by the code example is shown below.
-	
+
 (see animationStateDemo.gif)
 
 */
@@ -806,20 +809,20 @@ class AnimationState [[ClutterState*]]
 
 	/*
 		Constructor: AnimationState
-		
+
 		The AnimationState() constructor creates a new AnimationState object. All the object's states and transitions must be defined in the constructor, as described in the opening section of this page.
-		
+
 		The current state of the object can be changed by setting the <state> property.
-		
+
 		*Arguments:*
-		
+
 		props - table defining object's states and transitions
-		
+
 		*Return Value:* AnimationState object containing the defined states and transitions
-		
+
 		*See Also:* the <state> property
 	*/
-	
+
     AnimationState( table props )
     	[[
     		self=clutter_state_new();
@@ -828,20 +831,20 @@ class AnimationState [[ClutterState*]]
     		populate_state(L, props, self);
         	g_object_unref(self);
     	]];
-	
+
     ~AnimationState()
     	[[
     	]];
-	
+
 	/*
 		Property: duration
-		
+
 		The duration property specifies the default duration for transitions that have not explicitly defined a duration in the object's constructor. The duration is an integer value specifying the length of time in milliseconds. If no default duration is specified in the constructor, a value of 1000 milliseconds (1 second) is used.
 
 		Note: The duration property is equivalent to the constructor's duration setting that is specified *outside* of the transitions table. Duration settings made for individual transitions must be defined in the constructor's transitions table and cannot be accessed or modified outside of the constructor.
-		
+
 		*Default Value:* 1000
-		
+
 		*See Also:* setting duration values in the AnimationState constructor described in the beginning of this section
 	*/
 
@@ -851,11 +854,11 @@ class AnimationState [[ClutterState*]]
 
  	/*
 		Property: timeline
-		
+
 		The timeline property contains the <Timeline> object associated with the AnimationState. The Timeline is used to drive animations defined in the transition's keys table only; animations controlled by an Animator object are not driven by this Timeline object. The Timeline object's properties and functions can be utilized to control aspects of the key-frame-based animation.
-		
+
 		The Timeline object is created automatically and is owned by the AnimationState object.
-		
+
 		*See Also:* the <Timeline> object
 	*/
 
@@ -863,19 +866,19 @@ class AnimationState [[ClutterState*]]
     	[[
         	ClutterUtil::wrap_timeline(L , clutter_state_get_timeline(self));
     	]];
-    	
+
     /*
         Property: state
 
 		The state property contains a string specifying the current state of the AnimationState object. By changing the state property, a transition animation may be run if an associated transition from the original (source) state to the new (target) state has been defined.
-		
-		When the transition animation, if any, has completed, the object's on_completed() event handler is invoked.
-		
+
+		When the transition animation, if any, has completed, an <on_completed> event is fired.
+
 		To change the state without performing the transition's animation, use the <warp> function.
-		
+
 		*Default Value:* nil
-		
-		*See Also:* the <warp> function and the <on_completed> event handler
+
+		*See Also:* the <warp> function and the <on_completed> event
     */
 
 	string state
@@ -884,49 +887,100 @@ class AnimationState [[ClutterState*]]
 
 	/*
 		Function: warp
-		
+
 		The warp() function changes to a specified target state immediately, skipping any defined animation and setting all modified properties to their final values. Calling the warp() function also sets the object's <state> property to the target state.
-		
+
 		*Argument:*
-		
+
 		target_state_name - string specifying the new current state
-		
+
 		*Return Value:* None
-		
+
 		*See Also:* the <state> property
-	*/	
+	*/
 
 	warp(string target_state_name)
     	[[
     		clutter_state_warp_to_state(self, target_state_name);
     	]];
 
-	 /*
-    	Event: on_completed
-    	
-    	The on_completed() event handler is called when a new state has been assigned by either setting the object's <state> property or calling the <warp> function. If changing the state caused a transition animation to run, the on_competed() handler is called when the animation completes.
-    	
-		*Arguments:* None
-		
-		*Return Value:* None
-		
-		*See Also:* the <state> property and the <warp> function
-     */
-     
-    callback on_completed
-    	[[
-    	    UserData::get(L)->connect_signal_if(
-    			on_completed,
-    			"on_completed",
-    			"completed",
-    			G_CALLBACK(AnimationState_on_completed),
-    			L);	    	    
-    	]];
+/***************************************
+	Function: add_oncompleted_listener
+
+	The add_oncompleted_listener() function registers a handler function for <on_completed> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( )
+		(end)
+
+	*Handler Arguments:* None
+
+	*Handler Return Value:* None
+
+	*See Also:* the <on_completed> event and <remove_oncompleted_listener> function
+*/
+
+    int add_oncompleted_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_completed" , L );
+            UserData::get( L )->connect_signal(
+                "on_completed",
+                "completed",
+                G_CALLBACK(AnimationState_on_completed),
+                L);
+        ]];
+
+/***************************************
+	Function: remove_oncompleted_listener
+
+	The remove_oncompleted_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle of the event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
+
+	*See Also:* the <add_oncompleted_listener> function and the <on_completed> event
+*/
+
+    remove_oncompleted_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_completed" , L );
+        ]];
+
+/***************************************
+   	Event: on_completed
+
+   	The on_completed event occurs when a new state is assigned by either setting the object's <state> property or calling the <warp> function. If changing the state causes a transition animation to run, the on_completed event occurs after the animation is finished.
+
+	*See Also:* the <state> property and the <warp> and <add_oncompleted_listener> functions
+*/
+
+    function on_completed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_completed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_completed" , L );
+            UserData::get( L )->connect_signal(
+                "on_completed",
+                "completed",
+                G_CALLBACK(AnimationState_on_completed),
+                L);
+        ]];
+
 }
 
 [[
 void AnimationState_on_completed(ClutterState*state,lua_State*L)
 {
-    UserData::invoke_callback(G_OBJECT(state),"on_completed",0,0,L);
+    UserData::invoke_callbacks(G_OBJECT(state),"on_completed",0,0,L);
 }
 ]]

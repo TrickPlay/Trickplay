@@ -1,6 +1,7 @@
 module clutter_text;
 
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 
 #include "util.h"
@@ -11,134 +12,176 @@ module clutter_text;
 void Text_on_text_changed(ClutterText*text,lua_State*L);
 ]]
 
-/*
+/***************************************
     Class: Text
-    
+
     The Text data type provides various operations to support text on the display. A Text object can be a static label or it can be editable, as determined by the object's <editable> property.
-    
+
     In addition to the properties and functions described on this page, the Text data type also supports all the properties and functions defined in the <UIElement> interface.
-    
 */
 
 class Text [[ClutterActor*]] actor
 {
     Text(table props =0)
         [[
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
+            // We want to check for the "special" fields: "text", "font", and "color", and
+            // If combinations of those are set, construct this guy more efficiently.
+
+            lua_getfield(L, props, "text");  // Ends up in -3
+            lua_getfield(L, props, "font");  // Ends up in -2
+            lua_getfield(L, props, "color"); // Ends up in -1
+            if(lua_isnil(L, -3) || lua_isnil(L, -2))
+            {
+                // No text and/or font property: so just construct the innefficient way
+                lua_pop(L, 3);
+                self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_text_new ) );
+            }
+            else if(lua_isnil(L, -1))
+            {
+                // Do have text and font, but no color
+                self = lb_construct_gobject( ClutterActor,
+                                             CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( clutter_text_new_with_text(
+                                                                                                            lua_tostring(L, -2),
+                                                                                                            lua_tostring(L, -3)
+                                                                                                        ) ) ) ) )
+                                            );
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_setfield(L, props, "text");
+                lua_setfield(L, props, "font");
+                lua_pop(L, 3);
+            }
+            else
+            {
+                // We have all three
+                ClutterColor color;
+                ClutterUtil::to_clutter_color(L, -1, &color);
+                self = lb_construct_gobject( ClutterActor,
+                                             CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( clutter_text_new_full(
+                                                                                                            lua_tostring(L, -2),
+                                                                                                            lua_tostring(L, -3),
+                                                                                                            &color
+                                                                                                        ) ) ) ) )
+                                            );
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_pushnil(L);
+                lua_setfield(L, props, "text");
+                lua_setfield(L, props, "font");
+                lua_setfield(L, props, "color");
+                lua_pop(L, 3);
+            }
+
 		    ClutterUtil::initialize_actor(L,self,TEXT_METATABLE);
 		    ClutterUtil::set_props_from_table(L,props);
 		    g_object_unref( self );
         ]];
-	
+
     ~Text()
 		[[
         ]];
-    
-    /*
-    	Property: text
-    	
-    	The text property is the object's string to display.
-    	
-    	The string can include any text characters, but it may not
-    	specify formatting instructions, e.g., marking certain words as bold. 
-    	To include these types of formatting instructions, use the <markup> 
-    	property.
-    	
-    	*Example:* Create a new Text object and set its text property
-    	
+
+/***************************************
+   	Property: text
+
+   	The text property is the object's string to display.
+
+   	The string can include any text characters, but it may not specify formatting instructions, e.g., marking certain words as bold. To include these types of formatting instructions, use the <markup> property.
+
+   	*Code Example:* Create a new Text object and set its text property
+
     	(code)
-    	title = Text{ text = "Welcome to My World!" }
+    	title = Text( { text = "Welcome to My World!" } )
     	(end)
-    	
-    	*See Also:* the <markup> property and the <on_text_changed> event handler
-    */
-        
+
+   	*See Also:* the <markup> property and the <on_text_changed> event
+*/
+
     string text
         [[text=clutter_text_get_text(CLUTTER_TEXT(self));]]
         [[clutter_text_set_text(CLUTTER_TEXT(self),text);]];
-        
-    /*
-    	Property: font
-    	
-		The font property specifies the font to use when rendering the <text> string.
-		
-		The TrickPlay Engine uses the Pango open-source framework to implement the layout and rendering of internationalized text on the display. This section will describe the information necessary to enable you to specify a desired font; additional information about Pango will not be required. In case you would like more details about Pango, go to <the Pango website at http://developer.gnome.org/platform-overview/stable/pango>. Information about the Pango API function that the TrickPlay Engine calls to specify a font can be found <here at http://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string>.
 
-		A font is described in a string comprising the following components: *[FamilyList] [StyleList] [Size]*
-		
-		Each of the components is optional, so it is possible to specify an empty string, and a font will still be selected. In such a case, the selected font will have default settings for all three components, i.e., "Normal" FamilyList, "Normal" StyleList, and a size of 11 points.
+/***************************************
+   	Property: font
 
-		Supported values for each component are shown below.
+	The font property specifies the font to use when rendering the <text> string.
+
+	The TrickPlay Engine uses the Pango open-source framework to implement the layout and rendering of internationalized text on the display. This section will describe the information necessary to enable you to specify a desired font; additional information about Pango will not be required. In case you would like more details about Pango, go to <the Pango website at http://developer.gnome.org/platform-overview/stable/pango>. Information about the Pango API function that the TrickPlay Engine calls to specify a font can be found <here at http://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string>.
+
+	A font is described in a string comprising the following components: *[FamilyList] [StyleList] [Size]*
+
+	Each of the components is optional, so it is possible to specify an empty string, and a font will still be selected. In such a case, the selected font will have default settings for all three components, i.e., "Normal" FamilyList, "Normal" StyleList, and a size of 11 points.
+
+	Supported values for each component are shown below.
 
 		*[FamilyList] Settings:* A comma-separated list of families. The list may optionally terminate with a comma. The first family in the list that is installed on the system will be used.
 
-		"Normal" - (default) a sans-serif, variable-width font. Comparable to Helvetica
-		"Sans" - a sans-serif, variable-width font. Depending on the system, could be different from the "Normal" sans-serif font. Comparable to Helvetica
-		"Serif" - a serif, variable-width font. Comparable to Times Roman
-		"Monospace" - a serif, fixed-width font. Comparable to Courier
-		
-		You can also include the names of fonts, such as "Helvetica" or "Garamond."
-				
+			"Normal" - (default) a sans-serif, variable-width font. Comparable to Helvetica
+			"Sans" - a sans-serif, variable-width font. Depending on the system, could be different from the "Normal" sans-serif font. Comparable to Helvetica
+			"Serif" - a serif, variable-width font. Comparable to Times Roman
+			"Monospace" - a serif, fixed-width font. Comparable to Courier
+
+			You can also include the names of fonts, such as "Helvetica" or "Garamond."
+
 		*[StyleList] Settings:* A whitespace-separated list of words, where each word describes one of the styles listed below. The words can be specified in any order.
-		
-		*Style*
-		
-		"Normal" - (default) upright
-		"Oblique" - slanted in a Roman style
-		"Italic" - slanted in an italic style
-		
-		*Weight*
-		
-		"Ultra-Light" - a weight of 200
-		"Light" - a weight of 300
-		"Normal" - (default) a weight of 400
-		"Bold" - a weight of 700
-		"Ultra-Bold" - a weight of 800
-		"Heavy" - a weight of 900
-		
-		*Variant*
-		
-		"Normal" - (default) no variant
-		"Small-Caps" - small uppercase letters
-		
-		*Stretch*
-		
-		"Ultra-Condensed" - the smallest width
-		"Extra-Condensed" - getting wider...
-		"Condensed" - wider...
-		"Semi-Condensed" - wider......
-		"Normal" - (default)
-		"Semi-Expanded" - getting wider still...
-		"Expanded" - wider...
-		"Extra-Expanded" - wider......
-		"Ultra-Expanded" - the widest width
-		
-		*[Size] Settings:* An integer specifying the font size in points. The default size is 11 points. Alternatively, you may specify an absolute font size in pixels by  appending the integer value with the "PX" or "px" string, e.g., "72px".
-		
-		*Examples:* The following are some sample font strings.
-		
+
+			*Style*
+
+				"Normal" - (default) upright
+				"Oblique" - slanted in a Roman style
+				"Italic" - slanted in an italic style
+
+			*Weight*
+
+				"Ultra-Light" - a weight of 200
+				"Light" - a weight of 300
+				"Normal" - (default) a weight of 400
+				"Bold" - a weight of 700
+				"Ultra-Bold" - a weight of 800
+				"Heavy" - a weight of 900
+
+			*Variant*
+
+				"Normal" - (default) no variant
+				"Small-Caps" - small uppercase letters
+
+			*Stretch*
+
+				"Ultra-Condensed" - the smallest width
+				"Extra-Condensed" - getting wider...
+				"Condensed" - wider...
+				"Semi-Condensed" - wider......
+				"Normal" - (default)
+				"Semi-Expanded" - getting wider still...
+				"Expanded" - wider...
+				"Extra-Expanded" - wider......
+				"Ultra-Expanded" - the widest width
+
+			*[Size] Settings:* An integer specifying the font size in points. The default size is 11 points. Alternatively, you may specify an absolute font size in pixels by  appending the integer value with the "PX" or "px" string, e.g., "72px".
+
+	*Code Examples:* The following are some sample font strings.
+
 		(code)
 		"Sans 38px"
 		"Century Schoolbook,Garamond,Serif 72px"
 		"Sans Italic Bold 30"
 		(end)
-		
-		*See Also:* the <markup> property
 
-    */
-    
+	*See Also:* the <markup> property
+*/
+
     string font
         [[font=clutter_text_get_font_name(CLUTTER_TEXT(self));]]
         [[clutter_text_set_font_name(CLUTTER_TEXT(self),font);]];
-        
-    /*
-    	Property: color
-    	
-    	The color property specifies the color of the text string when displayed. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-    	*See Also:* the <font> property
-    */
-    
+/***************************************
+	Property: color
+
+	The color property specifies the color of the text string when displayed. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+
+	*See Also:* the <font> property
+*/
+
     table color
         [[
             ClutterColor color;
@@ -150,86 +193,84 @@ class Text [[ClutterActor*]] actor
             ClutterUtil::to_clutter_color(L,2,&color);
             clutter_text_set_color(CLUTTER_TEXT(self),&color);
         ]];
-    
-    /*
-    	Property: markup
-    	
-    	The markup property is the object's string to display. It differs from the <text> property in that the markup string may contain HTML-like formatting instructions. This capability is provided by the Pango Text Attribute Markup language. Only a small subset of HTML tags are supported; refer to the <Pango documentation at http://developer.gnome.org/pango/stable/PangoMarkupFormat.html> for complete details.
 
-    	When a string is assigned to the markup property, the object's <use_markup> property is automatically set to true and the string is also copied into the object's text property.
+/***************************************
+	Property: markup
 
-    	The markup property can be set, but it may not be retrieved. If you need to retrieve the string after setting it, you can get it from the object's text property.
-    	
-    	The markup property should not be used if the object's <editable> property is set to true; use the text property, instead.
-    	
-    	*Example:*
-    	
+	The markup property is the object's string to display. It differs from the <text> property in that the markup string may contain HTML-like formatting instructions. This capability is provided by the Pango Text Attribute Markup language. Only a small subset of HTML tags are supported; refer to the <Pango documentation at http://developer.gnome.org/pango/stable/PangoMarkupFormat.html> for complete details.
+
+	When a string is assigned to the markup property, the object's <use_markup> property is automatically set to true and the string is also copied into the object's text property.
+
+	The markup property can be set, but it may not be retrieved. If you need to retrieve the string after setting it, you can get it from the object's text property.
+
+	The markup property should not be used if the object's <editable> property is set to true; use the text property, instead.
+
+	*Code Example:*
+
     	(code)
-    	cool = Text{ markup = 'This is <span underline="single">soooo <b>cool!</b></span>' }
+    	cool = Text( { markup = 'This is <span underline="single">soooo <b>cool!</b></span>' } )
     	(end)
-    	
-    	*See Also:* the <text> property, the <use_markup> property
 
-    */
-    
+	*See Also:* the <text> property, the <use_markup> property
+*/
+
     string markup
         [[
             // markup doesn't have a getter
             markup=clutter_text_get_text(CLUTTER_TEXT(self));
         ]]
         [[clutter_text_set_markup(CLUTTER_TEXT(self),markup);]];
-        
-    /*
-    	Property: use_markup
-    	
-    	The use_markup property is a boolean flag indicating whether or not the object's text string contains Pango Text Attribute Markup tags. If set to true, formatting tags in the string will be appropriately processed.
 
-    	If you simply set the object's <markup> property to a text string, the TrickPlay Engine automatically sets the use_markup property to true. Alternatively, you may set the use_markup property yourself and then assign a text string containing formatting tags to the object's text property. Depending upon the structure of your application, this second method may be preferable because it enables your program to consistently assign the string to the text property, regardless of whether or not it contains formatting tags.
-    	
-    	If the object's <editable> property is set to true, the use_markup property is ignored.
-    	
-    	*Default Setting:* false
-    	
-    	*Example:* Create a string with formatting tags and assign it to the text property
-    	
+/***************************************
+	Property: use_markup
+
+	The use_markup property is a boolean flag indicating whether or not the object's text string contains Pango Text Attribute Markup tags. If set to true, formatting tags in the string will be appropriately processed.
+
+	If you simply set the object's <markup> property to a text string, the TrickPlay Engine automatically sets the use_markup property to true. Alternatively, you may set the use_markup property yourself and then assign a text string containing formatting tags to the object's text property. Depending upon the structure of your application, this second method may be preferable because it enables your program to consistently assign the string to the text property, regardless of whether or not it contains formatting tags.
+
+	If the object's <editable> property is set to true, the use_markup property is ignored.
+
+	*Default Setting:* false
+
+	*Code Example:* Create a string with formatting tags and assign it to the text property
+
     	(code)
     	local myText = Text()
     	myText.use_markup = true
     	myText.text = "This string contains <big>large words</big> and <small>tiny words</small>."
     	(end)
-    	
-    	*See Also:* the <markup> property, the <text> property
-    	
-    */    
-    
+
+	*See Also:* the <markup> property, the <text> property
+*/
+
     bool use_markup
         [[use_markup=clutter_text_get_use_markup(CLUTTER_TEXT(self));]]
         [[clutter_text_set_use_markup(CLUTTER_TEXT(self),use_markup);]];
-	
-	/*
-		Property: editable
-		
-		The editable property is a boolean flag that indicates whether or not the object's text string can be edited by the user (true=editable).
-		
-		When an editable Text object gets the key focus, the user will be able to use standard editing keystrokes to enter and modify the contents of the object's <text> property. A program can set the key focus to an object by calling its <UIElement.grab_key_focus> function.
-		
-		Depending upon the setting of the editable property, certain Text properties will be applicable and others ignored. The following Text properties are applicable only when the editable property is true.
-		
+
+/***************************************
+	Property: editable
+
+	The editable property is a boolean flag that indicates whether or not the object's text string can be edited by the user (true=editable).
+
+	When an editable Text object gets the key focus, the user will be able to use standard editing keystrokes to enter and modify the contents of the object's <text> property. A program can set the key focus to an object by calling its <UIElement.grab_key_focus> function.
+
+	Depending upon the setting of the editable property, certain Text properties will be applicable and others ignored. The following Text properties are applicable only when the editable property is true.
+
 		single_line - .
 		wants_enter - .
 		selection_color - .
 		cursor_visible - .
 		cursor_color - .
 		cursor_size - .
-		
-		The following Text properties are applicable only when the editable property is false.
-		
+
+	The following Text properties are applicable only when the editable property is false.
+
 		markup - .
 		use_markup - .
 		ellipsize - .
 
-		When a screen is first displayed, if the object to receive the initial key focus is an editable Text object, then a special focus-setting technique is necessary. Normally, an object receives key focus by having its grab_key_focus() function called, as shown below.
-		
+	When a screen is first displayed, if the object to receive the initial key focus is an editable Text object, then a special focus-setting technique is necessary. Normally, an object receives key focus by having its grab_key_focus() function called, as shown below.
+
 		(code)
 		-- Create editable Text object
 		textEdit = Text( { text = "I can be edited",
@@ -240,9 +281,9 @@ class Text [[ClutterActor*]] actor
 		-- Set focus to normal editable Text object
 		textEdit:grab_key_focus()
 		(end)
-		
-		However, if the editable Text object is to receive the key focus immediately upon the screen being displayed, the program must apply the focus-setting technique shown below.
-		
+
+	However, if the editable Text object is to receive the key focus immediately upon the screen being displayed, the program must apply the focus-setting technique shown below.
+
 		(code)
 		-- Create editable Text object
 		textEdit = Text( { text = "I can be edited",
@@ -253,56 +294,53 @@ class Text [[ClutterActor*]] actor
 		-- Set screen's initial focus to editable Text object
 		dolater( textEdit.grab_key_focus, textEdit )
 		(end)
-		
-		*Default Setting:* false, i.e., the user may not edit the object's text
-		
-		*See Also:* the <single_line> property and the <on_text_changed> event handler
-		
-	*/
-	
+
+	*Default Setting:* false, i.e., the user may not edit the object's text
+
+	*See Also:* the <single_line> property and the <on_text_changed> event
+*/
+
     bool editable
 		[[editable=clutter_text_get_editable(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_editable(CLUTTER_TEXT(self),editable);]];
 
-    /*
-    	UndocumentedProperty: wrap
-    	
-    	Note: There is a bug in Clutter that prevents the wrap property from working. Until this bug is fixed, the wrap property should not be documented.
-    	
-		The wrap property is a boolean flag to toggle text wrapping. If the property is true, wrapping will occur if the text extends beyond the right edge of the display area.
-		
-		Various types of wrapping are supported, such as word wrapping and character wrapping. The wrapping method is set by the object's wrap_mode property.
-		
-		If the object's <single_line> property is set to true, it overrides any wrap property setting and the text line will not wrap.
-		
-		*Default Setting:* false
-		
-		*See Also:* the <wrap_mode> property, the <alignment> property, the <single_line> property
+/***************************************
+   	UndocumentedProperty: wrap
 
-    */    
-    
+   	Note: There is a bug in Clutter that prevents the wrap property from working. Until this bug is fixed, the wrap property should not be documented.
+
+	The wrap property is a boolean flag to toggle text wrapping. If the property is true, wrapping will occur if the text extends beyond the right edge of the display area.
+
+	Various types of wrapping are supported, such as word wrapping and character wrapping. The wrapping method is set by the object's wrap_mode property.
+
+	If the object's <single_line> property is set to true, it overrides any wrap property setting and the text line will not wrap.
+
+	*Default Setting:* false
+
+	*See Also:* the <wrap_mode>, <alignment> and <single_line> properties
+*/
+
     bool wrap
         [[wrap=clutter_text_get_line_wrap(CLUTTER_TEXT(self));]]
         [[clutter_text_set_line_wrap(CLUTTER_TEXT(self),wrap);]];
-    
-    /*
-    	Property: wrap_mode
 
-		The wrap_mode property specifies the type of text wrapping to perform.
-		
-		By default, text wrapping is disabled. To enable wrapping, set the <UIElement.width> property. To display multiple lines of text, the <UIElement.height> property should also be set to an appropriate value. To disable wrapping after it has been enabled, set the width property to -1.
-		
-		*Supported wrap_mode Settings:* The wrap_mode settings are case-sensitive.
-		
+/***************************************
+   	Property: wrap_mode
+
+	The wrap_mode property specifies the type of text wrapping to perform.
+
+	By default, text wrapping is disabled. To enable wrapping, set the <UIElement.width> property. To display multiple lines of text, the <UIElement.height> property should also be set to an appropriate value. To disable wrapping after it has been enabled, set the width property to -1.
+
+	*Supported wrap_mode Settings:* The wrap_mode settings are case-sensitive.
+
 		WORD - Text is wrapped at word boundaries
 		CHAR - Text is wrapped at character boundaries
 		WORD_CHAR - Text is wrapped at word boundaries, unless there is not enough space on the next line for the full word, in which case CHAR wrapping occurs
-		
-		*Default Setting:* "WORD"
-		
-		*See Also:* the <UIElement.width>, <UIElement.height> and <max_length> properties
-		
-    */    
+
+	*Default Setting:* "WORD"
+
+	*See Also:* the <UIElement.width>, <UIElement.height> and <max_length> properties
+*/
 
     string wrap_mode
         [[
@@ -331,89 +369,87 @@ class Text [[ClutterActor*]] actor
             clutter_text_set_line_wrap_mode(CLUTTER_TEXT(self),wm);
         ]];
 
-	/*
-		Property: single_line
-		
-		The single_line property is a boolean flag indicating whether editable text that exceeds its output area should display as a scrolling line or if it should wrap over multiple lines (true=scrolling line).
-		
-		The single_line property affects editable Text objects only.
-		
-		The text's output area is defined by the <UIElement.width> property. For Text objects whose lines wrap, the <UIElement.height> property should also be set.
-		
-		Setting the single_line property to true automatically sets the <wants_enter> property to false to prevent newline characters from being inserted into the text string. If it is desired for newline characters to be entered into the text, reset the wants_enter property to true after setting the single_line property.
+/***************************************
+	Property: single_line
 
-		*Default Setting:* false, i.e., line will wrap
-		
-		*See Also:* the <editable>, <UIElement.width> and <UIElement.height> properties
-		
-	*/
+	The single_line property is a boolean flag indicating whether editable text that exceeds its output area should display as a scrolling line or if it should wrap over multiple lines (true=scrolling line).
+
+	The single_line property affects editable Text objects only.
+
+	The text's output area is defined by the <UIElement.width> property. For Text objects whose lines wrap, the <UIElement.height> property should also be set.
+
+	Setting the single_line property to true automatically sets the <wants_enter> property to false to prevent newline characters from being inserted into the text string. If it is desired for newline characters to be entered into the text, reset the wants_enter property to true after setting the single_line property.
+
+	*Default Setting:* false, i.e., line will wrap
+
+	*See Also:* the <editable>, <UIElement.width> and <UIElement.height> properties
+*/
+
     bool single_line
 		[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_single_line_mode(CLUTTER_TEXT(self),single_line);]];
-	
-	/*
-		Property: wants_enter
-		
-		The wants_enter property is a boolean flag that toggles whether or not pressing the <Enter>, <Return> or <OK> key when editing text will insert a newline character into the text string (true=insert newline).
-		
-		The wants_enter property affects editable Text objects only.
-		
-		Regardless of the setting of the wants_enter property, the object's on_key_down() and on_key_up() event handlers will receive notification of the keystroke. This enables a program to handle the keystroke in any desired manner. For example, the key focus may advance to the next object.
-		
-		Setting the single_line property to true automatically sets the <wants_enter> property to false to prevent newline characters from being inserted into the text string. If it is desired for newline characters to be entered into the text, reset the wants_enter property to true after setting the single_line property.
-		
-		*Default Setting:* true
-		
-		*See Also:* the <editable> and <single_line> properties and the <UIElement.on_key_down> and <UIElement.on_key_up> event handlers
 
-	*/
-	
+/***************************************
+	Property: wants_enter
+
+	The wants_enter property is a boolean flag that toggles whether or not pressing the <Enter>, <Return> or <OK> key when editing text will insert a newline character into the text string (true=insert newline).
+
+	The wants_enter property affects editable Text objects only.
+
+	Regardless of the setting of the wants_enter property, the keystroke causes the object's on_key_down and on_key_up events to occur. This enables a program to handle the keystroke in any desired manner. For example, the key focus may advance to the next object.
+
+	Setting the single_line property to true automatically sets the <wants_enter> property to false to prevent newline characters from being inserted into the text string. If it is desired for newline characters to be entered into the text, reset the wants_enter property to true after setting the single_line property.
+
+	*Default Setting:* true
+
+	*See Also:* the <editable> and <single_line> properties and the <UIElement.on_key_down> and <UIElement.on_key_up> events
+*/
+
     bool wants_enter
 		[[wants_enter=!clutter_text_get_activatable(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_activatable(CLUTTER_TEXT(self),!wants_enter);]];
-	
-	/*
-		Property: max_length
-		
-		The max_length property specifies the maximum number of characters allowed in the object's text string. To allow an unlimited number of characters, set this property to zero.
-		
-		If the text string contains Pango Text Attribute Markup tags, the characters used to define the tags are included when determining the string's length.
-		
-		*Default Setting:* 0, i.e., unlimited length
-		
-		*See Also:* the <text> property
-		
-	*/	
-	
+
+/***************************************
+	Property: max_length
+
+	The max_length property specifies the maximum number of characters allowed in the object's text string. To allow an unlimited number of characters, set this property to zero.
+
+	If the text string contains Pango Text Attribute Markup tags, the characters used to define the tags are included when determining the string's length.
+
+	*Default Setting:* 0, i.e., unlimited length
+
+	*See Also:* the <text> property
+*/
+
     int max_length
 		[[max_length=clutter_text_get_max_length(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_max_length(CLUTTER_TEXT(self),max_length);]];
 
-	/*
-		Property: ellipsize
-		
-		The ellipsize property is a string indicating if and where ellipsis ("...") should be added to clipped text.
-		
-		The ellipsize property is applicable to non-editable Text objects only; the property is ignored if the text is editable.
-		
-		By default, text is not clipped, and if the text is long, it will spill beyond the edge of the display, regardless of the setting of the ellipsize property. To enable clipping, set the object's <UIElement.width> property.
-		
-		When ellipsize is enabled, the text string will display on a single line, regardless of the object's <UIElement.height> setting.
-		
-		If an ellipsis is appended to the end of the text, enough extra characters are clipped from the string to guarantee that the ellipsis is viewable. For example, if the last character of the string doesn't fit in the display area, the last three or four characters may be clipped in order to fit in the ellipsis.
-		
-		*Supported Settings:* The ellipsize setting is case-sensitive.
-		
+/***************************************
+	Property: ellipsize
+
+	The ellipsize property is a string indicating if and where ellipsis ("...") should be added to clipped text.
+
+	The ellipsize property is applicable to non-editable Text objects only; the property is ignored if the text is editable.
+
+	By default, text is not clipped, and if the text is long, it will spill beyond the edge of the display, regardless of the setting of the ellipsize property. To enable clipping, set the object's <UIElement.width> property.
+
+	When ellipsize is enabled, the text string will display on a single line, regardless of the object's <UIElement.height> setting.
+
+	If an ellipsis is appended to the end of the text, enough extra characters are clipped from the string to guarantee that the ellipsis is viewable. For example, if the last character of the string doesn't fit in the display area, the last three or four characters may be clipped in order to fit in the ellipsis.
+
+	*Supported Settings:* The ellipsize setting is case-sensitive.
+
 		NONE - Do not add ellipsis to clipped text
 		START - Insert ellipsis at the beginning of the text
 		MIDDLE - Insert ellipsis in the middle of the text
 		END - Append ellipsis to the end of the text
-		
-		*Default Setting:* "NONE"
-		
-		*See Also:* the <UIElement.width> property		
-	*/
-	
+
+	*Default Setting:* "NONE"
+
+	*See Also:* the <UIElement.width> property
+*/
+
     string ellipsize
 		[[
 		    switch(clutter_text_get_ellipsize(CLUTTER_TEXT(self)))
@@ -443,68 +479,65 @@ class Text [[ClutterActor*]] actor
 			mode = PANGO_ELLIPSIZE_NONE;
 		    else
 			luaL_error(L,"Invalid ellipsize '%s'",ellipsize);
-		    clutter_text_set_ellipsize(CLUTTER_TEXT(self),mode);	
+		    clutter_text_set_ellipsize(CLUTTER_TEXT(self),mode);
 		]];
 
-	/*
-		Property: password_char
-		
-		The password_char property specifies the integer value of the Unicode character to display in place of each character in the text string.
+/***************************************
+	Property: password_char
 
-		If the password_char property is set to 0, text will display as entered.
-		
-		If the Text object is editable, each character entered will display as the password_char character.
-		
-		*Default Setting:* 0
-		
-		*Code Example:* Set the password_char to an asterisk (ASCII 42)
+	The password_char property specifies the integer value of the Unicode character to display in place of each character in the text string.
 
-			(code)
-			textEdit.password_char = 42
-			(end)
+	If the password_char property is set to 0, text will display as entered.
 
-		*See Also:* the <editable> and <max_length> properties
-		
-	*/
+	If the Text object is editable, each character entered will display as the password_char character.
+
+	*Default Setting:* 0
+
+	*Code Example:* Set the password_char to an asterisk (ASCII 42)
+
+		(code)
+		textEdit.password_char = 42
+		(end)
+
+	*See Also:* the <editable> and <max_length> properties
+*/
 
     int password_char
 		[[password_char=clutter_text_get_password_char(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
-	
-    /*
-    	Property: justify
-    	
-    	The justify property is a boolean flag indicating whether or not to justify displayed text; if the property is true, text justifies on both the left and right margins.
-    	
-    	*Default Setting:* false
-    	
-    	*See Also:* the <alignment> property
-    	
-    */
-    
+
+/***************************************
+   	Property: justify
+
+   	The justify property is a boolean flag indicating whether or not to justify displayed text; if the property is true, text justifies on both the left and right margins.
+
+   	*Default Setting:* false
+
+   	*See Also:* the <alignment> property
+*/
+
     bool justify
         [[justify=clutter_text_get_justify(CLUTTER_TEXT(self));]]
         [[clutter_text_set_justify(CLUTTER_TEXT(self),justify);]];
-    
-	/*
-		Property: alignment
-		
-		The alignment property is a string indicating the type of alignment to apply to lines of displayed text.
-		
-		If the Text object's <UIElement.width> property is not set, the alignment property is ignored.
-		
-		*Supported Settings:* The setting is case-sensitive.
-		
+
+/***************************************
+	Property: alignment
+
+	The alignment property is a string indicating the type of alignment to apply to lines of displayed text.
+
+	If the Text object's <UIElement.width> property is not set, the alignment property is ignored.
+
+	*Supported Settings:* The setting is case-sensitive.
+
 		LEFT - Lines are left-aligned
 		CENTER - Lines are center-aligned
 		RIGHT - Lines are right-aligned
 
-		*Default Setting:* "LEFT"
-		
-		*See Also:* the <UIElement.width> and <justify> properties
-		
-	*/	
-	
+	*Default Setting:* "LEFT"
+
+	*See Also:* the <UIElement.width> and <justify> properties
+*/
+
     string alignment
 		[[
 		    switch(clutter_text_get_line_alignment(CLUTTER_TEXT(self)))
@@ -517,7 +550,7 @@ class Text [[ClutterActor*]] actor
 			    break;
 			default:
 			    alignment="LEFT";
-		    }	    
+		    }
 		]]
 		[[
 		    PangoAlignment a=PANGO_ALIGN_LEFT;
@@ -532,16 +565,15 @@ class Text [[ClutterActor*]] actor
 		    clutter_text_set_line_alignment(CLUTTER_TEXT(self),a);
 		]];
 
-    /*
-        Property: baseline
-        
-        The baseline property specifies the numeric Y position in pixels of the baseline of the displayed text's first line.
+/***************************************
+    Property: baseline
 
-        The baseline property is a low-level system value that will be useful only in rare situations.
-        
-        *Default Setting:* 0
+    The baseline property specifies the numeric Y position in pixels of the baseline of the displayed text's first line.
 
-    */
+    The baseline property is a low-level system value that will be useful only in rare situations.
+
+    *Default Setting:* 0
+*/
 
     readonly int baseline
         [[
@@ -555,20 +587,19 @@ class Text [[ClutterActor*]] actor
             }
         ]];
 
-    /*
-        Property: line_spacing
+/***************************************
+	Property: line_spacing
 
-		The line_spacing property specifies the amount of spacing in pixels between lines of displayed text.
-		
-		The line_spacing property is applicable only when line wrapping is enabled. (Wrapping is enabled by setting the Text object's <UIElement.width> property.)
-		
-		Note: The line_spacing property should be set *after* the Text object has been added to the global <screen> variable; the property has no effect if set before being added to the screen.
-		
-		*Default Setting:* 0, i.e., use default line spacing based upon font size
-		
-		*See Also:* the <UIElement.width> property and the <screen> global variable
+	The line_spacing property specifies the amount of spacing in pixels between lines of displayed text.
 
-    */
+	The line_spacing property is applicable only when line wrapping is enabled. (Wrapping is enabled by setting the Text object's <UIElement.width> property.)
+
+	Note: The line_spacing property should be set *after* the Text object has been added to the global <screen> variable; the property has no effect if set before being added to the screen.
+
+	*Default Setting:* 0, i.e., use default line spacing based upon font size
+
+	*See Also:* the <UIElement.width> property and the <screen> global variable
+*/
 
     int line_spacing
         [[
@@ -590,41 +621,40 @@ class Text [[ClutterActor*]] actor
             }
         ]];
 
-	/*
-		Property: cursor_position
-		
-		The cursor_position property specifies the index within the object's <text> string at which to place the cursor. The index is zero-based, so that positioning the cursor at index zero places the cursor at the string's first character.
-		
-		To position the cursor to the end of the text string, set its value to -1.
+/***************************************
+	Property: cursor_position
 
-		The cursor_position property also specifies the starting position for <selected_text>. The ending boundary of the selection is specified by the <selection_end> property. Text can also be selected by calling the <set_selection> function.
+	The cursor_position property specifies the index within the object's <text> string at which to place the cursor. The index is zero-based, so that positioning the cursor at index zero places the cursor at the string's first character.
 
-		*Default Setting:* -1
+	To position the cursor to the end of the text string, set its value to -1.
 
-		*See Also:* the <selection_end> and <selected_text> properties and the <set_selection> function
+	The cursor_position property also specifies the starting position for <selected_text>. The ending boundary of the selection is specified by the <selection_end> property. Text can also be selected by calling the <set_selection> function.
 
-	*/	
-    
+	*Default Setting:* -1
+
+	*See Also:* the <selection_end> and <selected_text> properties and the <set_selection> function
+*/
+
     int cursor_position
 		[[cursor_position=clutter_text_get_cursor_position(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_cursor_position(CLUTTER_TEXT(self),cursor_position);]];
 
-	/*
-		Property: selection_end
+/***************************************
+	Property: selection_end
 
-		The selection_end property specifies the index within the object's <text> string of the selection's ending boundary character, non-inclusive. The index is zero-based.
+	The selection_end property specifies the index within the object's <text> string of the selection's ending boundary character, non-inclusive. The index is zero-based.
 
-		The first character in the selection is specified by the <cursor_position> property. The selection can be retrieved from the <selected_text> property.
-		
-		Notice that the character specified by the cursor_position property is included in the selection, but the character specified by selection_end is not.
+	The first character in the selection is specified by the <cursor_position> property. The selection can be retrieved from the <selected_text> property.
 
-		To select all the text from the cursor_position index to the end of the string, set the selection_end property to -1.
-		
-		Text can also be selected by calling the <set_selection> function.
+	Notice that the character specified by the cursor_position property is included in the selection, but the character specified by selection_end is not.
 
-		*Default Setting:* -1
-		
-		*Code Example:* Select part of a string
+	To select all the text from the cursor_position index to the end of the string, set the selection_end property to -1.
+
+	Text can also be selected by calling the <set_selection> function.
+
+	*Default Setting:* -1
+
+	*Code Example:* Select part of a string
 
 		(code)
 		myText = Text( { text = "The dog ate the bone." } )
@@ -633,51 +663,48 @@ class Text [[ClutterActor*]] actor
 		myText.selection_end = 7
 		print( 'Selection: "' .. myText.selected_text .. '"' )  -- prints Selection: "dog"
 		(end)
-		
-		*See Also:* the <cursor_position> and <selected_text> properties and the <set_selection> function
-		
-	*/
-	
+
+	*See Also:* the <cursor_position> and <selected_text> properties and the <set_selection> function
+*/
+
     int selection_end
 		[[selection_end=clutter_text_get_selection_bound(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_selection_bound(CLUTTER_TEXT(self),selection_end);]];
 
-	/*
-		Property: selected_text
+/***************************************
+	Property: selected_text
 
-		The selected_text property contains the portion of the object's <text> string contained within the indices specified by the <cursor_position> and <selection_end> properties.
+	The selected_text property contains the portion of the object's <text> string contained within the indices specified by the <cursor_position> and <selection_end> properties.
 
-		If the cursor_position and selection_end properties are not set, the selected_text contains an empty string.
-		
-		Text can also be selected by calling the <set_selection> function.
+	If the cursor_position and selection_end properties are not set, the selected_text contains an empty string.
 
-		*Default Setting:* empty string
+	Text can also be selected by calling the <set_selection> function.
 
-		*See Also:* the <cursor_position> and <selection_end> properties and the <set_selection> function
+	*Default Setting:* empty string
 
-	*/
-		
+	*See Also:* the <cursor_position> and <selection_end> properties and the <set_selection> function
+*/
+
     readonly string selected_text
 		[[
 		    gchar * s = clutter_text_get_selection(CLUTTER_TEXT(self));
-		    selected_text = s;	    
-		    FreeLater free_later(s);	    
+		    selected_text = s;
+		    FreeLater free_later(s);
 		]];
 
 
-	/*
-		Property: selection_color
-		
-		The selection_color property specifies the color of selected text. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
-		
-		The selection_color property is applicable to editable Text objects only.
+/***************************************
+	Property: selection_color
 
-		*Default Setting:* nil
-		
-		*See Also:* the <editable> and <selected_text> properties
+	The selection_color property specifies the color of selected text. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-	*/	
-    
+	The selection_color property is applicable to editable Text objects only.
+
+	*Default Setting:* nil
+
+	*See Also:* the <editable> and <selected_text> properties
+*/
+
     table selection_color
 		[[
 		    ClutterColor color;
@@ -690,34 +717,33 @@ class Text [[ClutterActor*]] actor
 		    clutter_text_set_selection_color(CLUTTER_TEXT(self),&color);
 		]];
 
-	/*
-		Property: cursor_visible
-		
-		The cursor_visible property is a boolean flag indicating whether or not the cursor is visible (true=visible).
-		
-		The cursor_visible property is applicable to editable Text objects only.
+/***************************************
+	Property: cursor_visible
 
-		*Default Setting:* false, i.e., not visible
-		
-		*See Also:* the <editable>, <cursor_position>, <cursor_color> and <cursor_size> properties
+	The cursor_visible property is a boolean flag indicating whether or not the cursor is visible (true=visible).
 
-	*/
-		
+	The cursor_visible property is applicable to editable Text objects only.
+
+	*Default Setting:* false, i.e., not visible
+
+	*See Also:* the <editable>, <cursor_position>, <cursor_color> and <cursor_size> properties
+*/
+
     bool cursor_visible
 		[[cursor_visible=clutter_text_get_cursor_visible(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_cursor_visible(CLUTTER_TEXT(self),cursor_visible);]];
 
-	/*
-		Property: cursor_color
+/***************************************
+	Property: cursor_color
 
-		The cursor_color property specifies the color of the cursor. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
-	
-		The cursor_color property is applicable to editable Text objects only.
+	The cursor_color property specifies the color of the cursor. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-		*Default Setting:* rgba(255,255,255,255)
-		
-		*See Also:* the <editable>, <cursor_position>, <cursor_visible> and <cursor_size> properties
-	*/
+	The cursor_color property is applicable to editable Text objects only.
+
+	*Default Setting:* rgba(255,255,255,255)
+
+	*See Also:* the <editable>, <cursor_position>, <cursor_visible> and <cursor_size> properties
+*/
 
     table cursor_color
 		[[
@@ -731,137 +757,136 @@ class Text [[ClutterActor*]] actor
 		    clutter_text_set_cursor_color(CLUTTER_TEXT(self),&color);
 		]];
 
-	/*
-		Property: cursor_size
+/***************************************
+	Property: cursor_size
 
-		The cursor_size property specifies the cursor width in pixels.
+	The cursor_size property specifies the cursor width in pixels.
 
-		If the value of cursor_size is -1, the default cursor width is used.
+	If the value of cursor_size is -1, the default cursor width is used.
 
-		The cursor_size property is applicable to editable Text objects only.
+	The cursor_size property is applicable to editable Text objects only.
 
-		*Default Setting:* -1
+	*Default Setting:* -1
 
-		*See Also:* the <editable>, <cursor_position>, <cursor_visible> and <cursor_color> properties
-		
-	*/    
-    
+	*See Also:* the <editable>, <cursor_position>, <cursor_visible> and <cursor_color> properties
+*/
+
     int cursor_size
 		[[cursor_size=clutter_text_get_cursor_size(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_cursor_size(CLUTTER_TEXT(self),cursor_size);]];
-	
-	/*
-		Function: set_selection
-		
-		The set_selection() function selects a substring of the object's <text> property.
-		
-		*Arguments*:
-		
+
+/***************************************
+	Function: set_selection
+
+	The set_selection() function selects a substring of the object's <text> property.
+
+	*Arguments*:
+
 		start_pos - index of first character in selection. The first character in the string is at index zero.
 		end_pos - index of last character in selection, non-inclusive
-		
-		Notice that the character at the start_pos argument is included in the selection, but the character at the end_pos position is not.
-		
-		If either argument is set to -1, the selected text will extend from the end of the string to the character specified in the other argument.
-		
-		Text can also be selected by setting the <cursor_position> and <selection_end> properties.
-		
-		*Return Value:* None. The selection can be accessed from the object's <selected_text> property. The object's cursor_position and selection_end properties are set to the function's start_pos and end_pos argument values, respectively.
-		
-		*See Also:* the <selected_text>, <cursor_position> and <selection_end> properties
-	*/
-	
+
+	Notice that the character at the start_pos argument is included in the selection, but the character at the end_pos position is not.
+
+	If either argument is set to -1, the selected text will extend from the end of the string to the character specified in the other argument.
+
+	Text can also be selected by setting the <cursor_position> and <selection_end> properties.
+
+	*Return Value:* None. The selection can be accessed from the object's <selected_text> property. The object's cursor_position and selection_end properties are set to the function's start_pos and end_pos argument values, respectively.
+
+	*See Also:* the <selected_text>, <cursor_position> and <selection_end> properties
+*/
+
     set_selection( int start_pos, int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
 
 
-	/*
-		Function: delete_selection
-		
-		The delete_selection() function removes a previously-defined text selection from the object's <text> string. The selection can be defined by calling the <set_selection> function or by setting the object's <cursor_position> and <selection_end> properties.
-		
-		*Arguments:* None
-		
-		*Return Value:* Boolean flag indicating success or failure of the deletion (true=success). After the selection is deleted, the selection_end property will have the same value as the cursor_position property.
-		
-		*See Also:* the <cursor_position> and <selection_end> properties and the <set_selection> function
-	*/
-	
+/***************************************
+	Function: delete_selection
+
+	The delete_selection() function removes a previously-defined text selection from the object's <text> string. The selection can be defined by calling the <set_selection> function or by setting the object's <cursor_position> and <selection_end> properties.
+
+	*Arguments:* None
+
+	*Return Value:* Boolean flag indicating success or failure of the deletion (true=success). After the selection is deleted, the selection_end property will have the same value as the cursor_position property.
+
+	*See Also:* the <cursor_position> and <selection_end> properties and the <set_selection> function
+*/
+
     bool delete_selection()
 	[[result=clutter_text_delete_selection(CLUTTER_TEXT(self));]];
-	
-	/*
-		Function: delete_text
-		
-		The delete_text() function removes characters from the object's <text> string.
-		
-		*Arguments:*
-		
+
+/***************************************
+	Function: delete_text
+
+	The delete_text() function removes characters from the object's <text> string.
+
+	*Arguments:*
+
 		start_pos - index of first character to delete. The first character in the text string is at index zero.
 		end_pos - index of last character to delete, non-inclusive. Notice that the character at start_pos is deleted, but the character at end_pos is not.
-		
-		*Return Argument:* None
-		
-		*See Also:* the <delete_chars> and <delete_selection> functions
-	*/
-	
+
+	*Return Argument:* None
+
+	*See Also:* the <delete_chars> and <delete_selection> functions
+*/
+
     delete_text( int start_pos, int end_pos )
 	[[clutter_text_delete_text(CLUTTER_TEXT(self),start_pos,end_pos);]];
-	
-	/*
-		Function: delete_chars
-		
-		The delete_chars() function deletes a specified number of characters from the object's <text> string. The first character removed is specified by the <cursor_position> property and deletion moves toward the beginning of the string.
-		
-		If an attempt is made to delete more characters than exist between the cursor_position and the start of the string, no characters will be deleted.
-		
-		To delete characters from the end of the string, set the cursor_position property to -1.
-		
-		*Arguments:*
-		
+
+/***************************************
+	Function: delete_chars
+
+	The delete_chars() function deletes a specified number of characters from the object's <text> string. The first character removed is specified by the <cursor_position> property and deletion moves toward the beginning of the string.
+
+	If an attempt is made to delete more characters than exist between the cursor_position and the start of the string, no characters will be deleted.
+
+	To delete characters from the end of the string, set the cursor_position property to -1.
+
+	*Arguments:*
+
 		count - number of character to delete starting at the <cursor_position>. Characters are deleted moving toward the start of the string.
-		
-		*Return Value:* None
-		
-		*See Also:* the <cursor_position> property and the <delete_text> function
-	*/
-	
+
+	*Return Value:* None
+
+	*See Also:* the <cursor_position> property and the <delete_text> function
+*/
+
     delete_chars( int count )
 	[[clutter_text_delete_chars(CLUTTER_TEXT(self),count);]];
-	
-	/*
-		Function: insert_text
-		
-		The insert_text() function inserts specified text into the object's <text> string.
 
-		*Arguments:*
-		
+/***************************************
+	Function: insert_text
+
+	The insert_text() function inserts specified text into the object's <text> string.
+
+	*Arguments:*
+
 		pos - index at which to insert text. The first character is at index 0. To append text to the end of the string, set to -1.
 		text - string to insert
-		
-		*Return Value:* None
-		
-		*See Also:* the <delete_text> function
-	*/
-	
+
+	*Return Value:* None
+
+	*See Also:* the <delete_text> function
+*/
+
     insert_text( int pos, string text )
 	[[clutter_text_insert_text(CLUTTER_TEXT(self),text,pos);]];
-	
-	/*
-		Function: get_chars
-		
-		The get_chars() function retrieves a substring from the object's <text> string.
-		
-		*Arguments:*
-		
+
+/***************************************
+	Function: get_chars
+
+	The get_chars() function retrieves a substring from the object's <text> string.
+
+	*Arguments:*
+
 		start_pos - index of first character to retrieve. The first character in the string is at index zero.
 		end_pos - index of last character to retrieve, non-inclusive. Notice that the character specified in start_pos is retrieved, but the character specified by end_pos is not. To retrieve all characters from start_pos to the end of the string, set end_pos to -1.
-		
-		*Return Value:* String containing the retrieved characters
-		
-		*See Also:* the <selected_text> property and <set_selection> function
-	*/
-	
+
+	*Return Value:* String containing the retrieved characters
+
+	*See Also:* the <selected_text> property and <set_selection> function
+*/
+
     string get_chars( int start_pos, int end_pos )
 	[[
 	    gchar * c=clutter_text_get_chars(CLUTTER_TEXT(self),start_pos,end_pos);
@@ -869,23 +894,23 @@ class Text [[ClutterActor*]] actor
 	    FreeLater free_later(c);
 	]];
 
-    /*
-        Function: position_to_coordinates
+/***************************************
+	Function: position_to_coordinates
 
-		The position_to_coordinates() function accepts an index position within the text string and calculates the position's X, Y, and line height values in pixels. The X and Y values are positive offset values relative to the string's upper-left corner.
-		
-		*Arguments:*
-		
+	The position_to_coordinates() function accepts an index position within the text string and calculates the position's X, Y, and line height values in pixels. The X and Y values are positive offset values relative to the string's upper-left corner.
+
+	*Arguments:*
+
 		position - the numeric index within the text string. The first character in the string is at index 0. To indicate the end of the string, specify a position value of -1.
-		
-		*Return Values:* If the specified position was invalid, returns nil. Otherwise, returns a table containing three integers. The table contents are shown below.
-		
+
+	*Return Values:* If the specified position was invalid, returns nil. Otherwise, returns a table containing three integers. The table contents are shown below.
+
 		(code)
 		{ X coordinate, Y coordinate, line height in pixels }
 		(end)
-		
-		*See Also:* the <baseline> and <line_spacing> properties
-	*/
+
+	*See Also:* the <baseline> and <line_spacing> properties
+*/
 
     table position_to_coordinates( int position )
         [[
@@ -912,45 +937,93 @@ class Text [[ClutterActor*]] actor
             }
         ]];
 
-	/*
-		Event Handler: on_text_changed
-		
-		The on_text_changed event handler is called whenever the Text object's text string is modified.
-		
-		The on_text_changed() event handler is applicable to both editable and non-editable Text objects. With non-editable objects, the handler is called whenever the object's <text> or <markup> properties are set.
-		
-		*Prototype:*
-		
+/***************************************
+	Function: add_ontextchanged_listener
+
+	The add_ontextchanged_listener() function registers a handler function for <on_text_changed> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontextchanged_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
 		(code)
-		on_text_changed( Text text )
+		f( textObj )
 		(end)
-		
-		*Arguments:*
-		
-		text - the Text object whose text string has been modified
-		
-		*Return Values:* None
-		
-		*See Also:* the <editable>, <text> and <markup> properties
-		
-	*/	
-	
-    callback on_text_changed
-		[[
-		    UserData::get(L)->connect_signal_if(
-				on_text_changed,
-				"on_text_changed",
-				"text-changed",
-				G_CALLBACK(Text_on_text_changed),
-				L);	    
-		]];
+
+	*Handler Arguments:*
+
+		textObj - the Text object whose text string has been modified
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_text_changed> event and the <remove_ontextchanged_listener> function
+*/
+
+    int add_ontextchanged_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_text_changed" , L );
+            UserData::get( L )->connect_signal(
+                "on_text_changed",
+                "text-changed",
+                G_CALLBACK(Text_on_text_changed),
+                L);
+        ]];
+
+/***************************************
+	Function: remove_ontextchanged_listener
+
+	The remove_ontextchanged_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_ontextchanged_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_ontextchanged_listener> function
+*/
+
+    remove_ontextchanged_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_text_changed" , L );
+        ]];
+
+/***************************************
+	Event: on_text_changed
+
+	The on_text_changed event occurs whenever the Text object's text string is modified.
+
+	The on_text_changed event is applicable to both editable and non-editable Text objects. With non-editable objects, the handler is called whenever the object's <text> or <markup> properties are set.
+
+	*See Also:* the <add_ontextchanged_listener> function
+*/
+
+    function on_text_changed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_text_changed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_text_changed" , L );
+            UserData::get( L )->connect_signal(
+                "on_text_changed",
+                "text-changed",
+                G_CALLBACK(Text_on_text_changed),
+                L);
+        ]];
+
+/***************************************
+
+*/
 
 }
 
 [[
 void Text_on_text_changed(ClutterText*text,lua_State*L)
 {
-	UserData::invoke_callback( G_OBJECT( text ) , "on_text_changed" , 0 , 0 , L );
+	UserData::invoke_callbacks( G_OBJECT( text ) , "on_text_changed" , 0 , 0 , L );
 }
 ]]
-

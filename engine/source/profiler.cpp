@@ -10,15 +10,25 @@
 
 GQueue * Profiler::get_queue()
 {
+#ifndef GLIB_VERSION_2_32
     static GStaticPrivate current_queue = G_STATIC_PRIVATE_INIT;
 
     GQueue * queue = ( GQueue * ) g_static_private_get( & current_queue );
+#else
+    static GPrivate current_queue = G_PRIVATE_INIT( ( GDestroyNotify ) g_queue_free );
+
+    GQueue * queue = ( GQueue * ) g_private_get( & current_queue );
+#endif
 
     if ( ! queue )
     {
         queue = g_queue_new();
 
+#ifndef GLIB_VERSION_2_32
         g_static_private_set( & current_queue, queue, ( GDestroyNotify ) g_queue_free );
+#else
+        g_private_set( & current_queue, queue );
+#endif
     }
 
     return queue;

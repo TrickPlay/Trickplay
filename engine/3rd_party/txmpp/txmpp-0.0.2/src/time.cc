@@ -25,7 +25,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "time.h"
+#include "txmpptime.h"
 
 #ifdef POSIX
 #include <sys/time.h>

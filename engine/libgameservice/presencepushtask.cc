@@ -10,22 +10,6 @@ namespace libgameservice {
 
 // string helper functions -----------------------------------------------------
 
-static bool
-IsXmlSpace(int ch) {
-  return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
-}
-
-static bool
-ListContainsToken(const std::string & list, const std::string & token) {
-  size_t i = list.find(token);
-  if (i == std::string::npos || token.empty())
-    return false;
-  bool boundary_before = (i == 0 || IsXmlSpace(list[i - 1]));
-  bool boundary_after = (i == list.length() - token.length() || IsXmlSpace(list[i + token.length()]));
-  return boundary_before && boundary_after;
-}
-
-
 bool
 PresencePushTask::HandleStanza(const XmlElement * stanza) {
   if (stanza->Name() != QN_PRESENCE)

@@ -473,8 +473,7 @@ XmppEngineImpl::StartTls(const std::string & domain) {
 
 XmppEngineImpl::EnterExit::EnterExit(XmppEngineImpl* engine)
   : engine_(engine),
-  state_(engine->state_),
-  error_(engine->error_code_) {
+  state_(engine->state_) {
   engine->engine_entered_ += 1;
 }
 

@@ -12,7 +12,7 @@ The Multi-Level Menus application organizes its data in three types of tables: M
 
 Each Menu table defines a single menu, including its menuItems. The contents of a Menu table are described below.
 
-parentMenu - reference to the menu's parent Menu table, if any. If the menu has no parent, this field is nil. 
+parentMenu - reference to the menu's parent Menu table, if any. If the menu has no parent, this field is nil.
 title - string to display above the menu
 menuItems - table of menuItem records
 
@@ -74,7 +74,7 @@ Group: General Program Structure
 
 The application displays two types of screens: a menu screen and a movieInfo screen. Each screen type has its own layout which is created at the start of the program. The layout defines the presentational aspects of the screen, such as the location, font, and color of a menu's title or location and size of a movie's poster image. When a particular menu or movieInfo screen must be displayed, the data for the menu/movieInfo is retrieved from the application's data structures and inserted into the layout. Thus, all menus are displayed in the same menu layout screen and all movieInfo records are displayed in the same movieInfo screen.
 
-The layout for the menu screen is constructed in the defineMenuLayout() function. 
+The layout for the menu screen is constructed in the defineMenuLayout() function.
 
 One interesting aspect of the menu layout is the "menuItem plaque." This rectangular region is the size of a single menuItem and always covers the current menuItem. By displaying the plaque in a different color from the other menuItems, it provides a visual indication of which menuItem is current. In addition, when the current menuItem changes, the plaque is animated to glide to the new current menuItem, providing some ocular sugar to the application.
 
@@ -102,16 +102,14 @@ To process the user input for the menu screen, the sample application defines a 
 			LEFT = function() moveToPrevMenu()     end,
 			OK   = function() selectMenuItem()     end,
 	}
-	(end)
-	
-In the table defined above, pressing the UP arrow key will cause the KeyHandler() function to call the moveToPrevMenuItem() function. The KeyHandler() function is initialized by passing the table to it, as shown below.
 
-	(code)
-	-- Hook the screen's menu keyboard input to our handlers
-	screen.on_key_down = KeyHandler( keyInputHandlerMenu )
+	-- Register the handler and key table with the screen's on_key_down event
+	currKeyHandler = screen:add_onkeydown_listener( KeyHandler( keyInputHandlerMenu ) )
 	(end)
 
-The movieInfo screen recognizes its own set of key input, but the same KeyHandler() function can be set to process this new input by passing it a different table when the movieInfo screen is displayed, as shown below.
+In the table defined above, pressing the UP arrow key will cause the KeyHandler() function to call the moveToPrevMenuItem() function; the other keys in the table are processed similarly. The KeyHandler() function is initialized by passing the key table to it. The KeyHandler() function will also process any on_key_down events by registering it using the add_onkeydown_listener() function. Notice that the handle returned by the registration function is saved in the currKeyHandler global variable.
+
+The movieInfo screen recognizes its own set of key input, but the same KeyHandler() function can be set to process this new input by passing it a different key table when the movieInfo screen is displayed. Before changing the key handler, the previous handler should be removed by calling the remove_onkeydown_listener() function and passing it the saved currKeyHandler.
 
 	(code)
 	-- MovieInfo screen keystroke handler
@@ -121,16 +119,16 @@ The movieInfo screen recognizes its own set of key input, but the same KeyHandle
 	}
 
 	-- Direct user input to the movieInfo handlers
-	screen.on_key_down = KeyHandler( keyInputHandlerMovie )
+	screen:remove_onkeydown_listener( currKeyHandler )
+	currKeyHandler = screen:add_onkeydown_listener( KeyHandler( keyInputHandlerMovie ) )
 	(end)
 
 The keyInputHandlerMovie table uses an alternative key assignment syntax. The LEFT = "OK" statement instructs the KeyHandler() function to process LEFT arrow keystrokes in the same manner as OK keystrokes. In other words, if the user presses either the LEFT arrow or OK keys, the selectControl() function will be called.
 
-If the user leaves the movieInfo screen and returns to the previous menu screen, the menu screen's key processing is restored by simply repassing the keyInputHandlerMenu table to the KeyHandler() function.
+If the user leaves the movieInfo screen and returns to the previous menu screen, the menu screen's key processing is restored by removing the movieInfo key handler and resetting the handler to the menu-key table.
 
 Topic: Scaling an Image
 
 When displaying a movie's poster image, the application can accept images that are too large to fit in the screen space allocated for it. When this occurs, the program automatically scales the image so it fits in the screen space. The scalePoster() function determines whether or not scaling is required and, if necessary, scales the image. The scaling operation maintains the image's aspect ratio, so odd stretching or squeezing effects don't occur.
 
 The scalePoster() function scales a large image down, but it will not scale a small image up. If your application requires such a capability, it can be added using the current scalePoster() function as a model.
-

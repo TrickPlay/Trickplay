@@ -3,7 +3,7 @@
 Filename: mediaplay1.lua
 Author: Peter von dem Hagen
 Date: January 28, 2011
-Description: Mediaplayer  test  
+Description: Mediaplayer  test
 
 --]]
 
@@ -13,25 +13,23 @@ Description: Mediaplayer  test
  media_player_loaded = false
  media_player_stream_completed = false
 
- mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
- mediaplayer:set_viewport_geometry (750,10,200,200)
- video_idle =mediaplayer.state
- 
+  function mediaplayer:on_end_of_stream()
+    media_player_stream_completed = true
+  end
 
  function mediaplayer:on_loaded()
  	media_player_loaded = true
 	mediaplayer:play()
 	video_playing = mediaplayer.state
 	bitrate = mediaplayer.tags["bitrate"]
-	mediaplayer.volume = 0.5
-	mediaplayer.mute = false
+    --mediaplayer.mute = false
+	mediaplayer.volume = 0.7
 	mediaplayer:seek(130)
   end
 
-  function mediaplayer:on_end_of_stream()
-	media_player_stream_completed = true
-  end
-
+ mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
+ mediaplayer:set_viewport_geometry (750,10,200,200)
+ video_idle =mediaplayer.state
 
 screen:show()
 
@@ -63,10 +61,10 @@ function test_mediaplayer_has_video ()
 end
 
 function test_mediaplayer_volume ()
-	
-    local relative_error = math.abs((mediaplayer.volume - 0.5) / math.max(mediaplayer.volume, 0.5))
+
+    local error = mediaplayer.volume - 0.7
     local epsilon = 0.000001
-    assert_less_than( relative_error, epsilon, "mediaplayer.volume returned: "..mediaplayer.volume.." Expected 0.5")
+    assert_less_than( error, epsilon, "mediaplayer.volume returned: "..mediaplayer.volume.." Expected 0.7")
 end
 
 function test_mediaplayer_mute ()
@@ -78,7 +76,7 @@ function test_mediaplayer_has_audio ()
 end
 
 function test_mediaplayer_tags ()
--- Commenting out this test as it's returning nil due to the short movie --  
+-- Commenting out this test as it's returning nil due to the short movie --
   assert_string ( mediaplayer.tags["bitrate"] , "mediaplayer.tags[bitrate] returned: "..tostring(mediaplayer.tags["bitrate"]).." Expected a string"  )
     assert_string ( mediaplayer.tags["container-format"] , "mediaplayer.tags[container-format] returned: "..mediaplayer.tags["container-format"].." Expected a string"  )
     assert_string ( mediaplayer.tags["video-codec"] , "mediaplayer.tags[video-codec] returned: "..mediaplayer.tags["video-codec"].." Expected a string"  )
