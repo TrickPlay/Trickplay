@@ -281,6 +281,7 @@ class MainWindow(QMainWindow):
             self.bar.setValue(100)
             self.bar.hide()
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
+            self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         else : 
             self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
