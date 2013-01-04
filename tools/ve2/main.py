@@ -17,8 +17,12 @@ class MainWindow(QMainWindow):
         
         self.apath = apath
 
-        self.stitcher = QProcess()
+        self.debugger = QProcess()
 
+        QObject.connect(self.debugger, SIGNAL('started()'), self.debug_started)
+        QObject.connect(self.debugger, SIGNAL('finished(int)'), self.debug_finished)
+
+        self.stitcher = QProcess()
         QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
         QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
         QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stdError)
@@ -211,7 +215,7 @@ class MainWindow(QMainWindow):
             self.saveProject()
         elif ret == QMessageBox.Cancel:
             return 
-
+        
     def import_started(self):
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
@@ -557,23 +561,33 @@ class MainWindow(QMainWindow):
             # Local Debugging / Run 
             self._emulatorManager.trickplay.close()
 
-    def debug(self):
-        self.sendLuaCommand("exeDebugger", "_VE_.exeDebugger()")
-        """
+    
+    def debug_started(self):
+        print "[VE] Code Editor Started"
         self.ui.fileSystemDock.hide()
         self.windows['images'] = False
         self.ui.InspectorDock.hide()
         self.windows['inspector'] = False
         self.ui.mainMenuDock.hide()
-        self.sendLuaCommand("screenHide", "_VE_.screenHide()")
-        """
+        
+    def debug_finished(self, errorCode):
+        print "[VE] Code Editor Finished"
+        if self.debugger.state() == QProcess.NotRunning :
+            self.ui.fileSystemDock.show()
+            self.windows['images'] = True
+            self.ui.InspectorDock.show()
+            self.windows['inspector'] = True
+            self.ui.mainMenuDock.show()
+            self.run()
+
+    def debug(self):
+        if self._emulatorManager.trickplay.state() == QProcess.Running:
+            self._emulatorManager.trickplay.close()
+        self.debugger.start("python /usr/share/trickplay/debug/start.py "+str(self.path))
 
     def run(self):
         self.inspector.clearTree()
         self._emulatorManager.run()
-
-        #self.ui.action_Run.setEnabled(False)
-        #self.ui.action_Stop.setEnabled(False)
 
     def exit(self):
         self.stop(False, True)
