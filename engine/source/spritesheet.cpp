@@ -30,12 +30,10 @@ void Source::handle_async_img( Image * image )
     if ( image )
     {
         CoglHandle texture = ref_texture_from_image( image );
-        set_texture( texture );
+        set_texture( texture, true );
         delete image;
         
         Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
-        
-        ping_all();
     }
     else
     {
@@ -43,7 +41,7 @@ void Source::handle_async_img( Image * image )
     }
 }
 
-void Source::make_texture()
+void Source::make_texture( bool immediately )
 {
     g_assert( uri );
     
@@ -51,21 +49,7 @@ void Source::make_texture()
     CoglHandle texture = Images::cache_get( cache_key, * jo );
     delete jo;
     
-    if ( all_pings_async )
-    {
-        if ( texture == COGL_INVALID_HANDLE )
-        {
-            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-        }
-        else
-        {
-            ping_all_later();
-        }
-        
-        set_texture( texture );
-    }
-    else
+    if ( immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
@@ -76,16 +60,29 @@ void Source::make_texture()
             Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
         }
         
-        set_texture( texture );
-        ping_all();
+        set_texture( texture, true );
+    }
+    else
+    {
+        if ( texture == COGL_INVALID_HANDLE )
+        {
+            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+            set_texture( texture, false );
+        }
+        else
+        {
+            set_texture( texture, true );
+            ping_all_later();
+        }
     }
 }
 
 void Source::set_source( const char * _uri )
 {
-    if ( sheet->native_json_path )
+    if ( sheet->json_path )
     {
-        char * json = g_path_get_dirname( sheet->native_json_path );
+        char * json = g_path_get_dirname( sheet->json_path );
         uri = g_build_filename( json, _uri, NULL );
         free( json );
     }
@@ -99,12 +96,23 @@ void Source::set_source( const char * _uri )
 
 void Source::set_source( Image * image )
 {
-    set_texture( ref_texture_from_image( image ) );
     cache = true;
+    set_texture( ref_texture_from_image( image ), true );
 }
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 {
+    int tw, th;
+    get_dimensions( &tw, &th );
+    
+    if ( w < 0 ) tw = MAX( tw - x, 0 );
+    if ( h < 0 ) th = MAX( th - y, 0 );
+    
+    if ( tw < x + w || th < y + h )
+    {
+        return cogl_texture_new_with_size( MAX( w, 1 ), MAX( h, 1 ), COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+    }
+    
     return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
 }
 
@@ -113,16 +121,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Sprite::update()
 {
     g_assert( source );
-    
-    int tx, ty, tw, th;
-    source->get_dimensions( &tw, &th );
-    
-    tx = MIN( x, tw - 1 );
-    ty = MIN( y, th - 1 );
-    tw = MIN( w < 0 ? tw : tx + w, tw ) - tx;
-    th = MIN( h < 0 ? th : ty + h, th ) - ty;
-    
-    set_texture( cogl_handle_ref( source->get_subtexture( tx, ty, tw, th ) ) );
+    set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
     ping_all();
 }
 
@@ -131,22 +130,14 @@ void on_ping( PushTexture * source, void * target )
     ((Sprite *) target)->update();
 }
 
-void Sprite::on_sync_change()
+void Sprite::make_texture( bool immediately )
 {
-    g_assert( source );
-    
-    ping.set( source, * on_ping, this, all_pings_async );
-}
-
-void Sprite::make_texture()
-{
-    on_sync_change();
-    update();
+    ping.set( source, * on_ping, this, immediately );
 }
 
 void Sprite::lost_texture()
 {
-    ping.set( NULL, NULL, NULL, true );
+    ping.set( NULL, NULL, NULL, false );
 }
 
 /* SpriteSheet */
@@ -165,7 +156,7 @@ class AsyncCallback : public Action
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), native_json_path( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_path( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -181,7 +172,7 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 SpriteSheet::~SpriteSheet()
 {
     g_free( extra );
-    if ( native_json_path ) g_free( native_json_path );
+    if ( json_path ) g_free( json_path );
 }
 
 void SpriteSheet::emit_signal( const char * msg )
@@ -245,11 +236,8 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
 
 void SpriteSheet::load_json( const char * json )
 {
-    native_json_path = strdup( json );
-
     char * map = NULL;
     gsize length;
-    
 
     if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
@@ -258,6 +246,8 @@ void SpriteSheet::load_json( const char * json )
     }
     else
     {
+        json_path = strdup( json );
+        
         AppResource resource( app, json );
         if ( resource.is_native() )
         {

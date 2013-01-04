@@ -37,8 +37,7 @@ public:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }
             void handle_async_img( Image * image );
             
-            void on_sync_change() {};
-            void make_texture();
+            void make_texture( bool immediately );
             void lost_texture() {};
             
             std::string cache_key;
@@ -62,8 +61,7 @@ public:
             const char * get_id() { return id; }
             
         private:
-            void on_sync_change();
-            void make_texture();
+            void make_texture( bool immediately );
             void lost_texture();
             
             PushTexture::PingMe ping;
@@ -90,6 +88,8 @@ public:
     
     bool has_id( const char * id );
 
+    char * get_json_path() { return json_path ? json_path : (char *) ""; }
+
     App * app;
     GObject * extra;
     bool async;
@@ -98,7 +98,7 @@ public:
     friend class Source;
 
 private:
-    char * native_json_path;
+    char * json_path;
     std::map < std::string, Sprite > sprites;
     std::list < Source > sources;
 };

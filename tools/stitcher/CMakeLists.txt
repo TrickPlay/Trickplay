@@ -1,5 +1,5 @@
 
-add_definitions( -DG_LOG_DOMAIN="stitcher" )
+add_definitions( -DG_LOG_DOMAIN="\\"stitcher\\"" )
 
 include( FindPkgConfig )
 
@@ -29,7 +29,10 @@ add_executable( stitcher
                 leaf.c
                 item.c
                 state.c
+                progress.c
 )
+
+add_definitions("-std=gnu99")
 
 target_link_libraries( stitcher
         ${GLIB2_LIBRARIES}

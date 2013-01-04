@@ -7,6 +7,16 @@ project( TP )
 
 if(CMAKE_TOOLCHAIN_FILE)
 
+    set(PREFIX $ENV{PREFIX})
+
+    if (PREFIX)
+
+        set( CMAKE_INSTALL_PREFIX ${PREFIX} )
+
+    endif(PREFIX)
+
+    unset(PREFIX)
+
 else(CMAKE_TOOLCHAIN_FILE)
 
     set( CMAKE_FIND_ROOT_PATH /opt/local /usr/local /usr)
@@ -66,8 +76,7 @@ message( STATUS "TRICKPLAY VERSION IS ${GIT_VERSION}" )
 # all warnings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_FLAGS "-Wall")
-set(CMAKE_C_FLAGS "-std=gnu99 -Wall")
+add_definitions("-Wall")
 
 #------------------------------------------------------------------------------
 # aggressive optimization
@@ -92,11 +101,7 @@ endif(OPT3)
 
 CHECK_CXX_COMPILER_FLAG("-fcolor-diagnostics" COLOR_CLANG_OUTPUT)
 if(COLOR_CLANG_OUTPUT)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics")
-endif(COLOR_CLANG_OUTPUT)
-CHECK_C_COMPILER_FLAG("-fcolor-diagnostics" COLOR_CLANG_OUTPUT)
-if(COLOR_CLANG_OUTPUT)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fcolor-diagnostics")
+    add_definitions("-fcolor-diagnostics")
 endif(COLOR_CLANG_OUTPUT)
 
 

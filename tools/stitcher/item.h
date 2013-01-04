@@ -5,14 +5,19 @@
 #include "options.h"
 
 typedef struct Item {
-  unsigned int w, h, area;
+  unsigned w, h, area, x_offset, y_offset;
   const char * id;
+  char * checksum;
   Image * source;
+  GPtrArray * children;
 } Item;
 
 Item * item_new ( const char * id );
 void item_free ( Item * item );
-Item * item_new_with_source( const char * id, Image * source, Options * options );
+Item * item_new_with_source( const char * id, Image * source );
+void item_add_child( Item * item, Item * child );
+Item * item_add_child_new( Item * item, const char * id, unsigned x_offset, unsigned y_offset, unsigned w, unsigned h );
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) );
+char * item_to_string( Item * item, int x, int y, unsigned indent );
 
 #endif
