@@ -343,7 +343,7 @@ return function(response_table)
     App_State.rolodex.cards = {}
     App_State.rolodex.visible_cards = {}
     
-    local tot = #response_table.deals
+    local tot = math.min(#response_table.deals,10)
     
     local divs = {}
     
