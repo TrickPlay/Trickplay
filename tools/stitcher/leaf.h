@@ -13,7 +13,6 @@ typedef struct Leaf {
 void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, Layout * layout );
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h );
 int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data );
-char * leaf_tostring ( Leaf * leaf, Options * options );
 void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc cmp_func, gpointer cmp_data );
 
 

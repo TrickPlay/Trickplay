@@ -51,10 +51,10 @@ public:
         public:
             typedef void (Callback)( PushTexture * source, void * target );
 
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ), async( true ) {};
+            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {}; //, async( true )
             ~PingMe();
 
-            void set( PushTexture * source, Callback * callback, void * target, bool async );
+            void set( PushTexture * source, Callback * callback, void * target, bool preload );
 
             friend class PushTexture;
 
@@ -64,36 +64,35 @@ public:
             PushTexture * source;
             Callback * callback;
             void * target;
-            bool async;
     };
 
-    PushTexture() : cache( false ), all_pings_async( false ), texture( NULL ), can_signal( true ) {};
+    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ) {}; //all_pings_async( true ), 
     ~PushTexture();
 
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture );
+    void set_texture( CoglHandle texture, bool real );
     void get_dimensions( int * w, int * h );
     void ping_all();
     void ping_all_later() { Action::post( new PingAllLater( this ) ); };
+    bool is_real() { return real; };
 
     friend class Subscription;
 
 protected:
-    virtual void on_sync_change() = 0;
-    virtual void make_texture() = 0;
+    virtual void make_texture( bool immediately ) = 0;
     virtual void lost_texture() = 0;
 
     bool cache;
-    bool all_pings_async;
 
 private:
-    void subscribe( PingMe * ping );
+    void subscribe( PingMe * ping, bool preload );
     void unsubscribe( PingMe * ping );
     void release_texture();
 
     std::set< PingMe * > pings;
     CoglHandle texture;
     bool can_signal;
+    bool real;
 };
 
 #endif
