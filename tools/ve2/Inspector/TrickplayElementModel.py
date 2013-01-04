@@ -129,7 +129,8 @@ class TrickplayElementModel(QStandardItemModel):
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
             else:
-                print ("newChildGid or newParentGid is nil ...")
+                pass
+                #print ("newChildGid or newParentGid is nil ...")
 
             self.lmChild = "false"
             self.lmRow = "nil"
