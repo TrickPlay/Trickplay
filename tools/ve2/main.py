@@ -583,7 +583,7 @@ class MainWindow(QMainWindow):
     def debug(self):
         if self._emulatorManager.trickplay.state() == QProcess.Running:
             self._emulatorManager.trickplay.close()
-        self.debugger.start("python /usr/share/trickplay/debug/start.py "+str(self.path))
+        self.debugger.start("python /usr/share/trickplay/debug/start.py \""+str(self.path)+"\"")
 
     def run(self):
         self.inspector.clearTree()
