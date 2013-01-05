@@ -9,20 +9,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>644</height>
+    <width>688</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>200</width>
-    <height>200</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="cursor">
@@ -50,7 +50,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>672</width>
+     <width>688</width>
      <height>25</height>
     </rect>
    </property>
@@ -72,20 +72,15 @@
     <addaction name="actionImport_Assets"/>
     <addaction name="actionImport_Skins"/>
     <addaction name="separator"/>
+    <addaction name="action_CodeEditor"/>
+    <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>Windows</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuRun">
-    <property name="title">
-     <string>Run</string>
-    </property>
-    <addaction name="action_Run"/>
-    <addaction name="action_Debugger"/>
-    <addaction name="action_Stop"/>
+    <addaction name="actionEditor"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -184,7 +179,6 @@
    <addaction name="menuEdit"/>
    <addaction name="menuArrange"/>
    <addaction name="menuView_2"/>
-   <addaction name="menuRun"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QDockWidget" name="InspectorDock">
@@ -199,8 +193,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>330</width>
-     <height>81</height>
+     <width>79</width>
+     <height>41</height>
     </size>
    </property>
    <property name="font">
@@ -211,11 +205,14 @@
    <property name="contextMenuPolicy">
     <enum>Qt::NoContextMenu</enum>
    </property>
+   <property name="floating">
+    <bool>true</bool>
+   </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetClosable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>Inspector : </string>
+    <string>Inspector</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -250,8 +247,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>330</width>
-     <height>81</height>
+     <width>79</width>
+     <height>41</height>
     </size>
    </property>
    <property name="font">
@@ -262,11 +259,14 @@
    <property name="contextMenuPolicy">
     <enum>Qt::NoContextMenu</enum>
    </property>
+   <property name="floating">
+    <bool>true</bool>
+   </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetClosable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>Images File System</string>
+    <string>Images</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -287,6 +287,66 @@
       </layout>
      </item>
     </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="mainMenuDock">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>56</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>672</width>
+     <height>50</height>
+    </size>
+   </property>
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string/>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="mainMenuContainer">
+    <property name="maximumSize">
+     <size>
+      <width>672</width>
+      <height>25</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <widget class="QWidget" name="gridLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>4</x>
+       <y>0</y>
+       <width>665</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="mainMenuLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <action name="actionExit">
@@ -961,6 +1021,22 @@
   <action name="action_Debugger">
    <property name="text">
     <string>Debug</string>
+   </property>
+  </action>
+  <action name="action_CodeEditor">
+   <property name="text">
+    <string>Code Editor...</string>
+   </property>
+  </action>
+  <action name="actionEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Editor</string>
    </property>
   </action>
  </widget>

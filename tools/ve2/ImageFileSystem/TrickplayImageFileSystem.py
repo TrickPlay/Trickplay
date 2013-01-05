@@ -109,10 +109,11 @@ class TrickplayImageFileSystem(QWidget):
         
         self.ui.fileSystemTree = DnDTreeWidget(self)
         self.ui.fileSystemTree.setObjectName(_fromUtf8("fileSystemTree"))
-        self.ui.fileSystemTree.headerItem().setText(0, _fromUtf8("1"))
+        #self.ui.fileSystemTree.headerItem().setText(0, _fromUtf8("1"))
+        self.ui.fileSystemTree.header().setVisible(False)
         self.ui.fileSystem.addWidget(self.ui.fileSystemTree, 0, 0, 1, 1)
 
-        self.ui.fileSystemTree.setHeaderLabels(['Name'])
+        #self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
         self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
         # id changed 
@@ -325,7 +326,7 @@ class TrickplayImageFileSystem(QWidget):
         item = self.ui.fileSystemTree.currentItem()
         source = item.whatsThis(0)
         if self.isDir(source) == False :
-            print ("Insert Image : %s"%source)
+            #print ("Insert Image : %s"%source)
             self.main.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self.main._inspector.curLayerGid)+"', 'Image', "+"'"+str(source)+"')")
         else:
             print ("Error : Dir is selected")
