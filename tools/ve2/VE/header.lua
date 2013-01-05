@@ -88,6 +88,7 @@ hdr.neighberKey_map =
 -- Global Variables
 ---------------------
 editor_lb = editor
+buildInsp = false
 --editor_use = false
 
 current_dir 	   = ""
