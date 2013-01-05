@@ -238,9 +238,8 @@ function screen_ui.selected(obj)
 			--obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
 			obj_border.x, obj_border.y = screen_pos_of_child(obj) 	
 		elseif group_pos then 
-            
-     		obj_border.x = obj.x + group_pos[1] 
-            obj_border.y = obj.y + group_pos[2] 
+     		obj_border.x = (obj.x * obj.parent_group.scale[1] + group_pos[1])
+            obj_border.y = (obj.y * obj.parent_group.scale[2] + group_pos[2])  
 		end
 
 		obj_border.extra.group_postion = obj.extra.group_position
@@ -269,7 +268,7 @@ function screen_ui.selected(obj)
 		if bumo then 
     		anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
 		elseif group_pos then
-    		anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+    		anchor_mark.position = {obj.x* obj.parent_group.scale[1] + group_pos[1] , obj.y * obj.parent_group.scale[2] + group_pos[2], obj.z}
 		end
     else 
    		anchor_mark.position = {obj.x, obj.y, obj.z}
@@ -285,6 +284,16 @@ function screen_ui.selected(obj)
 		obj_border.x = obj_border.x + tab_extra_w
 	end 
 	
+    if(obj.extra.is_in_group == true)then 
+        obj_border.scale = obj.parent_group.scale
+        if obj.parent_group.scale[1] < 1 then
+            obj_border.w = obj_border.w + 2 
+            obj_border.h = obj_border.h + 2 
+        end
+    elseif obj.scale[1] < 1 then 
+            obj_border.w = obj_border.w + 2 
+            obj_border.h = obj_border.h + 2 
+    end
     anchor_mark.name = obj.name.."a_m"
     screen:add(anchor_mark)
     screen:add(obj_border)
