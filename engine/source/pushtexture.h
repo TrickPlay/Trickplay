@@ -75,7 +75,7 @@ public:
             void * target;
     };
 
-    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ) {};
+    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ), failed( false ) {};
     ~PushTexture();
 
     CoglHandle get_texture();
@@ -84,12 +84,14 @@ public:
     void ping_all();
     void ping_all_later() { Action::post( new PingAllLater( this ) ); };
     bool is_real() { return real; };
+    bool is_failed() { return failed; };
 
 protected:
     virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
     virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
 
     bool cache; // if true, prevents texture from being released
+    bool failed;
 
 private:
     void subscribe( PingMe * ping, bool preload );

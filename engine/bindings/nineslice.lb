@@ -128,15 +128,16 @@ struct NineSliceBinding
         }
     }
     
-    void check_loaded()
+    void signal_loaded_later()
     {
         if ( async )
         {
-            nineslice_effect_check_loaded( effect );
+            nineslice_effect_signal_loaded_later( effect );
         }
     }
     
     bool async;
+    bool can_fire;
     
 private:
     NineSliceEffect * effect;
@@ -224,7 +225,7 @@ class NineSlice [[ClutterActor*]] actor
                 * get_ref( self ) = LUA_REFNIL;
             }
             
-            get_binding( self )->check_loaded();
+            get_binding( self )->signal_loaded_later();
         ]];
 
     /*
@@ -275,7 +276,7 @@ class NineSlice [[ClutterActor*]] actor
                     lua_pop( L, 1 );
                 }
                 
-                get_binding( self )->check_loaded();
+                get_binding( self )->signal_loaded_later();
             }
             else
             {
