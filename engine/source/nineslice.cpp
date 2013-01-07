@@ -16,13 +16,14 @@ struct Slice
         self->update();
     }
     
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ) {};
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ) {};
     ~Slice() { if ( material ) cogl_handle_unref( material ); }
     
     void set_sprite( Sprite * _sprite, bool async )
     {
         sprite = _sprite;
         loaded = false;
+        done = !sprite;
         ping.set( sprite, Slice::on_ping, this, !async );
     }
     
@@ -44,9 +45,10 @@ struct Slice
         
         clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
         
-        loaded = sprite && ( sprite->is_real() || sprite->is_failed() );
+        loaded = sprite && sprite->is_real();
+        done = !sprite || sprite->is_real() || sprite->is_failed();
         
-        if ( loaded )
+        if ( done )
         {
             nineslice_effect_signal_loaded_later( effect );
         }
@@ -57,6 +59,7 @@ struct Slice
     Sprite * sprite;
     PingMe ping;
     bool loaded;
+    bool done;
 };
 
 struct _NineSliceEffectPrivate {
@@ -73,9 +76,9 @@ class SignalLoadedLater : public Action
 
     protected: bool run()
     {
-        if ( nineslice_effect_is_loaded( self ) )
+        if ( nineslice_effect_is_done( self ) )
         {
-            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", nineslice_effect_is_failed( self ) );
+            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", !nineslice_effect_is_loaded( self ) );
         }
         
         self->priv->can_fire = true;
@@ -94,6 +97,21 @@ void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite *
     effect->priv->slices[i].set_sprite( sprite, async );
 }
 
+bool nineslice_effect_is_done( NineSliceEffect * effect )
+{
+    Slice * slices = effect->priv->slices;
+    
+    for ( unsigned i = 0; i < 9; ++i )
+    {
+        if ( !slices[i].done )
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 bool nineslice_effect_is_loaded( NineSliceEffect * effect )
 {
     Slice * slices = effect->priv->slices;
@@ -107,21 +125,6 @@ bool nineslice_effect_is_loaded( NineSliceEffect * effect )
     }
     
     return true;
-}
-
-bool nineslice_effect_is_failed( NineSliceEffect * effect )
-{
-    Slice * slices = effect->priv->slices;
-    
-    for ( unsigned i = 0; i < 9; ++i )
-    {
-        if ( slices[i].sprite && slices[i].sprite->is_failed() )
-        {
-            return true;
-        }
-    }
-    
-    return false;
 }
 
 void nineslice_effect_signal_loaded_later( NineSliceEffect * effect )
