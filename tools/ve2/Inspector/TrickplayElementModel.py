@@ -116,14 +116,21 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
-                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                    if str(self.lmParentGid) != 'nil' : 
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    else:
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 else:
-                    inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                    if str(self.lmParentGid) != 'nil' : 
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    else:
+                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 print inputCmd
                 self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
             else:
-                print ("newChildGid or newParentGid is nil ...")
+                pass
+                #print ("newChildGid or newParentGid is nil ...")
 
             self.lmChild = "false"
             self.lmRow = "nil"
@@ -142,8 +149,18 @@ class TrickplayElementModel(QStandardItemModel):
             for c in pdata["children"]:
                 if c["name"] == "screen":
                     child = c
+                    #self.theBigestGid = 2
                     break
                 
+            """
+            for c in child["children"]:
+                if c["name"][:5] == "Layer":
+                    layer = c 
+                    self.tpData = pdata
+                    self.insertElement(root, layer, pdata, True)
+
+            """
+
             if child is None:
                 print( "Could not find screen element." )
             else:
@@ -152,6 +169,7 @@ class TrickplayElementModel(QStandardItemModel):
                 self.insertElement(root, child, pdata, True)
 
             self.inspector.ui.inspector.expandAll()
+            #self.inspector.ui.inspector.setRowHidden(0, root.index(), True)
 
             gid = None
 
@@ -233,13 +251,14 @@ class TrickplayElementModel(QStandardItemModel):
 
         if "Texture" == title:
             title = "Image"
-            
+        elif "Widget_" == title[:7]:
+            title = title[7:]
+
         # Set the name node to gid + name
         if '' != value:   
             gs = str(gid)
             l = len(gs)
             #value =  gs + ' ' * 2 * (6 - l) + value 
-            value =  value 
         else:    
             #value = str(gid)
             value = ""
@@ -265,6 +284,7 @@ class TrickplayElementModel(QStandardItemModel):
         # causes problems with key presses in the app
         else:    
             del(data['is_visible'])
+            node.setSelectable(False)
         
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)

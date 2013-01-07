@@ -66,6 +66,9 @@ function editor.rectangle_done(x,y)
 
     _VE_.refresh()
     blockReport = false
+    _VE_.selectUIElement(uiRectangle.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiRectangle.gid, false)
     screen.grab_key_focus(screen)
 
 end 
@@ -124,10 +127,6 @@ function editor.clone()
 
 	for i, v in pairs(curLayer.children) do
 		if(v.selected == true) then
-            print (v.name)
-            print (v.name)
-            print (v.name)
-            print (v.name)
 		    screen_ui.n_selected(v)
 		    uiClone = WL.Widget_Clone {
 		        source = v,
@@ -150,6 +149,9 @@ function editor.clone()
 
     _VE_.refresh()
     blockReport = false
+    _VE_.selectUIElement(uiClone.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiClone.gid, false)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
@@ -191,6 +193,9 @@ function editor.group()
 
     _VE_.refresh()
     blockReport = false
+    --_VE_.selectUIElement(uiGroup.gid)
+    --_VE_.refreshDone()
+    --_VE_.openInspector(uiGroup.gid, false)
 
     screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
@@ -320,6 +325,14 @@ function editor.duplicate(gid)
 
             if uiTypeStr == "Widget_Group" then 
                 duplicate_child(uiDuplicate, v)
+            elseif uiTypeStr == "LayoutManager" then 
+                for r = 1, uiDuplicate.number_of_rows, 1 do 
+                    for c = 1, uiDuplicate.number_of_cols, 1 do 
+                        local item = uiDuplicate.cells[r][c]
+                        local itemType = util.getTypeNameStr(item) 
+                        util.assign_right_name(item, itemType)
+                    end 
+                end 
             end 
 
             util.addIntoLayer(uiDuplicate)
@@ -328,6 +341,9 @@ function editor.duplicate(gid)
     end -- for 
 
     blockReport = false
+    _VE_.selectUIElement(uiDuplicate.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiDuplicate.gid, false)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()

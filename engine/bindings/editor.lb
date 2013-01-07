@@ -76,6 +76,11 @@ restricted global editor [[ void * ]]
             result = App::get(L)->change_app_path( path );
         ]];
 
+    readonly string app_path
+    [[
+        app_path = App::get(L)->get_metadata().get_root_native_path().c_str();
+    ]]
+
      bool mkdir( string path )
         [[
             result = 0 == g_mkdir_with_parents( path , 0700 );

@@ -243,7 +243,7 @@ class Wizard():
         	directory = dir
         
 
-        path = QFileDialog.getExistingDirectory(None, 'Create an app directory', directory, QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(None, 'Choose a directory for your app', directory, QFileDialog.ShowDirsOnly)
         apath = os.path.dirname(str(path))
         
         result = self.adjustDialog(path, directory)
@@ -362,7 +362,7 @@ class Wizard():
                 mainPath = os.path.join(path, 'main.lua')
                 mainFile = open(mainPath, 'w')
 
-                mainContents = """-- GLOBAL SECTION\nWL=dofile('LIB/Widget/Widget_Library.lua') --Load widget library\ndofile('LIB/ve2/ve_runtime') --Load VE runtime library \n-- END GLOBAL SECTION\n\nfunction main()\n\n\tlocal layers_file = 'screens/layers.json'\n\tlocal styles_file = 'screens/styles.json'\n\tlocal screens_file = 'screens/screens.json'\n\tlocal image_path = 'assets/images/'\n\n\tlocal style = readfile(styles_file)\n\tstyle = string.sub(style, 2, string.len(style)-1)\n\tload_styles(style)\n\n\tlocal layer = readfile(layers_file)\n\tlayer = string.sub(layer, 2, string.len(layer)-1)\n\n\tlocal screens = readfile(screens_file)\n\tscreens = string.sub(screens, 2, string.len(screens)-1)\n\n\tlocal layerGroup = load_layer(layer)\n\n\tfor i,j in ipairs(layerGroup.children) do\n\t\tif string.find(j.name, 'Layer') then\n\t\t\tloadfile(string.lower(j.name)..'.lua')(j)\n\t\t\tj:unparent()\n\t\t\tscreen:add(j)\n\t\t\tj:hide()\n\t\tend\n\tend\n\n\ttransit_to(screens, nil)\n\n-- SCREEN ON_KEY_DOWN SECTION\n\tfunction screen:on_key_down(key)\n\tend\n-- END SCREEN ON_KEY_DOWN SECTION\n\nend\n\n-- GLOBAL SECTION FOOTER \ncontrollers:start_pointer()\nscreen:show()\ndolater(main)\n-- END GLOBAL SECTION FOOTER""" 
+                mainContents = """-- GLOBAL SECTION\nWL=dofile('LIB/Widget/Widget_Library.lua') --Load widget library\ndofile('LIB/ve2/ve_runtime') --Load VE runtime library \n-- END GLOBAL SECTION\n\nfunction main()\n\n\tlocal layers_file = 'screens/layers.json'\n\tlocal styles_file = 'screens/styles.json'\n\tlocal screens_file = 'screens/screens.json'\n\tlocal image_path = 'assets/images/'\n\n\tlocal style = readfile(styles_file)\n\tstyle = string.sub(style, 2, string.len(style)-1)\n\tload_styles(style)\n\n\tlocal layer = readfile(layers_file)\n\tlayer = string.sub(layer, 2, string.len(layer)-1)\n\n\tlocal screens = readfile(screens_file)\n\tscreens = string.sub(screens, 2, string.len(screens)-1)\n\n\tlocal layerGroup = load_layer(layer)\n\n\tfor i,j in ipairs(layerGroup.children) do\n\t\tif string.find(j.name, 'Layer') then\n\t\t\tloadfile(string.lower(j.name)..'.lua')\n\t\t\tj:unparent()\n\t\t\tscreen:add(j)\n\t\t\tj:hide()\n\t\tend\n\tend\n\n\ttransit_to(screens, nil)\n\n-- SCREEN ON_KEY_DOWN SECTION\n\tfunction screen:on_key_down(key)\n\tend\n-- END SCREEN ON_KEY_DOWN SECTION\n\nend\n\n-- GLOBAL SECTION FOOTER \ncontrollers:start_pointer()\nscreen:show()\ndolater(main)\n-- END GLOBAL SECTION FOOTER""" 
                 
                 mainFile.write(mainContents)
                 mainFile.close()

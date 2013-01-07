@@ -97,7 +97,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
         { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
-            & options->de_duplicate,             "Only include one copy of images that are the same (not currently implemented)", NULL },
+            & options->de_duplicate,             "Only include one copy of images that are the same", NULL },
         { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
             & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
         { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 

@@ -157,7 +157,7 @@ class SlotItem(QGraphicsRectItem):
 
     #def hoverEnterEvent(self, event):
     def mousePressEvent(self, event):
-        if self.brush().color() != Qt.red :
+        if self.brush().color() != Qt.red and str(self.parent.insp.ppp[:6]) != 'screen' :
             self.parent.resetAnchorPoint()
             self.parent.sendAnchorPointSetCommand(self.name)
             self.setBrush(Qt.red)
@@ -234,6 +234,8 @@ class DiagramScene(QGraphicsScene):
             self.v_pos = 1
 
     def sendAnchorPointSetCommand(self, name):
+        if self.insp.editable == False :
+            return
         if name == "tl" :
             anchorStr = '{0,0,0}'
         elif name == "ml" : 
@@ -252,6 +254,7 @@ class DiagramScene(QGraphicsScene):
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1]/2)+'}'
         elif name == "br" : 
             anchorStr = '{'+str(self.curSz[0])+','+str(self.curSz[1])+'}'
+
         self.insp.main._emulatorManager.setUIInfo(self.gid, 'anchor_point', anchorStr)
 
     def setCurrentAnchorPoint(self):
@@ -464,6 +467,7 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.setDragDropMode(QAbstractItemView.InternalMove)
         self.ui.inspector.setDefaultDropAction(Qt.MoveAction)
         self.ui.inspector.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.ui.inspector.setIndentation(10)
         #self.ui.inspector.setSelectionMode(QAbstractItemView.MultiSelection)
 
         self.ui.gridLayout_3.addWidget(self.ui.inspector, 2, 0, 1, 1)
@@ -475,7 +479,8 @@ class TrickplayInspector(QWidget):
         self.curLayerName = None
         self.curLayerGid = None
         self.curItemGid = None
-        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
+        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
+        self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector:", None, QApplication.UnicodeUTF8)) 
         self.layerName = {}
         self.layerGid = {}
         self.screens = {"_AllScreens":[],"Default":[]}
@@ -488,12 +493,12 @@ class TrickplayInspector(QWidget):
         self.inspectorModel = TrickplayElementModel(self)
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
-        self.ui.inspector.setIndentation(10)
+        #self.ui.inspector.setRowHidden(1, self.inspectorModel.root, True)
 
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
         self.currentScreenName = "Default"
-        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;}")
+        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
         self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
         QObject.connect(self.ui.deleteScreen, SIGNAL('clicked()'), self.removeScreen)
         QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
@@ -507,6 +512,7 @@ class TrickplayInspector(QWidget):
         self.ui.property.setIndentation(10)
         
         self.itemWidget = None
+        self.editable = True
         self.selectedItemCount = 1
 
         # QTreeView selectionChanged signal doesn't seem to work here...
@@ -700,6 +706,11 @@ class TrickplayInspector(QWidget):
 
     def propertyFill(self, data, styleIndex=None):
         
+        if str(data['name']) == 'screen':
+            self.editable = False
+
+        self.ppp = str(data['name'])
+
         # Clear Property Inspector 
         self.ui.property.clear()
         self.ui.property.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
@@ -729,7 +740,7 @@ class TrickplayInspector(QWidget):
                     i = QTreeWidgetItem() 
                     i.setText (0, p)  # first col : property name
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
-                    if p == 'label':
+                    if p == 'label' and self.editable == True:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
                     items.append(i)
                 else:
@@ -995,7 +1006,15 @@ class TrickplayInspector(QWidget):
             if str(data["type"]) in NO_STYLE_WIDGET and p == "style" :
                 pass
 
-            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton"): 
+            elif p is 'gid': 
+                i = QTreeWidgetItem() 
+                i.setText (0, p)  # first col : property name
+                i.setText (1, str(data[p])) # second col : property value (text input field) 
+                items.append(i)
+                n = n + 1
+                gidItem  = i
+
+            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") : # and p is not 'gid': 
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
@@ -1005,7 +1024,7 @@ class TrickplayInspector(QWidget):
                 #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
                 if p in TEXT_PROP or p in READ_ONLY :
                     i.setText (1, str(data[p])) # second col : property value (text input field) 
-                    if not  p in READ_ONLY :
+                    if not  p in READ_ONLY and self.editable is True:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 if p in READ_ONLY:
@@ -1129,7 +1148,7 @@ class TrickplayInspector(QWidget):
                             #j.setText (0, sp[:1].upper()+sp[1:])
                             j.setText (1, str(z[idx]))
                             #if p ~= "base_size": #read_only r: 'color
-                            if not p in READ_ONLY :
+                            if not p in READ_ONLY and self.editable is True :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
                     elif not str(data["type"]) in NO_STYLE_WIDGET and self.cbStyle is not None:
@@ -1144,50 +1163,56 @@ class TrickplayInspector(QWidget):
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
                             j.setText (0, sp)
-                            q = z[sp]
-                            c2 = 0 
-                            for ssp in PropertyIter(sp): #colors, corner_radius, width, alignment, font, justify, wrap, x-yoffset
-                                if ssp in NESTED_PROP_LIST and  ssp is not 'size':
-                                    k = QTreeWidgetItem(j) 
-                                    k.setText (0, ssp)
-                                    r = q[ssp]
-                                    c3 = 0
-                                    for sssp in PropertyIter(ssp): #activation, default, focus 
-                                        m = QTreeWidgetItem(k)
-                                        sssp = str(sssp)
-                                        m.setText(0,sssp)
-                                        if sssp in ['activation', 'default', 'focus']:
-                                            colNums = [n,c1,c2,c3]
-                                            colNames = [sssp, ssp, sp, 'style']
-                                            colorPropertyFill(colNames, colNums, r, (data['gid'])) 
-                                        else:
-                                            m.setText(1,str(r[sssp]))
-                                            m.setFlags(k.flags() ^Qt.ItemIsEditable)
-                                        c3 = c3 + 1
-                                else:
-                                    l = QTreeWidgetItem(j)
-                                    l.setText(0,ssp)
-                                    colNums = [n,c1,c2]
-                                    colNames = [ssp,sp,'style']
-                                    if ssp in ['activation', 'default', 'focus']:
-                                        colorPropertyFill(colNames, colNums, q, (data['gid'])) 
-                                    elif ssp == "font":
-                                        fontPropertyFill(colNames, colNums, q, (data['gid'])) 
-                                    elif ssp == "alignment":
-                                        comboPropertyFill(colNames, colNums, q, (data['gid'])) 
-                                    elif ssp in ['justify', 'wrap']:
-                                        boolPropertyFill(colNames, colNums, q, (data['gid'])) 
+                            try : 
+                                q = z[sp]
+                                c2 = 0 
+                                for ssp in PropertyIter(sp): #colors, corner_radius, width, alignment, font, justify, wrap, x-yoffset
+                                    if ssp in NESTED_PROP_LIST and  ssp is not 'size':
+                                        k = QTreeWidgetItem(j) 
+                                        k.setText (0, ssp)
+                                        r = q[ssp]
+                                        c3 = 0
+                                        for sssp in PropertyIter(ssp): #activation, default, focus 
+                                            m = QTreeWidgetItem(k)
+                                            sssp = str(sssp)
+                                            m.setText(0,sssp)
+                                            if sssp in ['activation', 'default', 'focus']:
+                                                colNums = [n,c1,c2,c3]
+                                                colNames = [sssp, ssp, sp, 'style']
+                                                colorPropertyFill(colNames, colNums, r, (data['gid'])) 
+                                            else:
+                                                m.setText(1,str(r[sssp]))
+                                                if self.editable == True:
+                                                    m.setFlags(k.flags() ^Qt.ItemIsEditable)
+                                            c3 = c3 + 1
                                     else:
-                                        l.setText(1,str(q[ssp]))
-                                        l.setFlags(l.flags() ^Qt.ItemIsEditable)
-                                c2 = c2 + 1 
-                            c1 = c1 + 1 
+                                        l = QTreeWidgetItem(j)
+                                        l.setText(0,ssp)
+                                        colNums = [n,c1,c2]
+                                        colNames = [ssp,sp,'style']
+                                        if ssp in ['activation', 'default', 'focus']:
+                                            colorPropertyFill(colNames, colNums, q, (data['gid'])) 
+                                        elif ssp == "font":
+                                            fontPropertyFill(colNames, colNums, q, (data['gid'])) 
+                                        elif ssp == "alignment":
+                                            comboPropertyFill(colNames, colNums, q, (data['gid'])) 
+                                        elif ssp in ['justify', 'wrap']:
+                                            boolPropertyFill(colNames, colNums, q, (data['gid'])) 
+                                        else:
+                                            l.setText(1,str(q[ssp]))
+                                            if self.editable == True:
+                                                l.setFlags(l.flags() ^Qt.ItemIsEditable)
+                                    c2 = c2 + 1 
+                                c1 = c1 + 1 
+                            except:
+                                pass
  
 
                 items.append(i)
                 n = n + 1
 
         self.ui.property.addTopLevelItems(items)
+        self.ui.property.setItemHidden(gidItem, True)
 
         #if self.neighbors :
         if neighbors_n > 0 :
@@ -1211,8 +1236,11 @@ class TrickplayInspector(QWidget):
                         self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]), 1, cb)
                         self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                     else:
-                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        try :
+                            self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        except : 
+                            pass
                     
         if fontPushButton :
             for n, pb in fontPushButton.iteritems() :
@@ -1221,8 +1249,11 @@ class TrickplayInspector(QWidget):
                     self.ui.property.itemWidget(self.ui.property.topLevelItem(int(fontNumber[n])),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                 else:
                     if len(fontNumber[n]) < 4:
-                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]), 1, pb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        try : 
+                            self.ui.property.setItemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]), 1, pb)
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        except : 
+                            pass
                 
         if boolCheckBox :
             for n, b in boolCheckBox.iteritems() :
@@ -1231,8 +1262,11 @@ class TrickplayInspector(QWidget):
                     self.ui.property.itemWidget(self.ui.property.topLevelItem(int(boolNumber[n])),1).setStyleSheet("QCheckBox{padding-top:-20;padding-bottom:-20px}")
                 else:
                     if len(boolNumber[n]) < 4:
-                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]), 1, b)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QCheckBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        try:
+                            self.ui.property.setItemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]), 1, b)
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QCheckBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        except:
+                            pass
 
         if comboBox :
             for n, cb in comboBox.iteritems() :
@@ -1241,8 +1275,11 @@ class TrickplayInspector(QWidget):
                     self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
                 else:
                     if len(comboNumber[n]) < 4:
-                        self.ui.property.setItemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        try:
+                            self.ui.property.setItemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]), 1, cb)
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        except:
+                            pass
 
         # substitude style property text input to style combo
 
@@ -1331,8 +1368,9 @@ class TrickplayInspector(QWidget):
                         self.sendData(theItem['gid'], "is_visible", False)
                         theItem.setCheckState(Qt.Unchecked)
 
-            self.curLayerGid = theItem['gid'] 
-            self.ui.inspector.setCurrentIndex(theItem.index())
+            if theItem :
+                self.curLayerGid = theItem['gid'] 
+                self.ui.inspector.setCurrentIndex(theItem.index())
 
 
                     
@@ -1360,6 +1398,9 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
         
+        if self.preventChanges:
+            return
+            
         selectedList = selected.indexes()
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
@@ -1423,8 +1464,10 @@ class TrickplayInspector(QWidget):
                         tempdata['index'] = item.tabIndex
                         #tempdata['neighbors'] = item.tabdata['tabs'][item.tabIndex]['contents']['neighbors']
                         self.propertyFill(tempdata)
+                        self.editable = True
                         self.curLayerName = self.layerName[(item.tabdata['gid'])] 
-                        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
+                        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
+                        self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                     self.preventChanges = False
                     return
             except:
@@ -1445,23 +1488,28 @@ class TrickplayInspector(QWidget):
                 
             if self.curData.has_key('gid') == True:
                 if self.curData.has_key('name') == False:
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
+                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
+                    self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
                 elif self.curData['name'][:5] == "Layer":
                     self.curLayerName = self.curData['name']
                     self.curLayerGid = self.curData['gid']
                     self.curItemGid = self.curData['gid']
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
+                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
+                    self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
                 elif self.layerName[(self.curData['gid'])] : 
                     self.curLayerName = self.layerName[(self.curData['gid'])] 
                     self.curLayerGid = self.layerGid[(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
 
                 if multiSelect == "true":
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
+                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
+                    self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.property.clear()
                 else :
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                    self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
                     self.propertyFill(self.curData)
+                    self.editable = True
 
             
             self.preventChanges = False
@@ -1684,6 +1732,7 @@ class TrickplayInspector(QWidget):
 
         self.LayerName = {}
         self.curLayerName = None
-        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
+        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
+        self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector:" , None, QApplication.UnicodeUTF8))
             
             
