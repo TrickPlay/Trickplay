@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Inspector.ui'
+# Form implementation generated from reading ui file 'Inspector-1.ui'
 #
-# Created: Thu Sep 27 14:04:51 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Wed Jan  2 01:11:10 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -40,7 +40,7 @@ class Ui_TrickplayInspector(object):
         font.setPointSize(9)
         self.tabWidget.setFont(font)
         self.tabWidget.setMouseTracking(True)
-        self.tabWidget.setTabPosition(QtGui.QTabWidget.South)
+        self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
         self.tabWidget.setTabShape(QtGui.QTabWidget.Rounded)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.ObjectInspector = QtGui.QWidget()
@@ -102,7 +102,18 @@ class Ui_TrickplayInspector(object):
         self.property.setObjectName(_fromUtf8("property"))
         self.property.headerItem().setText(0, _fromUtf8("1"))
         self.property.header().setDefaultSectionSize(100)
-        self.gridLayout_2.addWidget(self.property, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.property, 2, 0, 1, 1)
+        self.inspectorTitleLayout = QtGui.QGridLayout()
+        self.inspectorTitleLayout.setSpacing(0)
+        self.inspectorTitleLayout.setContentsMargins(-1, 3, -1, 3)
+        self.inspectorTitleLayout.setObjectName(_fromUtf8("inspectorTitleLayout"))
+        self.inspectorTitle = QtGui.QLabel(self.PropertyEditor)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.inspectorTitle.setFont(font)
+        self.inspectorTitle.setObjectName(_fromUtf8("inspectorTitle"))
+        self.inspectorTitleLayout.addWidget(self.inspectorTitle, 0, 0, 1, 1)
+        self.gridLayout_2.addLayout(self.inspectorTitleLayout, 0, 0, 1, 1)
         self.tabWidget.addTab(self.PropertyEditor, _fromUtf8(""))
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
@@ -115,5 +126,6 @@ class Ui_TrickplayInspector(object):
         self.deleteScreen.setText(QtGui.QApplication.translate("TrickplayInspector", "-", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("TrickplayInspector", "Screens:   ", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ObjectInspector), QtGui.QApplication.translate("TrickplayInspector", "Object Inspector", None, QtGui.QApplication.UnicodeUTF8))
+        self.inspectorTitle.setText(QtGui.QApplication.translate("TrickplayInspector", "  Inspector:", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.PropertyEditor), QtGui.QApplication.translate("TrickplayInspector", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
 

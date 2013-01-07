@@ -35,6 +35,9 @@
     <layout class="QGridLayout" name="fileSystem">
      <item row="0" column="0">
       <widget class="QTreeWidget" name="fileSystemTree">
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
          <string notr="true">1</string>

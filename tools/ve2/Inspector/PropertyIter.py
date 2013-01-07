@@ -507,7 +507,7 @@ NESTED_PROP_LIST = {
     'selection_color' : ['r', 'g', 'b', 'a'],
     #'message_color' : ['r', 'g', 'b', 'a'],
     'border_color' : ['r', 'g', 'b', 'a'],
-    'anchor_point' : ['x', 'y'],
+    #'anchor_point' : ['x', 'y'],
     'scale' : ['x', 'y'],
     'clip' : ['x', 'y', 'w', 'h'],
     'x_rotation' : ['angle', 'y center', 'z center'],

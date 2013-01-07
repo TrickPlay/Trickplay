@@ -184,7 +184,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 		newChild.group_position = {0,0,0}
         newChild.is_in_group = false
         newChild.parent_group = nil
-        newChild.reactive = true
+        newChild.reactive = false
         util.create_mouse_event_handler(newChild, newChild.widget_type)
         newParent:add(newChild)
 
@@ -196,6 +196,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
             newChild.reactive = true
         end 
 
+        newChild.reactive = false
         newChild.position = {0,0,0}
         newChild.is_in_group = true
         newChild.parent_group = newParent
@@ -585,10 +586,21 @@ _VE_.sendBackward = function(gid)
 
 end
 
+_VE_.setCurrentProject = function(path)
+    screen.name = path 
+end 
+
+_VE_.refreshDone = function()
+    buildInsp = false
+end 
+
 _VE_.refresh = function()
 
-    _VE_.getUIInfo()
-    _VE_.getStInfo()
+    if buildInsp == false then
+        _VE_.getUIInfo()
+        _VE_.getStInfo()
+        buildInsp = true
+    end
 
 end 
 
@@ -796,7 +808,9 @@ _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
 _VE_.openInspector = function(gid, multi)
-    if shift == true or multi then 
+    if buildInsp == true then
+        return
+    elseif shift == true or multi then 
         print("openInspc".."t"..gid)
     else
         print("openInspc".."f"..gid)
@@ -867,6 +881,7 @@ _VE_.openFile = function(path)
 
     --print(layer)
     s = load_layer(layer)
+    objectsNames = s.objects
     --print (s, #s.children)
 
     --_VE_.buildVF()
@@ -994,6 +1009,17 @@ _VE_.openLuaFile = function()
     end
 end 
 ]]
+
+_VE_.screenHide = function()
+    screen:hide()
+end 
+_VE_.screenShow = function()
+    screen:show()
+end 
+_VE_.setScreenLoc = function()
+    screen.y = 300
+    screen.x = 400
+end 
 
 _VE_.newLayer = function()
     
@@ -1143,8 +1169,8 @@ _VE_.saveFile = function(scrJson)
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
-    screen:clear()
-    _VE_.openFile(currentProjectPath)
+    --screen:clear()
+    --_VE_.openFile(currentProjectPath)
 
     codeGen()
 
@@ -1391,6 +1417,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
+    _VE_.selectUIElement(uiInstance.gid)
+    _VE_.refreshDone()
+    _VE_.openInspector(uiInstance.gid, false)
+
 end
 
 _VE_.selectUIElement = function(gid, multiSel)
@@ -1398,7 +1428,7 @@ _VE_.selectUIElement = function(gid, multiSel)
     if multiSel == true then
         shift = multiSel
     end
-    if gid ~= 2 then
+    if gid ~= screen.gid then
         screen_ui.selected(devtools:gid(gid))
     end 
     shift = org_shift
@@ -1413,7 +1443,7 @@ _VE_.deselectUIElement = function(gid, multiSel)
     if multiSel == true then
         shift = multiSel
     end 
-    if gid ~= 2 then
+    if gid ~= screen.gid then
         screen_ui.n_selected(devtools:gid(gid))
     end
     shift = org_shift

@@ -21,7 +21,7 @@ int main ( int argc, char ** argv )
     Progress * progress = progress_new( options );
     ProgressChunk * layout_chunk,
                   * comp_chunk,
-                  * spacer_chunk;
+                  * spacer_chunk = NULL;
     
     unsigned n_items;
     while (( n_items = g_sequence_get_length( state->items ) ))
@@ -33,6 +33,7 @@ int main ( int argc, char ** argv )
         
         layout_chunk = progress_new_chunk( progress, (float) n_items * (float) ( max_w - min_w ) / 6000.0f );
         comp_chunk   = progress_new_chunk( progress, sqrt( log10( (float) best->item_area ) * (float) n_items ) );
+        if ( spacer_chunk ) spacer_chunk->estimate = 0.0;
         spacer_chunk = progress_new_chunk( progress, ( layout_chunk->estimate + comp_chunk->estimate ) / 6.0 );
     
         for ( unsigned i = min_w; i <= max_w; i++ )
@@ -65,6 +66,7 @@ int main ( int argc, char ** argv )
         
         state_add_layout( state, best, comp_chunk, options );
         
+        layout_chunk->progress = 1.0;
         comp_chunk->estimate = sqrt( log10( (float) best->area ) * (float) best->places->len );
         comp_chunk->progress = 1.0;
         progress_recalculate( progress );
@@ -74,6 +76,7 @@ int main ( int argc, char ** argv )
 
     // collect garbage
 
+    progress_free( progress );
     options_free( options );
     state_free( state );
 

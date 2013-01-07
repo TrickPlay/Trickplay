@@ -2009,10 +2009,10 @@ interface actor [[ClutterActor*]]
 #ifdef CLUTTER_VERSION_1_10
         lua_getfield(L,props,"on_completed");
 
+        UserData * ud = UserData::get( L );
+
         if (lua_type(L,-1)==LUA_TFUNCTION)
         {
-            UserData * ud = UserData::get( L );
-
             ud->push_proxy();
 
             UserData::set_callback( "on_completed" , L , -1 , -2 );
@@ -2021,7 +2021,9 @@ interface actor [[ClutterActor*]]
         }
         else
         {
-            lua_pop(L,1);
+            ud->disconnect_signal( "on_completed" );
+
+            lua_pop(L,1); // pop the nil
         }
 
         clutter_actor_save_easing_state( self );
