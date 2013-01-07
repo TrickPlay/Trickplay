@@ -29,6 +29,7 @@ void Source::handle_async_img( Image * image )
 {
     if ( image )
     {
+        failed = false;
         CoglHandle texture = ref_texture_from_image( image );
         set_texture( texture, true );
         delete image;
@@ -37,7 +38,9 @@ void Source::handle_async_img( Image * image )
     }
     else
     {
+        failed = true;
         g_warning( "Could not download image %s", uri );
+        ping_all();
     }
 }
 
@@ -54,24 +57,33 @@ void Source::make_texture( bool immediately )
         if ( texture == COGL_INVALID_HANDLE )
         {
             Image * image = sheet->app->load_image( uri, false );
-            texture = ref_texture_from_image( image );
-            delete image;
             
-            Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+            if ( image )
+            {
+                failed = false;
+                texture = ref_texture_from_image( image );
+                delete image;
+                
+                Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+                set_texture( texture, true );
+            }
+            else
+            {
+                failed = true;
+                set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+            }
         }
-        
-        set_texture( texture, true );
     }
     else
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
             sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-            set_texture( texture, false );
+            set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
         }
         else
         {
+            failed = false;
             set_texture( texture, true );
             ping_all_later();
         }
@@ -121,8 +133,8 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Sprite::update()
 {
     g_assert( source );
+    failed = source->is_failed();
     set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
-    ping_all();
 }
 
 void on_ping( PushTexture * source, void * target )

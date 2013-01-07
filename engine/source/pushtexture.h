@@ -20,6 +20,9 @@ class PushTexture
 {
 public:
 
+    // When the last subscriber is lost, this Action is posted
+    // If the texture still has no subscribers at the next idle point, it releases the texture
+
     class ReleaseLater : public Action
     {
         PushTexture * self;
@@ -32,6 +35,8 @@ public:
             return false;
         }
     };
+    
+    // When posted, this Action will ping all subscribers at the next idle point
 
     class PingAllLater : public Action
     {
@@ -46,13 +51,17 @@ public:
         }
     };
 
+    // Allows some object to say to a PushTexture, "Ping me whenever you change"
+
     class PingMe
     {
         public:
             typedef void (Callback)( PushTexture * source, void * target );
 
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {}; //, async( true )
+            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {};
             ~PingMe();
+
+            // Note: if set() suceeds, it will immediately ping() this PingMe object using the given callback
 
             void set( PushTexture * source, Callback * callback, void * target, bool preload );
 
@@ -66,7 +75,7 @@ public:
             void * target;
     };
 
-    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ) {}; //all_pings_async( true ), 
+    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ), failed( false ) {};
     ~PushTexture();
 
     CoglHandle get_texture();
@@ -75,14 +84,14 @@ public:
     void ping_all();
     void ping_all_later() { Action::post( new PingAllLater( this ) ); };
     bool is_real() { return real; };
-
-    friend class Subscription;
+    bool is_failed() { return failed; };
 
 protected:
-    virtual void make_texture( bool immediately ) = 0;
-    virtual void lost_texture() = 0;
+    virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
+    virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
 
-    bool cache;
+    bool cache; // if true, prevents texture from being released
+    bool failed;
 
 private:
     void subscribe( PingMe * ping, bool preload );
