@@ -340,6 +340,18 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]];
         
+    /*
+        Property: async
+        
+        The async property is a boolean value that determines whether source images of the NineSlice (managed by its SpriteSheet) are loaded asynchronously or not.
+        
+        When either the <sheet> or <ids> change, any new source images that need to be loaded will also be loaded according to this value.
+        
+        *Default Setting:* false, i.e., all source images are loaded synchronously
+        
+        *See Also:* the <on_loaded> event
+    */
+        
     bool async
         [[
             async = get_binding( self )->async;
@@ -348,20 +360,79 @@ class NineSlice [[ClutterActor*]] actor
             get_binding( self )->async = async;
         ]];
         
+    /*
+        Property: loaded
+        
+        The loaded property is a boolean value indicating if all source images currently in use by the NineSlice are loaded successfully. For the purposes of this property, the NineSlice will ignore all ids not found in its spritesheet.
+        
+        *Default Setting:* true
+        
+        *See Also:* the <ids> property
+    */
+        
     readonly bool loaded
         [[
             loaded = get_binding( self )->is_loaded();
         ]];
         
-    int add_onloaded_listener( function f )
+    /*
+        Function: add_onloaded_listener
+        
+        The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+        
+        *Arguments*
+        
+            fn - reference to handler function. The function prototype is described below.
+
+        *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+        *Handler Prototype:*
+
+        (code)
+        fn( NineSlice self, boolean failed )
+        (end)
+
+        *Handler Arguments:*
+
+            self - the NineSlice object that has finished loading
+            failed - boolean value indicating overall failure or success of all load operations (true=failure)
+        
+        *Handler Return Value:* None
+        
+        *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+    */
+        
+    int add_onloaded_listener( function fn )
         [[
             result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
         ]];
+        
+    /*
+        Function: remove_onloaded_listener
+
+        The remove_onloaded_listener() function unregisters the specified event handler.
+
+        *Arguments:*
+
+            ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+        *Return Value:* None
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     remove_onloaded_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
         ]];
+
+    /*
+        Event: on_loaded
+
+        The on_loaded event occurs when all asynchronous loading operations have completed. 
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     function on_loaded
         [[
