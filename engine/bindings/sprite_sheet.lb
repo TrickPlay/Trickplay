@@ -197,7 +197,7 @@ class SpriteSheet [[SpriteSheet*]]
         *Properties:*
 
         map - Lua table or path to a .json file of source-and-sprite definitions
-        [async] - load remote URIs asynchronously
+        [async] - load the map URI asynchronously, and fire an <on_loaded> event
 
         *Return Value:* new NineSlice object
     */
@@ -274,42 +274,94 @@ class SpriteSheet [[SpriteSheet*]]
         ]];
 
     /*
-        Callback: on_loaded
+        Property: map_uri
 
-        The on_loaded() event handler is fired whenever SpriteSheet gets a result from an asynchronous load. A single SpriteSheet may load a map and/or one or more image files asynchronously.
-
-        *Prototype:*
-        (code)
-        void on_loaded( SpriteSheet self, boolean success, string status )
-        (end)
-
-        *Status Strings:*
-
-        FAILED_MAP_LOAD - Couldn't load the JSON map from a remote URI
-        FAILED_MAP_PARSE - Couldn't parse the JSON map correctly
-        FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
-        nil - Successfully loaded a source image (remote or local)
+        Returns the URI of the JSON map of this SpriteSheet, if applicable, or an empty string otherwise
     */
     
     readonly string map_uri
         [[
             map_uri = self->get_json_path();
         ]];
+        
+    /*
+        Property: loaded
+        
+        The loaded property is a boolean value indicating if the JSON map of the SpriteSheet was loaded successfully.
+        
+        *Default Setting:* false
+        
+        *See Also:* the <map_uri> property
+    */
     
     readonly bool loaded
         [[
             loaded = self->loaded;
         ]];
+        
+    /*
+        Function: add_onloaded_listener
+        
+        The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+        
+        *Arguments*
+        
+            fn - reference to handler function. The function prototype is described below.
+
+        *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+        *Handler Prototype:*
+
+        (code)
+        fn( SpriteSheet self, boolean failed )
+        (end)
+
+        *Handler Arguments:*
+
+            self - the SpriteSheet object that has finished loading
+            failed - boolean value indicating failure or success of the load operation (true=failure)
+        
+        *Handler Return Value:* None
+        
+        *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+    */
     
-    int add_onloaded_listener( function f )
+    int add_onloaded_listener( function fn )
         [[
             result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
         ]];
+        
+    /*
+        Function: remove_onloaded_listener
+
+        The remove_onloaded_listener() function unregisters the specified event handler.
+
+        *Arguments:*
+
+            ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+        *Return Value:* None
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     remove_onloaded_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
         ]];
+
+    /*
+        Event: on_loaded
+
+        The on_loaded event occurs when an asynchronously-loaded spritesheet map has finished loading. This only relates to the JSON map, not its source images, which will be lazy-loaded as sprites are used.
+
+        *Prototype:*
+        (code)
+        void on_loaded( SpriteSheet self, boolean failed )
+        (end)
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     function on_loaded
         [[
