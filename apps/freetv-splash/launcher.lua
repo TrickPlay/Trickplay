@@ -79,7 +79,8 @@ local function show_launcher(start_item)
     mediaplayer.on_loaded = function()
         mediaplayer:play()
     end
-    mediaplayer:load("http://bkpc/Videos/Tonight%20Show%20With%20Jay%20Leno.mpg")
+    --mediaplayer:load("http://bkpc/Videos/Tonight%20Show%20With%20Jay%20Leno.mpg")
+    mediaplayer:load('glee.mp4')
 
     screen:grab_key_focus()
     screen.on_key_down = launcher_hidden_key_handler
