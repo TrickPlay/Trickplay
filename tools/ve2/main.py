@@ -197,11 +197,13 @@ class MainWindow(QMainWindow):
             return 
         
     def import_started(self):
+        """
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
         self.bar.setWindowTitle("Import Assets...")
         self.bar.setGeometry(600, 400, 300, 20)
+        """
         self.bar.show()
         return 
 
@@ -259,6 +261,12 @@ class MainWindow(QMainWindow):
 
     def importAssets(self):
         path = -1 
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 100)
+        self.bar.setValue(0)
+        self.bar.setWindowTitle("Import Assets...")
+        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+
         while path == -1 :
             if self.path is None:
 		        self.path = self.apath
@@ -276,6 +284,12 @@ class MainWindow(QMainWindow):
 
     def importSkins(self):
         path = -1 
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 100)
+        self.bar.setValue(0)
+        self.bar.setWindowTitle("Import Skin...")
+        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+        #self.bar.setGeometry(600, 400, 300, 20)
         while path == -1 :
             if self.path is None:
 		        self.path = self.apath
