@@ -282,7 +282,7 @@ function screen_ui.move_selected_obj(direction)
 			["Down"] = function() return 1 end,  
 		}
 
-	if table.getn(selected_objs) ~= 0 then
+	if #selected_objs ~= 0 then
 		for q, w in pairs (selected_objs) do
 			local t_border = screen:find_child(w)
 			if(t_border ~= nil) then 

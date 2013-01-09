@@ -1,11 +1,41 @@
 WIDGET = true
 
-local uielement_properties = {
-	"position","size","anchor_point","name","gid",
-	"x_rotation","y_rotation","z_rotation","scale",
-	"opacity","clip","is_visible"
-}
+local external = ({...})[1] or _G
+local _ENV     = ({...})[2] or _ENV
 
+--List of Properties copied from docs
+local uielement_properties = {
+    "name",
+    "gid",
+    --"x",   redundant to position
+    --"y",
+    --"z",
+    --"depth",
+    "position",
+    --"w",   redundant to size
+    --"h",
+    --"width",
+    --"height",
+    "size",
+    "center",
+    "anchor_point",
+    "scale",
+    "x_rotation",
+    "y_rotation",
+    "z_rotation",
+    "is_scaled",
+    "is_rotated",
+    "opacity",
+    "clip",
+    "has_clip",
+    --"clip_to_size",    only applies to Groups
+    --"parent",          handled separately in Widget.attributes
+    "reactive",
+    "transformed_size",
+    "transformed_position",
+    "is_animating",
+    "is_visible",
+}
 --------------------------------------------------------------------------------
 -- This function receives a UIElement as its parameter sets up the attributes
 -- and methods of Widget. Namely:
@@ -21,7 +51,23 @@ local uielement_properties = {
 -- Yes this is a messy way to set up WidgetGroup, WidgetRectangle, WidgetText,
 -- WidgetImage, and WidgetClone
 --------------------------------------------------------------------------------
+local table_of_envs = {}
+
+function get_env(w) return table_of_envs[w] end
+
+--------------------------------------------------------------------------------
+
+WL_parent_redirect = setmetatable({},{__mode='v'})
+
+--------------------------------------------------------------------------------
 local function Widgetize(instance)
+    
+    local _ENV = setmetatable({},{__index=_ENV})
+    
+    table_of_envs[instance] = _ENV
+    
+    update = function() end
+    ----------------------------------------------------------------------------
     
     --Pablo's function to duplicate the metatable of UIElements
     dupmetatable(instance)
@@ -29,11 +75,59 @@ local function Widgetize(instance)
     local mt = getmetatable(instance)
     ----------------------------------------------------------------------------
     -- subscribe_to() / unsubscribe()
-    set_up_subscriptions(mt,mt,mt.__newindex,mt.set)
+    
+    local old__newindex = mt.__newindex
+    local old_set       = mt.set
+    
+    is_setting = false
+    
+    updating = false
+    
+    call_update = function()
+        if not updating then
+            
+            updating = true
+            
+            update(instance)
+            
+            updating = false
+            
+        end
+    end
+    
+    set_up_subscriptions(mt,mt,
+        --This function is called every time an attribute is being set
+        --set_up_subscriptions() sets up the real __newindex, and wraps this function
+        function(...)
+            
+            --print("w1",instance.w)
+            old__newindex(...)
+            --print("w2",instance.w)
+            
+            call_update()
+            
+        end,
+        function(self,v)
+            
+            if type(v) ~= "table" then error("Expected table. Received ".. type(v), 3 ) end
+            
+            if is_setting then error("already setting",2) end
+            
+            is_setting = true
+            
+            old_set(self,v)
+            
+            call_update()
+            
+            if not is_setting then error("no",2) end
+            
+            is_setting = false
+        end
+    )
     ----------------------------------------------------------------------------
     local key_functions = {}
     
-    function instance:add_key_handler(key,func)
+    override_function(instance,"add_key_handler",function(oldf,self,key,func)
         
         if not key_functions[key] then
             
@@ -49,18 +143,87 @@ local function Widgetize(instance)
             
         end
         
-    end
+    end)
     
-    function instance:on_key_down(key)
+    function instance:on_key_down(key,...)
         if not instance.enabled then return end
         
         if key_functions[key] then
+            
+            local retval = false
+            
             for f,_ in pairs(key_functions[key]) do
-                f()
+                retval = f(self,key,...) or retval
             end
+            
+            return retval
         end
         
     end
+    
+    ----------------------------------------------------------------------------
+    
+    local neighbors_unsubscribe = {}
+    local neighbors = {}
+    local opposite_keys = {
+        Left  = "Right",
+        Right = "Left",
+        Up    = "Down",
+        Down  = "Up",
+    }
+    
+    local external_neighbors = setmetatable(
+        {},
+        {
+            __newindex = function(t,k,v)
+                
+                if keys[k] == nil then error("'"..tostring(k).."' is an invalid key",2) end
+                
+                if neighbors[k]  then neighbors_unsubscribe[k]() end
+                
+                if type(v) == "userdata" and v.grab_key_focus then
+                    
+                    neighbors_unsubscribe[k] = instance:add_key_handler(
+                        
+                        keys[k],  function()   v:grab_key_focus()   end
+                    )
+                    
+                    neighbors[k] = v
+                    
+                    if opposite_keys[k] and v.neighbors[ opposite_keys[k] ] == nil then
+                        
+                        v.neighbors[ opposite_keys[k] ] = instance
+                        
+                    end
+                    
+                    instance:notify()
+                    
+                elseif v == nil then
+                    
+                    neighbors[k] = nil
+                    
+                    instance:notify()
+                    
+                end
+                
+            end,
+            __index = function(t,k)
+                
+                return neighbors[k]
+                
+            end,
+        }
+    )
+    
+	override_property(instance,"neighbors",
+        function(oldf,self) return external_neighbors end,
+        function(oldf,self,v) 
+            
+            if type(v) ~= "table" then error("Expected table. Received "..type(v),2) end
+            
+            for k,v in pairs(v) do  external_neighbors[k] = v  end
+        end
+    )
     
     ----------------------------------------------------------------------------
     local enabled_upval, retval
@@ -110,7 +273,7 @@ local function Widgetize(instance)
         )
     end
     
-    function instance:add_mouse_handler(event,func,ignore_enabled)
+    override_function(instance,"add_mouse_handler",function(oldf,self,event,func,ignore_enabled)
         
         if not event or not mouse_functions[event] then
             
@@ -129,7 +292,7 @@ local function Widgetize(instance)
         mouse_functions[event][func] = ignore_enabled
         
         return function()  mouse_functions[event][func] = nil  end
-    end
+    end)
     
     ----------------------------------------------------------------------------
     
@@ -159,6 +322,15 @@ local function Widgetize(instance)
                 
             end
             
+            t.neighbors = {}
+            
+            for k,v in pairs(neighbors) do
+                
+                t.neighbors[k] = v.name
+                
+            end
+            
+            t.parent  = self.parent and self.parent.gid
             t.style   = self.style.name
             t.focused = self.focused
             t.enabled = self.enabled
@@ -222,6 +394,58 @@ local function Widgetize(instance)
     
     ----------------------------------------------------------------------------
     local style = Style("Default")
+    local unsubscribe
+    
+    local function recursive_flag_setter(style_t,style_flags)
+        
+        if type(style_flags) == "string" then
+            mesg("STYLE_SUBSCRIPTIONS",0,"0 _ENV[",style_flags,"] = true")
+            _ENV[style_flags] = true
+            return
+        end
+        for k,v in pairs(style_t) do
+            
+            --if there is string for this substyle, then set the flag and move on
+            if type(style_flags[k]) == "string" then
+                
+                _ENV[  style_flags[k]  ] = true
+                mesg("STYLE_SUBSCRIPTIONS",0,"1 _ENV[",style_flags[k],"] = true")
+            --if there is a table of flags then
+            elseif type(style_flags[k]) == "table" then
+                
+                if type(v) ~= "table" then
+                    --set the list of flags, ignore further specifics
+                    for _,v in ipairs(style_flags[k]) do
+                        _ENV[v] = true
+                        mesg("STYLE_SUBSCRIPTIONS",0,"2 _ENV[",v,"] = true")
+                    end
+                --traverse the table
+                else
+                    for kk,vv in pairs(style_flags[k]) do
+                        if type(kk) == "number" then
+                            _ENV[vv] = true
+                            mesg("STYLE_SUBSCRIPTIONS",0,"3 _ENV[",vv,"] = true")
+                        elseif type(v) == "table" then
+                            recursive_flag_setter(v,style_flags[k])
+                        end
+                    end
+                end
+                
+            end
+        end
+    end
+    local subscription = function(style_t)
+        --print("herefdffds")
+        mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
+        --dumptable(style_t)
+        if not style_flags then return end
+        
+        recursive_flag_setter(style_t,style_flags)
+        
+        call_update()
+        
+    end
+    
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
@@ -234,13 +458,37 @@ local function Widgetize(instance)
             else
                 style = matches_nil_table_or_type(Style, "STYLE", v)
             end
+            unsubscribe()
+            --print("\n\nSET UP SUBS",instance.gid)
+            unsubscribe = style:subscribe_to( nil, subscription )
+            
+            if style_flags then 
+                mesg("STYLE_SUBSCRIPTIONS",0,"Widget.style was set, initiating the flag setter")
+                --print("style recursive set\n\n\n")
+                --dumptable(style.attributes)
+                recursive_flag_setter(style.attributes,style_flags) 
+            end
         end
 	)
     
+    unsubscribe = style:subscribe_to( nil, subscription )
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"parent",
+        function(oldf,self) 
+            local p = oldf(self)
+            while WL_parent_redirect[p] do
+                p = WL_parent_redirect[p]
+            end
+            return p 
+        end
+    )
+    
+    ----------------------------------------------------------------------------
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-    return instance
+    return instance, _ENV
 end
 
 --------------------------------------------------------------------------------
@@ -248,17 +496,48 @@ end
 
 Widget = function(parameters)
     
-    return  Widgetize(  Group()  ):set( 
+    local instance, _ENV = Widgetize(  Group()  )
+    
+    instance:set( 
         
         is_table_or_nil( "Widget_Group", parameters ) 
         
     )
     
+    add           = instance.add
+    remove        = instance.remove
+    clear         = instance.clear
+    foreach_child = instance.foreach_child
+    find_child    = instance.find_child
+    raise_child   = instance.raise_child
+    lower_child   = instance.lower_child
+    set_children  = getmetatable(instance).__setters__.children
+    get_children  = getmetatable(instance).__getters__.children
+    
+    override_function( instance, "add",           function() print(pcall(error,          "'add' method is removed",3)) end )
+    override_function( instance, "remove",        function() print(pcall(error,       "'remove' method is removed",3)) end )
+    override_function( instance, "clear",         function() print(pcall(error,        "'clear' method is removed",3)) end )
+    override_function( instance, "foreach_child", function() print(pcall(error,"'foreach_child' method is removed",3)) end )
+    override_function( instance, "find_child",    function() print(pcall(error,   "'find_child' method is removed",3)) end )
+    override_function( instance, "raise_child",   function() print(pcall(error,  "'raise_child' method is removed",3)) end )
+    override_function( instance, "lower_child",   function() print(pcall(error,  "'lower_child' method is removed",3)) end )
+    
+	override_property(
+        instance,"children", 
+        function() print("'children' property is removed") end, 
+        function() print("'children' property is removed") end
+    )
+    
+    
+    return instance, _ENV
 end
 Widget_Group = function(parameters)
     
     local instance =  Widgetize(  Group()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Group" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"children",
@@ -275,7 +554,7 @@ Widget_Group = function(parameters)
                 
                 if type(obj) == "table" and obj.type then 
                     
-                    v[i] = _G[obj.type](obj)
+                    v[i] = _ENV[obj.type](obj)
                     
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                 
@@ -331,6 +610,9 @@ Widget_Rectangle = function(parameters)
     
     local instance = Widgetize(  Rectangle()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Rectangle" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -365,6 +647,9 @@ Widget_Text = function(parameters)
     
     local instance = Widgetize(  Text()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Text" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -390,12 +675,15 @@ Widget_Text = function(parameters)
 end
 
 local image_properties = {
-    "src","loaded","async","read_tags","tags","base_size","tile"
+    "src","loaded","async","read_tags","tags","base_size","tile","sheet","id"
 }
 Widget_Image = function(parameters)
     
     local instance = Widgetize(  Image()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Image" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -427,6 +715,9 @@ Widget_Clone = function(parameters)
     
     local instance = Widgetize(  Clone()  )
     
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Clone" end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"attributes",
@@ -447,6 +738,88 @@ Widget_Clone = function(parameters)
     
 end
 
+local SpriteSheet_lookup   = {}
+local SpriteSheet_lookup_r = {}
+
+Widget_SpriteSheet = function(parameters)
+    
+    if type(parameters) ~= "table" or type(parameters.map) ~= "string" then
+        
+        error("Widget_SpriteSheet expects to receive a json file uri for its map",2)
+        
+    elseif SpriteSheet_lookup[parameters.map] then
+    
+        return SpriteSheet_lookup[parameters.map]
+        
+    end
+    
+    local instance = Widgetize(  SpriteSheet(parameters)  )
+    
+    SpriteSheet_lookup[parameters.map] = instance
+    SpriteSheet_lookup_r[    instance] = parameters.map
+    
+    return instance
+    
+end
+
+local sprite_properties = { 
+    "id",--"sheet"
+}
+Widget_Sprite = function(parameters)
+    
+    local instance = Widgetize(  Sprite()  )
+    
+	override_property(instance,"widget_type",
+        function(oldf,self) return "Widget_Sprite" end
+    )
+	override_property(instance,"sheet",
+        function(oldf,self)  return oldf(self)  end,
+        function(oldf,self,v)
+            
+            if type(v) == "string" then 
+                
+                v = Widget_SpriteSheet{map=v}
+                
+            end
+            
+            oldf(self,v)
+            
+        end
+    )
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.style = nil
+            
+            for _,k in pairs(sprite_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.sheet = self.sheet and SpriteSheet_lookup_r[self.sheet]
+            
+            t.type = "Widget_Sprite"
+            
+            return t
+        end
+    )
+    
+    return parameters and instance:set(parameters) or instance
+    
+end
+
+external.Widget             = Widget
+external.Widget_Group       = Widget_Group
+external.Widget_Clone       = Widget_Clone
+external.Widget_Image       = Widget_Image
+external.Widget_Text        = Widget_Text
+external.Widget_Rectangle   = Widget_Rectangle
+external.Widget_Sprite      = Widget_Sprite
+external.Widget_SpriteSheet = Widget_SpriteSheet
 
 
 

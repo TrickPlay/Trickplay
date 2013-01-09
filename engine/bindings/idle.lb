@@ -1,4 +1,5 @@
 [[
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 #include "app.h"
 ]]
@@ -49,38 +50,38 @@ struct idle
 };
 ]]
 
-/*
+/***************************************
     Global: idle
-    
-    The idle global variable supports a callback function that is invoked as often as possible when the system is otherwise idle. To enable the callback, simply set the variable's <on_idle> function; depending upon the system's workload, the function may be invoked immediately. To disable the callback function, set the variable's on_idle() function to nil.
-    
-    Unlike the <Timer> class, the on_idle() function is called on an irregular basis. During times when the system has little to do, the on_idle() function will be called often; when the system is busy performing other tasks, the function will seldom be called. It is not possible to schedule regular invocations of the on_idle() function. For operations that need to be performed on a predictable schedule, use a Timer object.
-    
+
+    The idle global variable supports a callback function that is invoked as often as possible when the system is otherwise idle. To enable the callback, register a handler for the <on_idle> event; depending upon the system's workload, the function may be invoked immediately. To disable the callback function, unregister the handler.
+
+    Unlike the <Timer> class, the on_idle event is fired on an irregular basis. During times when the system has little to do, the event fires often; when the system is busy performing other tasks, the event seldom occurs. It's not possible to schedule regular invocations of the on_idle event. For operations that need to be performed on a predictable schedule, use a Timer object.
+
 */
 
 global idle [[idle*]]
 {
     idle()
 	[[
-	    self=lb_construct( idle , new idle(L) );    
+	    self=lb_construct( idle , new idle(L) );
 	]];
-	
+
     ~idle()
 	[[
 	    delete self;
 	]];
 
-    /*
-        Property: limit
+/***************************************
+    Property: limit
 
-		The limit property specifies the minimum number of seconds that must elapse between invocations of the on_idle() function. For example, if limit is set to 1, then 1 second *or more* must elapse between invocations of the on_idle() function. Note: This does not mean that the on_idle() function will be invoked every second; it only means that the function will be invoked a *maximum* of once every second. The actual time between invocations will depend upon the other tasks the system must perform.
-		
-		The smallest value for the limit property is 0.001 seconds (1 millisecond).
-		
-		*Default Setting:* 0.001 (1 millisecond)
-		
-		*See Also:* the <on_idle> function
-    */
+	The limit property specifies the minimum number of seconds that must elapse between occurrences of the on_idle event. For example, if limit is set to 1, then 1 second *or more* must elapse between two on_idle events. Note: This does not mean that on_idle events will occur every second; it only means they will occur a *maximum* of once every second. The actual time between invocations depends upon the other tasks the system must perform.
+
+	The smallest value for the limit property is 0.001 seconds (1 millisecond).
+
+	*Default Setting:* 0.001 (1 millisecond)
+
+	*See Also:* the <on_idle> event
+*/
 
     double limit
     [[
@@ -89,68 +90,133 @@ global idle [[idle*]]
     [[
         self->limit = std::max( limit , 0.001 );
     ]];
-	
-	/*
-		Event Handler: on_idle
-		
-		The on_idle() event handler is a function that is invoked as often as possible (within the restriction of the variable's <limit> property) when the system is idle.
-		
-		The on_idle() function will start to be invoked as soon as it is set. To stop the function from being called, reset the variable's on_idle() handler to nil.
-		
-		*Prototype:*
-		
-			(code)
-			void on_idle( idle, double elapsed_seconds )
-			(end)
-			
-		*Arguments:*
-		
-			idle - the idle global variable
-			elapsed_seconds - a double value indicating the fractional number of seconds elapsed since the last on_idle() invocation. This value will be greater than or equal to the variable's limit property.
-			
-		*Return Value:* None
-		
-		*Code Example:* Define and run an on_idle() function that is invoked for a maximum of 10 seconds and is called no more than once per half-second.
-		
+
+/***************************************
+	Function: add_onidle_listener
+
+	The add_onidle_listener() function registers a handler function for <on_idle> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onidle_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( idle, elapsed_seconds )
+		(end)
+
+	*Handler Arguments:*
+
+		idle - the idle global variable
+		elapsed_seconds - a double value indicating the fractional number of seconds elapsed since the previous on_idle event. This value will be greater than or equal to the variable's limit property.
+
+    *Handler Return Value:* None
+
+	*Code Example:* Define and register an on_idle event handler that is called no more than once every half-second for a maximum of 10 seconds.
+
 		(code)
 		MAX_SECONDS  = 10.0
 		totalSeconds = 0
+		idleHandler  = nil
 
-		-- Define the on_idle() function
+		-- Define the on_idle event handler
 		function whileIdle( idle, numSeconds )
-			print( "In on_idle() function" )
+			print( "In on_idle event handler" )
 
 			-- Maintain total elapsed time since start
 			totalSeconds = totalSeconds + numSeconds
 
 			-- Have we run for the maximum length?
 			if( totalSeconds >= MAX_SECONDS ) then
-				-- Yes, stop invocations
-				idle.on_idle = nil
+				-- Yes, stop invocations by unregistering the handler
+				idle:remove_onidle_listener( idleHandler )
 			end
 		end
 
-		-- Invoke on_idle() no more than once per half-second
+		-- Fire event no more than once per half-second
 		idle.limit = 0.5
 
-		-- Set the on_idle() function. The function will begin to be invoked immediately.
-		idle.on_idle = whileIdle
+		-- Register the on_idle event handler. The handler may begin to be invoked immediately, depending on system workload.
+		idleHandler = idle:add_onidle_listener( whileIdle )
 		(end)
 
-		*See Also:* the <limit> property
+	*See Also:* the <on_idle> event and the <remove_onidle_listener> function
+*/
+
+    int add_onidle_listener( function f )
+        [[
+            char * name = (char*) "on_idle";
+            UserData * ud = UserData::get( L );
+            result = ud->add_callback( name , L );
+            if ( ud->callback_attached( name ) )
+            {
+               self->set();
+            }
+            else
+            {
+                self->clear();
+            }
+        ]];
+
+/***************************************
+	Function: remove_onidle_listener
+
+	The remove_onidle_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onidle_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onidle_listener> function
+*/
+
+    remove_onidle_listener( int ref )
+        [[
+            char * name = (char*) "on_idle";
+            UserData * ud = UserData::get( L );
+            ud->remove_callback( name , L );
+            if ( ! ud->callback_attached( name ) )
+            {
+                self->clear();
+            }
+        ]];
+
+/***************************************
+	Event: on_idle
+
+	The on_idle event occurs as often as possible when the system is idle (and within the restriction of the variable's <limit> property).
+
+	*See Also:* the <add_onidle_listener> function
 	*/
-	
-    callback on_idle( idle idle , double elapsed_seconds )
-	[[
-	    if (on_idle)
-	    {
-			self->set();
-	    }
-	    else
-	    {
-			self->clear();
-	    }
-	]];
+
+    function on_idle
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_idle" , L );
+        ]]
+        [[
+            char * name = (char*) "on_idle";
+            UserData * ud = UserData::get( L );
+
+            ud->set_last_callback( name , L );
+            if ( ud->callback_attached( name ) )
+            {
+               self->set();
+            }
+            else
+            {
+                self->clear();
+            }
+        ]];
+
+/***************************************
+
+*/
+
 }
 
 [[
@@ -161,21 +227,20 @@ gboolean idle::on_idle(gpointer data)
     if ( lua_State * L = self->lsp->get_lua_state() )
     {
 		double elapsed = g_timer_elapsed( self->timer , NULL );
-		     	
+
 		// If it is less than one ms, we bail
-		
+
 		if ( elapsed < self->limit )
 		{
 			return TRUE;
 		}
 
 		g_timer_start( self->timer );
-    
-        lua_pushnumber( L , elapsed );
-        lb_invoke_callback( L , self , IDLE_METATABLE , "on_idle" , 1 , 0 );
-    }
-    
-    return TRUE;
-}   
-]]
 
+        lua_pushnumber( L , elapsed );
+        lb_invoke_callbacks( L , self , IDLE_METATABLE , "on_idle" , 1 , 0 );
+    }
+
+    return TRUE;
+}
+]]

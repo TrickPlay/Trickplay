@@ -421,7 +421,7 @@
 }
 
 - (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera {
-    [self presentModalViewController:camera animated:YES];
+    [self presentViewController:camera animated:YES completion:nil];
 }
 
 - (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController {

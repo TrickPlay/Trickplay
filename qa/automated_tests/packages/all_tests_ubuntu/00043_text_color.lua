@@ -16,7 +16,7 @@ function generate_test_image ()
 			local font_name, text_txt
 			local font_size = row + 20
 			local my_scale = 0.3 + (1.5 * col / COLS)
-		
+
 			text_txt = Text {font="DejaVu Sans "..font_size.."px",text="TP"}
 			text_txt.color = {col * 35, 255 - col * 35, 255 - col * 35}
 
@@ -43,8 +43,6 @@ function generate_test_image ()
 			g:add(text_txt)
 		end
 	end
-	
-	g:add(myText_markup)
 
 	return g
 end

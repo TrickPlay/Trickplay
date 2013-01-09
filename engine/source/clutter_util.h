@@ -1,6 +1,7 @@
 #ifndef _TRICKPLAY_CLUTTER_UTIL_H
 #define _TRICKPLAY_CLUTTER_UTIL_H
 
+#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
 #include "clutter/clutter.h"
 
 #include "common.h"
@@ -64,6 +65,9 @@ namespace ClutterUtil
 
     void set_props_from_table( lua_State * L, int table );
 
+    // Figure out what kind of actor this is, from its metatable if possible
+     const gchar * get_actor_type( ClutterActor * actor );
+
     // Adds metatable to an actor
 
     void initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable );
@@ -84,20 +88,20 @@ namespace ClutterUtil
 
     // Inject key_down event
 
-    void inject_key_down( guint key_code, gunichar unicode , unsigned long int modifiers );
+    void inject_key_down( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_key_up( guint key_code, gunichar unicode , unsigned long int modifiers );
+    void inject_key_up( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_motion( gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_motion( ClutterActor *stage, gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_press( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_button_press( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
+    void inject_button_release( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_scroll( int direction , unsigned long int modifiers );
+    void inject_scroll( ClutterActor *stage, int direction , unsigned long int modifiers );
 
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
-    void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );
+    void stage_coordinates_to_screen_coordinates( ClutterActor *stage, gdouble *x, gdouble *y );
 
     unsigned long int get_tp_modifiers( ClutterEvent * event );
 

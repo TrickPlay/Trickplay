@@ -17,16 +17,17 @@ myText1.on_text_changed = function ()
 	myText1_changed = true
 end
 
+-- does not delete backwards from the end
 myText1:delete_chars(4)
 
 -- Did the on_text_changed event handler get called during delete_chars --
 function test_Text_delete_chars_event_handler ()
-	assert_true (myText1_changed, "insert_chars did not fire a text changed event.")
+	assert_false (myText1_changed, "delete_chars fired a text changed event.")
 end
 
 -- Basic delete chars test --
 function test_Text_delete_chars_basic ()
-	assert_equal (myText1.text, "Fun with Dick and ", "delete_chars did not remove the last 4 chars of the line.")
+	assert_equal (myText1.text, "Fun with Dick and Jane", "delete_chars should not remove the last 4 chars of the line.")
 end
 
 function test_Text_default_cursor_position ()
@@ -39,15 +40,15 @@ myText2.text = "Fun with Dick and Jane"
 myText2.font = "DejaVu Sans 20px"
 myText2.color = "33FF22AA"
 myText2.position = { 1200, 130 }
-myText2.cursor_position = 17
+myText2.cursor_position = 8
 myText2:delete_chars (9)
 
 function test_Text_delete_chars_moved_cursor_position ()
-	assert_equal ( myText2.text, "Fun with Jane", "delete_chars did not remove the last 4 chars of the line.")
+	assert_equal ( myText2.text, "Fun with Jane", "delete_chars did not remove the correct section of the line:" .. myText2.text)
 end
 
 function test_Text_change_cursor_position ()
-	assert_equal ( myText2.cursor_position, 8, "myText2.cursor_position is returning "..myText2.cursor_position..". Expected return value is 8.")
+	assert_equal ( myText2.cursor_position, -1, "myText2.cursor_position is returning "..myText2.cursor_position..". Expected return value is -1.")
 end
 
 

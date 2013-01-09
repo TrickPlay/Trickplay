@@ -87,7 +87,7 @@ public:
 
         lua_setfield( L, t, "extra" );
     }
-    
+
     void push_app_info( const SystemDatabase::AppInfo & info )
     {
         lua_newtable(L);
@@ -106,26 +106,25 @@ public:
 
         lua_pushinteger(L,info.release);
         lua_setfield(L,-2,"release");
-        
+
         lua_newtable(L);
         int i = 1;
-        
+
         for ( StringSet::const_iterator fit = info.fingerprints.begin(); fit != info.fingerprints.end(); ++fit, ++i )
         {
         	lua_pushstring(L,fit->c_str() );
         	lua_rawseti(L,-2,i);
         }
-        
+
         lua_setfield(L,-2,"fingerprints");
-        
+
         lua_pushstring(L,info.badge_style.c_str() );
         lua_setfield(L, -2,"badge_style" );
-        
+
         lua_pushstring(L,info.badge_text.c_str() );
         lua_setfield(L,-2,"badge_text" );
 
         lua_newtable( L );
-        i = 1;
         for ( StringSet::const_iterator fit = info.attributes.begin(); fit != info.attributes.end(); ++fit )
         {
             lua_pushstring( L , fit->c_str() );
@@ -161,21 +160,21 @@ global apps [[Apps*]]
         [[
             self = lb_construct( Apps , new Apps( L ) );
         ]];
-        
+
     ~apps()
         [[
             delete self;
         ]];
-    
-    #..........................................................................    
+
+    #..........................................................................
     # Returns a table listing all the apps found in the database
-    
+
     table get_all()
         [[
             SystemDatabase::AppInfo::List list = self->get_context()->get_db()->get_all_apps();
-                        
+
             lua_newtable(L);
-            
+
             for ( SystemDatabase::AppInfo::List::const_iterator it = list.begin(); it != list.end(); ++it )
             {
                 lua_pushstring(L,it->id.c_str());
@@ -188,13 +187,13 @@ global apps [[Apps*]]
 
     #..........................................................................
     # Returns a table listing all the apps for the current profile
-    
+
     table get_for_current_profile()
     	[[
             SystemDatabase::AppInfo::List list = self->get_context()->get_db()->get_apps_for_current_profile();
-                        
+
             lua_newtable(L);
-            
+
             for ( SystemDatabase::AppInfo::List::const_iterator it = list.begin(); it != list.end(); ++it )
             {
                 lua_pushstring(L,it->id.c_str());
@@ -204,7 +203,7 @@ global apps [[Apps*]]
                 lua_settable(L,-3);
             }
     	]];
-    
+
     #..........................................................................
     # Returns true if the app is in the system database. If check_metadata is
     # true, it also tries to load the app's metadata from disk.
@@ -223,31 +222,31 @@ global apps [[Apps*]]
             }
         ]];
 
-        
+
     #..........................................................................
     # Lets the caller load the contents of a file that belongs to any app by
     # passing the app id and a path into its bundle
-    
+
     lstring load_app_file( string app_id, string file_name )
         [[
             result = 0;
             result_len = 0;
-            
+
             String root_uri = self->get_context()->get_db()->get_app_path( app_id );
-            
-            Util::Buffer contents( AppResource( root_uri.c_str() , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );  
+
+            Util::Buffer contents( AppResource( root_uri.c_str() , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );
 
             if ( contents )
             {
                 result = contents.data();
-                result_len = contents.length();     
+                result_len = contents.length();
             }
         ]];
-        
+
     #..........................................................................
     # Launch an app...if it succeeds, it will never return, because this Lua
     # state will be killed
-    
+
     int launch( string app_id )
         [[
             result=self->get_context()->launch_app( app_id , App::LaunchInfo( App::get( L )->get_id() ) );
@@ -256,11 +255,11 @@ global apps [[Apps*]]
     #..........................................................................
     # Start downloading and installing an app. Returns a download id or zero if
     # it fails to start.
-    
+
     int download_and_install_app( string app_id, string app_name, bool locked, string url, table required_fingerprints = 0,table extra = 0 )
         [[
         	StringSet fingerprints;
-        	
+
         	if ( required_fingerprints )
         	{
                 lua_pushnil( L );
@@ -279,8 +278,8 @@ global apps [[Apps*]]
                     lua_pop( L, 1 );
                 }
         	}
-        	
-        	
+
+
             StringMap extra_map;
 
             if ( extra )
@@ -356,9 +355,41 @@ global apps [[Apps*]]
             self->get_context()->get_installer()->abandon_install( id );
         ]];
 
-    callback on_install_progress;
+    function on_install_progress
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_install_progress" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_install_progress" , L );
+        ]];
 
-    callback on_install_finished;
+    int add_oninstallprogress_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_install_progress" , L );
+        ]];
+
+    remove_oninstallprogress_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_install_progress" , L );
+        ]];
+
+    function on_install_finished
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_install_finished" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_install_finished" , L );
+        ]];
+
+    int add_oninstallfinished_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_install_finished" , L );
+        ]];
+
+    remove_oninstallfinished_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_install_finished" , L );
+        ]];
 }
 
 
@@ -376,13 +407,13 @@ void Apps::download_finished( const Installer::Info & install_info, const Downlo
 void Apps::install_progress( const Installer::Info & install_info )
 {
     push_installer_info( install_info );
-    invoke_apps_on_install_progress( L, this, 1, 0 );
+    lb_invoke_callbacks(L,this,"APPS_METATABLE","on_install_progress",1,0);
 }
 
 void Apps::install_finished( const Installer::Info & install_info )
 {
     push_installer_info( install_info );
-    invoke_apps_on_install_finished( L, this, 1, 0 );
+    lb_invoke_callbacks(L,this,"APPS_METATABLE","on_install_progress",1,0);
 }
 
 ]]

@@ -128,7 +128,7 @@ local function orderedNext(t, state)
     end
     -- fetch the next value
     key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
+    for i = 1,#t.__orderedIndex do
         if t.__orderedIndex[i] == state then
             key = t.__orderedIndex[i+1]
         end
@@ -1032,7 +1032,7 @@ function util.make_attr_t(v)
   local obj_map = {
        ["Rectangle"] = function() return {"border_color", "color", "border_width", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus"} end,
        ["Text"] = function() return {"color", "font", "wrap_mode", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus",} end,
-       ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
+       ["Image"] = function() return {"src","scale", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color", "focus_border_color", "fill_color", "focus_fill_color","text_color","focus_text_color","text_font","border_width","border_corner_radius"} end,
@@ -1044,7 +1044,7 @@ function util.make_attr_t(v)
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color",} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","focus","rows","columns","variable_cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset",} end,
+       ["LayoutManager"] = function() return {"lock", "scale","skin","x_rotation","anchor_point", "opacity","focus","rows","columns","variable_cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset",} end,
        ["ScrollPane"] = function() return {"lock", "skin", "visible_width", "visible_height",  "virtual_width", "virtual_height","opacity", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer","empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width"} end,  
        ["ArrowPane"] = function() return {"lock", "skin","visible_width", "visible_height",  "virtual_width", "virtual_height","opacity",  "arrow_color","focus_arrow_color","box_color", "focus_box_color", "arrow_size", "arrow_dist_to_frame", "arrows_visible", "box_border_width", "scroll_distance"} end,
        ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","focus_border_color","fill_color","focus_fill_color","text_color", "focus_text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","show_ring", "items"} end,
@@ -1298,7 +1298,7 @@ function util.itemTostring(v, d_list, t_list)
 				     			table.insert(tile_name_table, "nil")
 				   			end 
 						end 
-		        		if table.getn(tile_name_table) ~= 0 then 
+		        		if #tile_name_table ~= 0 then
 							table.insert(tiles_name_table, tile_name_table)
 						end
 					end 
@@ -1460,7 +1460,7 @@ function util.itemTostring(v, d_list, t_list)
 						   ["65293"] = function() return "keys.Return" end, 
 						  }
 
-		itm_str = itm_str..v.name.."\.extra\.focus = {" 
+		itm_str = itm_str..v.name..".extra.focus = {"
 		for m,n in pairs (v.extra.focus) do 
 			if type(n) ~= "function" then 
 		     	itm_str = itm_str.."["..focus_map[tostring(m)]().."] = \""..n.."\", " 
@@ -1472,17 +1472,17 @@ function util.itemTostring(v, d_list, t_list)
 			for q=1, #v.tab_labels do 
 				if v.tab_position == "top" then 
 					if v.tabs[q].extra.up_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.up_focus = \""..v.tabs[q].extra.up_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.up_focus = \""..v.tabs[q].extra.up_focus.."\"\n"
 					end 
 					if v.tabs[q].extra.down_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.down_focus = \""..v.tabs[q].extra.down_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.down_focus = \""..v.tabs[q].extra.down_focus.."\"\n"
 					end 
 				else 
 					if v.tabs[q].extra.left_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.left_focus = \""..v.tabs[q].extra.left_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.left_focus = \""..v.tabs[q].extra.left_focus.."\"\n"
 					end 
 					if v.tabs[q].extra.right_focus ~= nil then 
-						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.right_focus = \""..v.tabs[q].extra.right_focus.."\"\n"
+						itm_str = itm_str..v.name..".tabs["..tostring(q).."].extra.right_focus = \""..v.tabs[q].extra.right_focus.."\"\n"
 					end 
 				end 
 			end 
@@ -1507,15 +1507,15 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.reactive ~= nil then 
-		itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+		itm_str = itm_str..v.name..".extra.reactive = "..tostring(v.extra.reactive).."\n\n"
     end 
 	if v.extra.type == "Group" then 
-		itm_str = itm_str..v.name.."\.extra\.type= \"Group\"".."\n\n"
+		itm_str = itm_str..v.name..".extra.type= \"Group\"".."\n\n"
 	end 
 
 
     if v.extra.timeline then 
-	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
+	    itm_str = itm_str..v.name..".extra.timeline = {"
 	    for m,n in pairs (v.extra.timeline) do 
 	         itm_str = itm_str.."["..m.."] = { \n"
 	         for q,r in pairs (n) do

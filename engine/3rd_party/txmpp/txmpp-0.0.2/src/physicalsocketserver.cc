@@ -1147,9 +1147,7 @@ class Signaler : public EventDispatcher {
 };
 
 PhysicalSocketServer::PhysicalSocketServer()
-    : fWait_(false),
-      last_tick_tracked_(0),
-      last_tick_dispatch_count_(0) {
+    : fWait_(false) {
   signal_wakeup_ = new Signaler(this, &fWait_);
 #ifdef WIN32
   socket_ev_ = WSACreateEvent();

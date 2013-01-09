@@ -45,23 +45,23 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 
 		local function there(j) 
 		     if util.need_stub_code(j) == true then 
-	         	new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n		
+	         	new_contents = new_contents.."-- "..fileUpper.."."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n
 			   	if j.extra.type == "Button" then 
-	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_unfocus = function() -- Handler for "..j.name.."\.on_unfocus in this screen\nend\n"
+	            	new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".on_focus = function() -- Handler for "..j.name..".on_focus in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".on_press = function() -- Handler for "..j.name..".on_press in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".on_unfocus = function() -- Handler for "..j.name..".on_unfocus in this screen\nend\n"
 			    elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
+	            	new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".on_selection_change = function(selected_item) -- Handler for "..j.name..".on_selection_change in this screen\nend\n"
 			   	elseif j.extra.type == "CheckBoxGroup" then 
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_items) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".on_selection_change = function(selected_items) -- Handler for "..j.name..".on_selection_change in this screen\nend\n"
 			   	elseif j.extra.type == "MenuButton" then 
 			   		for k,l in pairs (j.items) do 
 			   	     	if l["type"] == "item" then 
-	                   		new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
+	                   		new_contents = new_contents.."layout[\""..fileLower.."\"]."..j.name..".items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
 			   	     	end 
 			   		end 
 			   	end 
-	            new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
+	            new_contents = new_contents.."-- END "..fileUpper.."."..string.upper(j.name).." SECTION\n\n"
 		     else -- if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if util.is_this_container(j) == true then 
 					if j.extra.type == "TabBar" then 
@@ -81,7 +81,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 								end 
 							end 
 						end 
-						new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+						new_contents = new_contents.."-- "..fileUpper.."."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]."..lm_name..".rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]."..lm_name..".columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]."..lm_name..".cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."."..string.upper(lm_name).." SECTION\n\n"
 					elseif j.extra.type == "Group" then  
 						gen_stub_code(j)
 					end
@@ -92,7 +92,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   	gen_stub_code = function(grp) 
 	 
 			if new_contents == nil then 	
-				new_contents="-- "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+				new_contents="-- "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"/screens/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
 			end
 
 			for i, j in pairs (grp.children) do 
@@ -131,7 +131,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   if main_exist == false then 
 		-- main.lua 생성해서 
 
-		global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
+		global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"/lib/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
 
 		local screen_mouse_code = "\n-- SCREEN ON_MOTION SECTION\nfunction screen:on_motion(x,y)\n\tif dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MOTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
@@ -215,7 +215,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 			current_fn = ""
 			editor_lb:writefile("screens/unsaved_temp.lua", "", true)
 		else 
-			local back_file = current_fn.."\.back"
+			local back_file = current_fn..".back"
 			editor_lb:writefile(back_file, cfc, true)	
 		end 
 
@@ -237,7 +237,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
      end 
 
      if(g.extra.video ~= nil) then util.clear_bg() end 
-     item_num = table.getn(g.children)
+     item_num = #g.children
 
      local x_scroll_from=0
      local x_scroll_to=0
@@ -302,7 +302,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 		   		local f 
 		   		f = function (k, c) 
      		    	if type(c) == "table" then
-	 		   			table.foreach(c, f)
+	 		   			--table.foreach(c, f)
+                        for p, q in pairs(c) do
+                            f(p, c[p])
+                        end
      		    	elseif not c.extra.is_in_group then 
 						if c.extra.type and c.extra.type == "Group" then 
 							there(d,false)
@@ -311,7 +314,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 						end 
      		    	end 
 		   		end 
-		   		table.foreach(v.cells, f)
+		   		--table.foreach(v.cells, f)
+                for p, q in pairs(v.cells) do
+                    f(p, v.cells[p])
+                end
 	       end 
 	  	end 
 	end 

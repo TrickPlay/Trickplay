@@ -18,7 +18,7 @@ static int invoke_lua_callback( lua_State* L, CallbackDataStruct* cb_data, int n
 {
 
 	int lua_callback_ref = cb_data != NULL ? cb_data->lua_callback_ref : LUA_REFNIL;
-	UserData * ud = cb_data->user_data;
+	UserData * ud = cb_data ? cb_data->user_data : NULL;
 
     LSG;
 
@@ -486,7 +486,7 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 
 		TPGameServiceUtil::push_app_id_arg( L, app_id );
 
-		invoke_gameservice_on_ready( L, this, 1, 0 );
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_ready",1,0);
 
 		// call the on_ready lua callback
 	} else {
@@ -495,7 +495,7 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 
 		TPGameServiceUtil::push_response_status_arg( L, rs );
 
-		invoke_gameservice_on_error( L, this, 1, 0 );
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_error",1,0);
 	}
 }
 
@@ -708,7 +708,7 @@ void GameServiceSupport::OnStart(const std::string& match_id, const Participant&
 
 		TPGameServiceUtil::push_participant_arg( L, from );
 
-		invoke_gameservice_on_match_started( L, this, 2, 0 );
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_match_started",2,0);
 }
 
 void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& from,
@@ -731,7 +731,7 @@ void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& 
 
 		TPGameServiceUtil::push_turn_arg( L, turn_message);
 
-		invoke_gameservice_on_turn_received( L, this, 3, 0 );
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_turn_received",3,0);
 }
 
 void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& from,
@@ -756,7 +756,7 @@ void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& 
 
 		TPGameServiceUtil::push_item_arg( L, item);
 
-		invoke_gameservice_on_participant_joined( L, this, 3, 0 );
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_participant_joined",3,0);
 
 }
 
@@ -776,7 +776,7 @@ void GameServiceSupport::OnLeave(const std::string& match_id, const Participant&
 
 		TPGameServiceUtil::push_participant_arg( L, participant );
 
-		invoke_gameservice_on_participant_left( L, this, 2, 0);
+                lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_participant_left",2,0);
 }
 
 void GameServiceSupport::OnUnavailable(const std::string& match_id,
@@ -827,7 +827,7 @@ void GameServiceSupport::OnCurrentMatchState(const std::string& match_id,
 
 	TPGameServiceUtil::push_match_state_arg( L, match_state );
 
-	invoke_gameservice_on_match_updated( L, this, 3, 0);
+        lb_invoke_callbacks(L,this,"GAMESERVICE_METATABLE","on_match_updated",3,0);
 
 }
 
@@ -844,6 +844,3 @@ void GameServiceSupport::OnStatusError(const std::string &stanza) {
 void GameServiceSupport::WakeupMainThread() {
 	::Action::post(new DoCallbacksAction( this ));
 }
-
-
-

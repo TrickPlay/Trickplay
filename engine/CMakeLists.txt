@@ -1,8 +1,8 @@
 
+add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
+
 add_subdirectory( lua )
 add_subdirectory( clutter_alpha_mode )
-
-add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
 set( LB_GENERATOR   ${ENGINE_SRC}/lb/bin/lb.py )
@@ -53,6 +53,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(SQLITE        REQUIRED    sqlite3)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
     pkg_check_modules(EXIF          REQUIRED    libexif)
+    pkg_check_modules(EXPAT                     expat)
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
         pkg_check_modules(UUID      REQUIRED    uuid)
@@ -245,14 +246,19 @@ endif( TP_FONT_DEBUG )
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
 
-TP_FIND_INCLUDE( expat.h                                ENGINE_INCLUDE_DIRS )
+if( NOT(EXPAT_FOUND) )
+    # expat only doesn't exist on broken version of shitty Ubuntu
+    TP_FIND_INCLUDE( expat.h                                ENGINE_INCLUDE_DIRS )
+    list( APPEND ENGINE_LIBRARY_NAMES expat )
+endif( NOT(EXPAT_FOUND) )
+
 TP_FIND_INCLUDE( jpeglib.h                              ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.h                               ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( tiffio.hxx                             ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( gif_lib.h                              ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h                        ENGINE_INCLUDE_DIRS )
 
-list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
+list( APPEND  ENGINE_LIBRARY_NAMES jpeg png tiff tiffxx gif uriparser )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -345,12 +351,6 @@ foreach( LIB ${ENGINE_LIBRARY_NAMES} )
 endforeach( LIB )
 
 #------------------------------------------------------------------------------
-# all warnings
-#------------------------------------------------------------------------------
-
-set(CMAKE_CXX_FLAGS "-Wall")
-
-#------------------------------------------------------------------------------
 # log domain for glib log functions
 #------------------------------------------------------------------------------
 
@@ -434,6 +434,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/apps.lb
     ${BINDINGS_SRC}/controller.lb
     ${BINDINGS_SRC}/controllers.lb
+    ${BINDINGS_SRC}/tuner.lb
+    ${BINDINGS_SRC}/tuners.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
@@ -441,7 +443,6 @@ list( APPEND LB_FILES
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
-    ${BINDINGS_SRC}/clutter_screen.lb
     ${BINDINGS_SRC}/clutter_rectangle.lb
     ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_clone.lb
@@ -451,10 +452,15 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_animator.lb
     ${BINDINGS_SRC}/clutter_state.lb
     ${BINDINGS_SRC}/clutter_score.lb
+# clutter_screen.lb has mac-specific code in it, so needs to be treated specially -- see below
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb
     ${BINDINGS_SRC}/clutter_path.lb
     ${BINDINGS_SRC}/clutter_constraint.lb
+
+    ${BINDINGS_SRC}/sprite_sheet.lb
+    ${BINDINGS_SRC}/sprite.lb
+    ${BINDINGS_SRC}/nineslice.lb
 
     ${BINDINGS_SRC}/socket.lb
 
@@ -471,6 +477,14 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/physics_bullet.lb
 
 )
+
+# Deal with clutter_screen.lb which has Objective-C code in it for OSX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list( APPEND LB_SPECIAL_MAC_FILES ${BINDINGS_SRC}/clutter_screen.lb )
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list( APPEND LB_FILES ${BINDINGS_SRC}/clutter_screen.lb )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 
 if (TP_WITH_GAMESERVICE)
     list ( APPEND LB_FILES
@@ -539,10 +553,16 @@ list( APPEND
     ${ENGINE_SRC}/source/images.cpp
     ${ENGINE_SRC}/source/clutter_util.cpp
 
+    ${ENGINE_SRC}/source/pushtexture.cpp
+    ${ENGINE_SRC}/source/spritesheet.cpp
+    ${ENGINE_SRC}/source/nineslice.cpp
+
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp
     ${ENGINE_SRC}/source/controller_lirc.cpp
     ${ENGINE_SRC}/source/controller_delegates.cpp
+    ${ENGINE_SRC}/source/tuner_list.cpp
+    ${ENGINE_SRC}/source/tuner_delegates.cpp
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp

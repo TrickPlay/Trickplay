@@ -76,6 +76,11 @@ restricted global editor [[ void * ]]
             result = App::get(L)->change_app_path( path );
         ]];
 
+    readonly string app_path
+    [[
+        app_path = App::get(L)->get_metadata().get_root_native_path().c_str();
+    ]]
+
      bool mkdir( string path )
         [[
             result = 0 == g_mkdir_with_parents( path , 0700 );
@@ -159,7 +164,7 @@ restricted global editor [[ void * ]]
 
             Display * display = clutter_x11_get_default_display();
 
-            Window window = clutter_x11_get_stage_window( CLUTTER_STAGE( clutter_stage_get_default() ) );
+            Window window = clutter_x11_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
 
             if ( shape >= 0 )
             {
