@@ -144,7 +144,7 @@ class Wizard():
                         return 
 
             else:
-                print('[VDBG] Error - ' + path + ' is not existing directory.')
+                print('[VE] Error - ' + path + ' is not existing directory.')
             
     def lineSplit(self, line):
         """

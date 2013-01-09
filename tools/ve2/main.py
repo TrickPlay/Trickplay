@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
         QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
         QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stdError)
-        #QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stdOut)
         QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
@@ -135,7 +134,7 @@ class MainWindow(QMainWindow):
         # Restore sizes/positions of docks
         #self.restoreState(settings.value("mainWindowState").toByteArray());
 
-        self.path =  None #os.path.join(self.apath, 'VE')
+        self.path =  None 
         self.app = app
         self.command = None
         self.currentProject = None
@@ -154,7 +153,7 @@ class MainWindow(QMainWindow):
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
         self.command = selfCmd
-        print inputCmd
+        print "[VE] "+inputCmd
 
     def openLua(self):
         self.sendLuaCommand("openLuaFile", "_VE_.openLuaFile()")
@@ -173,32 +172,13 @@ class MainWindow(QMainWindow):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
         return True
 
-    """
-    def okMsg(self, eMsg):
-        msg = QMessageBox()
-        msg.setText(eMsg)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.setDefaultButton(QMessageBox.Ok)
-        msg.setWindowTitle("Notification")
-        ret = msg.exec_()
-        if ret == QMessageBox.Ok:
-            return
-    """
-
     def errorMsg(self, eMsg):
         msg = QMessageBox()
         msg.setText(eMsg)
-        #msg.setStandardButtons(QMessageBox.Retry | QMessageBox.Cancel)
-        #msg.setDefaultButton(QMessageBox.Cancel)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setWindowTitle("Error")
         ret = msg.exec_()
-        #if ret == QMessageBox.Retry:
-        #    self.importAssets()
-        #    return
-        #elif ret == QMessageBox.Cancel:
-        #    return 
         if ret == QMessageBox.Ok:
             return
 
@@ -223,31 +203,17 @@ class MainWindow(QMainWindow):
         self.bar.setWindowTitle("Import Assets...")
         self.bar.setGeometry(600, 400, 300, 20)
         self.bar.show()
-
         return 
 
-    """
-    def import_stderr(self):
-        errorMsg = str(self.stitcher.readAllStandardError().data())
-        if errorMsg[:5] == "Error" :
-            self.errorMsg(errorMsg)
-        return
-    """
-
     def import_readyRead(self):
-        print("import_readyRead")
         while True:
-            # Read one line
             if not self.stitcher.canReadLine():
                 break
-            # Read one line
             s = self.stitcher.readLine()
             if s.isNull():
                 break
             s = str( s ).rstrip()
             print s
-
-
         return
 
     def import_stdError(self):
@@ -268,11 +234,8 @@ class MainWindow(QMainWindow):
                         newVal = int(l[0])
                     self.lastNumber = l[len(l) - 1]
                         
-                #s = str( s ).rstrip()
-                #print s+"...."
-                #print l 
                 self.bar.setValue(newVal)
-                print "[ progressBar.setValue : %s ] "%str(newVal)
+                print "[VE] progressBar.setValue : %s  "%str(newVal)
             except : 
                 pass
 
@@ -281,7 +244,7 @@ class MainWindow(QMainWindow):
 
     def import_finished(self, errorCode):
         if errorCode == 0 : 
-            print "[ progressBar.setValue : %s ] "%'100'
+            print "[VE] progressBar.setValue : %s  "%'100'
             self.bar.setValue(100)
             self.bar.hide()
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
@@ -302,15 +265,14 @@ class MainWindow(QMainWindow):
             path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
 
         if path:
-            print ("[VDBG] Import Asset Images ...[%s]"%path)
+            print ("[VE] Import Asset Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
-                print("stitcher -rp -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                print("[VE] stitcher -rp -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
                 self.stitcher.start("stitcher -rp -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
             else:
-                print("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                print("[VE] stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
                 self.stitcher.start("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
-
 
     def importSkins(self):
         path = -1 
@@ -320,14 +282,14 @@ class MainWindow(QMainWindow):
             path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
 
         if path:
-            print ("[VDBG] Import Skin Images ...[%s]"%path)
+            print ("[VE] Import Skin Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
-                print("stitcher -r -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                print("[VE] stitcher -r -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -m \""+str(os.path.join(self.path, "assets/skins/skins.json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
             else:
-                print("stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                print("[VE] stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -r -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
 
     def newProject(self):
         orgPath = self.path
@@ -371,7 +333,7 @@ class MainWindow(QMainWindow):
 		        self.path = self.apath
             path = QFileDialog.getExistingDirectory(None, 'Open Project', self.path, QFileDialog.ShowDirsOnly)
             path = wizard.start(path, True)
-        print ("[VDBG] Open Project [%s]"%path)
+        print ("[VE] Open Project [%s]"%path)
         if path:
             settings = QSettings()
             if settings.value('path') is not None:
@@ -623,7 +585,6 @@ class MainWindow(QMainWindow):
         self.path = path
         if path is not -1:
             self.ui.mainMenuDock.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
-            #self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
             #self.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(path)) +"')")
 
