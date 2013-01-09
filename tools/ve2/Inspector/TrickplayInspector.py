@@ -1163,7 +1163,6 @@ class TrickplayInspector(QWidget):
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
                             if sp == 'spritesheet_map' :
-                                #KKK j.setText(1, z[sp])
                                 skinItem = j
                                 skin_idx = 0
                                 self.skinCB = QComboBox()
