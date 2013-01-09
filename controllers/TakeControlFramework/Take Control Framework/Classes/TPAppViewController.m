@@ -313,6 +313,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
             hasPictures = @"\tPS";
         }
         
+        // Figure out fi the device has video streaming
+        NSString *hasVideoStreaming = @"";
+        if ([AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]) {
+            hasVideoStreaming = @"\tSV";
+        }
+        
         // Retrieve the UUID or make a new one and save it
         NSData *deviceID;
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -331,7 +337,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
         NSLog(@"deviceID: %@", deviceID);
         
         // Tell the service what this device is capable of
-        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.4\t%@\tKY\tAX\tFM\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.4\t%@\tKY\tAX\tFM\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, hasVideoStreaming, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
         
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
@@ -339,6 +345,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
         camera = nil;
+        videoStreamer = nil;
         
         // For audio playback
         audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
@@ -1003,11 +1010,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
  *  4. Resource name of a possible mask to use to cover the camera view port when
  *     taking or editing an image.
  *  5. A label to inform the user of how he or she should be using the camera
- *  6. A label pasted on any button that when pushed cancels taking a photo.
+ *  6. A label pasted on any button that when pushed cancels taking a photo
  */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
-    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName) {
+    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName || videoStreamer) {
         [self canceledPickingImage];
         return;
     }
@@ -1107,24 +1114,109 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 #pragma mark -
 #pragma mark Video Streaming
 
-- (void)do_VS {
-    // TODO: Make sure that the camera is not in use first. Also, camera should destroy itself when not in use.
-    if (camera) {
-        // TODO: warn TrickPlay of cancellation with error message
+// Video Streaming Server->Controller
+
+/**
+ * SVSC = Streaming Video Start Call
+ *
+ * Begins a SIP call to a specific address.
+ *
+ * Passes 1 argument
+ *  0. The address to initiate a SIP call to
+ */
+- (void)do_SVSC:(NSArray *)args {
+    NSLog(@"Streaming Video Start Call");
+    if ([self.navigationController visibleViewController] != self) {
+        NSLog(@"Could not start Streaming Video Call, app is not visible on device");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video failed, app is not visible on device"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
         return;
     }
-    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    // Check the arguments
+    if (args.count < 1) {
+        NSLog(@"Could not start Streaming Video Call, no address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t<NOTHING>\t%@\n", @"Streaming Video failed can not connect, invalid address provided"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Make sure that the camera is not in use first. (Camera should destroy itself when not in use)
+    if (camera) {
+        NSLog(@"Could not start Streaming Video Call, the Camera is currently in use!");
+        // Send Streaming Video Call Failed <address> <reason>
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, camera is currently in use"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    // Make sure there isn't already a Streaming Video session
+    if (videoStreamer) {
+        NSLog(@"Could not start Streaming Video Call, Streaming Video currently in session");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, call is currently in session"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
+        return;
+    }
+    
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteAddress:[args objectAtIndex:0] serverPort:5060 clientPort:50160] autorelease];
     if (!context) {
-        // TODO: warn TrickPlay of cancellation with error message
+        NSLog(@"Could not start Streaming Video Call, invalid address provided!");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video can not connect, invalid address provided"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
         return;
     }
     videoStreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
     if (!videoStreamer) {
-        // TODO: warn TrickPlay of cancellation with error message
+        NSLog(@"Could not start Streaming Video Call, VideoStreamer failed to launch on Device");
+        NSString *sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", [args objectAtIndex:0], @"Streaming Video module failed to launch on device"];
+        [socketManager sendData:[sentData UTF8String] 
+                  numberOfBytes:[sentData length]];
         return;
     }
+    videoStreamer.view.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:.5];
     [videoStreamer startChat];
     [delegate tpAppViewController:self wantsToPresentCamera:videoStreamer];
+}
+
+/**
+ * SVEC = Streaming Video End Call
+ *
+ * Ends a call in progress to a specific address, or abort the calline sequence
+ * if the call is not yet connected.
+ *
+ * Passes 1 argument
+ *  0. The address of the call the TV wants to end
+ */
+- (void)do_SVEC:(NSArray *)args {
+    NSLog(@"Streaming Video End Call");
+
+    [videoStreamer endChat];
+}
+
+/**
+ * SVSS = Streaming Video Send Status
+ *
+ * Sends a Streaming Video Call Status (SVCS) event ASAP to indicate the current state
+ * of the streaming video system.
+ */
+- (void)do_SVSS {
+    NSLog(@"Streaming Video Send Status");
+    NSString *sentData;
+    if (videoStreamer) {
+        if (videoStreamer.status == CONNECTED) {
+            sentData = [NSString stringWithFormat:@"SVCS\tCONNECTED\t%@\n", videoStreamer.streamerContext.fullAddress];
+        } else if(videoStreamer.status == INITIATING) {
+            sentData = @"SVCS\tWAIT\tWAIT\n";
+        } else {
+            sentData = @"SVCS\tREADY\tREADY\n";
+        }
+    } else {
+        sentData = @"SVCS\tREADY\tREADY\n";
+    }
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
 }
 
 // TODO: If in any way the video streamer is destroyed, pass cancel message back to TrickPlay
@@ -1134,11 +1226,40 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 }
 
 - (void)videoStreamerChatStarted:(id)_videoStreamer {
-    
+    NSLog(@"Streaming Video Call Connected");
+    NSString *sentData = [NSString stringWithFormat:@"SVCC\t%@\n", videoStreamer.streamerContext.fullAddress];
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-- (void)videoStreamer:(id)_videoStreamer chatEndedWithInfo:(NSString *)reason {
+- (void)videoStreamer:(VideoStreamer *)_videoStreamer chatEndedWithInfo:(NSString *)reason networkCode:(enum NETWORK_TERMINATION_CODE)code {
     
+    NSLog(@"Streaming Video Call Ended: %@", reason);
+    
+    NSString *sentData;
+    switch (code) {
+        case CALL_ENDED_BY_CALLEE:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_ENDED_BY_CALLER:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLER\n", videoStreamer.streamerContext.fullAddress];
+            break;
+        case CALL_FAILED:
+            sentData = [NSString stringWithFormat:@"SVCF\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+        case CALL_DROPPED:
+            sentData = [NSString stringWithFormat:@"SVCD\t%@\t%@\n", videoStreamer.streamerContext.fullAddress, reason];
+            break;
+            
+        default:
+            sentData = [NSString stringWithFormat:@"SVCE\t%@\tCALLEE\n", videoStreamer.streamerContext.fullAddress];
+            break;
+    }
+    
+    [videoStreamer dismissViewControllerAnimated:YES completion:^(void){
+        NSLog(@"VideoStreamer dismissed");
+        [videoStreamer release];
+        videoStreamer = nil;
+    }];
 }
 
 #pragma mark -
@@ -1260,6 +1381,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     if (camera) {
         [camera release];
         camera = nil;
+    }
+    
+    if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     
     /*
@@ -1549,6 +1677,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
     }
     if (camera) {
         [camera release];
+    }
+    if (videoStreamer) {
+        videoStreamer.delegate = nil;
+        [videoStreamer endChat];
+        [videoStreamer release];
+        videoStreamer = nil;
     }
     if (virtualRemote) {
         [virtualRemote release];

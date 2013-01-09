@@ -33,7 +33,7 @@ One other consideration: Each Path node takes two values: an X coordinate and a 
 	sphereScale:line_to( 100,  25 )
 	(end)
 
-In the animation's on_new_frame() event handler, each sphere's scale factor is extracted from the {X,Y}-coordinate table returned from get_position() and divided by 100 to convert it back to floating-point scale values. The final value gets assigned to the sphere's scale property to animate its size. The code statements shown below perform these operations.
+In the animation's on_new_frame event handler, each sphere's scale factor is extracted from the {X,Y}-coordinate table returned from get_position() and divided by 100 to convert it back to floating-point scale values. The final value gets assigned to the sphere's scale property to animate its size. The code statements shown below perform these operations.
 
 	(code)
 	-- Event handler called to update animated properties
@@ -46,7 +46,7 @@ In the animation's on_new_frame() event handler, each sphere's scale factor is e
 		local scaleFactors     = sphereScale:get_position( progress )
 		local scaleFactorImage = scaleFactors[ 1 ] / 100
 		local scaleFactorClone = scaleFactors[ 2 ] / 100
-		
+
 		-- Assign each sphere's scale value
 		sphereImage.scale = { scaleFactorImage, scaleFactorImage }
 		sphereClone.scale = { scaleFactorClone, scaleFactorClone }

@@ -6,38 +6,38 @@ void profile_changing_handler(TPContext *,const char *,void * l);
 void profile_changed_handler(TPContext *,const char *,void * l);
 ]]
 
-/*
+/***************************************
 	Global: profile
-	
+
 	The profile global variable enables a TrickPlay application to retrieve information about the currently active profile. The profile variable also provides event handlers that can notify an application when the current profile changes.
-	
+
 	It is not possible for a TrickPlay application to create a new profile. Nor can an application switch to a different profile. Profiles are created and set by entering commands manually in the TrickPlay Console. The console command "/profile" displays information in the Console window about the active profile. The "/profile new" command creates a new profile with a specified name. The "/profile switch" command changes the active profile. Refer to <The Engine Console> for additional information about these Console commands.
-	
+
 	Each profile has a database associated with it. Each database entry comprises a key/value pair. Each key must be a string; its value can be a number, boolean, string, or table. A TrickPlay application can create and access database entries for the active profile by referencing the <settings> global variable.
-	
+
 	Although the database entries are key/value pairs, the database is not a Lua table, so it cannot be iterated through. Nor can it be accessed using Lua table functions. Instead, it must be referenced using either the dot syntax or square-bracket syntax, as shown in the examples below.
-	
+
 	(code)
 	-- Create a key called "main_file" (using dot syntax) and give it the value "main.lua"
 	settings.main_file = "main.lua"
-	
+
 	-- Create a key called "data_file" (using square-bracket syntax) and give it the value "data.xml"
 	settings[ "data_file" ]  = "data.xml"
 	(end)
 
 	A database entry can be removed by setting it to nil, as shown below.
-	
+
 	(code)
 	-- Remove data_file setting from active profile
 	settings.data_file = nil
 	(end)
-	
+
 	If an attempt is made to access a non-existent database entry, the value returned is nil.
-	
+
 	When the profile changes, the database entries accessible through the settings variable change to those associated with the new profile. The diagram shown below demonstrates this behavior. When "Jack" is the active profile, the settings associated with that profile are accessible through the settings variable. If the active profile is switched to "Jill," the keys and values in the settings variable change accordingly. Notice that each profile can define and set its own unique keys which the other profiles haven't necessarily defined. For example, the "Jill" profile defines a "fav_color" key, but none of the other profiles define such a key. If the "Jack" profile was active and access was made to the "fav_color" key, it would return a nil value.
-	
+
 (see profile_org.png)
-	
+
 */
 
 global profile [[App*]]
@@ -46,87 +46,180 @@ global profile [[App*]]
         [[
             self=lb_construct( App , App::get(L) );
             self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGING,profile_changing_handler,L);
-            self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);            
+            self->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGED,profile_changed_handler,L);
         ]];
 
-	/*
-		Property: id
-		
-		The id property is the numeric ID of the currently active profile. Each profile has a unique numeric ID that is assigned by the TrickPlay Engine when the profile is created via the Console command "/profile new".
-		
-		*See Also:* <The Engine Console>
-	*/
-    
+/***************************************
+	Property: id
+
+	The id property is the numeric ID of the currently active profile. Each profile has a unique numeric ID that is assigned by the TrickPlay Engine when the profile is created via the Console command "/profile new".
+
+	*See Also:* <The Engine Console>
+*/
+
     readonly int id
         [[id=self->get_profile_id();]];
 
 
-    /*
-    	Property: name
-    	
-    	The name property is the string name of the currently active profile. A profile's name is not necessarily unique between different profiles. A profile's name is specified at the time it is created via the Console command "/profile new".
-    	
-    	*See Also:* <The Engine Console>
-    */
-    
+/***************************************
+    Property: name
+
+    The name property is the string name of the currently active profile. A profile's name is not necessarily unique between different profiles. A profile's name is specified at the time it is created via the Console command "/profile new".
+
+    *See Also:* <The Engine Console>
+*/
+
     readonly string name
         [[name=self->get_context()->get(PROFILE_NAME);]];
 
+/***************************************
+	Function: add_onchanging_listener
 
-	/*
-		Event Handler: on_changing
-		
-		The on_changing() event handler is invoked immediately before the current profile changes to another profile. At the time of its invocation, the profile variable's property values and the values stored in the <settings> variable are those of the soon-to-be-changed profile.
-		
-		*Prototype:*
-		
-			(code)
-			on_changing( profile )
-			(end)
-			
-		*Arguments:*
-		
-			profile - reference to the profile global variable
-			
-		*Return Value:* None
-		
-		*See Also:* the <on_changed> event handler
-	*/
-    callback on_changing;
+	The add_onchanging_listener() function registers a handler function for <on_changing> events.
 
+	*Arguments:*
 
-	/*
-		Event Handler: on_changed
-		
-		The on_changed() event handler is invoked after switching to another profile. The profile variable's property values and the <settings> variable's values are those of the switched-to profile.
-		
-		*Prototype:*
-		
-			(code)
-			on_changed( profile )
-			(end)
-			
-		*Arguments:*
-		
-			profile - reference to the profile global variable
-			
-		*Return Value:* None
-		
-		*See Also:* the <on_changing> event handler
-	*/
-    callback on_changed;
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onchanging_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( profile )
+		(end)
+
+	*Handler Arguments:*
+
+		profile - reference to the profile global variable
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_changing> event and the <remove_onchanging_listener> function
+*/
+
+    int add_onchanging_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_changing" , L );
+        ]];
+
+/***************************************
+	Function: remove_onchanging_listener
+
+	The remove_onchanging_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onchanging_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onchanging_listener> function
+*/
+
+    remove_onchanging_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_changing" , L );
+        ]];
+
+/***************************************
+	Function: add_onchanged_listener
+
+	The add_onchanged_listener() function registers a handler function for <on_changed> events.
+
+	*Arguments:*
+
+		f - reference to handler function. The function prototype is described below.
+
+	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onchanged_listener> function to unregister the handler.
+
+	*Handler Prototype:*
+
+		(code)
+		f( profile )
+		(end)
+
+	*Handler Arguments:*
+
+		profile - reference to the profile global variable
+
+    *Handler Return Value:* None
+
+	*See Also:* the <on_changed> event and the <remove_onchanged_listener> function
+*/
+
+    int add_onchanged_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_changed" , L );
+        ]];
+
+/***************************************
+	Function: remove_onchanged_listener
+
+	The remove_onchanged_listener() function unregisters the specified event handler.
+
+	*Arguments:*
+
+		ref - handle for event handler to unregister. This handle is returned by the <add_onchanged_listener> function.
+
+	*Return Value:* None
+
+	*See Also:* the <add_onchanged_listener> function
+*/
+
+    remove_onchanged_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_changed" , L );
+        ]];
+
+/***************************************
+	Event: on_changing
+
+	The on_changing event occurs immediately before the current profile changes to another profile. At the time of its invocation, the profile variable's property values and the values stored in the <settings> variable are those of the soon-to-be-changed profile.
+
+	*See Also:* the <add_onchanging_listener> function
+*/
+
+    function on_changing
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_changing" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_changing" , L );
+        ]];
+
+/***************************************
+	Event: on_changed
+
+	The on_changed event occurs after switching to another profile. The profile variable's property values and the <settings> variable's values are those of the switched-to profile.
+
+	*See Also:* the <add_onchanged_listener> function
+*/
+
+    function on_changed
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_changed" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_changed" , L );
+        ]];
+
+/***************************************
+
+*/
+
 }
 
 [[
 void profile_changing_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_profile_on_changing(L,App::get(L),0,0);
+    lb_invoke_callbacks(L,App::get(L),"PROFILE_METATABLE","on_changing",0,0);
 }
 
 void profile_changed_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
-    invoke_profile_on_changed(L,App::get(L),0,0);
+    lb_invoke_callbacks(L,App::get(L),"PROFILE_METATABLE","on_changed",0,0);
 }
 ]]

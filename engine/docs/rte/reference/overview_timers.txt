@@ -1,5 +1,5 @@
 
 Title: Timers Overview
 
-The TrickPlay SDK library supports several types of timers. The <Timer> class enables a user-defined event handler to be invoked after a specified amount of time has elapsed. The <Stopwatch> class measures elapsed time. The <idle> global variable supports a user-defined event handler that is called as often as possible when the system is otherwise idle.
+The TrickPlay SDK library supports several types of timers. The <Timer> class enables a user-defined event to be fired after a specified amount of time has elapsed. The <Stopwatch> class measures elapsed time. The <idle> global variable supports a user-defined event that is fired as often as possible when the system is otherwise idle.
 

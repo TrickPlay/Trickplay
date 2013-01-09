@@ -1,0 +1,2834 @@
+{
+  "Channels": {
+    "resultCount": 218,
+    "Channel": [
+      {
+        "id": "vtm HD",
+        "LogicalChannelNumber": 1,
+        "Name": "vtm HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/vtm_hd.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "één HD",
+        "LogicalChannelNumber": 2,
+        "Name": "één HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/een_hd.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "VT4",
+        "LogicalChannelNumber": 3,
+        "Name": "VT4",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/vt4.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "2BE",
+        "LogicalChannelNumber": 5,
+        "Name": "2BE",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/2be.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "VijfTV",
+        "LogicalChannelNumber": 6,
+        "Name": "VijfTV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/vijftv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Vitaya",
+        "LogicalChannelNumber": 7,
+        "Name": "Vitaya",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/vitaya.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "RTV Mechelen",
+        "LogicalChannelNumber": 8,
+        "Name": "RTV Mechelen",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/rtv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Acht",
+        "LogicalChannelNumber": 9,
+        "Name": "Acht",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/acht.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "KanaalZ",
+        "LogicalChannelNumber": 10,
+        "Name": "KanaalZ",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/kanaalZ_logo_nl.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Infokanaal",
+        "LogicalChannelNumber": 11,
+        "Name": "Infokanaal",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/infokanaal.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery Vl",
+        "LogicalChannelNumber": 15,
+        "Name": "Discovery Vl",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Discovery.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC Entertainment",
+        "LogicalChannelNumber": 26,
+        "Name": "BBC Entertainment",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCEntertainment.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Disney VL",
+        "LogicalChannelNumber": 29,
+        "Name": "Disney VL",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DisneyChannel.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "JIM",
+        "LogicalChannelNumber": 30,
+        "Name": "JIM",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Jim.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Exqi Sport-Cult",
+        "LogicalChannelNumber": 42,
+        "Name": "Exqi Sport-Cult",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ExqiSportCult.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be Shop TV",
+        "LogicalChannelNumber": 46,
+        "Name": "Be Shop TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BeShopTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Exqi Sport-Cult HD",
+        "LogicalChannelNumber": 50,
+        "Name": "Exqi Sport-Cult HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/EXQICultHd1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery HD",
+        "LogicalChannelNumber": 60,
+        "Name": "Discovery HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DiscoveryHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Animal Planet HD",
+        "LogicalChannelNumber": 61,
+        "Name": "Animal Planet HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/AnimPlanetHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC HD",
+        "LogicalChannelNumber": 62,
+        "Name": "BBC HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "FoxLife HD",
+        "LogicalChannelNumber": 64,
+        "Name": "FoxLife HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/FoxlifeHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Eurosport HD",
+        "LogicalChannelNumber": 65,
+        "Name": "Eurosport HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/EuroSportHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC 1",
+        "LogicalChannelNumber": 120,
+        "Name": "BBC 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCONE.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC 2",
+        "LogicalChannelNumber": 121,
+        "Name": "BBC 2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCTWO.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "AB3",
+        "LogicalChannelNumber": 135,
+        "Name": "AB3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/AB3.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "France 2",
+        "LogicalChannelNumber": 151,
+        "Name": "France 2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/France2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "France 3",
+        "LogicalChannelNumber": 152,
+        "Name": "France 3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/France3.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "France 4",
+        "LogicalChannelNumber": 153,
+        "Name": "France 4",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/France4.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "France 5",
+        "LogicalChannelNumber": 154,
+        "Name": "France 5",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/France5.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Arte Belgique",
+        "LogicalChannelNumber": 155,
+        "Name": "Arte Belgique",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Arte.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "France O",
+        "LogicalChannelNumber": 158,
+        "Name": "France O",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/France0.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ARD",
+        "LogicalChannelNumber": 170,
+        "Name": "ARD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ARD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Eurosport",
+        "LogicalChannelNumber": 210,
+        "Name": "Eurosport",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Eurosport.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Eurosport 2",
+        "LogicalChannelNumber": 211,
+        "Name": "Eurosport 2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Eurosport2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ESPN Classic",
+        "LogicalChannelNumber": 212,
+        "Name": "ESPN Classic",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ESPN.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Extreme Sport",
+        "LogicalChannelNumber": 214,
+        "Name": "Extreme Sport",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ExtremeSports.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ESPN AMERICA",
+        "LogicalChannelNumber": 215,
+        "Name": "ESPN AMERICA",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ESPNAmerica.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Eurosport.FR",
+        "LogicalChannelNumber": 220,
+        "Name": "Eurosport.FR",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Eurosport.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Actua TV",
+        "LogicalChannelNumber": 400,
+        "Name": "Actua TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ActuaTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "CNN",
+        "LogicalChannelNumber": 401,
+        "Name": "CNN",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/CNN.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC World",
+        "LogicalChannelNumber": 403,
+        "Name": "BBC World",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCWorld.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Al Jazeera Eng.",
+        "LogicalChannelNumber": 404,
+        "Name": "Al Jazeera Eng.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Aljazeera.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Euronews",
+        "LogicalChannelNumber": 405,
+        "Name": "Euronews",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Euronews.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "CCTV",
+        "LogicalChannelNumber": 411,
+        "Name": "CCTV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Cctv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery Wo",
+        "LogicalChannelNumber": 502,
+        "Name": "Discovery Wo",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DiscWorld.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery ID",
+        "LogicalChannelNumber": 503,
+        "Name": "Discovery ID",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DiscoveryID.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery Sci",
+        "LogicalChannelNumber": 504,
+        "Name": "Discovery Sci",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DiscScience.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "History",
+        "LogicalChannelNumber": 505,
+        "Name": "History",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/HistoryChannel.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Animal Planet",
+        "LogicalChannelNumber": 506,
+        "Name": "Animal Planet",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/AnimalPlanet.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Discovery FR",
+        "LogicalChannelNumber": 510,
+        "Name": "Discovery FR",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Discovery.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Fashion TV",
+        "LogicalChannelNumber": 550,
+        "Name": "Fashion TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/FashionTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Food Network",
+        "LogicalChannelNumber": 553,
+        "Name": "Food Network",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/FoodNetwork.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "E!",
+        "LogicalChannelNumber": 555,
+        "Name": "E!",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/E.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "13th Street",
+        "LogicalChannelNumber": 563,
+        "Name": "13th Street",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/13th_Street.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC 3",
+        "LogicalChannelNumber": 565,
+        "Name": "BBC 3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCTHREE.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BBC 4",
+        "LogicalChannelNumber": 566,
+        "Name": "BBC 4",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BBCFour.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Cartoon Network",
+        "LogicalChannelNumber": 600,
+        "Name": "Cartoon Network",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/CartoonNetwork.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Disney XD",
+        "LogicalChannelNumber": 601,
+        "Name": "Disney XD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DisneyXD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Boomerang",
+        "LogicalChannelNumber": 602,
+        "Name": "Boomerang",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Boomerang.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Cbeebies",
+        "LogicalChannelNumber": 604,
+        "Name": "CBeebies",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Cbeebies.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "CBBC",
+        "LogicalChannelNumber": 605,
+        "Name": "CBBC",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/CBBC.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "JimJam",
+        "LogicalChannelNumber": 607,
+        "Name": "JimJam",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/JimJam.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Canal J",
+        "LogicalChannelNumber": 610,
+        "Name": "Canal J",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/CanalJ.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ketnet+~~2FCanvas+",
+        "Name": "Ketnet+/Canvas+",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/KetnetPlusCanvasPlus.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ketnet~~2FCanvas",
+        "Name": "Ketnet/Canvas",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/KetnetCanvas.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ketnet~~2FCanvas HD",
+        "Name": "Ketnet/Canvas HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/KetnetCanvas.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nat Geo",
+        "LogicalChannelNumber": 16,
+        "Name": "Nat Geo",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/NationalGeographic.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "njam!",
+        "LogicalChannelNumber": 20,
+        "Name": "njam!",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Njam.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nickelodeon",
+        "LogicalChannelNumber": 31,
+        "Name": "Nickelodeon",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Nickelodeon.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nick Jr.",
+        "LogicalChannelNumber": 32,
+        "Name": "Nick Jr.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/NickJunior.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Studio 100 TV",
+        "LogicalChannelNumber": 33,
+        "Name": "Studio 100 TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Studio100TV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "vtmKzoom",
+        "LogicalChannelNumber": 34,
+        "Name": "vtmKzoom",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VTMKZoom.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MTV",
+        "LogicalChannelNumber": 35,
+        "Name": "MTV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MTVNHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TMF",
+        "LogicalChannelNumber": 36,
+        "Name": "TMF",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TMF.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MENT TV",
+        "LogicalChannelNumber": 37,
+        "Name": "MENT TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MentTv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Q-music",
+        "LogicalChannelNumber": 39,
+        "Name": "Q-music",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Q-music.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Stories",
+        "LogicalChannelNumber": 40,
+        "Name": "Stories",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Stories.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Life!tv",
+        "LogicalChannelNumber": 41,
+        "Name": "Life!tv",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Lifetv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Bass,  Breaks",
+        "Name": "MC Bass,  Breaks",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Xite",
+        "LogicalChannelNumber": 44,
+        "Name": "Xite",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Xite.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nat Geo HD",
+        "LogicalChannelNumber": 51,
+        "Name": "Nat Geo HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/NationalGeographicHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sundance HD",
+        "LogicalChannelNumber": 63,
+        "Name": "Sundance HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Sundance.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "vtm",
+        "LogicalChannelNumber": 98,
+        "Name": "vtm",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VTM.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "één",
+        "LogicalChannelNumber": 99,
+        "Name": "één",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/een.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ned1",
+        "LogicalChannelNumber": 100,
+        "Name": "Ned1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Ned1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ned2",
+        "LogicalChannelNumber": 101,
+        "Name": "Ned2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Ned2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Ned3",
+        "LogicalChannelNumber": 102,
+        "Name": "Ned3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Ned3.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Plug RTL",
+        "LogicalChannelNumber": 134,
+        "Name": "Plug RTL",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PlugTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "R. Contact Vision",
+        "LogicalChannelNumber": 137,
+        "Name": "R. Contact Vision",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Contact.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "La Trois",
+        "LogicalChannelNumber": 138,
+        "Name": "La Trois",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/LaTrois.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TF1 HD",
+        "LogicalChannelNumber": 150,
+        "Name": "TF1 HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TF1HD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TV Breizh",
+        "LogicalChannelNumber": 157,
+        "Name": "TV Breizh",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TVBreizh.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ZDF",
+        "LogicalChannelNumber": 171,
+        "Name": "ZDF",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ZDF.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ProSieben",
+        "LogicalChannelNumber": 172,
+        "Name": "ProSieben",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Prosieben.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "WDR",
+        "LogicalChannelNumber": 173,
+        "Name": "WDR",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/WDR.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sat. 1",
+        "LogicalChannelNumber": 174,
+        "Name": "Sat. 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/SAT1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "RTL Tele",
+        "LogicalChannelNumber": 175,
+        "Name": "RTL Tele",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/RTLTELE.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Rai Uno",
+        "LogicalChannelNumber": 180,
+        "Name": "Rai Uno",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/RaiUno.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TVE",
+        "LogicalChannelNumber": 181,
+        "Name": "TVE",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TVE.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TRT",
+        "LogicalChannelNumber": 184,
+        "Name": "TRT",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TRT.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Mediaset Italia",
+        "LogicalChannelNumber": 187,
+        "Name": "Mediaset Italia",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MediasetItalia.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporting Info",
+        "LogicalChannelNumber": 190,
+        "Name": "Sporting Info",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Dummy.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporting HD2",
+        "LogicalChannelNumber": 201,
+        "Name": "Sporting HD2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/SportingHd2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporting 3",
+        "LogicalChannelNumber": 202,
+        "Name": "Sporting 3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Sporting3.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporting 4",
+        "LogicalChannelNumber": 203,
+        "Name": "Sporting 4",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Dummy.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporting 5",
+        "LogicalChannelNumber": 204,
+        "Name": "Sporting 5",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Dummy.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Motors TV",
+        "LogicalChannelNumber": 213,
+        "Name": "Motors TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MotorsTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Star HD",
+        "LogicalChannelNumber": 300,
+        "Name": "Prime Star HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeStarHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Star+1",
+        "LogicalChannelNumber": 301,
+        "Name": "Prime Star+1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeStar1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Action",
+        "LogicalChannelNumber": 302,
+        "Name": "Prime Action",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeAction.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Family",
+        "LogicalChannelNumber": 303,
+        "Name": "Prime Family",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeFamily.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Fezztival",
+        "LogicalChannelNumber": 304,
+        "Name": "Prime Fezztival",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeFezztival.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Series",
+        "LogicalChannelNumber": 305,
+        "Name": "Prime Series",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeSeries.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Prime Star",
+        "LogicalChannelNumber": 306,
+        "Name": "Prime Star",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PrimeStar.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Telenet 3Demo",
+        "LogicalChannelNumber": 333,
+        "Name": "Telenet 3Demo",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Telenet3Demo.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "LCI",
+        "LogicalChannelNumber": 406,
+        "Name": "LCI",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/LCI1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Onze TV",
+        "LogicalChannelNumber": 408,
+        "Name": "Onze TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/OnzeTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Russia Today",
+        "LogicalChannelNumber": 410,
+        "Name": "Russia Today",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/RT.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nat Geo FR",
+        "LogicalChannelNumber": 511,
+        "Name": "Nat Geo FR",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/NationalGeographic.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Out TV",
+        "LogicalChannelNumber": 551,
+        "Name": "Out TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/OutTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Travel Channel",
+        "LogicalChannelNumber": 554,
+        "Name": "Travel Channel",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TravelChannel.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "TCM",
+        "LogicalChannelNumber": 560,
+        "Name": "TCM",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TCM.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MGM Movie Ch.",
+        "LogicalChannelNumber": 562,
+        "Name": "MGM Movie Ch.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MGM_Movie_Channel.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Syfy",
+        "LogicalChannelNumber": 564,
+        "Name": "Syfy",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/SYFYUniversal.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nick Toons",
+        "LogicalChannelNumber": 603,
+        "Name": "Nick Toons",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Nicktoons.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "vtmKzoom+",
+        "LogicalChannelNumber": 606,
+        "Name": "vtmKzoom+",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VTMKZoomPlus.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Pebble TV",
+        "LogicalChannelNumber": 609,
+        "Name": "Pebble TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PebbleTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "VH1",
+        "LogicalChannelNumber": 650,
+        "Name": "VH1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VH1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MTV Rocks",
+        "LogicalChannelNumber": 651,
+        "Name": "MTV Rocks",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MtvRocks.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Lite TV",
+        "LogicalChannelNumber": 652,
+        "Name": "Lite TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Litetv.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Mezzo",
+        "LogicalChannelNumber": 655,
+        "Name": "Mezzo",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Mezzo.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Trace Tropical",
+        "LogicalChannelNumber": 656,
+        "Name": "Trace Tropical",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/TraceTropical.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MTV Live HD",
+        "LogicalChannelNumber": 658,
+        "Name": "MTV Live HD",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MTVNHD.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be 1",
+        "LogicalChannelNumber": 700,
+        "Name": "Be 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Be1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be Ciné",
+        "LogicalChannelNumber": 701,
+        "Name": "Be Ciné",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BeCine.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be Séries",
+        "LogicalChannelNumber": 702,
+        "Name": "Be Séries",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BeSeries.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be Sport 1",
+        "LogicalChannelNumber": 703,
+        "Name": "Be Sport 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BeSport1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be Sport 2",
+        "LogicalChannelNumber": 704,
+        "Name": "Be Sport 2",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BeSport2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Be 1+1h",
+        "LogicalChannelNumber": 705,
+        "Name": "Be 1+1h",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Be1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "VOO Foot",
+        "LogicalChannelNumber": 706,
+        "Name": "VOO Foot",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VooFoot.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "La Une",
+        "LogicalChannelNumber": 790,
+        "Name": "La Une",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/LaUne.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "La Deux",
+        "LogicalChannelNumber": 791,
+        "Name": "La Deux",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/LaDeux.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "RTL TVI",
+        "LogicalChannelNumber": 792,
+        "Name": "RTL TVI",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/RTLTVI.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Club RTL",
+        "LogicalChannelNumber": 793,
+        "Name": "Club RTL",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/ClubRTL.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Playboy TV",
+        "LogicalChannelNumber": 800,
+        "Name": "Playboy TV",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/PlayboyTV.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Adult Channel",
+        "LogicalChannelNumber": 801,
+        "Name": "Adult Channel",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/AdultChannel.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "X-Passion",
+        "LogicalChannelNumber": 810,
+        "Name": "X-Passion",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/X-zone.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 1",
+        "LogicalChannelNumber": 900,
+        "Name": "Radio 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 2 Vl. Br.",
+        "LogicalChannelNumber": 901,
+        "Name": "Radio 2 Vl. Br.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MNM",
+        "LogicalChannelNumber": 902,
+        "Name": "MNM",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MNM.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "StuBru",
+        "LogicalChannelNumber": 903,
+        "Name": "StuBru",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/StuBru.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Klara",
+        "LogicalChannelNumber": 904,
+        "Name": "Klara",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Klara.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Klara Continuo",
+        "LogicalChannelNumber": 905,
+        "Name": "Klara Continuo",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/KlaraCont.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MNM Hits",
+        "LogicalChannelNumber": 906,
+        "Name": "MNM Hits",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MNMHits.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "nieuws+",
+        "LogicalChannelNumber": 907,
+        "Name": "nieuws+",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/NieuwsPlus.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Sporza",
+        "LogicalChannelNumber": 909,
+        "Name": "Sporza",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Sporza.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Q-music radio",
+        "LogicalChannelNumber": 910,
+        "Name": "Q-music radio",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Q-music.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "JOE fm",
+        "LogicalChannelNumber": 911,
+        "Name": "JOE fm",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/joefm.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Top Radio",
+        "LogicalChannelNumber": 913,
+        "Name": "Top Radio",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Topradio.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 2 Antw.",
+        "LogicalChannelNumber": 914,
+        "Name": "Radio 2 Antw.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 2 Limb.",
+        "LogicalChannelNumber": 915,
+        "Name": "Radio 2 Limb.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 2 O. Vl.",
+        "LogicalChannelNumber": 916,
+        "Name": "Radio 2 O. Vl.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Radio 2 W. Vl.",
+        "LogicalChannelNumber": 917,
+        "Name": "Radio 2 W. Vl.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio2.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Nostalgie",
+        "LogicalChannelNumber": 918,
+        "Name": "Nostalgie",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Nostalgie.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "La Première",
+        "LogicalChannelNumber": 920,
+        "Name": "La Première",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/LaPremiere.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "VivaCité",
+        "LogicalChannelNumber": 921,
+        "Name": "VivaCité",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/VivaCite.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Musiq3",
+        "LogicalChannelNumber": 922,
+        "Name": "Musiq3",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Musiq3.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Pure FM",
+        "LogicalChannelNumber": 923,
+        "Name": "Pure FM",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Radio1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Classic21",
+        "LogicalChannelNumber": 924,
+        "Name": "Classic21",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Classic21.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Bel RTL",
+        "LogicalChannelNumber": 926,
+        "Name": "Bel RTL",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BelRTL.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Contact",
+        "LogicalChannelNumber": 927,
+        "Name": "Contact",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Contact.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Mint",
+        "LogicalChannelNumber": 928,
+        "Name": "Mint",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Mint.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "RFI",
+        "LogicalChannelNumber": 929,
+        "Name": "RFI",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/RFI.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BRF 1",
+        "LogicalChannelNumber": 935,
+        "Name": "BRF 1",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/BRF1.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Class. Greats",
+        "LogicalChannelNumber": 950,
+        "Name": "MC Class. Greats",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Class. Calm",
+        "LogicalChannelNumber": 951,
+        "Name": "MC Class. Calm",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Class. Orch.",
+        "LogicalChannelNumber": 952,
+        "Name": "MC Class. Orch.",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Belpop",
+        "LogicalChannelNumber": 953,
+        "Name": "MC Belpop",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Chansons",
+        "LogicalChannelNumber": 954,
+        "Name": "MC Chansons",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Silk",
+        "LogicalChannelNumber": 955,
+        "Name": "MC Silk",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Ultimate Urban",
+        "LogicalChannelNumber": 956,
+        "Name": "MC Ultimate Urban",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Groove Disco&Funk",
+        "LogicalChannelNumber": 958,
+        "Name": "MC Groove Disco&Funk",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Drive",
+        "LogicalChannelNumber": 959,
+        "Name": "MC Drive",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC All Day Party",
+        "LogicalChannelNumber": 960,
+        "Name": "MC All Day Party",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC World Carniv",
+        "LogicalChannelNumber": 961,
+        "Name": "MC World Carniv",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Indie Classics",
+        "LogicalChannelNumber": 962,
+        "Name": "MC Indie Classics",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Rock & Roll",
+        "LogicalChannelNumber": 963,
+        "Name": "MC Rock & Roll",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Class. Rock",
+        "LogicalChannelNumber": 964,
+        "Name": "MC Class. Rock",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Strictly 60s",
+        "LogicalChannelNumber": 965,
+        "Name": "MC Strictly 60s",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC 80s",
+        "LogicalChannelNumber": 966,
+        "Name": "MC 80s",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC 90s",
+        "LogicalChannelNumber": 967,
+        "Name": "MC 90s",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Classic RnB&Soul",
+        "LogicalChannelNumber": 968,
+        "Name": "MC Classic RnB&Soul",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Hip Hop",
+        "LogicalChannelNumber": 969,
+        "Name": "MC Hip Hop",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Cool Jazz",
+        "LogicalChannelNumber": 970,
+        "Name": "MC Cool Jazz",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Blues",
+        "LogicalChannelNumber": 971,
+        "Name": "MC Blues",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Country",
+        "LogicalChannelNumber": 972,
+        "Name": "MC Country",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Cocktail Lou",
+        "LogicalChannelNumber": 973,
+        "Name": "MC Cocktail Lou",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Revival",
+        "LogicalChannelNumber": 974,
+        "Name": "MC Revival",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Schlager",
+        "LogicalChannelNumber": 975,
+        "Name": "MC Schlager",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Türk Müzigi",
+        "LogicalChannelNumber": 976,
+        "Name": "MC Türk Müzigi",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits France",
+        "LogicalChannelNumber": 977,
+        "Name": "MC Total Hits France",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits Italy",
+        "LogicalChannelNumber": 978,
+        "Name": "MC Total Hits Italy",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits Nordic",
+        "LogicalChannelNumber": 979,
+        "Name": "MC Total Hits Nordic",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits Spain",
+        "LogicalChannelNumber": 980,
+        "Name": "MC Total Hits Spain",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits German",
+        "LogicalChannelNumber": 981,
+        "Name": "MC Total Hits German",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Total Hits - UK",
+        "LogicalChannelNumber": 990,
+        "Name": "MC Total Hits - UK",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC The Alternative",
+        "LogicalChannelNumber": 991,
+        "Name": "MC The Alternative",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Dancefloor Filler",
+        "LogicalChannelNumber": 992,
+        "Name": "MC Dancefloor Filler",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC 70s",
+        "LogicalChannelNumber": 993,
+        "Name": "MC 70s",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Chillout",
+        "LogicalChannelNumber": 994,
+        "Name": "MC Chillout",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Reggae Vibra",
+        "LogicalChannelNumber": 995,
+        "Name": "MC Reggae Vibra",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Harder Than",
+        "LogicalChannelNumber": 996,
+        "Name": "MC Harder Than",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Rock Anthems",
+        "LogicalChannelNumber": 997,
+        "Name": "MC Rock Anthems",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Freedom",
+        "LogicalChannelNumber": 998,
+        "Name": "MC Freedom",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "MC Jazz Classics",
+        "LogicalChannelNumber": 999,
+        "Name": "MC Jazz Classics",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/MCBelpop.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Playhouse Disney",
+        "Name": "Playhouse Disney",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/DisneyPlayhouse.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Vitaliteit",
+        "Name": "Vitaliteit",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/Vitaliteit.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      },
+      {
+        "id": "één+",
+        "Name": "één+",
+        "Pictures": {
+          "Picture": [
+            {
+              "Value": "local_data/logos/eenplus.png",
+              "type": "Logo"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

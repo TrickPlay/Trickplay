@@ -35,7 +35,7 @@ public:
         }
         else
         {
-            ctx->add_internal( & key , new Graph() , destroy );
+            ctx->add_internal( & key , new Graph(ctx->get_stage()) , destroy );
         }
     }
 
@@ -46,13 +46,14 @@ private:
         delete ( Graph * ) me;
     }
 
-    Graph()
+    ClutterActor *stage;
+
+    Graph(ClutterActor *stg) :
+    stage( stg )
     {
         texture = clutter_texture_new();
 
         g_object_ref_sink( texture );
-
-        ClutterActor * stage = clutter_stage_get_default();
 
         width = clutter_actor_get_width( stage );
         height = clutter_actor_get_height( stage );
@@ -63,7 +64,11 @@ private:
 
         g_free( t );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, texture );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
+#endif
 
         clutter_actor_set_name( texture , "graph" );
 
@@ -83,7 +88,11 @@ private:
 
         g_object_ref_sink( text );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
 
         time = 0;
         frames = 0;
@@ -95,9 +104,14 @@ private:
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
         {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, texture );
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
 
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
         }
 
         g_object_unref( texture );
@@ -153,7 +167,11 @@ private:
 
         clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , white_bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
 
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( stage, texture, NULL );
+#else
         clutter_actor_raise_top( texture );
+#endif
 
         time += t;
         ++frames;
@@ -168,7 +186,11 @@ private:
 
             clutter_text_set_text( text , buffer );
 
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
             clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
 
             time = 0;
             frames = 0;
@@ -192,6 +214,57 @@ private:
     gfloat          max_fps;
     char            buffer[256];
 };
+
+static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
+{
+#ifdef CLUTTER_VERSION_1_10
+    ClutterActorIter iter;
+    ClutterActor *check;
+    clutter_actor_iter_init( &iter, parent );
+    while(clutter_actor_iter_next( &iter, &check ))
+    {
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+#else
+    GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
+
+    for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
+    {
+        ClutterActor *check = CLUTTER_ACTOR( item->data );
+
+        // Check if this one matches, or it contains child
+        if( check == child || check_children( check, child ) == child )
+        {
+            return child;
+        }
+    }
+
+    g_list_free( list );
+#endif
+
+    // If nothing matched above, then return NULL
+    return NULL;
+}
+
+static ClutterActor * validate_pointer( ClutterActor *first, const gchar *pointer_str )
+{
+    // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+    ClutterActor * actor = (ClutterActor *) g_ascii_strtoull( pointer_str, NULL, 16 );
+
+    // Can't use clutter_actor_contains because it will call CLUTTER_IS_ACTOR which will
+    // attempt to de-ref actor, which could explode.  We have to walk the list manually.
+    if( check_children( first, actor ) )
+    {
+        return actor;
+    }
+
+    return NULL;
+}
+
 ]]
 
 /*
@@ -199,7 +272,7 @@ private:
 
 	The devtools global variable provides low-level capabilities that are useful during development of a TrickPlay application.
 
-	Note: The devtools variable is available in TrickPlay Engine non-production builds only; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
+	Note: The devtools variable is available only in TrickPlay Engine non-production builds; it is not available in production builds. For this reason, the devtools variable is typically called from the Engine Console. If devtools is referenced from a Lua source file, the reference should be removed or commented out prior to releasing the final version of the application.
 
 */
 
@@ -363,7 +436,7 @@ global devtools [[ void * ]]
 
     string screensum()
         [[
-            Image * image = Image::screenshot();
+            Image * image = Image::screenshot(App::get(L)->get_context()->get_stage());
 
             String checksum;
 
@@ -399,8 +472,8 @@ global devtools [[ void * ]]
 
     keypress( int key, int unicode = 0 )
         [[
-            ClutterUtil::inject_key_down( key , unicode , 0 );
-            ClutterUtil::inject_key_up( key , unicode , 0 );
+            ClutterUtil::inject_key_down( App::get(L)->get_context()->get_stage(), key , unicode , 0 );
+            ClutterUtil::inject_key_up( App::get(L)->get_context()->get_stage(), key , unicode , 0 );
         ]];
 
 	/*
@@ -427,15 +500,15 @@ global devtools [[ void * ]]
 			(end)
 	*/
 
-    udata gid( int gid )
+    udata gid( string gid )
         [[
-            ClutterActor * actor = clutter_get_actor_by_gid( gid );
+            // Convert string to a pointer; next we NEED to validate that this pointer is indeed an actor
+            // but we can't trust the pointer, so we have to walk the list to find it
+            ClutterActor * actor = (ClutterActor *) validate_pointer( App::get(L)->get_context()->get_stage(), gid );
 
-            // There is a bug in clutter 1.6.14 where free gids are
-            // set to this value but not checked later.
-
-            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            if( !actor )
             {
+                g_warning("Actor not found: %s", Util::where_am_i_lua(L).c_str());
                 lua_pushnil( L );
             }
             else
@@ -497,11 +570,11 @@ global devtools [[ void * ]]
 
             result = 0;
 
-            Image * image = Image::screenshot();
+            Image * image = Image::screenshot(App::get(L)->get_context()->get_stage());
 
             if ( ! image )
             {
-                g_warning( "FAILED TO TAKE SCREENSHOT" );
+                g_warning( "FAILED TO TAKE SCREENSHOT: %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
@@ -545,7 +618,7 @@ global devtools [[ void * ]]
 
                     if ( ! image->write_to_png( path.c_str() ) )
                     {
-                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s': %s" , path.c_str(), Util::where_am_i_lua(L).c_str() );
                     }
                     else
                     {
@@ -680,7 +753,7 @@ global devtools [[ void * ]]
 
     fs( bool f)
         [[
-            clutter_stage_set_fullscreen( CLUTTER_STAGE( clutter_stage_get_default() ) , f ? TRUE : FALSE );
+            clutter_stage_set_fullscreen( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) , f ? TRUE : FALSE );
         ]];
 }
 

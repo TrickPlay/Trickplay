@@ -297,9 +297,8 @@ class GameServiceClientWorker: public txmpp::MessageHandler,
 		public txmpp::has_slots<> {
 public:
 	GameServiceClientWorker(GameServiceClientNotify *notify) :
-		worker_thread_(NULL), notify_(notify), ppt_(NULL),
-				presence_listener_task_(NULL), message_listener_task_(NULL),
-				is_test_login_(false) {
+		worker_thread_(NULL), notify_(notify),
+				presence_listener_task_(NULL), message_listener_task_(NULL) {
 
 		main_thread_.reset(new txmpp::AutoThread());
 
@@ -1477,13 +1476,11 @@ private:
 	GameServiceClientNotify *notify_;
 	txmpp::XmppClientSettings xcs_;
 	txmpp::PhysicalSocketServer pss_;
-	PresencePushTask *ppt_;
 	MUGPresenceListenerTask* presence_listener_task_;
 	MUGMessageListenerTask* message_listener_task_;
 
 	txmpp::scoped_ptr<XmppPump> pump_;
 
-	bool is_test_login_;
 };
 
 

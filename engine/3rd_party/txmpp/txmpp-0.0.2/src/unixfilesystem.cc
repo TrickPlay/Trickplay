@@ -153,7 +153,7 @@ bool UnixFilesystem::DeleteEmptyFolder(const Pathname &folder) {
 
 bool UnixFilesystem::GetTemporaryFolder(Pathname &pathname, bool create,
                                         const std::string *append) {
-#ifdef OSX
+#if 0
   FSRef fr;
   if (0 != FSFindFolder(kOnAppropriateDisk, kTemporaryFolderType,
                         kCreateFolder, &fr))
@@ -364,7 +364,7 @@ bool UnixFilesystem::GetAppDataFolder(Pathname* path, bool per_user) {
   ASSERT(!application_name_.empty());
 
   // First get the base directory for app data.
-#ifdef OSX
+#if 0
   if (per_user) {
     // Use ~/Library/Application Support/<orgname>/<appname>/
     FSRef fr;

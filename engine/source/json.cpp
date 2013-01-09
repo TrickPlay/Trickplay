@@ -96,6 +96,11 @@ namespace JSON
 
         Value result;
 
+        if ( index < 0 )
+        {
+            index = lua_gettop( L ) + index + 1;
+        }
+
         switch( lua_type( L , index ) )
         {
             case LUA_TNUMBER:
@@ -748,7 +753,7 @@ namespace JSON
     {
         return map[ key ];
     }
-    
+
     Value & Object::at ( const String & key )
     {
         return map[ key ];

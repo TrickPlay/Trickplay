@@ -660,7 +660,12 @@ namespace ImageDecoders
 
             UserData user_data = { ( guchar * ) data, size };
 
-            GifFileType * g = DGifOpen( & user_data , input_function );
+#if defined(GIFLIB_MAJOR) && (GIFLIB_MAJOR >= 5)
+            int error;
+            GifFileType * g = DGifOpen( & user_data , input_function , &error );
+#else
+            GifFileType * g = DGifOpen( &user_data, input_function );
+#endif
 
             if ( ! g )
             {
@@ -678,7 +683,12 @@ namespace ImageDecoders
         {
             PROFILER( "Images::GIF_decode/file" , PROFILER_INTERNAL_CALLS );
 
+#if defined(GIFLIB_MAJOR) && (GIFLIB_MAJOR >= 5)
+            int error;
+            GifFileType * g = DGifOpenFileName( filename , &error );
+#else
             GifFileType * g = DGifOpenFileName( filename );
+#endif
 
             if ( ! g )
             {

@@ -118,7 +118,7 @@ class TrickplayDeviceManager(QWidget):
 					    else :
 					        print("[VDBG] Didn't get %s's debug_port information "%d[0])
 					    if data.has_key("http"):
-					        self.http_port = data["http"]
+					        #self.http_port = data["http"]
 					        #print("[VDBG] http Port : %s"%self.http_port)
 					        self.ui.comboBox.setItemData(index, data["http"], HTTP_PORT)
 					    else :

@@ -1,15 +1,12 @@
 
+# This should be taken out for windows
+add_definitions( -DZIP_STD=1 )
+
 list( APPEND 3RD_PARTY_SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils/unzip.cpp
 
 )
-
-# This should be taken out for windows
-
-add_definitions( -DZIP_STD=1 )
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/txmpp)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/zip_utils )
 
@@ -77,15 +74,18 @@ set_source_files_properties( ${3RD_PARTY_SOURCE_FILES} COMPILE_FLAGS "-w" )
 
 set( BUILD_DEMOS OFF CACHE BOOL "" FORCE )
 set( USE_GLUT OFF CACHE BOOL "" FORCE )
-set( INSTALL_LIBS OFF CACHE BOOL "" FORCE )
+set( INSTALL_LIBS ON CACHE BOOL "" FORCE )
 set( BUILD_MINICL_OPENCL_DEMOS OFF CACHE BOOL "" FORCE )
 set( BUILD_NVIDIA_OPENCL_DEMOS OFF CACHE BOOL "" FORCE )
 set( BUILD_EXTRAS OFF CACHE BOOL "" FORCE )
 
 add_definitions( -DBT_NO_PROFILE=1 )
 
+set(CMAKE_CXX_OLDFLAGS ${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS "-w")
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79 )
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_OLDFLAGS})
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79/src )
 
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/txmpp)

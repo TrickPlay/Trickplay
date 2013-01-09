@@ -119,7 +119,18 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         memset(client_address.sin_zero, 0, sizeof(client_address.sin_zero));
         
         STUNClient *stun = [[STUNClient alloc] initWithOutgoingAddress:client_address];
+        
+        if (!stun) {
+            NSLog(@"Failed to initiate STUN module");
+            [self release];
+            return nil;
+        }
         NSDictionary *ipInfo = [stun getIPInfo];
+        if (!ipInfo) {
+            NSLog(@"Failed to STUN public IP/port");
+            [self release];
+            return nil;
+        }
         // We are going to create a new socket for SIP, so close the socket from STUN
         if (close(stun.sock_fd)) {
             perror("STUN socket could not close");
@@ -289,7 +300,9 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 
         [notify receivedNotify:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
-        NSLog(@"Fix handling extra BYEs here\n");
+        ByeDialog *bye = [[[ByeDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP delegate:self] autorelease];
+        
+        [bye receivedBye:sipHdrDic fromAddr:remoteAddr];
     } else {
         NSLog(@"\nUnauthorized New Dialog\n");
     }
@@ -299,6 +312,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
  * This is where we parse a SIP packet.
  *
  * This is broken, it assumes that the buffer only holds exactly 1 SIP packet at a time.
+ * Sockets, however, do not guarentee you read 1 packet at a time.
  * TODO: Fix this later.
  */
 - (void)sipParse:(NSData *)sipData fromAddr:(NSData *)remoteAddr {
@@ -506,7 +520,6 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             
                 // Add my input sources here (sockets, etc.)
                 CFRunLoopSourceRef rls = CFSocketCreateRunLoopSource(NULL, sipSocket, 0);
-                assert(rls != NULL);
                 if (rls) {
                     CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
                     CFRelease(rls);
@@ -543,12 +556,12 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     // Tell the delegate that the thread and socket terminated.
     // Return any possible error values.
     
-    // TODO: currently we need to check that the delegate exists because
+    // Currently we need to check that the delegate exists because
     // if an RTP stream ends we throw away the NetworkManager that is
     // likely this delegate.
     if (self.delegate) {
         dispatch_async(dispatch_get_main_queue(), ^(void) {
-            [self.delegate client:self finishedWithError:current_error];
+            [self.delegate client:self sipFinishedWithError:current_error];
         });
     }
 }
@@ -593,6 +606,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 #pragma mark -
 #pragma mark Thread Agnostic Methods
 
+/**
+ * Returns whether or not this SIPClient is still functioning.
+ * This method is thread safe.
+ */
 - (BOOL)isValid {
     BOOL temp;
     @synchronized(self) {
@@ -629,11 +646,9 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 #pragma mark Memory
 
 - (void)dealloc {
-    // Technically this shouldn't need to be called since dealloc isn't called until
-    // sipThread exits (FYI: NSThread -initWithTarget: retains the target).
-    // Thus, [self stop] should be called somewhere else on the main
-    // Thread in order to dealloc. But no harm done having it here.
-    [self stop];
+    // DO NOT EVER put [self stop] here! Causes a DEADLOCK!
+    // [self stop] had to have been called sometime earlier anyway because
+    // sipThread retains 'self'.
     
     if (sipDialogs) {
         [sipDialogs release];

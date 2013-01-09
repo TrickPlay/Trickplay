@@ -633,7 +633,7 @@ void World::tick_callback( btDynamicsWorld * world , btScalar time )
 	if ( lua_State * L = self->lsp->get_lua_state() )
 	{
 		lua_pushnumber( L , time );
-		invoke_pb_on_step( L , self , 1 , 0 );
+                lb_invoke_callbacks(L,self,"PB_METATABLE","on_step",1,0);
 	}
 }
 
