@@ -492,7 +492,8 @@ PROP_LIST = [
 ]
 
 NESTED_PROP_LIST = {
-    'style' : ['arrow', 'border', 'fill_colors', 'text'], 
+    #'style' : ['arrow', 'border', 'fill_colors', 'text'], 
+    'style' : ['text', 'spritesheet_map'], 
     'arrow' : ['colors', 'offset', 'size'],
     'border' : ['colors', 'corner_radius', 'width'],
     'fill_colors' : ['activation', 'default', 'focus'],

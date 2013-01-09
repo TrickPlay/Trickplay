@@ -724,6 +724,7 @@ class TrickplayInspector(QWidget):
         source_n = 0 
         items_n = 0 
         anchor_n = 0 
+        skinItem = None 
         neighbors_n = 0 
         
         source_button = None
@@ -1151,9 +1152,8 @@ class TrickplayInspector(QWidget):
                             if not p in READ_ONLY and self.editable is True :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
-                    elif not str(data["type"]) in NO_STYLE_WIDGET and self.cbStyle is not None:
 
-                        
+                    elif not str(data["type"]) in NO_STYLE_WIDGET and self.cbStyle is not None:
                         #find Style name from combo box  
                         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
                         z = self.inspectorModel.styleData[0][self.style_name]
@@ -1162,6 +1162,19 @@ class TrickplayInspector(QWidget):
                         for sp in PropertyIter(p): #'arrow', 'border', 'fill_colors', 'text
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
+                            if sp == 'spritesheet_map' :
+                                #KKK j.setText(1, z[sp])
+                                skinItem = j
+                                skin_idx = 0
+                                self.skinCB = QComboBox()
+                                self.skinCB.addItem(z[sp])
+                                sp = 'skin'
+
+                                #QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.skinChanged)
+                                #QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.skinActivated)
+                                #QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.skinEditTextChanged)
+
+
                             j.setText (0, sp)
                             try : 
                                 q = z[sp]
@@ -1215,14 +1228,18 @@ class TrickplayInspector(QWidget):
         self.ui.property.setItemHidden(gidItem, True)
 
         #if self.neighbors :
+
         if neighbors_n > 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(neighbors_n), 1, self.neighbors)
-            #self.ui.property.itemWidget(self.ui.property.topLevelItem(neighbors_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
 
+        if self.skinCB :
+            self.ui.property.setItemWidget(skinItem, 1, self.skinCB)
+            self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+            
         if self.anchor :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
-            #self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{margin:-5px;padding:-15;border-width:0px}")
+
         if self.itemWidget and data["type"] == "ButtonPicker":
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
         if colorPushButton :
