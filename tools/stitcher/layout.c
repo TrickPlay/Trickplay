@@ -32,65 +32,54 @@ void layout_free ( Layout * layout )
     free( layout );
 }
 
-/*
-unsigned int gcf( unsigned int a, unsigned int b )
-{
-    unsigned int t;
-    if ( b > a )
-    {
-        t = b;
-        b = a;
-        a = t;
-    }
-    while ( b != 0 )
-    {
-        t = b;
-        b = a % b;
-        a = t;
-    }
-    return a;
-}
-*/
-
 #define W( item ) ( ( item )->w + 2 * layout->buffer_pixels )
 #define H( item ) ( ( item )->h + 2 * layout->buffer_pixels )
 #define AREA( item ) ( W( item ) * H( item ) )
 
 Leaf * layout_leaf_for_item ( Layout * layout, Item * item )
 {
-    // searches for a leaf with the best shape-match that expands the height of the page the least
-
-    unsigned int growth, close_growth = 0, fallback_growth = 0;
-    Leaf * leaf     = NULL,
-         * best     = NULL,
+    unsigned close_growth    = 0,
+             fallback_growth = 0;
+    
+    Leaf * best     = NULL,
          * close    = NULL,
          * fallback = NULL;
 
+    // look for the smallest leaf (sorted by area) ...
     GSequenceIter * si = g_sequence_search( layout->leaves, item, leaf_compare, NULL );
+    
     while ( !g_sequence_iter_is_end( si ) )
     {
-        leaf = g_sequence_get( si );
+        Leaf * leaf = g_sequence_get( si );
+        unsigned growth = MAX( layout->height, leaf->y + H( item ) ) - layout->height;
+        
+        // ... large enough to hold the item ...
         if ( leaf->w >= W( item ) && leaf->h >= H( item ) )
         {
-            growth = MAX( layout->height, leaf->y + H( item ) ) - layout->height;
+            // ... exactly matching at least one dimension ...
             if ( leaf->w == W( item ) || leaf->h == H( item ) )
             {
+                // (1) ... which doesn't expand the layout height
                 if ( growth == 0 )
                 {
                     return leaf;
                 }
+                // (3) ... which expands the layout height the least
                 else if ( growth < close_growth || close_growth == 0 )
                 {
                     close = leaf;
                     close_growth = growth;
                 }
             }
+            // ... not exactly matching either dimension ...
             else
             {
+                // (2) ... which doesn't expand the layout height
                 if ( growth == 0 )
                 {
                     best = leaf;
                 }
+                // (4) ... which expands the layout height the least
                 else if ( growth < fallback_growth || fallback_growth == 0 )
                 {
                     fallback = leaf;
@@ -137,12 +126,17 @@ void layout_loop_item( Item * item, Layout * layout )
 Layout * layout_new_from_state ( State * state, unsigned width, Options * options )
 {
     Layout * layout = layout_new( width, options->add_buffer_pixels ? 1 : 0 );
+    
+    // gather data about the potential items
+    
     g_sequence_foreach( state->items, (GFunc) layout_scan_item, layout );
 
     if ( width < layout->max_item_w )
     {
         return layout;
     }
+    
+    // generate a starting leaf and start placing items
 
     Leaf * leaf = leaf_new( 0, 0, width, options->output_size_limit );
     g_sequence_insert_sorted( layout->leaves, leaf, leaf_compare, NULL );
@@ -151,6 +145,8 @@ Layout * layout_new_from_state ( State * state, unsigned width, Options * option
 
     return layout;
 }
+
+// optimize for efficiency, largeness, and squareness, in that order
 
 float layout_heuristic( Layout * layout )
 {
@@ -163,7 +159,7 @@ Layout * layout_choose( Layout * a, Layout * b, Options * options )
     if ( !b ) return a;
 
     if ( a->places->len > 0 && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
-            return a;
+        return a;
 
     return b;
 }
