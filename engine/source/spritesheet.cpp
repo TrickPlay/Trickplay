@@ -250,6 +250,7 @@ void SpriteSheet::load_json( const char * json )
 {
     char * map = NULL;
     gsize length;
+    Network::Response response;
 
     if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
@@ -279,7 +280,7 @@ void SpriteSheet::load_json( const char * json )
             }
             else
             {
-                Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+                response = app->get_network()->perform_request( request, app->get_cookie_jar() );
 
                 if ( response.failed || response.body->len == 0 )
                 {
