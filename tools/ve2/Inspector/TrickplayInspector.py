@@ -1231,9 +1231,12 @@ class TrickplayInspector(QWidget):
         if neighbors_n > 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(neighbors_n), 1, self.neighbors)
 
-        if self.skinCB :
-            self.ui.property.setItemWidget(skinItem, 1, self.skinCB)
-            self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+        try :
+            if self.skinCB :
+                self.ui.property.setItemWidget(skinItem, 1, self.skinCB)
+                self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+        except:
+            pass
             
         if self.anchor :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
