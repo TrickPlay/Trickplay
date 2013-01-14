@@ -8,15 +8,17 @@ Layout * layout_new ( unsigned width, unsigned buffer_pixels )
     Layout * layout = malloc( sizeof( Layout ) );
     
     layout->buffer_pixels = buffer_pixels;
-    layout->width = width;
-    layout->height = 0;
-    layout->area = 0;
-    layout->coverage = 0.0f;
+    layout->width      = width;
+    layout->height     = 0;
+    layout->area       = 0;
     layout->min_item_w = 256;
     layout->min_item_h = 256;
     layout->max_item_w = 0;
     layout->max_item_h = 0;
     layout->item_area  = 0;
+    
+    layout->coverage = 0.0f;
+    layout->value    = 0.0f;
     
     layout->leaves = g_sequence_new( NULL );
     layout->places = g_ptr_array_new_with_free_func( g_free );
@@ -143,23 +145,9 @@ Layout * layout_new_from_state ( State * state, unsigned width, Options * option
 
     g_sequence_foreach( state->items, (GFunc) layout_loop_item, layout );
 
+    // optimize for efficiency, largeness, and squareness, in that order
+
+    layout->value = pow( layout->coverage, 4.0f ) * (float) ( layout->area + layout->width + layout->height );
+
     return layout;
-}
-
-// optimize for efficiency, largeness, and squareness, in that order
-
-float layout_heuristic( Layout * layout )
-{
-    return pow( layout->coverage, 4.0 ) * ( layout->area + layout->width + layout->height );
-}
-
-Layout * layout_choose( Layout * a, Layout * b, Options * options )
-{
-    if ( !a ) return b;
-    if ( !b ) return a;
-
-    if ( a->places->len > 0 && ( b->coverage == 0 || layout_heuristic( a ) > layout_heuristic( b ) ) )
-        return a;
-
-    return b;
 }

@@ -51,9 +51,10 @@ int main ( int argc, char ** argv )
         for ( unsigned i = min_w; i <= max_w; i++ )
         {
             Layout * layout = layout_new_from_state( state, i, options );
-            Layout * better = layout_choose( layout, best, options );
 
-            if ( layout == better )
+            // optimize for efficiency, largeness, and squareness, in that order
+
+            if ( layout->value > best->value )
             {
                 layout_free( best );
                 best = layout;

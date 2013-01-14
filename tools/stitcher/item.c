@@ -73,7 +73,7 @@ Item * item_add_child_new( Item * item, const char * id, unsigned x_offset, unsi
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
-    unsigned  m = ( MAX( bb->w, bb->h ) - MAX( aa->w, aa->h ) );
+    int       m = ( MAX( bb->w, bb->h ) - MAX( aa->w, aa->h ) );
     if ( !m ) m =   MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 
     return m;
