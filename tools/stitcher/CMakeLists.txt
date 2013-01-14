@@ -29,6 +29,7 @@ add_executable( stitcher
                 leaf.c
                 item.c
                 state.c
+                progress.c
 )
 
 add_definitions("-std=gnu99")

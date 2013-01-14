@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'VirtualFileSystem.ui'
 #
-# Created: Fri Nov  9 15:27:25 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Thu Jan  3 12:18:18 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -35,6 +35,7 @@ class Ui_VirtualFileSystem(object):
         self.fileSystemTree = QtGui.QTreeWidget(VirtualFileSystem)
         self.fileSystemTree.setObjectName(_fromUtf8("fileSystemTree"))
         self.fileSystemTree.headerItem().setText(0, _fromUtf8("1"))
+        self.fileSystemTree.header().setVisible(False)
         self.fileSystem.addWidget(self.fileSystemTree, 0, 0, 1, 1)
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.buttonsLayout.setObjectName(_fromUtf8("buttonsLayout"))

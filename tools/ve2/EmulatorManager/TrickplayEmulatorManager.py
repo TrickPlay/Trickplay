@@ -1,4 +1,4 @@
-import os, telnetlib, base64, sys, random, json, time
+import os, telnetlib, base64, sys, random, json, time, re
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -50,7 +50,12 @@ class TrickplayEmulatorManager(QWidget):
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
+        
         print inputCmd
+        self.inspector.setGid = gid
+        self.inspector.setProp = property
+
+        #self.inspector.preventChanges = True
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -80,6 +85,7 @@ class TrickplayEmulatorManager(QWidget):
     
     def app_started(self):
 		print "[VE] APP Started"
+		self.main.ui.actionEditor.setEnabled(True)
 
     def deleteClicked(self) :
         inputCmd = str("_VE_.deleteGuideLine()")
@@ -121,11 +127,14 @@ class TrickplayEmulatorManager(QWidget):
 					     else:
 					        self.main.open() 
 
-					self.inspector.refresh() 
+					#self.inspector.refresh() 
 				except:
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
 					self.trickplay.close()
+				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
+				self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
+
 			else:
 				# Output the log line
 				sdata = None
@@ -249,7 +258,8 @@ class TrickplayEmulatorManager(QWidget):
                             # open Property Tab 
 					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
-					        print("UI Element not found")
+					        print(gid, "---UI Element not found")
+					        return
 
 					except:
 					    print("error :(")
@@ -281,14 +291,30 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
+				        self.inspector.preventChanges = True
 				        self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
+				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
+				        try:
+				            result = self.inspector.search(self.inspector.setGid, 'gid')
+				            if result: 
+				                self.inspector.ui.inspector.selectionModel().clear()
+				                self.inspector.selectItem(result, "f")
+				            g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
+				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
+				            self.inspector.ui.property.setExpanded(g_index, True)
+				        except : 
+				            #print ("couldn't find setGid")
+				            pass
+                        
+				        self.inspector.preventChanges = False
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
+
 
 				elif s is not None:
 				    pass
@@ -299,6 +325,7 @@ class TrickplayEmulatorManager(QWidget):
 			print "[VE] Trickplay APP is finished"
 			self.inspector.clearTree()
 			self.main.stop()
+			self.main.ui.actionEditor.setEnabled(False)
 	
     def run(self):
         # Run on local trickplay

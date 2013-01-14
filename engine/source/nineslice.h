@@ -32,7 +32,11 @@ ClutterEffect * nineslice_effect_new();
 
 void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, SpriteSheet::Sprite * sprite, bool async );
 
+bool nineslice_effect_is_done( NineSliceEffect * effect );
 bool nineslice_effect_is_loaded( NineSliceEffect * effect );
+void nineslice_effect_signal_loaded_later( NineSliceEffect * effect ); // fires "load_finished" signal if true
+
+// There are 6 tile parameters (see nineslice.lb); set/get them individually or as an array
 
 bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i );
 void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );

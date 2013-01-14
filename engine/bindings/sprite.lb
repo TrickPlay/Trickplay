@@ -14,7 +14,22 @@ module sprite;
 
 struct SpriteBinding
 {
-    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+    class SignalLoadedLater : public Action
+    {
+        SpriteBinding * self;
+
+        public: SignalLoadedLater( SpriteBinding * self ) : self( self ) { g_assert( self ); };
+
+        protected: bool run()
+        {
+            self->signal_loaded();
+            self->can_fire = true;
+            return false;
+        }
+    };
+    
+    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), 
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
     
     ~SpriteBinding()
     {
@@ -51,25 +66,51 @@ struct SpriteBinding
         
         clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), sprite ? sprite->get_texture() : null_texture );
         clutter_actor_queue_redraw( actor );
+        
+        loaded = sprite && sprite->is_real();
+        
+        signal_loaded_later();
+    }
+    
+    void signal_loaded()
+    {
+        if ( async && id && sheet )
+        {
+            GError * error = NULL;
+            
+            if ( !sprite || sprite->is_failed() || !sprite->is_real() )
+            {
+                g_set_error( &error, CLUTTER_TEXTURE_ERROR, CLUTTER_TEXTURE_ERROR_BAD_FORMAT, "?" );
+            }
+            
+            g_signal_emit_by_name( G_OBJECT( actor ), "load-finished", error );
+        }
+    }
+    
+    void signal_loaded_later()
+    {
+        if ( async && can_fire )
+        {
+            can_fire = false;
+            Action::post( new SignalLoadedLater( this ) );
+        }
     }
     
     bool async;
     bool loaded;
+    bool can_fire;
     
 private:
     static void on_ping( PushTexture * source, void * target )
     {
         SpriteBinding * self = (SpriteBinding *) target;
         self->update();
-        self->loaded = true;
-        g_signal_emit_by_name( G_OBJECT( self->actor ), "load-finished", 0 );
     };
 
     void update_sprite()
     {
         sprite = sheet ? sheet->get_sprite( id ) : NULL;
-        ping.set( sprite, SpriteBinding::on_ping, this, async );
-        update();
+        ping.set( sprite, SpriteBinding::on_ping, this, !async );
     }
 
     PushTexture::PingMe   ping;
@@ -203,6 +244,18 @@ class Sprite [[ClutterActor*]] actor
             binding->set_id( new_id );
         ]];
         
+    /*
+        Property: async
+        
+        The async property is a boolean value that determines whether the source image of the Sprite (managed by its SpriteSheet) is loaded asynchronously or not.
+        
+        When either the <sheet> or <id> changes, if a new source image needs to be loaded, it will also be loaded according to this value.
+        
+        *Default Setting:* false, i.e., the source image is loaded synchronously
+        
+        *See Also:* the <on_loaded> event
+    */
+        
     bool async
         [[
             async = get_binding( self )->async;
@@ -211,22 +264,81 @@ class Sprite [[ClutterActor*]] actor
             get_binding( self )->async = async;
         ]];
         
+    /*
+        Property: loaded
+        
+        The loaded property is a boolean value indicating if the source image currently in use by the Sprite was loaded successfully.
+        
+        *Default Setting:* false
+        
+        *See Also:* the <id> property
+    */
+        
     readonly bool loaded
         [[
             loaded = get_binding( self )->loaded;
         ]];
         
-    int add_onloaded_listener( function f )
+    /*
+        Function: add_onloaded_listener
+        
+        The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+        
+        *Arguments*
+        
+            fn - reference to handler function. The function prototype is described below.
+
+        *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+        *Handler Prototype:*
+
+        (code)
+        fn( Sprite self, boolean failed )
+        (end)
+
+        *Handler Arguments:*
+
+            self - the Sprite object that has finished loading
+            failed - boolean value indicating failure or success of the load operation (true=failure)
+        
+        *Handler Return Value:* None
+        
+        *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+    */
+        
+    int add_onloaded_listener( function fn )
         [[
             result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
             UserData::get( L )->connect_signal( "on_loaded",
                 "load-finished", (GCallback) Sprite_on_loaded, L );
         ]];
+        
+    /*
+        Function: remove_onloaded_listener
+
+        The remove_onloaded_listener() function unregisters the specified event handler.
+
+        *Arguments:*
+
+            ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+        *Return Value:* None
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     remove_onloaded_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
         ]];
+
+    /*
+        Event: on_loaded
+
+        The on_loaded event occurs when an asynchronously-loaded source image has finished loading.
+
+        *See Also:* the <add_onloaded_listener> function
+    */
 
     function on_loaded
         [[
@@ -255,11 +367,11 @@ class Sprite [[ClutterActor*]] actor
 
 [[
 
-void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L )
+void Sprite_on_loaded( ClutterTexture * self, gpointer failed, lua_State * L )
 {
     if ( get_binding( self )->async )
     {
-        lua_pushboolean( L, error ? 1 : 0 );
+        lua_pushboolean( L, !!failed );
         UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
     }
 }

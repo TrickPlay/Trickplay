@@ -20,6 +20,9 @@ class PushTexture
 {
 public:
 
+    // When the last subscriber is lost, this Action is posted
+    // If the texture still has no subscribers at the next idle point, it releases the texture
+
     class ReleaseLater : public Action
     {
         PushTexture * self;
@@ -32,6 +35,8 @@ public:
             return false;
         }
     };
+    
+    // When posted, this Action will ping all subscribers at the next idle point
 
     class PingAllLater : public Action
     {
@@ -46,15 +51,19 @@ public:
         }
     };
 
+    // Allows some object to say to a PushTexture, "Ping me whenever you change"
+
     class PingMe
     {
         public:
             typedef void (Callback)( PushTexture * source, void * target );
 
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ), async( true ) {};
+            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {};
             ~PingMe();
 
-            void set( PushTexture * source, Callback * callback, void * target, bool async );
+            // Note: if set() suceeds, it will immediately ping() this PingMe object using the given callback
+
+            void set( PushTexture * source, Callback * callback, void * target, bool preload );
 
             friend class PushTexture;
 
@@ -64,36 +73,35 @@ public:
             PushTexture * source;
             Callback * callback;
             void * target;
-            bool async;
     };
 
-    PushTexture() : cache( false ), all_pings_async( true ), texture( NULL ), can_signal( true ) {};
+    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ), failed( false ) {};
     ~PushTexture();
 
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture );
+    void set_texture( CoglHandle texture, bool real );
     void get_dimensions( int * w, int * h );
     void ping_all();
     void ping_all_later() { Action::post( new PingAllLater( this ) ); };
-
-    friend class Subscription;
+    bool is_real() { return real; };
+    bool is_failed() { return failed; };
 
 protected:
-    virtual void on_sync_change() = 0;
-    virtual void make_texture() = 0;
-    virtual void lost_texture() = 0;
+    virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
+    virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
 
-    bool cache;
-    bool all_pings_async; // loading will be done asynchronously only if all current ping requests are asynchronous
+    bool cache; // if true, prevents texture from being released
+    bool failed;
 
 private:
-    void subscribe( PingMe * ping );
+    void subscribe( PingMe * ping, bool preload );
     void unsubscribe( PingMe * ping );
     void release_texture();
 
     std::set< PingMe * > pings;
     CoglHandle texture;
     bool can_signal;
+    bool real;
 };
 
 #endif

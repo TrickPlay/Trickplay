@@ -8,8 +8,8 @@
 
 State * state_new()
 {
-    State * state      = malloc( sizeof( State ) );
-
+    State * state       = malloc( sizeof( State ) );
+    
     state->segregated   = g_ptr_array_new_with_free_func( (GDestroyNotify) item_free );
     state->images       = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImage );
     state->infos        = g_ptr_array_new_with_free_func( (GDestroyNotify) DestroyImageInfo );
@@ -377,7 +377,7 @@ void image_composite_leaf( Image * dest, Leaf * leaf, Options * options )
 
 }
 
-void state_add_layout ( State * state, Layout * layout, Options * options )
+void state_add_layout ( State * state, Layout * layout, ProgressChunk * chunk, Options * options )
 {
     ExceptionInfo * exception = AcquireExceptionInfo();
     Image         * image  = AcquireImage( NULL );
@@ -400,6 +400,12 @@ void state_add_layout ( State * state, Layout * layout, Options * options )
 
         image_composite_leaf( image, leaf, options );
         g_sequence_remove_sorted( state->items, leaf->item, item_compare, NULL );
+        
+        if ( chunk )
+        {
+            chunk->progress = 1.0 - (float) i / (float) layout->places->len;
+            progress_recalculate( chunk->parent );
+        }
     }
 
     // append to json

@@ -451,22 +451,19 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
     uiInstance.extra.mouse_handler = true 
 end 
 
+function util.is_available (name) 
+    for i, j in pairs (objectsNames) do
+        if i == name then 
+            return false
+        end
+    end 
+    return true
+end
+
 function util.assign_right_name (uiInstance, uiTypeStr)
 
-    for m,n in ipairs (screen.children) do
-        if n.name then 
-        print (n.name)
-        if string.find(n.name, "Layer") ~= nil and 
-         string.find(n.name, "a_m") == nil and 
-         string.find(n.name, "border") == nil 
-        then  
-            for k,l in ipairs (n.children) do 
-                if l.name == uiTypeStr:lower()..uiNum then 
-                    uiNum = uiNum + 1
-                end
-            end
-        end
-        end
+    while util.is_available(uiTypeStr:lower()..uiNum) == false do
+        uiNum = uiNum + 1
     end 
 
     uiInstance.name = uiTypeStr:lower()..uiNum
