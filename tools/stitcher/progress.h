@@ -1,5 +1,13 @@
 #ifndef __PROGRESS_H__
 
+/*
+
+progress.h
+
+A Progress struct manages the combined measurement and reporting of several ProgressChunks, which each represent a single estimateable chunk of work that needs to be completed. As ProgressChunks are updated, the total progress can be recalculated and printed to stderr.
+
+*/
+
 #include <glib.h>
 #include "options.h"
 

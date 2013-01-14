@@ -48,7 +48,7 @@ Item * item_new_with_source( const char * id, Image * source )
     return item;
 }
 
-// items can be given children which describe duplicates and subsets of them, saving space
+// items can be given children which describe duplicates and subimages of them, saving space
 
 void item_add_child( Item * item, Item * child )
 {
