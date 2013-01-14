@@ -7,37 +7,30 @@ PushTexture::~PushTexture()
     if ( texture ) cogl_handle_unref( texture );
 }
 
-void PushTexture::subscribe( PingMe * ping )
+void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
     
-    if ( all_pings_async && !ping->async )
+    if ( !real && preload )
     {
-        all_pings_async = false;
-        if ( texture ) on_sync_change();
+        make_texture( true );
+        g_assert( texture );
+        g_assert( real || failed );
     }
-    
-    if ( !texture ) make_texture();
-    g_assert( texture );
+    else if ( !texture )
+    {
+        make_texture( false );
+        g_assert( texture );
+    }
+    else
+    {
+        ping->ping();
+    }
 }
 
 void PushTexture::unsubscribe( PingMe * ping )
 {
     pings.erase( ping );
-    
-    if ( !all_pings_async && !ping->async )
-    {
-        all_pings_async = true;
-        for ( std::set< PingMe * >::iterator it = pings.begin(); it != pings.end(); ++it )
-        {
-            if ( !(* it)->async )
-            {
-                all_pings_async = false;
-                on_sync_change();
-                break;
-            }
-        }
-    }
     
     if ( can_signal && !cache && pings.empty() )
     {
@@ -71,11 +64,14 @@ CoglHandle PushTexture::get_texture()
     return texture ? texture : null_texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture )
+void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
     if ( texture ) cogl_handle_ref( texture );
+    
+    real = texture && _real;
+    ping_all();
 }
 
 void PushTexture::ping_all()
@@ -88,16 +84,15 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::set( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool _async )
+void PingMe::set( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
     if ( source ) source->unsubscribe( this );
     
     source = _source;
     callback = _callback;
     target = _target;
-    async = _async;
     
-    if ( source ) source->subscribe( this );
+    if ( source ) source->subscribe( this, preload );
 }
 
 PingMe::~PingMe()

@@ -17,17 +17,22 @@ class MainWindow(QMainWindow):
         
         self.apath = apath
 
-        self.stitcher = QProcess()
+        self.debugger = QProcess()
 
+        QObject.connect(self.debugger, SIGNAL('started()'), self.debug_started)
+        QObject.connect(self.debugger, SIGNAL('finished(int)'), self.debug_finished)
+
+        self.stitcher = QProcess()
         QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
         QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
-        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stderr)
-        QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stderr)
+        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stdError)
+        #QObject.connect(self.stitcher, SIGNAL('readyReadStandardOut()'), self.import_stdOut)
+        QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.windows = {"inspector":False}
+        self.windows = {"inspector":False, "images":False}
         self.inspectorWindowClicked()
 
         # Create Inspector
@@ -39,10 +44,15 @@ class MainWindow(QMainWindow):
         self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create Image File System
+        self.ui.fileSystemDock.toggleViewAction().setText("Images")
+        self.ui.menuView.addAction(self.ui.fileSystemDock.toggleViewAction())
+        self.ui.fileSystemDock.toggleViewAction().triggered.connect(self.imagesWindowClicked)
+
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
 
         # Create EmulatorManager
+        self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
         self._emulatorManager = TrickplayEmulatorManager(self) 
         self._inspector.emulatorManager = self._emulatorManager
 
@@ -119,7 +129,7 @@ class MainWindow(QMainWindow):
 
 		#Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
-        QObject.connect(self.ui.action_Debugger, SIGNAL("triggered()"),  self.debug)
+        QObject.connect(self.ui.action_CodeEditor, SIGNAL("triggered()"),  self.debug)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
 		
         # Restore sizes/positions of docks
@@ -205,8 +215,15 @@ class MainWindow(QMainWindow):
             self.saveProject()
         elif ret == QMessageBox.Cancel:
             return 
-
+        
     def import_started(self):
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 100)
+        self.bar.setValue(0)
+        self.bar.setWindowTitle("Import Assets...")
+        self.bar.setGeometry(600, 400, 300, 20)
+        self.bar.show()
+
         return 
 
     """
@@ -217,21 +234,63 @@ class MainWindow(QMainWindow):
         return
     """
 
-    def import_stderr(self):
-        errorMsg = str(self.stitcher.readAllStandardError().data())
-        if errorMsg[:5] == "Error" :
-            self.errorMsg(errorMsg)
-        elif errorMsg[:6] == "Output" :
-            self.sendLuaCommand("buildVF", '_VE_.buildVF()')
-            pass
+    def import_readyRead(self):
+        print("import_readyRead")
+        while True:
+            # Read one line
+            if not self.stitcher.canReadLine():
+                break
+            # Read one line
+            s = self.stitcher.readLine()
+            if s.isNull():
+                break
+            s = str( s ).rstrip()
+            print s
+
+
         return
+
+    def import_stdError(self):
+        s = self.stitcher.readAllStandardError()
+        if s.contains('\r') or s.contains('\n') :
+            l = s.split('\n') 
+            newVal = 0
+            try : 
+                if s[len(s)-1:] in ['\r', '\n'] : 
+                    newVal = int(l[len(l) - 2])
+                    self.lastNumber = None
+                else :
+                    if len(l) > 2 :
+                        newVal = int(l[len(l) - 2])
+                    elif self.lastNum is not None:
+                        newVal = int(self.lastNum+l[0])
+                    else : 
+                        newVal = int(l[0])
+                    self.lastNumber = l[len(l) - 1]
+                        
+                #s = str( s ).rstrip()
+                #print s+"...."
+                #print l 
+                self.bar.setValue(newVal)
+                print "[ progressBar.setValue : %s ] "%str(newVal)
+            except : 
+                pass
+
+        else:
+            print str(s.data())
 
     def import_finished(self, errorCode):
         if errorCode == 0 : 
+            print "[ progressBar.setValue : %s ] "%'100'
+            self.bar.setValue(100)
+            self.bar.hide()
             self.sendLuaCommand("buildVF", '_VE_.buildVF()')
+            self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         else : 
+            self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
-            self.errorMsg(errorMsg)
+            print errorMsg
+            self.errorMsg("Import Failed.")
         return 
 
 
@@ -246,15 +305,11 @@ class MainWindow(QMainWindow):
             print ("[VDBG] Import Asset Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
-                #print("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                #self.stitcher.start("stitcher "+path+" -r -j "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                print("stitcher -r -m "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
-                self.stitcher.start("stitcher -r -m "+str(os.path.join(self.path, "assets/images/images.json"))+" -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
+                print("stitcher -rp -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                self.stitcher.start("stitcher -rp -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
             else:
-                #print("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                #self.stitcher.start("stitcher "+path+" -r -o "+str(os.path.join(self.path, "assets/images"))+"/images")
-                print("stitcher -r -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
-                self.stitcher.start("stitcher -r -o "+str(os.path.join(self.path, "assets/images"))+"/images "+path)
+                print("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                self.stitcher.start("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
 
 
     def importSkins(self):
@@ -268,11 +323,11 @@ class MainWindow(QMainWindow):
             print ("[VDBG] Import Skin Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
-                print("stitcher -r -m "+str(os.path.join(self.path, "assets/skins/skins.json"))+" -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
-                self.stitcher.start("stitcher -m "+str(os.path.join(self.path, "assets/skins/skins.json"))+" -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
+                print("stitcher -r -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
             else:
-                print("stitcher -r -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
-                self.stitcher.start("stitcher -r -o "+str(os.path.join(self.path, "assets/skins"))+"/skins "+path)
+                print("stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
 
     def newProject(self):
         orgPath = self.path
@@ -506,20 +561,52 @@ class MainWindow(QMainWindow):
             # Local Debugging / Run 
             self._emulatorManager.trickplay.close()
 
+    
+    def debug_started(self):
+        print "[VE] Code Editor Started"
+        self.ui.fileSystemDock.hide()
+        self.windows['images'] = False
+        self.ui.InspectorDock.hide()
+        self.windows['inspector'] = False
+        self.ui.mainMenuDock.hide()
+        
+    def debug_finished(self, errorCode):
+        print "[VE] Code Editor Finished"
+        if self.debugger.state() == QProcess.NotRunning :
+            self.ui.fileSystemDock.show()
+            self.windows['images'] = True
+            self.ui.InspectorDock.show()
+            self.windows['inspector'] = True
+            self.ui.mainMenuDock.show()
+            self.run()
+
     def debug(self):
-        self.sendLuaCommand("exeDebugger", "_VE_.exeDebugger()")
+        if self._emulatorManager.trickplay.state() == QProcess.Running:
+            self._emulatorManager.trickplay.close()
+        self.debugger.start("python /usr/share/trickplay/debug/start.py \""+str(self.path)+"\"")
 
     def run(self):
         self.inspector.clearTree()
         self._emulatorManager.run()
 
-        #self.ui.action_Run.setEnabled(False)
-        #self.ui.action_Stop.setEnabled(False)
-
     def exit(self):
         self.stop(False, True)
         #self._emulatorManager.stop()
         self.close()
+
+    def editorWindowClicked(self) :
+        if self.ui.actionEditor.isChecked() == True :
+            self.sendLuaCommand("screenShow", "_VE_.screenShow()")
+        else :
+            self.sendLuaCommand("screenHide", "_VE_.screenHide()")
+
+    def imagesWindowClicked(self) :
+    	if self.windows['images'] == True:
+    		self.ui.fileSystemDock.hide()
+    		self.windows['images'] = False
+    	else :
+    		self.ui.fileSystemDock.show()
+    		self.windows['images'] = True
 
     def inspectorWindowClicked(self) :
     	if self.windows['inspector'] == True:
@@ -535,8 +622,10 @@ class MainWindow(QMainWindow):
         """
         self.path = path
         if path is not -1:
-            self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
+            self.ui.mainMenuDock.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
+            #self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
+            #self.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(path)) +"')")
 
 
     def backgroundImage(self):
