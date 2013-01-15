@@ -4,24 +4,6 @@ local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
 
-local default_fill_colors = {
-    default    = {  0,  0,  0},
-    focus      = {  0,  0,  0,  0},
-    activation = {155,155,155},
-    selection  = {  0,  0,155},
-} 
-local default_arrow_colors = {
-    default    = {255,255,255},
-    focus      = {255,255,255},
-    activation = {255,  0,  0},
-    selection  = {  0,  0,155},
-} 
-local default_border_colors = {
-    default    = {255,255,255},
-    focus      = {255,  0,  0},
-    activation = {255,  0,  0},
-    selection  = {  0,  0,  0,  0},
-} 
 local default_text_colors = {
     default    = {255,255,255},
     focus      = {255,  0,  0},
@@ -57,146 +39,6 @@ end
 
 
 --------------------------------------------------------------------------------
-
-ArrowStyle = function(parameters)
-    
-	--input is either nil or a table
-	parameters = is_table_or_nil("ArrowStyle",parameters)
-    
-    local instance, size, offset
-    local colors = ColorScheme(default_arrow_colors)
-    
-    local  meta_setters = {
-        size   = function(v) size   = v  end,
-        offset = function(v) offset = v  end,
-        colors = function(v) colors:set(v or {}) end,
-    }
-    local meta_getters = {
-        size   = function() return size   or 20 end,
-        offset = function() return offset or 10 end,
-        colors = function() return colors       end,
-        type   = function() return "ARROWSTYLE" end,
-        attributes = function() 
-            return {
-                size   = instance.size,
-                offset = instance.offset,
-                colors = colors.attributes,
-            }
-        end,
-    }
-    
-    instance = setmetatable(
-        {
-            to_json = function()
-                return json:stringify{
-                    size   = instance.size,
-                    offset = instance.offset,
-                    colors = instance.colors.attributes,
-                }
-            end,
-        },
-        {
-            __index    = __index(meta_getters)
-        }
-    )
-    set_up_subscriptions( instance, getmetatable(instance),
-        
-        __newindex(meta_setters),
-        
-        function(self,t)
-            
-            if type(t) ~= "table" then
-                error("Expects a table. Received "..type(t),2)
-            end
-            
-            for k, v in pairs(t) do
-                self[k] = v
-            end
-            
-        end
-    )
-    
-    --can't use a table, need to ensure some properties receive a nil in order
-    --to trigger the default condition
-    instance.size   = parameters.size
-    instance.offset = parameters.offset
-    instance.colors = parameters.colors
-    colors:subscribe_to( nil, function(t) instance:notify({colors=t}) end )
-    
-    return instance
-    
-end
-
---------------------------------------------------------------------------------
-
-BorderStyle = function(parameters)
-    
-	parameters = is_table_or_nil("BorderStyle",parameters)
-    
-    
-    local instance, width, corner_radius, name
-    local colors = ColorScheme(default_border_colors)
-    
-    local  meta_setters = {
-        width         = function(v) width         = v   end,
-        corner_radius = function(v) corner_radius = v   end,
-        colors        = function(v) colors:set(v or {}) end,
-    }
-    local meta_getters = {
-        width         = function() return width         or 2  end,
-        corner_radius = function() return corner_radius or 10 end,
-        colors        = function() return colors              end,
-        type          = function() return "BORDERSTYLE"       end,
-        attributes    = function() 
-            return {
-                width         = instance.width,
-                corner_radius = instance.corner_radius,
-                colors        = colors.attributes,
-            }
-        end,
-    }
-    
-    instance = setmetatable(
-        {
-            to_json = function()
-                return json:stringify{
-                    width         = instance.width,
-                    corner_radius = instance.corner_radius,
-                    colors        = instance.colors.name,
-                }
-            end,
-        },
-        {
-            __index    = __index(meta_getters),
-        }
-    )
-    set_up_subscriptions( instance, getmetatable(instance),
-        
-        __newindex(meta_setters),
-        
-        function(self,t)
-            
-            if type(t) ~= "table" then
-                error("Expects a table. Received "..type(t),2)
-            end
-            
-            for k, v in pairs(t) do
-                self[k] = v
-            end
-            
-        end
-    )
-    
-    --can't use a table, need to ensure some properties receive a nil in order
-    --to trigger the default condition
-    instance.width         = parameters.width
-    instance.corner_radius = parameters.corner_radius
-    instance.colors        = parameters.colors
-    colors:subscribe_to( nil, function(t) instance:notify({colors=t}) end )
-    
-    return instance
-    
-end
 
 --------------------------------------------------------------------------------
 
@@ -337,11 +179,7 @@ end
 
 
 local global_style_subscriptions = {}
-clone_sources = 
-    screen:find_child("Widget Library Clone Sources - DO NOT REMOVE or SHOW") or 
-    Group{       name="Widget Library Clone Sources - DO NOT REMOVE or SHOW"}
-if clone_sources.parent == nil then screen:add(clone_sources) end
-clone_sources:hide()
+
 states = {"default","focus","activation","selection"}
 
 local fallbacks = {
@@ -750,6 +588,11 @@ local fallbacks = {
     ["ToggleButton/selection/w.png"]  = "ToggleButton/activation/w.png",
 
 }
+to_json = function(self)
+    
+    return json:stringify(self.attributes)
+    
+end
 
 Style = setmetatable({},
     {
@@ -775,7 +618,7 @@ Style = setmetatable({},
         end,
 
         __call = function(self,parameters)
-            --print("Style(",parameters,")")
+            
             if type(parameters) == "string" then
                 if all_styles[parameters] then
                     
@@ -788,224 +631,18 @@ Style = setmetatable({},
                 end
                 
             end
-            --print("new style",parameters.name)
             
-            local style_sources = Group{name=tostring(parameters.name)}
-            clone_sources:add(style_sources)
-            --if parameters.name == false then error("no",4) end
             parameters = is_table_or_nil("Style",parameters)
             
-            local instance = { 
-                    to_json = function(self)
-                        
-                        return json:stringify(self.attributes)
-                        
-                    end,
-                }
+            local instance = { to_json = to_json }
+            local instance_mt = { }
             local name
-            local arrow       = ArrowStyle()
-            local border      = BorderStyle()
             local text        = TextStyle()
             local fill_colors = ColorScheme(default_fill_colors)
-            --[=[
-            local last_built = nil
             
-            local rounded_corner_getter,rounded_corner_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_rounded_corner(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local rounded_corner 
             
-            local top_edge_getter,top_edge_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_top_sliver(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local top_edge 
             
-            local side_edge_getter,side_edge_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_side_sliver(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local side_edge 
             
-            local arrow_getter,arrow_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_arrow(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local triangle 
-            
-            local empty_toggle_icon_getter,empty_toggle_icon_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_box(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local empty_toggle_icon
-            
-            local filled_toggle_icon_getter,filled_toggle_icon_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_x_box(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local filled_toggle_icon
-            
-            local empty_radio_icon_getter,empty_radio_icon_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_empty_radio_icon(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local empty_radio_icon
-            
-            local filled_radio_icon_getter,filled_radio_icon_setter = 
-                image_set_interface(function() 
-                    local t = {}
-                    local x = 0
-                    local y = (last_built==nil) and 0 or (last_built.y+last_built.h*2+5)
-                    for _,state in ipairs(states) do
-                        t[state] = make_filled_radio_icon(instance,state) 
-                        t[state].scale = 2
-                        t[state].x = x
-                        x = x + t[state].w*2 + 5
-                        t[state].y = y
-                    end
-                    last_built = t[states[1]]
-                    return t
-                end, function(old, new) 
-                    if old then old:unparent() end
-                    if new then 
-                        if new.parent then new:unparent() end
-                        style_sources:add(new)
-                    end
-                end
-            )
-            local filled_radio_icon
-            
-            local toggle_icon_w = parameters.toggle_icon_w or 30
-            local toggle_icon_h = parameters.toggle_icon_h or 30
-            local radio_icon_r = parameters.radio_icon_r or 15
-            --]=]
             local spritesheet
             local spritesheet_map
             local meta_getters
@@ -1028,7 +665,7 @@ Style = setmetatable({},
                         }
                     end,
                 }
-                getmetatable(instance).__index    = __index(meta_getters)
+                instance_mt.__index    = __index(meta_getters)
                 
                 for id,_ in pairs(spritesheet:get_ids()) do
                     meta_getters[id] = function()
@@ -1049,24 +686,8 @@ Style = setmetatable({},
                     setup_meta_getters()
                     
                 end,
-                text          = function(v) text:set(       v or {}) end,
-                --[[
-                toggle_icon_w = function(v) toggle_icon_w = v end,
-                toggle_icon_h = function(v) toggle_icon_h = v end,
-                radio_icon_r  = function(v) radio_icon_r  = v end,
-                arrow         = function(v) arrow:set(      v or {}) end,
-                border        = function(v) border:set(     v or {}) end,
-                fill_colors   = function(v) fill_colors:set(v or {}) end,
-                rounded_corner     = rounded_corner_setter,
-                top_edge           = top_edge_setter,
-                side_edge          = side_edge_setter,
-                empty_toggle_icon  = empty_toggle_icon_setter,
-                filled_toggle_icon = filled_toggle_icon_setter,
-                empty_radio_icon   = empty_radio_icon_setter,
-                filled_radio_icon  = filled_radio_icon_setter,
-                arrow              = arrow_setter,
-                --]]
-                name        = function(v)
+                text = function(v) text:set( v or {} ) end,
+                name = function(v)
                     
                     if v ~= false then
                         
@@ -1080,44 +701,8 @@ Style = setmetatable({},
                     
                 end,
             }
-            --[[
-            local meta_getters = {
-                spritesheet   = function() return spritesheet end,
-                toggle_icon_w = function() return toggle_icon_w end,
-                toggle_icon_h = function() return toggle_icon_h end,
-                radio_icon_r  = function() return radio_icon_r end,
-                name          = function() return name        end,
-                arrow         = function() return arrow       end,
-                border        = function() return border      end,
-                text          = function() return text        end,
-                fill_colors   = function() return fill_colors end,
-                type          = function() return "STYLE"     end,
-                rounded_corner     = rounded_corner_getter,
-                top_edge           = top_edge_getter,
-                side_edge          = side_edge_getter,
-                empty_toggle_icon  = empty_toggle_icon_getter,
-                filled_toggle_icon = filled_toggle_icon_getter,
-                empty_radio_icon   = empty_radio_icon_getter,
-                filled_radio_icon  = filled_radio_icon_getter,
-                triangle              = arrow_getter,
-                attributes  = function() 
-                    return {
-                        name        = instance.name,
-                        arrow       = instance.arrow.attributes,
-                        border      = instance.border.attributes,
-                        text        = instance.text.attributes,
-                        fill_colors = instance.fill_colors.attributes,
-                    }
-                end,
-            }
-            --]]
-            setmetatable(
-                instance,
-                {
-                    __index    = __index(meta_getters)
-                }
-            )
-            set_up_subscriptions( instance, getmetatable(instance),
+            setmetatable( instance, instance_mt )
+            set_up_subscriptions( instance, instance_mt,
                 
                 __newindex(meta_setters),
                 
@@ -1146,35 +731,14 @@ Style = setmetatable({},
                     return instance
                 end
             )
-            --[[
+            
             --can't use a table, need to ensure some properties receive a nil in order
             --to trigger the default condition 
-            instance.name        = parameters.name 
-            instance.arrow       = parameters.arrow
-            instance.border      = parameters.border
-            instance.fill_colors = parameters.fill_colors
-            --clone_sources
-            instance.rounded_corner     = parameters.rounded_corner
-            instance.top_edge           = parameters.top_edge
-            instance.side_edge          = parameters.side_edge
-            instance.empty_toggle_icon  = parameters.empty_toggle_icon
-            instance.filled_toggle_icon = parameters.filled_toggle_icon
-            instance.empty_radio_icon   = parameters.empty_radio_icon
-            instance.filled_radio_icon  = parameters.filled_radio_icon
-            instance.triangle           = parameters.triangle
-            
-            --]]
             instance.name            = parameters.name 
             instance.spritesheet_map = parameters.spritesheet_map
             instance.text            = parameters.text
-            ---[[
             -- if a substyle was modified, notify my subscribers
-            --print(instance.name,"Style object is subscribing to sub-styles")
-            --arrow:subscribe_to(       nil, function(t) instance:notify({arrow       = t}) end )
-            --border:subscribe_to(      nil, function(t) instance:notify({border      = t}) end )
             text:subscribe_to(        nil, function(t) instance:notify({text        = t}) end )
-            --fill_colors:subscribe_to( nil, function(t) instance:notify({fill_colors = t}) end )
-            --]]
             for f,_ in pairs(global_style_subscriptions) do
                 instance:subscribe_to(nil,f)
             end
