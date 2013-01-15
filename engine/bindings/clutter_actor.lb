@@ -2589,7 +2589,7 @@ interface actor [[ClutterActor*]]
 /***************************************
     UndocumentedFunction: add_constraints
 
-    Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint Align, Bind and Snap bindings in clutter_constraint.lb. They seem like they would be useful, but a comment in the Snap code states that the Clutter code seems to be broken. For the moment, these functions will remain undocumented.
+    Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint AlignConstraint, BindConstraint, SnapConstraint and PathConstraint bindings in clutter_constraint.lb.  For the moment, these functions will remain undocumented.
 
 */
 
