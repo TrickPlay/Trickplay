@@ -276,11 +276,11 @@ class MainWindow(QMainWindow):
             print ("[VE] Import Asset Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
-                print("[VE] stitcher -rp -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
-                self.stitcher.start("stitcher -rp -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
+                self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
             else:
-                print("[VE] stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
-                self.stitcher.start("stitcher -rp -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                print("[VE] stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
 
     def importSkins(self):
         path = -1 
@@ -299,11 +299,11 @@ class MainWindow(QMainWindow):
             print ("[VE] Import Skin Images ...[%s]"%path)
 
             if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
-                print("[VE] stitcher -r -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -m \""+str(os.path.join(self.path, "assets/skins/skins.json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
+                print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/skins.json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
             else:
-                print("[VE] stitcher -r -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -r -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
+                print("[VE] stitcher -rpd -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
+                self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
 
     def newProject(self):
         orgPath = self.path
@@ -325,6 +325,7 @@ class MainWindow(QMainWindow):
             self.setAppPath()
             self.run()
             self.command = "newProject"
+            self.menuCommand = "newProject"
             self._ifilesystem.ui.fileSystemTree.clear()
 
             while self.inspector.ui.screenCombo.count() > 0 :
