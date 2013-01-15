@@ -297,6 +297,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
+
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 				        try:
 				            result = self.inspector.search(self.inspector.setGid, 'gid')
@@ -307,10 +308,15 @@ class TrickplayEmulatorManager(QWidget):
 				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
 				            self.inspector.ui.property.setExpanded(g_index, True)
 				        except : 
-				            #print ("couldn't find setGid")
 				            pass
                         
 				        self.inspector.preventChanges = False
+				        try : 
+				            if self.main.menuCommand == "newProject" :
+				                self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
+				                self.main.menuCommand = "" 
+				        except:
+				            pass
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
