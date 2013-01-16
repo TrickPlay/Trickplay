@@ -2,10 +2,10 @@
 --pwd equals the path to "Widget_Library.lua"
 local pwd = (where_am_i()).file
 
---i equals the index of the last '\', counting from the back
+--i equals the index of the last '/', counting from the back
 local i = string.find(string.reverse(pwd),'/')
 
---if there were no '\', then the relative path is the empty string
+--if there were no '/', then the relative path is the empty string
 --otherwise the pwd equals the path with "Widget_Library.lua" removed
 pwd = i == nil and "" or string.sub( pwd ,1,pwd:len() - i+1)
 
@@ -15,6 +15,7 @@ pwd = i == nil and "" or string.sub( pwd ,1,pwd:len() - i+1)
 --so that all of those variables remain internal and so that
 --the global table doesn't become polluted with it
 local WL_ENV = setmetatable({},{__index = _G})
+
 --This table will hold everything that will be exposed to users
 local WL_EXT = {}
 
@@ -61,7 +62,6 @@ local widget_dependencies = {
     ListManager      = {"LayoutManager"},
     LayoutManager    = {"LayoutManager"},
     MenuButton       = {"ToggleButton","LayoutManager","MenuButton"},
-    --NineSlice        = {"LayoutManager","NineSlice"},
     OrbittingDots    = {"OrbittingDots"},
     ProgressBar      = {"ProgressBar"},
     ProgressSpinner  = {"ProgressSpinner"},
@@ -110,18 +110,21 @@ end
 --------------------------------------------------------------------------
 
 --Interface
-return setmetatable({},{
-    __index = function(t,k)
-        --WL_EXT[k]                = something that is already loaded
-        --widget_dependencies[k]   = something that can be loaded
-        --launch_recursive_load(k) = load that 'something'
-        return WL_EXT[k] or widget_dependencies[k] ~= nil and launch_recursive_load(k) or nil
-        
-    end,
-    __newindex =  function(t,k,v)
-        
-        error("attempted to set the Widget_Library's index '"..
-            tostring(k).."' to '"..tostring(v).."'",2)
-        
-    end,
-})
+return setmetatable(
+    {},
+    {
+        __index = function(t,k)
+            --WL_EXT[k]                = something that is already loaded
+            --widget_dependencies[k]   = something that can be loaded
+            --launch_recursive_load(k) = load that 'something'
+            return WL_EXT[k] or widget_dependencies[k] ~= nil and launch_recursive_load(k) or nil
+            
+        end,
+        __newindex =  function(t,k,v)
+            
+            error("attempted to set the Widget_Library's index '"..
+                tostring(k).."' to '"..tostring(v).."'",2)
+            
+        end,
+    }
+)
