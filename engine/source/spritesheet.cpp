@@ -259,7 +259,7 @@ void SpriteSheet::load_json( const char * json )
     }
     else
     {
-        json_path = strdup( json );
+        json_path = g_strdup( json );
         
         AppResource resource( app, json );
         if ( resource.is_native() )
