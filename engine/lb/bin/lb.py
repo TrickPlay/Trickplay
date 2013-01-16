@@ -521,9 +521,9 @@ def emit( stuff , f , header ):
         def flow_code( code ):
 
             if code is not None:
-                code = code.strip()
+                #code = code.strip()
                 for line in code.splitlines():
-                    f.write( "  " + line.strip() + "\n" )
+                    f.write( line + "\n" )
 
         def profiling_header(name):
 
@@ -622,7 +622,7 @@ def emit( stuff , f , header ):
             #-----------------------------------------------------------------------
             # GETTER FROM UDATA
             #-----------------------------------------------------------------------
-            
+
             header.write( '#define LB_GET_%s(L,i) ((%s)lb_get_udata_check(L,i,"%s"))\n' % ( bind_name.upper() , udata_type , bind_name ) )
 
             #-----------------------------------------------------------------------
@@ -1335,14 +1335,14 @@ if __name__ == "__main__":
     (options,args) = parser.parse_args()
 
     for file_name in args:
-        
+
         bn = os.path.basename( file_name )
 
         if options.mac:
             output = open( bn + ".mm" , "w")
         else:
             output = open( bn + ".cpp" , "w")
-            
+
         header = open( bn + ".h" , "w")
 
         binding = parse( open( file_name ).read() )
@@ -1356,5 +1356,5 @@ if __name__ == "__main__":
         header.write( "#endif //%s\n" % header_guard )
 
         output.close()
-        
+
         header.close()
