@@ -27,6 +27,7 @@ public:
     {
         public:
             Source( SpriteSheet * s ) : sheet( s ), uri( NULL ) {};
+            ~Source() { if (uri) g_free(uri); }
             
             void set_source( const char * uri );
             void set_source( Image * image );
@@ -46,7 +47,7 @@ public:
             void lost_texture() {};
             
             std::string cache_key;
-            const char * uri;
+            char * uri;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
