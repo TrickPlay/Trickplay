@@ -10,9 +10,6 @@ if (UNIX AND NOT APPLE)
         # autogenerate dependency information
         set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-        message( "CALCULATING DEPENDENCIES AUTOMAGICALLY" CPACK_DEBIAN_PACKAGE_DEPENDS)
-
-
         # Below, extra package dependencies that are not shared libraries which can be auto-detected
 
        set( DEPS
