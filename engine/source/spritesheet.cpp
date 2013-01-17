@@ -39,14 +39,14 @@ void Source::handle_async_img( Image * image )
     else
     {
         failed = true;
-        g_warning( "Could not download image %s", uri );
+        g_warning( "Could not download image %s", source_uri );
         ping_all();
     }
 }
 
 void Source::make_texture( bool immediately )
 {
-    g_assert( uri );
+    g_assert( source_uri );
     
     JSON::Object * jo = new JSON::Object();
     CoglHandle texture = Images::cache_get( cache_key, * jo );
@@ -56,7 +56,7 @@ void Source::make_texture( bool immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            Image * image = sheet->app->load_image( uri, false );
+            Image * image = sheet->app->load_image( source_uri, false );
             
             if ( image )
             {
@@ -78,7 +78,7 @@ void Source::make_texture( bool immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+            sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
             set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
         }
         else
@@ -95,15 +95,15 @@ void Source::set_source( const char * _uri )
     if ( sheet->json_path )
     {
         char * json = g_path_get_dirname( sheet->json_path );
-        uri = g_build_filename( json, _uri, NULL );
+        source_uri = g_build_filename( json, _uri, NULL );
         free( json );
     }
     else
     {
-        uri = strdup( _uri );
+        source_uri = strdup( _uri );
     }
     
-    cache_key = sheet->app->get_id() + ':' + uri;
+    cache_key = sheet->app->get_id() + ':' + source_uri;
 }
 
 void Source::set_source( Image * image )
