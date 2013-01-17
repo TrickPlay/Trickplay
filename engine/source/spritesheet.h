@@ -26,7 +26,7 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * sheet ) : sheet( sheet ), uri( NULL ) {};
+            Source( SpriteSheet * s ) : sheet( s ), uri( NULL ) {};
             
             void set_source( const char * uri );
             void set_source( Image * image );
