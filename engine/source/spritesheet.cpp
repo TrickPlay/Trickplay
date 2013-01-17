@@ -90,17 +90,17 @@ void Source::make_texture( bool immediately )
     }
 }
 
-void Source::set_source( const char * _uri )
+void Source::set_source( const char * uri )
 {
     if ( sheet->json_uri )
     {
         char * json = g_path_get_dirname( sheet->json_uri );
-        source_uri = g_build_filename( json, _uri, NULL );
+        source_uri = g_build_filename( json, uri, NULL );
         free( json );
     }
     else
     {
-        source_uri = strdup( _uri );
+        source_uri = g_strdup( uri );
     }
     
     cache_key = sheet->app->get_id() + ':' + source_uri;
