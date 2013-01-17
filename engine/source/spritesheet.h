@@ -110,8 +110,6 @@ public:
     GObject * extra;
     bool async;
     bool loaded;
-    
-    friend class Source;
 
 private:
     char * json_path;
