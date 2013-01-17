@@ -94,9 +94,9 @@ void Source::set_source( const char * uri )
 {
     if ( sheet->json_uri )
     {
-        char * json = g_path_get_dirname( sheet->json_uri );
-        source_uri = g_build_filename( json, uri, NULL );
-        free( json );
+        char * json_path = g_path_get_dirname( sheet->json_uri );
+        source_uri = g_build_filename( json_path, uri, NULL );
+        free( json_path );
     }
     else
     {
@@ -185,6 +185,8 @@ SpriteSheet::~SpriteSheet()
 {
     g_free( extra );
     if ( json_uri ) g_free( json_uri );
+    sources.clear();
+    sprites.clear();
 }
 
 void SpriteSheet::emit_signal( const char * msg )
