@@ -39,14 +39,14 @@ void Source::handle_async_img( Image * image )
     else
     {
         failed = true;
-        g_warning( "Could not download image %s", uri );
+        g_warning( "Could not download image %s", source_uri );
         ping_all();
     }
 }
 
 void Source::make_texture( bool immediately )
 {
-    g_assert( uri );
+    g_assert( source_uri );
     
     JSON::Object * jo = new JSON::Object();
     CoglHandle texture = Images::cache_get( cache_key, * jo );
@@ -56,7 +56,7 @@ void Source::make_texture( bool immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            Image * image = sheet->app->load_image( uri, false );
+            Image * image = sheet->app->load_image( source_uri, false );
             
             if ( image )
             {
@@ -78,7 +78,7 @@ void Source::make_texture( bool immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+            sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
             set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
         }
         else
@@ -90,20 +90,20 @@ void Source::make_texture( bool immediately )
     }
 }
 
-void Source::set_source( const char * _uri )
+void Source::set_source( const char * uri )
 {
-    if ( sheet->json_path )
+    if ( sheet->json_uri )
     {
-        char * json = g_path_get_dirname( sheet->json_path );
-        uri = g_build_filename( json, _uri, NULL );
-        free( json );
+        char * json_path = g_path_get_dirname( sheet->json_uri );
+        source_uri = g_build_filename( json_path, uri, NULL );
+        free( json_path );
     }
     else
     {
-        uri = strdup( _uri );
+        source_uri = g_strdup( uri );
     }
     
-    cache_key = sheet->app->get_id() + ':' + uri;
+    cache_key = sheet->app->get_id() + ':' + source_uri;
 }
 
 void Source::set_source( Image * image )
@@ -168,7 +168,7 @@ class AsyncCallback : public Action
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_path( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_uri( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -184,7 +184,9 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 SpriteSheet::~SpriteSheet()
 {
     g_free( extra );
-    if ( json_path ) g_free( json_path );
+    if ( json_uri ) g_free( json_uri );
+    sources.clear();
+    sprites.clear();
 }
 
 void SpriteSheet::emit_signal( const char * msg )
@@ -259,7 +261,7 @@ void SpriteSheet::load_json( const char * json )
     }
     else
     {
-        json_path = g_strdup( json );
+        json_uri = g_strdup( json );
         
         AppResource resource( app, json );
         if ( resource.is_native() )

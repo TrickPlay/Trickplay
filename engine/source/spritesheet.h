@@ -26,7 +26,8 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * sheet ) : sheet( sheet ), uri( NULL ) {};
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ) {};
+            ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
             void set_source( Image * image );
@@ -46,7 +47,7 @@ public:
             void lost_texture() {};
             
             std::string cache_key;
-            const char * uri;
+            char * source_uri;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
@@ -104,17 +105,15 @@ public:
     
     bool has_id( const char * id );
 
-    char * get_json_path() { return json_path ? json_path : (char *) ""; }
+    char * get_json_uri() { return json_uri ? json_uri : (char *) ""; }
 
     App * app;
     GObject * extra;
     bool async;
     bool loaded;
-    
-    friend class Source;
 
 private:
-    char * json_path;
+    char * json_uri;
     std::map < std::string, Sprite > sprites;
     std::list < Source > sources;
 };
