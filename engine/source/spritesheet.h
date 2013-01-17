@@ -105,7 +105,7 @@ public:
     
     bool has_id( const char * id );
 
-    char * get_json_path() { return json_path ? json_path : (char *) ""; }
+    char * get_json_uri() { return json_uri ? json_uri : (char *) ""; }
 
     App * app;
     GObject * extra;
@@ -113,7 +113,7 @@ public:
     bool loaded;
 
 private:
-    char * json_path;
+    char * json_uri;
     std::map < std::string, Sprite > sprites;
     std::list < Source > sources;
 };

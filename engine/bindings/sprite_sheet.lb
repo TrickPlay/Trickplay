@@ -281,7 +281,7 @@ class SpriteSheet [[SpriteSheet*]]
     
     readonly string map_uri
         [[
-            map_uri = self->get_json_path();
+            map_uri = self->get_json_uri();
         ]];
         
     /*
