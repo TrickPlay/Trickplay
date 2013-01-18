@@ -211,19 +211,28 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
         {
             JSON::Object & map = (JSON::Object &) maps[i].as<JSON::Object>();
 
+            // TODO: Check whether map is null (each json object is a JSON::Object)
             Source * source = add_source();
+            // TODO: Need to check whether the img file is valid or not
             source->set_source( map.at( "img" ).as<std::string>().c_str() );
-            JSON::Array & sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
 
-            for( unsigned i = 0; i < sprites.size(); i++ )
+            JSON::Array & json_sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
+
+            for( unsigned i = 0; i < json_sprites.size(); i++ )
             {
-                JSON::Object & sprite = (JSON::Object &) sprites[i].as<JSON::Object>();
-                
-                add_sprite( source, strdup( sprite.at( "id" ).as<std::string>().c_str() ),
-                    (int) sprite.at( "x" ).as<long long>(),
-                    (int) sprite.at( "y" ).as<long long>(),
-                    (int) sprite.at( "w" ).as<long long>(),
-                    (int) sprite.at( "h" ).as<long long>() );
+                JSON::Object & sprite = (JSON::Object &) json_sprites[i].as<JSON::Object>();
+
+                std::string id = sprite.at( "id" ).as<std::string>().c_str();
+                int x = sprite.at( "x" ).as<long long>();
+                int y = sprite.at( "y" ).as<long long>();
+                int w = sprite.at( "w" ).as<long long>();
+                int h = sprite.at( "h" ).as<long long>();
+
+                // If the same id is used multiple times, the list one will win
+                if (!id.empty() && (x >= 0) && (y > x) && (w >= 0) && (h >= 0)) {
+                    add_sprite(source, id.c_str(), x, y, w, h);
+                }
+                // Should check whether x, y, w, h are within the image when using the id
             }
         }
         
@@ -266,6 +275,7 @@ void SpriteSheet::load_json( const char * json )
         AppResource resource( app, json );
         if ( resource.is_native() )
         {
+            // TODO: Support loading native files in async mode if needed
             if ( ! g_file_get_contents( resource.get_native_path().c_str(), &map, &length, NULL ) )
             {
                 emit_signal( g_strdup_printf( "Could not open map %s", json ) );
@@ -297,6 +307,7 @@ void SpriteSheet::load_json( const char * json )
 
     if ( map && length )
     {
+        // map does not have to be a string ending with \0.
         parse_json( JSON::Parser::parse( map, length ) );
     }
 }
