@@ -222,7 +222,7 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
             {
                 JSON::Object & sprite = (JSON::Object &) json_sprites[i].as<JSON::Object>();
 
-                std::string id = sprite.at( "id" ).as<std::string>();
+                std::string id = sprite.at( "id" ).as<std::string>().c_str();
                 int x = sprite.at( "x" ).as<long long>();
                 int y = sprite.at( "y" ).as<long long>();
                 int w = sprite.at( "w" ).as<long long>();
