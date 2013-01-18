@@ -277,19 +277,16 @@ screen:show()
 
 
 ---[[
-b1 = WL.Button{w=200,h=50}
+b1 = WL.Button()
 b1.reactive = true
-print(screen.z)
 --]]
 ---[[
 --------------------------------------------------------------------------------
 b2 = WL.Button{x = 100,y = 200, label = "LABEL"}--,style = style}
-print("b2")
 --b2.style = style
-print("b2")
-b2.style.text.x_offset = 200
-b2.style.text.y_offset = -50
-b2.label = "lAbel"
+--b2.style.text.x_offset = 200
+--b2.style.text.y_offset = -50
+b2.label = "a"
 b2.reactive = true
 --------------------------------------------------------------------------------
 --]]
@@ -301,29 +298,22 @@ b3.reactive = true
 --------------------------------------------------------------------------------
 --]]
 ---[[
-print("b4")
 b4 = WL.Button{
     x = 200,y = 600,
-    images = {
-        default = "Button/button3.png",
-        focus   = "Button/button-focus.png"
-    },
     h = 150
 }
 b4.w = 300
 b4.reactive = true
-print("derrrp")
 --]]
 ---[[
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
 
 b5 = WL.Button{y=900}
-print("made b5, calling from json")
 b5:from_json(    b3:to_json()   )
-print(b3:to_json())
+--print(b3:to_json())
 print(b5:to_json())
-print(b5.style:to_json())
+--print(b5.style:to_json())
 b5.y = 700
 b5.reactive = true
 --]]
