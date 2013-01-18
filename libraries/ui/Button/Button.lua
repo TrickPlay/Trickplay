@@ -9,20 +9,12 @@ local _ENV     = ({...})[2] or _ENV
 Button = setmetatable(
     {},
     {
-    __index = function(self,k)
-        
-        return getmetatable(self)[k]
-        
-    end,
-    __call = function(self,p)
-        
-        return self:declare():set(p or {})
-        
-    end,
-    subscriptions = {
-    },
+    __index = function(self,k)  return getmetatable(self)[k]        end,
+    __call = function( self,p)  return self:declare():set(p or {})  end,
+    subscriptions = { },
     public = {
         properties = {
+            --setting to false makes button unresponsive to input
             enabled = function(instance,_ENV)
                 return function(oldf,...) return oldf(...) end, --TODO, nil getter
                 function(oldf,self,v)
@@ -40,6 +32,8 @@ Button = setmetatable(
                     end
                 end
             end,
+            --setting to true causes the button to display it's focus state
+            --receiving key focus, or a mouse_on_enter sets focused to true
             focused = function(instance,_ENV)
                 return nil,
                 function(oldf,self,v)
@@ -61,6 +55,7 @@ Button = setmetatable(
             widget_type = function(instance,_ENV)
                 return function() return "Button" end
             end,
+            --the text of the button
             label = function(instance,_ENV)
                 return function(oldf) return label.text     end,
                 function(oldf,self,v) 
@@ -73,10 +68,12 @@ Button = setmetatable(
                     end
                 end
             end,
+            --an event handler for when the button is pressed
             on_pressed =  function(instance,_ENV)
                 return function(oldf) return on_pressed     end,
                 function(oldf,self,v) on_pressed = v end
             end,
+            --an event handler for when the button is released
             on_released = function(instance,_ENV)
                 return function(oldf) return on_released     end,
                 function(oldf,self,v) on_released = v end
@@ -92,6 +89,7 @@ Button = setmetatable(
                     return t
                 end
             end,
+            --used to pass a different constructor, not to be used by the public
             create_canvas = function(instance,_ENV)
                 return function(oldf) return create_canvas     end,
                 function(oldf,self,v) 
@@ -127,6 +125,7 @@ Button = setmetatable(
             end,
         },
         functions = {
+            --initiates a click on the button
             click = function(instance,_ENV)
                 return function(old_function,self)
                     
@@ -135,6 +134,7 @@ Button = setmetatable(
                     dolater( 150, function()   instance:release()   end)
                 end
             end,
+            --causes the button to be pressed
             press = function(instance,_ENV)
                 return function(old_function,self)
                     
@@ -153,6 +153,7 @@ Button = setmetatable(
                     
                 end
             end,
+            --causes the button to be released
             release = function(instance,_ENV)
                 return function(old_function,self)
                     
@@ -364,36 +365,22 @@ Button = setmetatable(
         states = {"default","focus","activation"}
         --default create_canvas function
         create_canvas = function(self,state)
-            --print(state)
-            --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
-            --[[
-            print( state,"\n",
-                    self.style[self.widget_type.."/"..state.."/nw.png"],
-                    self.style[self.widget_type.."/"..state.."/n.png"],
-                    self.style[self.widget_type.."/"..state.."/ne.png"],
-                    self.style[self.widget_type.."/"..state.."/w.png"],
-                    self.style[self.widget_type.."/"..state.."/c.png"],
-                    self.style[self.widget_type.."/"..state.."/e.png"],
-                    self.style[self.widget_type.."/"..state.."/sw.png"],
-                    self.style[self.widget_type.."/"..state.."/s.png"],
-                    self.style[self.widget_type.."/"..state.."/se.png"]
-            )
-            --]]
+            
             return NineSlice{
                 name   = state,
                 w      = self.w,
                 h      = self.h,
                 sheet  = self.style.spritesheet,
                 ids    = {
-                    nw = self.style[self.widget_type.."/"..state.."/nw.png"],
-                    n  = self.style[self.widget_type.."/"..state.."/n.png"],
-                    ne = self.style[self.widget_type.."/"..state.."/ne.png"],
-                    w  = self.style[self.widget_type.."/"..state.."/w.png"],
-                    c  = self.style[self.widget_type.."/"..state.."/c.png"],
-                    e  = self.style[self.widget_type.."/"..state.."/e.png"],
-                    sw = self.style[self.widget_type.."/"..state.."/sw.png"],
-                    s  = self.style[self.widget_type.."/"..state.."/s.png"],
-                    se = self.style[self.widget_type.."/"..state.."/se.png"],
+                    nw = self.style[ self.widget_type.."/"..state.."/nw.png" ],
+                    n  = self.style[ self.widget_type.."/"..state.."/n.png"  ],
+                    ne = self.style[ self.widget_type.."/"..state.."/ne.png" ],
+                    w  = self.style[ self.widget_type.."/"..state.."/w.png"  ],
+                    c  = self.style[ self.widget_type.."/"..state.."/c.png"  ],
+                    e  = self.style[ self.widget_type.."/"..state.."/e.png"  ],
+                    sw = self.style[ self.widget_type.."/"..state.."/sw.png" ],
+                    s  = self.style[ self.widget_type.."/"..state.."/s.png"  ],
+                    se = self.style[ self.widget_type.."/"..state.."/se.png" ],
                 }
             }
             
