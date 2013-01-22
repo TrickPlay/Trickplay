@@ -235,7 +235,8 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
                 // Should check whether x, y, w, h are within the image when using the id
             }
         }
-        
+
+        // TODO: Skip the following if maps empty?
         loaded = true;
         emit_signal( NULL );
     }
