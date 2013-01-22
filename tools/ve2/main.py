@@ -495,7 +495,7 @@ class MainWindow(QMainWindow):
         return True
         
     def bottom(self):
-        self.sendLuaCommand("alignButtom", "_VE_.alignButtom('"+str(self._inspector.curLayerGid)+"')")
+        self.sendLuaCommand("alignBottom", "_VE_.alignBottom('"+str(self._inspector.curLayerGid)+"')")
         return True
         
     def horizontalCenter(self):
