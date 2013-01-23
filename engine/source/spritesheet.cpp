@@ -211,32 +211,38 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
         {
             JSON::Object & map = (JSON::Object &) maps[i].as<JSON::Object>();
 
-            // TODO: Check whether map is null (each json object is a JSON::Object)
-            Source * source = add_source();
-            // TODO: Need to check whether the img file is valid or not
-            source->set_source( map.at( "img" ).as<std::string>().c_str() );
+            std::string img = map.at( "img" ).as<std::string>();
+            if ( !img.empty() ) {
+                Source * source = NULL;
 
-            JSON::Array & json_sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
+                JSON::Array & json_sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
 
-            for( unsigned i = 0; i < json_sprites.size(); i++ )
-            {
-                JSON::Object & sprite = (JSON::Object &) json_sprites[i].as<JSON::Object>();
+                for( unsigned i = 0; i < json_sprites.size(); i++ )
+                {
+                    JSON::Object & sprite = (JSON::Object &) json_sprites[i].as<JSON::Object>();
 
-                std::string id = sprite.at( "id" ).as<std::string>();
-                int x = sprite.at( "x" ).as<long long>();
-                int y = sprite.at( "y" ).as<long long>();
-                int w = sprite.at( "w" ).as<long long>();
-                int h = sprite.at( "h" ).as<long long>();
+                    std::string id = sprite.at( "id" ).as<std::string>();
+                    // Safe to convert long to int as image should be less than 4096x4096
+                    int x = sprite.at( "x" ).as<long long>();
+                    int y = sprite.at( "y" ).as<long long>();
+                    int w = sprite.at( "w" ).as<long long>();
+                    int h = sprite.at( "h" ).as<long long>();
 
-                // If the same id is used multiple times, the list one will win
-                if (!id.empty() && (x >= 0) && (y > x) && (w >= 0) && (h >= 0)) {
-                    add_sprite(source, id.c_str(), x, y, w, h);
+                    // Should check whether x, y, w, h are within the image when using the id
+                    // No need to check whether x, y, w, h are valid when creating because the app
+                    // can correct them later
+                    if ( !id.empty() ) {
+                        // Load source only when needed, thus no need to delete source given invalid input
+                        if (source == NULL) {
+                            source = add_source();
+                            source->set_source( img.c_str() );
+                        }
+                        add_sprite(source, id.c_str(), x, y, w, h);
+                    }
                 }
-                // Should check whether x, y, w, h are within the image when using the id
             }
         }
 
-        // TODO: Skip the following if maps empty?
         loaded = true;
         emit_signal( NULL );
     }
@@ -264,6 +270,7 @@ void SpriteSheet::load_json( const char * json )
     gsize length;
     Network::Response response;
 
+    // Check whether variable json is the content of a json file instead of the address of a json file
     if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
         map = (char *) json;
