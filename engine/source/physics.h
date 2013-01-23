@@ -2,8 +2,7 @@
 #define _TRICKPLAY_PHYSICS_H
 
 #include "Box2D/Box2D.h"
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "cairo.h"
 
 #include "common.h"
