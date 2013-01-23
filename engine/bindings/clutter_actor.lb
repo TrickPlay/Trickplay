@@ -756,7 +756,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
@@ -807,7 +807,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
@@ -858,7 +858,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
