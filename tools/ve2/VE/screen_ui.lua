@@ -13,23 +13,19 @@ end
 
 
 function screen_ui.n_selected_all() 
+    local currentLayer 
 	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "border") then 
-				screen:remove(j)
-				local a, b = string.find(j.name,"border")
-		    	local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	-- VE2 g-> screen
-		    	if(t_obj ~= nil) then 
-					t_obj.extra.selected = false
-					local am = screen:find_child(t_obj.name.."a_m")
-        			if am then 
-	   					screen:remove(am)
-        			end
-	        	end
+
+		        local a, b = string.find(j.name,"border")
+		        local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	-- VE2 g-> screen
+			    _VE_.deselectUIElement(t_obj.gid, false)
+
 			end 
 		end
 	end
-
+    _VE_.openInspector(screen.gid, false)
 	selected_objs = {}
 
 end
@@ -328,13 +324,14 @@ end
 
 function screen_ui.n_select_all ()
 
+    local currentLayer 
+
 	for i, j in pairs (screen.children) do -- VE2 : g->screen
 		if(j.extra.selected == true) then 
 			screen_ui.n_selected(j) 
 		end 
 	end 
 	selected_objs = {}
-
 end 
 
 function screen_ui.n_select(obj, drag)

@@ -1484,6 +1484,10 @@ end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
+        if shift == false then
+            screen_ui.n_selected_all()
+        end 
+        
         if input_mode == hdr.S_FOCUS then 
             --local selObjName, selObjGid = screen_ui.getSelectedName()
             local selObj = screen_ui.getSelectedObj()
