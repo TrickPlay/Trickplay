@@ -237,7 +237,7 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
                             source = add_source();
                             source->set_source( img.c_str() );
                         }
-                        add_sprite(source, id.c_str(), x, y, w, h);
+                        add_sprite(source, g_strdup(id.c_str()), x, y, w, h);
                     }
                 }
             }

@@ -56,7 +56,8 @@ public:
     {
         public:
             Sprite() : source( NULL ), id( NULL ) {};
-            
+            ~Sprite() { if (id) g_free((char *) id); }
+
             void set( const char * _id, Source * _source, int _x, int _y, int _w, int _h )
             {
                 id = _id;
