@@ -6,6 +6,10 @@ module clutter_screen;
 #include "clutter/x11/clutter-x11.h"
 #elif defined(CLUTTER_WINDOWING_OSX)
 #include "clutter/osx/clutter-osx.h"
+#ifdef check
+// AppKit seems to pollute the global namespace with a "check" macro.
+#undef check
+#endif
 #endif
 #include "context.h"
 #include "clutter_util.h"
