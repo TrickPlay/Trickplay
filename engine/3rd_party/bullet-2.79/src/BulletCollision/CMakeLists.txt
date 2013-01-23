@@ -2,7 +2,6 @@ INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/src  )
 
 SET(BulletCollision_SRCS
 	BroadphaseCollision/btAxisSweep3.cpp
-	BroadphaseCollision/btBroadphaseProxy.cpp
 	BroadphaseCollision/btCollisionAlgorithm.cpp
 	BroadphaseCollision/btDbvt.cpp
 	BroadphaseCollision/btDbvtBroadphase.cpp
