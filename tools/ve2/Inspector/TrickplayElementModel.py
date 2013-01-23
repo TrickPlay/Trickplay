@@ -285,6 +285,7 @@ class TrickplayElementModel(QStandardItemModel):
         else:    
             del(data['is_visible'])
             node.setSelectable(False)
+            node.partner().setSelectable(False)
         
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
