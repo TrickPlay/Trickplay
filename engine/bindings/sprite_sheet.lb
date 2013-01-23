@@ -102,7 +102,7 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
     lua_getfield( L, index, "img" );
     int img = lua_gettop( L );
 
-    if ( lua_isnil( L, img) )
+    if ( lua_isnil( L, img ) )
     {
         g_warning( "Missing key 'img' in SpriteSheet constructor" );
     }
@@ -119,15 +119,15 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
     }
     else
     {
-        g_warning( "Source image is not a URI or Bitmap" );
+        g_warning( "Source image is not a URI or a Bitmap" );
     }
-    
+
     lua_pop( L, 1 );
-    
+
     lua_getfield( L, index, "sprites" );
     int sprites = lua_gettop( L );
 
-    if ( lua_isnil(L, sprites) )
+    if ( lua_isnil( L, sprites ) )
     {
         g_warning( "Missing list of sprites in SpriteSheet constructor" );
     }
