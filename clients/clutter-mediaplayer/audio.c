@@ -2,6 +2,7 @@
 #include <string.h>
 #include "glib.h"
 #include "gst/video/video.h"
+#include "clutter-gst/clutter-gst.h"
 
 #include "trickplay/audio-sampler.h"
 
