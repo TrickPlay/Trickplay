@@ -1,8 +1,7 @@
 #ifndef _TRICKPLAY_CLUTTER_UTIL_H
 #define _TRICKPLAY_CLUTTER_UTIL_H
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "common.h"
 #include "app.h"

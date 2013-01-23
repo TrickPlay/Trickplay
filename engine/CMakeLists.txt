@@ -410,6 +410,21 @@ if ( TP_TRACING )
 endif( TP_TRACING )
 
 
+#------------------------------------------------------------------------------
+# Deprecations
+#------------------------------------------------------------------------------
+
+if ( TP_WARN_DEPRECATED )
+
+    add_definitions( -DTP_CLUTTER_DEPRECATIONS )
+
+else (TP_WARN_DEPRECATED)
+
+    add_definitions( -Wno-deprecated-declarations )
+
+endif( TP_WARN_DEPRECATED )
+
+
 
 
 #------------------------------------------------------------------------------
