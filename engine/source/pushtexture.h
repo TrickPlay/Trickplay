@@ -1,8 +1,7 @@
 #ifndef __TRICKPLAY_PUSHTEXTURE_H__
 #define __TRICKPLAY_PUSHTEXTURE_H__
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include <clutter/clutter.h>
+#include "tp-clutter.h"
 #include <stdlib.h>
 #include "common.h"
 #include "app_resource.h"

@@ -1,8 +1,7 @@
 module clutter_screen;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #if defined(CLUTTER_WINDOWING_GLX)
 #include "clutter/x11/clutter-x11.h"
 #elif defined(CLUTTER_WINDOWING_OSX)
