@@ -50,8 +50,6 @@ static GstElement * find_element_by_name( GstElement * bin , const char * name )
 
     int done = FALSE;
 
-    GstElement * audio_convert = 0;
-
     while( ! done )
     {
         switch( gst_iterator_next( it , & el ) )
