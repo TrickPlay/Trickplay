@@ -143,6 +143,7 @@ class TrickplayEmulatorManager(QWidget):
 
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
+				    #print s[:15]
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
@@ -184,7 +185,6 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
 				        self.inspector.neighbors.toggled(False)
 				    elif luaCmd == "openInspc":
-				        #gid = int(s[10:])
 				        gid = (s[10:])
 				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
@@ -242,11 +242,6 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "openInspc":
 					try:
-					    #try:
-					        #gid = int(gid)
-					    #except:
-					        #print("error :( gid is missing!") 
-
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
 					        print('Found', result['gid'], result['name'])
@@ -256,15 +251,14 @@ class TrickplayEmulatorManager(QWidget):
 
 					        self.inspector.selectItem(result, shift)
                             # open Property Tab 
-					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
+					        # self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
 					        print(gid, "---UI Element not found")
+					        self.inspector.ui.inspector.clearSelection()
 					        return
 
 					except:
 					    print("error :(")
-					    #self.getUIInfo()
-					    #self.getStInfo()
 
 				    if luaCmd == "repStInfo":
 				        if self.main.command == "openFile" :

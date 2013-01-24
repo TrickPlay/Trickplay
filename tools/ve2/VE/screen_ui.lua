@@ -441,19 +441,20 @@ function screen_ui.multi_select_done(x,y)
 
     for k, l in pairs(screen.children) do -- VE2 : g -> screen
         if l.children then
+        --if l.name and string.find(l.name, "Layer") ~= nil then
         for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
 			if(v.extra.selected == false and v.parent.visible == true) then 
-		    	screen_ui.selected(v)
-                _VE_.openInspector(v.gid, true)
-
+			    if(v.extra.selected == false and l.visible == true) then 
+		    	    --screen_ui.selected(v)
+                    _VE_.openInspector(v.gid, true)
+                end
 			end 
 		end 
 		end 
 		end 
     end
-
 	
 	screen:remove(multi_select_border)
 	m_init_x = 0 

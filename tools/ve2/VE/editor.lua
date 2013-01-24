@@ -66,7 +66,7 @@ function editor.rectangle_done(x,y)
 
     _VE_.refresh()
     blockReport = false
-    _VE_.selectUIElement(uiRectangle.gid)
+    --_VE_.selectUIElement(uiRectangle.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiRectangle.gid, false)
     screen.grab_key_focus(screen)
@@ -149,7 +149,7 @@ function editor.clone()
 
     _VE_.refresh()
     blockReport = false
-    _VE_.selectUIElement(uiClone.gid)
+    --_VE_.selectUIElement(uiClone.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiClone.gid, false)
 
@@ -368,20 +368,44 @@ function editor.arrange_prep (gid)
 
     util.org_cord()
 
+    local sel_objs = util.table_copy(selected_objs) 
+        
     local basis_obj_name = util.getObjName(selected_objs[1])
     local basis_obj = curLayer:find_child(basis_obj_name)
 
-    return basis_obj_name, basis_obj
+    return basis_obj_name, basis_obj, sel_objs
 
 end
 
-function editor.arrange_end () 
+function editor.arrange_end (gid, obj, sel_objs) 
 
     util.ang_cord()
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     blockReport = false
     _VE_.refresh() 
+    _VE_.refreshDone()
+    selected_objs = {}
+
+    if #sel_objs > 1 then 
+        for i, j in pairs (sel_objs) do
+            local obj_name = util.getObjName(j)
+            local obj = curLayer:find_child(obj_name)
+            
+            if i == 1 then 
+                _VE_.selectUIElement(obj.gid, false)
+                _VE_.openInspector(obj.gid, false)
+            else
+                _VE_.selectUIElement(obj.gid, true)
+                _VE_.openInspector(obj.gid, true)
+            end
+        end 
+    else
+        _VE_.selectUIElement(obj.gid)
+        _VE_.refreshDone()
+        _VE_.openInspector(obj.gid, false)
+    end 
+
 
 end 
 
