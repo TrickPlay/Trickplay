@@ -124,6 +124,8 @@ class TrickplayImageFileSystem(QWidget):
         QObject.connect(self.ui.deleteButton, SIGNAL('clicked()'), self.removeAsset)
         QObject.connect(self.ui.newFolderButton, SIGNAL('clicked()'), self.createNewFolder)
         
+        self.ui.fileSystemTree.setSortingEnabled(True)
+        self.ui.fileSystemTree.sortItems(0, Qt.AscendingOrder)
         self.ui.fileSystemTree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.createContextMenu()
         QObject.connect(self.ui.fileSystemTree, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
