@@ -69,6 +69,7 @@ function editor.rectangle_done(x,y)
     --_VE_.selectUIElement(uiRectangle.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiRectangle.gid, false)
+    _VE_.repUIInfo(uiRectangle)
     screen.grab_key_focus(screen)
 
 end 
@@ -152,6 +153,7 @@ function editor.clone()
     --_VE_.selectUIElement(uiClone.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiClone.gid, false)
+    _VE_.repUIInfo(uiClone)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
@@ -344,6 +346,7 @@ function editor.duplicate(gid)
     _VE_.selectUIElement(uiDuplicate.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiDuplicate.gid, false)
+    _VE_.repUIInfo(uiDuplicate)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
