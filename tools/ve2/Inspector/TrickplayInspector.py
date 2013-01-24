@@ -1392,6 +1392,7 @@ class TrickplayInspector(QWidget):
                 self.ui.inspector.setCurrentIndex(theItem.index())
 
 
+
                     
     def styleActivated(self, index):
         self.cbStyle.setEditable (True)
@@ -1523,15 +1524,20 @@ class TrickplayInspector(QWidget):
                     self.curLayerGid = self.layerGid[(self.curData['gid'])] 
                     self.curItemGid = self.curData['gid']
 
-                if multiSelect == "true":
+                try :
+                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                    if len(self.ui.inspector.selectedIndexes()) > 2 :
+                        self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
+                        self.ui.property.clear()
+                    else:
+                        self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
+                        self.propertyFill(self.curData)
+                        self.editable = True
+                        
+                except: #if multiSelect == "true":
                     #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.property.clear()
-                else :
-                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
-                    self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
-                    self.propertyFill(self.curData)
-                    self.editable = True
 
             
             self.preventChanges = False
