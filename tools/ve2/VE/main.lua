@@ -26,7 +26,7 @@
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
- 
+    local openFile= false
     local key_map =
     {
         --[ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
@@ -619,6 +619,11 @@ end
 
 _VE_.refreshDone = function()
     buildInsp = false
+    if openFile== true then 
+        _VE_.openInspector(screen:find_child('Layer0').gid, false)
+        _VE_.repUIInfo(screen:find_child("Layer0"))
+        openFile= false
+    end 
 end 
 
 _VE_.refresh = function()
@@ -866,6 +871,7 @@ end
 _VE_.openFile = function(path)
 
     blockReport = true
+    openFile = true
     screen:clear()
 
     current_dir = path
@@ -991,7 +997,9 @@ _VE_.openFile = function(path)
     end
     
     _VE_.refresh()
+    
     blockReport = false
+
 
     --_VE_.buildVF()
     --[[
@@ -1445,8 +1453,10 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
+--yugi
     _VE_.refreshDone()
     _VE_.openInspector(uiInstance.gid, false)
+    _VE_.repUIInfo(uiInstance)
 
 end
 
