@@ -247,7 +247,7 @@ end
 
 _VE_.alignLeft = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
    
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -257,13 +257,13 @@ _VE_.alignLeft = function(gid)
     	end
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
 
 _VE_.alignRight = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -273,13 +273,13 @@ _VE_.alignRight = function(gid)
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
 
 _VE_.alignTop = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name ) then
@@ -290,13 +290,13 @@ _VE_.alignTop = function(gid)
 		end 
    end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
     
 end 
 
 _VE_.alignBottom = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and  v.name ~= basis_obj_name) then
@@ -307,13 +307,13 @@ _VE_.alignBottom = function(gid)
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
  
 _VE_.alignHorizontalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -324,13 +324,13 @@ _VE_.alignHorizontalCenter = function(gid)
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
  
 _VE_.alignVerticalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
@@ -341,12 +341,12 @@ _VE_.alignVerticalCenter = function(gid)
 		end 
     end
   
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 end 
 
 _VE_.distributeHorizontal = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
     
     local x_table = {}
     local temp_w = 0
@@ -400,12 +400,12 @@ _VE_.distributeHorizontal = function(gid)
         end 
     end 
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 _VE_.distributeVertical = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
     
     local y_table = {}
     local temp_h = 0
@@ -459,12 +459,12 @@ _VE_.distributeVertical = function(gid)
         end 
     end 
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 _VE_.bringToFront = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
 	    if(v.extra.selected == true) then
@@ -474,13 +474,13 @@ _VE_.bringToFront = function(gid)
         end
     end
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 
 _VE_.bringForward = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -510,13 +510,38 @@ _VE_.bringForward = function(gid)
 	    curLayer:add(v)
     end 
 
-    editor.arrange_end(gid)
+--[[
+    
+    for i, v in ipairs(curLayer.children) do
+	    curLayer:remove(v)  -- 1,2,(3)
+		if #slt_g ~= 0 then 
+			local b = table.remove(tmp_g)
+		    local f = table.remove(slt_g)
+			table.insert(tmp_g, f) 
+			table.insert(tmp_g, b)
+		end 
+	    if (v.extra.selected == true) then
+		    table.insert(slt_g, v) 
+			screen_ui.n_selected(v)
+		else 
+		    table.insert(tmp_g, v) 
+		end
+    end
+
+    tmp_g = util.get_reverse_t(tmp_g)
+    while #tmp_g ~= 0 do
+	    v = table.remove(tmp_g)
+	    curLayer:add(v) 
+    end 
+
+]]
+    editor.arrange_end(gid, obj, sel_objs)
 
 end
 
 _VE_.sendToBack = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -531,6 +556,7 @@ _VE_.sendToBack = function(gid)
 		end
     end
     
+    slt_g = util.get_reverse_t(slt_g) 
     while #slt_g ~= 0 do
 	    v = table.remove(slt_g)
 	    curLayer:add(v)	
@@ -542,13 +568,14 @@ _VE_.sendToBack = function(gid)
 	    curLayer:add(v)	
     end 
 	
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 
 end
 
 _VE_.sendBackward = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj
+    obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -582,8 +609,8 @@ _VE_.sendBackward = function(gid)
 	    curLayer:add(v) 
     end 
 
-    editor.arrange_end(gid)
-
+    editor.arrange_end(gid, obj, sel_objs)
+   
 end
 
 _VE_.setCurrentProject = function(path)
@@ -1022,7 +1049,6 @@ _VE_.setScreenLoc = function()
 end 
 
 _VE_.newLayer = function()
-    
     for m,n in ipairs (screen.children) do
         if n.name == "Layer"..layerNum then 
             layerNum = layerNum + 1
@@ -1417,7 +1443,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
-    _VE_.selectUIElement(uiInstance.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiInstance.gid, false)
 
@@ -1483,6 +1508,7 @@ end
     end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
+
 
         if shift == false then
             screen_ui.n_selected_all()

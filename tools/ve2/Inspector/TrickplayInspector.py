@@ -1420,6 +1420,7 @@ class TrickplayInspector(QWidget):
         if self.preventChanges:
             return
             
+        self.selectedItemCount = 0
         selectedList = selected.indexes()
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
@@ -1435,7 +1436,7 @@ class TrickplayInspector(QWidget):
             except:
                 pass
 
-        if self.selectedItemCount / 2 > 1 :
+        if self.selectedItemCount  > 1 :
             multiSelect = 'true'
         else :
             multiSelect = 'false'
@@ -1444,7 +1445,8 @@ class TrickplayInspector(QWidget):
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
                 inputCmd = str("_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
-                print inputCmd
+                inputCmd2 = str("_VE_.selectUIElement('"+str(selItem.TPJSON()['name'])+"',"+multiSelect+")")
+                print inputCmd2
                 self.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.main._emulatorManager.trickplay.waitForBytesWritten()
             except:
@@ -1455,7 +1457,8 @@ class TrickplayInspector(QWidget):
             try :
                 #print (str(deselItem.TPJSON()['name'])+" deselected!!!")
                 inputCmd = str("_VE_.deselectUIElement('"+str(deselItem.TPJSON()['gid'])+"',"+multiSelect+")")
-                print inputCmd
+                inputCmd2 = str("_VE_.deselectUIElement('"+str(deselItem.TPJSON()['name'])+"',"+multiSelect+")")
+                print inputCmd2
                 self.main._emulatorManager.trickplay.write(inputCmd+"\n")
                 self.main._emulatorManager.trickplay.waitForBytesWritten()
             except:
