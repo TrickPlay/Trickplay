@@ -63,7 +63,7 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, Source * source )
 
     if ( !lua_istable( L, index ) )
     {
-        g_warning( "Couldn't understand that sprite definition." );
+        g_warning( "Expecting table in sprite definition." );
         return;
     }
 
@@ -74,7 +74,7 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, Source * source )
     lua_getfield( L, index, "id" );
 
     source->sheet->add_sprite( source,
-        strdup( (char *) lua_tostring( L, -1 ) ),
+        g_strdup( (char *) lua_tostring( L, -1 ) ),
         (int) lua_tointeger( L, -5 ),
         (int) lua_tointeger( L, -4 ),
         (int) lua_tointeger( L, -3 ),
@@ -93,44 +93,57 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
         g_warning( "Map subsheet is not a table" );
         return;
     }
-    
+
     Bitmap * bitmap;
-    Source * source = self->add_source();
-    
-    
+
+    /* Call set_source only when input is valid */
+    Source * source = NULL;
+
     lua_getfield( L, index, "img" );
     int img = lua_gettop( L );
-    
-    if ( lua_isstring( L, img ) )
+
+    if ( lua_isnil( L, img ) )
     {
+        g_warning( "Missing key 'img' in SpriteSheet constructor" );
+    }
+    else if ( lua_isstring( L, img ) )
+    {
+        /* Get source when source is not null */
+        source = source ? source : self->add_source();
         source->set_source( lua_tostring( L, img ) );
     }
     else if (( bitmap = LB_GET_BITMAP( L, img ) ))
     {
+        source = source ? source : self->add_source();
         source->set_source( bitmap->get_image() );
     }
     else
     {
-        g_warning( "Source image is not a URI or Bitmap" );
+        g_warning( "Source image is not a URI or a Bitmap" );
     }
-    
+
     lua_pop( L, 1 );
-    
-    
+
     lua_getfield( L, index, "sprites" );
     int sprites = lua_gettop( L );
 
-    if ( lua_istable( L, sprites ) )
+    if ( lua_isnil( L, sprites ) )
     {
+        g_warning( "Missing list of sprites in SpriteSheet constructor" );
+    }
+    else if ( lua_istable( L, sprites ) )
+    {
+        source = source ? source : self->add_source();
         foreach_in_table( L, sprites, (LFunc) spritesheet_add_lua_sprite, source );
     }
     else
     {
         g_warning( "List of sprites is not a table" );
     }
-    
+
     lua_pop( L, 1 );
 }
+
 void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L );
 
 ]]
@@ -221,8 +234,12 @@ class SpriteSheet [[SpriteSheet*]]
                 lua_getfield( L, 1, "map" );
                 
                 self->async = lua_toboolean( L, -2 );
-                
-                if ( lua_isstring( L, -1 ) )
+
+                if ( lua_isnil( L, -1) ){
+                    /* TODO: Replace luaL_error so that the app can continue with such error */
+                    luaL_error( L, "Missing key 'map' in SpriteSheet constructor." );
+                }
+                else if ( lua_isstring( L, -1 ) )
                 {
                     self->load_json( lua_tostring( L, -1 ) );
                 }
