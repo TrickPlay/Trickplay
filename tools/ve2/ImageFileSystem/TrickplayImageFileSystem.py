@@ -266,13 +266,13 @@ class TrickplayImageFileSystem(QWidget):
         # Popup Menu
         self.popMenu = QMenu( self)
         self.popMenu.setFont(font)
-        self.popMenu.addAction( '&Import New Assets', self.importAsset )
+        self.popMenu.addAction( '&Add To Screen', self.insertImage )
         self.popMenu.addSeparator()
         self.popMenu.addAction( '&Create New Folder', self.createNewFolder)
         self.popMenu.addSeparator()
         self.popMenu.addAction( '&Delete', self.removeAsset )
         self.popMenu.addSeparator()
-        self.popMenu.addAction( '&Add To Screen', self.insertImage )
+        self.popMenu.addAction( '&Import New Assets', self.importAsset )
         
     def contextMenu(self, point):
         self.popMenu.exec_( self.ui.fileSystemTree.mapToGlobal(point) )
