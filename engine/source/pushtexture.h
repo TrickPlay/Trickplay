@@ -74,7 +74,7 @@ public:
             void * target;
     };
 
-    PushTexture() : cache( false ), texture( NULL ), can_signal( true ), real( false ), failed( false ) {};
+    PushTexture() : cache( false ), failed( false ), texture( NULL ), can_signal( true ), real( false ) {};
     ~PushTexture();
 
     CoglHandle get_texture();
