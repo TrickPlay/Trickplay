@@ -1531,7 +1531,7 @@ class TrickplayInspector(QWidget):
                         self.ui.property.clear()
                     else:
                         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
-                        self.propertyFill(self.curData)
+                        #self.propertyFill(self.curData)
                         self.editable = True
                         
                 except: #if multiSelect == "true":
