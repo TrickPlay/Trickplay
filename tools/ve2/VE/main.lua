@@ -1362,6 +1362,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     util.getCurLayer(layerGid)
 
+    screen_ui.n_selected_all()
+
     blockReport = true
 
     if uiTypeStr == "Rectangle" or uiTypeStr == "Widget_Rectangle"  then 
