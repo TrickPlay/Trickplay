@@ -349,4 +349,14 @@ class TrickplayEmulatorManager(QWidget):
 
         self.trickplay.setProcessEnvironment(env)
         
-        ret = self.trickplay.start('trickplay', [self.path()])
+        self.trickplay.start('trickplay', [self.path()])
+        ret = self.trickplay.waitForStarted()
+        if ret == False :
+            if self.trickplay.error() == QProcess.FailedToStart :
+                self.main.errorMsg("TrickPlay engine failed to launch: check TrickPlay SDK installation") 
+            elif self.trickplay.error() == QProcess.Timedout :
+                self.main.errorMsg("TrickPlay engine launch timed out: check TrickPlay SDK installation") 
+
+
+
+
