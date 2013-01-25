@@ -112,7 +112,7 @@ private:
     void update_sprite()
     {
         sprite = sheet ? sheet->get_sprite( id ) : NULL;
-        ping.set( sprite, SpriteBinding::on_ping, this, !async );
+        ping.assign( sprite, SpriteBinding::on_ping, this, !async );
     }
 
     PushTexture::PingMe   ping;
