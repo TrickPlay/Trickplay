@@ -48,9 +48,8 @@ void Source::make_texture( bool immediately )
 {
     g_assert( source_uri );
     
-    JSON::Object * jo = new JSON::Object();
-    CoglHandle texture = Images::cache_get( cache_key, * jo );
-    delete jo;
+    JSON::Object jo;
+    CoglHandle texture = Images::cache_get( cache_key, jo );
     
     if ( immediately )
     {
