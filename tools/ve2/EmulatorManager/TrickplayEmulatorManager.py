@@ -301,6 +301,7 @@ class TrickplayEmulatorManager(QWidget):
 				            g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
 				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
 				            self.inspector.ui.property.setExpanded(g_index, True)
+				            g_item[0].setSelected(True)
 				        except : 
 				            pass
                         
