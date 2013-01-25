@@ -313,11 +313,16 @@ class Neighbors(QWidget):
         self.resize(200,100)
         self.setMinimumSize(200,100)
 
-        QObject.connect(self.ui.upButton, SIGNAL("toggled(bool)"),  self.toggled)
-        QObject.connect(self.ui.downButton, SIGNAL("toggled(bool)"),  self.toggled)
-        QObject.connect(self.ui.enterButton, SIGNAL("toggled(bool)"),  self.toggled)
-        QObject.connect(self.ui.rightButton, SIGNAL("toggled(bool)"),  self.toggled)
+        #QObject.connect(self.ui.upButton, SIGNAL("toggled(bool)"),  self.toggled)
+        self.ui.upButton.toggled.connect(self.toggled)
+        #QObject.connect(self.ui.downButton, SIGNAL("toggled(bool)"),  self.toggled)
+        self.ui.downButton.toggled.connect(self.toggled)
+        #QObject.connect(self.ui.enterButton, SIGNAL("toggled(bool)"),  self.toggled)
+        self.ui.enterButton.toggled.connect(self.toggled)
+        #QObject.connect(self.ui.rightButton, SIGNAL("toggled(bool)"),  self.toggled)
+        self.ui.rightButton.toggled.connect(self.toggled)
         QObject.connect(self.ui.leftButton, SIGNAL("toggled(bool)"),  self.toggled)
+        #self.ui.leftButton.toggled(self.toggled)
 
         #self.tbDic = {'up': self.ui.upButton, 'down': self.ui.downButton, 'enter': self.ui.enterButton, 'left': self.ui.leftButton, 'right': self.ui.rightButton,  }
         self.keyDic = {'up': 'keys.Up', 'down': 'keys.Down', 'enter': 'keys.Return', 'left': 'keys.Left', 'right': 'keys.Right'}
@@ -382,9 +387,12 @@ class PickerItemTable(QWidget):
         self.ui.itemTable.verticalHeader().setVisible(False)
         self.ui.itemTable.setShowGrid(False)
 
-        QObject.connect(self.ui.itemTable, SIGNAL("itemChanged(QTableWidgetItem*)"), self.pickerItemChanged)
-        QObject.connect(self.ui.deleteItem, SIGNAL("pressed()"), self.deleteItemHandler)
-        QObject.connect(self.ui.addItem, SIGNAL("pressed()"), self.addItemHandler)
+        self.ui.itemTable.itemChanged.connect (self.pickerItemChanged)
+        #QObject.connect(self.ui.itemTable, SIGNAL("itemChanged(QTableWidgetItem*)"), self.pickerItemChanged)
+        self.ui.deleteItem.pressed.connect(self.deleteItemHandler)
+        #QObject.connect(self.ui.deleteItem, SIGNAL("pressed()"), self.deleteItemHandler)
+        self.ui.addItem.pressed.connect(self.addItemHandler)
+        #QObject.connect(self.ui.addItem, SIGNAL("pressed()"), self.addItemHandler)
 
         #self.insp.main._emulatorManager.setUIInfo(self.gid, 'items', "{'AA','BB'}") 
 
@@ -500,10 +508,15 @@ class TrickplayInspector(QWidget):
         self.currentScreenName = "Default"
         self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
         self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
-        QObject.connect(self.ui.deleteScreen, SIGNAL('clicked()'), self.removeScreen)
-        QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
-        QObject.connect(self.ui.screenCombo, SIGNAL('activated(int)'), self.screenActivated)
-        QObject.connect(self.ui.screenCombo, SIGNAL('editTextChanged(const QString)'), self.screenEditTextChanged)
+
+        self.ui.deleteScreen.clicked.connect(self.removeScreen)
+        #QObject.connect(self.ui.deleteScreen, SIGNAL('clicked()'), self.removeScreen)
+        self.ui.screenCombo.currentIndexChanged.connect(self.screenChanged)
+        #QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
+        self.ui.screenCombo.activated.connect(self.screenActivated)
+        #QObject.connect(self.ui.screenCombo, SIGNAL('activated(int)'), self.screenActivated)
+        self.ui.screenCombo.editTextChanged.connect(self.screenEditTextChanged)
+        #QObject.connect(self.ui.screenCombo, SIGNAL('editTextChanged(const QString)'), self.screenEditTextChanged)
 
         #self.ui.property.setModel(self.propertyModel)
 
@@ -517,33 +530,20 @@ class TrickplayInspector(QWidget):
 
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
-        QObject.connect(self.ui.inspector.selectionModel(),
-                        SIGNAL('selectionChanged(QItemSelection, QItemSelection)'),
-                        self.selectionChanged)
+
+        #QObject.connect(self.ui.inspector.selectionModel(), SIGNAL('selectionChanged(QItemSelection, QItemSelection)'), self.selectionChanged)
+        self.ui.inspector.selectionModel().selectionChanged.connect(self.selectionChanged)
         
         # For changing checkboxes (visibility)
-        QObject.connect(self.inspectorModel,
-                        SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"),
-                        self.inspectorDataChanged)
+        #QObject.connect(self.inspectorModel, SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), self.inspectorDataChanged)
+        self.inspectorModel.dataChanged.connect(self.inspectorDataChanged)
+
         
         # For changing UI Element properties
-        QObject.connect(self.ui.property, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), 
-                        self.propertyItemChanged)
-        QObject.connect(self.ui.property, SIGNAL("itemSelectionChanged()"), 
-                        self.itemSelectionChanged)
-        """
-        QObject.connect(self.ui.property, SIGNAL("itemExpanded(QTreeWidgetItem*)"), 
-                        self.propertyItemExpanded)
-        QObject.connect(self.ui.property, SIGNAL("itemClicked(const QTreeWidgetItem &, int)"),
-                        self.propertyDataChanged)
-        QObject.connect(self.ui.property, SIGNAL("itemChanged(const QTreeWidgetItem &, int)"), 
-                        self.propertyDataChanged)
-        QObject.connect(self.ui.property, SIGNAL("itemSelectionChanged()"), 
-                        self.propertyDataChanged)
-        QObject.connect(self.ui.property, 
-                        SIGNAL("currentItemChanged(const QTreeWidgetItem& , const QTreeWidgetItem &)"), 
-                        self.propertyDataChanged)
-        """
+        #QObject.connect(self.ui.property, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.propertyItemChanged)
+        self.ui.property.itemChanged.connect(self.propertyItemChanged)
+        #QObject.connect(self.ui.property, SIGNAL("itemSelectionChanged()"), self.itemSelectionChanged)
+        self.ui.property.itemSelectionChanged.connect(self.itemSelectionChanged)
 
         #icon 
         self.icon_up = QIcon()
@@ -784,12 +784,14 @@ class TrickplayInspector(QWidget):
                 boolCheckBox[strPropName] = bool_checkbox
                 boolNumber[strPropName] = propOrder
                 boolHandlers[strPropName] = makeBoolHandler(gid, propName)
-                QObject.connect(bool_checkbox, SIGNAL('stateChanged(int)'), boolHandlers[strPropName])
+                #QObject.connect(bool_checkbox, SIGNAL('stateChanged(int)'), boolHandlers[strPropName])
+                bool_checkbox.stateChanged.connect(boolHandlers[strPropName])
             else :
                 boolCheckBox[propName] = bool_checkbox
                 boolNumber[propName] = propOrder
                 boolHandlers[propName] = makeBoolHandler(str(data["gid"]), propName)
-                QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[propName])
+                #QObject.connect(bool_checkbox, SIGNAL("stateChanged(int)"), boolHandlers[propName])
+                bool_checkbox.stateChanged.connect(boolHandlers[propName])
                 
         fontPushButton = {}
         fontNumber = {}
@@ -839,12 +841,14 @@ class TrickplayInspector(QWidget):
             if type(propName) == list:
                 strPropName = ' '.join(propName)
                 fontHandlers[strPropName] = makeFontHandler(gid, defaultFont, propName)
-                QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[strPropName])
+                #QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[strPropName])
+                font_pushbutton.clicked.connect(fontHandlers[strPropName])
                 fontPushButton[strPropName] = font_pushbutton
                 fontNumber[strPropName] = propOrder
             else:
                 fontHandlers[propName] = makeFontHandler(str(data["gid"]), defaultFont, propName)
-                QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[propName])
+                #QObject.connect(font_pushbutton, SIGNAL('clicked()'), fontHandlers[propName])
+                font_pushbutton.clicked.connect(fontHandlers[propName])
                 fontPushButton[propName] = font_pushbutton
                 fontNumber[propName] = propOrder
     
@@ -909,12 +913,14 @@ class TrickplayInspector(QWidget):
             if type(propName) == list:
                 strPropName = ' '.join(propName)
                 colorHandlers[strPropName] = makeColorHandler(gid, currentColor, propName)
-                QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[strPropName])
+                #QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[strPropName])
+                color_pushbutton.clicked.connect(colorHandlers[strPropName])
                 colorPushButton[strPropName] = color_pushbutton
                 colorNumber[strPropName] = propOrder
             else :
                 colorHandlers[propName] = makeColorHandler(str(data["gid"]), currentColor, propName)
-                QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[propName])
+                #QObject.connect(color_pushbutton, SIGNAL('clicked()'), colorHandlers[propName])
+                color_pushbutton.clicked.connect(colorHandlers[propName])
                 colorPushButton[propName] = color_pushbutton
                 colorNumber[propName] = propOrder
 
@@ -981,23 +987,22 @@ class TrickplayInspector(QWidget):
 
             comboProp.setCurrentIndex(current_idx)
 
-            #QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
-            #QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
-            #QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
-
             if type(propName) == list:
                 strPropName = ' '.join(propName)
                 comboBox[strPropName] = comboProp
                 comboNumber[strPropName] = propOrder
                 comboHandlers[strPropName] = makeComboHandler(gid, comboProp, propName)
-                QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[strPropName])
+                #QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[strPropName])
+                comboProp.currentIndexChanged.connect(comboHandlers[strPropName])
             else :
                 comboBox[propName] = comboProp
                 comboNumber[propName] = propOrder
                 comboHandlers[propName] = makeComboHandler(str(data["gid"]), comboProp, propName)
-                QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[propName])
+                #QObject.connect(comboProp, SIGNAL('currentIndexChanged(int)'), comboHandlers[propName])
+                comboProp.currentIndexChanged.connect(comboHandlers[propName])
 
-            QObject.connect(comboProp, SIGNAL('activated(int)'), comboActivated)
+            #QObject.connect(comboProp, SIGNAL('activated(int)'), comboActivated)
+            comboProp.activated.connect(comboActivated)
 
         for p in PropertyIter(None):
 
@@ -1047,9 +1052,12 @@ class TrickplayInspector(QWidget):
                         else:
                             self.cbStyle.setCurrentIndex(cbStyle_idx)
 
-                        QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
-                        QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
-                        QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+                        self.cbStyle.currentIndexChanged.connect(self.styleChanged)
+                        #QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
+                        self.cbStyle.activated.connect(self.styleActivated)
+                        #QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
+                        self.cbStyle.editTextChanged.connect(self.editTextChanged)
+                        #QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
 
                 elif p == "source":
                     layers =  "','".join (self.screens[self.currentScreenName])
@@ -1072,7 +1080,8 @@ class TrickplayInspector(QWidget):
 
                     source_button = QPushButton()
                     source_button.setText(str(data[p]))
-                    QObject.connect(source_button, SIGNAL('clicked()'), openFileChooser)
+                    #QObject.connect(source_button, SIGNAL('clicked()'), openFileChooser)
+                    source_button.clicked.connect(openFileChooser)
 
                 elif p == "items":
                     if data["type"] != "MenuButton": 
@@ -1168,11 +1177,6 @@ class TrickplayInspector(QWidget):
                                 self.skinCB = QComboBox()
                                 self.skinCB.addItem(z[sp])
                                 sp = 'skin'
-
-                                #QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.skinChanged)
-                                #QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.skinActivated)
-                                #QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.skinEditTextChanged)
-
 
                             j.setText (0, sp)
                             try : 
