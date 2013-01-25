@@ -41,7 +41,7 @@ public:
     {
         PushTexture * self;
 
-        public: PingAllLater( PushTexture * self ) : self( self ) {};
+        public: PingAllLater( PushTexture * s ) : self( s ) {};
 
         protected: bool run()
         {

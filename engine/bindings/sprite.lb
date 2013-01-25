@@ -48,8 +48,10 @@ struct SpriteBinding
             {
                 g_warning( "Spritesheet does not contain the id '%s'", id );
             }
-            
-            update_sprite();
+            else
+            {
+                update_sprite();
+            }
         }
     }
     
