@@ -32,17 +32,17 @@ struct SpriteBinding
     
     ~SpriteBinding()
     {
-        if ( id ) free( id );
+        if ( id ) g_free( id );
     }
     
-    const char * get_id() { return id ? strdup( id ) : NULL; }
+    const char * get_id() { return id ? g_strdup( id ) : NULL; }
     
     void set_id( const char * new_id )
     {
         if ( !id || !new_id || strcmp( id, new_id ) )
         {
             if ( id ) free( id );
-            id = new_id ? strdup( new_id ) : NULL;
+            id = new_id ? g_strdup( new_id ) : NULL;
             
             if ( id && sheet && !sheet->has_id( id ) )
             {
