@@ -158,7 +158,7 @@ class AsyncCallback : public Action
     SpriteSheet * self;
     bool failed;
     
-    public: AsyncCallback( SpriteSheet * self, bool failed ) : self( self ), failed( failed ) {}
+    public: AsyncCallback( SpriteSheet * s, bool f ) : self( s ), failed( f ) {}
     
     protected: bool run()
     {
