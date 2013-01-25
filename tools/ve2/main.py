@@ -197,13 +197,6 @@ class MainWindow(QMainWindow):
             return 
         
     def import_started(self):
-        """
-        self.bar = QProgressBar()
-        self.bar.setRange(0, 100)
-        self.bar.setValue(0)
-        self.bar.setWindowTitle("Import Assets...")
-        self.bar.setGeometry(600, 400, 300, 20)
-        """
         self.bar.show()
         return 
 
@@ -258,6 +251,22 @@ class MainWindow(QMainWindow):
             self.errorMsg("Import Failed.")
         return 
 
+    def processErrorHandler(self, process_name):
+        if process_name == "stitcher" :
+            if self.stitcher.error() == QProcess.FailedToStart :
+                self.errorMsg("Import helper failed to launch: check TrickPlay SDK installation") 
+            elif self.stitcher.error() == QProcess.Timedout :
+                self.errorMsg("Import helper launch timed out: check TrickPlay SDK installation") 
+        elif process_name == "trickplay" :
+            if self._emulatorManager.trickplay.error() == QProcess.FailedToStart :
+                self.errorMsg("TrickPlay engine failed to launch: check TrickPlay SDK installation") 
+            elif self._emulatorManager.trickplay.error() == QProcess.Timedout :
+                self.errorMsg("TrickPlay engine launch timed out: check TrickPlay SDK installation") 
+        elif process_name == "debugger" :
+            if self.debugger.error() == QProcess.FailedToStart :
+                self.errorMsg("Visual Debugger helper failed to launch: check TrickPlay SDK installation") 
+            elif self.debugger.error() == QProcess.Timedout :
+                self.errorMsg("Visual Debugger helper launch timed out: check TrickPlay SDK installation") 
 
     def importAssets(self):
         path = -1 
@@ -278,9 +287,15 @@ class MainWindow(QMainWindow):
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
                 print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
                 self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                ret = self.stitcher.waitForStarted()
+                if ret == False :
+                    self.processErrorHandler("stitcher")
             else:
                 print("[VE] stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
                 self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                ret = self.stitcher.waitForStarted()
+                if ret == False :
+                    self.processErrorHandler("stitcher")
 
     def importSkins(self):
         path = -1 
@@ -301,9 +316,15 @@ class MainWindow(QMainWindow):
             if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
                 print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
                 self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/skins.json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
+                ret = self.stitcher.waitForStarted()
+                if ret == False :
+                    self.processErrorHandler("stitcher")
             else:
                 print("[VE] stitcher -rpd -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
                 self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
+                ret = self.stitcher.waitForStarted()
+                if ret == False :
+                    self.processErrorHandler("stitcher")
 
     def newProject(self):
         orgPath = self.path
@@ -556,11 +577,19 @@ class MainWindow(QMainWindow):
             self.windows['inspector'] = True
             self.ui.mainMenuDock.show()
             self.run()
+            if errorCode == 2 : 
+                self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
+            else :
+                if self.debugger.exitStatus() is not QProcess.NormalExit :
+                    self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
 
     def debug(self):
         if self._emulatorManager.trickplay.state() == QProcess.Running:
             self._emulatorManager.trickplay.close()
         self.debugger.start("python /usr/share/trickplay/debug/start.py \""+str(self.path)+"\"")
+        ret = self.debugger.waitForStarted()
+        if ret == False :
+            self.processErrorHandler("debugger")
 
     def run(self):
         self.inspector.clearTree()
