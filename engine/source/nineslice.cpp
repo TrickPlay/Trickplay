@@ -24,7 +24,7 @@ struct Slice
         sprite = _sprite;
         loaded = false;
         done = !sprite;
-        ping.set( sprite, Slice::on_ping, this, !async );
+        ping.assign( sprite, Slice::on_ping, this, !async );
     }
     
     void update()
