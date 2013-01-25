@@ -8,85 +8,6 @@ module nineslice;
 #include "sprite_sheet.lb.h"
 ]]
 
-    /*
-        Class: NineSlice
-
-        The NineSlice class will draw a grid of up to nine sprites from a spritesheet as if they were one fluid image. Instead of simply stretching, the object will adapt to different sizes by stretching or tiling the center sprites on both axes, leaving the corners unchanged.
-
-        An example constructor is shown below.
-
-        (code)
-        button = NineSlice {
-            sheet = SpriteSheet { map = "button.json" },
-            tile = { true, true },
-            ids = { nw = "button-nw.png", n = "button-n.png", ne = "button-ne.png",
-                    w  = "button-w.png",  c = "button-c.png", e  = "button-e.png",
-                    sw = "button-sw.png", s = "button-s.png", se = "button-se.png" }
-        }
-        (end)
-
-        Notice that "button-n.png" and "button-s.png" will be tiled horizontally, "button-w.png" and "button-e.png" will be tiled vertically, and "button-c.png" will be tiled in both directions. The layout of the nine positions in the ids table is shown below.
-
-        (see NineSliceCompass.png)
-
-        Properties may be changed after construction.
-
-        (code)
-        -- change the spritesheet from which the sprites are pulled
-
-        button.sheet = SpriteSheet { map = "button-focus.json" }
-        button.tile = { true, false }
-
-        -- animate the opacity of an NineSlice
-
-        aState = AnimationState {
-            transitions = {
-                {
-                    source = "*", target = "hide",
-                    keys = { { button, "opacity", 0 } }
-                },
-            }
-        }
-        (end)
-
-        *Code Example:* Creating a NineSlice sized to fit around a UIElement.
-
-        (code)
-        uiSheet = SpriteSheet { map = "ui.json" }
-
-        -- simple 3-slice text bounding box
-        -- the ids table only contains the NW, N, and NE ids, which means the box can expand horizontally but not vertically.
-
-        box = NineSlice {
-            sheet = uiSheet,
-            ids = { nw = "box-left-edge.png", n = "box-middle.png", nw = "box-right-edge.png" }
-        }
-        left, right = table.unpack( box.borders )
-        text = Text { x = left, text = "Text Button!" }
-        box.size = { left + text.w + right, 1 }
-        textBox = Group { children = { box, text } }
-
-        -- more complex 9-slice button
-
-        button = NineSlice {
-            sheet = uiSheet,
-            opacity = 255,
-            ids = { nw = "button-nw.png", n = "button-n.png", ne = "button-ne.png",
-                    w  = "button-w.png",  c = "button-c.png", e  = "button-e.png",
-                    sw = "button-sw.png", s = "button-s.png", se = "button-se.png" }
-        }
-
-        -- create an image inside of a group with enough padding for the borders of the button to nicely enclose the image
-
-        left, right, top, bottom = table.unpack( buttonEffect.borders )
-        image = Image { src = "assets/image.png", x = left, y = top }
-        button.size = { left + image.w + right, top + image.h + bottom }
-
-        imgButton = Group { children = { button, image } }
-        (end)
-
-        In addition to the properties and functions described on this page, the NineSlice type also supports all the properties and functions defined in the <UIElement> interface.
-    */
 
 [[
 
@@ -95,39 +16,39 @@ static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" 
 struct NineSliceBinding
 {
     NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
-    
+
     NineSliceEffect * get_effect() { return effect; };
-    
+
     bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
     void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
-    
+
     bool is_loaded() { return nineslice_effect_is_loaded( effect ); };
-    
+
     std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
-    
+
     std::string & get_id( unsigned i )
     {
         g_assert( i < 9 );
         return ids[i];
     };
-    
+
     void set_id( unsigned i, const std::string & new_id )
     {
         g_assert( i < 9 );
         ids[i] = new_id;
         nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
-    
+
     void set_sheet( SpriteSheet * _sheet )
     {
         sheet = _sheet;
-        
+
         for ( unsigned i = 0; i < 9; ++i )
         {
             nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
         }
     }
-    
+
     void signal_loaded_later()
     {
         if ( async )
@@ -135,10 +56,10 @@ struct NineSliceBinding
             nineslice_effect_signal_loaded_later( effect );
         }
     }
-    
+
     bool async;
     bool can_fire;
-    
+
 private:
     NineSliceEffect * effect;
     SpriteSheet * sheet;
@@ -152,19 +73,53 @@ void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * 
 
 ]]
 
+/***************************************
+    Class: NineSlice
+
+	The NineSlice data type enables images with shaped corners to be scaled while maintaining their corner shapes. Scaling a <Bitmap> or <Image> that has non-straight corners, such as a rounded button being sized around a constructed text string, will often cause the corner shapes to deform. Performing the same operation using a NineSlice object maintains the original corner shapes and applies the scaling operation to the straight lines that connect the corners.
+
+	A NineSlice object is similar to an Image object; it can be added to the <screen> global variable, and all the common operations, including animation, can be applied to it. In addition to the properties and functions described on this page, the NineSlice data type also supports all the properties and functions defined in the <UIElement> interface.
+
+	A NineSlice object is a group of multiple <Sprite> objects that are combined to form a single image. The diagram below shows the border of a rounded rectangle divided into nine separate regions. Each region has a unique ID (nw, n, ne, etc.), and each region references one <Sprite> object stored on a <SpriteSheet> object.
+
+	(see NineSliceCompass.png)
+
+	When a NineSlice object is scaled, certain regions will remain unchanged, while other regions will scale, but not necessarily in both horizontal and vertical directions. For example, the four corner regions, specified by the nw, ne, sw, and se IDs, will never scale; this maintains the correct shape of the shaped corners. The top and bottom regions, specified by the n and s IDs, will scale, but only horizontally; vertical scaling will never be applied to these regions. Similarly, the left and right regions, specified by the w and e IDs, will also scale, but only vertically; these regions will not be horizontally scaled. Finally, the center region, specified by the c ID, will scale both vertically and horizontally, as applicable. The directions that each region may be scaled are shown in the illustration below.
+
+	(see NineSliceResizing.png)
+
+	When scaling occurs, the default action is for the scaled regions to be reduced or increased in size with the existing contents compressed or stretched into the new space. Alternatively, the resized regions can be tiled, so the image contents are repeated using its original size. Refer to the <tile> property for additional information.
+
+	Although the data type is called NineSlice, the actual number of images that comprises the final image can be fewer than nine. For example, a graphic image of a tab, such as those found in a tabbed window interface, may need only three images, one image each for its left, middle and right sides. Or even two (for its left and right sides). Regardless of the number of Sprites in the NineSlice object, each region's directional scaling restrictions described earlier still apply. For example, if you define a NineSlice object with the three regions nw, n, and ne, when the object is scaled, only the n region scales, and it scales in the horizontal direction only. If a NineSlice object is defined with two regions and both regions are non-scaling--for example, an object with only regions nw and ne--subsequent scaling operations performed on the object have no effect.
+
+	The SpriteSheet object used by a NineSlice object is specified in the NineSlice <sheet> property. The Sprite IDs that reference particular images in the SpriteSheet are specified in the NineSlice <ids> property. The ids property is a table of key-value entries, where each key refers to a NineSlice region. Each region key contains the string ID of a Sprite in the SpriteSheet. A sample NineSlice definition is shown below.
+
+	(code)
+	-- Define a NineSlice object that uses all nine regions
+	buttonSkin = NineSlice( {
+					sheet = SpriteSheet( { map = "buttonPressed.json } ),
+					ids   = { nw = "top-left",    n = "top",    ne = "top-right",
+					          w  = "left",        c = "middle", e  = "right",
+							  sw = "bottom-left", s = "bottom", se = "bottom-right" },
+	} )
+	(end)
+*/
+
 class NineSlice [[ClutterActor*]] actor
 {
-    /*
-        Constructor: NineSlice
+/***************************************
+    Constructor: NineSlice
 
-        The NineSlice() constructor creates a new NineSlice object.
+    The NineSlice() constructor creates and initializes a new NineSlice object.
 
-        *Arguments:*
+    *Arguments:*
 
-        props - table defining the object's properties
+	    props - optional table of NineSlice property settings.
 
-        *Return Value:* new NineSlice object
-    */
+    *Return Value:* reference to the constructed NineSlice object
+
+	*See Also:* the <sheet> and <ids> properties
+*/
 
     NineSlice( table props = 0 )
         [[
@@ -174,17 +129,17 @@ class NineSlice [[ClutterActor*]] actor
             ClutterEffect * effect = nineslice_effect_new();
             clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
             clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
-            
+
             g_signal_connect_data( G_OBJECT( effect ), "load-finished",
                 (GCallback) NineSlice_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
-            
+
             g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_EFFECT( effect ) ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
-            
+
             ClutterUtil::set_props_from_table( L, props );
-            
+
             g_object_unref( self );
         ]];
 
@@ -194,15 +149,15 @@ class NineSlice [[ClutterActor*]] actor
             delete get_binding( self );
         ]];
 
-    /*
-        Property: sheet
+/***************************************
+    Property: sheet
 
-        The sheet property is a <SpriteSheet> object specifying where to pull sprites from, based on the ids provided at construction.
+	The sheet property references a <SpriteSheet> object from which to access individual <Sprite> images. The particular Sprite images used by the NineSlice object are specified in the <ids> property.
 
-        If the sheet is changed, the ids will be reevaluated. If a sheet lacks some or all of the ids, those ids will not be drawn.
+	*Default Setting:* nil
 
-        *See Also:* the <ids> property
-    */
+    *See Also:* the <ids> property
+*/
 
     SpriteSheet sheet
         [[
@@ -211,9 +166,9 @@ class NineSlice [[ClutterActor*]] actor
         [[
             NineSliceBinding * binding = get_binding( self );
             if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
-            
+
             SpriteSheet * new_sheet = LB_GET_SPRITESHEET( L, 2 );
-            
+
             if ( new_sheet )
             {
                 binding->set_sheet( new_sheet );
@@ -224,31 +179,33 @@ class NineSlice [[ClutterActor*]] actor
                 binding->set_sheet( NULL );
                 * get_ref( self ) = LUA_REFNIL;
             }
-            
+
             get_binding( self )->signal_loaded_later();
         ]];
 
-    /*
-        Property: ids
+/***************************************
+    Property: ids
 
-        The ids property is a table containing the string ids of the nine sprites used by the NineSlice.
+	The ids property is a table of key/value pairs, where the key specifies one of the nine NineSlice regions and its value contains the string ID of the <Sprite> to use for that region. Each ID value should reference an existing Sprite in the SpriteSheet definition.
 
-        nw - top left
-        n - top center, adjusts horizontally
-        ne - top right
-        w - middle left, adjusts vertically
-        c - center, adjusts both directions
-        e - middle right, adjusts vertically
-        sw - bottom left
-        s - bottom center, adjusts horizontally
-        se - bottom right
+	Supported key/region values are listed below. Refer to the discussion at the top of this page to view an illustration of the nine regions.
 
-        Some of the ids may be nil or not applicable to the current spritesheet, in which case they will not be drawn. For example, a 3-slice button can be created by providing just the top three positions with left-cap, middle, and right-cap sprites, and leaving the rest blank.
+		nw - top left
+		n  - top center (resizes horizontally only)
+		ne - top right
+		w  - middle left (resizes vertically only)
+		c  - center (resizes horizontally and vertically)
+		e  - middle right (resizes vertically only)
+		sw - bottom left
+		s  - bottom center (resizes horizontally only)
+		se - bottom right
 
-        If the sheet property is changed, the ids will be reevaluated.
+	A NineSlice object need only define the regions it requires; the remaining regions can remain undefined and will contain nil values.
 
-        *See Also:* the <sheet> property
-    */
+	*Default Settings:* Each key/region contains a nil value
+
+    *See Also:* the <sheet> property
+*/
 
     table ids
         [[
@@ -267,7 +224,7 @@ class NineSlice [[ClutterActor*]] actor
             if ( lua_istable( L, 2 ) )
             {
                 NineSliceBinding * binding = get_binding( self );
-                
+
                 for ( unsigned i = 0; i < 9; ++i )
                 {
                     lua_getfield( L, 2, keys[i] );
@@ -275,7 +232,7 @@ class NineSlice [[ClutterActor*]] actor
                     binding->set_id( i, std::string( id != NULL ? id : "" ) );
                     lua_pop( L, 1 );
                 }
-                
+
                 get_binding( self )->signal_loaded_later();
             }
             else
@@ -284,29 +241,50 @@ class NineSlice [[ClutterActor*]] actor
             }
         ]];
 
-    /*
-        Property: tile
+/***************************************
+    Property: tile
 
-        The tile property is a table containing six boolean values specifying whether sprites should tile horizontally and/or vertically instead of stretching.
+	The tile property is a table of six boolean flags indicating whether a region's sprite should tile when the region is resized. By default, when a region is resized, its image is compressed or stretched to fit the new space. By tiling the sprite, the image is repeated using its original size.
 
-        In order to match the dimensions of the target object's bounding box, the center sprites (N, S, W, E, and C) must be either stretched or tiled.
+	Various table formats are recognized when setting the tile property. Each format is shown below and demonstrated in the *Code Examples* section. When retrieving the tile property, the six-boolean-flags table format (Format #1 below) is always returned.
 
-        tile[1] - C tile horizontally
-        tile[2] - C tile vertically
-        tile[3] - N tile horizontally
-        tile[4] - S tile horizontally
-        tile[5] - W tile vertically
-        tile[6] - E tile vertically
+	*Table Format #1:* { C Region/Horizontal, C Region/Vertical, N Region, S Region, W Region, E Region }
 
-        The tile property can also be set more compactly using a two-boolean table, { horizontal, vertical }, or a single boolean; however, it can only be retrieved as a table of six.
+	*Table Format #2:* { Tile Horizontally, Tile Vertically }
 
-        *Default Setting:* tile = { false, false, false, false, false, false }
-    */
+	*Table Format #3:* single boolean flag indicating whether or not tiling should occur for all resizable regions (true=tile)
+
+	*Default Setting:* All flags = false, i.e., no regions are tiled.
+
+	*Code Example:* Demonstrate the various table formats recognized when setting the tile property
+
+		(code)
+		-- Set each region individually in a table
+		mySlice.tile = { true, false, true, false, true, false }
+
+		-- Set the regions to tile individually
+		mySlice.tile[ 1 ] = true
+		mySlice.tile[ 2 ] = false
+		mySlice.tile[ 3 ] = true
+		mySlice.tile[ 4 ] = false
+		mySlice.tile[ 5 ] = true
+		mySlice.tile[ 6 ] = false
+
+		-- Set all regions that resize horizontally to tile
+		-- and all regions that resize vertically to compress/stretch
+		mySlice.tile = { true, false }
+
+		-- Set all resizable regions to tile
+		mySlice.tile = true
+		(end)
+
+	*See Also:* the NineSlice region illustration at the top of this page
+*/
 
     table tile
         [[
             NineSliceBinding * binding = get_binding( self );
-            
+
             lua_newtable( L );
 
             for ( unsigned i = 0; i < 6; ++i )
@@ -339,19 +317,23 @@ class NineSlice [[ClutterActor*]] actor
                 g_warning( "Trying to set tile on a nineslice with a thing that wasn't a table or a boolean. Bad." );
             }
         ]];
-        
-    /*
-        Property: async
-        
-        The async property is a boolean value that determines whether source images of the NineSlice (managed by its SpriteSheet) are loaded asynchronously or not.
-        
-        When either the <sheet> or <ids> change, any new source images that need to be loaded will also be loaded according to this value.
-        
-        *Default Setting:* false, i.e., all source images are loaded synchronously
-        
-        *See Also:* the <on_loaded> event
-    */
-        
+
+/***************************************
+    Property: async
+
+    The async property is a boolean value that determines whether the image file associated with any region's Sprite (as defined by the NineSlice object's <sheet> and <ids> properties) is loaded synchronously (async=false) or asynchronously (async=true).
+
+    Asynchronously-loaded images enable your application to continue to run while the image is loading. After the images are completely loaded, your application is notified by the firing of an <on_loaded> event.
+
+    After starting one asynchronous load, it is possible for your application to begin a second Sprite-load (synchronous or asynchronous) before the first load completes. There is no guarantee, however, that load operations will complete in the same order in which they were started; it is possible that the second load will finish before the first load. Therefore, your code should not contain any assumptions about the order in which Sprites finish loading.
+
+    To load the Sprite images asynchronously, the async property must be initialized prior to beginning the load operation. The load operation may occur when the NineSlice object is created or when its sheet or ids property changes.
+
+    *Default Setting:* false, i.e., Sprite images are loaded synchronously
+
+    *See Also:* the <on_loaded> event and the <sheet> and <ids> properties
+*/
+
     bool async
         [[
             async = get_binding( self )->async;
@@ -359,99 +341,35 @@ class NineSlice [[ClutterActor*]] actor
         [[
             get_binding( self )->async = async;
         ]];
-        
-    /*
-        Property: loaded
-        
-        The loaded property is a boolean value indicating if all source images currently in use by the NineSlice are loaded successfully. For the purposes of this property, the NineSlice will ignore all ids not found in its spritesheet.
-        
-        *Default Setting:* true
-        
-        *See Also:* the <ids> property
-    */
-        
+
+/***************************************
+    Property: loaded
+
+	The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image(s) referenced by the object's <sheet> and <ids> properties (true=success).
+
+	Note: The loaded property cannot be used to determine the result or status of asynchonously-loaded images. To receive status notification of asynchronously-loaded images, register an <on_loaded> event handler.
+
+    *Default Setting:* false
+
+    *See Also:* the <sheet> and <ids> properties
+*/
+
     readonly bool loaded
         [[
             loaded = get_binding( self )->is_loaded();
         ]];
-        
-    /*
-        Function: add_onloaded_listener
-        
-        The add_onloaded_listener() function registers a handler function for <on_loaded> events.
-        
-        *Arguments*
-        
-            fn - reference to handler function. The function prototype is described below.
 
-        *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+/***************************************
+    Property: borders
 
-        *Handler Prototype:*
+	The borders property is a table of integer values specifying the maximum sizes of the object's sides in their non-scaling dimensions. For example, the NineSlice object's left side is made up of the nw, w, and sw regions. The left side cannot scale in the horizontal direction, i.e, its width cannot change. Thus, the borders table entry for the left side will contain the width of the widest image contained in the three regions. Similarly, the object's top side (comprising the nw, n, and ne regions) cannot be resized vertically (its height cannot change), so the maximum size of the top side is determined by the image in those regions that has the largest height.
 
-        (code)
-        fn( NineSlice self, boolean failed )
-        (end)
+	Note: Any images in a side's region that are smaller than the side's largest width/height are stretched to match the side's maximum size.
 
-        *Handler Arguments:*
+	*Table Format:* { max left-side width, max right-side width, max top height, max bottom height }
 
-            self - the NineSlice object that has finished loading
-            failed - boolean value indicating overall failure or success of all load operations (true=failure)
-        
-        *Handler Return Value:* None
-        
-        *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
-    */
-        
-    int add_onloaded_listener( function fn )
-        [[
-            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
-        ]];
-        
-    /*
-        Function: remove_onloaded_listener
-
-        The remove_onloaded_listener() function unregisters the specified event handler.
-
-        *Arguments:*
-
-            ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
-
-        *Return Value:* None
-
-        *See Also:* the <add_onloaded_listener> function
-    */
-
-    remove_onloaded_listener( int ref )
-        [[
-            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
-        ]];
-
-    /*
-        Event: on_loaded
-
-        The on_loaded event occurs when all asynchronous loading operations have completed. 
-
-        *See Also:* the <add_onloaded_listener> function
-    */
-
-    function on_loaded
-        [[
-            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
-        ]]
-        [[
-            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
-        ]];
-
-    /*
-        Property: borders
-
-        The borders property is a table reflecting the maximum sizes of the sprites making up the left, right, top, and bottom borders of the NineSlice, in that order.
-
-        borders[1] - reflects the left border (maximum width of NW, W, and SW sprites)
-        borders[2] - reflects the right border (maximum width of NE, E, and SE sprites)
-        borders[3] - reflects the top border (maximum height of SW, S, and SE sprites)
-        borders[4] - reflects the bottom border, (maximum height of NW, N, and NE sprites)
-    */
+	*See Also:* the <sheet> and <ids> properties
+*/
 
     readonly table borders
         [[
@@ -464,9 +382,82 @@ class NineSlice [[ClutterActor*]] actor
                 lua_pushnumber( L, list->at( i ) );
                 lua_rawseti( L, -2, i + 1 );
             }
-            
+
             delete list;
         ]];
+
+/***************************************
+    Function: add_onloaded_listener
+
+    The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+
+    *Arguments*
+
+        f - reference to handler function. The function prototype is described below.
+
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+    *Handler Prototype:*
+
+		(code)
+		f( loadedNineSlice, failed )
+		(end)
+
+    *Handler Arguments:*
+
+        loadedNineSlice - the NineSlice object that has loaded the image
+        failed - boolean value indicating failure or success of the load operation (true=failure)
+
+    *Handler Return Value:* None
+
+    *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
+
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Function: remove_onloaded_listener
+
+    The remove_onloaded_listener() function unregisters the specified event handler.
+
+    *Arguments:*
+
+        ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+    *Return Value:* None
+
+    *See Also:* the <add_onloaded_listener> function
+*/
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Event: on_loaded
+
+    The on_loaded event occurs when the object's asynchronously-loaded sprite images have finished loading.
+
+    *See Also:* the <add_onloaded_listener> function
+*/
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char *) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
+        ]];
+
+/***************************************
+
+
+*/
+
 }
 
 [[
@@ -474,7 +465,7 @@ class NineSlice [[ClutterActor*]] actor
 void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L )
 {
     ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) );
-    
+
     if ( get_binding( self )->async )
     {
         lua_pushboolean( L, error ? 1 : 0 );
