@@ -6,7 +6,7 @@ stitcher - a tool to stitch together many source sprites into a single spriteshe
 
 .SH SYNOPSIS
 
-stitcher INPUT ... [-h] [-B] [-i FILTER] [-g ID] [-m PATH] [-o PATH] [-s INT] [-t INT]
+stitcher INPUT ... [-h] [-B] [-i "FILTER"] [-g ID] [-m PATH] [-o PATH] [-s INT] [-t INT]
 
 .SH INPUTS
 stitcher will accept a list of directories and/or images, and things that might be convertible to images (ie. SVG). Experiment to see what input formats work for your case.
@@ -26,7 +26,7 @@ Sprites behave just as if they were loaded from the original image.
 
 .TP
 
-stitcher assets/ui special-image.jpg -i *.png nav/bg-?.jpg -s 256
+stitcher assets/ui special-image.jpg -i "*.png" -i "nav/bg-?.jpg" -s 256
 Include all PNGs plus JPGs whose filenames match 'nav/bg-?.jpg'. 'special-image.jpg' doesn't match either filter, but will be included since it was named directly. Additionally, images bigger than 256 pixels on a side will be placed in their own seperate textures.
 
 .TP
@@ -68,8 +68,8 @@ Id of a sprite (ie., its path within its original source directory) to ignore or
 
 .TP
 
--i FILTER, --input-name-filter=FILTER
-Inclusive wildcard (?, *) filter for files within input directories (default: *); multiple filters can be passed, in which case files will be included if they match at least one filter
+-i "FILTER", --input-name-filter="FILTER"
+Inclusive wildcard (?, *) filter for files within input directories (default: "*"); multiple filters can be passed, in which case files will be included if they match at least one filter
 
 .TP
 

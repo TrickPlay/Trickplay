@@ -107,7 +107,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
             & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
         { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 
-            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: *)", "FILTER" },
+            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: '*')", "'FILTER'" },
         { "log-level",         'l', G_OPTION_FLAG_HIDDEN,      G_OPTION_ARG_INT, 
             & options->log_level,                "Granularity of message logging, 0-3 (default: 1) (not yet implemented)", "LEVEL" },
         { "merge-json",        'm', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
