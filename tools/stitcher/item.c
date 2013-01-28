@@ -48,6 +48,8 @@ Item * item_new_with_source( const char * id, Image * source )
     return item;
 }
 
+// items can be given children which describe duplicates and subimages of them, saving space
+
 void item_add_child( Item * item, Item * child )
 {
     g_ptr_array_add( item->children, child );
@@ -66,14 +68,18 @@ Item * item_add_child_new( Item * item, const char * id, unsigned x_offset, unsi
     return child;
 }
 
+// comparison first by the longer dimension, then the shorter dimension
+
 gint item_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused)) )
 {
     Item * aa = (Item *) a, * bb = (Item *) b;
-    unsigned  m = ( MAX( bb->w, bb->h ) - MAX( aa->w, aa->h ) );
+    int       m = ( MAX( bb->w, bb->h ) - MAX( aa->w, aa->h ) );
     if ( !m ) m =   MIN( bb->w, bb->h ) - MIN( aa->w, aa->h );
 
     return m;
 }
+
+// generate the JSON row for this item, but also the rows of its children, and their children, etc
 
 char * item_to_string( Item * item, int x, int y, unsigned indent )
 {
