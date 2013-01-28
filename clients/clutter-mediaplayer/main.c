@@ -525,7 +525,6 @@ static int mp_set_audio_volume(TPMediaPlayer * mp,double volume)
 static int mp_get_audio_mute(TPMediaPlayer * mp,int * mute)
 {
     USERDATA(mp);
-    CM(ud);
 
     *mute = ud->mute;
 

@@ -15,7 +15,7 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
     {
         make_texture( true );
         g_assert( texture );
-        g_assert( real );
+        g_assert( real || failed );
     }
     else if ( !texture )
     {
