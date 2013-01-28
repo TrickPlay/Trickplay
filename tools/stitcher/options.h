@@ -1,6 +1,16 @@
 #ifndef __OPTIONS_H__
 #define __OPTIONS_H__
 
+/*
+
+options.h
+
+The Options struct is a representation of the arguments passed to stitcher via command line, and is not meant to be changed after creation.
+
+It also manages the uniqueness of Item ids.
+
+*/
+
 #include <glib.h>
 
 typedef struct Options {

@@ -5,6 +5,14 @@
 #include "layout.h"
 #include "item.h"
 
+/*
+
+leaf.h
+
+A Leaf represents a single space-partition within a Layout (see layout.h).
+
+*/
+
 typedef struct Leaf {
     unsigned int w, h, area, x, y;
     Item * item;
