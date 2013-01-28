@@ -5,6 +5,7 @@ typedef PushTexture::PingMe PingMe;
 PushTexture::~PushTexture()
 {
     if ( texture ) cogl_handle_unref( texture );
+    if ( !pings.empty() ) pings.clear();
 }
 
 void PushTexture::subscribe( PingMe * ping, bool preload )
@@ -84,7 +85,7 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::set( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
+void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
     if ( source ) source->unsubscribe( this );
     

@@ -60,9 +60,9 @@ public:
             PingMe() : source( NULL ), callback( NULL ), target( NULL ) {};
             ~PingMe();
 
-            // Note: if set() suceeds, it will immediately ping() this PingMe object using the given callback
+            // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
 
-            void set( PushTexture * source, Callback * callback, void * target, bool preload );
+            void assign( PushTexture * source, Callback * callback, void * target, bool preload );
 
             friend class PushTexture;
 
