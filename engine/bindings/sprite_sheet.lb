@@ -63,7 +63,7 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, Source * source )
 
     if ( !lua_istable( L, index ) )
     {
-        g_warning( "Couldn't understand that sprite definition." );
+        g_warning( "Expecting table in sprite definition." );
         return;
     }
 
@@ -74,7 +74,7 @@ void spritesheet_add_lua_sprite ( lua_State * L, int index, Source * source )
     lua_getfield( L, index, "id" );
 
     source->sheet->add_sprite( source,
-        strdup( (char *) lua_tostring( L, -1 ) ),
+        g_strdup( (char *) lua_tostring( L, -1 ) ),
         (int) lua_tointeger( L, -5 ),
         (int) lua_tointeger( L, -4 ),
         (int) lua_tointeger( L, -3 ),
@@ -93,136 +93,177 @@ void spritesheet_add_lua_map ( lua_State * L, int index, SpriteSheet * self )
         g_warning( "Map subsheet is not a table" );
         return;
     }
-    
+
     Bitmap * bitmap;
-    Source * source = self->add_source();
-    
-    
+
+    /* Call set_source only when input is valid */
+    Source * source = NULL;
+
     lua_getfield( L, index, "img" );
     int img = lua_gettop( L );
-    
-    if ( lua_isstring( L, img ) )
+
+    if ( lua_isnil( L, img ) )
     {
+        g_warning( "Missing key 'img' in SpriteSheet constructor" );
+    }
+    else if ( lua_isstring( L, img ) )
+    {
+        /* Get source when source is not null */
+        source = source ? source : self->add_source();
         source->set_source( lua_tostring( L, img ) );
     }
     else if (( bitmap = LB_GET_BITMAP( L, img ) ))
     {
+        source = source ? source : self->add_source();
         source->set_source( bitmap->get_image() );
     }
     else
     {
-        g_warning( "Source image is not a URI or Bitmap" );
+        g_warning( "Source image is not a URI or a Bitmap" );
     }
-    
+
     lua_pop( L, 1 );
-    
-    
+
     lua_getfield( L, index, "sprites" );
     int sprites = lua_gettop( L );
 
-    if ( lua_istable( L, sprites ) )
+    if ( lua_isnil( L, sprites ) )
     {
+        g_warning( "Missing list of sprites in SpriteSheet constructor" );
+    }
+    else if ( lua_istable( L, sprites ) )
+    {
+        source = source ? source : self->add_source();
         foreach_in_table( L, sprites, (LFunc) spritesheet_add_lua_sprite, source );
     }
     else
     {
         g_warning( "List of sprites is not a table" );
     }
-    
+
     lua_pop( L, 1 );
 }
+
 void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L );
 
 ]]
 
-/*
-    Class: SpriteSheet
+/***************************************
+	Class: SpriteSheet
 
-    The SpriteSheet class will load a set of large images containing many small sprites. An app may want to do this to avoid loading possibly hundreds of small icons or sprites, or to simplify the management of many similar images onscreen at once. A SpriteSheet, once created, is a static userdata that can be referenced by <Sprite> or <NineSlice>. These objects can then draw sprites from the SpriteSheet directly without creating copies or clones.
+	The SpriteSheet data type enables multiple images to be stored within a single image file, similar to a sheet of paper having multiple images printed on it. Each image is called a "sprite." Each sprite's location on the sheet and its size are specified in either a JSON map file or Lua source code. In addition, each sprite is assigned a unique ID which is subsequently used to access the sprite for image manipulation or display on the screen. Individual sprites in the SpriteSheet are accessed by using the <Sprite> or <NineSlice> data types.
 
-    In order to know what to draw, the SpriteSheet needs a map of where individual sprites appear in each source texture. This map is specified in the SpriteSheet constructor with either a Lua table, or a .json file with the following structure.
+	The SpriteSheet and Sprite classes provide an efficient alternative to the loading and processing of multiple <Image> or <Clone> objects.
 
-    (code)
-    // assets.json
-    [
-        {
-            "sprites": [
-                { "x": 0, "y": 0, "w": 16, "h": 16, "id": "sprite-1.png" },
-                { "x": 16, "y": 0, "w": 16, "h": 16, "id": "subfolder/sprite-2.png },
-                ...
-            ],
-            "img": "assets.png"
-        },
-        ...
-    ]
+	A SpriteSheet object may contain multiple sheets/files, and each sheet may contain multiple sprites.
 
-    -- main.lua
-    sheet1 = SpriteSheet { map = "assets.json" }
-    sheet2 = SpriteSheet { map = {
-        {
-            sprites = {
-                { x = 0, y = 0, w = 16, h = 16, id = "sprite-1.png" },
-                { x = 16, y = 0, w = 16, h = 16, id = "subfolder/sprite-2.png" },
-                ...
-            },
-            img = Bitmap{ src = "assets.png" }
-        },
-        ...
-    }
-    (end)
+	The SpriteSheet "map" specifies the location, size and string ID of each sprite contained on a sheet. Maps are defined in either an external JSON text file or in Lua code statements. The structure of the map information is similar in both formats; only the syntax varies.
 
-    Notice that the id strings look like path names; this is not stricly necessary, since ids can be any string at all, but since SpriteSheets are usually generated from seperate source files, using a path name as if the SpriteSheet is actually a folder of images is often clearer.
+	Each SpriteSheet map includes a table of sprite definitions and the name of the file that contains the sprites/images. A sprite/image file can be loaded from local storage or a URL. The table of sprite definitions are specified in a property called "sprites"; the image filename property is "img". A sample SpriteSheet map in JSON is shown below.
 
-    What if the app needs to download its assets from a URL? The SpriteSheet can take URI paths as well as local paths, and load its map and texture asynchronously.
+		(code)
+		... JSON SpriteSheet Map ...
+		... Filename: animationFrames.json ...
+		[
+			{
+				"sprites": [
+					{ "x":  0, "y": 0, "w": 16, "h": 16, "id": "frame1" },
+					{ "x": 16, "y": 0, "w": 16, "h": 16, "id": "frame2" },
+					... Additional sprite definitions can be added here ...
+				]
+				"img": "animationFrames.png"
+			},
+			... Additional maps for other sheets/files can be defined here ...
+		]
+		(end)
 
-    (code)
-    sheet = SpriteSheet { map = "http://www.trickplay.com/resources/assets.json", async = true }
-    (end)
+	As the JSON map defined above shows, each definition in the "sprites" property is a table containing the following required fields.
 
-    *See Also:* the <Sprite> class
+		x - X coordinate position on the sheet of the sprite's top-left corner
+		y - Y coordinate position on the sheet of the sprite's top-left corner
+		w - sprite's width in pixels
+		h - sprite's height in pixels
+		id - sprite's unique string ID. IDs must be unique within the SpriteSheet object.
 
+	The "img" property recognizes filenames and URI references. *Note:* For filenames, the specified file location is relative to the JSON file's location.
+
+	To load the JSON map in a TrickPlay application, simply specify the JSON filename in the SpriteSheet constructor's "map" property as shown below.
+
+		(code)
+		spriteMap = SpriteSheet( { map = "animationFrames.json" } )
+		(end)
+
+	SpriteSheet maps can also be defined using Lua. Below is Lua code that defines a SpriteSheet map equivalent to the earlier JSON-defined map.
+
+		(code)
+		-- Lua SpriteSheet Map
+		spriteMap = SpriteSheet( {
+			map = {
+				{
+					sprites = {
+						{ x =  0, y = 0, w = 16, h = 16, id = "frame1" },
+						{ x = 16, y = 0, w = 16, h = 16, id = "frame2" },
+						-- Additional sprite definitions can be added here
+					},
+					img = Bitmap( { src = "animationFrames.png" } )
+				},
+				-- Additional maps for other sheets/files can be defined here
+			}
+		} )
+		(end)
+
+	Notice in the Lua version that the "img" property is defined as a <Bitmap> object. In addition, the specified file location is relative to the application's app bundle. These are differences from the earlier JSON syntax, but all the remaining differences between the two formats are syntax-related.
+
+    *See Also:* the <Sprite> and <NineSlice> classes
 */
 
 class SpriteSheet [[SpriteSheet*]]
 {
-    /*
-        Constructor: SpriteSheet
 
-        The SpriteSheet() constructor creates a new SpriteSheet object.
+/***************************************
+    Constructor: SpriteSheet
 
-        *Arguments:*
+    The SpriteSheet() constructor creates a new SpriteSheet object.
 
-        props - table defining the object's construction
+    *Arguments:*
 
-        *Properties:*
+		props - table defining the map of the sheets/files contained in the object. For details, refer to the discussion at the top of this page.
 
-        map - Lua table or path to a .json file of source-and-sprite definitions
-        [async] - load remote URIs asynchronously
+    *Properties:*
 
-        *Return Value:* new NineSlice object
-    */
+		map - Lua table or JSON file specification containing the map definition of the sheets/files contained in the object.
+		async - Optional boolean flag indicating whether a remote JSON map file should be loaded synchronously or asynchronously. Default: false, i.e., load synchronously. The async argument is relevant only when a *remote* JSON file is used to define the map; local JSON files are always loaded synchronously. When an asynchronous remote JSON load has finished, an <on_loaded> event is fired. Note: <Sprite> and <NineSlice> objects must not be created from the SpriteSheet until the map definition has loaded. This is not an issue when defining the map in a Lua table or a JSON file loaded synchronously; when loading the map from an asynchronously-loaded remote JSON file, Sprite and NineSlice objects must not be created until the on_loaded event is fired.
+
+    *Return Value:* reference to the constructed SpriteSheet object
+
+	*See Also:* the discussion at the top of this page and the <on_loaded> event
+*/
 
     SpriteSheet( table props = 0 )
         [[
             LSG;
             self = lb_construct( SpriteSheet, new SpriteSheet() );
-            
+
             g_signal_connect_data( self->extra, "load-finished",
                 (GCallback) SpriteSheet_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
-            
+
             self->app = App::get( L );
-            
+
             if ( props )
             {
                 ClutterUtil::set_props_from_table( L, props );
-                
+
                 lua_getfield( L, 1, "async" );
                 lua_getfield( L, 1, "map" );
-                
+
                 self->async = lua_toboolean( L, -2 );
-                
-                if ( lua_isstring( L, -1 ) )
+
+                if ( lua_isnil( L, -1) ){
+                    /* TODO: Replace luaL_error so that the app can continue with such error */
+                    luaL_error( L, "Missing key 'map' in SpriteSheet constructor." );
+                }
+                else if ( lua_isstring( L, -1 ) )
                 {
                     self->load_json( lua_tostring( L, -1 ) );
                 }
@@ -236,14 +277,14 @@ class SpriteSheet [[SpriteSheet*]]
                 {
                     luaL_error( L, "Key 'map' was not a table or URI string." );
                 }
-                
+
                 lua_pop( L, 2 );
             }
             else
             {
                 luaL_error( L, "Must pass a table to SpriteSheet constructor." );
             }
-            
+
             LSG_END( 0 );
         ]];
 
@@ -251,11 +292,43 @@ class SpriteSheet [[SpriteSheet*]]
         [[
         ]];
 
-    /*
-        Function: get_ids()
+/***************************************
+    Property: map_uri
 
-        Returns a table of all the sprite ids in this SpriteSheet
-    */
+	The map_uri property contains the file specification of the JSON file used to define the object's sprite map. If the sprite map was defined in Lua code statements, the property contains a nil value.
+
+	*Default Setting:* nil
+*/
+
+    readonly string map_uri
+        [[
+            map_uri = self->get_json_uri();
+        ]];
+
+/***************************************
+    Property: loaded
+
+	The loaded property is a boolean flag indicating the success or failure of the synchronous loading of a JSON map file (true=success).
+
+	Note: The loaded property cannot be used to determine the result or status of an asynchonously-loaded map file. To receive status notification of an asynchronously-loaded map file, register an <on_loaded> event handler.
+
+    *Default Setting:* false
+
+    *See Also:* the <map_uri> property
+*/
+
+    readonly bool loaded
+        [[
+            loaded = self->loaded;
+        ]];
+
+/***************************************
+    Function: get_ids
+
+	The get_ids() function returns a table listing all the sprite IDs defined in the object. Each sprite defined in the SpriteSheet object must have a string ID that is unique for that SpriteSheet. For additional information, refer to the discussion at the top of this page.
+
+	*Return Value:* table of sprite string IDs
+*/
 
     table get_ids()
         [[
@@ -273,43 +346,64 @@ class SpriteSheet [[SpriteSheet*]]
             delete ids;
         ]];
 
-    /*
-        Callback: on_loaded
+/***************************************
+    Function: add_onloaded_listener
 
-        The on_loaded() event handler is fired whenever SpriteSheet gets a result from an asynchronous load. A single SpriteSheet may load a map and/or one or more image files asynchronously.
+    The add_onloaded_listener() function registers a handler function for <on_loaded> events.
 
-        *Prototype:*
-        (code)
-        void on_loaded( SpriteSheet self, boolean success, string status )
-        (end)
+    *Arguments*
 
-        *Status Strings:*
+        f - reference to handler function. The function prototype is described below.
 
-        FAILED_MAP_LOAD - Couldn't load the JSON map from a remote URI
-        FAILED_MAP_PARSE - Couldn't parse the JSON map correctly
-        FAILED_IMG_LOAD - Couldn't load one of the source images (remote or local)
-        nil - Successfully loaded a source image (remote or local)
-    */
-    
-    readonly string map_uri
-        [[
-            map_uri = self->get_json_path();
-        ]];
-    
-    readonly bool loaded
-        [[
-            loaded = self->loaded;
-        ]];
-    
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+    *Handler Prototype:*
+
+		(code)
+		f( loadedSheet, failed )
+		(end)
+
+    *Handler Arguments:*
+
+        loadedSheet - the SpriteSheet object that has finished loading
+        failed - boolean value indicating failure or success of the load operation (true=failure)
+
+    *Handler Return Value:* None
+
+    *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
+
     int add_onloaded_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char *) "on_loaded" , L );
         ]];
 
+/***************************************
+    Function: remove_onloaded_listener
+
+    The remove_onloaded_listener() function unregisters the specified event handler.
+
+    *Arguments:*
+
+        ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+    *Return Value:* None
+
+    *See Also:* the <add_onloaded_listener> function
+*/
+
     remove_onloaded_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char *) "on_loaded" , L );
         ]];
+
+/***************************************
+    Event: on_loaded
+
+    The on_loaded event occurs when an asynchronously-loaded JSON map has finished loading. Note: The on_loaded event refers only to the loading of the JSON map file and not to any image files referenced within the file.
+
+    *See Also:* the <add_onloaded_listener> function
+*/
 
     function on_loaded
         [[
@@ -318,6 +412,11 @@ class SpriteSheet [[SpriteSheet*]]
         [[
             UserData::get( L )->set_last_callback( (char *) "on_loaded" , L );
         ]];
+
+/***************************************
+
+*/
+
 }
 
 [[
@@ -325,7 +424,7 @@ class SpriteSheet [[SpriteSheet*]]
 void SpriteSheet_on_loaded( GObject * extra, gpointer error, lua_State * L )
 {
     SpriteSheet * self = (SpriteSheet *) g_object_get_data( extra, "tp-sheet" );
-    
+
     if ( self->async )
     {
         lua_pushboolean( L, error ? 1 : 0 );

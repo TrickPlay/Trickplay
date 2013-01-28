@@ -29,6 +29,7 @@ void Source::handle_async_img( Image * image )
 {
     if ( image )
     {
+        failed = false;
         CoglHandle texture = ref_texture_from_image( image );
         set_texture( texture, true );
         delete image;
@@ -37,61 +38,71 @@ void Source::handle_async_img( Image * image )
     }
     else
     {
-        g_warning( "Could not download image %s", uri );
+        failed = true;
+        g_warning( "Could not download image %s", source_uri );
+        ping_all();
     }
 }
 
 void Source::make_texture( bool immediately )
 {
-    g_assert( uri );
+    g_assert( source_uri );
     
-    JSON::Object * jo = new JSON::Object();
-    CoglHandle texture = Images::cache_get( cache_key, * jo );
-    delete jo;
+    JSON::Object jo;
+    CoglHandle texture = Images::cache_get( cache_key, jo );
     
     if ( immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            Image * image = sheet->app->load_image( uri, false );
-            texture = ref_texture_from_image( image );
-            delete image;
+            Image * image = sheet->app->load_image( source_uri, false );
             
-            Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+            if ( image )
+            {
+                failed = false;
+                texture = ref_texture_from_image( image );
+                delete image;
+                
+                Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+                set_texture( texture, true );
+            }
+            else
+            {
+                failed = true;
+                set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+            }
         }
-        
-        set_texture( texture, true );
     }
     else
     {
         if ( texture == COGL_INVALID_HANDLE )
         {
-            sheet->app->load_image_async( uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-            set_texture( texture, false );
+            sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+            set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
         }
         else
         {
+            failed = false;
             set_texture( texture, true );
             ping_all_later();
         }
     }
 }
 
-void Source::set_source( const char * _uri )
+void Source::set_source( const char * uri )
 {
-    if ( sheet->json_path )
+    if ( sheet->json_uri )
     {
-        char * json = g_path_get_dirname( sheet->json_path );
-        uri = g_build_filename( json, _uri, NULL );
-        free( json );
+        char * json_path = g_path_get_dirname( sheet->json_uri );
+        source_uri = g_build_filename( json_path, uri, NULL );
+        free( json_path );
     }
     else
     {
-        uri = strdup( _uri );
+        source_uri = g_strdup( uri );
     }
     
-    cache_key = sheet->app->get_id() + ':' + uri;
+    cache_key = sheet->app->get_id() + ':' + source_uri;
 }
 
 void Source::set_source( Image * image )
@@ -121,8 +132,8 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Sprite::update()
 {
     g_assert( source );
+    failed = source->is_failed();
     set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
-    ping_all();
 }
 
 void on_ping( PushTexture * source, void * target )
@@ -156,7 +167,7 @@ class AsyncCallback : public Action
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_path( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_uri( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -172,7 +183,9 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 SpriteSheet::~SpriteSheet()
 {
     g_free( extra );
-    if ( json_path ) g_free( json_path );
+    if ( json_uri ) g_free( json_uri );
+    sources.clear();
+    sprites.clear();
 }
 
 void SpriteSheet::emit_signal( const char * msg )
@@ -197,22 +210,38 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
         {
             JSON::Object & map = (JSON::Object &) maps[i].as<JSON::Object>();
 
-            Source * source = add_source();
-            source->set_source( map.at( "img" ).as<std::string>().c_str() );
-            JSON::Array & sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
+            std::string img = map.at( "img" ).as<std::string>();
+            if ( !img.empty() ) {
+                Source * source = NULL;
 
-            for( unsigned i = 0; i < sprites.size(); i++ )
-            {
-                JSON::Object & sprite = (JSON::Object &) sprites[i].as<JSON::Object>();
-                
-                add_sprite( source, strdup( sprite.at( "id" ).as<std::string>().c_str() ),
-                    (int) sprite.at( "x" ).as<long long>(),
-                    (int) sprite.at( "y" ).as<long long>(),
-                    (int) sprite.at( "w" ).as<long long>(),
-                    (int) sprite.at( "h" ).as<long long>() );
+                JSON::Array & json_sprites = (JSON::Array &) map.at( "sprites" ).as<JSON::Array>();
+
+                for( unsigned i = 0; i < json_sprites.size(); i++ )
+                {
+                    JSON::Object & sprite = (JSON::Object &) json_sprites[i].as<JSON::Object>();
+
+                    std::string id = sprite.at( "id" ).as<std::string>();
+                    // Safe to convert long to int as image should be less than 4096x4096
+                    int x = sprite.at( "x" ).as<long long>();
+                    int y = sprite.at( "y" ).as<long long>();
+                    int w = sprite.at( "w" ).as<long long>();
+                    int h = sprite.at( "h" ).as<long long>();
+
+                    // Should check whether x, y, w, h are within the image when using the id
+                    // No need to check whether x, y, w, h are valid when creating because the app
+                    // can correct them later
+                    if ( !id.empty() ) {
+                        // Load source only when needed, thus no need to delete source given invalid input
+                        if (source == NULL) {
+                            source = add_source();
+                            source->set_source( img.c_str() );
+                        }
+                        add_sprite(source, g_strdup(id.c_str()), x, y, w, h);
+                    }
+                }
             }
         }
-        
+
         loaded = true;
         emit_signal( NULL );
     }
@@ -238,7 +267,9 @@ void SpriteSheet::load_json( const char * json )
 {
     char * map = NULL;
     gsize length;
+    Network::Response response;
 
+    // Check whether variable json is the content of a json file instead of the address of a json file
     if ( g_regex_match_simple( "^\\s*\\[", json, (GRegexCompileFlags) 0, (GRegexMatchFlags) 0 ) )
     {
         map = (char *) json;
@@ -246,11 +277,12 @@ void SpriteSheet::load_json( const char * json )
     }
     else
     {
-        json_path = strdup( json );
+        json_uri = g_strdup( json );
         
         AppResource resource( app, json );
         if ( resource.is_native() )
         {
+            // TODO: Support loading native files in async mode if needed
             if ( ! g_file_get_contents( resource.get_native_path().c_str(), &map, &length, NULL ) )
             {
                 emit_signal( g_strdup_printf( "Could not open map %s", json ) );
@@ -267,7 +299,7 @@ void SpriteSheet::load_json( const char * json )
             }
             else
             {
-                Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
+                response = app->get_network()->perform_request( request, app->get_cookie_jar() );
 
                 if ( response.failed || response.body->len == 0 )
                 {
@@ -282,6 +314,7 @@ void SpriteSheet::load_json( const char * json )
 
     if ( map && length )
     {
+        // map does not have to be a string ending with \0.
         parse_json( JSON::Parser::parse( map, length ) );
     }
 }
