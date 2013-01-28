@@ -143,12 +143,12 @@ void on_ping( PushTexture * source, void * target )
 
 void Sprite::make_texture( bool immediately )
 {
-    ping.set( source, * on_ping, this, immediately );
+    ping.assign( source, * on_ping, this, immediately );
 }
 
 void Sprite::lost_texture()
 {
-    ping.set( NULL, NULL, NULL, false );
+    ping.assign( NULL, NULL, NULL, false );
 }
 
 /* SpriteSheet */
@@ -158,7 +158,7 @@ class AsyncCallback : public Action
     SpriteSheet * self;
     bool failed;
     
-    public: AsyncCallback( SpriteSheet * self, bool failed ) : self( self ), failed( failed ) {}
+    public: AsyncCallback( SpriteSheet * s, bool f ) : self( s ), failed( f ) {}
     
     protected: bool run()
     {
@@ -330,7 +330,7 @@ void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, in
 {
     g_assert( source );
     
-    sprites[ std::string( id ) ].set( id, source, x, y, w, h );
+    sprites[ std::string( id ) ].assign( id, source, x, y, w, h );
 }
 
 Sprite * SpriteSheet::get_sprite( const char * id )

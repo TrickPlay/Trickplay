@@ -17,7 +17,7 @@ struct SpriteBinding
     {
         SpriteBinding * self;
 
-        public: SignalLoadedLater( SpriteBinding * self ) : self( self ) { g_assert( self ); };
+        public: SignalLoadedLater( SpriteBinding * s ) : self( s ) { g_assert( s ); };
 
         protected: bool run()
         {
@@ -32,18 +32,19 @@ struct SpriteBinding
 
     ~SpriteBinding()
     {
-        if ( id ) free( id );
+        if ( id ) g_free( id );
     }
-
-    const char * get_id() { return id ? strdup( id ) : NULL; }
-
+    
+    const char * get_id() { return id ? g_strdup( id ) : NULL; }
+    
     void set_id( const char * new_id )
     {
+        /* TODO: replace strcmp with something safe */
         if ( !id || !new_id || strcmp( id, new_id ) )
         {
-            if ( id ) free( id );
-            id = new_id ? strdup( new_id ) : NULL;
-
+            if ( id ) g_free( id );
+            id = new_id ? g_strdup( new_id ) : NULL;
+            
             if ( id && sheet && !sheet->has_id( id ) )
             {
                 g_warning( "Spritesheet does not contain the id '%s'", id );
@@ -111,7 +112,7 @@ private:
     void update_sprite()
     {
         sprite = sheet ? sheet->get_sprite( id ) : NULL;
-        ping.set( sprite, SpriteBinding::on_ping, this, !async );
+        ping.assign( sprite, SpriteBinding::on_ping, this, !async );
     }
 
     PushTexture::PingMe   ping;
