@@ -22,7 +22,7 @@ struct NineSliceBinding
     bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
     void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
 
-    bool is_loaded() { return nineslice_effect_is_loaded( effect ); };
+    bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
 
     std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
 
