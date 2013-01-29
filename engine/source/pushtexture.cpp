@@ -12,13 +12,13 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
     
-    if ( !real && preload )
+    if ( !failed && !real && preload )
     {
         make_texture( true );
         g_assert( texture );
         g_assert( real || failed );
     }
-    else if ( !texture )
+    else if ( !failed && !texture )
     {
         make_texture( false );
         g_assert( texture );
