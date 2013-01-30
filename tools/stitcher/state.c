@@ -198,7 +198,7 @@ void state_merge_local_sprites( State * state, JsonArray * sprites, const char *
     if ( exception->severity != UndefinedException )
     {
         fprintf( stderr, "Could not load spritesheet source image %s.\n", img );
-        exit( 1 );
+        exit( SS_IMAGE_LOAD_FAILED );
     }
     
     gboolean destroy_source_image = TRUE;
@@ -269,7 +269,7 @@ void state_merge_json ( State * state, const char * path, Options * options )
     if ( !json_parser_load_from_file( json, path, NULL ) )
     {
         fprintf( stderr, "Could not load JSON file of spritesheet %s.\n", path );
-        exit( 1 );
+        exit( SS_JSON_LOAD_FAILED );
     }
 
     JsonNode * root = json_parser_get_root( json );
@@ -277,7 +277,7 @@ void state_merge_json ( State * state, const char * path, Options * options )
     if ( !JSON_NODE_HOLDS_ARRAY( root ) )
     {
         fprintf( stderr, "Could not parse JSON file of spritesheet %s.\n", path );
-        exit( 1 );
+        exit( SS_JSON_LOAD_FAILED );
     }
 
     JsonArray * maps = json_node_get_array( root );

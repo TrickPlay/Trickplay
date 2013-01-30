@@ -78,7 +78,7 @@ int main ( int argc, char ** argv )
         if ( !best->places->len )
         {
             fprintf( stderr, "Failed to fit all of the images.\n" );
-            exit( 1 );
+            exit( LAYOUT_FAILED );
         }
         
         // save the layout, generating one PNG and part of the JSON
