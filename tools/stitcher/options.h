@@ -29,7 +29,8 @@ enum errorCodes
     
     // merge I/O errors
     SS_JSON_LOAD_FAILED = 201,
-    SS_IMAGE_LOAD_FAILED = 202,
+    SS_JSON_PARSE_FAILED = 202,
+    SS_IMAGE_LOAD_FAILED = 203,
     
     // internal errors
     LAYOUT_FAILED = 301,

@@ -277,7 +277,7 @@ void state_merge_json ( State * state, const char * path, Options * options )
     if ( !JSON_NODE_HOLDS_ARRAY( root ) )
     {
         fprintf( stderr, "Could not parse JSON file of spritesheet %s\n", path );
-        exit( SS_JSON_LOAD_FAILED );
+        exit( SS_JSON_PARSE_FAILED );
     }
 
     JsonArray * maps = json_node_get_array( root );
