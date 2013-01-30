@@ -77,7 +77,7 @@ int main ( int argc, char ** argv )
         
         if ( !best->places->len )
         {
-            fprintf( stderr, "Failed to fit all of the images.\n" );
+            fprintf( stderr, "Failed to fit all of the images\n" );
             exit( LAYOUT_FAILED );
         }
         
@@ -101,5 +101,5 @@ int main ( int argc, char ** argv )
 
     MagickCoreTerminus();
 
-    return 0;
+    return SUCCESS;
 }
