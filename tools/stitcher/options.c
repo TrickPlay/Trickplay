@@ -172,13 +172,13 @@ Options * options_new_from_arguments ( int argc, char ** argv )
             else
             {
                 fprintf( stderr, "Ambiguous output path\n" );
-                exit( AMBIGUOUS_INPUTS );
+                exit( AMBIGUOUS_OUTPUT_PATH );
             }
         }
         else
         {
             fprintf( stderr, "Ambiguous output path\n" );
-            exit( AMBIGUOUS_INPUTS );
+            exit( AMBIGUOUS_OUTPUT_PATH );
         }
     }
 
