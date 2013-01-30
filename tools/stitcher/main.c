@@ -77,8 +77,8 @@ int main ( int argc, char ** argv )
         
         if ( !best->places->len )
         {
-            fprintf( stderr, "Failed to fit all of the images.\n" );
-            exit( 1 );
+            fprintf( stderr, "Failed to fit all of the images\n" );
+            exit( LAYOUT_FAILED );
         }
         
         // save the layout, generating one PNG and part of the JSON
@@ -101,5 +101,5 @@ int main ( int argc, char ** argv )
 
     MagickCoreTerminus();
 
-    return 0;
+    return SUCCESS;
 }
