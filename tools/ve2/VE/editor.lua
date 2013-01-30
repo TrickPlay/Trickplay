@@ -150,7 +150,6 @@ function editor.clone()
 
     _VE_.refresh()
     blockReport = false
-    --_VE_.selectUIElement(uiClone.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiClone.gid, false)
     _VE_.repUIInfo(uiClone)
@@ -337,16 +336,19 @@ function editor.duplicate(gid)
                 end 
             end 
 
+		    screen_ui.n_selected(v)
             util.addIntoLayer(uiDuplicate)
+
+            _VE_.refresh()
+            blockReport = false
+            --_VE_.selectUIElement(uiDuplicate.gid)
+            _VE_.refreshDone()
+            --_VE_.openInspector(uiDuplicate.gid, false)
+            _VE_.repUIInfo(uiDuplicate)
 
 		end --if selected == true
     end -- for 
 
-    blockReport = false
-    _VE_.selectUIElement(uiDuplicate.gid)
-    _VE_.refreshDone()
-    _VE_.openInspector(uiDuplicate.gid, false)
-    _VE_.repUIInfo(uiDuplicate)
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
