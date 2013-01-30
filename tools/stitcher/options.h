@@ -13,6 +13,20 @@ It also manages the uniqueness of Item ids.
 
 #include <glib.h>
 
+enum errorCodes {
+    NONE,
+    ARGUMENT_PARSE_ERROR,
+    NO_INPUTS,
+    AMBIGUOUS_INPUTS,
+    SEG_SIZE_LIMIT,
+    TEX_SIZE_LIMIT,
+    INPUT_LOAD_FAILED,
+    SS_JSON_LOAD_FAILED,
+    SS_IMAGE_LOAD_FAILED,
+    LAYOUT_FAILED,
+    EXPORT_FAILED
+};
+
 typedef struct Options {
     unsigned int input_size_limit,
                  output_size_limit,
