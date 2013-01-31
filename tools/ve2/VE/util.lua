@@ -116,8 +116,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             return true
         elseif control == true and uiInstance.extra.is_in_group == true or 
  --]]
-        if uiInstance.extra.is_in_group == true or 
-           control == false and uiInstance.extra.is_in_group == false then 
+        if uiInstance.extra.is_in_group == false or control == false then -- and uiInstance.extra.is_in_group == false then 
 
             _VE_.openInspector(uiInstance.gid)
 
@@ -462,13 +461,21 @@ end
 
 function util.assign_right_name (uiInstance, uiTypeStr)
 
+    while util.is_available(uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]) == false do
+        hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
+    end 
+
+    uiInstance.name = uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]
+    hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
+
+--[[
     while util.is_available(uiTypeStr:lower()..uiNum) == false do
         uiNum = uiNum + 1
     end 
 
     uiInstance.name = uiTypeStr:lower()..uiNum
     uiNum = uiNum + 1
-
+]]
 end 
 	
 

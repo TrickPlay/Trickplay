@@ -74,6 +74,36 @@ hdr.uiElementCreate_map =
         ['MenuButton'] = function(p)  return WL.MenuButton(p) end, 
     }
 
+hdr.uiNum_map = 
+    {
+        ['Clone'] = 0,
+        ['Widget_Clone'] = 0,
+        ['Group'] = 0,
+        ['Widget_Group'] = 0,
+        ['Rectangle'] = 0,
+        ['Widget_Rectangle'] = 0,
+        ['Text'] = 0,
+        ['Widget_Text'] = 0,
+        ['Image'] = 0,
+        ['Widget_Sprite'] = 0,
+    
+        ['Button'] = 0,
+        ['DialogBox'] =0, 
+        ['ToastAlert'] = 0,
+        ['ProgressSpinner'] = 0,
+        ['ProgressBar'] = 0,
+        ['OrbittingDots'] = 0,
+        ['TextInput'] = 0,
+        ['RadioButton'] = 0,
+        ['CheckBox'] = 0,
+        ['LayoutManager'] = 0,
+        ['Slider'] = 0,
+        ['ArrowPane'] = 0,
+        ['ScrollPane'] = 0,
+        ['TabBar'] = 0,
+        ['ButtonPicker'] = 0,
+        ['MenuButton'] = 0,
+    }
 
 hdr.neighberKey_map = 
     {
