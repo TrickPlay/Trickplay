@@ -2,7 +2,7 @@ local hdr = {}
 
 WL = dofile("LIB/Widget/Widget_Library.lua")
 
-dofile("LIB/VE/ve_runtime")
+VL = dofile("LIB/VE/ve_runtime")
 
 hdr.test = 0
 ----------------
@@ -97,7 +97,6 @@ current_dir 	   = ""
 --restore_fn  	   = ""
 debugger_script = "trickplay-debugger"
 current_focus 	   = nil
-current_screen 	   = ""
 --prev_tab 		   = nil
 selected_container = nil
 selected_content   = nil

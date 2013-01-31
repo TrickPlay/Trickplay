@@ -899,7 +899,7 @@ _VE_.openFile = function(path)
         error("Style '"..styles_file.."' does not exist.",2)
     end
 
-    load_styles(style) 
+    VL.load_styles(style) 
 
     local layer = readfile(layers_file)
     layer = string.sub(layer, 2, string.len(layer)-1)
@@ -913,7 +913,7 @@ _VE_.openFile = function(path)
     _VE_.buildVF()
 
     --print(layer)
-    s = load_layer(layer)
+    s = VL.load_layer(layer)
     objectsNames = s.objects
     --print (s, #s.children)
 
