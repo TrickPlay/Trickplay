@@ -116,8 +116,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             return true
         elseif control == true and uiInstance.extra.is_in_group == true or 
  --]]
-        if uiInstance.extra.is_in_group == false or control == false then -- and uiInstance.extra.is_in_group == false then 
 
+        if uiInstance.extra.is_in_group == true or control == false and uiInstance.extra.is_in_group == false then
             _VE_.openInspector(uiInstance.gid)
 
             --[[
