@@ -7,3 +7,4 @@ The TrickPlay IDE is a complete development environment that includes a full-fea
 
 A TrickPlay application's user interface can be created quickly by using the Visual Editor to position screen elements, like pushbuttons and edit boxes.
 
+The Stitcher program combines several images into a single file. It also creates a JSON map file so the combined image file can be used to construct a <SpriteSheet> object.

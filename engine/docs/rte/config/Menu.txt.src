@@ -286,5 +286,11 @@ Group: Development Tools {
 			}
 		}
 	}
-}
+
+    Group: Miscellaneous Tools {
+	    File: Stitcher (no auto-title, docs/devtools/misc/stitcher.txt)
+	}
+
+}  # Group: Development Tools
+
 
