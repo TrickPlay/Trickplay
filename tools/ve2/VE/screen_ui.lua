@@ -34,12 +34,12 @@ function screen_ui.draw_selected_container_border(x,y)
 
 	local prev_selected_container
 
+	selected_container = util.find_container(x,y) 
+
 	if selected_container then 
 		prev_selected_container = selected_container 
 	end 
 			
-	selected_container = util.find_container(x,y) 
-
 	if prev_selected_container then 
 		if prev_selected_container ~= selected_container then 
 			screen_ui.n_selected (prev_selected_container)
