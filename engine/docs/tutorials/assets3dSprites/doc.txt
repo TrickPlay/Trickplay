@@ -1,0 +1,22 @@
+
+Title: Using SpriteSheet and Sprite Objects
+
+The SpriteSheet/Sprite sample application modifies the program described in <Using 3D Assets in a TrickPlay Application> so that it uses <SpriteSheet> and <Sprite> objects in each animation frame rather than individual <Image> objects.
+
+The complete sample application, including source code and SpriteSheet assets, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
+(see Assets3dDemo.png)
+
+Group: Creating the SpriteSheet Object
+
+The individual still-frame images are combined into a single image by using the TrickPlay SDK's <Stitcher> tool. This tool also generates a JSON text file defining the map of the combined file in a syntax conformant with that expected by the <SpriteSheet> constructor. The sample application's combined image and its related JSON map file are stored in the "images" subdirectory of the app bundle in the files CoinSpriteSheet.png and SpritesCoin.json, respectively.
+
+The sample application references these files when it creates a SpriteSheet object in the loadCoinAnimationCels() function. SpriteSheet objects can be created by either loading a JSON map file or executing Lua code statements that define the image file's contents. Both of these methods are demonstrated in the function. Each method can be enabled or disabled by setting the function's fromJSON local variable.
+
+Group: Referencing the Images in the SpriteSheet
+
+In the Image-based version of this application, each frame cel is loaded into its own Image object which is stored in a table. The complete animation contains 24 frames, so 24 Image objects are created. As the animation advances from frame to frame, an index advances through the table to reference the appropriate Image.
+
+In the SpriteSheet version, a single Sprite object is created. As the animation advances from frame to frame, the Sprite references the appropriate image in the SpriteSheet by setting the Sprite object's "id" property. The single Sprite is constructed in the sample application's coinSpritesLoaded() function. The setting of the Sprite's "id" property for the current cel frame is performed at the beginning of the nextCoinFrame() function.
+
+Ultimately, the choice between using multiple Image objects or SpriteSheet and Sprite objects depends on the requirements of each particular application and the preferences of the developer.
