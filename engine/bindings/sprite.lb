@@ -35,7 +35,7 @@ struct SpriteBinding
         if ( id ) g_free( id );
     }
     
-    const char * get_id() { return id ? g_strdup( id ) : NULL; }
+    const char * get_id() { return id; }
     
     void set_id( const char * new_id )
     {
@@ -111,7 +111,7 @@ private:
 
     void update_sprite()
     {
-        if ( sheet ) {
+        if ( sheet && id ) {
             sprite = sheet->get_sprite( id );
             if ( sprite ) {
                 ping.assign( sprite, SpriteBinding::on_ping, this, !async );
