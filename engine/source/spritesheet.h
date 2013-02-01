@@ -25,7 +25,7 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ) {};
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ) { g_assert(s); };
             ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
@@ -55,12 +55,15 @@ public:
     class Sprite : public PushTexture
     {
         public:
-            Sprite() : source( NULL ), id( NULL ) {};
+            Sprite() : source( NULL ), id( NULL ), x(0), y(0), w(0), h(0) {};
             ~Sprite() { if (id) g_free((char *) id); }
 
             void assign( const char * _id, Source * _source, int _x, int _y, int _w, int _h )
             {
-                id = _id;
+                g_assert( _id );
+                g_assert( _source );
+
+                id = (const char *) g_strdup(_id);
                 source = _source;
                 x = MAX( _x, 0 ); y = MAX( _y, 0 ); w = _w; h = _h;
             }
@@ -114,8 +117,8 @@ public:
 
 private:
     char * json_uri;
-    std::map < std::string, Sprite > sprites;
-    std::list < Source > sources;
+    std::map < std::string, Sprite > * sprites;
+    std::list < Source > * sources;
 };
 
 #endif

@@ -72,7 +72,7 @@ class SignalLoadedLater : public Action
 {
     NineSliceEffect * self;
 
-    public: SignalLoadedLater( NineSliceEffect * self ) : self( self ) { g_assert( self ); };
+    public: SignalLoadedLater( NineSliceEffect * s ) : self( s ) { g_assert( s ); };
 
     protected: bool run()
     {
