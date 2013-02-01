@@ -1029,7 +1029,11 @@ class TrickplayInspector(QWidget):
 
                 #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
                 if p in TEXT_PROP or p in READ_ONLY :
-                    i.setText (1, str(data[p])) # second col : property value (text input field) 
+                    if p == "scale":
+                        i.setText (1, str(data[p][:2])) # second col : property value (text input field) 
+                    else:
+                        i.setText (1, str(data[p])) # second col : property value (text input field) 
+                        
                     if not  p in READ_ONLY and self.editable is True:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
