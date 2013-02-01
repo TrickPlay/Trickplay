@@ -51,11 +51,12 @@ class TrickplayEmulatorManager(QWidget):
         else:
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
         
-        print inputCmd
+        print "[VE] "+inputCmd
         self.inspector.setGid = gid
         self.inspector.setProp = property
 
         #self.inspector.preventChanges = True
+        self.main.command = "setUIInfo"
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -278,9 +279,10 @@ class TrickplayEmulatorManager(QWidget):
 				        self.pdata = self.pdata[0]
 				        self.inspector.curData = self.pdata
 				        if self.inspector.curItemGid == self.inspector.curData['gid'] :
-				            self.inspector.preventChanges = True
-				            self.inspector.propertyFill(self.inspector.curData)
-				            self.unsavedChanges = True
+				            if self.main.command is not "setUIInfo" :
+				                self.inspector.preventChanges = True
+				                self.inspector.propertyFill(self.inspector.curData)
+				                self.unsavedChanges = True
 				            #print("---------------unsavedChanges", self.unsavedChanges)
 				        self.inspector.preventChanges = False
 
@@ -298,10 +300,10 @@ class TrickplayEmulatorManager(QWidget):
 				            if result: 
 				                self.inspector.ui.inspector.selectionModel().clear()
 				                self.inspector.selectItem(result, "f")
-				            g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
-				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
-				            self.inspector.ui.property.setExpanded(g_index, True)
-				            g_item[0].setSelected(True)
+				            #g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
+				            #g_index = self.inspector.ui.property.indexFromItem(g_item[0])
+				            #self.inspector.ui.property.setExpanded(g_index, True)
+				            #g_item[0].setSelected(True)
 				        except : 
 				            pass
                         
