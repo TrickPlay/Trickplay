@@ -353,6 +353,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 				screen:remove(screen:find_child(c.name.."a_m"))
 				screen:remove(screen:find_child(uiInstance.name.."border"))
 				screen:remove(screen:find_child(uiInstance.name.."a_m"))
+		        selected_container.selected = false
+		        selected_content.selected = false
 				selected_content = nil
 		        selected_container = nil
 	        end 
