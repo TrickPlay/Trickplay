@@ -11,15 +11,17 @@ PushTexture::~PushTexture()
 void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
-    
+
     if ( !failed && !real && preload )
     {
-        make_texture( true );
+        // May call Source::make_texture or Sprite::make_texture
+        make_texture( true ); // May update real and failed
         g_assert( texture );
         g_assert( real || failed );
     }
     else if ( !failed && !texture )
     {
+        // May call Source::make_texture or Sprite::make_texture
         make_texture( false );
         g_assert( texture );
     }
@@ -87,6 +89,8 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
+    // TODO: optimizize when source == _source
+
     if ( source ) source->unsubscribe( this );
     
     source = _source;
