@@ -15,7 +15,7 @@
 #define TP_COGL_TEXTURE(t) (t)
 #define TP_CoglTexture CoglHandle
 #endif
-    
+
 class SpriteSheet : public RefCounted
 {
 public:
