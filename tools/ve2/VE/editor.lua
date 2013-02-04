@@ -360,6 +360,8 @@ end
 -- Arrange ----------------------------------
 ---------------------------------------------
 
+local copy_selected_objs = {} 
+
 function editor.arrange_prep (gid) 
 
     util.getCurLayer(gid)
@@ -377,6 +379,8 @@ function editor.arrange_prep (gid)
         
     local basis_obj_name = util.getObjName(selected_objs[1])
     local basis_obj = curLayer:find_child(basis_obj_name)
+    --copy_selected_objs = selected_objs
+    --dumptable(copy_selected_objs)
 
     return basis_obj_name, basis_obj, sel_objs
 
@@ -390,10 +394,13 @@ function editor.arrange_end (gid, obj, sel_objs)
     blockReport = false
     _VE_.refresh() 
     _VE_.refreshDone()
-    selected_objs = {}
+    --selected_objs = sel_objs
+    screen_ui.n_selected_all()
 
-    if #sel_objs > 1 then 
-        for i, j in pairs (sel_objs) do
+    --if #sel_objs > 1 then 
+    --[[
+    if #copy_selected_objs > 1 then 
+        for i, j in pairs (copy_selected_objs) do
             local obj_name = util.getObjName(j)
             local obj = curLayer:find_child(obj_name)
             
@@ -410,7 +417,7 @@ function editor.arrange_end (gid, obj, sel_objs)
         _VE_.refreshDone()
         _VE_.openInspector(obj.gid, false)
     end 
-
+    ]]
 
 end 
 
