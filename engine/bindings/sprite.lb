@@ -35,12 +35,14 @@ struct SpriteBinding
         if ( id ) g_free( id );
     }
     
-    const char * get_id() { return id ? g_strdup( id ) : NULL; }
+    const char * get_id() { return id; }
     
     void set_id( const char * new_id )
     {
+        g_assert( new_id );
+
         /* TODO: replace strcmp with something safe */
-        if ( !id || !new_id || strcmp( id, new_id ) )
+        if ( !id || strcmp( id, new_id ) )
         {
             if ( id ) g_free( id );
             id = new_id ? g_strdup( new_id ) : NULL;
@@ -111,11 +113,12 @@ private:
 
     void update_sprite()
     {
-        if ( sheet ) {
+        if ( sheet && id ) {
             sprite = sheet->get_sprite( id );
-            if ( sprite ) {
-                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
-            }
+
+            g_assert( sprite );
+
+            ping.assign( sprite, SpriteBinding::on_ping, this, !async );
         }
     }
 
