@@ -115,15 +115,15 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 {
     int tw, th;
     get_dimensions( &tw, &th );
-    
+
     if ( w < 0 ) tw = MAX( tw - x, 0 );
     if ( h < 0 ) th = MAX( th - y, 0 );
-    
+
     if ( tw < x + w || th < y + h )
     {
         return cogl_texture_new_with_size( MAX( w, 1 ), MAX( h, 1 ), COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
     }
-    
+
     return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
 }
 
@@ -133,7 +133,13 @@ void Sprite::update()
 {
     g_assert( source );
     failed = source->is_failed();
-    set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
+    if ( failed ) {
+        set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+    }
+    else
+    {
+        set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
+    }
 }
 
 void on_ping( PushTexture * source, void * target )
