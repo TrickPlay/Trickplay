@@ -116,9 +116,9 @@ private:
         if ( sheet && id ) {
             sprite = sheet->get_sprite( id );
 
-            g_assert( sprite );
-
-            ping.assign( sprite, SpriteBinding::on_ping, this, !async );
+            if ( sprite ) {
+                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
+            }
         }
     }
 
