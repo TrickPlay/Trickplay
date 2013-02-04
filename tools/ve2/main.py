@@ -13,6 +13,8 @@ class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
         
+        self.luaEy = 300
+        self.luaEx = 1700
         QWidget.__init__(self, parent)
         
         self.apath = apath
@@ -29,12 +31,16 @@ class MainWindow(QMainWindow):
         QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
+
         self.ui.setupUi(self)
+        self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
 
         self.windows = {"inspector":False, "images":False}
         self.inspectorWindowClicked()
 
         # Create Inspector
+        self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
@@ -49,6 +55,7 @@ class MainWindow(QMainWindow):
 
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
+        self.ui.fileSystemDock.setGeometry(self.luaEx-360,self.luaEy-25,330,570)
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
