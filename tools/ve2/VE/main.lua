@@ -10,16 +10,15 @@
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd3")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/TEST/test.test11")
     end 
 
     bb = function ()
-        _VE_.insertUIElement(8, 'LayoutManager')
-        _VE_.insertUIElement(8, 'Button')
+        dumptable(screen:find_child("Layer0").children)
     end 
 
-    cc = function ()
-        
+    cc = function (gidN)
+        _VE_.selectUIElement(gidN, false)
     end 
     dd = function ()
     end 
@@ -811,7 +810,7 @@ _VE_.setUIInfo = function(gid, property, value, n)
         uiInstance:move_anchor_point(ax, ay)
     elseif n ~= nil then 
         uiInstance['tabs'][n].label = value 
-        print (n, value)
+        --print (n, value)
     else
         uiInstance[property] = value 
     end 
@@ -1053,7 +1052,7 @@ _VE_.screenShow = function()
 end 
 _VE_.setScreenLoc = function()
     screen.y = 300
-    screen.x = 400
+    screen.x = 1700
 end 
 
 _VE_.newLayer = function()

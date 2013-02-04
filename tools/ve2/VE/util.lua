@@ -2,7 +2,9 @@
 -- Utils 
 -----------
 local util = {}
-
+local containerOrder 
+local numberOfItems 
+local oupperObj, tupperObj
 
 local uiElementCreate_map = 
 {
@@ -167,9 +169,12 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                    string.find(j.name, "a_m") == nil and 
                    string.find(j.name, "border") == nil 
                    and j.visible == true  then 
+                    numberOfItems = #(j.children)
                     for k,l in ipairs (j.children) do 
 			            if util.is_this_container(l) == true then 
-				            l:lower_to_bottom()
+                            oupperObj = j.children[k+1]
+                            tupperObj = j.children[k+2]
+				            l:lower_to_bottom() 
 		                end 
                     end 
                 end 
@@ -252,24 +257,31 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         if dragging ~= nil then 
             actor , dx , dy = unpack( dragging )
         end 
+        ---[[ Content Setting 
+        local c, t 
 
-        ----[[ Content Setting 
 		if util.is_in_container_group(x,y) and selected_content then 
-		    local c, t = util.find_container(x,y) 
+		        --local c, t = util.find_container(x,y) 
+		        c, t = util.find_container(x,y) 
 			    if not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
 			        if c and t then 
 				        if (uiInstance.extra.selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
+                            print(uiInstance.parent.name)
+                            dumptable(uiInstance.parent.children)
 			        	    uiInstance:unparent()
 						    if t ~= "TabBar" then
 			        	        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y,0}
 						    end 
+
 			        	    uiInstance.extra.is_in_group = true
+                            
 							if screen:find_child(uiInstance.name.."border") then 
 			             	    screen:find_child(uiInstance.name.."border").position = uiInstance.position
 							end
 							if screen:find_child(uiInstance.name.."a_m") then 
 			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
 			        		end 
+
 			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" or t == "Widget_Group" then 
 
                                 if t == "DialogBox" then 
@@ -278,7 +290,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                     uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
                                     uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
                                 elseif t == "ScrollPane" then 
-                                    uiInstance.x = uiInstance.x + c.virtual_x
+                                    uiInstance.x = uiInstance.x + c.virtual_x 
                                     uiInstance.y = uiInstance.y + c.virtual_y
                                 end 
 
@@ -323,8 +335,6 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 end 
 
 			        		elseif t == "TabBar" then 
-                                ---[[
-							    --local x_off, y_off = c:get_offset() TODO : Tab direction 
 							    local t_index = c.selected_tab
 							    if t_index then 
                                     uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
@@ -338,11 +348,27 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 if blockReport ~= true then
                                     _VE_.refresh()
                                 end 
-                                --]]
 
-							elseif t == "Group" then 
+							elseif t == "Group" or t == "WidgetGroup" then 
 							    c:add(uiInstance)
 			        		end 
+
+--[[
+                            print(c.parent.name)
+                            dumptable(c.parent.children)
+
+                            local row , col=  c:r_c_from_abs_x_y(x,y)
+                            if col and row then 
+                                uiInstance.reactive = false
+                                uiInstance.is_in_group = true
+                                uiInstance.parent_group = c
+		                        uiInstance.group_position = c.position
+                                c.cells[row][col] = uiInstance
+                            end
+
+                            print(c.parent.name)
+                            dumptable(c.parent.children)
+]]
 			     	      end 
 			       		end 
 					editor_lb:set_cursor(68)
@@ -359,7 +385,18 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		        selected_container = nil
 	        end 
 	    end 
+        if c then 
+            c:raise_to_top()
+            if oupperObj and c.parent:find_child(oupperObj.name) then 
+                c:lower(oupperObj)
+            elseif tupperObj then 
+                c:lower(tupperObj)
+            end 
+        end 
+
 	    -- Content Setting --]] 
+
+
 
         for i, j in ipairs (screen.children) do 
 	        if j.name then 
@@ -439,8 +476,6 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			   	end
 			end
 		end 
-
-
 		selected_content = nil
 		selected_container = nil
         dragging = nil
@@ -450,6 +485,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         return true 
 	end,true) 
     uiInstance.extra.mouse_handler = true 
+
 end 
 
 function util.is_available (name) 
