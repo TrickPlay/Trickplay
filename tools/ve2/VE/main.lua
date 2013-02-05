@@ -1052,7 +1052,7 @@ _VE_.screenShow = function()
 end 
 _VE_.setScreenLoc = function()
     screen.y = 300
-    screen.x = 1700
+    screen.x = 1900
 end 
 
 _VE_.newLayer = function()

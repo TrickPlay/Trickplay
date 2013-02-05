@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app, apath=None, parent = None):
         
         self.luaEy = 300
-        self.luaEx = 1700
+        self.luaEx = 1900
         QWidget.__init__(self, parent)
         
         self.apath = apath
@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
 
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
-        self.ui.fileSystemDock.setGeometry(self.luaEx-360,self.luaEy-25,330,570)
+        self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
