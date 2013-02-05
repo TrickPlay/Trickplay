@@ -260,6 +260,7 @@ class Sprite [[ClutterActor*]] actor
             }
             else
             {
+                /* TODO: free previously assigned resources */
                 g_warning( "Failed to set 'sheet': not a SpriteSheet." );
                 binding->set_sheet( NULL );
                 * get_ref( self ) = LUA_REFNIL;

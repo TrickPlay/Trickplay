@@ -69,6 +69,8 @@ CoglHandle PushTexture::get_texture()
 
 void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
+    if ( texture == _texture ) return;
+
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
     if ( texture ) cogl_handle_ref( texture );
