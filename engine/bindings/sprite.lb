@@ -287,7 +287,7 @@ class Sprite [[ClutterActor*]] actor
             const char * new_id = lua_tostring( L , -1 );
 
             g_object_set_data_full( G_OBJECT( self ), "tp-src",
-                g_strdup_printf( "(Sprite) \"%s\"", new_id ? new_id : "" ), g_free );
+                g_strdup_printf( "[Sprite] \"%s\"", new_id ? new_id : "" ), g_free );
 
             binding->set_id( new_id );
         ]];
