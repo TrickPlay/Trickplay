@@ -91,7 +91,7 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    // TODO: optimizize when source == _source
+    if ( source == _source ) return;
 
     if ( source ) source->unsubscribe( this );
     
