@@ -170,7 +170,7 @@ class DiagramScene(QGraphicsScene):
         self.insp = insp
         self.gid = data['gid']
         self.curAp = data['anchor_point']
-        self.curSz = data['size']
+        self.curSz = data['size'] 
         
         self.drawAnchorPointSetter()
         self.findCurrentAnchorPoint()
@@ -290,12 +290,17 @@ class AnchorPointGraphicSchene(QWidget):
         self.scene = DiagramScene(parent, data)
         #self.scene.setCurrentAnchorPoint()
 
+        #kkk
         self.view = QGraphicsView(self.scene)
+        rect = self.view.sceneRect().toRect()
+        rect.setX(rect.x() - 2)
+        self.view.setSceneRect(QRectF(rect))
         self.view.setRenderHint(QPainter.Antialiasing)
         layout = QVBoxLayout()
         layout.addWidget(self.view)
         layout.setSpacing(0)
         layout.setContentsMargins(0,0,0,0)
+        layout.setSizeConstraint(QLayout.SetFixedSize) 
         self.setLayout(layout)
     
 class Neighbors(QWidget):
@@ -1248,7 +1253,9 @@ class TrickplayInspector(QWidget):
             
         if self.anchor :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
-            self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
+            # kkk
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-5px;padding:-12px;border-width:2px}")
+            self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-1px;padding:2px}")
 
         if self.itemWidget and data["type"] == "ButtonPicker":
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
