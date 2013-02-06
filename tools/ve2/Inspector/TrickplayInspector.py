@@ -1030,6 +1030,12 @@ class TrickplayInspector(QWidget):
 
                 i = QTreeWidgetItem() 
                 i.setText (0, p)  # first col : property name
+
+                if PROP_S_LIST.has_key(p):
+                    i.setText(0, PROP_S_LIST[p])
+                else:
+                    i.setText (0, p)  # first col : property name
+                
                 #i.setText (0, p[:1].upper()+p[1:])
 
                 #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
@@ -1163,7 +1169,12 @@ class TrickplayInspector(QWidget):
                         for sp in PropertyIter(p):
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
-                            j.setText (0, sp)
+                            #j.setText (0, sp)
+                            if NESTED_PROP_S_LIST.has_key(sp):
+                                j.setText(0, NESTED_PROP_S_LIST[sp])
+                            else:
+                                j.setText (0, sp)  # first col : property name
+                            #kkk
                             #j.setText (0, sp[:1].upper()+sp[1:])
                             j.setText (1, str(z[idx]))
                             #if p ~= "base_size": #read_only r: 'color
@@ -1187,7 +1198,11 @@ class TrickplayInspector(QWidget):
                                 self.skinCB.addItem(z[sp])
                                 sp = 'skin'
 
-                            j.setText (0, sp)
+                            #j.setText (0, sp)
+                            if NESTED_PROP_S_LIST.has_key(sp):
+                                j.setText(0, NESTED_PROP_S_LIST[sp])
+                            else:
+                                j.setText (0, sp)  # first col : property name
                             try : 
                                 q = z[sp]
                                 c2 = 0 
@@ -1200,7 +1215,11 @@ class TrickplayInspector(QWidget):
                                         for sssp in PropertyIter(ssp): #activation, default, focus 
                                             m = QTreeWidgetItem(k)
                                             sssp = str(sssp)
-                                            m.setText(0,sssp)
+                                            if NESTED_PROP_S_LIST.has_key(sssp):
+                                                m.setText(0, NESTED_PROP_S_LIST[sssp])
+                                            else:
+                                                m.setText (0, sssp)  # first col : property name
+                                            #m.setText(0,sssp)
                                             if sssp in ['activation', 'default', 'focus']:
                                                 colNums = [n,c1,c2,c3]
                                                 colNames = [sssp, ssp, sp, 'style']
@@ -1212,7 +1231,11 @@ class TrickplayInspector(QWidget):
                                             c3 = c3 + 1
                                     else:
                                         l = QTreeWidgetItem(j)
-                                        l.setText(0,ssp)
+                                        #l.setText(0,ssp)
+                                        if NESTED_PROP_S_LIST.has_key(ssp):
+                                            l.setText(0, NESTED_PROP_S_LIST[ssp])
+                                        else:
+                                            l.setText (0, ssp)  # first col : property name
                                         colNums = [n,c1,c2]
                                         colNames = [ssp,sp,'style']
                                         if ssp in ['activation', 'default', 'focus']:
