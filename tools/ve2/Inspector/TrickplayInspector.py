@@ -709,6 +709,21 @@ class TrickplayInspector(QWidget):
     def boolValChanged (self,state):
         print state
 
+    def skinCBIdxChanged(self,index):
+        currentPropVal = str(self.skinCB.itemText(self.skinCB.currentIndex()))                    
+        if not self.preventChanges:
+            self.preventChanges = True
+            #self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], '"'+currentPropVal+'"')
+            if currentPropVal == "Default":
+                currentPropVal = "LIB/Widget/skin.json"
+            else :
+                currentPropVal = "assets/skins/"+currentPropVal+".json"
+            inputCmd = str("WL.Style('"+str(self.style_name)+"').spritesheet_map = '"+currentPropVal+"'")
+            print inputCmd
+            self.main._emulatorManager.trickplay.write(inputCmd+"\n")
+            self.main._emulatorManager.trickplay.waitForBytesWritten()
+            self.preventChanges = False
+
     def propertyFill(self, data, styleIndex=None):
         
         if str(data['name']) == 'screen':
@@ -1195,7 +1210,25 @@ class TrickplayInspector(QWidget):
                                 skinItem = j
                                 skin_idx = 0
                                 self.skinCB = QComboBox()
-                                self.skinCB.addItem(z[sp])
+                                self.skinCB.currentIndexChanged.connect(self.skinCBIdxChanged)
+                                #add default skin 
+                                self.skinCB.addItem("Default")
+
+                                #add other skins 
+                                dir = str(self.main.path)+"/assets/skins/"
+                                if os.path.exists(dir) and os.path.isdir(dir):
+                                    files = os.listdir(dir)
+                                    idx = 0 
+                                    current_idx = 0
+                                    for f in files :
+                                        if f.find("json") > 0 :
+                                            self.skinCB.addItem(f[:-5])
+                                            idx = idx + 1
+                                            if z[sp][14:] == f :
+                                                current_idx = idx
+
+                                #set current idx 
+                                self.skinCB.setCurrentIndex(current_idx)
                                 sp = 'skin'
 
                             #j.setText (0, sp)

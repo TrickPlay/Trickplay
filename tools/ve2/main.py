@@ -8,6 +8,7 @@ from UI.MainWindow import Ui_MainWindow
 from Inspector.TrickplayInspector import TrickplayInspector
 from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
+from UI.ImportSkinDialog import Ui_importSkinImages
 
 class MainWindow(QMainWindow):
     
@@ -304,7 +305,91 @@ class MainWindow(QMainWindow):
                 if ret == False :
                     self.processErrorHandler("stitcher")
 
+    def chooseDirectoryDialog(self, dir=None):
+
+        if self.path is None:
+            self.path = self.apath
+        path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
+
+        #result = self.adjustPath(path)
+        if path :
+            self.uiD.directory.setText(path)
+            self.uiD.id.setReadOnly(False)
+
+        return path
+        """
+        path = -1
+        while path == -1 :
+            if self.path is None:
+                self.path = self.apath
+            path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
+            self.sourcePath = path 
+        return path
+        """
+
+    def idChanged(self, change):
+        self.id = change
+
+    def exit_ii(self):
+        pass
+
+    def importSkinDialog(self, path=None, id=None, name=None):
+        print "importSkinsDialog"
+        """
+        New app dialog
+        """
+        self.dialog = QDialog() #QDialog
+        self.id = ""
+        self.name = ""
+        self.uiD = Ui_importSkinImages()
+        self.uiD.setupUi(self.dialog)
+
+        if path is not None :
+            self.uiD.directory.setText(path)
+        
+
+        cancelButton = self.uiD.buttonBox.button(QDialogButtonBox.Cancel)
+        okButton = self.uiD.buttonBox.button(QDialogButtonBox.Ok)
+
+        QObject.connect(self.uiD.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
+
+        if id is not None:
+            self.uiD.id.setText(id)
+
+        if self.dialog.exec_():            
+            id = str(self.uiD.id.text())
+            path = str(self.uiD.directory.text())
+
+            if '' == id or '' == name or path == "source image directory" :
+                return self.importSkinDialog(path, id, name)
+        return path, id 
+
     def importSkins(self):
+        print "importSkins"
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 100)
+        self.bar.setValue(0)
+        self.bar.setWindowTitle("Import Skin...")
+        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+
+        skinPath, id = self.importSkinDialog()
+        if skinPath:
+            print ("[VE] Import Skin Images ...[%s]"%skinPath)
+
+        if os.path.exists(os.path.join(self.path, "assets/skins/"+id+".json")) == True:
+            print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/'"+id+" "+skinPath)
+            self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" "+skinPath)
+            ret = self.stitcher.waitForStarted()
+            if ret == False :
+                self.processErrorHandler("stitcher")
+        else:
+            print("[VE] stitcher -rpd -o \'"+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\' "+skinPath)
+            self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" "+skinPath)
+            ret = self.stitcher.waitForStarted()
+            if ret == False :
+                self.processErrorHandler("stitcher")
+
+    def importSkins_org(self):
         path = -1 
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
@@ -315,7 +400,7 @@ class MainWindow(QMainWindow):
         while path == -1 :
             if self.path is None:
 		        self.path = self.apath
-            path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
+            path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
 
         if path:
             print ("[VE] Import Skin Images ...[%s]"%path)
