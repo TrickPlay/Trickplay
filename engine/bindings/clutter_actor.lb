@@ -1199,49 +1199,6 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-    Property: is_animating
-
-    The is_animating property is a boolean value specifying whether or not the object is currently running an animation started by the <animate> function (true = running an animation).
-
-    *Default Setting:* false
-
-    *See Also:* the <animate> function
-*/
-
-    readonly bool is_animating
-    [[
-#ifdef CLUTTER_VERSION_1_10
-        is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
-#else
-        is_animating=clutter_actor_get_animation(self)!=NULL;
-#endif
-    ]];
-
-/***************************************
-    Function: is_property_animating
-
-    The is_property_animating() function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
-
-    *Arguments:*
-
-        property_name - the name of the property to check
-
-    *Return Value:* Returns true if the specified property is animating; false if it is not
-
-    *See Also:* the <animate> function and the <is_animating> property
-*/
-
-    bool is_property_animating(string property_name)
-    [[
-#ifdef CLUTTER_VERSION_1_10
-        result = (clutter_actor_get_transition(self, property_name) != NULL);
-#else
-        g_error("is_property_animating not supported with this version of the clutter library")
-        result = false
-#endif
-    ]];
-
-/***************************************
     Property: is_visible
 
     The is_visible property is a boolean value specifying whether the object is shown or hidden (true = shown).
@@ -1274,6 +1231,25 @@ interface actor [[ClutterActor*]]
                 clutter_actor_hide( self );
             }
         ]];
+
+/***************************************
+    Property: is_animating
+
+    The is_animating property is a boolean value specifying whether or not the object is currently running an animation started by the <animate> function (true = running an animation).
+
+    *Default Setting:* false
+
+    *See Also:* the <animate> and <is_property_animating> functions
+*/
+
+    readonly bool is_animating
+    [[
+#ifdef CLUTTER_VERSION_1_10
+        is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
+#else
+        is_animating=clutter_actor_get_animation(self)!=NULL;
+#endif
+    ]];
 
 /***************************************
     Function: set
@@ -2537,6 +2513,30 @@ interface actor [[ClutterActor*]]
 
             result=true;
         }
+#endif
+    ]];
+
+/***************************************
+    Function: is_property_animating
+
+    The is_property_animating() function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
+
+    *Arguments:*
+
+        property_name - the name of the property to check
+
+    *Return Value:* Returns true if the specified property is animating; false if it is not
+
+    *See Also:* the <animate> function and the <is_animating> property
+*/
+
+    bool is_property_animating(string property_name)
+    [[
+#ifdef CLUTTER_VERSION_1_10
+        result = (clutter_actor_get_transition(self, property_name) != NULL);
+#else
+        g_error("is_property_animating not supported with this version of the clutter library")
+        result = false
 #endif
     ]];
 
