@@ -69,6 +69,8 @@ CoglHandle PushTexture::get_texture()
 
 void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
+    if ( texture == _texture ) return;
+
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
     if ( texture ) cogl_handle_ref( texture );
@@ -89,7 +91,7 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    // TODO: optimizize when source == _source
+    if ( source == _source ) return;
 
     if ( source ) source->unsubscribe( this );
     
