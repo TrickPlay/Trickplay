@@ -479,7 +479,7 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
-        self.setAppPath()
+        #self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         self._emulatorManager.unsavedChanges = False
         return True
