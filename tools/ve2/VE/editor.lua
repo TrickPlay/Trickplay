@@ -127,7 +127,7 @@ function editor.clone()
    	end 
 
 	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
+		if(v.ve_selected == true) then
 		    screen_ui.n_selected(v)
 		    uiClone = WL.Widget_Clone {
 		        source = v,
@@ -180,7 +180,7 @@ function editor.group()
 
 
 	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
+		if(v.ve_selected == true) then
 			screen_ui.n_selected(v)
 			v:unparent()
 			v.is_in_group = true
@@ -221,7 +221,7 @@ function editor.ungroup(gid)
     blockReport = true
     for i, v in pairs(curLayer.children) do
         if curLayer:find_child(v.name) then
-		  	if(v.extra.selected == true) then
+		  	if(v.extra.ve_selected == true) then
 				if util.is_this_group(v) == true then
 			     	screen_ui.n_selected(v)
 			     	for i,c in pairs(v.children) do 
@@ -271,7 +271,7 @@ local function duplicate_child(new, org)
 
         n.reactive = false
         n.lock = false
-        n.selected = false
+        n.ve_selected = false
         n.is_in_group = true
 
         if n.subscribe_to then  
