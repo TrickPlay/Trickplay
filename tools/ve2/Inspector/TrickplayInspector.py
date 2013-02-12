@@ -1224,7 +1224,7 @@ class TrickplayInspector(QWidget):
                                         if f.find("json") > 0 :
                                             self.skinCB.addItem(f[:-5])
                                             idx = idx + 1
-                                            if z[sp][14:] == f :
+                                            if z[sp][13:] == f :
                                                 current_idx = idx
 
                                 #set current idx 

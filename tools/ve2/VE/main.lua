@@ -898,6 +898,8 @@ _VE_.openFile = function(path)
         error("Style '"..styles_file.."' does not exist.",2)
     end
 
+    -- Library 
+    WL = dofile("LIB/Widget/Widget_Library.lua")
     VL.load_styles(style) 
 
     local layer = readfile(layers_file)
@@ -907,9 +909,11 @@ _VE_.openFile = function(path)
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
-    -- Library 
-    WL = dofile("LIB/Widget/Widget_Library.lua")
+    --print(WL.get_all_styles())
+
     _VE_.buildVF()
+
+    --print(WL.get_all_styles())
 
     --print(layer)
     s = VL.load_layer(layer)
@@ -1105,7 +1109,7 @@ local codeGen = function()
             local lowLayerName = string.lower(layerName)
             
             local contents = readfile(lowLayerName..".lua")
-            print ( contents )
+            --print ( contents )
 
             local contents_header = "local "..lowLayerName.." = ...\n" 
             local contents_tail = "return "..lowLayerName 
@@ -1127,7 +1131,7 @@ local codeGen = function()
 				end
 
                 -----------------------------------
-                print (contents_last)
+                --print (contents_last)
 				local temp = contents_last 
                 local backup_obj = {}
 
@@ -1146,7 +1150,7 @@ local codeGen = function()
                     c, d = string.find(temp, "[-][-] BEGIN ")
                 end 
                         
-                dumptable(backup_obj)
+                --dumptable(backup_obj)
 
                 local temp_first, temp_last, temp_middle
                 for k, l in ipairs(backup_obj) do 
@@ -1196,6 +1200,10 @@ _VE_.saveFile = function(scrJson)
     end
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
+
+    --print ("***********************************")
+    --print (WL.get_all_styles())
+    --print ("***********************************")
 
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     --editor_lb:writefile("/screens/layers.json", '['..json:stringify(layer_t)..']', true) 
