@@ -48,10 +48,10 @@ function screen_ui.draw_selected_container_border(x,y)
 
 	if selected_container and selected_content then 
 		if selected_content.extra.is_in_group ~= true then 
-			if selected_container.selected == false then
+			if selected_container.ve_selected == false then
 				screen_ui.container_selected(selected_container,x,y)	
 			elseif selected_container.widget_type == "LayoutManager" then 
-				if selected_container.selected == true then
+				if selected_container.ve_selected == true then
 					local layout_bdr = screen:find_child(selected_container.name.."border")
 					if layout_bdr then 
 				    	local r_c = layout_bdr.r_c
@@ -120,7 +120,7 @@ function screen_ui.container_selected(obj, x, y)
 
     if not screen:find_child(obj_border.name) then 
         screen:add(obj_border)
-        obj.extra.selected = true
+        obj.extra.ve_selected = true
         --table.insert(selected_objs, obj_border.name)
     end
 end  
@@ -293,7 +293,7 @@ function screen_ui.selected(obj)
     anchor_mark.name = obj.name.."a_m"
     screen:add(anchor_mark)
     screen:add(obj_border)
-    obj.extra.selected = true
+    obj.extra.ve_selected = true
     table.insert(selected_objs, obj_border.name)
 end  
 
@@ -317,7 +317,7 @@ function screen_ui.n_selected(obj)
 
 		util.table_removekey(selected_objs, obj.name.."border")
 
-        obj.extra.selected = false
+        obj.extra.ve_selected = false
      end 
 
 end  
@@ -327,7 +327,7 @@ function screen_ui.n_select_all ()
     local currentLayer 
 
 	for i, j in pairs (screen.children) do -- VE2 : g->screen
-		if(j.extra.selected == true) then 
+		if(j.extra.ve_selected == true) then 
 			screen_ui.n_selected(j) 
 		end 
 	end 
@@ -445,8 +445,8 @@ function screen_ui.multi_select_done(x,y)
         for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
-			if(v.extra.selected == false and v.parent.visible == true) then 
-			    if(v.extra.selected == false and l.visible == true) then 
+			if(v.extra.ve_selected == false and v.parent.visible == true) then 
+			    if(v.extra.ve_selected == false and l.visible == true) then 
 		    	    --screen_ui.selected(v)
                     _VE_.openInspector(v.gid, true)
                 end

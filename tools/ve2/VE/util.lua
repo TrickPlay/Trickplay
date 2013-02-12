@@ -46,7 +46,7 @@ function util.addIntoLayer (uiInstance, group)
 
     uiInstance.reactive = true
     uiInstance.lock = false
-    uiInstance.selected = false
+    uiInstance.ve_selected = false
     uiInstance.is_in_group = false
 
     --devtools:gid(curLayerGid):add(uiInstance)
@@ -80,7 +80,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         if dragging then
             local actor , dx , dy = unpack( dragging )
             actor.position = { x - dx , y - dy  }
-            if uiInstance.selected == true then 
+            if uiInstance.ve_selected == true then 
                 local border= screen:find_child(uiInstance.name.."border")
                 if border then 
                     border.position = { x - dx , y - dy  }
@@ -265,7 +265,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		        c, t = util.find_container(x,y) 
 			    if not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
 			        if c and t then 
-				        if (uiInstance.extra.selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
+				        if (uiInstance.extra.ve_selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
                             print(uiInstance.parent.name)
                             dumptable(uiInstance.parent.children)
 			        	    uiInstance:unparent()
@@ -379,8 +379,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 				screen:remove(screen:find_child(c.name.."a_m"))
 				screen:remove(screen:find_child(uiInstance.name.."border"))
 				screen:remove(screen:find_child(uiInstance.name.."a_m"))
-		        selected_container.selected = false
-		        selected_content.selected = false
+		        selected_container.ve_selected = false
+		        selected_content.ve_selected = false
 				selected_content = nil
 		        selected_container = nil
 	        end 
@@ -606,7 +606,7 @@ function util.get_min_max ()
 
      for i, v in pairs(curLayer.children) do
           if curLayer:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.ve_selected == true) then
 			if(v.x < min_x) then min_x = v.x end 
 			if(v.x > max_x) then max_x = v.x end
 			if(v.y < min_y) then min_y = v.y end 
@@ -625,7 +625,7 @@ end
 
 function util.org_cord() 
     for i, v in pairs(curLayer.children) do
-		if(v.extra.selected == true) then
+		if(v.extra.ve_selected == true) then
 		     v.x = v.x - v.anchor_point[1] 
 		     v.y = v.y - v.anchor_point[2] 
 		end 
@@ -634,7 +634,7 @@ end
 
 function util.ang_cord() 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    screen_ui.n_selected(v)
 		    v.x = v.x + v.anchor_point[1] 
 		    v.y = v.y + v.anchor_point[2] 
@@ -681,7 +681,7 @@ function util.get_x_sort_t()
      local x_sort_t = {}
      
      for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    local n = #x_sort_t
 			if(n ==0) then
 				table.insert(x_sort_t, v) 

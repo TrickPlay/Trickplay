@@ -249,7 +249,7 @@ _VE_.alignLeft = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
    
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		    if(v.x ~= basis_obj.x) then
 			  	v.x = basis_obj.x
 		    end
@@ -265,7 +265,7 @@ _VE_.alignRight = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
 			v.x = basis_obj.x + basis_obj.w - v.w
 		   end
@@ -281,7 +281,7 @@ _VE_.alignTop = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name ) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name ) then
 		  --   screen_ui.n_selected(v)
 		  if(v.y ~= basis_obj.y) then
 			v.y = basis_obj.y 
@@ -298,7 +298,7 @@ _VE_.alignBottom = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and  v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and  v.name ~= basis_obj_name) then
 		    --screen_ui.n_selected(v)
 		    if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
 			    v.y = basis_obj.y + basis_obj.h - v.h 
@@ -315,7 +315,7 @@ _VE_.alignHorizontalCenter = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		    -- screen_ui.n_selected(v)
 		    if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
 			    v.x = basis_obj.x + basis_obj.w/2 - v.w/2
@@ -332,7 +332,7 @@ _VE_.alignVerticalCenter = function(gid)
     local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		-- screen_ui.n_selected(v)
 		    if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
 			    v.y = basis_obj.y + basis_obj.h/2 - v.h/2
@@ -356,7 +356,7 @@ _VE_.distributeHorizontal = function(gid)
     local distance = 0
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             table.insert(x_table, j.x)
             if j.x < min then 
                 min = j.x 
@@ -369,7 +369,7 @@ _VE_.distributeHorizontal = function(gid)
 
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             if j.x == min then 
                 min = j.x + j.w
             elseif j.x ~= max then 
@@ -386,7 +386,7 @@ _VE_.distributeHorizontal = function(gid)
 
     while #x_table ~= 0 do
         for i,j in ipairs (curLayer.children) do 
-            if j.extra.selected == true then 
+            if j.extra.ve_selected == true then 
                 if j.x == next_x then 
                     j.x = next_pos - j.w
                     screen:find_child(j.name.."border").x = next_pos - j.w
@@ -415,7 +415,7 @@ _VE_.distributeVertical = function(gid)
     local distance = 0
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             table.insert(y_table, j.y)
             if j.y < min then 
                 min = j.y 
@@ -428,7 +428,7 @@ _VE_.distributeVertical = function(gid)
 
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             if j.y == min then 
                 min = j.y + j.h
             elseif j.y ~= max then 
@@ -445,7 +445,7 @@ _VE_.distributeVertical = function(gid)
 
     while #y_table ~= 0 do
         for i,j in ipairs (curLayer.children) do 
-            if j.extra.selected == true then 
+            if j.extra.ve_selected == true then 
                 if j.y == next_y then 
                     j.y = next_pos - j.h
                     screen:find_child(j.name.."border").y = next_pos - j.h
@@ -466,7 +466,7 @@ _VE_.bringToFront = function(gid)
     local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 			curLayer:remove(v)
 			curLayer:add(v)
 			--screen_ui.n_selected(v)
@@ -490,7 +490,7 @@ _VE_.bringForward = function(gid)
 		    table.insert(tmp_g, v)
 			table.insert(tmp_g, table.remove(slt_g))
 		end 
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    table.insert(slt_g, v) 
 			screen_ui.n_selected(v)
 		else 
@@ -547,7 +547,7 @@ _VE_.sendToBack = function(gid)
 
     for i, v in ipairs(curLayer.children) do
 	    curLayer:remove(v) 
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    table.insert(slt_g, v)
 			screen_ui.n_selected(v)
 		else 
@@ -587,7 +587,7 @@ _VE_.sendBackward = function(gid)
 			table.insert(tmp_g, b)
 			table.insert(tmp_g, f) 
 		end 
-	    if (v.extra.selected == true) then
+	    if (v.extra.ve_selected == true) then
 		    table.insert(slt_g, v) 
 			screen_ui.n_selected(v)
 		else 
@@ -703,7 +703,7 @@ _VE_.delete = function(gid)
     blockReport = true
 
     for i, v in pairs(curLayer.children) do
-		if(v.extra.selected == true) then
+		if(v.extra.ve_selected == true) then
 			if v.extra.clone then 
 				if #v.extra.clone > 0 then
                     print (v.name,"can't be deleted. It has clone object")
@@ -991,7 +991,7 @@ _VE_.openFile = function(path)
                 end 
                 m.reactive = true 
                 m.lock = false
-                m.selected = false
+                m.ve_selected = false
                 m.is_in_group = false
             end
         end     
