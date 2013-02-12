@@ -107,7 +107,7 @@ ButtonPicker = setmetatable(
                         t.cell_w = nil
                         t.cells = nil
                         
-                        t.style = instance.style
+                        t.style = instance.style.name
                         
                         t.window_w = instance.window_w
                         t.window_h = instance.window_h
