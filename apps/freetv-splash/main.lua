@@ -14,7 +14,8 @@
     8. "Welcome to" "FREE TV!" zooms back in to middle of screen
 
 ]]--
-
+local bg = Rectangle{size=screen.size}
+screen:add(bg)
 dofile("widget_helper.lua")
 
 dofile("launcher.lua")
@@ -55,3 +56,4 @@ else
     screen:show()
     start_launcher(settings.service, settings.back_to_start)
 end
+bg:lower_to_bottom()
