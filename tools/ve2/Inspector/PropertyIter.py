@@ -514,7 +514,7 @@ PROP_S_LIST = {
     #'orientation',
     'window_w':'window width', 
     'window_h':'window height', 
-    'animate_duration':'animate duration', 
+    'animate_duration':'animation duration', 
     'border_color':'border color',
     'anchor_point':'anchor point',
     #'scale',
@@ -544,7 +544,7 @@ PROP_S_LIST = {
     # Color Scheme 
     'default_color':'default color', 
     'focus_color':'focus color', 
-    'activate_color':'activate color', 
+    'activate_color':'active color', 
     'select_color':'select color', 
     # Color
     'hex_string':'hex string', 
@@ -561,10 +561,14 @@ PROP_S_LIST = {
     # Layout Manager
     'number_of_rows':'rows',
     'number_of_columns':'columns',
+    'cell_w':'cell width', 
+    'cell_h':'cell height', 
     'cell_width':'cell width', 
     'cell_height':'cell height', 
     'horizontal_cell_spacing':'horizontal cell spacing', 
+    'horizontal_spacing':'horizontal cell spacing', 
     'vertical_cell_spacing':'vertical cell spacing', 
+    'vertical_spacing':'vertical cell spacing', 
     'cell_timing':'cell timing', 
     'cell_timing_offset':'cell timing offset', 
     'cells_focusable':'cell focusable', 
@@ -608,30 +612,27 @@ PROP_S_LIST = {
     #'derection',
     # Tab Bar
     #'direction', #"horizontal"
-    'dist_from_pane' : 'distance from pane',
-    'focus_opens_tab' : 'focus opens tab',
+    'dist_from_pane' : 'distance from pane',# Alex 
+    'focus_opens_tab' : 'focus opens tab', # Alex 
     # ArrowPane
-    'children_want_focus' : 'children want focus', 
+    'children_want_focus' : 'children want focus', # Alex 
     #'clip',
-    'clip_to_size' : 'clip to size',
+    'clip_to_size' : 'clip to size',# Alex 
     #'count',
     #'depth',
     #'has_clip',
-    #'horizontal_alignment',
-    #'horizontal_spacing',
+    'horizontal_alignment' : 'horizontal alignment',
     #'is_animating',
     #'is_rotated',
     #'is_scaled',
-    'arrow_move_by':'arrow move by',
-    'note_constructor' : 'note_constructor',
+    'arrow_move_by':'arrow moves by',
     'number_of_cols' : 'columns',
     'number_of_rows' : 'rows',
     'pane_h': 'pane height', 
     'pane_w': 'pane width', 
     #'placeholder', 
     'request_mode':'request mode', # "HEIGHT_FOR_WIDTH"
-    #'vertical_alignment', 
-    #'vertical_spacing', 
+    'vertical_alignment' : 'vertical alignment',
     'virtual_x' : 'virtual x',
     'virtual_y' : 'virtual y',
     'virtual_w' : 'virtual w',
