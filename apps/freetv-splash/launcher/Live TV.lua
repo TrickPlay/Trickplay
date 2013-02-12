@@ -193,6 +193,14 @@ local function make_show_tile(channel_num, data)
         self.anim.state = "unfocus"
     end
     show_group.anim:warp("unfocus")
+    
+    show_group.slogan = "Burberry Shopping App"
+    show_group.description = [[The greatest app since sliced bread. Just ask Arnold. buy some cool stuff and pay lots n lots for it. Just press OK now!]]
+    show_group.start_time = "8pm"
+    show_group.aired_on = "8pm"
+    show_group.season = 2
+    show_group.episode = 3
+    show_group.episode = 3
     return show_group
 end
 
@@ -219,8 +227,175 @@ local function make_stub(w)
     return stub
 end
 
+local backing = Group()
+
+local set_incoming_show, set_current_show, hide_current_show
+
+do
+    local r = Rectangle{color="black",w=screen.w,opacity=155}
+    backing:add(r)
+    local hidden_y = 150
+    backing.extra.anim = AnimationState {
+                                                    duration = 250,
+                                                    mode = "EASE_OUT_SINE",
+                                                    transitions = {
+                                                        {
+                                                            source = "*",
+                                                            target = "hidden",
+                                                            keys = {
+                                                                { r, "y", hidden_y },
+                                                                { r, "h",        0 },
+                                                            },
+                                                        },
+                                                        {
+                                                            source = "*",
+                                                            target = "full",
+                                                            keys = {
+                                                                { r, "y", hidden_y - 500 },
+                                                                { r, "h",            500 },
+                                                            },
+                                                        },
+                                                    },
+    }
+    function backing.extra.anim.timeline.on_started()
+        if backing.extra.anim.state ~= "full" then
+            --set_incoming_show({slogan="",description=""},"right")
+            hide_current_show()
+        end
+    end
+    function backing.extra.anim.timeline.on_completed()
+        if backing.extra.anim.state == "full" then
+            print("happenin")
+            set_incoming_show(menubar:find_child("tv_shows").children[active_show],"right")
+        end
+    end
+end
+
+do
+    local text_w = 600
+    local duration = 200
+    local setup_info = function(g)
+        g.slogan = Text{
+            y = -350,
+            w=text_w,
+            ellipsize = "END",
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+        }
+        g.description = Text{
+            y=-300,
+            wrap=true,
+            wrap_mode = "WORD",
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." 20px",
+        }
+        g.start_time = Text{
+            y=-150,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+        }
+        g.aired_on = Text{
+            y=-120,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+        }
+        g.season_episode = Text{
+            y=-90,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.."  20px",
+        }
+        g.related = Text{
+            x= 650,
+            y=-350,
+            text = "Related",
+            color = "white",
+            font = FONT_NAME.."  20px",
+        }
+        g.next_airings = Text{
+            x= 650,
+            y=-150,
+            color = "white",
+            font = FONT_NAME.."  20px",
+        }
+        g:add( 
+            g.slogan, 
+            g.description, 
+            g.start_time, 
+            g.aired_on,
+            g.season_episode,
+            g.related,
+            g.next_airings
+        )
+        return g
+    end
+    
+    local   incoming_show = setup_info( Group{ name=   "incoming_show", opacity = 0 } )
+    local displaying_show = setup_info( Group{ name= "displaying_show", opacity = 0, x = 200 } )
+    local next_show
+    local animating = false
+    
+    set_incoming_show = function(curr_app,direction)
+        
+        if animating then 
+            next_show = {curr_app,direction} 
+            return 
+        end
+        animating = true
+        print("incoming")
+        incoming_show.slogan.text      = curr_app.slogan
+        incoming_show.description.text = curr_app.description
+        
+        if direction == "left" then
+            incoming_show.x = displaying_show.x - screen.w
+            displaying_show:animate{
+                duration = duration,
+                x = displaying_show.x + screen.w,
+                opacity = 0,
+            }
+        elseif direction == "right" then
+            incoming_show.x = displaying_show.x + screen.w
+            displaying_show:animate{
+                duration = duration,
+                x = displaying_show.x - screen.w,
+                opacity = 0,
+            }
+        else
+            error("Direction must equal 'left' or 'right' . Received "..
+                tostring(direction),2)
+        end
+        incoming_show:animate{
+            duration = duration,
+            x = displaying_show.x,
+            opacity = 255,
+            on_completed = function()
+                incoming_show.opacity = 0
+                displaying_show:stop_animation()
+                displaying_show.x = incoming_show.x
+                displaying_show.slogan.text      = incoming_show.slogan.text
+                displaying_show.description.text = incoming_show.description.text
+                displaying_show.opacity = 255
+                animating = false
+            end
+        }
+    end
+    
+    hide_current_show = function()
+        displaying_show:animate{duration=200,opacity=0}
+    end
+    set_current_show = function(curr_app)
+        displaying_show.slogan.text      = curr_app.slogan
+        displaying_show.description.text = curr_app.description
+    end
+    backing:add(displaying_show,incoming_show)
+    
+end
+
 local function build_bar()
-    screen:add(menubar)
+    screen:add(backing,menubar)
     menubar:hide()
     local clone_src = Group { name = "Clone sources" }
     menubar:add(clone_src)
@@ -260,6 +435,7 @@ local function build_bar()
     clip_group_outter.clip = { -205, 0, 205+stub.x+stub.w, bar_height }
 
     menubar.y = 925 - channel_bar.h
+    backing.y = menubar.y
 
     focus_show(active_show,10)
 end
@@ -274,6 +450,7 @@ end
 local function hide_bar()
     menubar:find_child("clip_inner"):stop_animation()
     menubar:find_child("clip_inner"):animate({ duration = 250, y = bar_height, mode = "EASE_OUT_SINE", on_completed = function() menubar:hide() end })
+    backing.anim.state = "hidden"
 end
 
 local function on_activate(label)
@@ -303,12 +480,17 @@ local function on_key_down(label, key)
         if(keys.Left == key) then
             active_show = ((active_show - 2) % menubar:find_child("tv_shows").count) + 1
             if( active_show == menubar:find_child("tv_shows").count ) then transition_time = menubar:find_child("tv_shows").count*50 end
+            if backing.anim.state == "full" then set_incoming_show(menubar:find_child("tv_shows").children[active_show],"left") end
         else
             active_show = (active_show % menubar:find_child("tv_shows").count) + 1
             if( active_show == 1 ) then transition_time = menubar:find_child("tv_shows").count*50 end
+            if backing.anim.state == "full" then set_incoming_show(menubar:find_child("tv_shows").children[active_show],"right") end
         end
 
         focus_show(active_show, transition_time)
+        return true
+    elseif( keys.Up == key ) then
+        backing.anim.state = "full"
         return true
     end
 end
