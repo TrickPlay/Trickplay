@@ -26,7 +26,7 @@ public:
     {
         PushTexture * self;
 
-        public: ReleaseLater( PushTexture * self ) : self( self ) {};
+        public: ReleaseLater( PushTexture * s ) : self( s ) {};
 
         protected: bool run()
         {
