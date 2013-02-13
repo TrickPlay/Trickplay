@@ -185,27 +185,35 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
             0, 0, 0, 0, G_TYPE_NONE, 1, G_TYPE_POINTER );
     }
 
-    sprites = new std::map < std::string, Sprite >();
+    sprites = new std::map < std::string, Sprite * >();
     g_assert( sprites );
 
-    sources = new std::list < Source >();
+    sources = new std::list < Source * >();
     g_assert( sources );    
 }
 
 SpriteSheet::~SpriteSheet()
 {
-    g_free( extra );
+    //g_free( extra ); // extra is pointing to self, cannot delete it here
 
     if ( json_uri ) g_free( json_uri );
 
-    if ( sources) {
-        sources->clear();
-        delete( sources );
-    }
-
     if ( sprites ) {
+        for (std::map < std::string, Sprite * >::iterator it = sprites->begin() ; it != sprites->end(); ++it)
+        {
+            delete( (PushTexture *)(it->second) );
+        }
         sprites->clear();
         delete( sprites );
+    }
+
+    if ( sources ) {
+        for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
+        {
+            delete( (PushTexture *) (* it) );
+        }
+        sources->clear();
+        delete( sources );
     }
 }
 
@@ -343,8 +351,9 @@ void SpriteSheet::load_json( const char * json )
 Source * SpriteSheet::add_source()
 {
     g_assert( app );
-    sources->push_back( Source( this ) );
-    return & sources->back();
+    Source * source = new Source( this );
+    sources->push_back( source );
+    return source;
 }
 
 void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, int w, int h )
@@ -352,7 +361,9 @@ void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, in
     g_assert( source );
 
     // If the same ID has been used before, the old definition will be replaced silently
-    (* sprites)[ std::string( id ) ].assign( id, source, x, y, w, h );
+    Sprite * sprite = new Sprite();
+    sprite->assign( id, source, x, y, w, h );
+    (* sprites)[ std::string( id ) ] = sprite;
 }
 
 Sprite * SpriteSheet::get_sprite( const char * id )
@@ -362,14 +373,14 @@ Sprite * SpriteSheet::get_sprite( const char * id )
         return NULL;
     }
     
-    return & (* sprites)[ std::string( id ) ];
+    return (* sprites)[ std::string( id ) ];
 }
 
 std::list< std::string > * SpriteSheet::get_ids()
 {
     std::list< std::string > * ids = new std::list< std::string >();
     
-    for ( std::map< std::string, Sprite >::iterator it = sprites->begin(); it != sprites->end(); ++it )
+    for ( std::map< std::string, Sprite *>::iterator it = sprites->begin(); it != sprites->end(); ++it )
     {
         ids->push_back( it->first );
     }
