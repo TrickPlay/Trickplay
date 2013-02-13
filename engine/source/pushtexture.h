@@ -26,7 +26,7 @@ public:
     {
         PushTexture * self;
 
-        public: ReleaseLater( PushTexture * self ) : self( self ) {};
+        public: ReleaseLater( PushTexture * s ) : self( s ) {};
 
         protected: bool run()
         {
@@ -75,7 +75,7 @@ public:
     };
 
     PushTexture() : cache( false ), failed( false ), texture( NULL ), can_signal( true ), real( false ) {};
-    ~PushTexture();
+    virtual ~PushTexture();
 
     CoglHandle get_texture();
     void set_texture( CoglHandle texture, bool real );
