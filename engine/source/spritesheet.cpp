@@ -50,7 +50,7 @@ void Source::make_texture( bool immediately )
     
     JSON::Object jo;
     CoglHandle texture = Images::cache_get( cache_key, jo );
-    
+
     if ( immediately )
     {
         if ( texture == COGL_INVALID_HANDLE )
@@ -372,12 +372,13 @@ void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, in
 
 Sprite * SpriteSheet::get_sprite( const char * id )
 {
-    if ( !id || !sprites->count( id ) )
+    std::string s = std::string(id);
+    if ( !id || !sprites->count(s) )
     {
         return NULL;
     }
-    
-    return (* sprites)[ std::string( id ) ];
+
+    return (* sprites)[s];
 }
 
 std::list< std::string > * SpriteSheet::get_ids()
@@ -394,5 +395,5 @@ std::list< std::string > * SpriteSheet::get_ids()
 
 bool SpriteSheet::has_id( const char * id )
 {
-    return id && sprites->count( id );
+    return id && sprites->count( std::string(id) );
 }
