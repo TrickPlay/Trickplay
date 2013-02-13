@@ -117,8 +117,8 @@ public:
 
 private:
     char * json_uri;
-    std::map < std::string, Sprite > * sprites;
-    std::list < Source > * sources;
+    std::map < std::string, Sprite * > * sprites;
+    std::list < Source * > * sources;
 };
 
 #endif
