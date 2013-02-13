@@ -886,7 +886,7 @@ class TrickplayInspector(QWidget):
                     
             # QPushButton for font setting
             color_pushbutton = QPushButton()
-            color_pushbutton.setText(colorStr)
+            #color_pushbutton.setText(colorStr)
 
             # Current Color 
             colorStr = colorStr[:len(colorStr)-1]
@@ -902,6 +902,8 @@ class TrickplayInspector(QWidget):
 
             if len(colorList) == 4:
                 currentColor.setAlpha(int(colorList[3]))
+
+            color_pushbutton.setText(currentColor.name())
             
             pix = QPixmap(10,10)
             pix.fill(currentColor)
