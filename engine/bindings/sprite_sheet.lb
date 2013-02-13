@@ -290,6 +290,10 @@ class SpriteSheet [[SpriteSheet*]]
 
     ~SpriteSheet()
         [[
+            if ( self )
+            {
+                delete( self );
+            }
         ]];
 
 /***************************************
