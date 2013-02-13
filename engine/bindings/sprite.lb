@@ -27,7 +27,7 @@ struct SpriteBinding
         }
     };
 
-    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ),
+    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
                                              actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
 
     ~SpriteBinding()
@@ -46,22 +46,16 @@ struct SpriteBinding
         {
             if ( id ) g_free( id );
             id = new_id ? g_strdup( new_id ) : NULL;
-            
-            if ( id && sheet && !sheet->has_id( id ) )
-            {
-                g_warning( "Spritesheet does not contain the id '%s'", id );
-            }
-            else
-            {
-                update_sprite();
-            }
         }
+
+        if ( !constructing ) update_sprite();
+
     }
 
     void set_sheet( SpriteSheet * _sheet )
     {
         sheet = _sheet;
-        update_sprite();
+        if ( !constructing ) update_sprite();
     };
 
     SpriteSheet * get_sheet()
@@ -105,9 +99,27 @@ struct SpriteBinding
         }
     }
 
+    void update_sprite()
+    {
+        if ( sheet && id )
+        {
+            sprite = sheet->get_sprite( id );
+
+            if ( sprite )
+            {
+                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
+            }
+            else
+            {
+                g_warning( "Spritesheet does not contain the id '%s'", id );
+            }
+        }
+    }
+
     bool async;
     bool loaded;
     bool can_fire;
+    bool constructing;
 
 private:
     static void on_ping( PushTexture * source, void * target )
@@ -115,17 +127,6 @@ private:
         SpriteBinding * self = (SpriteBinding *) target;
         self->update();
     };
-
-    void update_sprite()
-    {
-        if ( sheet && id ) {
-            sprite = sheet->get_sprite( id );
-
-            if ( sprite ) {
-                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
-            }
-        }
-    }
 
     PushTexture::PingMe   ping;
     ClutterActor        * actor;
@@ -229,8 +230,11 @@ class Sprite [[ClutterActor*]] actor
 
             if ( props )
             {
+                get_binding(self)->constructing = true;
                 set_sheet_first( L, props );
                 ClutterUtil::set_props_from_table( L, props );
+                get_binding(self)->constructing = false;
+                get_binding(self)->update_sprite();
             }
 
             g_object_unref( self );
@@ -422,17 +426,23 @@ class Sprite [[ClutterActor*]] actor
 */
 
     /*
-        This makes sure sheet is set first.
+        This makes sure sheet is set first so that id can be verified.
     */
 
     UIElement set( table props )
         [[
             luaL_checktype( L, -1, LUA_TTABLE );
 
+            get_binding(self)->constructing = true;
+
             set_sheet_first( L, props );
             ClutterUtil::set_props_from_table( L, props );
 
             lua_pushvalue( L, 1 );
+
+            get_binding(self)->constructing = false;
+
+            get_binding(self)->update_sprite();
         ]];
 }
 
