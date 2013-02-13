@@ -966,7 +966,8 @@ class TrickplayInspector(QWidget):
                 return handler
 
             def comboActivated(index):
-                comboProp.setEditable (True)
+                #comboProp.setEditable (True)
+                pass
 
             idx = 0 
             current_idx = 0
@@ -1006,6 +1007,8 @@ class TrickplayInspector(QWidget):
                 idx = idx + 1
 
             comboProp.setCurrentIndex(current_idx)
+
+            #comboProp.setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
 
             if type(propName) == list:
                 strPropName = ' '.join(propName)
@@ -1303,7 +1306,7 @@ class TrickplayInspector(QWidget):
         try :
             if self.skinCB :
                 self.ui.property.setItemWidget(skinItem, 1, self.skinCB)
-                self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+                self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}")
         except:
             pass
             
@@ -1359,17 +1362,23 @@ class TrickplayInspector(QWidget):
                             pass
 
         if comboBox :
+        #"""
             for n, cb in comboBox.iteritems() :
                 if type(comboNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(comboNumber[n])), 1, cb)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}") 
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:-20;padding-bottom:-20px;width:40px}")
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{padding-top:10px;padding-bottom:10px;font-size:8px;padding-left:20px;}")
                 else:
                     if len(comboNumber[n]) < 4:
                         try:
                             self.ui.property.setItemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]), 1, cb)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{padding-top:10px;padding-bottom:10px;font-size:8px;padding-left:20px;}")
                         except:
                             pass
+        #"""
 
         # substitude style property text input to style combo
 
@@ -1379,7 +1388,7 @@ class TrickplayInspector(QWidget):
 
         if style_n is not 0 : 
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
-            self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+            self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top:0px;padding-bottom:0px;font-size:12px;}")
 
         #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
 
@@ -1466,6 +1475,7 @@ class TrickplayInspector(QWidget):
 
                     
     def styleActivated(self, index):
+        print("styleActivateed")
         self.cbStyle.setEditable (True)
 
     def editTextChanged(self, str):
