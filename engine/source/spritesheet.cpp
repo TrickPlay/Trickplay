@@ -359,11 +359,15 @@ Source * SpriteSheet::add_source()
 void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, int w, int h )
 {
     g_assert( source );
+    std::string s = std::string( id );
 
     // If the same ID has been used before, the old definition will be replaced silently
-    Sprite * sprite = new Sprite();
+    Sprite * sprite = (* sprites)[s];
+    if (sprite) delete( sprite );
+
+    sprite = new Sprite();
     sprite->assign( id, source, x, y, w, h );
-    (* sprites)[ std::string( id ) ] = sprite;
+    (* sprites)[s] = sprite;
 }
 
 Sprite * SpriteSheet::get_sprite( const char * id )
