@@ -64,6 +64,11 @@ struct SpriteBinding
         update_sprite();
     };
 
+    SpriteSheet * get_sheet()
+    {
+        return sheet;
+    }
+
     void update()
     {
         static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
@@ -142,6 +147,11 @@ void set_sheet_first( lua_State * L , int table )
     lua_pop( L, 1 );
 }
 
+void free_SpriteBinding( void * instance )
+{
+    delete ( (SpriteBinding *) instance );
+}
+
 #define get_binding( self ) ( (SpriteBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
 #define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
 
@@ -212,9 +222,10 @@ class Sprite [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor, ClutterUtil::make_actor( clutter_texture_new ) );
             ClutterUtil::initialize_actor( L, self, SPRITE_METATABLE );
 
-            g_object_set_data( G_OBJECT( self ), "tp-binding", new SpriteBinding( self ) );
-            g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
-            * get_ref( self ) = LUA_REFNIL;
+            int *my_sheet_ref = g_new( int, 1 );
+            *my_sheet_ref = LUA_REFNIL;
+            g_object_set_data_full( G_OBJECT( self ), "tp-binding", new SpriteBinding( self ), free_SpriteBinding );
+            g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", my_sheet_ref, g_free );
 
             if ( props )
             {

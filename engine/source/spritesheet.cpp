@@ -194,18 +194,9 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 
 SpriteSheet::~SpriteSheet()
 {
-    g_free( extra );
+    //g_free( extra ); // extra is pointing to self, cannot delete it here
 
     if ( json_uri ) g_free( json_uri );
-
-    if ( sources ) {
-        for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
-        {
-            delete( (PushTexture *) (* it) );
-        }
-        sources->clear();
-        delete( sources );
-    }
 
     if ( sprites ) {
         for (std::map < std::string, Sprite * >::iterator it = sprites->begin() ; it != sprites->end(); ++it)
@@ -214,6 +205,15 @@ SpriteSheet::~SpriteSheet()
         }
         sprites->clear();
         delete( sprites );
+    }
+
+    if ( sources ) {
+        for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
+        {
+            delete( (PushTexture *) (* it) );
+        }
+        sources->clear();
+        delete( sources );
     }
 }
 
