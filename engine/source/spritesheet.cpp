@@ -366,7 +366,7 @@ void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, in
     if (sprite) delete( sprite );
 
     sprite = new Sprite();
-    sprite->assign( id, source, x, y, w, h );
+    sprite->assign( source, x, y, w, h );
     (* sprites)[s] = sprite;
 }
 
