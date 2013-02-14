@@ -48,14 +48,14 @@ struct SpriteBinding
             id = new_id ? g_strdup( new_id ) : NULL;
         }
 
-        if ( !constructing ) update_sprite();
+        update_sprite();
 
     }
 
     void set_sheet( SpriteSheet * _sheet )
     {
         sheet = _sheet;
-        if ( !constructing ) update_sprite();
+        update_sprite();
     };
 
     void update()
@@ -99,6 +99,8 @@ struct SpriteBinding
         if ( sheet && id )
         {
             sprite = sheet->get_sprite( id );
+
+            if ( constructing ) return;
 
             if ( sprite )
             {
@@ -227,9 +229,13 @@ class Sprite [[ClutterActor*]] actor
             if ( props )
             {
                 get_binding(self)->constructing = true;
+
                 set_sheet_first( L, props );
+
                 ClutterUtil::set_props_from_table( L, props );
+
                 get_binding(self)->constructing = false;
+
                 get_binding(self)->update_sprite();
             }
 
@@ -239,6 +245,7 @@ class Sprite [[ClutterActor*]] actor
     ~Sprite()
         [[
             if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
+
             delete get_binding( self );
         ]];
 
