@@ -2,7 +2,7 @@ screen:show()
 
 local MAX_COUNTS=10 -- 10 second rolling window for average
 local FPS = Text { font = "Comfortaa Thin 75px", text = "FPS:", position = { 50, 20 }, color = "white" }
-local FPS_num = Text { font = FPS.font, text = "17.9", position = { 50 + 10 + FPS.w, 20 }, width = FPS.w * 1.2, color = "white", alignment = "RIGHT", wrap = true }
+local FPS_num = Text { font = FPS.font, text = "17.9", position = { 50 + 10 + FPS.w, 20 }, width = FPS.w * 1.4, color = "white", alignment = "RIGHT", wrap = true }
 local framecount = { 0 }
 local frame_ticker = Timeline
 {
