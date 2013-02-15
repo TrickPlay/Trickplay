@@ -72,6 +72,11 @@ void Source::make_texture( bool immediately )
                 set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
             }
         }
+        else
+        {
+            failed = false;
+            set_texture( texture, true );
+        }
     }
     else
     {

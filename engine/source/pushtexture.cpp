@@ -8,20 +8,19 @@ PushTexture::~PushTexture()
     if ( !pings.empty() ) pings.clear();
 }
 
+// Only called by Source instances
 void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
 
     if ( !failed && !real && preload )
     {
-        // May call Source::make_texture or Sprite::make_texture
         make_texture( true ); // May update real and failed
         g_assert( texture );
         g_assert( real || failed );
     }
     else if ( !failed && !texture )
     {
-        // May call Source::make_texture or Sprite::make_texture
         make_texture( false );
         g_assert( texture );
     }
@@ -31,6 +30,7 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
     }
 }
 
+// Only called by Source instances
 void PushTexture::unsubscribe( PingMe * ping )
 {
     pings.erase( ping );
@@ -47,6 +47,8 @@ void PushTexture::release_texture()
     if ( texture && !cache && pings.empty() )
     {
         cogl_handle_unref( texture );
+        failed = false;
+        real = false;
         texture = NULL;
         
         lost_texture();
