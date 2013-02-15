@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.InspectorDock.sizePolicy().hasHeightForWidth())
         self.InspectorDock.setSizePolicy(sizePolicy)
-        self.InspectorDock.setMinimumSize(QtCore.QSize(79, 41))
+        self.InspectorDock.setMinimumSize(QtCore.QSize(330, 41))
         font = QtGui.QFont()
         font.setPointSize(9)
         self.InspectorDock.setFont(font)
