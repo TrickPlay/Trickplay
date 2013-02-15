@@ -509,11 +509,11 @@ function util.assign_right_name (uiInstance, uiTypeStr)
             hdr.uiNum_map[imgFileName] = 0 
         end 
 
-        while  util.is_available(imgFileName..hdr.uiNum_map[imgFileName]) == false do 
+        while  util.is_available(imgFileName.."-"..hdr.uiNum_map[imgFileName]) == false do 
             hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
         end 
 
-        uiInstance.name = imgFileName..hdr.uiNum_map[imgFileName]
+        uiInstance.name = imgFileName.."-"..hdr.uiNum_map[imgFileName]
         hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
 
     else 
