@@ -1443,7 +1443,11 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         --uiInstance.items = {WL.Button{name="pretty_button"}}
     end 
         
-    util.assign_right_name(uiInstance, uiTypeStr)
+    if uiTypeStr == "Image" then 
+        util.assign_right_name(uiInstance, path)
+    else 
+        util.assign_right_name(uiInstance, uiTypeStr)
+    end
 
     if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
         uiInstance.sheet = spriteSheet
