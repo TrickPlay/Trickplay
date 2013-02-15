@@ -159,7 +159,7 @@ void Sprite::make_texture( bool immediately )
 
 void Sprite::lost_texture()
 {
-    ping.assign( NULL, NULL, NULL, false );
+    ping.assign( NULL, NULL, NULL, false ); // Unregister Sprite call back function
 }
 
 /* SpriteSheet */
