@@ -491,21 +491,40 @@ end
 function util.is_available (name) 
     for i, j in pairs (objectsNames) do
         if i == name then 
+            print(name.."  is not available")
             return false
         end
     end 
+    print(name.."  is available")
     return true
 end
 
 function util.assign_right_name (uiInstance, uiTypeStr)
 
-    while util.is_available(uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]) == false do
+    if hdr.uiNum_map[uiTypeStr] == nil then
+        local imgFileName, i, j
+        i, j = string.find(uiTypeStr, ".png")
+        imgFileName = string.sub(uiTypeStr, 1, i-1)
+        if hdr.uiNum_map[imgFileName] == nil then
+            hdr.uiNum_map[imgFileName] = 0 
+        end 
+
+        while  util.is_available(imgFileName..hdr.uiNum_map[imgFileName]) == false do 
+            hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
+        end 
+
+        uiInstance.name = imgFileName..hdr.uiNum_map[imgFileName]
+        hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
+
+    else 
+
+        while util.is_available(uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]) == false do
+            hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
+        end 
+    
+        uiInstance.name = uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]
         hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
-    end 
-
-    uiInstance.name = uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]
-    hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
-
+    
 --[[
     while util.is_available(uiTypeStr:lower()..uiNum) == false do
         uiNum = uiNum + 1
@@ -514,6 +533,7 @@ function util.assign_right_name (uiInstance, uiTypeStr)
     uiInstance.name = uiTypeStr:lower()..uiNum
     uiNum = uiNum + 1
 ]]
+    end 
 end 
 	
 
