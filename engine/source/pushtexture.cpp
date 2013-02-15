@@ -15,13 +15,13 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 
     if ( !failed && !real && preload )
     {
-        make_texture( true ); // May update real and failed
+        make_texture( true ); // Will update real and failed
         g_assert( texture );
         g_assert( real || failed );
     }
     else if ( !failed && !texture )
     {
-        make_texture( false );
+        make_texture( false ); // Will update real and failed
         g_assert( texture );
     }
     else
@@ -91,22 +91,23 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
+// Only called by Sprite instances
 void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
 {
     if ( source == _source ) return;
 
     if ( source ) source->unsubscribe( this );
-    
+
     source = _source;
     callback = _callback;
     target = _target;
-    
+
     if ( source ) source->subscribe( this, preload );
 }
 
 PingMe::~PingMe()
 {
-    if ( source ) source->unsubscribe( this );
+    if ( source ) source->unsubscribe( this ); // Sprite release reference to source
 }
 
 
