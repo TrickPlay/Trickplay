@@ -92,26 +92,26 @@ void PushTexture::ping_all()
 /* PingMe */
 
 // Only called by Sprite instances
-void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
+void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    if ( source == _source ) return;
+    if ( instance == _instance ) return;
 
-    if ( source ) source->unsubscribe( this );
+    if ( instance ) instance->unsubscribe( this );
 
-    source = _source;
+    instance = _instance;
     callback = _callback;
     target = _target;
 
-    if ( source ) source->subscribe( this, preload );
+    if ( instance ) instance->subscribe( this, preload );
 }
 
 PingMe::~PingMe()
 {
-    if ( source ) source->unsubscribe( this ); // Sprite release reference to source
+    if ( instance ) instance->unsubscribe( this ); // Sprite release reference to Source
 }
 
 
 void PingMe::ping()
 {
-    if ( callback ) callback( source, target );
+    if ( callback ) callback( instance, target );
 }

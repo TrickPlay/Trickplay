@@ -55,21 +55,21 @@ public:
     class PingMe
     {
         public:
-            typedef void (Callback)( PushTexture * source, void * target );
+            typedef void (Callback)( PushTexture * instance, void * target );
 
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {};
+            PingMe() : instance( NULL ), callback( NULL ), target( NULL ) {};
             ~PingMe();
 
             // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
 
-            void assign( PushTexture * source, Callback * callback, void * target, bool preload );
+            void assign( PushTexture * instance, Callback * callback, void * target, bool preload );
 
             friend class PushTexture;
 
         private:
             void ping();
 
-            PushTexture * source;
+            PushTexture * instance;
             Callback * callback;
             void * target;
     };
