@@ -30,18 +30,6 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
     }
 }
 
-// Only called by Source instances
-void PushTexture::unsubscribe( PingMe * ping )
-{
-    pings.erase( ping );
-    
-    if ( can_signal && !cache && pings.empty() )
-    {
-        Action::post( new PushTexture::ReleaseLater( this ) );
-        can_signal = false;
-    }
-}
-
 void PushTexture::release_texture()
 {
     if ( texture && !cache && pings.empty() )
@@ -96,7 +84,9 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
 {
     if ( instance == _instance ) return;
 
-    if ( instance ) instance->unsubscribe( this );
+    // Sprite instances will always have texture released immediately
+    // Source instances will have it released later when the app is running
+    if ( instance ) instance->unsubscribe( this, false );
 
     instance = _instance;
     callback = _callback;
@@ -107,7 +97,7 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
 
 PingMe::~PingMe()
 {
-    if ( instance ) instance->unsubscribe( this ); // Sprite release reference to Source
+    if ( instance ) instance->unsubscribe( this, true ); // Sprite release reference to Source
 }
 
 
