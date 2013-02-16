@@ -58,7 +58,7 @@ public:
             Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {};
             ~Sprite() {}
 
-            void assign( Source * _source, int _x, int _y, int _w, int _h )
+            void set_sprite( Source * _source, int _x, int _y, int _w, int _h )
             {
                 g_assert( _source );
                 source = _source;
