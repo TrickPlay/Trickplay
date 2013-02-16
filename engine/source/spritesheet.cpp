@@ -132,7 +132,29 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
     return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
 }
 
+void Source::unsubscribe( PingMe * ping)
+{
+    pings.erase( ping );
+    
+    if ( can_signal && !cache && pings.empty() )
+    {
+        Action::post( new PushTexture::ReleaseLater( this ) );
+        can_signal = false;
+    }
+}
+
 /* Sprite */
+
+void Sprite::unsubscribe( PingMe * ping)
+{
+    pings.erase( ping );
+
+    if ( can_signal && !cache && pings.empty() )
+    {
+        release_texture();            
+        can_signal = false;
+    }
+}
 
 void Sprite::update()
 {
@@ -159,7 +181,7 @@ void Sprite::make_texture( bool immediately )
 
 void Sprite::lost_texture()
 {
-    ping.assign( NULL, NULL, NULL, false );
+    ping.assign( NULL, NULL, NULL, false ); // Unregister Sprite call back function
 }
 
 /* SpriteSheet */
@@ -371,7 +393,7 @@ void SpriteSheet::add_sprite( Source * source, const char * id, int x, int y, in
     if (sprite) delete( sprite );
 
     sprite = new Sprite();
-    sprite->assign( source, x, y, w, h );
+    sprite->set_sprite( source, x, y, w, h );
     (* sprites)[s] = sprite;
 }
 
