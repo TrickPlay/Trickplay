@@ -35,8 +35,10 @@ public:
             // but will be empty/transparent if the source image isn't loaded yet or the coords are out of bounds
             
             CoglHandle get_subtexture( int x, int y, int w, int h );
+            void unsubscribe( PingMe * ping );
             
             SpriteSheet * sheet;
+            char * source_uri;
             
         private:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }
@@ -46,7 +48,6 @@ public:
             void lost_texture() {};
             
             std::string cache_key;
-            char * source_uri;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
@@ -58,7 +59,7 @@ public:
             Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {};
             ~Sprite() {}
 
-            void assign( Source * _source, int _x, int _y, int _w, int _h )
+            void set_sprite( Source * _source, int _x, int _y, int _w, int _h )
             {
                 g_assert( _source );
                 source = _source;
@@ -67,6 +68,7 @@ public:
             
             void update();
             void get_natural_dimensions( int * _w, int * _h ) { * _w = w; * _h = h; }
+            void unsubscribe( PingMe * ping );
             
         private:
             void make_texture( bool immediately );
@@ -77,7 +79,7 @@ public:
             int x, y, w, h;
     };
     
-    inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
+    //inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
 
     SpriteSheet();
     ~SpriteSheet();

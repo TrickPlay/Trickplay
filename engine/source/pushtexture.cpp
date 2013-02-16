@@ -5,6 +5,7 @@ typedef PushTexture::PingMe PingMe;
 PushTexture::~PushTexture()
 {
     if ( texture ) cogl_handle_unref( texture );
+    texture = NULL;
     if ( !pings.empty() ) pings.clear();
 }
 
@@ -15,30 +16,18 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 
     if ( !failed && !real && preload )
     {
-        make_texture( true ); // May update real and failed
+        make_texture( true ); // Will update real and failed
         g_assert( texture );
         g_assert( real || failed );
     }
     else if ( !failed && !texture )
     {
-        make_texture( false );
+        make_texture( false ); // Will update real and failed
         g_assert( texture );
     }
     else
     {
         ping->ping();
-    }
-}
-
-// Only called by Source instances
-void PushTexture::unsubscribe( PingMe * ping )
-{
-    pings.erase( ping );
-    
-    if ( can_signal && !cache && pings.empty() )
-    {
-        Action::post( new PushTexture::ReleaseLater( this ) );
-        can_signal = false;
     }
 }
 
@@ -91,26 +80,32 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::assign( PushTexture * _source, PingMe::Callback * _callback, void * _target, bool preload )
+// Only called by Sprite instances
+void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    if ( source == _source ) return;
+    if ( instance == _instance ) return;
 
-    if ( source ) source->unsubscribe( this );
-    
-    source = _source;
+    // Sprite instances will always have texture released immediately
+    // Source instances will have it released later when the app is running
+    if ( instance ) instance->unsubscribe( this);
+
+    instance = _instance;
     callback = _callback;
     target = _target;
-    
-    if ( source ) source->subscribe( this, preload );
+
+    if ( instance ) instance->subscribe( this, preload );
 }
 
 PingMe::~PingMe()
 {
-    if ( source ) source->unsubscribe( this );
+    if ( instance ) instance->unsubscribe( this ); // Sprite release reference to Source
+    instance = NULL;
+    callback = NULL;
+    target = NULL;
 }
 
 
 void PingMe::ping()
 {
-    if ( callback ) callback( source, target );
+    if ( callback ) callback( instance, target );
 }

@@ -55,26 +55,26 @@ public:
     class PingMe
     {
         public:
-            typedef void (Callback)( PushTexture * source, void * target );
+            typedef void (Callback)( PushTexture * instance, void * target );
 
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ) {};
+            PingMe() : instance( NULL ), callback( NULL ), target( NULL ) {};
             ~PingMe();
 
             // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
 
-            void assign( PushTexture * source, Callback * callback, void * target, bool preload );
+            void assign( PushTexture * instance, Callback * callback, void * target, bool preload );
 
             friend class PushTexture;
 
         private:
             void ping();
 
-            PushTexture * source;
+            PushTexture * instance;
             Callback * callback;
             void * target;
     };
 
-    PushTexture() : cache( false ), failed( false ), texture( NULL ), can_signal( true ), real( false ) {};
+    PushTexture() : cache( false ), failed( false ), can_signal( true ), texture( NULL ), real( false ) {};
     virtual ~PushTexture();
 
     CoglHandle get_texture();
@@ -88,18 +88,18 @@ public:
 protected:
     virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
     virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
+    void release_texture();
 
     bool cache; // if true, prevents texture from being released
     bool failed;
+    std::set< PingMe * > pings;
+    bool can_signal;
 
 private:
     void subscribe( PingMe * ping, bool preload );
-    void unsubscribe( PingMe * ping );
-    void release_texture();
+    virtual void unsubscribe( PingMe * ping ) = 0;
 
-    std::set< PingMe * > pings;
     CoglHandle texture;
-    bool can_signal;
     bool real;
 };
 
