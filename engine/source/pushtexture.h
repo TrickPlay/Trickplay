@@ -97,7 +97,7 @@ protected:
 
 private:
     void subscribe( PingMe * ping, bool preload );
-    virtual void unsubscribe( PingMe * ping, bool release_now ) = 0;
+    virtual void unsubscribe( PingMe * ping ) = 0;
 
     CoglHandle texture;
     bool real;
