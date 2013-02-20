@@ -64,7 +64,9 @@ void PushTexture::set_texture( CoglHandle _texture, bool _real )
 
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
-    if ( texture ) cogl_handle_ref( texture );
+
+    // No need to call cogl_handle_ref again since it has been done before calling set_texture
+    //if ( texture ) cogl_handle_ref( texture );
     
     real = texture && _real;
     ping_all();

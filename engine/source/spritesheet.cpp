@@ -10,6 +10,7 @@ typedef SpriteSheet::Sprite Sprite;
 
 /* Source */
 
+// cogl_handle_ref will be called for the texture returned
 CoglHandle ref_texture_from_image( Image * image )
 {
     g_assert( image );
