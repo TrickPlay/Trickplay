@@ -675,7 +675,7 @@ class MainWindow(QMainWindow):
             if errorCode == 2 : 
                 self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
             else :
-                if self.debugger.exitStatus() is not QProcess.NormalExit :
+                if self.debugger.exitStatus() is not QProcess.NormalExit and self.debugger.exitStatus() != 0:
                     self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
 
     def debug(self):
