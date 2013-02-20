@@ -325,7 +325,7 @@ void async_map_callback ( const Network::Response & response, SpriteSheet * self
 
 void SpriteSheet::load_json( const char * json )
 {
-    char * map = NULL;
+    gchar * map = NULL;
     gsize length;
     Network::Response response;
 
@@ -377,6 +377,8 @@ void SpriteSheet::load_json( const char * json )
         // map does not have to be a string ending with \0.
         parse_json( JSON::Parser::parse( map, length ) );
     }
+
+    if ( map ) g_free( map );
 }
 
 Source * SpriteSheet::add_source()
