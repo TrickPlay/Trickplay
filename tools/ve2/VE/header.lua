@@ -224,7 +224,7 @@ ui = {
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
 
-function dump_properties( o )
+local function dump_properties( o )
         local t = {}
         local l = 0
         for k , v in pairs( getmetatable( o ).__getters__ ) do
@@ -244,9 +244,6 @@ function dump_properties( o )
             print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
         end
 end
-
-
-
 
 return hdr
 

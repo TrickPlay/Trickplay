@@ -118,6 +118,7 @@ class TrickplayEmulatorManager(QWidget):
 					#self.main.open() # load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
                     
+					self.ve_ready = True
 					if self.main and self.main.currentProject is None: 
 					     return
 					elif self.main and self.main.currentProject : 
@@ -268,8 +269,9 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.preventChanges = True
 				        if self.inspector.cbStyle is not None:
 				            self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
-				            self.unsavedChanges = True
-				            #print("---------------------unsavedChanges", self.unsavedChanges)
+				            if self.ve_ready == False :
+				                self.unsavedChanges = True
+				            self.ve_ready = False 
 				        self.inspector.preventChanges = False
 				        return
 
@@ -282,8 +284,9 @@ class TrickplayEmulatorManager(QWidget):
 				            if self.main.command is not "setUIInfo" :
 				                self.inspector.preventChanges = True
 				                self.inspector.propertyFill(self.inspector.curData)
-				                self.unsavedChanges = True
-				            #print("---------------unsavedChanges", self.unsavedChanges)
+				                if self.ve_ready == False :
+				                    self.unsavedChanges = True
+				                self.ve_ready = False 
 				        self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
