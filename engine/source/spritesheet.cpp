@@ -13,15 +13,15 @@ typedef SpriteSheet::Sprite Sprite;
 CoglHandle ref_texture_from_image( Image * image )
 {
     g_assert( image );
-    
+
     ClutterActor * actor = clutter_texture_new();
     Images::load_texture( CLUTTER_TEXTURE( actor ), image );
-    
+
     CoglHandle texture = (CoglHandle) clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
     cogl_handle_ref( texture );
-    
+
     clutter_actor_destroy( actor );
-    
+
     return texture;
 }
 
@@ -69,13 +69,13 @@ void Source::make_texture( bool immediately )
             else
             {
                 failed = true;
-                set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+                set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
             }
         }
         else
         {
             failed = false;
-            set_texture( texture, true );
+            set_texture( cogl_handle_ref(texture), true );
         }
     }
     else
@@ -83,12 +83,12 @@ void Source::make_texture( bool immediately )
         if ( texture == COGL_INVALID_HANDLE )
         {
             sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+            set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
         }
         else
         {
             failed = false;
-            set_texture( texture, true );
+            set_texture( cogl_handle_ref(texture), true );
             ping_all_later();
         }
     }
@@ -132,26 +132,30 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
     return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
 }
 
-void Source::unsubscribe( PingMe * ping)
+void Source::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
     
     if ( can_signal && !cache && pings.empty() )
     {
-        Action::post( new PushTexture::ReleaseLater( this ) );
-        can_signal = false;
+        if ( release_now ) {
+            release_texture();
+        } else {
+            Action::post( new PushTexture::ReleaseLater( this ) );
+        }
+        can_signal = false;        
     }
 }
 
 /* Sprite */
 
-void Sprite::unsubscribe( PingMe * ping)
+void Sprite::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
 
     if ( can_signal && !cache && pings.empty() )
     {
-        release_texture();            
+        release_texture();
         can_signal = false;
     }
 }
@@ -161,11 +165,11 @@ void Sprite::update()
     g_assert( source );
     failed = source->is_failed();
     if ( failed ) {
-        set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
     }
     else
     {
-        set_texture( cogl_handle_ref( source->get_subtexture( x, y, w, h ) ), source->is_real() );
+        set_texture( cogl_handle_ref(source->get_subtexture( x, y, w, h )), source->is_real() );
     }
 }
 

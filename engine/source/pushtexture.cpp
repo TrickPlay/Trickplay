@@ -87,7 +87,7 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
 
     // Sprite instances will always have texture released immediately
     // Source instances will have it released later when the app is running
-    if ( instance ) instance->unsubscribe( this);
+    if ( instance ) instance->unsubscribe( this, false );
 
     instance = _instance;
     callback = _callback;
@@ -98,7 +98,7 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
 
 PingMe::~PingMe()
 {
-    if ( instance ) instance->unsubscribe( this ); // Sprite release reference to Source
+    if ( instance ) instance->unsubscribe( this, true ); // Sprite release reference to Source
     instance = NULL;
     callback = NULL;
     target = NULL;
