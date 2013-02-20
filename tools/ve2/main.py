@@ -1,4 +1,4 @@
-import os
+import os, time
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -9,6 +9,7 @@ from Inspector.TrickplayInspector import TrickplayInspector
 from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 from UI.ImportSkinDialog import Ui_importSkinImages
+
 
 class MainWindow(QMainWindow):
     
@@ -201,8 +202,10 @@ class MainWindow(QMainWindow):
         ret = msg.exec_()
         if ret == QMessageBox.Save:
             self.saveProject()
+            time.sleep(0.1)
         elif ret == QMessageBox.Cancel:
-            return 
+            return False
+        return True
         
     def import_started(self):
         self.bar.show()
@@ -250,8 +253,8 @@ class MainWindow(QMainWindow):
             print "[VE] progressBar.setValue : %s  "%'100'
             self.bar.setValue(100)
             self.bar.hide()
-            self.sendLuaCommand("buildVF", '_VE_.buildVF()')
-            self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
+            if self.importCmd == "assests" :
+                self.sendLuaCommand("buildVF", '_VE_.buildVF()')
         else : 
             self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
@@ -277,6 +280,7 @@ class MainWindow(QMainWindow):
                 self.errorMsg("Visual Debugger helper launch timed out: check TrickPlay SDK installation") 
 
     def importAssets(self):
+        self.importCmd = "assets"
         path = -1 
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
@@ -334,7 +338,6 @@ class MainWindow(QMainWindow):
         pass
 
     def importSkinDialog(self, path=None, id=None, name=None):
-        print "importSkinsDialog"
         """
         New app dialog
         """
@@ -365,7 +368,7 @@ class MainWindow(QMainWindow):
         return path, id 
 
     def importSkins(self):
-        print "importSkins"
+        self.importCmd = "skins"
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
@@ -677,6 +680,8 @@ class MainWindow(QMainWindow):
 
     def debug(self):
         if self._emulatorManager.trickplay.state() == QProcess.Running:
+            if self._emulatorManager.unsavedChanges == True :
+                self.warningMsg()
             self._emulatorManager.trickplay.close()
         self.debugger.start("python /usr/share/trickplay/debug/start.py \""+str(self.path)+"\"")
         ret = self.debugger.waitForStarted()
@@ -688,9 +693,14 @@ class MainWindow(QMainWindow):
         self._emulatorManager.run()
 
     def exit(self):
-        self.stop(False, True)
-        #self._emulatorManager.stop()
-        self.close()
+        if self._emulatorManager.trickplay.state() == QProcess.Running:
+            if self._emulatorManager.unsavedChanges == True :
+                if self.warningMsg() == False :
+                    return True
+            self.stop(False, True)
+            #self._emulatorManager.stop()
+            self.close()
+        return True
 
     def editorWindowClicked(self) :
         if self.ui.actionEditor.isChecked() == True :
