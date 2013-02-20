@@ -221,7 +221,7 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 
 SpriteSheet::~SpriteSheet()
 {
-    //g_free( extra ); // extra is pointing to self, cannot delete it here
+    g_object_unref( extra );
 
     if ( json_uri ) g_free( json_uri );
 
@@ -292,7 +292,7 @@ void SpriteSheet::parse_json ( const JSON::Value & root )
                             source = add_source();
                             source->set_source( img.c_str() );
                         }
-                        add_sprite(source, g_strdup(id.c_str()), x, y, w, h);
+                        add_sprite(source, id.c_str(), x, y, w, h);
                     }
                 }
             }
