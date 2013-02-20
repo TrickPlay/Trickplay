@@ -32,7 +32,14 @@ struct SpriteBinding
 
     ~SpriteBinding()
     {
-        if ( id ) g_free( id );
+        if ( id ) {
+            g_free( id );
+            id = NULL;
+        }
+        if ( sheet ) {
+            RefCounted::unref( sheet );
+            sheet = NULL;
+        }
     }
     
     const char * get_id() { return id; }
@@ -54,7 +61,18 @@ struct SpriteBinding
 
     void set_sheet( SpriteSheet * _sheet )
     {
+        if ( sheet == _sheet ) return;
+
+        if ( sheet ) {
+            RefCounted::unref( sheet );
+        }
+
         sheet = _sheet;
+
+        if ( _sheet ) {
+            RefCounted::ref( _sheet );
+        }
+
         update_sprite();
     };
 
@@ -246,7 +264,7 @@ class Sprite [[ClutterActor*]] actor
         [[
             if ( * get_ref( self ) ) lb_strong_unref( L, * get_ref( self ) );
 
-            delete get_binding( self );
+            delete( get_binding( self ) );
         ]];
 
 /***************************************
