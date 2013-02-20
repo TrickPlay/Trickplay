@@ -35,7 +35,7 @@ public:
             // but will be empty/transparent if the source image isn't loaded yet or the coords are out of bounds
             
             CoglHandle get_subtexture( int x, int y, int w, int h );
-            void unsubscribe( PingMe * ping );
+            void unsubscribe( PingMe * ping, bool release_now );
             
             SpriteSheet * sheet;
             char * source_uri;
@@ -68,7 +68,7 @@ public:
             
             void update();
             void get_natural_dimensions( int * _w, int * _h ) { * _w = w; * _h = h; }
-            void unsubscribe( PingMe * ping );
+            void unsubscribe( PingMe * ping, bool release_now );
             
         private:
             void make_texture( bool immediately );
@@ -78,7 +78,7 @@ public:
             Source * source;
             int x, y, w, h;
     };
-    
+
     //inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }
 
     SpriteSheet();
