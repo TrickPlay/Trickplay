@@ -57,8 +57,7 @@ void Source::make_texture( bool immediately )
     if ( cache )
     {
         g_assert( !failed );
-        //g_assert( !texture );
-        //g_assert( real );
+        //g_assert( !texture && real );
         return;
     }
     
