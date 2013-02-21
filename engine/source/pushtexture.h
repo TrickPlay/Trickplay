@@ -74,7 +74,7 @@ public:
             void * target;
     };
 
-    PushTexture() : cache( false ), failed( false ), can_signal( true ), texture( NULL ), real( false ) {};
+    PushTexture() : failed( false ), can_signal( true ), texture( NULL ), real( false ) {};
     virtual ~PushTexture();
 
     CoglHandle get_texture();
@@ -90,7 +90,6 @@ protected:
     virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
     void release_texture();
 
-    bool cache; // if true, prevents texture from being released
     bool failed;
     std::set< PingMe * > pings;
     bool can_signal;
