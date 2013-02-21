@@ -31,6 +31,8 @@ void Source::handle_async_img( Image * image )
     if ( image )
     {
         failed = false;
+        cache = false; // When used next time, need to check cache to see whether in cache or not
+
         CoglHandle texture = ref_texture_from_image( image );
         set_texture( texture, true );
         delete image;
@@ -40,7 +42,10 @@ void Source::handle_async_img( Image * image )
     else
     {
         failed = true;
+        cache = false;
+
         g_warning( "Could not download image %s", source_uri );
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
         ping_all();
     }
 }
@@ -48,51 +53,61 @@ void Source::handle_async_img( Image * image )
 void Source::make_texture( bool immediately )
 {
     g_assert( source_uri );
+
+    if ( cache )
+    {
+        g_assert( !failed );
+        //g_assert( !texture );
+        //g_assert( real );
+        return;
+    }
     
     JSON::Object jo;
     CoglHandle texture = Images::cache_get( cache_key, jo );
 
+    // In cache
+    if ( texture != COGL_INVALID_HANDLE )
+    {
+        failed = false;
+        cache = true;
+        set_texture( cogl_handle_ref(texture), true );
+
+        if ( !immediately ) ping_all();
+
+        return;
+    }
+
+    // Not in cache
+    cache = false;
+
     if ( immediately )
     {
-        if ( texture == COGL_INVALID_HANDLE )
+        Image * image = sheet->app->load_image( source_uri, false );
+
+        if ( image )
         {
-            Image * image = sheet->app->load_image( source_uri, false );
-            
-            if ( image )
-            {
-                failed = false;
-                texture = ref_texture_from_image( image );
-                delete image;
-                
-                Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
-                set_texture( texture, true );
-            }
-            else
-            {
-                failed = true;
-                set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
-            }
+            texture = ref_texture_from_image( image );
+            delete image;
+
+            Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+            // Set variable cache next time when used, because we do not know whether
+            // this time the image is saved in cache properly or not.
+
+            failed = false;
+            set_texture( texture, true );
         }
         else
         {
-            failed = false;
-            set_texture( cogl_handle_ref(texture), true );
+            failed = true;
+            set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
         }
     }
     else
     {
-        if ( texture == COGL_INVALID_HANDLE )
-        {
-            sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-            set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
-        }
-        else
-        {
-            failed = false;
-            set_texture( cogl_handle_ref(texture), true );
-            ping_all_later();
-        }
-    }
+        failed = false;
+        sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+   }
 }
 
 void Source::set_source( const char * uri )
@@ -113,7 +128,10 @@ void Source::set_source( const char * uri )
 
 void Source::set_source( Image * image )
 {
-    cache = true;
+    // TODO: need to increase ref counter of image
+    cache = true; // Coming from memory
+    failed = false;
+
     set_texture( ref_texture_from_image( image ), true );
 }
 
@@ -136,11 +154,11 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 void Source::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
-    
-    if ( can_signal && !cache && pings.empty() )
+
+    if ( can_signal && pings.empty() )
     {
         if ( release_now ) {
-            release_texture();
+            release_texture(); // Will update cache, failed and real
         } else {
             Action::post( new PushTexture::ReleaseLater( this ) );
         }
@@ -154,8 +172,9 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
 
-    if ( can_signal && !cache && pings.empty() )
+    if ( can_signal )
     {
+        //g_assert( pings.empty() );
         release_texture();
         can_signal = false;
     }
@@ -164,16 +183,16 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 void Sprite::update()
 {
     g_assert( source );
+
     failed = source->is_failed();
 
-    if ( failed )
+    if ( !failed && source->is_real() )
     {
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+        set_texture( cogl_handle_ref(source->get_subtexture( x, y, w, h )), true );
+        return;
     }
-    else
-    {
-        set_texture( cogl_handle_ref(source->get_subtexture( x, y, w, h )), source->is_real() );
-    }
+
+    set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
 }
 
 void on_ping( PushTexture * source, void * target )
