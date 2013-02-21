@@ -9,7 +9,6 @@ PushTexture::~PushTexture()
     if ( !pings.empty() ) pings.clear();
 }
 
-// Only called by Source instances
 void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
@@ -86,9 +85,11 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-// Only called by Sprite instances
 void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
+    callback = _callback;
+    target = _target;
+
     if ( instance == _instance ) return;
 
     // Sprite instances will always have texture released immediately
@@ -96,8 +97,6 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
     if ( instance ) instance->unsubscribe( this, false );
 
     instance = _instance;
-    callback = _callback;
-    target = _target;
 
     if ( instance ) instance->subscribe( this, preload );
 }
