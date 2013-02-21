@@ -5,7 +5,12 @@ typedef PushTexture::PingMe PingMe;
 PushTexture::~PushTexture()
 {
     if ( texture ) cogl_handle_unref( texture );
+
     texture = NULL;
+    cache = false;
+    failed = false;
+    real = false;
+
     if ( !pings.empty() ) pings.clear();
 }
 
@@ -32,9 +37,11 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 
 void PushTexture::release_texture()
 {
-    if ( texture && !cache && pings.empty() )
+    if ( texture && pings.empty() )
     {
         cogl_handle_unref( texture );
+
+        cache = false;
         failed = false;
         real = false;
         texture = NULL;
@@ -54,14 +61,22 @@ void PushTexture::get_dimensions( int * w, int * h )
 CoglHandle PushTexture::get_texture()
 {
     static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-    return texture ? texture : null_texture;
+
+    if ( !texture )
+    {
+        texture = cogl_handle_ref( null_texture );
+    }
+
+    return texture;
 }
 
 void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
-    if ( texture == _texture )
+    // cache, failed and real are updated in Sprite and Source instances
+
+    if ( ( texture == _texture ) && !texture )
     {
-        cogl_handle_unref( texture );
+        cogl_handle_unref( texture ); // texture has been cogl_handle_ref'ed before calling
         return;
     }
 
@@ -104,6 +119,7 @@ void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void
 PingMe::~PingMe()
 {
     if ( instance ) instance->unsubscribe( this, true ); // Sprite release reference to Source
+
     instance = NULL;
     callback = NULL;
     target = NULL;
