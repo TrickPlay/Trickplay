@@ -7,7 +7,6 @@ PushTexture::~PushTexture()
     if ( texture ) cogl_handle_unref( texture );
 
     texture = NULL;
-    cache = false;
     failed = false;
     real = false;
 
@@ -41,7 +40,6 @@ void PushTexture::release_texture()
     {
         cogl_handle_unref( texture );
 
-        cache = false;
         failed = false;
         real = false;
         texture = NULL;
@@ -72,7 +70,7 @@ CoglHandle PushTexture::get_texture()
 
 void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
-    // cache, failed and real are updated in Sprite and Source instances
+    // failed and real are updated in Sprite and Source instances
 
     if ( ( texture == _texture ) && !texture )
     {

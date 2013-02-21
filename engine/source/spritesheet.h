@@ -25,7 +25,7 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ) { g_assert(s); };
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ) { g_assert(s); };
             ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
@@ -48,6 +48,7 @@ public:
             void lost_texture() {};
             
             std::string cache_key;
+            bool cache;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
