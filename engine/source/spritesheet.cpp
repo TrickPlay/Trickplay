@@ -173,7 +173,6 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 
     if ( can_signal )
     {
-        //g_assert( pings.empty() );
         release_texture();
         can_signal = false;
     }
