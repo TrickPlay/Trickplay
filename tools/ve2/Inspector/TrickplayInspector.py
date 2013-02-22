@@ -1207,7 +1207,7 @@ class TrickplayInspector(QWidget):
                         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
                         z = self.inspectorModel.styleData[0][self.style_name]
                         
-                        c1 = 0 
+                        c1 = 1 
                         for sp in PropertyIter(p): #'arrow', 'border', 'fill_colors', 'text
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
@@ -1250,14 +1250,13 @@ class TrickplayInspector(QWidget):
                                         k.setText (0, ssp)
                                         r = q[ssp]
                                         c3 = 0
-                                        for sssp in PropertyIter(ssp): #activation, default, focus 
+                                        for sssp in PropertyIter(ssp): 
                                             m = QTreeWidgetItem(k)
-                                            sssp = str(sssp)
+                                            sssp = str(sssp) #activation, default, focus 
                                             if NESTED_PROP_S_LIST.has_key(sssp):
                                                 m.setText(0, NESTED_PROP_S_LIST[sssp])
                                             else:
-                                                m.setText (0, sssp)  # first col : property name
-                                            #m.setText(0,sssp)
+                                                m.setText (0, sssp) # first col : property name
                                             if sssp in ['activation', 'default', 'focus']:
                                                 colNums = [n,c1,c2,c3]
                                                 colNames = [sssp, ssp, sp, 'style']
@@ -1274,6 +1273,7 @@ class TrickplayInspector(QWidget):
                                             l.setText(0, NESTED_PROP_S_LIST[ssp])
                                         else:
                                             l.setText (0, ssp)  # first col : property name
+
                                         colNums = [n,c1,c2]
                                         colNames = [ssp,sp,'style']
                                         if ssp in ['activation', 'default', 'focus']:
