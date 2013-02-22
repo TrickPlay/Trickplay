@@ -157,9 +157,10 @@ void Source::unsubscribe( PingMe * ping, bool release_now )
     if ( can_signal && pings.empty() )
     {
         if ( release_now ) {
-            release_texture(); // Will update cache, failed and real
+            cache = false;
+            release_texture(); // Will update failed and real
         } else {
-            Action::post( new PushTexture::ReleaseLater( this ) );
+            Action::post( new SpriteSheet::ReleaseLater( this ) );
         }
         can_signal = false;        
     }
