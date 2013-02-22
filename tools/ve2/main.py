@@ -229,6 +229,7 @@ class MainWindow(QMainWindow):
 
     def newLayer(self):
         self.sendLuaCommand("newLayer", "_VE_.newLayer()")
+        self._emulatorManager.unsavedChanges = True
         return True
 
     def errorMsg(self, eMsg):
@@ -571,7 +572,8 @@ class MainWindow(QMainWindow):
 
     def openProject(self):
         if self._emulatorManager.unsavedChanges == True :
-            self.warningMsg()
+            if self.warningMsg() == False:
+                return
 
         wizard = Wizard(self)
         path = -1
@@ -579,6 +581,8 @@ class MainWindow(QMainWindow):
             if self.path is None:
 		        self.path = self.apath
             path = QFileDialog.getExistingDirectory(None, 'Open Project', self.path, QFileDialog.ShowDirsOnly)
+            if path == None or path == "":
+                return 
             path = wizard.start(path, True)
         print ("[VE] Open Project [%s]"%path)
         if path:
