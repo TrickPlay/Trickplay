@@ -15,6 +15,56 @@ class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
         
+        self.stitcherErrorCode = {
+            1 : 'Could not parse arguments',
+            2 : 'No inputs given',
+            3 : 'Ambiguous output path',
+            4 : 'Segregation size (see --help) cannot be larger than 65,536 x 65,536',
+            5 : 'Maximum texture size (see --help) cannot be larger than 65,536 x 65,536',
+            201 : 'Could not load JSON file of spritesheet <path>',
+            202 : 'Could not parse JSON file of spritesheet <path>',
+            203 : 'Could not load spritesheet source image <path>',
+            301 : 'Failed to fit all of the images'
+        }
+            
+        self.skinUI = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "ClippingRegion"]
+
+        self.skinPath = {"ArrowPane": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
+         "ButtonPicker": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
+         "Button": ['default', 'activation', 'focus'],  
+         "DialogBox": ['default', 'seperator-h.png'],  
+         "MenuButton": ['default', 'activation', 'focus'],  
+         "RadioButton": ['default', 'activation', 'focus', 'selection', 'box-focus.png', 'box-default.png','box-selected.png', 'box-focus-selected.png'],  
+         "CheckBox": ['default', 'activation', 'focus', 'selection', 'radio-focus.png', 'radio-default.png','radio-selected.png', 'radio-focus-selected.png'],  
+         "TabBar": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default', 'activation', 'focus', 'selection'],  
+         "ToastAlert": ['default', 'seperator-h.png', 'error.png'],  
+         "TextInput": ['default', 'focus'],  
+         "ScrollPane": ['default', 'track', 'grip/default', 'grip/focus'],  
+         "Slider": ['track', 'grip/default', 'grip/focus'],  
+         "ProgressBar": ['empty', 'filled'], 
+         "OrbitingDots": ['icon.png'], 
+         "ProgressSpinner": ['icon.png'], 
+         "ClippingRegion": ['default'],  
+        }
+        self.skinPathList = self.skinPath.items()
+
+        self.skinSubPath = {'arrow-up':['default.png', 'focus.png', 'activation.png'],
+            'arrow-down':['default.png', 'focus.png', 'activation.png'],
+            'arrow-right':['default.png', 'focus.png', 'activation.png'],
+            'arrow-left':['default.png', 'focus.png', 'activation.png'],
+            'default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'grip/default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'activation':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png'], 
+            'focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'grip/focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'selection':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'empty':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'filled':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
+            'track':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'] 
+        }
+
+        self.bar = None
+
         self.luaEy = 300
         self.luaEx = 1900
         QWidget.__init__(self, parent)
@@ -208,7 +258,8 @@ class MainWindow(QMainWindow):
         return True
         
     def import_started(self):
-        self.bar.show()
+        if self.bar is not None :
+            self.bar.show()
         return 
 
     def import_readyRead(self):
@@ -240,7 +291,8 @@ class MainWindow(QMainWindow):
                         newVal = int(l[0])
                     self.lastNumber = l[len(l) - 1]
                         
-                self.bar.setValue(newVal)
+                if self.bar is not None:
+                    self.bar.setValue(newVal)
                 print "[VE] progressBar.setValue : %s  "%str(newVal)
             except : 
                 pass
@@ -252,14 +304,17 @@ class MainWindow(QMainWindow):
         if errorCode == 0 : 
             print "[VE] progressBar.setValue : %s  "%'100'
             self.bar.setValue(100)
-            self.bar.hide()
-            if self.importCmd == "assests" :
+            if self.importCmd is not "skins" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
-        else : 
             self.bar.hide()
+        else : 
+            if self.bar is not None:
+                self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
-            print errorMsg
-            self.errorMsg("Import Failed.")
+            if self.stitcherErrorCode[int(errorCode)]:
+                self.errorMsg(self.stitcherErrorCode[int(errorCode)])
+            else :
+                self.errorMsg("Import Failed.")
         return 
 
     def processErrorHandler(self, process_name):
@@ -367,6 +422,65 @@ class MainWindow(QMainWindow):
                 return self.importSkinDialog(path, id, name)
         return path, id 
 
+
+    def importSkinErrorMsg(self, sUIs, fUIs):
+        msg = QMessageBox()
+        errorMsg = "" 
+
+        if len (sUIs) is not 0:
+            errorMsg = "Skin assets are available for the following UI Elements:      \n\n      "
+            for j in sUIs:
+                errorMsg = errorMsg + j + "\n      "
+            errorMsg = errorMsg + "\n\n"
+
+        errorMsg = errorMsg + "Could not find skin assets for the following UI Elements:      \n\n      "
+
+        for i in fUIs:
+            errorMsg = errorMsg+i+"\n      "
+        errorMsg = errorMsg + "\nWould you proceed ?\n"
+        msg.setText(errorMsg)
+        msg.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setWindowTitle("Import Skin Error")
+        ret = msg.exec_()
+        if ret == QMessageBox.Ok:
+            return True 
+        else:
+            return False 
+            
+
+    def checkSkinAssetsExist(self, path):
+        
+        id1 = ""
+        id2 = ""
+        uiName = ""
+        failedUI = []
+        succeedUI = self.skinUI
+
+        for i, v in self.skinPathList:
+            uiName = i 
+            for j in v:
+                id1 = j
+                if self.skinSubPath.has_key(j) == True :
+                    for x in self.skinSubPath[j]:
+                        id2 = x
+                        if os.path.exists(os.path.join(path, uiName+"/"+id1+"/"+id2)) == False:
+                            if not uiName in failedUI:
+                                failedUI.insert(0, uiName)
+                else:
+                    if os.path.exists(os.path.join(path, uiName+"/"+id1)) == False:
+                        if not uiName in failedUI:
+                            failedUI.insert(0, uiName)
+
+        if len(failedUI) == 0 :
+            return True
+        else :
+            for l in failedUI:
+                if l in succeedUI:
+                    succeedUI.remove(l)
+
+            return self.importSkinErrorMsg(succeedUI, failedUI)
+
     def importSkins(self):
         self.importCmd = "skins"
         self.bar = QProgressBar()
@@ -378,6 +492,8 @@ class MainWindow(QMainWindow):
         skinPath, id = self.importSkinDialog()
         if skinPath:
             print ("[VE] Import Skin Images ...[%s]"%skinPath)
+            if self.checkSkinAssetsExist(skinPath) != True :
+                return 
 
         if os.path.exists(os.path.join(self.path, "assets/skins/"+id+".json")) == True:
             print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/'"+id+" "+skinPath)
