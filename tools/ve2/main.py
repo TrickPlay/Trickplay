@@ -303,11 +303,12 @@ class MainWindow(QMainWindow):
 
     def import_finished(self, errorCode):
         if errorCode == 0 : 
-            print "[VE] progressBar.setValue : %s  "%'100'
-            self.bar.setValue(100)
+            if self.bar is not None:
+                print "[VE] progressBar.setValue : %s  "%'100'
+                self.bar.setValue(100)
+                self.bar.hide()
             if self.importCmd is not "skins" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
-            self.bar.hide()
         else : 
             if self.bar is not None:
                 self.bar.hide()
