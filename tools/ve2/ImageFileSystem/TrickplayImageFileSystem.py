@@ -281,6 +281,13 @@ class TrickplayImageFileSystem(QWidget):
         self.main.importAssets()
 
     def removeAsset(self) :
+        self.main.importCmd = "remove"
+        self.main.bar = QProgressBar()
+        self.main.bar.setRange(0, 100)
+        self.main.bar.setValue(0)
+        self.main.bar.setWindowTitle("Remove Assets...")
+        self.main.bar.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 200, self.main.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+
         item = self.ui.fileSystemTree.currentItem()
         itemWhatsThis = item.whatsThis(0)
         emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
@@ -295,8 +302,8 @@ class TrickplayImageFileSystem(QWidget):
                         idsToRemove = idsToRemove+id+" "
 
             idsToRemove = idsToRemove[:len(idsToRemove) - 1]
-            print("stitcher "+emptyPath+" -j "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -f "+ idsToRemove + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-            self.main.stitcher.start("stitcher "+emptyPath+" -j "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -f "+ idsToRemove +" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
+            print("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ idsToRemove + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
+            self.main.stitcher.start("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ idsToRemove +" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
         else :
             
             fileCnt = 0 
@@ -306,8 +313,8 @@ class TrickplayImageFileSystem(QWidget):
                     if id.find(self.getDir(item.whatsThis(0))) == 0 : 
                         fileCnt = fileCnt + 1
 
-            print("stitcher "+emptyPath+" -j "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -f "+ item.whatsThis(0) + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-            self.main.stitcher.start("stitcher "+emptyPath+" -j "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -f "+ item.whatsThis(0)+" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
+            print("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ item.whatsThis(0) + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
+            self.main.stitcher.start("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ item.whatsThis(0)+" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
 
             if fileCnt == 1 :
                 orgId = "}\n\t],"
