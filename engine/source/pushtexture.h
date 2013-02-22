@@ -19,22 +19,6 @@ class PushTexture
 {
 public:
 
-    // When the last subscriber is lost, this Action is posted
-    // If the texture still has no subscribers at the next idle point, it releases the texture
-
-    class ReleaseLater : public Action
-    {
-        PushTexture * self;
-
-        public: ReleaseLater( PushTexture * s ) : self( s ) {};
-
-        protected: bool run()
-        {
-            self->release_texture();
-            return false;
-        }
-    };
-    
     // When posted, this Action will ping all subscribers at the next idle point
 
     class PingAllLater : public Action
@@ -84,11 +68,11 @@ public:
     void ping_all_later() { Action::post( new PingAllLater( this ) ); };
     bool is_real() { return real; };
     bool is_failed() { return failed; };
+    void release_texture();
 
 protected:
     virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
     virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
-    void release_texture();
 
     bool failed;
     std::set< PingMe * > pings;

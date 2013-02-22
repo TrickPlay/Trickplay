@@ -11,7 +11,7 @@ typedef SpriteSheet::Sprite Sprite;
 /* Source */
 
 // cogl_handle_ref will be called for the texture returned
-CoglHandle ref_texture_from_image( Image * image )
+CoglHandle ref_texture_from_image( Image * image, bool release )
 {
     g_assert( image );
 
@@ -23,6 +23,8 @@ CoglHandle ref_texture_from_image( Image * image )
 
     clutter_actor_destroy( actor );
 
+    if ( release ) delete( image );
+
     return texture;
 }
 
@@ -33,9 +35,8 @@ void Source::handle_async_img( Image * image )
         failed = false;
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
-        CoglHandle texture = ref_texture_from_image( image );
+        CoglHandle texture = ref_texture_from_image( image, true );
         set_texture( texture, true );
-        delete image;
         
         Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
     }
@@ -85,8 +86,7 @@ void Source::make_texture( bool immediately )
 
         if ( image )
         {
-            texture = ref_texture_from_image( image );
-            delete image;
+            texture = ref_texture_from_image( image, true );
 
             Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
             // Set variable cache next time when used, because we do not know whether
@@ -131,7 +131,7 @@ void Source::set_source( Image * image )
     cache = true; // Coming from memory
     failed = false;
 
-    set_texture( ref_texture_from_image( image ), true );
+    set_texture( ref_texture_from_image( image, false ), true );
 }
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
@@ -157,9 +157,10 @@ void Source::unsubscribe( PingMe * ping, bool release_now )
     if ( can_signal && pings.empty() )
     {
         if ( release_now ) {
-            release_texture(); // Will update cache, failed and real
+            cache = false;
+            release_texture(); // Will update failed and real
         } else {
-            Action::post( new PushTexture::ReleaseLater( this ) );
+            Action::post( new SpriteSheet::ReleaseLater( this ) );
         }
         can_signal = false;        
     }
@@ -173,7 +174,6 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 
     if ( can_signal )
     {
-        //g_assert( pings.empty() );
         release_texture();
         can_signal = false;
     }
