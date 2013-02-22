@@ -19,6 +19,24 @@
 class SpriteSheet : public RefCounted
 {
 public:
+    class Source;
+
+    // When the last subscriber is lost, this Action is posted
+    // If the texture still has no subscribers at the next idle point, it releases the texture
+
+    class ReleaseLater : public Action
+    {
+        Source * self;
+
+        public: ReleaseLater( Source * s ) : self( s ) {};
+
+        protected: bool run()
+        {
+            self->cache = false;
+            self->release_texture();
+            return false;
+        }
+    };
     
     // A source image owned by the spritesheet, which sprites will refer into to get their textures
     
@@ -39,6 +57,7 @@ public:
             
             SpriteSheet * sheet;
             char * source_uri;
+            bool cache;
             
         private:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }
@@ -48,7 +67,6 @@ public:
             void lost_texture() {};
             
             std::string cache_key;
-            bool cache;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
