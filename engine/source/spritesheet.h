@@ -34,6 +34,7 @@ public:
         {
             self->cache = false;
             self->release_texture();
+            self->can_signal = true;
             return false;
         }
     };
@@ -43,7 +44,7 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ) { g_assert(s); };
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ) { g_assert(s); };
             ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
@@ -58,6 +59,7 @@ public:
             SpriteSheet * sheet;
             char * source_uri;
             bool cache;
+            bool can_signal;
             
         private:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }

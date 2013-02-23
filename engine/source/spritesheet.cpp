@@ -70,6 +70,7 @@ void Source::make_texture( bool immediately )
     {
         failed = false;
         cache = true;
+
         set_texture( cogl_handle_ref(texture), true );
 
         if ( !immediately ) ping_all();
@@ -159,10 +160,11 @@ void Source::unsubscribe( PingMe * ping, bool release_now )
         if ( release_now ) {
             cache = false;
             release_texture(); // Will update failed and real
+            can_signal = true;
         } else {
             Action::post( new SpriteSheet::ReleaseLater( this ) );
+            can_signal = false; // Prevents a second instance of ReleaseSheet from being created
         }
-        can_signal = false;        
     }
 }
 
@@ -172,10 +174,9 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
 
-    if ( can_signal )
+    if ( pings.empty() )
     {
         release_texture();
-        can_signal = false;
     }
 }
 
