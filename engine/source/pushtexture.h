@@ -58,7 +58,7 @@ public:
             void * target;
     };
 
-    PushTexture() : failed( false ), can_signal( true ), texture( NULL ), real( false ) {};
+    PushTexture() : failed( false ), texture( NULL ), real( false ) {};
     virtual ~PushTexture();
 
     CoglHandle get_texture();
@@ -76,7 +76,6 @@ protected:
 
     bool failed;
     std::set< PingMe * > pings;
-    bool can_signal;
 
 private:
     void subscribe( PingMe * ping, bool preload );

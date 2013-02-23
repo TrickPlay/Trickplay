@@ -46,8 +46,6 @@ void PushTexture::release_texture()
         
         lost_texture();
     }
-    
-    can_signal = true;
 }
 
 void PushTexture::get_dimensions( int * w, int * h )
@@ -100,15 +98,20 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    callback = _callback;
-    target = _target;
 
-    if ( instance == _instance ) return;
+    if ( instance == _instance )
+    {
+        callback = _callback;
+        target = _target;
+        return;
+    }
 
     // Sprite instances will always have texture released immediately
     // Source instances will have it released later when the app is running
     if ( instance ) instance->unsubscribe( this, false );
 
+    callback = _callback;
+    target = _target;
     instance = _instance;
 
     if ( instance ) instance->subscribe( this, preload );
