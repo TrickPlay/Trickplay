@@ -8,6 +8,60 @@ from UI.NewFolder import Ui_newFolderDialog
 multiSelect = 'false'
 
 
+class StitcherThread(QThread):
+    def __init__(self, imageTree, itemWhatsThis, emptyPath) :
+        QThread.__init__(self)
+        #self.name = name
+        #self.receiver = receiver
+        self.imageTree = imageTree
+        self.itemWT = itemWhatsThis
+        self.emptyPath = emptyPath
+        self.stopped = 0
+
+    def run(self):
+        """
+        while not self.stopped:
+            time.sleep(rand.random() * 0.3)
+            msg = rand.random()
+            event = QCustomEvent(10000)
+            event.setData("%s: %f" % (self.name, msg))
+            QThread.postEvent(self.receiver, event)
+        """
+         
+        if self.imageTree.isDir(self.itemWT) == True:
+            for imageData in self.imageTree.data:
+                for imageFile in imageData['sprites']:
+                    id = imageFile['id']
+                    if id.find(self.itemWT) == 0 :
+                        idsToRemove = idsToRemove+id+" "
+
+            idsToRemove = idsToRemove[:len(idsToRemove) - 1]
+            print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ idsToRemove + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+            self.imageTree.main.stitcher.start("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ idsToRemove +" -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+        else :
+            
+            fileCnt = 0 
+            for imageData in self.imageTree.data:
+                for imageFile in imageData['sprites']:
+                    id = imageFile['id']
+                    if id.find(self.imageTree.getDir(self.itemWT)) == 0 : 
+                        fileCnt = fileCnt + 1
+
+            print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.itemWT + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+
+            self.imageTree.main.stitcher.start("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.itemWT+" -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+
+
+            if fileCnt == 1 :
+                orgId = "}\n\t],"
+                newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+self.imageTree.getDir(self.itemWT)+"\" }\n\t],"
+                self.imageTree.imageJsonItemSub(orgId, newFolderInfo) 
+
+    def stop(self):
+        self.stopped = 1
+
+
+
 try:
     _fromUtf8 = QString.fromUtf8
 except AttributeError:
@@ -241,7 +295,22 @@ class TrickplayImageFileSystem(QWidget):
                     for imageData in self.data:
                         for imageFile in imageData['sprites']:
                             id = imageFile['id']
-                            if id[:len(dragFrom)] == dragFrom :
+         class WorkerThread(QThread):
+  def __init__(self, name, receiver):
+    QThread.__init__(self)
+    self.name = name
+    self.receiver = receiver
+    self.stopped = 0
+  def run(self):
+    while not self.stopped:
+      time.sleep(rand.random() * 0.3)
+      msg = rand.random()
+      event = QCustomEvent(10000)
+      event.setData("%s: %f" % (self.name, msg))
+      QThread.postEvent(self.receiver, event)
+
+  def stop(self):
+    self.stopped = 1                   if id[:len(dragFrom)] == dragFrom :
                                 org = id 
                                 new = id[len(dragFrom):]
                                 self.imageJsonItemSub(org, new) 
@@ -282,18 +351,24 @@ class TrickplayImageFileSystem(QWidget):
 
     def removeAsset(self) :
         self.main.importCmd = "remove"
+        """
         self.main.bar = QProgressBar()
         self.main.bar.setRange(0, 100)
         self.main.bar.setValue(0)
         self.main.bar.setWindowTitle("Remove Assets...")
         self.main.bar.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 200, self.main.ui.fileSystemDock.geometry().y() + 100, 300, 20)
-
+        """
         item = self.ui.fileSystemTree.currentItem()
         itemWhatsThis = item.whatsThis(0)
         emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
         #idsToRemove = []
         idsToRemove = ""
 
+        self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
+        self.ui.fileSystemTree.currentItem().removeChild(item)
+        self.sTread.run()
+        
+        """
         if self.isDir(item.whatsThis(0)) == True:
             for imageData in self.data:
                 for imageFile in imageData['sprites']:
@@ -320,15 +395,7 @@ class TrickplayImageFileSystem(QWidget):
                 orgId = "}\n\t],"
                 newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+self.getDir(itemWhatsThis)+"\" }\n\t],"
                 self.imageJsonItemSub(orgId, newFolderInfo) 
-                """
-                f = open(self.main.imageJsonFile)
-                jsonFileContents = f.read()
-                f.close()
-                f = open(self.main.imageJsonFile, 'w')
-                f.write(jsonFileContents.replace(orgId, newFolderInfo))
-                f.close()
-                self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
-                """
+        """
 
     def insertImage(self) :
         
