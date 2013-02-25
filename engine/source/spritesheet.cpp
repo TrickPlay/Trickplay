@@ -56,16 +56,14 @@ void Source::make_texture( bool immediately )
 
     if ( cache )
     {
-        g_assert( !failed );
-        //g_assert( !texture && real );
+        g_assert( !failed ); // also !texture && real
         return;
     }
-    
+
     JSON::Object jo;
     CoglHandle cache_texture = Images::cache_get( cache_key, jo );
 
-    // In cache
-    if ( cache_texture != COGL_INVALID_HANDLE )
+    if ( cache_texture != COGL_INVALID_HANDLE ) // In cache
     {
         failed = false;
         cache = true;
@@ -150,9 +148,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
         subtexture = cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
     }
 
-    cogl_handle_ref( subtexture );
-
-    return subtexture;
+    return cogl_handle_ref( subtexture );
 }
 
 void Source::unsubscribe( PingMe * ping, bool release_now )
@@ -178,7 +174,7 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
 
-    if ( pings.empty() )
+    if ( pings.empty() ) // Sprite texture should always be release immediately
     {
         release_texture();
     }
@@ -189,8 +185,11 @@ void Sprite::update()
     g_assert( source );
 
     failed = source->is_failed();
+    bool is_real = source->is_real();
 
-    if ( !failed && source->is_real() )
+    g_assert( !failed || !is_real );
+
+    if ( !failed && is_real )
     {
         set_texture( source->get_subtexture( x, y, w, h ), true );
         return;
