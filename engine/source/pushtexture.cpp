@@ -4,9 +4,12 @@ typedef PushTexture::PingMe PingMe;
 
 PushTexture::~PushTexture()
 {
-    if ( texture ) cogl_handle_unref( texture );
+    if ( texture )
+    {
+        cogl_handle_unref( texture );
+        texture = NULL;
+    }
 
-    texture = NULL;
     failed = false;
     real = false;
 
