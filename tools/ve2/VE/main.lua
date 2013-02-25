@@ -1104,17 +1104,15 @@ local codeGen = function()
 
     for a,b in ipairs (screen.children) do 
         if b.name and string.find(b.name, "Layer") then 
-
             local layerName = b.name
             local lowLayerName = string.lower(layerName)
-            
             local contents = readfile(lowLayerName..".lua")
             --print ( contents )
 
             local contents_header = "local "..lowLayerName.." = ...\n" 
             local contents_tail = "return "..lowLayerName 
 
-            if contents ~= nil then 
+            if contents ~= nil and b.elements ~= nil then 
                 local new_contents = ""
 
                 for i, j in pairs(b.elements) do 
@@ -1176,9 +1174,11 @@ local codeGen = function()
                 
                 contents = contents_header
 
-                for i, j in pairs(b.elements) do 
-                    contents = objCodeGen(contents, layerName, lowLayerName, j) 
-                end 
+                if b.elements then 
+                    for i, j in pairs(b.elements) do 
+                        contents = objCodeGen(contents, layerName, lowLayerName, j) 
+                    end 
+                end
 
                 contents = contents..contents_tail
                 editor_lb:writefile(lowLayerName..".lua", contents, true)
@@ -1210,8 +1210,8 @@ _VE_.saveFile = function(scrJson)
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
-    --screen:clear()
-    --_VE_.openFile(currentProjectPath)
+    screen:clear()
+    _VE_.openFile(currentProjectPath)
 
     codeGen()
 
