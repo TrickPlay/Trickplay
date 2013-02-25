@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
                 print "[VE] progressBar.setValue : %s  "%'100'
                 self.bar.setValue(100)
                 self.bar.hide()
-            if self.importCmd is not "skins" :
+            if self.importCmd is "assets" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
         else : 
             if self.bar is not None:
