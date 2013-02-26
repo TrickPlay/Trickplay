@@ -40,6 +40,9 @@ struct SpriteBinding
             RefCounted::unref( sheet );
             sheet = NULL;
         }
+        if ( actor ) {
+            clutter_actor_destroy( actor );
+        }
     }
     
     const char * get_id() { return id; }
