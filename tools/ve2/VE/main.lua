@@ -839,6 +839,9 @@ _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
 _VE_.openInspector = function(gid, multi)
+    if gid == screen.gid then 
+        return
+    end
     if buildInsp == true then
         return
     elseif shift == true or multi then 
@@ -1536,7 +1539,7 @@ end
 
 
         if shift == false then
-            screen_ui.n_selected_all()
+            --screen_ui.n_selected_all()
         end 
         
         if input_mode == hdr.S_FOCUS then 

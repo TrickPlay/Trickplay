@@ -1500,6 +1500,8 @@ class TrickplayInspector(QWidget):
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
+
+        #print("selectionChaged begin")
         
         if self.preventChanges:
             return
@@ -1623,6 +1625,7 @@ class TrickplayInspector(QWidget):
                     self.ui.property.clear()
 
             
+            #print("selectionChaged end")
             self.preventChanges = False
     
     # "dataChanged(const QModelIndex &, const QModelIndex &)"
