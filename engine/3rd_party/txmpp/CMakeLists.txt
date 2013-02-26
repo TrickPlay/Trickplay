@@ -199,6 +199,12 @@ list( APPEND
 
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+include( CheckCXXCompilerFlag )
+CHECK_CXX_COMPILER_FLAG("-x c++" LUA_BUILD_FORCE_CXX)
+if(LUA_BUILD_FORCE_CXX)
+    add_definitions("-x c++")
+endif(LUA_BUILD_FORCE_CXX)
+
 set_source_files_properties(
 
     ${TXMPP_SOURCE_FILES}

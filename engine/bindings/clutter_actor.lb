@@ -1,9 +1,7 @@
 module clutter_actor;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
-
+#include "tp-clutter.h"
 #include "util.h"
 #include "clutter_util.h"
 #include "context.h"
@@ -758,7 +756,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_X_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_X_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
@@ -809,7 +807,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_Y_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Y_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
@@ -860,7 +858,7 @@ interface actor [[ClutterActor*]]
                 gfloat x;
                 gfloat y;
                 gfloat z;
-                gdouble angle = clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
+                (void)clutter_actor_get_rotation(self,CLUTTER_Z_AXIS,&x,&y,&z);
                 clutter_actor_set_rotation(self,CLUTTER_Z_AXIS,lua_tonumber(L,2),x,y,z);
             }
         ]];
@@ -1201,49 +1199,6 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
-    Property: is_animating
-
-    The is_animating property is a boolean value specifying whether or not the object is currently running an animation started by the <animate> function (true = running an animation).
-
-    *Default Setting:* false
-
-    *See Also:* the <animate> function
-*/
-
-    readonly bool is_animating
-    [[
-#ifdef CLUTTER_VERSION_1_10
-        is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
-#else
-        is_animating=clutter_actor_get_animation(self)!=NULL;
-#endif
-    ]];
-
-/***************************************
-    Function: is_property_animating
-
-    The is_property_animating() function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
-
-    *Arguments:*
-
-        property_name - the name of the property to check
-
-    *Return Value:* Returns true if the specified property is animating; false if it is not
-
-    *See Also:* the <animate> function and the <is_animating> property
-*/
-
-    bool is_property_animating(string property_name)
-    [[
-#ifdef CLUTTER_VERSION_1_10
-        result = (clutter_actor_get_transition(self, property_name) != NULL);
-#else
-        g_error("is_property_animating not supported with this version of the clutter library")
-        result = false
-#endif
-    ]];
-
-/***************************************
     Property: is_visible
 
     The is_visible property is a boolean value specifying whether the object is shown or hidden (true = shown).
@@ -1276,6 +1231,25 @@ interface actor [[ClutterActor*]]
                 clutter_actor_hide( self );
             }
         ]];
+
+/***************************************
+    Property: is_animating
+
+    The is_animating property is a boolean value specifying whether or not the object is currently running an animation started by the <animate> function (true = running an animation).
+
+    *Default Setting:* false
+
+    *See Also:* the <animate> and <is_property_animating> functions
+*/
+
+    readonly bool is_animating
+    [[
+#ifdef CLUTTER_VERSION_1_10
+        is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
+#else
+        is_animating=clutter_actor_get_animation(self)!=NULL;
+#endif
+    ]];
 
 /***************************************
     Function: set
@@ -2543,6 +2517,30 @@ interface actor [[ClutterActor*]]
     ]];
 
 /***************************************
+    Function: is_property_animating
+
+    The is_property_animating() function is a boolean value specifying whether or not the object's property is currently running an animation started by the <animate> function (true = running an animation).
+
+    *Arguments:*
+
+        property_name - the name of the property to check
+
+    *Return Value:* Returns true if the specified property is animating; false if it is not
+
+    *See Also:* the <animate> function and the <is_animating> property
+*/
+
+    bool is_property_animating(string property_name)
+    [[
+#ifdef CLUTTER_VERSION_1_10
+        result = (clutter_actor_get_transition(self, property_name) != NULL);
+#else
+        g_error("is_property_animating not supported with this version of the clutter library")
+        result = false
+#endif
+    ]];
+
+/***************************************
     UndocumentedProperty: constraints
 
 */
@@ -2589,7 +2587,7 @@ interface actor [[ClutterActor*]]
 /***************************************
     UndocumentedFunction: add_constraints
 
-    Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint Align, Bind and Snap bindings in clutter_constraint.lb. They seem like they would be useful, but a comment in the Snap code states that the Clutter code seems to be broken. For the moment, these functions will remain undocumented.
+    Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint AlignConstraint, BindConstraint, SnapConstraint and PathConstraint bindings in clutter_constraint.lb.  For the moment, these functions will remain undocumented.
 
 */
 
@@ -3662,9 +3660,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    UndocumentedFunction: grab_pointer
+    Function: grab_pointer
 
-    Experimental. Clutter warns about using it.
+    Experimental. Grab the pointer and ensure all pointer events are delivered to this actor, regardless of the position of the cursor.
 */
 
     grab_pointer()
@@ -3673,9 +3671,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    UndocumentedFunction: ungrab_pointer
+    Function: ungrab_pointer
 
-    Experimental. Clutter warns about using it.
+    Experimental. Release the pointer lock to this actor.
 */
 
     ungrab_pointer()

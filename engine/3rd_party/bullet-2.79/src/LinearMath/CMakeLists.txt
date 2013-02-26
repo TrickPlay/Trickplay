@@ -8,7 +8,6 @@ SET(LinearMath_SRCS
 	btConvexHull.cpp
 	btConvexHullComputer.cpp
 	btGeometryUtil.cpp
-	btQuickprof.cpp
 	btSerializer.cpp
 )
 

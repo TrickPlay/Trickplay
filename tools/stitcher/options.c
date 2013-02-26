@@ -35,6 +35,8 @@ void options_free( Options * options )
     free( options );
 }
 
+// check whether an id matches at least one of the name filters
+
 gboolean options_allows_id ( Options * options, const char * id )
 {
     unsigned int i, length = options->input_patterns->len;
@@ -48,6 +50,8 @@ gboolean options_allows_id ( Options * options, const char * id )
     return FALSE;
 }
 
+// enforce the uniqueness of ids on a first-come, first-serve basis
+
 gboolean options_take_unique_id ( Options * options, const char * id )
 {
     if ( g_hash_table_lookup( options->input_ids, (char *) id ) )
@@ -57,6 +61,8 @@ gboolean options_take_unique_id ( Options * options, const char * id )
     g_hash_table_insert( options->input_ids, (char *) id, (char *) id );
     return TRUE;
 }
+
+// functions for the command line parser to make use of
 
 gboolean opt_forget( const gchar * opt, const gchar * value, Options * options, GError ** error )
 {
@@ -97,13 +103,13 @@ Options * options_new_from_arguments ( int argc, char ** argv )
         { "no-buffer-pixels",  'B', G_OPTION_FLAG_REVERSE,     G_OPTION_ARG_NONE, 
             & options->add_buffer_pixels,        "Do not place buffer pixels around sprite edges", NULL },
         { "de-duplicate",      'd', 0,                         G_OPTION_ARG_NONE, 
-            & options->de_duplicate,             "Only include one copy of images that are the same", NULL },
+            & options->de_duplicate,             "Only include one copy of images that are exactly the same", NULL },
         { "ignore",            'g', 0,                         G_OPTION_ARG_CALLBACK,
             & opt_forget,                        "Id of a sprite to ignore or forget", "ID" },
         { "input-name-filter", 'i', 0,                         G_OPTION_ARG_CALLBACK, 
-            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: *)", "FILTER" },
-        { "log-level",         'l', 0,                         G_OPTION_ARG_INT, 
-            & options->log_level,                "Granularity of message logging, 0-3 (default: 1)", "LEVEL" },
+            & opt_filter,                        "Inclusive wildcard (?, *) filter applied to the relative paths of files within input directories (default: '*')", "'FILTER'" },
+        { "log-level",         'l', G_OPTION_FLAG_HIDDEN,      G_OPTION_ARG_INT, 
+            & options->log_level,                "Granularity of message logging, 0-3 (default: 1) (not yet implemented)", "LEVEL" },
         { "merge-json",        'm', G_OPTION_FLAG_FILENAME,    G_OPTION_ARG_CALLBACK,
             & opt_json,                          "Path to the JSON file of a spritesheet to merge into this one", "PATH" },
         { "output-prefix",     'o', 0,                         G_OPTION_ARG_STRING, 
@@ -126,23 +132,23 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     if ( !g_option_context_parse( context, &argc, &argv, NULL ) )
     {
         fprintf( stderr, "Could not parse arguments\n" );
-        exit( 1 );
+        exit( ARGUMENT_PARSE_ERROR );
     }
     
     g_option_context_free( context );
     
-    gboolean errors = FALSE;
+    // sanity-check the inputs
     
     if ( options->input_size_limit > 65536 )
     {
         fprintf( stderr, "Segregation size (see --help) cannot be larger than 65,536 x 65,536\n" );
-        errors = TRUE;
+        exit( SEG_SIZE_LIMIT );
     }
     
     if ( options->output_size_limit > 65536 )
     {
         fprintf( stderr, "Maximum texture size (see --help) cannot be larger than 65,536 x 65,536\n" );
-        errors = TRUE;
+        exit( TEX_SIZE_LIMIT );
     }
     
     options->input_size_limit = MIN( options->input_size_limit, options->output_size_limit );
@@ -150,7 +156,7 @@ Options * options_new_from_arguments ( int argc, char ** argv )
     if ( options->input_paths->len + options->json_to_merge->len == 0 )
     {
         fprintf( stderr, "No inputs given\n" );
-        errors = TRUE;
+        exit( NO_INPUTS );
     }
 
     if ( options->output_path == NULL )
@@ -166,19 +172,14 @@ Options * options_new_from_arguments ( int argc, char ** argv )
             else
             {
                 fprintf( stderr, "Ambiguous output path\n" );
-                errors = TRUE;
+                exit( AMBIGUOUS_OUTPUT_PATH );
             }
         }
         else
         {
             fprintf( stderr, "Ambiguous output path\n" );
-            errors = TRUE;
+            exit( AMBIGUOUS_OUTPUT_PATH );
         }
-    }
-    
-    if ( errors )
-    {
-        exit( 1 );
     }
 
     return options;

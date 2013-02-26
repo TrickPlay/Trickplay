@@ -289,7 +289,7 @@ TabBar = setmetatable(
                         t.cell_w = nil
                         t.cells  = nil
                         
-                        t.style = instance.style
+                        t.style = instance.style.name
                         
                         t.tab_w  = instance.tab_w
                         t.tab_h  = instance.tab_h
