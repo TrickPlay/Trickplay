@@ -3,7 +3,9 @@ local icon_font = "Lato 40px"
 local screen_w = screen.w
 
 screen:show()
-
+local recycle_bin = Image{src="recycle bin.png"}
+screen:add(recycle_bin)
+-------------------------------------------------------------
 local function make_icon(text,w,h)
     local instance = Group()
 
@@ -14,10 +16,59 @@ local function make_icon(text,w,h)
     t.anchor_point = {t.w/2,0}
 
     instance:add(r,t)
+
+    function instance:on_enter()
+        r.color = "red"
+    end
+    function instance:on_leave()
+        r.color = "white"
+    end
+    local grabbed = false
+    local last_x, last_y,orig_x,orig_y
+    function instance:on_button_down(x,y)
+        instance:grab_pointer()
+        grabbed = true
+        last_y = y
+        last_x = x
+        orig_y = instance.y
+        orig_x = instance.x
+    end
+    function instance:on_motion( x,y )
+        if grabbed then
+            instance:move_by(x-last_x,y-last_y)
+            last_x = x
+            last_y = y
+        end
+    end
+    function instance:on_button_up(x,y)
+        if grabbed then
+            grabbed = false
+            instance:ungrab_pointer()
+
+            if
+                x > recycle_bin.x and
+                x < recycle_bin.x + recycle_bin.w and
+                y > recycle_bin.y and
+                y < recycle_bin.y + recycle_bin.h then
+
+                instance.parent:delete(
+                    instance.r,instance.c
+                )
+
+            else
+                instance:animate{
+                    duration = 100,
+                    x = orig_x,
+                    y = orig_y,
+                }
+            end
+        end
+    end
     return instance
 end
 
 
+-------------------------------------------------------------
 local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
 
     local instance = Group()
@@ -26,6 +77,8 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
     local function position_entry(item,r,c)
         item.x = (cell_w+x_spacing)*(c-1)
         item.y = (cell_h+y_spacing)*(r-1)
+        item.r = r
+        item.c = c
     end
     for r,row in ipairs(items) do
         entries[r] = {}
@@ -62,19 +115,21 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
                     --ignore these
                 elseif r == d_r and c == d_c then
                     --delete this one
-                    table.insert(
-                        properties,
-                        {
-                            source = item,
-                            name   = "opacity",
-                            keys   = {
-                                {0.0,"EASE_OUT_CIRC",255},
-                                {t_start,"EASE_OUT_CIRC",255},
-                                {t_end,"EASE_OUT_CIRC",  0},
-                                {1.0,"EASE_OUT_CIRC",  0},
-                            },
-                        }
-                    )
+                    if item.parent then
+                        table.insert(
+                            properties,
+                            {
+                                source = item,
+                                name   = "opacity",
+                                keys   = {
+                                    {0.0,"EASE_OUT_CIRC",255},
+                                    {t_start,"EASE_OUT_CIRC",255},
+                                    {t_end,"EASE_OUT_CIRC",  0},
+                                    {1.0,"EASE_OUT_CIRC",  0},
+                                },
+                            }
+                        )
+                    end
                 elseif c == 1 then
                     --these wrap around
                     --item:unparent()
@@ -128,54 +183,14 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
 
         local a = Animator{
             duration = deletion_duration,
-            properties = properties--[[{
-                {
-                    source = entries[d_r][d_c],
-                    name   = "opacity",
-                    keys   = {
-                        {0.0,"EASE_OUT_CIRC",255},
-                        {1.0,"EASE_OUT_CIRC",  0},
-                    },
-                },
-                {
-                    source = wrapping_around,
-                    name   = "x",
-                    keys   = {
-                        {0.0,"EASE_OUT_CIRC",0},
-                        {1.0,"EASE_OUT_CIRC",w-(cell_w)},
-                    },
-                },
-                {
-                    source = wrapping_around,
-                    name   = "y",
-                    keys   = {
-                        {0.0,"EASE_OUT_CIRC",0},
-                        {1.0,"EASE_OUT_CIRC", -(cell_h+y_spacing)},
-                    },
-                },
-                {
-                    source = sliding_left,
-                    name   = "x",
-                    keys   = {
-                        {0.0,"EASE_OUT_CIRC", 0},
-                        {1.0,"EASE_OUT_CIRC", -(cell_w+x_spacing)},
-                    },
-                },
-            }--]]
+            properties = properties
         }
 ---[=[
         function a.timeline.on_completed()
---[[
-            local items = sliding_left.children
-            sliding_left:clear()
-            sliding_left:unparent()
-            instance:add(unpack(items))
 
-            items = wrapping_around.children
-            wrapping_around:clear()
-            wrapping_around:unparent()
-            instance:add(unpack(items))
---]]
+            if entries[d_r][d_c].parent then
+                entries[d_r][d_c]:unparent()
+            end
             for c=d_c+1,#entries[d_r] do
                 entries[d_r][c-1] = entries[d_r][c]
                 position_entry(entries[d_r][c-1],d_r,c-1)
@@ -205,6 +220,14 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
         dolater(a.start,a)
     end
 
+    function instance:make_icons_reactive()
+        for i,row in ipairs(entries) do
+            for i,icon in ipairs(row) do
+                icon.reactive = true
+            end
+        end
+    end
+
     return instance
 
 end
@@ -218,7 +241,7 @@ for i=1,4 do
     end
 end
 grid = make_grid(items,100,100,80,80)
-
+grid:make_icons_reactive()
 grid.x = screen_w/2
 grid.y = 400
 screen:add(grid)
@@ -264,4 +287,6 @@ end
 
 screen:add(modal_menu)
 modal_menu.z = -100
+
+controllers:start_pointer()
 
