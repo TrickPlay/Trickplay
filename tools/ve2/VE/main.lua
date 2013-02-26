@@ -6,7 +6,6 @@
     -- Constants, Global Variables  
     -------------------------------
     hdr = dofile("header")
-    local currentProjectPath 
 
     --TEST Function 
     aa = function ()
@@ -25,6 +24,8 @@
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
+    local currentProjectPath 
+    local select_screen = false
     local openFile= false
     local key_map =
     {
@@ -839,8 +840,10 @@ _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
 _VE_.openInspector = function(gid, multi)
-    if gid == screen.gid then 
+    if gid == screen.gid and select_screen == false then 
         return
+    elseif  gid == screen.gid and select_screen == true then  
+        select_screen = false
     end
     if buildInsp == true then
         return
@@ -1382,7 +1385,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     util.getCurLayer(layerGid)
 
-    screen_ui.n_selected_all()
 
     blockReport = true
 
@@ -1400,7 +1402,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         end 
 
     elseif uiTypeStr == "Clone" or uiTypeStr == "Widget_Clone" then 
-        
         editor.clone()
         return
 
@@ -1462,6 +1463,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     end
 
     if uiInstance ~= nil then 
+        screen_ui.n_selected_all()
         uiInstance.extra.mouse_handler = false 
         util.create_mouse_event_handler(uiInstance, uiTypeStr)
         util.addIntoLayer(uiInstance)
@@ -1539,7 +1541,8 @@ end
 
 
         if shift == false then
-            --screen_ui.n_selected_all()
+            screen_ui.n_selected_all()
+            select_screen = true
         end 
         
         if input_mode == hdr.S_FOCUS then 
