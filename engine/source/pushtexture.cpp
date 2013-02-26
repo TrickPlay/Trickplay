@@ -61,7 +61,7 @@ CoglHandle PushTexture::get_texture()
 {
     if ( !texture )
     {
-        texture = cogl_handle_ref( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ) );
+        texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
     }
 
     return texture;
