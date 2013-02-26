@@ -3660,9 +3660,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    UndocumentedFunction: grab_pointer
+    Function: grab_pointer
 
-    Experimental. Clutter warns about using it.
+    Experimental. Grab the pointer and ensure all pointer events are delivered to this actor, regardless of the position of the cursor.
 */
 
     grab_pointer()
@@ -3671,9 +3671,9 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    UndocumentedFunction: ungrab_pointer
+    Function: ungrab_pointer
 
-    Experimental. Clutter warns about using it.
+    Experimental. Release the pointer lock to this actor.
 */
 
     ungrab_pointer()
