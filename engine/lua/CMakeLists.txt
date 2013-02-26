@@ -53,6 +53,13 @@ set( LUA_SOURCE_FILES
 #    ${LUA_ROOT}/src/linit.c
 )
 
+include( CheckCXXCompilerFlag )
+CHECK_CXX_COMPILER_FLAG("-x c++" LUA_BUILD_FORCE_CXX)
+if(LUA_BUILD_FORCE_CXX)
+    add_definitions("-x c++")
+endif(LUA_BUILD_FORCE_CXX)
+
+
 set_source_files_properties(
 
     ${LUA_SOURCE_FILES}

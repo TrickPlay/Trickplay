@@ -19,6 +19,8 @@ void progress_free( Progress * progress )
     free( progress );
 }
 
+// progress is estimated as a sum of independent chunks, taken together
+
 void progress_recalculate( Progress * progress )
 {
     float p = 0.0, t = 0.0;
@@ -35,6 +37,8 @@ void progress_recalculate( Progress * progress )
     if ( t > 0.0 )
     {
         p = 100.0 * p / t ;
+        
+        // update only if the progress has increased by at least 1%; don't allow backtracking when estimates are changed
 
         if ( progress->percent < (int) p )
         {
