@@ -4,9 +4,12 @@ typedef PushTexture::PingMe PingMe;
 
 PushTexture::~PushTexture()
 {
-    if ( texture ) cogl_handle_unref( texture );
+    if ( texture )
+    {
+        cogl_handle_unref( texture );
+        texture = NULL;
+    }
 
-    texture = NULL;
     failed = false;
     real = false;
 
@@ -56,11 +59,9 @@ void PushTexture::get_dimensions( int * w, int * h )
 
 CoglHandle PushTexture::get_texture()
 {
-    static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-
     if ( !texture )
     {
-        texture = cogl_handle_ref( null_texture );
+        texture = cogl_handle_ref( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ) );
     }
 
     return texture;

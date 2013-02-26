@@ -18,14 +18,14 @@ CoglHandle ref_texture_from_image( Image * image, bool release )
     ClutterActor * actor = clutter_texture_new();
     Images::load_texture( CLUTTER_TEXTURE( actor ), image );
 
-    CoglHandle texture = (CoglHandle) clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
-    cogl_handle_ref( texture );
+    CoglHandle t = (CoglHandle) clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+    cogl_handle_ref( t );
 
     clutter_actor_destroy( actor );
 
     if ( release ) delete( image );
 
-    return texture;
+    return t;
 }
 
 void Source::handle_async_img( Image * image )
@@ -35,10 +35,9 @@ void Source::handle_async_img( Image * image )
         failed = false;
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
-        CoglHandle texture = ref_texture_from_image( image, true );
-        set_texture( texture, true );
-        
-        Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
+        set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+
+        Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
     }
     else
     {
@@ -57,21 +56,19 @@ void Source::make_texture( bool immediately )
 
     if ( cache )
     {
-        g_assert( !failed );
-        //g_assert( !texture && real );
+        g_assert( !failed ); // also !texture && real
         return;
     }
-    
-    JSON::Object jo;
-    CoglHandle texture = Images::cache_get( cache_key, jo );
 
-    // In cache
-    if ( texture != COGL_INVALID_HANDLE )
+    JSON::Object jo;
+    CoglHandle cache_texture = Images::cache_get( cache_key, jo );
+
+    if ( cache_texture != COGL_INVALID_HANDLE ) // In cache
     {
         failed = false;
         cache = true;
 
-        set_texture( cogl_handle_ref(texture), true );
+        set_texture( cogl_handle_ref( cache_texture ), true );
 
         if ( !immediately ) ping_all();
 
@@ -87,14 +84,12 @@ void Source::make_texture( bool immediately )
 
         if ( image )
         {
-            texture = ref_texture_from_image( image, true );
+            failed = false;
+            set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
 
-            Images::cache_put( sheet->app->get_context(), cache_key, texture, JSON::Object() );
             // Set variable cache next time when used, because we do not know whether
             // this time the image is saved in cache properly or not.
-
-            failed = false;
-            set_texture( texture, true );
+            Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
         }
         else
         {
@@ -138,6 +133,7 @@ void Source::set_source( Image * image )
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 {
     int tw, th;
+    CoglHandle subtexture;
     get_dimensions( &tw, &th );
 
     if ( w < 0 ) tw = MAX( tw - x, 0 );
@@ -145,10 +141,14 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 
     if ( tw < x + w || th < y + h )
     {
-        return cogl_texture_new_with_size( MAX( w, 1 ), MAX( h, 1 ), COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+        subtexture = cogl_texture_new_with_size( MAX( w, 1 ), MAX( h, 1 ), COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
+    }
+    else
+    {
+        subtexture = cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
     }
 
-    return cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
+    return cogl_handle_ref( subtexture );
 }
 
 void Source::unsubscribe( PingMe * ping, bool release_now )
@@ -174,7 +174,7 @@ void Sprite::unsubscribe( PingMe * ping, bool release_now )
 {
     pings.erase( ping );
 
-    if ( pings.empty() )
+    if ( pings.empty() ) // Sprite texture should always be release immediately
     {
         release_texture();
     }
@@ -185,10 +185,13 @@ void Sprite::update()
     g_assert( source );
 
     failed = source->is_failed();
+    bool is_real = source->is_real();
 
-    if ( !failed && source->is_real() )
+    g_assert( !failed || !is_real );
+
+    if ( !failed && is_real )
     {
-        set_texture( cogl_handle_ref(source->get_subtexture( x, y, w, h )), true );
+        set_texture( source->get_subtexture( x, y, w, h ), true );
         return;
     }
 
