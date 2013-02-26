@@ -230,7 +230,7 @@ class TrickplayEmulatorManager(QWidget):
 
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
-					        print('Found', result['gid'], result['name'])
+					        print('Found*', result['gid'], result['name'])
 					        self.inspector.clearItem(result)
 					        #self.inspector.selectItem(result, shift)
                             # open Property Tab 
