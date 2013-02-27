@@ -1,5 +1,7 @@
 #include "leaf.h"
 
+// because the comparison given to g_sequence_lookup cannot, on its own, distinguish between leaves of equal area
+
 void g_sequence_remove_sorted ( GSequence * seq, gpointer data, GCompareDataFunc cmp_func, gpointer cmp_data )
 {
     gpointer found;
@@ -44,7 +46,7 @@ int leaf_compare ( gconstpointer a, gconstpointer b, gpointer user_data __attrib
 {
     Leaf * aa = (Leaf *) a,
          * bb = (Leaf *) b;
-    return (int)aa->area - (int)bb->area;
+    return (int) aa->area - (int) bb->area;
 }
 
 Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h )
@@ -60,6 +62,8 @@ Leaf * leaf_new ( unsigned int x, unsigned int y, unsigned int w, unsigned int h
 
     return leaf;
 }
+
+// splits a leaf as if taking a (w x h) chunk out of its top-left corner, making up to two new leaves if they would be large enough
 
 void leaf_cut ( Leaf * leaf, unsigned int w, unsigned int h, Layout * layout )
 {

@@ -4,6 +4,7 @@
 
 #include "clutter_util.h"
 #include "lb.h"
+#include "profiler.h"
 #include "trickplay/controller.h"
 
 #include "clutter_actor.lb.h"
@@ -438,6 +439,7 @@ void ClutterUtil::wrap_timeline( lua_State * L , ClutterTimeline * timeline )
         luaL_getmetatable( L , "TIMELINE_METATABLE" );
     }
     lua_setmetatable( L , -2 );
+    PROFILER_CREATED("Timeline",timeline);
 }
 
 //-----------------------------------------------------------------------------

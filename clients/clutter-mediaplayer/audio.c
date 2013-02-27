@@ -2,6 +2,7 @@
 #include <string.h>
 #include "glib.h"
 #include "gst/video/video.h"
+#include "clutter-gst/clutter-gst.h"
 
 #include "trickplay/audio-sampler.h"
 
@@ -49,8 +50,6 @@ static GstElement * find_element_by_name( GstElement * bin , const char * name )
     gpointer el = 0;
 
     int done = FALSE;
-
-    GstElement * audio_convert = 0;
 
     while( ! done )
     {

@@ -3,8 +3,7 @@ module mediaplayer_module;
 
 [[
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "mediaplayers.h"
 #include "app.h"

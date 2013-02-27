@@ -1,0 +1,21 @@
+Title: Stitcher
+
+The Stitcher program combines multiple image files into a single file. Also created is a JSON map file that can be used when constructing a <SpriteSheet> object.
+
+Stitcher is a command-line program. It can be run from a terminal or makefile.
+
+Stitcher Command-Line Options:
+
+Stitcher recognizes the following command-line options.
+
+	-h, --help - Display information about Stitcher.
+	-B, --no-buffer-pixels - Do not include spacer pixels between images in the combined file.
+	-d, --de-duplicate - Do not store multiple copies of the same file in the combined file.
+	-g, --ignore=FILESPEC - File to ignore when creating combined file.
+	-i, --input-name-filter=FILESPEC - File(s) to ignore when creating combined file. Wildcard characters ? and * may be used in FILESPEC.
+	-l, --log-level=LEVEL - Level of Stitcher output messages. Range: 0(silent) - 4(verbose). Default: 1.
+	-m, --merge-json=FILESPEC - JSON map file to merge into combined file.
+	-o, --output-prefix=FILESPEC - Path location and filename prefix for combined file(s).
+	-r, --recursive - Recursively process subdirectories.
+	-s, --size-segregation=SIZE - Maximum image file size in KB. Files exceeding SIZE are placed in their own JSON map file. Default: 512.
+	-t, --max-texture-size=SIZE - Maximum file size in KB for combined file. If size exceeds SIZE, a second combined file is created. Process continues until all image files are handled. Default: 4096.

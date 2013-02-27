@@ -11,8 +11,7 @@
 #include "glib.h"
 //-----------------------------------------------------------------------------
 #include "json-glib/json-glib.h"
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #define TRICKPLAY_PRIORITY CLUTTER_PRIORITY_REDRAW
 //-----------------------------------------------------------------------------
 #include "lua.h"

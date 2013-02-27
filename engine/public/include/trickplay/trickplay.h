@@ -32,8 +32,8 @@ extern "C" {
     TrickPlay version
 */
 
-#define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    27
+#define TP_MAJOR_VERSION    2
+#define TP_MINOR_VERSION    0
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------

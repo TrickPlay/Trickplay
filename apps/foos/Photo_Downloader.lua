@@ -1,5 +1,5 @@
 --[[
-    local adapters = 
+    local adapters =
     {
         { name = "Google Search",
           logosrc = "adapter/Google/logo.png",
@@ -9,11 +9,11 @@
                      search_index.."&imgsz=xxlarge"
           end,
           search_response = function(response)
-              if (type(data.responseData) == "table"  and 
+              if (type(data.responseData) == "table"  and
                  data.responseData.results[1] ~= nil) then
                   return data.responseData.results[1].unescapedUrl
               else
-                  return "" 
+                  return ""
               end
           end,
         },
@@ -84,15 +84,15 @@ local api_key = "e68b53548e8e6a71565a1385dc99429f"
 --Grabs the creative commons licensing information
 local licenses_acquired = false
 local licenses = {}
-local license_info_url = 
+local license_info_url =
 	"http://api.flickr.com/services/rest/?"..
 	"method=flickr.photos.licenses.getInfo"..
 	"&format=json&nojsoncallback=1"
 
 local extract_short_license = function(url)
 	local result
-	_, _, result = string.find(url, "http:\/\/creativecommons.org\/"..
-									"licenses\/([%a%-]+)\/")
+	_, _, result = string.find(url, "http://creativecommons.org/"..
+									"licenses/([%a%-]+)/")
 	if(nil == result) then
 		result = "free"
 	end
@@ -106,7 +106,7 @@ local req = URLRequest{
 		if response.body == nil then return end
 		local data = json:parse( response.body )
 		for i, license in ipairs( data.licenses.license ) do
-			licenses[license.id] =	
+			licenses[license.id] =
 			{
 				name  = license.name,
 				url   = license.url,
@@ -130,12 +130,12 @@ Flickr_Interesting = Class(nil,function(adapter, slot_ref,search_term,...)
 	adapter.photo_list = {}
 	--an attempt to prevent the user from flooding Flickr with requests
 	local outbound_requests = {}
-	 
+
 
 	--gets the list of URLs from a search query
 	function adapter:get_interesting_photos(i)
 		local num_retrys = 0
-		local base_url = 
+		local base_url =
 				"http://api.flickr.com/services/rest/?"..
 				"method=flickr.photos.search"..
 				"&license=4%2C5%2C6%2C7%2C8"..
@@ -290,13 +290,13 @@ function urlencode(str)
    if (str) then
        str = string.gsub (str, "\n", "\r\n")
        str = string.gsub (str, "([^%w ])",
-                function (c) 
+                function (c)
                     return string.format ("%%%02X", string.byte(c))
                  end
              )
        str = string.gsub (str, " ", "+")
    end
-   return str        
+   return str
 end
 --[=[
 function urlencode(input)
@@ -304,7 +304,7 @@ function urlencode(input)
     input = string.gsub(input,"%%%%","%%25")
     --yes this means that the '%20's will be %2520, its stupid... i know
 
-    input = string.gsub(input,"&","%%26")    
+    input = string.gsub(input,"&","%%26")
     input = string.gsub(input,"/","%%2F")
     input = string.gsub(input,":","%%3A")
     input = string.gsub(input,"=","%%3D")
@@ -324,13 +324,13 @@ function oauth_signing(param_list, url_path, http_method)
         "oauth_timestamp",
         "oauth_version"
     }
-    local lex_vals = 
+    local lex_vals =
     {
         developer_key,
         nonce,
         "HMAC-SHA1",
         os.time(),
-        "1.0",        
+        "1.0",
     }
     --insert the other params alphabetically
     for k,v in pairs(param_list) do
@@ -356,7 +356,7 @@ function oauth_signing(param_list, url_path, http_method)
     local base_string = http_method.."&"..urlencode(url_path).."&"..
                                           urlencode(params_str)
     local sig = hmac_sha1(private_key.."&",base_string)
-    
+
 
     --add the signature to the params string
     local pos = 1

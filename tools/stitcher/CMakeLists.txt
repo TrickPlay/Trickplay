@@ -49,4 +49,4 @@ set_target_properties( stitcher
 )
 
 install(TARGETS stitcher RUNTIME DESTINATION bin)
-install(FILES stitcher.1 DESTINATION share/man/man1/)
+#install(FILES stitcher.1 DESTINATION share/man/man1/)

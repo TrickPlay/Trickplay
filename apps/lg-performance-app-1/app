@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.test",
+    release     = "5",
+    version     = "1.4",
+    name        = "Test App",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+
