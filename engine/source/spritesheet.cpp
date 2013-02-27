@@ -45,7 +45,7 @@ void Source::handle_async_img( Image * image )
         cache = false;
 
         g_warning( "Could not download image %s", source_uri );
-        set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+        set_texture( NULL, false );
         ping_all();
     }
 }
@@ -94,14 +94,14 @@ void Source::make_texture( bool immediately )
         else
         {
             failed = true;
-            set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+            set_texture( NULL, false );
         }
     }
     else
     {
         failed = false;
         sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-        set_texture( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ), false );
+        set_texture( NULL, false );
    }
 }
 
