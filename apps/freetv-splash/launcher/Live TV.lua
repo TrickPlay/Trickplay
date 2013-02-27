@@ -193,7 +193,7 @@ local function make_show_tile(channel_num, data)
         self.anim.state = "unfocus"
     end
     show_group.anim:warp("unfocus")
-    
+
     show_group.slogan = "Burberry Shopping App"
     show_group.description = [[The greatest app since sliced bread. Just ask Arnold. buy some cool stuff and pay lots n lots for it. Just press OK now!]]
     show_group.start_time = "8pm"
@@ -321,10 +321,10 @@ do
             color = "white",
             font = FONT_NAME.."  20px",
         }
-        g:add( 
-            g.slogan, 
-            g.description, 
-            g.start_time, 
+        g:add(
+            g.slogan,
+            g.description,
+            g.start_time,
             g.aired_on,
             g.season_episode,
             g.related,
@@ -332,23 +332,23 @@ do
         )
         return g
     end
-    
+
     local   incoming_show = setup_info( Group{ name=   "incoming_show", opacity = 0 } )
     local displaying_show = setup_info( Group{ name= "displaying_show", opacity = 0, x = 200 } )
     local next_show
     local animating = false
-    
+
     set_incoming_show = function(curr_app,direction)
-        
-        if animating then 
-            next_show = {curr_app,direction} 
-            return 
+
+        if animating then
+            next_show = {curr_app,direction}
+            return
         end
         animating = true
         print("incoming")
         incoming_show.slogan.text      = curr_app.slogan
         incoming_show.description.text = curr_app.description
-        
+
         if direction == "left" then
             incoming_show.x = displaying_show.x - screen.w
             displaying_show:animate{
@@ -382,16 +382,23 @@ do
             end
         }
     end
-    
+
     hide_current_show = function()
-        displaying_show:animate{duration=200,opacity=0}
+        displaying_show:animate{
+            duration=200,
+            opacity=0,
+            y=displaying_show.y+500,
+            on_completed = function()
+                displaying_show.y = displaying_show.y -500
+            end
+        }
     end
     set_current_show = function(curr_app)
         displaying_show.slogan.text      = curr_app.slogan
         displaying_show.description.text = curr_app.description
     end
     backing:add(displaying_show,incoming_show)
-    
+
 end
 
 local function build_bar()
