@@ -53,12 +53,7 @@ void Source::handle_async_img( Image * image )
 void Source::make_texture( bool immediately )
 {
     g_assert( source_uri );
-
-    if ( cache )
-    {
-        g_assert( !failed ); // also !texture && real
-        return;
-    }
+    g_assert( !cache ); // Should not reach this function if already in cache
 
     JSON::Object jo;
     CoglHandle cache_texture = Images::cache_get( cache_key, jo );
@@ -72,9 +67,6 @@ void Source::make_texture( bool immediately )
 
         return;
     }
-
-    // Not in cache
-    cache = false;
 
     if ( immediately )
     {
@@ -191,10 +183,11 @@ void Sprite::update()
     if ( !failed && is_real )
     {
         set_texture( source->get_subtexture( x, y, w, h ), true );
-        return;
     }
-
-    set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+    else
+    {
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+    }
 }
 
 void on_ping( PushTexture * source, void * target )
