@@ -258,17 +258,8 @@ SpriteSheet::~SpriteSheet()
     if ( sources ) {
         for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
         {
-            Source * source = (Source *) (* it);
-            if ( source->can_signal )
-            {
-                delete( source );
-            }
-            else
-            {
-                source->set_destroy(); // Delete source in ReleaseLater
-            }
+            delete( (PushTexture *) (* it) );
         }
-
         sources->clear();
         delete( sources );
     }
