@@ -20,20 +20,14 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
 
-    if ( !failed && !real && preload )
+    if ( real )
     {
-        make_texture( true ); // Will update real and failed
-        //g_assert( texture );
-        g_assert( real || failed );
-    }
-    else if ( !failed && !texture )
-    {
-        make_texture( false ); // Will update real and failed
-        //g_assert( texture );
+        g_assert( !failed );
+        ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
     }
     else
     {
-        ping->ping();
+        make_texture( preload ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
     }
 }
 
