@@ -47,7 +47,6 @@ void Source::handle_async_img( Image * image )
 
         g_warning( "Could not download image %s", source_uri );
         set_texture( NULL, false );
-        ping_all();
     }
 }
 
@@ -70,8 +69,6 @@ void Source::make_texture( bool immediately )
         cache = true;
 
         set_texture( cogl_handle_ref( cache_texture ), true );
-
-        if ( !immediately ) ping_all();
 
         return;
     }
