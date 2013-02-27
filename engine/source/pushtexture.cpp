@@ -23,13 +23,13 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
     if ( !failed && !real && preload )
     {
         make_texture( true ); // Will update real and failed
-        g_assert( texture );
+        //g_assert( texture );
         g_assert( real || failed );
     }
     else if ( !failed && !texture )
     {
         make_texture( false ); // Will update real and failed
-        g_assert( texture );
+        //g_assert( texture );
     }
     else
     {
@@ -59,11 +59,6 @@ void PushTexture::get_dimensions( int * w, int * h )
 
 CoglHandle PushTexture::get_texture()
 {
-    if ( !texture )
-    {
-        texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-    }
-
     return texture;
 }
 
@@ -71,7 +66,7 @@ void PushTexture::set_texture( CoglHandle _texture, bool _real )
 {
     // failed and real are updated in Sprite and Source instances
 
-    if ( ( texture == _texture ) && !texture )
+    if ( ( texture == _texture ) && texture )
     {
         cogl_handle_unref( texture ); // texture has been cogl_handle_ref'ed before calling
         return;
@@ -99,7 +94,6 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-
     if ( instance == _instance )
     {
         callback = _callback;
