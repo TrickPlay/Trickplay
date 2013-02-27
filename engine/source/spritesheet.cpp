@@ -35,9 +35,10 @@ void Source::handle_async_img( Image * image )
         failed = false;
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
-        set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+        CoglHandle t = ref_texture_from_image( image, true );
+        set_texture( t, true ); // Will update texture
 
-        Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+        Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
     }
     else
     {
@@ -45,7 +46,7 @@ void Source::handle_async_img( Image * image )
         cache = false;
 
         g_warning( "Could not download image %s", source_uri );
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+        set_texture( NULL, false );
         ping_all();
     }
 }
@@ -85,23 +86,24 @@ void Source::make_texture( bool immediately )
         if ( image )
         {
             failed = false;
-            set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+            CoglHandle t = ref_texture_from_image( image, true );
+            set_texture( t, true ); // Will update texture
 
             // Set variable cache next time when used, because we do not know whether
             // this time the image is saved in cache properly or not.
-            Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+            Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
         }
         else
         {
             failed = true;
-            set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+            set_texture( NULL, false );
         }
     }
     else
     {
         failed = false;
         sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+        set_texture( NULL, false );
    }
 }
 
@@ -148,7 +150,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
         subtexture = cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
     }
 
-    return cogl_handle_ref( subtexture );
+    return subtexture;
 }
 
 void Source::unsubscribe( PingMe * ping, bool release_now )
