@@ -249,7 +249,7 @@ SpriteSheet::~SpriteSheet()
     if ( sprites ) {
         for (std::map < std::string, Sprite * >::iterator it = sprites->begin() ; it != sprites->end(); ++it)
         {
-            delete( (PushTexture *)(it->second) );
+            delete( (Sprite *)(it->second) );
         }
         sprites->clear();
         delete( sprites );
@@ -258,8 +258,17 @@ SpriteSheet::~SpriteSheet()
     if ( sources ) {
         for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
         {
-            delete( (PushTexture *) (* it) );
+            Source * source = (Source *) (* it);
+            if ( source->can_signal )
+            {
+                delete( source );
+            }
+            else
+            {
+                source->set_destroy(); // Delete source in ReleaseLater
+            }
         }
+
         sources->clear();
         delete( sources );
     }
