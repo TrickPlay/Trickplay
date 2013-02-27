@@ -28,7 +28,7 @@ struct SpriteBinding
     };
 
     SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
-                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ) {}
 
     ~SpriteBinding()
     {
@@ -86,12 +86,20 @@ struct SpriteBinding
 
         loaded = sprite && sprite->is_real();
         CoglHandle new_texture = loaded ? sprite->get_texture() : null_texture;
+
         g_assert( new_texture );
 
-        clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), new_texture );
-        clutter_actor_queue_redraw( actor );
+        if ( texture != new_texture ) {
 
-        signal_loaded_later();
+            texture = new_texture;
+
+            /* No need to unref the texture previously associated with the actor, as
+                clutter_texture_set_cogl_texture will do it */
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), new_texture );
+            clutter_actor_queue_redraw( actor );
+
+            signal_loaded_later();
+        }
     }
 
     void signal_loaded()
@@ -155,6 +163,7 @@ private:
     SpriteSheet::Sprite * sprite;
     SpriteSheet         * sheet;
     char * id;
+    CoglHandle texture;
 };
 
 void set_sheet_first( lua_State * L , int table )
