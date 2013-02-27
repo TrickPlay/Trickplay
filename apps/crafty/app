@@ -1,0 +1,8 @@
+app=
+{
+    id          = "com.trickplay.craftymind",
+    release     = "1",
+    version     = "1.0",
+    name        = "Craftymind",
+    author      = "TrickPlay, Inc.",
+}

@@ -1,0 +1,140 @@
+
+/***************************************/
+Class: RadioButton
+
+	The RadioButton widget implements a single radio-button that the user can toggle on/off. To implement a group of multiple radio-buttons in which only a single button can be selected among the group, use the <RadioButtonGroup> widget.
+
+	In addition to the properties and functions described on this page, the RadioButton data type also supports all the properties and functions defined in the <UIElement> interface and <Button> class.
+
+	*Code Example:* Create a RadioButton object, display it on the screen, and receive notification when the user toggles it.
+
+		(code)
+		-- **************************************
+		-- Load the Widget Library. This is necessary before creating any widget.
+		WL = dofile( "widgetlib/Widget_Library" )
+
+		-- Create a RadioButton object; make it reactive so it receives pointer/mouse events
+		radioButton = WL.RadioButton( { position       = { 100, 100 },
+										label          = "My First RadioButton",
+										reactive       = true,
+										on_selection   = radioSelectHandler,
+										on_deselection = radioDeselectHandler,
+		} )
+		if( radioButton == nil )then
+			print( "ERROR: Could not create RadioButton object" )
+			exit()
+		end
+
+		-- Add the RadioButton to the screen and show the screen
+		screen:add( radioButton )
+		screen:show()
+
+		-- Activate pointer/mouse events to all reactive objects
+		controllers:start_pointer()
+
+		-- **************************************
+		function radioSelectHandler()
+
+			-- This function is invoked when the user toggles the RadioButton so it is selected
+			print( "The radioButton was selected." )
+		end
+
+		-- **************************************
+		function radioDeselectHandler()
+
+			-- This function is invoked when the user toggles the RadioButton so it is deselected
+			print( "The radioButton was deselected." )
+
+		end
+		-- **************************************
+		(end)
+
+/***************************************/
+Constructor: RadioButton
+
+	The RadioButton() constructor creates a new RadioButton object. Initial property values can be specified in the constructor's argument.
+
+	*Prototype:*
+
+		(code)
+		RadioButton( table props = 0 )
+		(end)
+
+	*Arguments:*
+
+		props - optional table of RadioButton property settings.
+
+	*Return Value:* reference to the constructed RadioButton object. If an error occurred, returns nil.
+
+	*Code Example:* Create a new RadioButton object
+
+		(code)
+		myRadioButton = WidgetLibrary.RadioButton( { label    = "myRadioButton",
+													 size     = { 300, 50 },
+													 position = { 100, 100 },
+													 selected = true,
+		} )
+		if( myRadioButton == nil ){
+			print( "Error: Could not create RadioButton object" )
+		end
+		(end)
+
+	*See Also:* the <selected> property
+
+/***************************************/
+Property: selected
+
+	The selected property is a boolean flag indicating whether the RadioButton object is currently selected or unselected (true=selected).
+
+	Setting the selected property in a TrickPlay application updates the object's display and fires the appropriate event (either the <on_selection> or the <on_deselection> event).
+
+	*Default Setting:* false, i.e., deselected
+
+	*See Also:* the <on_selection> and <on_deselection> events
+
+/***************************************/
+Property: icon_x_offset
+
+	The icon_x_offset property specifies the X-coordinate offset (relative to the object's <UIElement.position>) of the location at which to place the radio-button icon graphic. By setting the icon_x_offset (and related <icon_y_offset>), the radio-button graphic can be positioned to the right of the object's <Button.label> (or above the label or below it, etc.).
+
+	*Default Setting:* 0, i.e., radio-button graphic is positioned to the left of the object's label
+
+	*See Also:* the <icon_y_offset> property
+
+/***************************************/
+Property: icon_y_offset
+
+	The icon_y_offset property specifies the Y-coordinate offset (relative to the object's <UIElement.position>) of the location at which to place the radio-button icon graphic. By setting the icon_y_offset (and related <icon_x_offset>), the radio-button graphic can be positioned to the right of the object's <Button.label> (or above the label or below it, etc.).
+
+	*Default Setting:* 0, i.e., radio-button graphic is positioned to the left of the object's label
+
+	*See Also:* the <icon_x_offset> property
+
+/***************************************/
+Property: group
+
+	The group property specifies the <RadioButtonGroup> of which the RadioButton object is a member. If the object is not a member of a RadioButtonGroup, the property's value is nil. Refer to the <RadioButtonGroup> documentation for additional information.
+
+	*Default Setting:* nil, i.e., not a member of a RadioButtonGroup
+
+	*See Also:* the <RadioButtonGroup> class
+
+/***************************************/
+Event: on_selection
+
+	The on_selection event occurs whenever the RadioButton object is selected. The object can be selected by either a user action or by a TrickPlay application setting the object's <selected> property to true.
+
+	*Code Example:* Refer to the Code Example at the top of this page
+
+	*See Also:* the <on_deselection> event
+
+/***************************************/
+Event: on_deselection
+
+	The on_deselection event occurs whenever the RadioButton object is deselected. The object can be deselected by either a user action or by a TrickPlay application setting the object's <selected> property to false.
+
+	*Code Example:* Refer to the Code Example at the top of this page
+
+	*See Also:* the <on_selection> event
+
+/***************************************/
