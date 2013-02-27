@@ -1,3 +1,6 @@
+local lorem_ipsum = [[
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.]]
+
 local icon_w = 480
 local icon_h = 270
 local launcher_icons = {}
@@ -9,17 +12,17 @@ do
     local i,g,r,t
     local padding=10
     for k,v in pairs(app_list) do
-        
+
         if not v.attributes.nolauncher    and
             k ~= "com.trickplay.launcher" and
             k ~= "com.trickplay.empty"    and
             k ~= "com.trickplay.app-shop" and
             k ~= "com.trickplay.editor"   then
-            
+
             local i = Image()
             if not(i:load_app_icon(v.id,"launcher-icon.png") or
                 i:load_app_icon(v.id,"launcher-icon.jpg")) then
-                
+
                 i = Clone{source=generic_launcher_icon}
             end
             i.size = {icon_w,icon_h}
@@ -40,14 +43,14 @@ do
                 color="black",
                 opacity = 200
             }
-            
+
             g.slogan = "Burberry Shopping App"
-            g.description = [[The greatest app since sliced bread. Just ask Arnold. buy some cool stuff and pay lots n lots for it. Just press OK now!]]
+            g.description = v.description or lorem_ipsum
             g.name = v.id
             g:add(i,title_grp)
             title_grp:add(r,t)
-            
-            
+
+
             g.anchor_point = { g.w/2, g.h/2 }
             g.y_rotation = { 0, g.w/2, 0 }
             g.extra.anim = AnimationState {
@@ -76,7 +79,7 @@ do
                                                                 },
                                                             },
             }
-        
+
             g.extra.focus = function(self)
                 --title_grp.clip_to_size = false
                 self.anim.state = "focus"
@@ -87,14 +90,14 @@ do
                 self.anim.state = "unfocus"
             end
             g.anim:warp("unfocus")
-            
-            
-            
-            
+
+
+
+
             --launcher_icons[v.id] = i
             table.insert(launcher_icons,g)
         end
-        
+
     end
 end
 
@@ -175,17 +178,17 @@ do
         g:add( g.slogan, g.description )
         return g
     end
-    
+
     local   incoming_text = setup_text( Group{ name=   "incoming_text" } )
     local displaying_text = setup_text( Group{ name= "displaying_text",x = 200 } )
     local next_text
     local animating = false
     local set_incoming_text__internal = function(curr_app,direction)
-        
+
         next_text = nil
         incoming_text.slogan.text      = curr_app.slogan
         incoming_text.description.text = curr_app.description
-        
+
         if direction == "left" then
             incoming_text.x = displaying_text.x - screen.w
             displaying_text:animate{
@@ -222,21 +225,21 @@ do
         }
     end
     set_incoming_text = function(curr_app,direction)
-        if animating then 
-            next_text = {curr_app,direction} 
-            return 
+        if animating then
+            next_text = {curr_app,direction}
+            return
         else
             animating = true
             set_incoming_text__internal(curr_app,direction)
         end
     end
-    
+
     set_current_text = function(curr_app)
         displaying_text.slogan.text      = curr_app.slogan
         displaying_text.description.text = curr_app.description
     end
     backing:add(displaying_text,incoming_text)
-    
+
 end
 
 local function focus_app(number, t)
