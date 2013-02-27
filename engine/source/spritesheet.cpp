@@ -35,9 +35,10 @@ void Source::handle_async_img( Image * image )
         failed = false;
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
-        set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+        CoglHandle t = ref_texture_from_image( image, true );
+        set_texture( t, true ); // Will update texture
 
-        Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+        Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
     }
     else
     {
@@ -85,11 +86,12 @@ void Source::make_texture( bool immediately )
         if ( image )
         {
             failed = false;
-            set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+            CoglHandle t = ref_texture_from_image( image, true );
+            set_texture( t, true ); // Will update texture
 
             // Set variable cache next time when used, because we do not know whether
             // this time the image is saved in cache properly or not.
-            Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+            Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
         }
         else
         {
