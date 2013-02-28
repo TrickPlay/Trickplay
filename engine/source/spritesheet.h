@@ -44,7 +44,9 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ), action( NULL ) { g_assert(s); }
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ),
+                                        action( NULL ), async_loading( false ) { g_assert(s); }
+
             ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
@@ -56,6 +58,7 @@ public:
             CoglHandle get_subtexture( int x, int y, int w, int h );
             void unsubscribe( PingMe * ping, bool release_now );
             void cancel_release_later();
+            bool is_async_loading() { return async_loading; }
 
             SpriteSheet * sheet;
             char * source_uri;
@@ -72,6 +75,7 @@ public:
             std::string cache_key;
 
             ReleaseLater * action;
+            bool async_loading;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
