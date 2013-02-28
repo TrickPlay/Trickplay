@@ -139,11 +139,13 @@ public:
     GObject * extra;
     bool async;
     bool loaded;
+    bool can_fire;
 
 private:
     char * json_uri;
     std::map < std::string, Sprite * > * sprites;
     std::list < Source * > * sources;
+    Action * action;
 };
 
 #endif
