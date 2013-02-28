@@ -271,7 +271,12 @@ class Action
 {
 public:
 
+    Action(): cancel_handle(0) {}
     virtual ~Action();
+
+    // Cancel this action if it was posted
+
+    static void cancel( Action * action ) { if ( action->cancel_handle ) g_source_remove( action->cancel_handle ); }
 
     static void destroy( gpointer action );
 
@@ -311,6 +316,8 @@ protected:
 private:
 
     static gboolean run_internal( Action * action );
+
+    guint cancel_handle;
 };
 
 //-----------------------------------------------------------------------------
