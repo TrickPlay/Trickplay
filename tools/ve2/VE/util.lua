@@ -287,8 +287,9 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 if t == "DialogBox" then 
 								    uiInstance.y = uiInstance.y - c.separator_y
                                 elseif t == "ArrowPane" then 
-                                    uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
-                                    uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
+                                    print("ArrowPane's new contents x, y should be set (the arrow size and offset)")
+                                    --uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
+                                    --uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
                                 elseif t == "ScrollPane" then 
                                     uiInstance.x = uiInstance.x + c.virtual_x 
                                     uiInstance.y = uiInstance.y + c.virtual_y
@@ -337,7 +338,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			        		elseif t == "TabBar" then 
 							    local t_index = c.selected_tab
 							    if t_index then 
-                                    uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
+                                    print("TabBar's new contents x should be set (the arrow size and offset)")
+                                    --uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
 								    uiInstance.y = uiInstance.y - c.y - c.tab_h
                                     uiInstance.reactive = true
                                     uiInstance.is_in_group = true
