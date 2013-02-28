@@ -153,10 +153,24 @@ void Source::unsubscribe( PingMe * ping, bool release_now )
             release_texture(); // Will update failed and real
             can_signal = true;
         } else {
-            Action::post( new SpriteSheet::ReleaseLater( this ) );
+            action = new SpriteSheet::ReleaseLater( this );
+            Action::post( action );
             can_signal = false; // Prevents a second instance of ReleaseSheet from being created
         }
     }
+}
+
+void Source::cancel_release_later()
+{
+    // Remove ReleaseLater from Action queue
+    // so that Source instance can be immediately released
+
+    g_assert( !can_signal );
+    g_assert( action );
+
+    Action::cancel( action );
+    can_signal = true;
+    action = NULL;
 }
 
 /* Sprite */
@@ -259,16 +273,11 @@ SpriteSheet::~SpriteSheet()
         for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
         {
             Source * source = (Source *) (* it);
-            if ( source->can_signal )
-            {
-                delete( source );
-            }
-            else
-            {
-                source->set_destroy(); // Delete source in ReleaseLater
-            }
-        }
 
+            if ( ! source->can_signal ) source->cancel_release_later();
+
+            delete( source );
+        }
         sources->clear();
         delete( sources );
     }

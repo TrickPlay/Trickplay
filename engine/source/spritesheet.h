@@ -28,15 +28,13 @@ public:
     {
         Source * self;
 
-        public: ReleaseLater( Source * s ) : self( s ) {};
+        public: ReleaseLater( Source * s ) : self( s ) {}
 
         protected: bool run()
         {
             self->cache = false;
             self->release_texture();
             self->can_signal = true;
-
-            if ( self->is_destroy() ) delete( self );
             return false;
         }
     };
@@ -46,9 +44,9 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ), destroy( false ) { g_assert(s); };
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ), action( NULL ) { g_assert(s); }
             ~Source() { if (source_uri) g_free(source_uri); }
-
+            
             void set_source( const char * uri );
             void set_source( Image * image );
             
@@ -57,14 +55,13 @@ public:
             
             CoglHandle get_subtexture( int x, int y, int w, int h );
             void unsubscribe( PingMe * ping, bool release_now );
-            void set_destroy() { destroy = true; }
-            bool is_destroy() { return destroy; }
+            void cancel_release_later();
 
             SpriteSheet * sheet;
             char * source_uri;
             bool cache;
             bool can_signal;
-
+            
         private:
             static void async_img_callback( Image * image, Source * source ) { source->handle_async_img( image ); }
             void handle_async_img( Image * image );
@@ -74,9 +71,7 @@ public:
             
             std::string cache_key;
 
-            // set to true in ~SpriteSheet however can_signal is false
-            // Used by ReleaseLater to free the Source instance
-            bool destroy;
+            ReleaseLater * action;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
@@ -85,7 +80,7 @@ public:
     class Sprite : public PushTexture
     {
         public:
-            Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {};
+            Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {}
             ~Sprite() {}
 
             void set_sprite( Source * _source, int _x, int _y, int _w, int _h )
