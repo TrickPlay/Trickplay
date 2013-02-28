@@ -194,9 +194,8 @@ function editor.group()
 
     _VE_.refresh()
     blockReport = false
-    --_VE_.selectUIElement(uiGroup.gid)
-    --_VE_.refreshDone()
-    --_VE_.openInspector(uiGroup.gid, false)
+    _VE_.refreshDone()
+    _VE_.repUIInfo(uiGroup)
 
     screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
@@ -326,6 +325,11 @@ function editor.duplicate(gid)
 
             if uiTypeStr == "Widget_Group" then 
                 duplicate_child(uiDuplicate, v)
+            elseif uiTypeStr == "DialogBox" then 
+                for i, v in pairs (uiDuplicate.children) do
+                    local itemType = util.getTypeNameStr(v) 
+                    util.assign_right_name(v, itemType)
+                end 
             elseif uiTypeStr == "LayoutManager" then 
                 for r = 1, uiDuplicate.number_of_rows, 1 do 
                     for c = 1, uiDuplicate.number_of_cols, 1 do 
