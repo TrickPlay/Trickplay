@@ -15,11 +15,16 @@
 
 ]]--
 local bg = Rectangle{size=screen.size}
+json_null = json.null
 screen:add(bg)
 dofile("widget_helper.lua")
 
 dofile("launcher.lua")
 
+load_data = dofile("tv_data.lua")
+print("before")
+channels, series = load_data("tv_guide_json/")
+print("after")
 --[[
     Globals -- very limited set of these
 ]]--
