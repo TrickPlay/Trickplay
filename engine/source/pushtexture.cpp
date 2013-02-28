@@ -56,7 +56,7 @@ CoglHandle PushTexture::get_texture()
     return texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture, bool _real )
+void PushTexture::set_texture( CoglHandle _texture, bool _real, bool trigger )
 {
     // failed and real are updated in Sprite and Source instances
 
@@ -65,7 +65,8 @@ void PushTexture::set_texture( CoglHandle _texture, bool _real )
     // Skip cogl_handle_ref as it is done before calling set_texture
     
     real = texture && _real;
-    ping_all();
+
+    if ( trigger ) ping_all();
 }
 
 void PushTexture::ping_all()

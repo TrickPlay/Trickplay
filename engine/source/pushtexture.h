@@ -62,7 +62,7 @@ public:
     virtual ~PushTexture();
 
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture, bool real );
+    void set_texture( CoglHandle texture, bool real, bool trigger );
     void get_dimensions( int * w, int * h );
     void ping_all();
     void ping_all_later() { Action::post( new PingAllLater( this ) ); }

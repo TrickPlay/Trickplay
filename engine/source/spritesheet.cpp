@@ -36,7 +36,7 @@ void Source::handle_async_img( Image * image )
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
         CoglHandle t = ref_texture_from_image( image, true );
-        set_texture( t, true ); // Will update texture
+        set_texture( t, true, true ); // Will update texture
 
         Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
     }
@@ -46,8 +46,10 @@ void Source::handle_async_img( Image * image )
         cache = false;
 
         g_warning( "Could not download image %s", source_uri );
-        set_texture( NULL, false );
+        set_texture( NULL, false, true );
     }
+
+    async_loading = false;
 }
 
 void Source::make_texture( bool immediately )
@@ -63,7 +65,7 @@ void Source::make_texture( bool immediately )
         failed = false;
         cache = true;
 
-        set_texture( cogl_handle_ref( cache_texture ), true );
+        set_texture( cogl_handle_ref( cache_texture ), true, true );
 
         return;
     }
@@ -76,7 +78,7 @@ void Source::make_texture( bool immediately )
         {
             failed = false;
             CoglHandle t = ref_texture_from_image( image, true );
-            set_texture( t, true ); // Will update texture
+            set_texture( t, true, true ); // Will update texture
 
             // Set variable cache next time when used, because we do not know whether
             // this time the image is saved in cache properly or not.
@@ -85,14 +87,15 @@ void Source::make_texture( bool immediately )
         else
         {
             failed = true;
-            set_texture( NULL, false );
+            set_texture( NULL, false, true );
         }
     }
     else
     {
+        async_loading = true;
         failed = false;
         sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-        set_texture( NULL, false );
+        set_texture( NULL, false, false ); // Do not fire on_loaded event
    }
 }
 
@@ -120,7 +123,7 @@ void Source::set_source( Image * image )
     cache = true; // Coming from memory
     failed = false;
 
-    set_texture( ref_texture_from_image( image, false ), true );
+    set_texture( ref_texture_from_image( image, false ), true, true );
 }
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
@@ -198,11 +201,11 @@ void Sprite::update()
 
     if ( !failed && is_real )
     {
-        set_texture( source->get_subtexture( x, y, w, h ), true );
+        set_texture( source->get_subtexture( x, y, w, h ), true, true );
     }
     else
     {
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false, true );
     }
 }
 
