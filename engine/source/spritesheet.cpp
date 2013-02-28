@@ -98,7 +98,9 @@ void Source::make_texture( bool immediately )
 
 void Source::set_source( const char * uri )
 {
-    if ( sheet->json_uri )
+    AppResource resource( sheet->app, uri );
+
+    if ( sheet->json_uri && resource.is_native() )
     {
         char * json_path = g_path_get_dirname( sheet->json_uri );
         source_uri = g_build_filename( json_path, uri, NULL );
@@ -108,7 +110,7 @@ void Source::set_source( const char * uri )
     {
         source_uri = g_strdup( uri );
     }
-    
+
     cache_key = sheet->app->get_id() + ':' + source_uri;
 }
 
