@@ -236,11 +236,13 @@ class AsyncCallback : public Action
     protected: bool run()
     {
         g_signal_emit_by_name( self->extra, "load-finished", GINT_TO_POINTER( failed ) );
+        self->can_fire = true;
         return false;
     }
 };
 
-SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ), async( false ), loaded( false ), json_uri( NULL )
+SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_OBJECT, NULL ) ) ),
+                             async( false ), loaded( false ), can_fire( true ), json_uri( NULL ), action( NULL )
 {
     g_object_set_data( extra, "tp-sheet", this );
 
@@ -286,13 +288,23 @@ SpriteSheet::~SpriteSheet()
         sources->clear();
         delete( sources );
     }
+
+    if ( !can_fire )
+    {
+        g_assert( action );
+        Action::cancel( action );
+        can_fire = true;
+        action = NULL;
+    }
 }
 
 void SpriteSheet::emit_signal( const char * msg )
 {
-    if ( async )
+    if ( async && can_fire )
     {
-        Action::post( new AsyncCallback( this, msg != NULL ) );
+        action = new AsyncCallback( this, msg != NULL );
+        Action::post( action );
+        can_fire = false;
     }
     else if ( msg )
     {
