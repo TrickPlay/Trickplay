@@ -28,7 +28,7 @@ public:
     {
         Source * self;
 
-        public: ReleaseLater( Source * s ) : self( s ) {};
+        public: ReleaseLater( Source * s ) : self( s ) {}
 
         protected: bool run()
         {
@@ -44,7 +44,9 @@ public:
     class Source : public PushTexture
     {
         public:
-            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ) { g_assert(s); };
+            Source( SpriteSheet * s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ),
+                                        action( NULL ), async_loading( false ) { g_assert(s); }
+
             ~Source() { if (source_uri) g_free(source_uri); }
             
             void set_source( const char * uri );
@@ -55,7 +57,9 @@ public:
             
             CoglHandle get_subtexture( int x, int y, int w, int h );
             void unsubscribe( PingMe * ping, bool release_now );
-            
+            void cancel_release_later();
+            bool is_async_loading() { return async_loading; }
+
             SpriteSheet * sheet;
             char * source_uri;
             bool cache;
@@ -66,9 +70,12 @@ public:
             void handle_async_img( Image * image );
             
             void make_texture( bool immediately );
-            void lost_texture() {};
+            void lost_texture() {}
             
             std::string cache_key;
+
+            ReleaseLater * action;
+            bool async_loading;
     };
     
     // A sprite within the spritesheet, which other objects can take pointers to
@@ -77,7 +84,7 @@ public:
     class Sprite : public PushTexture
     {
         public:
-            Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {};
+            Sprite() : source( NULL ), x(0), y(0), w(0), h(0) {}
             ~Sprite() {}
 
             void set_sprite( Source * _source, int _x, int _y, int _w, int _h )

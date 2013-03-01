@@ -20,20 +20,14 @@ void PushTexture::subscribe( PingMe * ping, bool preload )
 {
     pings.insert( ping );
 
-    if ( !failed && !real && preload )
+    if ( real )
     {
-        make_texture( true ); // Will update real and failed
-        g_assert( texture );
-        g_assert( real || failed );
-    }
-    else if ( !failed && !texture )
-    {
-        make_texture( false ); // Will update real and failed
-        g_assert( texture );
+        g_assert( !failed );
+        ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
     }
     else
     {
-        ping->ping();
+        make_texture( preload ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
     }
 }
 
@@ -59,32 +53,20 @@ void PushTexture::get_dimensions( int * w, int * h )
 
 CoglHandle PushTexture::get_texture()
 {
-    if ( !texture )
-    {
-        texture = cogl_handle_ref( cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 ) );
-    }
-
     return texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture, bool _real )
+void PushTexture::set_texture( CoglHandle _texture, bool _real, bool trigger )
 {
     // failed and real are updated in Sprite and Source instances
 
-    if ( ( texture == _texture ) && !texture )
-    {
-        cogl_handle_unref( texture ); // texture has been cogl_handle_ref'ed before calling
-        return;
-    }
-
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
-
-    // No need to call cogl_handle_ref again since it has been done before calling set_texture
-    //if ( texture ) cogl_handle_ref( texture );
+    // Skip cogl_handle_ref as it is done before calling set_texture
     
     real = texture && _real;
-    ping_all();
+
+    if ( trigger ) ping_all();
 }
 
 void PushTexture::ping_all()
@@ -99,7 +81,6 @@ void PushTexture::ping_all()
 
 void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-
     if ( instance == _instance )
     {
         callback = _callback;
