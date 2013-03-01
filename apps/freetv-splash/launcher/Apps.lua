@@ -1,5 +1,4 @@
-local lorem_ipsum = [[
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.]]
+local lorem_ipsum = [[Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.]]
 
 local icon_w = 480
 local icon_h = 270
@@ -62,7 +61,7 @@ do
                                                                     target = "focus",
                                                                     keys = {
                                                                         --{ g, "opacity", 255 },
-                                                                        { g, "y_rotation", 0 },
+                                                                        --{ g, "y_rotation", 0 },
                                                                         { title_grp, "opacity", 255 },
                                                                         { g, "scale", { .75, .75 } },
                                                                     },
@@ -72,7 +71,7 @@ do
                                                                     target = "unfocus",
                                                                     keys = {
                                                                         --{ g, "opacity", 64 },
-                                                                        { g, "y_rotation", 5 },
+                                                                        --{ g, "y_rotation", 5 },
                                                                         { title_grp, "opacity", 0 },
                                                                         { g, "scale", { .5, .5 } },
                                                                     },
