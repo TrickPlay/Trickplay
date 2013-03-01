@@ -1,9 +1,5 @@
 
 local icon_font = "Lato 40px"
-local screen_w = screen.w
-
-local recycle_bin = Image{src="recycle bin.png"}
-screen:add(recycle_bin)
 -------------------------------------------------------------
 local function make_icon(text,w,h)
     local instance = Group()
@@ -231,4 +227,4 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
 
 end
 
-
+return make_grid
