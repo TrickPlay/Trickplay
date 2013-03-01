@@ -502,11 +502,14 @@ function util.is_available (name)
 end
 
 function util.assign_right_name (uiInstance, uiTypeStr)
-
+    uiTypeStr = (uiTypeStr:sub(1, 1):upper()..uiTypeStr:sub(2, -1))
     if hdr.uiNum_map[uiTypeStr] == nil then
         local imgFileName, i, j
         i, j = string.find(uiTypeStr, ".png")
-        imgFileName = string.sub(uiTypeStr, 1, i-1)
+        
+        if i ~= nil then 
+            imgFileName = string.sub(uiTypeStr, 1, i-1)
+        end 
         if hdr.uiNum_map[imgFileName] == nil then
             hdr.uiNum_map[imgFileName] = 0 
         end 
