@@ -35,9 +35,10 @@ void Source::handle_async_img( Image * image )
         failed = false;
         cache = false; // When used next time, need to check cache to see whether in cache or not
 
-        set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+        CoglHandle t = ref_texture_from_image( image, true );
+        set_texture( t, true, true ); // Will update texture
 
-        Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+        Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
     }
     else
     {
@@ -45,20 +46,16 @@ void Source::handle_async_img( Image * image )
         cache = false;
 
         g_warning( "Could not download image %s", source_uri );
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
-        ping_all();
+        set_texture( NULL, false, true );
     }
+
+    async_loading = false;
 }
 
 void Source::make_texture( bool immediately )
 {
     g_assert( source_uri );
-
-    if ( cache )
-    {
-        g_assert( !failed ); // also !texture && real
-        return;
-    }
+    g_assert( !cache ); // Should not reach this function if already in cache
 
     JSON::Object jo;
     CoglHandle cache_texture = Images::cache_get( cache_key, jo );
@@ -68,15 +65,10 @@ void Source::make_texture( bool immediately )
         failed = false;
         cache = true;
 
-        set_texture( cogl_handle_ref( cache_texture ), true );
-
-        if ( !immediately ) ping_all();
+        set_texture( cogl_handle_ref( cache_texture ), true, true );
 
         return;
     }
-
-    // Not in cache
-    cache = false;
 
     if ( immediately )
     {
@@ -85,29 +77,33 @@ void Source::make_texture( bool immediately )
         if ( image )
         {
             failed = false;
-            set_texture( ref_texture_from_image( image, true ), true ); // Will update texture
+            CoglHandle t = ref_texture_from_image( image, true );
+            set_texture( t, true, true ); // Will update texture
 
             // Set variable cache next time when used, because we do not know whether
             // this time the image is saved in cache properly or not.
-            Images::cache_put( sheet->app->get_context(), cache_key, get_texture(), JSON::Object() );
+            Images::cache_put( sheet->app->get_context(), cache_key, t, JSON::Object() );
         }
         else
         {
             failed = true;
-            set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+            set_texture( NULL, false, true );
         }
     }
     else
     {
+        async_loading = true;
         failed = false;
         sheet->app->load_image_async( source_uri, false, (Image::DecodeAsyncCallback) Source::async_img_callback, this, NULL );
-        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+        set_texture( NULL, false, false ); // Do not fire on_loaded event
    }
 }
 
 void Source::set_source( const char * uri )
 {
-    if ( sheet->json_uri )
+    AppResource resource( sheet->app, uri );
+
+    if ( sheet->json_uri && resource.is_native() )
     {
         char * json_path = g_path_get_dirname( sheet->json_uri );
         source_uri = g_build_filename( json_path, uri, NULL );
@@ -117,7 +113,7 @@ void Source::set_source( const char * uri )
     {
         source_uri = g_strdup( uri );
     }
-    
+
     cache_key = sheet->app->get_id() + ':' + source_uri;
 }
 
@@ -127,7 +123,7 @@ void Source::set_source( Image * image )
     cache = true; // Coming from memory
     failed = false;
 
-    set_texture( ref_texture_from_image( image, false ), true );
+    set_texture( ref_texture_from_image( image, false ), true, true );
 }
 
 CoglHandle Source::get_subtexture( int x, int y, int w, int h )
@@ -148,7 +144,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
         subtexture = cogl_texture_new_from_sub_texture( (TP_CoglTexture) get_texture(), x, y, w, h );
     }
 
-    return cogl_handle_ref( subtexture );
+    return subtexture;
 }
 
 void Source::unsubscribe( PingMe * ping, bool release_now )
@@ -162,10 +158,24 @@ void Source::unsubscribe( PingMe * ping, bool release_now )
             release_texture(); // Will update failed and real
             can_signal = true;
         } else {
-            Action::post( new SpriteSheet::ReleaseLater( this ) );
+            action = new SpriteSheet::ReleaseLater( this );
+            Action::post( action );
             can_signal = false; // Prevents a second instance of ReleaseSheet from being created
         }
     }
+}
+
+void Source::cancel_release_later()
+{
+    // Remove ReleaseLater from Action queue
+    // so that Source instance can be immediately released
+
+    g_assert( !can_signal );
+    g_assert( action );
+
+    Action::cancel( action );
+    can_signal = true;
+    action = NULL;
 }
 
 /* Sprite */
@@ -191,11 +201,12 @@ void Sprite::update()
 
     if ( !failed && is_real )
     {
-        set_texture( source->get_subtexture( x, y, w, h ), true );
-        return;
+        set_texture( source->get_subtexture( x, y, w, h ), true, true );
     }
-
-    set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false );
+    else
+    {
+        set_texture( cogl_handle_ref(cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 )), false, true );
+    }
 }
 
 void on_ping( PushTexture * source, void * target )
@@ -257,7 +268,7 @@ SpriteSheet::~SpriteSheet()
     if ( sprites ) {
         for (std::map < std::string, Sprite * >::iterator it = sprites->begin() ; it != sprites->end(); ++it)
         {
-            delete( (PushTexture *)(it->second) );
+            delete( (Sprite *)(it->second) );
         }
         sprites->clear();
         delete( sprites );
@@ -266,7 +277,11 @@ SpriteSheet::~SpriteSheet()
     if ( sources ) {
         for (std::list < Source * >::iterator it = sources->begin() ; it != sources->end(); ++it)
         {
-            delete( (PushTexture *) (* it) );
+            Source * source = (Source *) (* it);
+
+            if ( ! source->can_signal ) source->cancel_release_later();
+
+            delete( source );
         }
         sources->clear();
         delete( sources );
