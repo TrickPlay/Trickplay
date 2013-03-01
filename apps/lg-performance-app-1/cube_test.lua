@@ -1,20 +1,61 @@
 
-r1 = Rectangle{
-    w=1000,
-    h=600,
-    anchor_point={500,300},
-    color='red'
-}
-r2 = Rectangle{
-    w=1000,
-    h=600,
-    anchor_point={500,300},
-    color='green'
+w = screen.w-200
+h = 700
+
+end_angle = 90
+
+local function make_side(w,h,bg_color)
+    local instance = Group{
+        anchor_point={w/2,h/2},
+    }
+
+
+    local r = Rectangle{
+        w=w,
+        h=h,
+        --position={w/2,h/2},
+        color=bg_color
+    }
+
+
+    local items = {}
+    for i=1,4 do
+        items[i] = {}
+        for j=1,8 do
+            items[i][j] = "Icon "..i.." "..j
+        end
+    end
+    local grid = make_grid(items,100,100,80,80)
+    grid.x = w/2
+    --grid.y = h/2
+    instance:add(r,grid)
+
+    return instance
+end
+
+
+r1 = make_side(w,h,'red')
+r2 = make_side(w,h,'green')
+
+g = Group{
+    position={screen.w/2,h/2+50}
 }
 
-g = Group{position={screen.w/2,screen.h/2}}
+
+local items = {}
+for i=1,1 do
+    items[i] = {}
+    for j=1,10 do
+        items[i][j] = "Icon "..i.." "..j
+    end
+end
+local grid = make_grid(items,100,100,80,80)
+grid.x = screen.w/2
+grid.y = 850
+
 g:add(r1,r2)
-screen:add(g)
+screen:add(grid,g)
+
 
 local phase_one, phase_two
 local animating = false
@@ -23,8 +64,8 @@ local next_r = r1
 local function rotate(outgoing,incoming,direction)
     if animating then return end
     animating = true
-    outgoing.y_rotation={ 0,0,-500}
-    incoming.y_rotation={(direction == "LEFT" and -90 or 90),0,-500}
+    outgoing.y_rotation={ 0,0,-w/2}
+    incoming.y_rotation={(direction == "LEFT" and -end_angle or end_angle),0,-w/2}
     phase_one = Animator{
         duration = 400,
         properties = {
@@ -32,24 +73,24 @@ local function rotate(outgoing,incoming,direction)
                 source = outgoing,
                 name   = "y_rotation",
                 keys   = {
-                    {0.0,"LINEAR",  0},
-                    {1.0,"LINEAR", (direction == "LEFT" and 45 or -45)},
+                    {0.0,"EASE_IN_SINE",  0},
+                    {1.0,"EASE_IN_SINE", (direction == "LEFT" and end_angle/2 or -end_angle/2)},
                 },
             },
             {
                 source = incoming,
                 name   = "y_rotation",
                 keys   = {
-                    {0.0,"LINEAR", (direction == "LEFT" and -90 or 90)},
-                    {1.0,"LINEAR", (direction == "LEFT" and -45 or 45)},
+                    {0.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle   or end_angle)},
+                    {1.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
                 },
             },
             {
                 source = g,
-                name   = "scale",
+                name   = "z",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", {1,1}},
-                    {1.0,"EASE_OUT_SINE", {.5,.5}},
+                    {0.0,"EASE_IN_OUT_QUAD", 0},
+                    {1.0,"EASE_IN_OUT_QUAD", -w/2},
                 },
             },
         }
@@ -63,24 +104,24 @@ local function rotate(outgoing,incoming,direction)
                     source = outgoing,
                     name   = "y_rotation",
                     keys   = {
-                        {0.0,"LINEAR",(direction == "LEFT" and 45 or -45)},
-                        {1.0,"LINEAR",(direction == "LEFT" and 90 or -90)},
+                        {0.0,"EASE_OUT_SINE",(direction == "LEFT" and end_angle/2 or -end_angle/2)},
+                        {1.0,"EASE_OUT_SINE",(direction == "LEFT" and end_angle   or -end_angle)},
                     },
                 },
                 {
                     source = incoming,
                     name   = "y_rotation",
                     keys   = {
-                        {0.0,"LINEAR", (direction == "LEFT" and -45 or 45)},
-                        {1.0,"LINEAR",  0},
+                        {0.0,"EASE_OUT_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
+                        {1.0,"EASE_OUT_SINE",  0},
                     },
                 },
                 {
                     source = g,
-                    name   = "scale",
+                    name   = "z",
                     keys   = {
-                        {0.0,"EASE_IN_SINE", {.5,.5}},
-                        {1.0,"EASE_IN_SINE",  {1,1}},
+                        {0.0,"EASE_IN_OUT_QUAD", -w/2},
+                        {1.0,"EASE_IN_OUT_QUAD",  0},
                     },
                 },
             }
