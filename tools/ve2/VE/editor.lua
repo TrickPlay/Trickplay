@@ -286,6 +286,30 @@ local function duplicate_child(new, org)
 
 end 
  
+local function contentsNameAssign(v) 
+	local itemType = util.getTypeNameStr(v) 
+    if itemType == "image" then
+        util.assign_right_name(v, v.id)
+    else
+        util.assign_right_name(v, itemType)
+
+        if itemType == "group" or itemType == "DialogBox" then 
+            for i,j in pairs (v.children) do 
+                j = contentsNameAssign(j)
+            end 
+        elseif itemType == "LayoutManager" then 
+            for r = 1, v.number_of_rows, 1 do 
+                for c = 1, v.number_of_cols, 1 do 
+                    local item = v.cells[r][c]
+                    item = contentsNameAssign(item)
+                end 
+            end 
+        end 
+    end 
+
+    return v
+end 
+
 function editor.duplicate(gid)
 
     -- no selected object 
@@ -319,13 +343,12 @@ function editor.duplicate(gid)
             uiDuplicate.position = {v.x + 20, v.y +20}
 
 			uiTypeStr = util.getTypeNameStr(v) 
+            --util.assign_right_name(uiDuplicate, uiTypeStr)
+            uiDuplicate = contentsNameAssign(uiDuplicate)
 
-            util.assign_right_name(uiDuplicate, uiTypeStr)
             util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
-
-            if uiTypeStr == "Widget_Group" then 
-                duplicate_child(uiDuplicate, v)
-            elseif uiTypeStr == "DialogBox" then 
+    --[[
+            if uiTypeStr == "Widget_Group" or uiTypeStr == "group" or uiTypeStr == "DialogBox" then 
                 for i, v in pairs (uiDuplicate.children) do
                     local itemType = util.getTypeNameStr(v) 
                     util.assign_right_name(v, itemType)
@@ -339,6 +362,7 @@ function editor.duplicate(gid)
                     end 
                 end 
             end 
+        ]]
 
 		    screen_ui.n_selected(v)
             util.addIntoLayer(uiDuplicate)
