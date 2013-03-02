@@ -346,6 +346,7 @@ class TrickplayEmulatorManager(QWidget):
                 n = re.search("=", item).end()
                 env.remove(item[:n-1])
 
+        env.insert("TP_first_app_exits", "false")
         env.insert("TP_LOG", "raw")
         env.insert("TP_config_file","")
 
