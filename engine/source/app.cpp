@@ -874,6 +874,8 @@ static gboolean lua_gc_every_frame( gpointer state )
     static unsigned num_steps = 0;
 
     lua_State *L = (lua_State *)state;
+
+    g_timer_stop(gc_timer); // In case it was running -- ie the first time
     g_timer_continue(gc_timer);
     int result = lua_gc( L, LUA_GCSTEP, 1);
     g_timer_stop(gc_timer);
@@ -1271,6 +1273,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     // Collect garbage every frame
 
     lua_gc_func = clutter_threads_add_repaint_func( lua_gc_every_frame, L, 0 );
+    lua_gc( L, LUA_GCGEN, 0 ); // Switch to generational colletor
 
     //.........................................................................
     // Run the script
