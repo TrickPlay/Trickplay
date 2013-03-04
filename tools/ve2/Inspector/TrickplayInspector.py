@@ -1049,8 +1049,8 @@ class TrickplayInspector(QWidget):
                 # Text Inputs
 
                 i = QTreeWidgetItem() 
-                i.setText (0, p)  # first col : property name
-
+                #i.setText (0, p)  # first col : property name
+                i.setWhatsThis(0, p)  # first col : property name
                 if PROP_S_LIST.has_key(p):
                     i.setText(0, PROP_S_LIST[p])
                 else:
@@ -1189,7 +1189,7 @@ class TrickplayInspector(QWidget):
                         for sp in PropertyIter(p):
                             j = QTreeWidgetItem(i) 
                             sp = str(sp)
-                            #j.setText (0, sp)
+                            j.setWhatsThis (0, sp)
                             if NESTED_PROP_S_LIST.has_key(sp):
                                 j.setText(0, NESTED_PROP_S_LIST[sp])
                             else:
@@ -1236,7 +1236,7 @@ class TrickplayInspector(QWidget):
                                 self.skinCB.setCurrentIndex(current_idx)
                                 sp = 'skin'
 
-                            #j.setText (0, sp)
+                            j.setWhatsThis (0, sp)
                             if NESTED_PROP_S_LIST.has_key(sp):
                                 j.setText(0, NESTED_PROP_S_LIST[sp])
                             else:
@@ -1253,6 +1253,7 @@ class TrickplayInspector(QWidget):
                                         for sssp in PropertyIter(ssp): 
                                             m = QTreeWidgetItem(k)
                                             sssp = str(sssp) #activation, default, focus 
+                                            m.setWhatsThis(0, sssp) # first col : property name
                                             if NESTED_PROP_S_LIST.has_key(sssp):
                                                 m.setText(0, NESTED_PROP_S_LIST[sssp])
                                             else:
@@ -1268,7 +1269,7 @@ class TrickplayInspector(QWidget):
                                             c3 = c3 + 1
                                     else:
                                         l = QTreeWidgetItem(j)
-                                        #l.setText(0,ssp)
+                                        l.setWhatsThis(0,ssp)
                                         if NESTED_PROP_S_LIST.has_key(ssp):
                                             l.setText(0, NESTED_PROP_S_LIST[ssp])
                                         else:
@@ -1755,8 +1756,6 @@ class TrickplayInspector(QWidget):
                         print("Error >> Invalid data entered", e.value)
                         return True
 
-                #print(self.style_name, item.text(0), style_property[0], style_property[1], value)
-                #('Default', PyQt4.QtCore.QString(u'corner_radius'), PyQt4.QtCore.QString(u'border'), PyQt4.QtCore.QString(u'style'), 5.0)
                 self.main._emulatorManager.setStyleInfo(self.style_name, item.text(0), style_property[0], style_property[1], value)
                 return True
         return False
@@ -1764,22 +1763,25 @@ class TrickplayInspector(QWidget):
 
         
     def propertyItemChanged(self, item, col):
-        
         if self.handle_style(item) is True:
             return
 
-        if str(item.text(0)) in NESTED_PROP_LIST and str(item.text(0)) != "text" :
+        #if str(item.text(0)) in NESTED_PROP_LIST and str(item.text(0)) != "text" :
+        if str(item.whatsThis(0)) in NESTED_PROP_LIST and str(item.whatsThis(0)) != "text" :
             return
 
         if self.is_this_subItem(item) is True:
             n, pItem = self.getParentInfo(item)
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
-            self.sendData(self.getGid(), str(pItem.text(0)), tValue)
+            
+            self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
+            #self.sendData(self.getGid(), str(pItem.text(0)), tValue)
         else :
-            if str(item.text(0)) == "label" and self.getType() == "Tab":
+            if str(item.whatsThis(0)) == "label" and self.getType() == "Tab":
                 self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), self.getIndex()) 
             else:
-                self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
+                self.sendData(self.getGid(), str(item.whatsThis(0)), str(item.text(1)))
+                #self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
 
     def oopropertyDataChanged(self, topLeft, bottomRight):
         """
