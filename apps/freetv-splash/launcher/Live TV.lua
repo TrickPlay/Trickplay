@@ -408,9 +408,10 @@ do
                     --print(i, (#series[show.series_id]))
                     if i < (#series[show.series_id]) then
                         curr_show = series[show.series_id][i]
+
                         airings[i].text =
                             curr_show.start_time_t.wkdy.." "..
-                            curr_show.start_time_t.hour.."\n"
+                            tonumber(curr_show.start_time_t.hour).."\n"
                         airings[i].text = airings[i].text..(
                             (curr_show.season_number  ~= json_null) and
                             (curr_show.episode_number ~= json_null) and
