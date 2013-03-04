@@ -6,6 +6,17 @@ local launcher_icons = {}
 generic_launcher_icon = Image{src="assets/generic-app-icon.jpg"}
 screen:add( generic_launcher_icon )
 generic_launcher_icon:hide()
+
+local function pre_x(i)
+    return icon_w*.5*(i-1)-icon_w*.25
+end
+local function sel_x(i)
+    return icon_w*.5*(i-1)--icon_w*.25
+end
+local function post_x(i)
+    return icon_w*.5*(i-1)+icon_w*.25
+end
+
 do
     local app_list = apps:get_for_current_profile()
     local i,g,r,t
@@ -42,7 +53,8 @@ do
                 color="black",
                 opacity = 200
             }
-
+            local duration = 250
+            local mode     = "EASE_OUT_SINE"
             g.slogan = "Burberry Shopping App"
             g.description = v.description or lorem_ipsum
             g.name = v.id
@@ -50,11 +62,12 @@ do
             title_grp:add(r,t)
 
 
-            g.anchor_point = { g.w/2, g.h/2 }
+            g.position     = {     0, g.h/2*3/4 }
+            g.anchor_point = { g.w/2, g.h   }
             g.y_rotation = { 0, g.w/2, 0 }
             g.extra.anim = AnimationState {
-                                                            duration = 250,
-                                                            mode = "EASE_OUT_SINE",
+                                                            duration = duration,
+                                                            mode = mode,
                                                             transitions = {
                                                                 {
                                                                     source = "*",
@@ -63,7 +76,7 @@ do
                                                                         --{ g, "opacity", 255 },
                                                                         --{ g, "y_rotation", 0 },
                                                                         { title_grp, "opacity", 255 },
-                                                                        { g, "scale", { .75, .75 } },
+                                                                        { g, "scale", { 1, 1 } },
                                                                     },
                                                                 },
                                                                 {
@@ -79,14 +92,30 @@ do
                                                             },
             }
 
-            g.extra.focus = function(self)
+            g.extra.focus = function(self,x)
                 --title_grp.clip_to_size = false
                 self.anim.state = "focus"
+                if x then
+                    g:stop_animation()
+                    g:animate{
+                        duration=duration,
+                        mode = mode,
+                        x = x,
+                    }
+                end
             end
 
-            g.extra.unfocus = function(self)
+            g.extra.unfocus = function(self,x)
                 --title_grp.clip_to_size = true
                 self.anim.state = "unfocus"
+                if x then
+                    g:stop_animation()
+                    g:animate{
+                        duration=duration,
+                        mode = mode,
+                        x = x,
+                    }
+                end
             end
             g.anim:warp("unfocus")
 
@@ -245,13 +274,45 @@ local function focus_app(number, t)
     menubar:stop_animation()
     local the_app = apps_list[number]
     the_app:raise_to_top()
-    the_app:focus()
+    the_app:focus(sel_x(number))
     local mode = "EASE_IN_OUT_SINE"
-    menubar:animate({ duration = t, mode = mode, x = 400 - the_app.x })
+    menubar:animate({ duration = t, mode = mode, x = 400 - sel_x(number) })
 end
 
-local function unfocus_app(number)
-    apps_list[number]:unfocus()
+local function unfocus_app(number,direction)
+    apps_list[number]:unfocus(direction==1 and pre_x(number) or post_x(number))
+end
+
+local function transfer_focus(curr_i,direction,dur)
+
+
+    if curr_i == 1 and direction == -1 then
+        transition_time = menubar:find_child("apps").count*50
+
+        for i,app in ipairs(menubar:find_child("apps").children) do
+            app.x = app.x - (post_x(1) - pre_x(1))
+        end
+        menubar.x = menubar.x + (post_x(1) - pre_x(1))
+
+        unfocus_app(curr_i,1)
+    elseif curr_i == menubar:find_child("apps").count and direction == 1 then
+        transition_time = menubar:find_child("apps").count*50
+        for i,app in ipairs(menubar:find_child("apps").children) do
+            app.x = app.x + (post_x(1) - pre_x(1))
+        end
+        menubar.x = menubar.x - (post_x(1) - pre_x(1))
+
+        unfocus_app(curr_i,-1)
+    else
+        unfocus_app(curr_i,direction)
+    end
+    curr_i = wrap_i(
+        curr_i+direction,
+        menubar:find_child("apps").count
+    )
+
+
+    focus_app( curr_i, dur )
 end
 
 local function build_bar()
@@ -268,13 +329,18 @@ local function build_bar()
 
     for k,v in pairs(launcher_icons) do
         local new_movie = v
-        v.x = app_offset
-        app_offset = app_offset + v.w*.75
+        v.x = pre_x(#apps_list+1)
         apps_group:add(v)
         apps_list[#apps_list+1] = v
     end
+    for i,v in ipairs(apps_list) do
+        v.x = (
+            i == active_app and sel_x or
+            i <  active_app and pre_x or
+            i >  active_app and post_x)(i)
+    end
 
-    menubar.y = 1150 - apps_group.h - icon_h/4
+    menubar.y = 812.5
     backing.y = menubar.y
     focus_app(active_app,10)
     --set_current_text(apps_list[active_app])
@@ -299,7 +365,13 @@ local function on_activate(label)
 end
 
 local function on_deactivate(label, new_active)
-    label:animate({ duration = 250, opacity = 128, on_completed = function() if(new_active) then new_active:activate() end end } )
+    label:animate{
+        duration = 250,
+        opacity = 128,
+        on_completed = function()
+            if(new_active) then new_active:activate() end
+        end ,
+    }
     hide_bar()
 end
 
@@ -311,27 +383,46 @@ local function on_sleep(label)
     hide_bar()
 end
 
-local function on_key_down(label, key)
-    if( keys.Left == key or keys.Right == key ) then
-        unfocus_app(active_app)
-
+local prev_app
+local key_events = {
+    [keys.Left] = function()
+        --unfocus_app(active_app)
+        prev_app = active_app
         local transition_time = 250
-        if(keys.Left == key) then
-            active_app = ((active_app - 2) % menubar:find_child("apps").count) + 1
-            if( active_app == menubar:find_child("apps").count ) then transition_time = menubar:find_child("apps").count*50 end
-            if backing.anim.state == "full" then set_incoming_text(apps_list[active_app],"left") end
-        else
-            active_app = (active_app % menubar:find_child("apps").count) + 1
-            if( active_app == 1 ) then transition_time = menubar:find_child("apps").count*50 end
-            if backing.anim.state == "full" then set_incoming_text(apps_list[active_app],"right") end
+        active_app = wrap_i(active_app-1,menubar:find_child("apps").count)--((active_app - 2) % menubar:find_child("apps").count) + 1
+        if( active_app == menubar:find_child("apps").count ) then
+            transition_time = menubar:find_child("apps").count*50
         end
-
-        focus_app(active_app, transition_time)
+        if backing.anim.state == "full" then
+            set_incoming_text(apps_list[active_app],"left")
+        end
+        --focus_app(active_app, transition_time)
+        transfer_focus(prev_app,-1,transition_time)
         return true
-    elseif( keys.Up == key ) then
+    end,
+    [keys.Right] = function()
+        --unfocus_app(active_app)
+        prev_app = active_app
+        local transition_time = 250
+        active_app = wrap_i(active_app+1,menubar:find_child("apps").count)--(active_app % menubar:find_child("apps").count) + 1
+        if( active_app == 1 ) then
+            transition_time = menubar:find_child("apps").count*50
+        end
+        if backing.anim.state == "full" then
+            set_incoming_text(apps_list[active_app],"right")
+        end
+        --focus_app(active_app, transition_time)
+        transfer_focus(prev_app,1,transition_time)
+        return true
+    end,
+    [keys.Up] = function()
         backing.anim.state = "full"
         return true
-    end
+    end,
+}
+
+local function on_key_down(label, key)
+    return key_events[key] and key_events[key]()
 end
 
 return {
