@@ -882,7 +882,7 @@ static gboolean lua_gc_every_frame( gpointer state )
     num_steps++;
     if(1 == result)
     {
-        g_info("GC completed; total time: %fms, num steps = %d", g_timer_elapsed( gc_timer, NULL )*1000, num_steps);
+        tplog2("GC completed; total time: %fms, num steps = %d", g_timer_elapsed( gc_timer, NULL )*1000, num_steps);
         g_timer_reset(gc_timer);
         num_steps=0;
     }
