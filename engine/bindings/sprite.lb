@@ -28,7 +28,8 @@ struct SpriteBinding
     };
 
     SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
-                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ) {}
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ),
+                                             action( NULL ) {}
 
     ~SpriteBinding()
     {
@@ -43,6 +44,12 @@ struct SpriteBinding
         if ( actor ) {
             clutter_actor_destroy( actor );
             actor = NULL;
+        }
+        if ( !can_fire ) {
+            g_assert( action );
+            Action::cancel( action );
+            action = NULL;
+            can_fire = true;
         }
     }
     
@@ -122,7 +129,8 @@ struct SpriteBinding
         if ( async && can_fire )
         {
             can_fire = false;
-            Action::post( new SignalLoadedLater( this ) );
+            action = new SignalLoadedLater( this );
+            Action::post( action );
         }
     }
 
@@ -164,6 +172,7 @@ private:
     SpriteSheet         * sheet;
     char * id;
     CoglHandle texture;
+    SignalLoadedLater   * action;
 };
 
 void set_sheet_first( lua_State * L , int table )
