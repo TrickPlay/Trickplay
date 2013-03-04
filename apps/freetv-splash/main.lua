@@ -14,6 +14,11 @@
     8. "Welcome to" "FREE TV!" zooms back in to middle of screen
 
 ]]--
+
+wrap_i = function(i,n) return (i - 1) % (n) + 1 end
+
+
+
 local bg = Rectangle{size=screen.size}
 json_null = json.null
 screen:add(bg)
