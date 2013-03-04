@@ -430,22 +430,43 @@ class MainWindow(QMainWindow):
         errorMsg = "" 
 
         if len (sUIs) is not 0:
-            errorMsg = "Skin assets are available for the following UI Elements:      \n\n      "
+            errorMsg = "Skin assets are available for the following UI Elements: \n\n"
+            i = 1 
             for j in sUIs:
-                errorMsg = errorMsg + j + "\n      "
+                if j == "TabBar" and errorMsg[-1:] != "\n": 
+                    errorMsg = errorMsg[:len(errorMsg)-1]
+                    errorMsg = errorMsg + j + "\t\t"
+                elif len(j) > 10 :
+                    errorMsg = errorMsg + j + "\t"
+                else:
+                    errorMsg = errorMsg + j + "\t\t"
+                if i % 3 == 0 :
+                    errorMsg = errorMsg + "\n"
+                i = i + 1 
+
             errorMsg = errorMsg + "\n\n"
 
-        errorMsg = errorMsg + "Could not find skin assets for the following UI Elements:      \n\n      "
-
+        errorMsg = errorMsg + "Could not find skin assets for the following UI Elements: \n\n"
+        j = 1 
         for i in fUIs:
-            errorMsg = errorMsg+i+"\n      "
-        errorMsg = errorMsg + "\nWould you proceed ?\n"
+            if i == "TabBar" and errorMsg[-1:] != "\n": 
+                errorMsg = errorMsg[:len(errorMsg)-1]
+                errorMsg = errorMsg + i + "\t\t"
+            elif len(i) > 10 :
+                errorMsg = errorMsg + i + "\t"
+            else:
+                errorMsg = errorMsg + i + "\t\t"
+            if j % 3 == 0 :
+                errorMsg = errorMsg + "\n"
+            j = j + 1 
+
+        errorMsg = errorMsg + "\n\nDo you want to proceed ?\n"
         msg.setText(errorMsg)
-        msg.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
-        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
+        msg.setDefaultButton(QMessageBox.Yes)
         msg.setWindowTitle("Import Skin Error")
         ret = msg.exec_()
-        if ret == QMessageBox.Ok:
+        if ret == QMessageBox.Yes:
             return True 
         else:
             return False 
