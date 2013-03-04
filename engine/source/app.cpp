@@ -870,8 +870,21 @@ int App::lua_panic_handler( lua_State * L )
 
 static gboolean lua_gc_every_frame( gpointer state )
 {
+    static GTimer *gc_timer = g_timer_new();
+    static unsigned num_steps = 0;
+
     lua_State *L = (lua_State *)state;
-    lua_gc( L, LUA_GCCOLLECT, 0);
+    g_timer_continue(gc_timer);
+    int result = lua_gc( L, LUA_GCSTEP, 1);
+    g_timer_stop(gc_timer);
+    num_steps++;
+    if(1 == result)
+    {
+        g_info("GC completed; total time: %fms, num steps = %d", g_timer_elapsed( gc_timer, NULL )*1000, num_steps);
+        g_timer_reset(gc_timer);
+        num_steps=0;
+    }
+
     return true;
 }
 
