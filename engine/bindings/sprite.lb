@@ -45,7 +45,7 @@ struct SpriteBinding
             clutter_actor_destroy( actor );
             actor = NULL;
         }
-        if ( !can_fire ) {
+        if ( !can_fire && async ) {
             g_assert( action );
             Action::cancel( action );
             action = NULL;
