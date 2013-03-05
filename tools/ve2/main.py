@@ -77,9 +77,9 @@ class MainWindow(QMainWindow):
         QObject.connect(self.debugger, SIGNAL('finished(int)'), self.debug_finished)
 
         self.stitcher = QProcess()
-        QObject.connect(self.stitcher, SIGNAL('started()'), self.import_started)
-        QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.import_finished)
-        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.import_stdError)
+        QObject.connect(self.stitcher, SIGNAL('started()'), self.stitcher_started)
+        QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.stitcher_finished)
+        QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.stitcher_stdError)
         QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
             return False
         return True
         
-    def import_started(self):
+    def stitcher_started(self):
         if self.bar is not None :
             self.bar.show()
         return 
@@ -274,7 +274,7 @@ class MainWindow(QMainWindow):
             print s
         return
 
-    def import_stdError(self):
+    def stitcher_stdError(self):
         s = self.stitcher.readAllStandardError()
         if s.contains('\r') or s.contains('\n') :
             l = s.split('\n') 
@@ -301,7 +301,7 @@ class MainWindow(QMainWindow):
         else:
             print str(s.data())
 
-    def import_finished(self, errorCode):
+    def stitcher_finished(self, errorCode):
         if errorCode == 0 : 
             if self.bar is not None:
                 print "[VE] progressBar.setValue : %s  "%'100'
