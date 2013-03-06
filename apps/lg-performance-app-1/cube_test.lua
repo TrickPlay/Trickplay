@@ -1,137 +1,292 @@
-local bg = Rectangle{
-    size = screen.size,
-    color = "bbbbbb"
-}
-local card_src = Image{
-    src = "assets/card.png"
-}
-card_src:hide()
-w = screen.w-200
+local cube = Group()
+
+local card_src = Sprite{sheet = assets,id="card.png"}
+local live_card_src = Sprite{sheet = assets,id="card-live.png"}
+local card_reflection_src = Sprite{sheet = assets,id="card-shadow.png"}
+local card_src_w = card_src.w*3/2
+local card_src_h = card_src.h*3/2
+local live_card_src_w = live_card_src.w*3/2
+local live_card_src_h = live_card_src.h*3/2
+local card_reflection_src_w = card_reflection_src.w*3/2
+local card_reflection_src_h = card_reflection_src.h*3/2
+
+card_src = nil
+card_reflection_src = nil
+
+w = screen.w
 h = 700
 
 end_angle = 90
 
-local function make_side(w,h,bg_color)
+
+local function first_card_icon(item_data)
+    local instance = Group()
+
+    local icon = Sprite{sheet = assets,id=item_data.src,x=5,y=5}
+
+    icon.w = icon.w*3/2
+    icon.h = icon.h*3/2
+
+    local title = Text{
+        text = item_data.text,
+        font = CARD_TITLE_FONT,
+        w     = card_src_w/3-10,
+        wrap  = true,
+        wrap_mode = "WORD_CHAR",
+        color = "black",
+        x     = icon.x,
+        y     = icon.y+icon.h+5,
+    }
+    local more = Text{
+        text = "More...",
+        font = ICON_FONT,
+        color = "666666",
+    }
+    more.x = card_src_w/3 - more.w
+    more.y = card_src_h/3 - more.h
+
+    instance:add(icon,title,more)
+
+    return instance
+end
+local function make_card_icon(item)
+    local instance = Group()
+
+    local r = Sprite{sheet = assets,id=item.src}
+
+    r.w = r.w*3/2
+    r.h = r.h*3/2
+
+    local t = Text{text = item.text,font = ICON_FONT, color = "666666",y = r.h,x=r.w/2}
+
+    t.anchor_point = {t.w/2,0}
+
+    instance.anchor_point = {r.w/2,r.h/2}
+    instance:add(r,t)
+    return instance
+
+end
+function make_icon_card(items_data)
+
+    local n_rows = 3
+    local n_cols = 3
+
+    if #items_data ~= (n_cols*n_rows) then
+        error("need "..tostring(n_cols*n_rows)..
+            ", got "..tostring(#items_data),2)
+    end
+
+    local instance = Group{
+        name="Card",
+        children={
+            Sprite{
+                sheet = assets,
+                id="card.png",
+                w = card_src_w,
+                h = card_src_h,
+            },
+            Sprite{
+                sheet = assets,
+                id = "card-shadow.png",
+                y=card_src_h,
+                x=card_src_w/2,
+                anchor_point = {card_reflection_src_w/2,0},
+                w = card_reflection_src_w,
+                h = card_reflection_src_h,
+            },
+        }
+    }
+
+    local items={{}}
+    local icon = first_card_icon(items_data[1])
+
+    items[1][1] =icon
+    instance:add(icon)
+
+    for i=2,#items_data do
+        if i%n_cols == 1 then
+            items[#items+1] = {}
+        end
+
+        icon = make_card_icon(items_data[i])
+
+        table.insert(items[#items], icon )
+        icon.x = (2*#items[#items]-1)*card_src_w/6
+        icon.y = (2*#items        -1)*card_src_h/6
+        instance:add(icon)
+
+    end
+
+    return instance
+
+end
+local function make_live_card(item_data)
+
+    local ad = Sprite{
+        sheet = assets,
+        id = "live-lg-ad.png",
+    }
+
+    ad.w = ad.w*3/2-5
+    ad.h = ad.h*3/2+10
+    ad.y = card_src_h-ad.h
+
+    local instance = Group{
+        name="Card",
+        children={
+            Sprite{
+                sheet = assets,
+                id = "card-live.png",
+                w = card_src_w,
+                h = card_src_h,
+            },
+            ad,
+            Sprite{
+                sheet = assets,
+                id = "card-shadow.png",
+                y=live_card_src_h,
+                x=live_card_src_w/2,
+                anchor_point = {card_reflection_src_w/2,0},
+                w = card_reflection_src_w,
+                h = card_reflection_src_h,
+            },
+            Text{
+                font = CARD_TITLE_FONT,
+                color = "111111",
+                text  = item_data.title,
+                y=card_src_h/2,
+                x=5,
+                w = card_src_w - 10,
+                ellipsize = "END",
+            },
+            Text{
+                font = ICON_FONT,
+                color = "999999",
+                text  = item_data.sub_t,
+                y=card_src_h/2+40,
+                x=5,
+                w = card_src_w - 10,
+                ellipsize = "END",
+            },
+        }
+    }
+
+    return instance
+
+end
+local function make_side(cards)--w,h,bg_color)
     local instance = Group{
         anchor_point={w/2,h/2},
+        clip = {0,0,screen_w,screen_h}
     }
 
 
-    local bg = Rectangle{
-        w=w,
-        h=h,
-        --position={w/2,h/2},
-        color=bg_color
-    }
-
-    -----------------------------------------------
-    local top_left = Rectangle{
-        x=26,
-        y=32,
-        w=530,
-        h=400,
-        --position={w/2,h/2},
-        color="pink"
-    }
-    local btm_left = Rectangle{
-        x=top_left.x,
-        y=top_left.y+top_left.h,
-        w=top_left.w,
-        h=260,
-        --position={w/2,h/2},
-        color="yellow"
-    }
-    -----------------------------------------------
-    local items1 = {}
-    for i=1,3 do
-        items1[i] = {}
-        for j=1,3 do
-            items1[i][j] = "Icon "..i.." "..j
-        end
+    for i,card in ipairs(cards) do
+        instance:add(card:set{
+                x = (card_src_w+50)*(i-1),
+                y = 100,
+            })
     end
-    local grid1 = make_grid(items1,90,140,80,80)
-    grid1.x = w*3/6
-    grid1.y = top_left.y+20
-    -----------------------------------------------
-    local items2 = {}
-    for i=1,3 do
-        items2[i] = {}
-        for j=1,3 do
-            items2[i][j] = "Icon "..i.." "..j
-        end
-    end
-    local grid2 = make_grid(items2,150,100,30,120)
-    grid2.x = w*5/6+5
-    grid2.y = top_left.y+40
-    -----------------------------------------------
-    --grid.y = h/2
-    instance:add(
-        bg,
-        Clone{
-            source = card_src,
-        },
-        Clone{
-            source = card_src,
-            x      = w*2/6
-        },
-        Clone{
-            source = card_src,
-            x      = w*4/6
-        },
-        top_left,
-        btm_left,
-        grid1,
-        grid2
-    )
-
     return instance
 end
 
 
-r1 = make_side(w,h,'red')
-r2 = make_side(w,h,'green')
+--r1 = make_side(w,h,bg.color)
+r1 = make_side{
+    make_icon_card{
+        {text="3D WORLD",     src="title-icon-3d-world.png"},
+        {text="Settings",     src="icon-settings.png"},
+        {text="Now & Hot",    src="icon-now-hot.png"},
+        {text="Search",       src="icon-search.png"},
+        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="3d On",        src="icon-3d-on.png"},
+        {text="TV Guide",     src="icon-tv-guide.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
+        {text="Internet",     src="icon-internet.png"},
+    },
+    make_icon_card{
+        {text="GAMES",        src="title-icon-game.png"},
+        {text="Settings",     src="icon-settings.png"},
+        {text="Now & Hot",    src="icon-now-hot.png"},
+        {text="Search",       src="icon-search.png"},
+        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="3d On",        src="icon-3d-on.png"},
+        {text="TV Guide",     src="icon-tv-guide.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
+        {text="Internet",     src="icon-internet.png"},
+    },
+    make_icon_card{
+        {text="MY CARD",      src="title-icon-my-card.png"},
+        {text="Settings",     src="icon-settings.png"},
+        {text="Now & Hot",    src="icon-now-hot.png"},
+        {text="Search",       src="icon-search.png"},
+        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="3d On",        src="icon-3d-on.png"},
+        {text="TV Guide",     src="icon-tv-guide.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
+        {text="Internet",     src="icon-internet.png"},
+    },
+}:set{opacity=0}
+r2 = make_side{
+    make_live_card{
+        title = "11-1 LGC HD The Blue Earth",
+        sub_t = "PM 10:20 - 11:20",
+    },
+    make_icon_card{
+        {text="GAME WORLD",   src="title-icon-game.png"},
+        {text="Angry Birds",   src="icon-game-angry-birds.png"},
+        {text="Bejeweled",   src="icon-game-bejeweled3.png"},
+        {text="Cut The Rope",   src="icon-game-cut-the-rope.png"},
+        {text="Downhill Bowl",   src="icon-game-downhill-bowl.png"},
+        {text="Earth Story",   src="icon-game-earth-story.png"},
+        {text="Exit 2",   src="icon-game-exit2.png"},
+        {text="Find Ball",   src="icon-game-find-ball.png"},
+        {text="Frisbee Forever",   src="icon-game-frisbee-forever.png"},
+    },
+    make_icon_card{
+        {text="LG SMART WORLD", src="title-icon-lg-smart-world.png"},
+        {text="LG B",         src="icon-lg-b.png"},
+        {text="Mable",        src="icon-lg-mable.png"},
+        {text="Adobe TV",     src="icon-lg-adobetvb.png"},
+        {text="iVillage",     src="icon-lg-ivillage.png"},
+        {text="Highcut",      src="icon-lg-highcut.png"},
+        {text="Easy Map",     src="icon-lg-easy-map.png"},
+        {text="nPoint",       src="icon-lg-npoint.png"},
+        {text="Astronaut",    src="icon-lg-astronaut.png"},
+    },
+    make_icon_card{
+        {text="MY CARD",      src="title-icon-my-card.png"},
+        {text="Settings",     src="icon-settings.png"},
+        {text="Now & Hot",    src="icon-now-hot.png"},
+        {text="Search",       src="icon-search.png"},
+        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="3d On",        src="icon-3d-on.png"},
+        {text="TV Guide",     src="icon-tv-guide.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
+        {text="Internet",     src="icon-internet.png"},
+    },
+}
+--r2 = make_side(w,h,bg.color)
 
 g = Group{
     position={screen.w/2,h/2+50}
 }
 
 
-local btm_row_backing = Image{
-    src="assets/bottom-bar.png"
-}
-btm_row_backing.y = screen.h-btm_row_backing.h
-local btm_row_backing_text = Text{
-    text = "More",
-    font = "Lato 40px",
-    color = "white",
-    x  = screen.w/2,
-    y  = btm_row_backing.y,
-}
-btm_row_backing_text.anchor_point = {btm_row_backing_text.w/2,0}
-local items = {}
-for i=1,1 do
-    items[i] = {}
-    for j=1,10 do
-        items[i][j] = "Icon "..i.." "..j
-    end
-end
-local grid = make_grid(items,100,100,80,80)
-grid.x = screen.w/2
-grid.y = 900
-
 g:add(r1,r2)
-screen:add(card_src,bg,btm_row_backing,btm_row_backing_text,grid,g)
+cube:add(bg,g)
 
 
 local phase_one, phase_two
 local animating = false
 local curr_r = r2
 local next_r = r1
-local function rotate(outgoing,incoming,direction)
+function cube:rotate(outgoing,incoming,direction)
     if animating then return end
     animating = true
     outgoing.y_rotation={ 0,0,-w/2}
     incoming.y_rotation={(direction == "LEFT" and -end_angle or end_angle),0,-w/2}
+    incoming.opacity = 0
     phase_one = Animator{
         duration = 400,
         properties = {
@@ -149,6 +304,14 @@ local function rotate(outgoing,incoming,direction)
                 keys   = {
                     {0.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle   or end_angle)},
                     {1.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
+                },
+            },
+            {
+                source = incoming,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_IN_SINE",   0},
+                    {1.0,"EASE_IN_SINE", 255},
                 },
             },
             {
@@ -190,6 +353,14 @@ local function rotate(outgoing,incoming,direction)
                         {1.0,"EASE_IN_OUT_QUAD",  0},
                     },
                 },
+                {
+                    source = outgoing,
+                    name   = "opacity",
+                    keys   = {
+                        {0.0,"EASE_OUT_SINE", 255},
+                        {1.0,"EASE_OUT_SINE",   0},
+                    },
+                },
             }
         }
         function phase_two.timeline.on_completed()
@@ -204,14 +375,27 @@ local function rotate(outgoing,incoming,direction)
 end
 
 
+
+
+
+
+
+
+
+
+
+
 local key_events = {
     [keys.Right] = function()
-        rotate(curr_r,next_r,"RIGHT")
+        cube:rotate(curr_r,next_r,"RIGHT")
     end,
     [keys.Left] = function()
-        rotate(curr_r,next_r,"LEFT")
+        cube:rotate(curr_r,next_r,"LEFT")
     end,
 }
-function screen:on_key_down(k)
+cube.key_events = key_events
+function cube:on_key_down(k)
     return key_events[k] and key_events[k]()
 end
+
+return cube

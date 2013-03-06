@@ -1,17 +1,26 @@
 
-local icon_font = "Lato 30px"
 -------------------------------------------------------------
-local function make_icon(text,w,h)
+
+local function make_icon(item)
     local instance = Group()
 
-    local r = Rectangle{w=w,h=h}
+    local r = Sprite{sheet = assets,id=item.src}
+    local checkbox = Sprite{sheet=assets,id="checkbox.png"}
+    checkbox.w = checkbox.w*3/2
+    checkbox.h = checkbox.h*3/2
+    checkbox.x = -checkbox.w
 
-    local t = Text{text = text,font = icon_font, color = "666666",y = h,x=w/2}
+    r.w = r.w*3/2
+    r.h = r.h*3/2
+
+    local t = Text{text = item.text,font = ICON_FONT, color = "white",y = r.h,x=r.w/2}
 
     t.anchor_point = {t.w/2,0}
 
-    instance:add(r,t)
+    instance.anchor_point = {r.w/2,r.h/2}
+    instance:add(r,checkbox,t)
     return instance
+
 end
 
 
