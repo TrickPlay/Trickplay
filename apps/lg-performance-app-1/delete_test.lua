@@ -5,23 +5,22 @@ local screen_w = screen.w
 local recycle_bin = Image{src="recycle bin.png"}
 screen:add(recycle_bin)
 -------------------------------------------------------------
-local function make_icon(text,w,h)
+local function make_icon(item)
     local instance = Group()
 
-    local r = Rectangle{w=w,h=h}
+    local r = Sprite{sheet = assets,id=item.src}
+    r.w = r.w*3/2
+    r.h = r.h*3/2
 
-    local t = Text{text = text,font = icon_font, color = "white",y = h,x=w/2}
+    local w = r.w
+    local h = r.h
+
+    local t = Text{text = item.text,font = ICON_FONT, color = "white",y = r.h,x=r.w/2}
 
     t.anchor_point = {t.w/2,0}
 
     instance:add(r,t)
 
-    function instance:on_enter()
-        r.color = "red"
-    end
-    function instance:on_leave()
-        r.color = "white"
-    end
     local grabbed = false
     local last_x, last_y,orig_x,orig_y
     function instance:on_button_down(x,y)
@@ -68,7 +67,7 @@ end
 
 
 -------------------------------------------------------------
-local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
+return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
     local instance = Group()
 
@@ -227,6 +226,68 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
         end
     end
 
+    local sel_r = 1
+    local sel_c = 1
+    local hl  = Sprite{
+        sheet = assets,
+        id    = "focus-block.png",
+        opacity = 0,
+        x = entries[sel_r][sel_c].x+55,
+        y = entries[sel_r][sel_c].y+70,
+    }
+    instance.hl = hl
+    hl.w = (cell_w+x_spacing)
+    hl.h = (cell_h+x_spacing)
+    hl.anchor_point = {hl.w/2,hl.h/2}
+    instance:add(hl)
+    local function move_hl()
+        hl:stop_animation()
+        hl:animate{
+            duration = 100,
+            mode="EASE_OUT_QUAD",
+            x = entries[sel_r][sel_c].x+55,
+            y = entries[sel_r][sel_c].y+70,
+        }
+    end
+    local key_events = {
+        [keys.OK] = function()
+            if entries[1][2] then
+                instance:delete(sel_r,sel_c)
+            end
+        end,
+        [keys.Up] = function()
+            if entries[sel_r-1] then
+                sel_r = sel_r-1
+                move_hl()
+                return true
+            end
+        end,
+        [keys.Down] = function()
+            if entries[sel_r+1] then
+                sel_r = sel_r+1
+                move_hl()
+                return true
+            end
+        end,
+        [keys.Left] = function()
+            if entries[sel_r][sel_c-1] then
+                sel_c = sel_c-1
+                move_hl()
+                return true
+            end
+        end,
+        [keys.Right] = function()
+            if entries[sel_r][sel_c+1] then
+                sel_c = sel_c+1
+                move_hl()
+                return true
+            end
+        end,
+    }
+    instance.key_events = key_events
+    function instance:on_key_down(k)
+        return key_events[k] and key_events[k]()
+    end
     return instance
 
 end
