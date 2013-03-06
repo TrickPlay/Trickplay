@@ -303,12 +303,14 @@ class MainWindow(QMainWindow):
 
     def stitcher_finished(self, errorCode):
         if errorCode == 0 : 
-            if self.bar is not None:
+            if self.bar is not None and self.importCmd is not "remove":
                 print "[VE] progressBar.setValue : %s  "%'100'
                 self.bar.setValue(100)
                 self.bar.hide()
             if self.importCmd is "assets" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
+
+
         else : 
             if self.bar is not None:
                 self.bar.hide()
@@ -355,13 +357,13 @@ class MainWindow(QMainWindow):
 
             if os.path.exists(os.path.join(self.path, "assets/images/images.json")) == True:
                 print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/images/images.json"))+"' -o '"+str(os.path.join(self.path, "assets/images"))+"/images' "+path)
-                self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/images/images.json"))+"\" -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" \""+path+"\"")
                 ret = self.stitcher.waitForStarted()
                 if ret == False :
                     self.processErrorHandler("stitcher")
             else:
                 print("[VE] stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
-                self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" "+path)
+                self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/images"))+"/images\" \""+path+"\"")
                 ret = self.stitcher.waitForStarted()
                 if ret == False :
                     self.processErrorHandler("stitcher")
@@ -520,45 +522,16 @@ class MainWindow(QMainWindow):
 
         if os.path.exists(os.path.join(self.path, "assets/skins/"+id+".json")) == True:
             print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/'"+id+" "+skinPath)
-            self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" "+skinPath)
+            self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" \""+skinPath+"\"")
             ret = self.stitcher.waitForStarted()
             if ret == False :
                 self.processErrorHandler("stitcher")
         else:
             print("[VE] stitcher -rpd -o \'"+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\' "+skinPath)
-            self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" "+skinPath)
+            self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/"+id+"\" \""+skinPath+"\"")
             ret = self.stitcher.waitForStarted()
             if ret == False :
                 self.processErrorHandler("stitcher")
-
-    def importSkins_org(self):
-        path = -1 
-        self.bar = QProgressBar()
-        self.bar.setRange(0, 100)
-        self.bar.setValue(0)
-        self.bar.setWindowTitle("Import Skin...")
-        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
-        #self.bar.setGeometry(600, 400, 300, 20)
-        while path == -1 :
-            if self.path is None:
-		        self.path = self.apath
-            path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
-
-        if path:
-            print ("[VE] Import Skin Images ...[%s]"%path)
-
-            if os.path.exists(os.path.join(self.path, "assets/skins/skins.json")) == True:
-                print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/skins.json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -rpd -m \""+str(os.path.join(self.path, "assets/skins/skins.json"))+"\" -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
-                ret = self.stitcher.waitForStarted()
-                if ret == False :
-                    self.processErrorHandler("stitcher")
-            else:
-                print("[VE] stitcher -rpd -o '"+str(os.path.join(self.path, "assets/skins"))+"/skins' "+path)
-                self.stitcher.start("stitcher -rpd -o \""+str(os.path.join(self.path, "assets/skins"))+"/skins\" "+path)
-                ret = self.stitcher.waitForStarted()
-                if ret == False :
-                    self.processErrorHandler("stitcher")
 
     def newProject(self):
         orgPath = self.path
