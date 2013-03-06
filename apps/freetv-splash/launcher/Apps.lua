@@ -8,13 +8,13 @@ screen:add( generic_launcher_icon )
 generic_launcher_icon:hide()
 
 local function pre_x(i)
-    return icon_w*.5*(i-1)-icon_w*.25
+    return (10+icon_w*.5)*(i-1)-icon_w*.25
 end
 local function sel_x(i)
-    return icon_w*.5*(i-1)--icon_w*.25
+    return (10+icon_w*.5)*(i-1)--icon_w*.25
 end
 local function post_x(i)
-    return icon_w*.5*(i-1)+icon_w*.25
+    return (10+icon_w*.5)*(i-1)+icon_w*.25
 end
 
 do
