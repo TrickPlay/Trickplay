@@ -217,6 +217,13 @@ class TrickplayEmulatorManager(QWidget):
 				        self.imgData = json.loads(s[9:])
 				        self.fscontentMoveBlock = True 
 				        self.filesystem.buildImageTree(self.imgData)
+				        if self.filesystem.orgCnt >= self.filesystem.idCnt and self.filesystem.imageCommand is not "replace":
+				            #print self.filesystem.orgCnt, self.filesystem.idCnt 
+				            #print "less images files are found in the new imges.json" 
+				            self.main.errorMsg("No new image file was added !")
+
+				        if self.filesystem.imageCommand == "replace":
+				            self.filesystem.imageCommand = ""
 				        self.fscontentMoveBlock = False 
 				    else:
 				        pass
