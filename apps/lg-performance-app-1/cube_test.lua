@@ -122,13 +122,23 @@ function make_icon_card(items_data)
 end
 local function make_live_card(item_data)
 
+    local pip = Sprite{
+        sheet = assets,
+        id = "live-image.png",
+    }
+
+    pip.w = pip.w*3/2-20
+    pip.h = pip.h*3/2
+    pip.x = 2
+
     local ad = Sprite{
         sheet = assets,
         id = "live-lg-ad.png",
     }
 
-    ad.w = ad.w*3/2-5
+    ad.w = ad.w*3/2-10
     ad.h = ad.h*3/2+10
+    ad.x = 2
     ad.y = card_src_h-ad.h
 
     local instance = Group{
@@ -140,7 +150,7 @@ local function make_live_card(item_data)
                 w = card_src_w,
                 h = card_src_h,
             },
-            ad,
+            ad,pip,
             Sprite{
                 sheet = assets,
                 id = "card-shadow.png",

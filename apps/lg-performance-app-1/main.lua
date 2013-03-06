@@ -220,7 +220,7 @@ modal_menu:add(
 modal_menu.opacity = 0
 
 function modal_menu:focus(f)
-    modal_menu.z = -300
+    modal_menu.z = -400
     modal_menu:animate{
         duration = 250,
         opacity = 255,
@@ -240,7 +240,7 @@ function modal_menu:unfocus(f)
     modal_menu:animate{
         duration = 250,
         opacity = 0,
-        z = -300,
+        z = -400,
         on_completed = f
     }
     modal_menu_skim:animate{
@@ -365,7 +365,7 @@ do
         sheet=assets,
         id="icon-top-my-apps.png",
         x = 30,
-        y = 40,
+        y = 20,
     }
     icon.w = icon.w*3/2
     icon.h = icon.h*3/2
@@ -375,8 +375,27 @@ do
         color = "white",
         font = TITLE_FONT,
         x = icon.x + icon.w+10,
-        y = icon.y
+        y = icon.y-5
     }
+
+    local pip = Sprite{
+        sheet=assets,
+        id="my-apps-mad-men.png",
+        x = 100,
+        y =  90,
+    }
+    pip.w = pip.w*3/2
+    pip.h = pip.h*3/2
+
+    local prog_bar = Sprite{
+        sheet=assets,
+        id="my-apps-progress-bar-whole.png",
+        x = 800,
+        y = 300,
+    }
+    prog_bar.w = prog_bar.w*3/2
+    prog_bar.h = prog_bar.h*3/2
+
     local hdd_usb = Sprite{
         sheet=assets,
         id="button-hdd-usb-default.png",
@@ -424,7 +443,7 @@ do
     banner.h = banner.h*3/2
 
 
-    my_apps_top:add(icon,my_apps_text,hdd_usb,lrg_btn,lrg_btn_text,lrg_btn_arrow,banner)
+    my_apps_top:add(icon,my_apps_text,pip,prog_bar,hdd_usb,lrg_btn,lrg_btn_text,lrg_btn_arrow,banner)
 end
 --------------------------------------------------------------
 
