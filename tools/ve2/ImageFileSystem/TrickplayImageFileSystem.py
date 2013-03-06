@@ -11,33 +11,23 @@ multiSelect = 'false'
 class StitcherThread(QThread):
     def __init__(self, imageTree, itemWhatsThis, emptyPath) :
         QThread.__init__(self)
-        #self.name = name
-        #self.receiver = receiver
         self.imageTree = imageTree
         self.itemWT = itemWhatsThis
         self.emptyPath = emptyPath
-        self.stopped = 0
+        self.runState = 0
 
     def run(self):
-        """
-        while not self.stopped:
-            time.sleep(rand.random() * 0.3)
-            msg = rand.random()
-            event = QCustomEvent(10000)
-            event.setData("%s: %f" % (self.name, msg))
-            QThread.postEvent(self.receiver, event)
-        """
-         
+        self.runState = 1
         if self.imageTree.isDir(self.itemWT) == True:
             for imageData in self.imageTree.data:
                 for imageFile in imageData['sprites']:
                     id = imageFile['id']
                     if id.find(self.itemWT) == 0 :
-                        idsToRemove = idsToRemove+id+" "
+                        self.imageTree.idsToRemove = self.imageTree.idsToRemove+id+" "
 
-            idsToRemove = idsToRemove[:len(idsToRemove) - 1]
-            print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ idsToRemove + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
-            self.imageTree.main.stitcher.start("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ idsToRemove +" -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+            self.imageTree.idsToRemove = self.imageTree.idsToRemove[:len(self.imageTree.idsToRemove) - 1]
+            print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.imageTree.idsToRemove + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
+            self.imageTree.main.stitcher.start("stitcher \""+self.emptyPath+"\" -m \""+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+"\" -g "+ self.imageTree.idsToRemove +" -o \""+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images\"")
         else :
             
             fileCnt = 0 
@@ -49,8 +39,7 @@ class StitcherThread(QThread):
 
             print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.itemWT + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
 
-            self.imageTree.main.stitcher.start("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.itemWT+" -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
-
+            self.imageTree.main.stitcher.start("stitcher \""+self.emptyPath+"\" -m \""+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+"\" -g "+ self.itemWT+" -o \""+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images\"") 
 
             if fileCnt == 1 :
                 orgId = "}\n\t],"
@@ -58,7 +47,7 @@ class StitcherThread(QThread):
                 self.imageTree.imageJsonItemSub(orgId, newFolderInfo) 
 
     def stop(self):
-        self.stopped = 1
+        self.runState = 0
 
 
 
@@ -114,7 +103,7 @@ class DnDTreeWidget(QTreeWidget):
          for index in reversed(selection):
              item = self.itemFromIndex(QModelIndex(index))
              if item is None or item.parent() is None:
-                 print item.whatsThis(0), "Look 111"
+                 #print item.whatsThis(0), "Look 111"
                  taken.append(self.takeTopLevelItem(index.row()))
              else:
                  if self.fileSystem.isThisUniq(item.text(0), dropTo) == False :
@@ -184,6 +173,10 @@ class TrickplayImageFileSystem(QWidget):
         self.createContextMenu()
         QObject.connect(self.ui.fileSystemTree, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
 
+        self.idCnt = 0 
+        self.orgCnt = 0 
+        self.imageCommand = ""
+
     def isDir(self, orgId) :
         if orgId[len(orgId)-1:] == "/":
             return True
@@ -248,14 +241,15 @@ class TrickplayImageFileSystem(QWidget):
         f = open(self.main.imageJsonFile, 'w')
         f.write(jsonFileContents.replace(org, new))
         f.close()
+        self.imageCommand = "replace"
         self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
     def dragNdrop(self, dragFrom, dropTo):
         dragFromText = dragFrom.text(0)
         dragFrom = dragFrom.whatsThis(0)
 
-        print "Drag From : %s"%dragFrom
-        print "Drop To : %s"%dropTo
+        #print "Drag From : %s"%dragFrom
+        #print "Drop To : %s"%dropTo
         
         #Dir -> Dir
         if self.isOnTop(dragFrom) == True :
@@ -268,63 +262,11 @@ class TrickplayImageFileSystem(QWidget):
             org = dragFrom
             new = dropTo+dragFromText
 
-        print "Org Id : %s "%org
-        print "New Id : %s "%new
+        #print "Org Id : %s "%org
+        #print "New Id : %s "%new
+
         if org != new :
             self.imageJsonItemSub(org, new) 
-
-        """
-        if self.isOnTop(dragFrom) == True :
-            #if self.isDir(dropTo) == False and self.isOnTop(dropTo) == True :
-                #print ("same level 111 ")
-            #else :
-            org = dragFrom
-            new = dropTo+dragFrom
-            self.imageJsonItemSub(org, new) 
-            # TODO : (1) need to delete empty dropTo/ if dropTo was empty 
-            print ("case1")
-        else :
-            if self.isOnTop(dropTo) == True :
-                if self.isDir(dragFrom) == False : 
-                    org = dragFrom
-                    new = dragFromText
-                    self.imageJsonItemSub(org, new) 
-                    # TODO : (2) need to create empty dragFrom folder / if dragFrom is empty 
-                    print ("case2")
-                else : 
-                    for imageData in self.data:
-                        for imageFile in imageData['sprites']:
-                            id = imageFile['id']
-         class WorkerThread(QThread):
-  def __init__(self, name, receiver):
-    QThread.__init__(self)
-    self.name = name
-    self.receiver = receiver
-    self.stopped = 0
-  def run(self):
-    while not self.stopped:
-      time.sleep(rand.random() * 0.3)
-      msg = rand.random()
-      event = QCustomEvent(10000)
-      event.setData("%s: %f" % (self.name, msg))
-      QThread.postEvent(self.receiver, event)
-
-  def stop(self):
-    self.stopped = 1                   if id[:len(dragFrom)] == dragFrom :
-                                org = id 
-                                new = id[len(dragFrom):]
-                                self.imageJsonItemSub(org, new) 
-                                print ("case3")
-            elif self.isSameDir(dragFrom, dropTo) == True:
-                print ("same level 222 ")
-            else :
-                print ("case4")
-                if self.isDir(dragFrom) == False :
-                    org = dragFrom
-                    new = dragFromText
-                    self.imageJsonItemSub(org, new) 
-                    
-            #"""
         return True
 
     def createContextMenu(self):
@@ -351,51 +293,17 @@ class TrickplayImageFileSystem(QWidget):
 
     def removeAsset(self) :
         self.main.importCmd = "remove"
-        """
-        self.main.bar = QProgressBar()
-        self.main.bar.setRange(0, 100)
-        self.main.bar.setValue(0)
-        self.main.bar.setWindowTitle("Remove Assets...")
-        self.main.bar.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 200, self.main.ui.fileSystemDock.geometry().y() + 100, 300, 20)
-        """
         item = self.ui.fileSystemTree.currentItem()
         itemWhatsThis = item.whatsThis(0)
         emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
-        #idsToRemove = []
-        idsToRemove = ""
+        self.idsToRemove = ""
 
         self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
+
         self.ui.fileSystemTree.currentItem().removeChild(item)
+        self.idCnt = self.idCnt - 1
         self.sTread.run()
         
-        """
-        if self.isDir(item.whatsThis(0)) == True:
-            for imageData in self.data:
-                for imageFile in imageData['sprites']:
-                    id = imageFile['id']
-                    if id.find(item.whatsThis(0)) == 0 :
-                        idsToRemove = idsToRemove+id+" "
-
-            idsToRemove = idsToRemove[:len(idsToRemove) - 1]
-            print("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ idsToRemove + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-            self.main.stitcher.start("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ idsToRemove +" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-        else :
-            
-            fileCnt = 0 
-            for imageData in self.data:
-                for imageFile in imageData['sprites']:
-                    id = imageFile['id']
-                    if id.find(self.getDir(item.whatsThis(0))) == 0 : 
-                        fileCnt = fileCnt + 1
-
-            print("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ item.whatsThis(0) + " -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-            self.main.stitcher.start("stitcher "+emptyPath+" -m "+str(os.path.join(self.main.path, "assets/images/images.json"))+" -g "+ item.whatsThis(0)+" -o "+str(os.path.join(self.main.path, "assets/images"))+"/images")
-
-            if fileCnt == 1 :
-                orgId = "}\n\t],"
-                newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+self.getDir(itemWhatsThis)+"\" }\n\t],"
-                self.imageJsonItemSub(orgId, newFolderInfo) 
-        """
 
     def insertImage(self) :
         
@@ -434,15 +342,6 @@ class TrickplayImageFileSystem(QWidget):
 			    newFolderInfo = orgId+"\" },\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path
 
 			self.imageJsonItemSub(orgId, newFolderInfo) 
-			"""
-			f = open(self.main.imageJsonFile)
-			jsonFileContents = f.read()
-			f.close()
-			f = open(self.main.imageJsonFile, 'w')
-			f.write(jsonFileContents.replace(orgId, newFolderInfo))
-			f.close()
-			self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
-			"""
             
     def fileItemChanged(self, item, col):
         #if self.main._emulatorManager.fscontentMoveBlock == True :
@@ -467,7 +366,10 @@ class TrickplayImageFileSystem(QWidget):
     def buildImageTree(self,  data, styleIndex=None):
 
         # Clear Image File System Tree
+        self.orgCnt = self.idCnt 
+
         self.ui.fileSystemTree.clear()
+        self.idCnt = 0 
 
         #self.ui.fileSystemTree.setColumnCount(2)
         # Init variables 
@@ -513,13 +415,6 @@ class TrickplayImageFileSystem(QWidget):
                         folders[folderIdx][0] = i[idx - 1]                    
                         folders[folderIdx][1] = i[1]                    
 
-                """
-                if folders.has_key(folderIdx) == False and idx > 1:
-                    folders[folderIdx] = {}
-                    folders[folderIdx][0] = i[idx - 1]                    
-                    folders[folderIdx][1] = i[1]                    
-                """
-
                 fileName = id    
                 if idx > 1 :
                     if len(id) > 0:
@@ -536,7 +431,8 @@ class TrickplayImageFileSystem(QWidget):
                     self.ui.fileSystemTree.addTopLevelItem(j)
                 cnt = cnt + 1
 
-                    
+            self.idCnt = self.idCnt + cnt
+
         return 
         
                     
