@@ -256,14 +256,14 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             end
         end,
         [keys.Up] = function()
-            if entries[sel_r-1] then
+            if entries[sel_r-1] and entries[sel_r-1][sel_c] then
                 sel_r = sel_r-1
                 move_hl()
                 return true
             end
         end,
         [keys.Down] = function()
-            if entries[sel_r+1] then
+            if entries[sel_r+1] and entries[sel_r+1][sel_c] then
                 sel_r = sel_r+1
                 move_hl()
                 return true
