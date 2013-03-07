@@ -392,21 +392,19 @@ class TrickplayImageFileSystem(QWidget):
                     n = re.search("\/", id).end()
                     folder = id[:n-1]
                     folderIdx = folderIdx+folder+":"
-
                     if idx > 1:
-                        if folders.has_key(folderIdx) == True :
-                            i[idx] = folders[folderIdx][0] 
-                        else : 
-                            i[idx] = QTreeWidgetItem(i[idx-1])
-                            i[idx].setText (0, folder)  
-                            i[idx].setWhatsThis(0, folderIdx.replace(":", "/"))
-                    else :
-                        if folders.has_key(folderIdx) == True :
-                            i[idx] = folders[folderIdx][1] # top level item 
-                        else:
-                            i[idx] = QTreeWidgetItem()
-                            i[idx].setText (0, folder)  
-                            i[idx].setWhatsThis(0, folderIdx.replace(":", "/"))
+                        folderColIdx = 0 
+                        folderParent = i[idx-1]
+                    else:
+                        folderColIdx = 1 
+                        folderParent = None
+
+                    if folders.has_key(folderIdx) == True :
+                        i[idx] = folders[folderIdx][folderColIdx] 
+                    else : 
+                        i[idx] = QTreeWidgetItem(folderParent)
+                        i[idx].setText (0, folder)  
+                        i[idx].setWhatsThis(0, folderIdx.replace(":", "/"))
 
                     idx = idx + 1
                     id = id[n:]
@@ -423,7 +421,15 @@ class TrickplayImageFileSystem(QWidget):
                         j.setText (0, fileName)  
                         j.setFlags(j.flags() ^Qt.ItemIsEditable)
                         j.setWhatsThis(0, imageFile['id'])
+                    else :
+                        folders[folderIdx][0].setText(0, folders[folderIdx][0].text(0)+" [%s items folder]"%str(folders[folderIdx][0].childCount()))
+                        #print folders[folderIdx][0].text(0)+"[%s items folder]"%str(folders[folderIdx][0].childCount())
+                        if folders[folderIdx][0].childCount() == 0 :
+                            j = QTreeWidgetItem(folders[folderIdx][0]) 
+                            j.setText (0, "(Emplty)")  
+                            j.setWhatsThis(0, imageFile['id'])
                     self.ui.fileSystemTree.addTopLevelItem(folders[folderIdx][1]) # top level item
+
                 else :
                     j = QTreeWidgetItem()
                     j.setText (0, fileName) 
