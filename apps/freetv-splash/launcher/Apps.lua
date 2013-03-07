@@ -55,7 +55,7 @@ do
             }
             local duration = 250
             local mode     = "EASE_OUT_SINE"
-            g.slogan = "Burberry Shopping App"
+            g.slogan = v.long_name or v.name
             g.description = v.description or lorem_ipsum
             g.name = v.id
             g:add(i,title_grp)
@@ -158,8 +158,8 @@ do
                                                             source = "*",
                                                             target = "half",
                                                             keys = {
-                                                                { r, "y", hidden_y - (icon_h*.75+20) },
-                                                                { r, "h",            (icon_h*.75+20) },
+                                                                { r, "y", hidden_y - (icon_h+20) },
+                                                                { r, "h",            (icon_h+20) },
                                                             },
                                                         },
                                                         {
