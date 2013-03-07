@@ -1417,13 +1417,13 @@ class TrickplayInspector(QWidget):
             self.cbStyle.setEditable (False)
 
     def removeScreen(self):
-        if self.currentScreenName is not "Default":
+        if self.currentScreenName != "Default" and self.ui.screenCombo.count() > 1:
             curIdx = self.ui.screenCombo.currentIndex()
             del self.screens[self.currentScreenName]
             self.ui.screenCombo.removeItem(curIdx)
         else:
+            self.main.errorMsg("There should be at least one screen.") 
             pass 
-            #TODO:Error Message ..
 
     def screenActivated(self, index):
         if self.screen_textChanged == True :
