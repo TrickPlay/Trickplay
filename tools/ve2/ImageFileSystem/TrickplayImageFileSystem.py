@@ -303,7 +303,6 @@ class TrickplayImageFileSystem(QWidget):
         self.ui.fileSystemTree.currentItem().removeChild(item)
         self.idCnt = self.idCnt - 1
         self.sTread.run()
-        
 
     def insertImage(self) :
         
@@ -314,9 +313,6 @@ class TrickplayImageFileSystem(QWidget):
             self.main.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self.main._inspector.curLayerGid)+"', 'Image', "+"'"+str(source)+"')")
         else:
             print ("Error : Dir is selected")
-
-
-
         """
             spriteSheet = SpriteSheet { map = "assets/image/images.json" }
             image = WidgetImage{ sheet = spriteSheet, id = "ee/ff.png" }
@@ -326,7 +322,12 @@ class TrickplayImageFileSystem(QWidget):
         #if self.main._emulatorManager.fscontentMoveBlock == True :
             #return
         item = self.ui.fileSystemTree.currentItem()
-        newFolderParent = self.getDir(item.whatsThis(0))
+        if item == None :
+            newFolderParent = self.getDir(self.topWhatsThis)
+            orgId = str(self.topWhatsThis)
+        else :
+            newFolderParent = self.getDir(item.whatsThis(0))
+            orgId = str(item.whatsThis(0))
 
         self.dialog = QDialog()
         self.ndirUi = Ui_newFolderDialog()
@@ -334,7 +335,7 @@ class TrickplayImageFileSystem(QWidget):
         if self.dialog.exec_():
 			dir_name = self.ndirUi.folder_name.text()
 			new_path = newFolderParent+dir_name+"/"
-			orgId = str(item.whatsThis(0))
+			#orgId = str(item.whatsThis(0))
 			if self.isDir(orgId) == True: #[len(orgId)-1:] == "/":
 			    orgId = "}\n\t],"
 			    newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
@@ -428,6 +429,7 @@ class TrickplayImageFileSystem(QWidget):
                     j.setText (0, fileName) 
                     j.setFlags(j.flags() ^Qt.ItemIsEditable)
                     j.setWhatsThis(0, imageFile['id'])
+                    self.topWhatsThis = imageFile['id']
                     self.ui.fileSystemTree.addTopLevelItem(j)
                 cnt = cnt + 1
 
