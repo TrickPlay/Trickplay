@@ -404,6 +404,10 @@ class TrickplayImageFileSystem(QWidget):
                     else : 
                         i[idx] = QTreeWidgetItem(folderParent)
                         i[idx].setText (0, folder)  
+                        temp = i[idx].font(0)
+                        temp.setBold(True)
+                        #i[idx].setFont (0, i[idx].font(0))  
+                        i[idx].setFont (0, temp)  
                         i[idx].setWhatsThis(0, folderIdx.replace(":", "/"))
 
                     idx = idx + 1
