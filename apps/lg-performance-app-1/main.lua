@@ -36,10 +36,6 @@ function make_wide_button(text)
     local unfocused = Sprite{sheet=assets,id="button-default.png"}
     local   focused = Sprite{sheet=assets,id="button-focus.png"  }
 
-    focused.w   = focused.w*3/2
-    focused.h   = focused.h*3/2
-    unfocused.w = unfocused.w*3/2
-    unfocused.h = unfocused.h*3/2
 
     local text = Text{
         text = text,
@@ -105,11 +101,11 @@ local items = {
 
         {text="Search",        src="icon-search.png"},
         {text="Now & Hot",     src="icon-now-hot.png"},
-        {text="SmartShare",    src="icon-smart-share.png"},
+        {text="CNN",           src="icon-cnn.png"},
     },
     {
-        {text="LG Cloud",      src="icon-lg-cloud.png"},
-        {text="Game World",    src="icon-game-world.png"},
+        {text="Cinema Now",    src="icon-cinema-now.png"},
+        {text="AP",            src="icon-ap.png"},
         {text="User Guide",    src="icon-user-guide.png"},
 
         {text="Ch. List",      src="icon-ch-list.png"},
@@ -118,15 +114,15 @@ local items = {
     },
     {
         {text="LG Smart",      src="icon-lg-smart.png"},
-        {text="3D World",      src="icon-3d-world.png"},
-        {text="K-pop",         src="icon-kpop-zone.png"},
+        {text="3D World",      src="icon-3d-on.png"},
+        {text="Nat Geo",       src="icon-national-geo.png"},
 
-        {text="Social Center", src="icon-social-center.png"},
-        {text="Video",         src="icon-video.png"},
-        {text="Photo",         src="icon-photo.png"},
+        {text="Gystle",        src="icon-gystle.png"},
+        {text="Netflix",       src="icon-netflix.png"},
+        {text="NHL",           src="icon-nhl.png"},
     },
     {
-        {text="Music",         src="icon-music.png"},
+        {text="O2",            src="icon-o2.png"},
         {text="Simplelink",    src="icon-simple-link.png"},
         {text="Quick Menu",    src="icon-quick-menu.png"},
 
@@ -137,17 +133,19 @@ local items = {
 }
 modal_menu_skim = Rectangle{size=screen.size,color = "black",opacity=0}
 modal_menu = Group{name = "Modal Menu",x=40,y=60}
-modal_menu_grid = make_grid(items,100,100,60,70)
+modal_menu_grid = make_grid(items,100,100,90,70)
 
-modal_menu_grid.x = screen_w*3/4 - 100
+modal_menu_grid.x = screen_w*3/4 - 130
 modal_menu_grid.y = 200
 
 modal_menu_bg = Sprite{
     sheet = assets,
     id = "bg-create-my-card.png",
+    x  = -20,
+    y  = -20,
 }
-modal_menu_bg.w = screen_w-modal_menu.x*2--modal_menu_bg.w*3/2
-modal_menu_bg.h = screen_h-modal_menu.y*2--modal_menu_bg.h*3/2
+--modal_menu_bg.w = screen_w-modal_menu.x*2--modal_menu_bg.w*3/2
+--modal_menu_bg.h = screen_h-modal_menu.y*2--modal_menu_bg.h*3/2
 modal_menu:add(
     modal_menu_bg,
     Text{
@@ -173,8 +171,8 @@ modal_menu:add(
                 id = "title-icon-my-card.png",
                 x  = 10,
                 y  = 10,
-                w  = 30*3/2,
-                h  = 29*3/2,
+                --w  = 30*3/2,
+                --h  = 29*3/2,
             },
             Text{
                 text = "My Card 1",
@@ -300,22 +298,22 @@ local items = {
         {text="Internet",      src="icon-internet.png"},
         {text="Search",        src="icon-search.png"},
         {text="Now & Hot",     src="icon-now-hot.png"},
-        {text="SmartShare",    src="icon-smart-share.png"},
-        {text="LG Cloud",      src="icon-lg-cloud.png"},
-        {text="Game World",    src="icon-game-world.png"},
+        {text="CNN",           src="icon-cnn.png"},
+        {text="Cinema Now",    src="icon-cinema-now.png"},
+        {text="AP",            src="icon-ap.png"},
         {text="User Guide",    src="icon-user-guide.png"},
         {text="Ch. List",      src="icon-ch-list.png"},
     },
     {
-        {text="Dual Play",     src="icon-dual-play.png"},
-        {text="Camera",        src="icon-camera.png"},
+        {text="Google Earth",  src="icon-google-earth.png"},
+        {text="Forky",         src="icon-forky.png"},
         {text="LG Smart",      src="icon-lg-smart.png"},
-        {text="3D World",      src="icon-3d-world.png"},
-        {text="K-pop",         src="icon-kpop-zone.png"},
-        {text="Social Center", src="icon-social-center.png"},
-        {text="Video",         src="icon-video.png"},
-        {text="Photo",         src="icon-photo.png"},
-        {text="Music",         src="icon-music.png"},
+        {text="3D World",      src="icon-3d-on.png"},
+        {text="Nat Geo",       src="icon-national-geo.png"},
+        {text="Gystle",        src="icon-gystle.png"},
+        {text="Netflix",       src="icon-netflix.png"},
+        {text="NHL",           src="icon-nhl.png"},
+        {text="O2",            src="icon-o2.png"},
         {text="Simplelink",    src="icon-simple-link.png"},
     },
     {
@@ -326,7 +324,7 @@ local items = {
         {text="Skype",         src="icon-skype.png"},
         {text="Facebook",      src="icon-facebook.png"},
         {text="Adobe TV",      src="icon-lg-adobetvb.png"},
-        {text="Hulu",          src="icon-user-guide.png"},
+        {text="TED",           src="icon-ted.png"},
         {text="MLB",           src="icon-mlb.png"},
         {text="Find Ball",     src="icon-game-find-ball.png"},
     },
@@ -490,8 +488,10 @@ for i=1,#top_items do
     local v =top_items[i]
 
     v.anchor_point = {0,v.h/2}
-    v.w = v.w*3/2
-    v.h = v.h*3/2
+    if v.id == "top-bar-line-separator.png" then
+        v.w = v.w*3/2
+        v.h = v.h*3/2
+    end
     v.x = i == 1 and 0 or (top_items[i-1].x+top_items[i-1].w+20)--(i-1)*(v.w+20)
 end
 
