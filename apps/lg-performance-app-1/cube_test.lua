@@ -3,12 +3,12 @@ local cube = Group()
 local card_src = Sprite{sheet = assets,id="card.png"}
 local live_card_src = Sprite{sheet = assets,id="card-live.png"}
 local card_reflection_src = Sprite{sheet = assets,id="card-shadow.png"}
-local card_src_w = card_src.w*3/2
-local card_src_h = card_src.h*3/2
+local card_src_w = card_src.w
+local card_src_h = card_src.h
 local live_card_src_w = live_card_src.w*3/2
 local live_card_src_h = live_card_src.h*3/2
-local card_reflection_src_w = card_reflection_src.w*3/2
-local card_reflection_src_h = card_reflection_src.h*3/2
+local card_reflection_src_w = card_reflection_src.w
+local card_reflection_src_h = card_reflection_src.h
 
 card_src = nil
 card_reflection_src = nil
@@ -24,8 +24,8 @@ local function first_card_icon(item_data)
 
     local icon = Sprite{sheet = assets,id=item_data.src,x=5,y=5}
 
-    icon.w = icon.w*3/2
-    icon.h = icon.h*3/2
+    --icon.w = icon.w*3/2
+    --icon.h = icon.h*3/2
 
     local title = Text{
         text = item_data.text,
@@ -54,8 +54,8 @@ local function make_card_icon(item)
 
     local r = Sprite{sheet = assets,id=item.src}
 
-    r.w = r.w*3/2
-    r.h = r.h*3/2
+    --r.w = r.w*3/2
+    --r.h = r.h*3/2
 
     local t = Text{text = item.text,font = ICON_FONT, color = "666666",y = r.h,x=r.w/2}
 
@@ -133,13 +133,14 @@ local function make_live_card(item_data)
 
     local ad = Sprite{
         sheet = assets,
-        id = "live-lg-ad.png",
+        id = "ad-worldnews-abc.png",
     }
 
-    ad.w = ad.w*3/2-10
-    ad.h = ad.h*3/2+10
+    --ad.w = ad.w*3/2-10
+    --ad.h = ad.h*3/2+10
+    ad.w = ad.w-20
     ad.x = 2
-    ad.y = card_src_h-ad.h
+    ad.y = card_src_h-ad.h+26
 
     local instance = Group{
         name="Card",
@@ -208,7 +209,7 @@ r1 = make_side{
         {text="Settings",     src="icon-settings.png"},
         {text="Now & Hot",    src="icon-now-hot.png"},
         {text="Search",       src="icon-search.png"},
-        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="Input List",   src="icon-input-list.png"},
         {text="3d On",        src="icon-3d-on.png"},
         {text="TV Guide",     src="icon-tv-guide.png"},
         {text="User Guide",   src="icon-user-guide.png"},
@@ -219,7 +220,7 @@ r1 = make_side{
         {text="Settings",     src="icon-settings.png"},
         {text="Now & Hot",    src="icon-now-hot.png"},
         {text="Search",       src="icon-search.png"},
-        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="Input List",   src="icon-input-list.png"},
         {text="3d On",        src="icon-3d-on.png"},
         {text="TV Guide",     src="icon-tv-guide.png"},
         {text="User Guide",   src="icon-user-guide.png"},
@@ -230,7 +231,7 @@ r1 = make_side{
         {text="Settings",     src="icon-settings.png"},
         {text="Now & Hot",    src="icon-now-hot.png"},
         {text="Search",       src="icon-search.png"},
-        {text="LG Smart",     src="icon-lg-cloud.png"},
+        {text="Input List",   src="icon-input-list.png"},
         {text="3d On",        src="icon-3d-on.png"},
         {text="TV Guide",     src="icon-tv-guide.png"},
         {text="User Guide",   src="icon-user-guide.png"},
@@ -243,15 +244,15 @@ r2 = make_side{
         sub_t = "PM 10:20 - 11:20",
     },
     make_icon_card{
-        {text="GAME WORLD",   src="title-icon-game.png"},
-        {text="Angry Birds",   src="icon-game-angry-birds.png"},
-        {text="Bejeweled",   src="icon-game-bejeweled3.png"},
-        {text="Cut The Rope",   src="icon-game-cut-the-rope.png"},
-        {text="Downhill Bowl",   src="icon-game-downhill-bowl.png"},
-        {text="Earth Story",   src="icon-game-earth-story.png"},
-        {text="Exit 2",   src="icon-game-exit2.png"},
-        {text="Find Ball",   src="icon-game-find-ball.png"},
-        {text="Frisbee Forever",   src="icon-game-frisbee-forever.png"},
+        {text="GAME WORLD",    src="title-icon-game.png"},
+        {text="Quick Menu",    src="icon-quick-menu.png"},
+        {text="Netflix",       src="icon-netflix.png"},
+        {text="Youtube",       src="icon-youtube.png"},
+        {text="Accuweather",   src="icon-accuweather.png"},
+        {text="Skype",         src="icon-skype.png"},
+        {text="Facebook",      src="icon-facebook.png"},
+        {text="Adobe TV",      src="icon-lg-adobetvb.png"},
+        {text="TED",           src="icon-ted.png"},
     },
     make_icon_card{
         {text="LG SMART WORLD", src="title-icon-lg-smart-world.png"},

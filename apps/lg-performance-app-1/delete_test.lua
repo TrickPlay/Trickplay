@@ -9,8 +9,8 @@ local function make_icon(item)
     local instance = Group()
 
     local r = Sprite{sheet = assets,id=item.src}
-    r.w = r.w*3/2
-    r.h = r.h*3/2
+    --r.w = r.w*3/2
+    --r.h = r.h*3/2
 
     local w = r.w
     local h = r.h
