@@ -80,7 +80,7 @@ local function show_launcher(start_item)
         mediaplayer:play()
     end
     --mediaplayer:load("http://bkpc/Videos/Tonight%20Show%20With%20Jay%20Leno.mpg")
-    mediaplayer:load('glee.mp4')
+    --mediaplayer:load('glee.mp4')
 
     screen:grab_key_focus()
     screen.on_key_down = launcher_hidden_key_handler
@@ -93,4 +93,82 @@ function start_launcher(the_service, start_item)
     service = the_service
     load_assets()
     show_launcher(start_item)
+    --[=[ 
+    -- This code creates the EPG, right now it just hangs out in the back 
+    -- (there was no discussion on how to animate to it)
+    -- it grabs key focus, but the key presses bleed through to the main UI as well
+    
+    
+    epg_menu = dofile("EPG.lua")
+    screen:add(epg_menu)
+    epg_menu:lower_to_bottom()
+    
+    --get_channel_list(function(channels)
+        
+        local channels = json:parse( readfile("tv_guide_json/channels.json") )--readfile("local_data/get_channel_list"))
+        if channels == nil then
+            error("bad channels")
+        end
+        --[[
+        if  type(channels) ~= "table" or 
+            type(channels.Channels) ~= "table" or 
+            type(channels.Channels.Channel) ~= "table" then
+            
+            print("get_channel_list got bad data")
+            return
+        end
+        --]]
+        for i,channel in pairs(channels) do--.Channels.Channel) do
+            --print("--------------------------------------------------------------------")
+            --dumptable(channel)
+            --[[
+            if type(channel) ~= "table" or 
+                type(channel.Name) ~= "string" or 
+                type(channel.Pictures) ~= "table" or 
+                type(channel.Pictures.Picture[1]) ~= "table" or 
+                type(channel.Pictures.Picture[1].Value) ~= "string" then 
+                
+                print("get_channel_list got bad entry")
+                return 
+            end
+            
+            local pic
+            for i,p in ipairs(channel.Pictures.Picture) do
+                if p.type == "Logo" then
+                    pic = p.Value
+                    break;
+                end
+            end
+            --]]
+            make_proxy(
+                
+                channel.name,
+                
+                pic
+                
+            )
+        end
+        --]]
+        epg_menu:setup_icons(  channels  )--.Channels.Channel )
+        --channel_menu:populate( channels.Channels.Channel )
+    --end)
+    --[[
+    --get_scheduling(function(t,old)
+        local old = 1351875000
+        local t = json:parse(readfile("local_data/get_scheduling"))
+        if  type(t) ~= "table" or 
+            type(t.Channels) ~= "table" or 
+            type(t.Channels.Channel) ~= "table" then
+            
+            print("get_scheduling got bad data")
+            return
+        end
+        --dumptable(t)
+        epg_menu:load_scheduling(t,old)
+        --]]
+        epg_menu:load_scheduling()
+    dolater(function()
+        epg_menu:grab_key_focus()
+        
+    end)--]=]
 end
