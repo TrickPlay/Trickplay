@@ -16,6 +16,7 @@ modelToDataTable = {
     'focused': lambda v: ('focused', toBool(v)),
     'enabled': lambda v: ('enabled', toBool(v)),
     'editable': lambda v: ('editable', toBool(v)),
+    'clip_to_size': lambda v: ('clip_to_size', toBool(v)),
     'justify': lambda v: ('justify', toBool(v)),
     'single_line': lambda v: ('single_line', toBool(v)),
     'use_markup': lambda v: ('use_markup', toBool(v)),
