@@ -867,7 +867,6 @@ _VE_.buildVF = function(path)
     local images = readfile(images_file)
     if images and #images > 0 then 
         images = string.gsub (images, "(\n+)", "")
-        --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo"..images)
         spriteSheet = WL.Widget_SpriteSheet { map = images_file } 
     end
@@ -1060,9 +1059,12 @@ end
 _VE_.screenShow = function()
     screen:show()
 end 
-_VE_.setScreenLoc = function()
-    screen.y = 300
-    screen.x = 1900
+_VE_.getScreenLoc = function()
+    print("screenLoc"..screen.x..","..screen.y)
+end 
+_VE_.setScreenLoc = function(x, y)
+    screen.y = y--300
+    screen.x = x--1900
 end 
 
 _VE_.newLayer = function()

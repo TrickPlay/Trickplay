@@ -83,15 +83,14 @@ class MainWindow(QMainWindow):
         QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
         self.ui = Ui_MainWindow()
-
         self.ui.setupUi(self)
-        self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
+        #self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
 
         self.windows = {"inspector":False, "images":False}
         self.inspectorWindowClicked()
 
         # Create Inspector
-        self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+        #self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
 
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
@@ -107,7 +106,7 @@ class MainWindow(QMainWindow):
 
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
-        self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
+        #self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
@@ -191,7 +190,15 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
 		
         # Restore sizes/positions of docks
-        #self.restoreState(settings.value("mainWindowState").toByteArray());
+        settings = QSettings()
+        if settings.value('mainMenuDock') and settings.value('inspectorDock') and settings.value('fileSystemDock') :
+            self.ui.mainMenuDock.setGeometry((settings.value('mainMenuDock').toRect()))
+            self.ui.InspectorDock.setGeometry((settings.value('inspectorDock').toRect()))
+            self.ui.fileSystemDock.setGeometry((settings.value('fileSystemDock').toRect()))
+        else :
+            self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
+            self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+            self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         self.path =  None 
         self.app = app
@@ -808,12 +815,20 @@ class MainWindow(QMainWindow):
         self._emulatorManager.run()
 
     def exit(self):
+        self.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
+        settings = QSettings()
+        settings.setValue("mainMenuDock", self.ui.mainMenuDock.geometry());
+        settings.setValue("inspectorDock", self.ui.InspectorDock.geometry());
+        settings.setValue("fileSystemDock", self.ui.fileSystemDock.geometry());
+        time.sleep(0.1)
+        settings.setValue("x", self.x)
+        settings.setValue("y", self.y)
+
         if self._emulatorManager.trickplay.state() == QProcess.Running:
             if self._emulatorManager.unsavedChanges == True :
                 if self.warningMsg() == False :
                     return True
             self.stop(False, True)
-            #self._emulatorManager.stop()
             self.close()
         return True
 
