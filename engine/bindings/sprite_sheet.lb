@@ -15,31 +15,6 @@ module sprite_sheet;
 [[
 
 //------------------------------------------------------------------------
-// Emit signal "later"
-/*
-class EmitLoadedSignalLater : public Action
-{
-
-public:
-    EmitLoadedSignalLater( SpriteSheet * self, const char * error_message )
-    {
-        this->self = self;
-        this->error_message = error_message;
-    }
-
-protected:
-    bool run()
-    {
-        g_signal_emit_by_name( self->extra, "load-finished", error_message );
-        return false;
-    }
-
-private:
-    SpriteSheet * self;
-    const char  * error_message;
-};
-*/
-//------------------------------------------------------------------------
 // Helper functions
 
 typedef void (* LFunc) ( lua_State * L, int index, gpointer user_data );

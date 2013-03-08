@@ -28,7 +28,8 @@ struct SpriteBinding
     };
 
     SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
-                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ) {}
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ),
+                                             action( NULL ) {}
 
     ~SpriteBinding()
     {
@@ -39,6 +40,16 @@ struct SpriteBinding
         if ( sheet ) {
             RefCounted::unref( sheet );
             sheet = NULL;
+        }
+        if ( actor ) {
+            clutter_actor_destroy( actor );
+            actor = NULL;
+        }
+        if ( !can_fire && async ) {
+            g_assert( action );
+            Action::cancel( action );
+            action = NULL;
+            can_fire = true;
         }
     }
     
@@ -80,12 +91,22 @@ struct SpriteBinding
     {
         static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
 
-        clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), sprite ? sprite->get_texture() : null_texture );
-        clutter_actor_queue_redraw( actor );
-
         loaded = sprite && sprite->is_real();
+        CoglHandle new_texture = loaded ? sprite->get_texture() : null_texture;
 
-        signal_loaded_later();
+        g_assert( new_texture );
+
+        if ( texture != new_texture ) {
+
+            texture = new_texture;
+
+            /* No need to unref the texture previously associated with the actor, as
+                clutter_texture_set_cogl_texture will do it */
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( actor ), new_texture );
+            clutter_actor_queue_redraw( actor );
+
+            signal_loaded_later();
+        }
     }
 
     void signal_loaded()
@@ -108,7 +129,8 @@ struct SpriteBinding
         if ( async && can_fire )
         {
             can_fire = false;
-            Action::post( new SignalLoadedLater( this ) );
+            action = new SignalLoadedLater( this );
+            Action::post( action );
         }
     }
 
@@ -149,6 +171,8 @@ private:
     SpriteSheet::Sprite * sprite;
     SpriteSheet         * sheet;
     char * id;
+    CoglHandle texture;
+    SignalLoadedLater   * action;
 };
 
 void set_sheet_first( lua_State * L , int table )

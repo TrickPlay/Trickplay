@@ -15,10 +15,21 @@
 
 ]]--
 
+wrap_i = function(i,n) return (i - 1) % (n) + 1 end
+
+
+
+local bg = Rectangle{size=screen.size}
+json_null = json.null
+screen:add(bg)
 dofile("widget_helper.lua")
 
 dofile("launcher.lua")
 
+load_data = dofile("tv_data.lua")
+print("before")
+channels, series = load_data("tv_guide_json/")
+print("after")
 --[[
     Globals -- very limited set of these
 ]]--
@@ -55,3 +66,4 @@ else
     screen:show()
     start_launcher(settings.service, settings.back_to_start)
 end
+bg:lower_to_bottom()
