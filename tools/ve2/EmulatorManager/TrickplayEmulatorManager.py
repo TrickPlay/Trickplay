@@ -134,7 +134,16 @@ class TrickplayEmulatorManager(QWidget):
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
 					self.trickplay.close()
-				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
+
+				settings = QSettings()
+				self.main.x = str(settings.value('x').toInt()[0])
+				self.main.y = str(settings.value('y').toInt()[0])
+
+				if self.main.x == None or self.main.y == None:
+				    self.main.x = str(1900)
+				    self.main.y = str(300)
+
+				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc("+self.main.x+","+self.main.y+")")
 				self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
 
 			else:
@@ -148,6 +157,14 @@ class TrickplayEmulatorManager(QWidget):
 				    #print s[:15]
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "screenLoc":
+				        screenLoc = s[9:]
+				        sepPos = screenLoc.find(",")
+				        self.main.x = screenLoc[:sepPos]
+				        self.main.y = screenLoc[sepPos + 1:]
+				        settings = QSettings()
+				        settings.setValue("x", self.main.x)
+				        settings.setValue("y", self.main.y)
 				    elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
 				        org_position = int(s[9:])
 				        self.GLI_dialog = QDialog()
