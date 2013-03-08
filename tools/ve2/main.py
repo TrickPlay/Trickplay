@@ -245,6 +245,7 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setWindowTitle("Error")
+        msg.setGeometry(self.ui.mainMenuDock.geometry().x() + 100, self.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
         ret = msg.exec_()
         if ret == QMessageBox.Ok:
             return
@@ -257,6 +258,7 @@ class MainWindow(QMainWindow):
         msg.addButton("Close without Saving" , QMessageBox.NoRole )
         msg.setDefaultButton(QMessageBox.Cancel)
         msg.setWindowTitle("Warning")
+        msg.setGeometry(self.ui.mainMenuDock.geometry().x() + 100, self.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
         ret = msg.exec_()
         if ret == QMessageBox.Save:
             self.saveProject()
@@ -419,6 +421,7 @@ class MainWindow(QMainWindow):
 
         cancelButton = self.uiD.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.uiD.buttonBox.button(QDialogButtonBox.Ok)
+        self.dialog.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
 
         QObject.connect(self.uiD.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
 
