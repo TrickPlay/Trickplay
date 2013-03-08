@@ -10,7 +10,7 @@ FONT = "Lato"
 ICON_FONT = FONT.." 24px"
 CARD_TITLE_FONT = FONT.." 30px"
 TITLE_FONT = FONT.." Bold 60px"
-dumptable(assets:get_ids())
+--dumptable(assets:get_ids())
 --dofile("delete_test")
 make_grid = dofile('make_grid')
 --[=[]]
@@ -109,8 +109,8 @@ local items = {
         {text="User Guide",    src="icon-user-guide.png"},
 
         {text="Ch. List",      src="icon-ch-list.png"},
-        {text="Dual Play",     src="icon-dual-play.png"},
-        {text="Camera",        src="icon-camera.png"},
+        {text="MLB",           src="icon-mlb.png"},
+        {text="Orange",        src="icon-orange.png"},
     },
     {
         {text="LG Smart",      src="icon-lg-smart.png"},
@@ -126,7 +126,7 @@ local items = {
         {text="Simplelink",    src="icon-simple-link.png"},
         {text="Quick Menu",    src="icon-quick-menu.png"},
 
-        {text="Netflix",       src="icon-netflix.png"},
+        {text="Hulu+",         src="icon-hulu-plus.png"},
         {text="Youtube",       src="icon-youtube.png"},
         {text="Accuweather",   src="icon-accuweather.png"},
     },
@@ -218,6 +218,9 @@ modal_menu:add(
 modal_menu.opacity = 0
 
 function modal_menu:focus(f)
+    screen:add(modal_menu)
+    modal_menu:raise_to_top()
+    dolater(function()
     modal_menu.z = -400
     modal_menu:animate{
         duration = 250,
@@ -233,13 +236,17 @@ function modal_menu:focus(f)
         duration = 250,
         opacity = 150,
     }
+    end)
 end
 function modal_menu:unfocus(f)
     modal_menu:animate{
         duration = 250,
         opacity = 0,
         z = -400,
-        on_completed = f
+        on_completed = function()
+            modal_menu:unparent()
+            return f and f()
+        end
     }
     modal_menu_skim:animate{
         duration = 250,
@@ -326,7 +333,7 @@ local items = {
         {text="Adobe TV",      src="icon-lg-adobetvb.png"},
         {text="TED",           src="icon-ted.png"},
         {text="MLB",           src="icon-mlb.png"},
-        {text="Find Ball",     src="icon-game-find-ball.png"},
+        {text="Orange",        src="icon-orange.png"},
     },
     {
         {text="Picasa",        src="icon-picasa.png"},
@@ -498,7 +505,7 @@ end
 top_bar.x = screen.w - top_items[#top_items].x - 100
 top_bar.y = 60
 
-screen:add(bg,cards,btm,top_bar,modal_menu_skim,modal_menu,my_apps_top)
+screen:add(bg,cards,btm,top_bar,modal_menu_skim)
 
 
 --------------------------------------------------------------
@@ -513,6 +520,9 @@ cards.key_events[keys.OK] = function()
     screen:grab_key_focus()
 end
 cards.key_events[keys.Down] = function()
+    screen:add(my_apps_top)
+    my_apps_top:raise_to_top()
+    dolater(function()
     bg:animate{
         mode = "EASE_OUT_SINE",
         duration = 250,
@@ -549,10 +559,83 @@ cards.key_events[keys.Down] = function()
             grid:grab_key_focus()
         end,
     }
+    end)
     screen:grab_key_focus()
 end
 
 grid.key_events[keys.BACK] = function()
+    --[[ beginning the conversion over to an Animator
+    phase_one = Animator{
+        duration = 400,
+        mode = "EASE_OUT_SINE",
+        properties = {
+            {
+                source = bg,
+                name   = "h",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE",  0},
+                    {1.0,"EASE_OUT_SINE", screen_h},
+                },
+            },
+            {
+                source = my_apps_top,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", 255},
+                    {1.0,"EASE_OUT_SINE",   0},
+                },
+            },
+            {
+                source = my_apps_top,
+                name   = "z",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE",   0},
+                    {1.0,"EASE_OUT_SINE", 300},
+                },
+            },
+            {
+                source = g,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE",   0},
+                    {1.0,"EASE_OUT_SINE", 255},
+                },
+            },
+            {
+                source = g,
+                name   = "z",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", -300},
+                    {1.0,"EASE_OUT_SINE",    0},
+                },
+            },
+            {
+                source = btm_row_tab,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE",   0},
+                    {1.0,"EASE_OUT_SINE", 255},
+                },
+            },
+            {
+                source = btm,
+                name   = "y",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", btm.y},
+                    {1.0,"EASE_OUT_SINE",     0},
+                },
+            },
+            {
+                source = grid.hl,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", 255},
+                    {1.0,"EASE_OUT_SINE",   0},
+                },
+            },
+        }
+    }
+    --]]
     bg:animate{
         mode = "EASE_OUT_SINE",
         duration = 250,
@@ -564,6 +647,9 @@ grid.key_events[keys.BACK] = function()
         opacity = 0,
         --x_rotation = -90,
         z=300,
+        on_completed = function()
+            my_apps_top:unparent()
+        end,
     }
     btm_row_tab:animate{
         mode = "EASE_OUT_SINE",

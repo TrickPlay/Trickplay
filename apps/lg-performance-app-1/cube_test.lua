@@ -284,7 +284,7 @@ g = Group{
 }
 
 
-g:add(r1,r2)
+g:add(r2)
 cube:add(bg,g)
 
 
@@ -294,6 +294,7 @@ local curr_r = r2
 local next_r = r1
 function cube:rotate(outgoing,incoming,direction)
     if animating then return end
+    g:add(incoming)
     animating = true
     outgoing.y_rotation={ 0,0,-w/2}
     incoming.y_rotation={(direction == "LEFT" and -end_angle or end_angle),0,-w/2}
@@ -379,8 +380,9 @@ function cube:rotate(outgoing,incoming,direction)
 
             curr_r = incoming
             next_r = outgoing
+            outgoing:unparent()
         end
-        dolater(phase_two.start,phase_two)
+        phase_two:start()
     end
     dolater(phase_one.start,phase_one)
 end
