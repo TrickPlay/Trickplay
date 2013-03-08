@@ -180,7 +180,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         end
 
         local a = Animator{
-            duration = deletion_duration,
+            duration = deletion_duration*dur_mult,
             properties = properties
         }
 ---[=[
@@ -243,7 +243,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     local function move_hl()
         hl:stop_animation()
         hl:animate{
-            duration = 100,
+            duration = 100*dur_mult,
             mode="EASE_OUT_QUAD",
             x = entries[sel_r][sel_c].x+55,
             y = entries[sel_r][sel_c].y+70,

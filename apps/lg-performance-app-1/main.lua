@@ -13,6 +13,15 @@ TITLE_FONT = FONT.." Bold 60px"
 --dumptable(assets:get_ids())
 --dofile("delete_test")
 make_grid = dofile('make_grid')
+
+dur_mult = 1
+--[[
+Sprite = function(t)
+
+    t.src = "assets/"..t.id
+    return Image(t)
+end
+--]]
 --[=[]]
 -------------------------------------------------------------
 local items = {}
@@ -49,7 +58,7 @@ function make_wide_button(text)
     instance:add(unfocused,focused,text)
 
     local as = AnimationState {
-        duration = 250,
+        duration = 250*dur_mult,
         mode = "EASE_OUT_SINE",
         transitions = {
             {
@@ -223,24 +232,24 @@ function modal_menu:focus(f)
     dolater(function()
     modal_menu.z = -400
     modal_menu:animate{
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 255,
     }
     modal_menu:animate{
-        duration = 300,
+        duration = 300*dur_mult,
         mode = "EASE_OUT_BACK",
         z = 0,
         on_completed = f
     }
     modal_menu_skim:animate{
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 150,
     }
     end)
 end
 function modal_menu:unfocus(f)
     modal_menu:animate{
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
         z = -400,
         on_completed = function()
@@ -249,7 +258,7 @@ function modal_menu:unfocus(f)
         end
     }
     modal_menu_skim:animate{
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
     }
 end
@@ -525,35 +534,35 @@ cards.key_events[keys.Down] = function()
     dolater(function()
     bg:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         h = 375
     }
     my_apps_top:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 255,
         --x_rotation = 0,
         z=0,
     }
     btm_row_tab:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
     }
     g:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
         z = -400,
     }
     grid.hl:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 255,
     }
     btm:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         y = -515,
         on_completed = function()
             grid:grab_key_focus()
@@ -566,7 +575,7 @@ end
 grid.key_events[keys.BACK] = function()
     --[[ beginning the conversion over to an Animator
     phase_one = Animator{
-        duration = 400,
+        duration = 400*dur_mult,
         mode = "EASE_OUT_SINE",
         properties = {
             {
@@ -638,12 +647,12 @@ grid.key_events[keys.BACK] = function()
     --]]
     bg:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         h = screen_h
     }
     my_apps_top:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
         --x_rotation = -90,
         z=300,
@@ -653,12 +662,12 @@ grid.key_events[keys.BACK] = function()
     }
     btm_row_tab:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 255,
     }
     g:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 255,
         z = -0,
         on_completed = function()
@@ -667,12 +676,12 @@ grid.key_events[keys.BACK] = function()
     }
     grid.hl:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         opacity = 0,
     }
     btm:animate{
         mode = "EASE_OUT_SINE",
-        duration = 250,
+        duration = 250*dur_mult,
         y = 0,
     }
     screen:grab_key_focus()
