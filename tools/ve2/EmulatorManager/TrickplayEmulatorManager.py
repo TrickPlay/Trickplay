@@ -174,7 +174,9 @@ class TrickplayEmulatorManager(QWidget):
 				            self.GLInspector_ui = Ui_horizGuideDialog()
 
 				        self.GLInspector_ui.setupUi(self.GLI_dialog) 
-				        self.GLI_dialog.setGeometry(400,400, 286, 86)
+				        #self.GLI_dialog.setGeometry(400,400, 286, 86)
+				        self.main.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
+				        self.GLI_dialog.setGeometry(int(self.main.x)+400,int(self.main.y)+200, 286, 86)
 				        self.GLI_dialog.focusWidget()
 				        self.GLInspector_ui.spinBox.setValue(org_position) 
 				        QObject.connect(self.GLInspector_ui.deleteButton, SIGNAL("clicked()"), self.deleteClicked)
