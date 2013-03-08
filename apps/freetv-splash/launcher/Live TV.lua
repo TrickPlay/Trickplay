@@ -50,6 +50,19 @@ local function orderedPairs(t)
 end
 
 
+local i = 1
+local channel_data = {}
+while i <= 100 do
+    if type(channels[i]) == "number" then i = channels[i] end
+    print(i)
+    channel_data[i] = {
+        channel = channels[i].name,
+        show    = channels[i].schedule[1].show_name,
+        show_ref = channels[i].schedule[1]
+    }
+    i = i + 1
+end
+--[[
 local channel_data = {
     [2] = {
                 channel = "fox", -- missing logo
@@ -127,7 +140,7 @@ local channel_data = {
                 hd = true,
             },
 }
-
+--]]
 local menubar = Group { }
 local channel_bar
 local channel_bar_focus
@@ -193,6 +206,15 @@ local function make_show_tile(channel_num, data)
         self.anim.state = "unfocus"
     end
     show_group.anim:warp("unfocus")
+
+    show_group.show_ref = data.show_ref
+    show_group.slogan = "Burberry Shopping App"
+    show_group.description = [[The greatest app since sliced bread. Just ask Arnold. buy some cool stuff and pay lots n lots for it. Just press OK now!]]
+    show_group.start_time = "8pm"
+    show_group.aired_on = "8pm"
+    show_group.season = 2
+    show_group.episode = 3
+    show_group.episode = 3
     return show_group
 end
 
@@ -219,8 +241,266 @@ local function make_stub(w)
     return stub
 end
 
+local backing = Group()
+
+local set_incoming_show, set_current_show, hide_current_show
+
+do
+    local r = Rectangle{color="black",w=screen.w,opacity=155}
+    backing:add(r)
+    local hidden_y = 150
+    backing.extra.anim = AnimationState {
+                                                    duration = 250,
+                                                    mode = "EASE_OUT_SINE",
+                                                    transitions = {
+                                                        {
+                                                            source = "*",
+                                                            target = "hidden",
+                                                            keys = {
+                                                                { r, "y", hidden_y },
+                                                                { r, "h",        0 },
+                                                            },
+                                                        },
+                                                        {
+                                                            source = "*",
+                                                            target = "full",
+                                                            keys = {
+                                                                { r, "y", hidden_y - 500 },
+                                                                { r, "h",            500 },
+                                                            },
+                                                        },
+                                                    },
+    }
+    function backing.extra.anim.timeline.on_started()
+        if backing.extra.anim.state ~= "full" then
+            --set_incoming_show({slogan="",description=""},"right")
+            hide_current_show()
+        end
+    end
+    function backing.extra.anim.timeline.on_completed()
+        if backing.extra.anim.state == "full" then
+            print("happenin")
+            set_incoming_show(
+                menubar:find_child("tv_shows").children[
+                    active_show].show_ref,
+                "right"
+            )
+        end
+    end
+end
+
+do
+    local text_w = 600
+    local duration = 200
+    local max_airings = 5
+    local setup_info = function(g)
+        g.slogan = Text{
+            y = -350,
+            w=text_w,
+            ellipsize = "END",
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+        }
+        g.description = Text{
+            y=-300,
+            wrap=true,
+            wrap_mode = "WORD",
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." 20px",
+            text = "description",
+        }
+        g.start_time = Text{
+            y=-150,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+            text = "start_time",
+        }
+        g.aired_on = Text{
+            y=-120,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." Bold 20px",
+            text = "aired_on",
+        }
+        g.season_episode = Text{
+            y=-90,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.."  20px",
+            text = "season_episode",
+        }
+        g.related = Text{
+            x= 800,
+            y=-350,
+            text = "Related",
+            color = "white",
+            font = FONT_NAME.."  20px",
+            text = "related",
+        }
+        g.next_airings = Text{
+            x= g.related.x,
+            y=-150,
+            color = "white",
+            font = FONT_NAME.."  20px",
+            text = "next_airings",
+        }
+        g:add(
+            g.slogan,
+            g.description,
+            g.start_time,
+            g.aired_on,
+            g.season_episode,
+            g.related,
+            g.next_airings
+        )
+        local airings = {}
+        for i=1,max_airings do
+            airings[i] = Text{
+                x = g.next_airings.x+150*(i-1),
+                y = g.next_airings.y+60,
+                color = "white",
+                font =  FONT_NAME.."  20px",
+            }
+            g:add(airings[i])
+        end
+        local curr_show
+        function g:get_show()
+            return curr_show
+        end
+        function g:set_show(show)
+            if show == nil then error("nil show",2) end
+            curr_show = show
+            g.season_episode.text =
+                (show.season_number  ~= json_null) and
+                (show.episode_number ~= json_null) and
+                ("Season "   ..show.season_number..
+                " : Episode "..show.episode_number) or
+                (show.season_number ~= json_null) and
+                "Season "..show.season_number
+                (show.episode_number ~= json_null) and
+                "Episode "..show.episode_number or ""
+            g.slogan.text =
+                show.series_description ~= json_null and
+                show.series_description or
+                show.show_name ~= json_null and
+                show.show_name or ""
+            g.description.text =
+                show.show_description ~= json_null and
+                show.show_description or ""
+            g.aired_on.text =
+                show.original_air_date ~= json_null and
+                ("AIRED ON "..show.original_air_date) or ""
+            g.start_time.text =
+                show.start_time ~= json_null and
+                show.start_time_t.hour..":"..show.start_time_t.min or ""
+            ---[[
+            if show.series_id and #series[show.series_id] > 1 then
+                --print("num in series",#series[show.series_id])
+                g.next_airings.text =
+                    show.show_name ~= json_null and
+                    "Next Airings of "..show.show_name..":" or
+                    "Next Airings:"
+
+                local curr_show
+                for i=1,#airings do
+                    --print(i, (#series[show.series_id]))
+                    if i < (#series[show.series_id]) then
+                        curr_show = series[show.series_id][i]
+
+                        airings[i].text =
+                            curr_show.start_time_t.wkdy.." "..
+                            tonumber(curr_show.start_time_t.hour).."\n"
+                        airings[i].text = airings[i].text..(
+                            (curr_show.season_number  ~= json_null) and
+                            (curr_show.episode_number ~= json_null) and
+                            ("S "   ..curr_show.season_number..
+                            " : Ep "..curr_show.episode_number) or
+                            (curr_show.season_number ~= json_null) and
+                            "S "..curr_show.season_number
+                            (curr_show.episode_number ~= json_null) and
+                            "Ep "..curr_show.episode_number or "")
+                    else
+                        airings[i].text = "b"
+                    end
+                end
+            else
+                g.next_airings.text = ""
+            end
+            --]]
+        end
+        return g
+    end
+
+    local   incoming_show = setup_info( Group{ name=   "incoming_show", opacity = 0 } )
+    local displaying_show = setup_info( Group{ name= "displaying_show", opacity = 0, x = 200 } )
+    local next_show
+    local animating = false
+
+    set_incoming_show = function(curr_show,direction)
+        if curr_show == nil then error("nil show",2) end
+
+        if animating then
+            next_show = {curr_show,direction}
+            return
+        end
+        animating = true
+        print("incoming")
+        incoming_show:set_show(curr_show)
+
+        if direction == "left" then
+            incoming_show.x = displaying_show.x - screen.w
+            displaying_show:animate{
+                duration = duration,
+                x = displaying_show.x + screen.w,
+                opacity = 0,
+            }
+        elseif direction == "right" then
+            incoming_show.x = displaying_show.x + screen.w
+            displaying_show:animate{
+                duration = duration,
+                x = displaying_show.x - screen.w,
+                opacity = 0,
+            }
+        else
+            error("Direction must equal 'left' or 'right' . Received "..
+                tostring(direction),2)
+        end
+        incoming_show:animate{
+            duration = duration,
+            x = displaying_show.x,
+            opacity = 255,
+            on_completed = function()
+                incoming_show.opacity = 0
+                displaying_show:stop_animation()
+                displaying_show.x = incoming_show.x
+                displaying_show:set_show(incoming_show:get_show())
+                displaying_show.opacity = 255
+                animating = false
+            end
+        }
+    end
+
+    hide_current_show = function()
+        displaying_show:animate{
+            duration=200,
+            opacity=0,
+            y=displaying_show.y+500,
+            on_completed = function()
+                displaying_show.y = displaying_show.y -500
+            end
+        }
+    end
+    set_current_show = function(curr_show)
+        displaying_show:set_show(curr_show)
+    end
+    backing:add(displaying_show,incoming_show)
+
+end
+
 local function build_bar()
-    screen:add(menubar)
+    screen:add(backing,menubar)
     menubar:hide()
     local clone_src = Group { name = "Clone sources" }
     menubar:add(clone_src)
@@ -260,6 +540,7 @@ local function build_bar()
     clip_group_outter.clip = { -205, 0, 205+stub.x+stub.w, bar_height }
 
     menubar.y = 925 - channel_bar.h
+    backing.y = menubar.y
 
     focus_show(active_show,10)
 end
@@ -274,6 +555,7 @@ end
 local function hide_bar()
     menubar:find_child("clip_inner"):stop_animation()
     menubar:find_child("clip_inner"):animate({ duration = 250, y = bar_height, mode = "EASE_OUT_SINE", on_completed = function() menubar:hide() end })
+    backing.anim.state = "hidden"
 end
 
 local function on_activate(label)
@@ -303,12 +585,29 @@ local function on_key_down(label, key)
         if(keys.Left == key) then
             active_show = ((active_show - 2) % menubar:find_child("tv_shows").count) + 1
             if( active_show == menubar:find_child("tv_shows").count ) then transition_time = menubar:find_child("tv_shows").count*50 end
+            if backing.anim.state == "full" then
+                set_incoming_show(
+                    menubar:find_child("tv_shows").children[
+                        active_show].show_ref,
+                    "left"
+                )
+            end
         else
             active_show = (active_show % menubar:find_child("tv_shows").count) + 1
             if( active_show == 1 ) then transition_time = menubar:find_child("tv_shows").count*50 end
+            if backing.anim.state == "full" then
+                set_incoming_show(
+                    menubar:find_child("tv_shows").children[
+                        active_show].show_ref,
+                    "right"
+                )
+            end
         end
 
         focus_show(active_show, transition_time)
+        return true
+    elseif( keys.Up == key ) then
+        backing.anim.state = "full"
         return true
     end
 end

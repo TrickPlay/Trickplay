@@ -19,21 +19,6 @@ class PushTexture
 {
 public:
 
-    // When posted, this Action will ping all subscribers at the next idle point
-
-    class PingAllLater : public Action
-    {
-        PushTexture * self;
-
-        public: PingAllLater( PushTexture * s ) : self( s ) {};
-
-        protected: bool run()
-        {
-            self->ping_all();
-            return false;
-        }
-    };
-
     // Allows some object to say to a PushTexture, "Ping me whenever you change"
 
     class PingMe
@@ -41,7 +26,7 @@ public:
         public:
             typedef void (Callback)( PushTexture * instance, void * target );
 
-            PingMe() : instance( NULL ), callback( NULL ), target( NULL ) {};
+            PingMe() : instance( NULL ), callback( NULL ), target( NULL ) {}
             ~PingMe();
 
             // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
@@ -58,16 +43,15 @@ public:
             void * target;
     };
 
-    PushTexture() : failed( false ), texture( NULL ), real( false ) {};
+    PushTexture() : failed( false ), texture( NULL ), real( false ) {}
     virtual ~PushTexture();
 
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture, bool real );
+    void set_texture( CoglHandle texture, bool real, bool trigger );
     void get_dimensions( int * w, int * h );
     void ping_all();
-    void ping_all_later() { Action::post( new PingAllLater( this ) ); };
-    bool is_real() { return real; };
-    bool is_failed() { return failed; };
+    bool is_real() { return real; }
+    bool is_failed() { return failed; }
     void release_texture();
 
 protected:
