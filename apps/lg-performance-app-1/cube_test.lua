@@ -300,7 +300,7 @@ function cube:rotate(outgoing,incoming,direction)
     incoming.y_rotation={(direction == "LEFT" and -end_angle or end_angle),0,-w/2}
     incoming.opacity = 0
     phase_one = Animator{
-        duration = 400,
+        duration = 400*dur_mult,
         properties = {
             {
                 source = outgoing,
@@ -339,7 +339,7 @@ function cube:rotate(outgoing,incoming,direction)
     function phase_one.timeline.on_completed()
         incoming:raise_to_top()
         phase_two = Animator{
-            duration = 400,
+            duration = 400*dur_mult,
             properties = {
                 {
                     source = outgoing,
