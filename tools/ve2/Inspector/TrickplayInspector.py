@@ -1065,7 +1065,7 @@ class TrickplayInspector(QWidget):
                     else:
                         i.setText (1, str(data[p])) # second col : property value (text input field) 
                         
-                    if not  p in READ_ONLY and self.editable is True:
+                    if not  p in READ_ONLY and self.editable is True and not p in NESTED_PROP_LIST:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 if p in READ_ONLY:
