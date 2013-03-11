@@ -427,7 +427,7 @@ class TrickplayImageFileSystem(QWidget):
                         j.setFlags(j.flags() ^Qt.ItemIsEditable)
                         j.setWhatsThis(0, imageFile['id'])
                     else :
-                        folders[folderIdx][0].setText(0, folders[folderIdx][0].text(0)+" [%s items folder]"%str(folders[folderIdx][0].childCount()))
+                        folders[folderIdx][0].setText(0, folders[folderIdx][0].text(0)+" [%s items]"%str(folders[folderIdx][0].childCount()))
                         #print folders[folderIdx][0].text(0)+"[%s items folder]"%str(folders[folderIdx][0].childCount())
                         if folders[folderIdx][0].childCount() == 0 :
                             j = QTreeWidgetItem(folders[folderIdx][0]) 
