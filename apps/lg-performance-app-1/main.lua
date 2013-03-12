@@ -560,6 +560,81 @@ end
 cards.key_events[keys.Down] = function()
     screen:add(my_apps_top)
     my_apps_top:raise_to_top()
+    local a = Animator{
+        duration = 400*dur_mult,
+        mode = "EASE_OUT_SINE",
+        properties = {
+            {
+                source = bg,
+                name   = "h",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE",  bg.h},
+                    {1.0,"EASE_OUT_SINE", 375},
+                },
+            },
+            {
+                source = my_apps_top,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", my_apps_top.opacity},
+                    {1.0,"EASE_OUT_SINE", 255},
+                },
+            },
+            {
+                source = my_apps_top,
+                name   = "z",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", my_apps_top.z},
+                    {1.0,"EASE_OUT_SINE",   0},
+                },
+            },
+            {
+                source = g,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", g.opacity},
+                    {1.0,"EASE_OUT_SINE",   0},
+                },
+            },
+            {
+                source = g,
+                name   = "z",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", g.z},
+                    {1.0,"EASE_OUT_SINE", -400},
+                },
+            },
+            {
+                source = btm_row_tab,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", btm_row_tab.opacity},
+                    {1.0,"EASE_OUT_SINE",   0},
+                },
+            },
+            {
+                source = btm,
+                name   = "y",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", btm.y},
+                    {1.0,"EASE_OUT_SINE",   -515},
+                },
+            },
+            {
+                source = grid.hl,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", grid.hl.opacity},
+                    {1.0,"EASE_OUT_SINE", 255},
+                },
+            },
+        }
+    }
+    function a.timeline.on_completed()
+            grid:grab_key_focus()
+    end
+    a:start()
+    --[[
     dolater(function()
     bg:animate{
         mode = "EASE_OUT_SINE",
@@ -598,12 +673,13 @@ cards.key_events[keys.Down] = function()
         end,
     }
     end)
+--]]
     screen:grab_key_focus()
 end
 
 grid.key_events[keys.BACK] = function()
-    --[[ beginning the conversion over to an Animator
-    phase_one = Animator{
+    ---[[ beginning the conversion over to an Animator
+    local a = Animator{
         duration = 400*dur_mult,
         mode = "EASE_OUT_SINE",
         properties = {
@@ -611,7 +687,7 @@ grid.key_events[keys.BACK] = function()
                 source = bg,
                 name   = "h",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE",  0},
+                    {0.0,"EASE_OUT_SINE",  bg.h},
                     {1.0,"EASE_OUT_SINE", screen_h},
                 },
             },
@@ -619,7 +695,7 @@ grid.key_events[keys.BACK] = function()
                 source = my_apps_top,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", 255},
+                    {0.0,"EASE_OUT_SINE", my_apps_top.opacity},
                     {1.0,"EASE_OUT_SINE",   0},
                 },
             },
@@ -627,7 +703,7 @@ grid.key_events[keys.BACK] = function()
                 source = my_apps_top,
                 name   = "z",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE",   0},
+                    {0.0,"EASE_OUT_SINE", my_apps_top.z},
                     {1.0,"EASE_OUT_SINE", 300},
                 },
             },
@@ -635,7 +711,7 @@ grid.key_events[keys.BACK] = function()
                 source = g,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE",   0},
+                    {0.0,"EASE_OUT_SINE", g.opacity},
                     {1.0,"EASE_OUT_SINE", 255},
                 },
             },
@@ -643,7 +719,7 @@ grid.key_events[keys.BACK] = function()
                 source = g,
                 name   = "z",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", -300},
+                    {0.0,"EASE_OUT_SINE", g.z},
                     {1.0,"EASE_OUT_SINE",    0},
                 },
             },
@@ -651,7 +727,7 @@ grid.key_events[keys.BACK] = function()
                 source = btm_row_tab,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE",   0},
+                    {0.0,"EASE_OUT_SINE", btm_row_tab.opacity},
                     {1.0,"EASE_OUT_SINE", 255},
                 },
             },
@@ -667,13 +743,18 @@ grid.key_events[keys.BACK] = function()
                 source = grid.hl,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", 255},
+                    {0.0,"EASE_OUT_SINE", grid.hl.opacity},
                     {1.0,"EASE_OUT_SINE",   0},
                 },
             },
         }
     }
-    --]]
+    function a.timeline.on_completed()
+            my_apps_top:unparent()
+            g:grab_key_focus()
+    end
+    a:start()
+    --[[
     bg:animate{
         mode = "EASE_OUT_SINE",
         duration = 250*dur_mult,
@@ -713,6 +794,7 @@ grid.key_events[keys.BACK] = function()
         duration = 250*dur_mult,
         y = 0,
     }
+    --]]
     screen:grab_key_focus()
 
 end
