@@ -142,10 +142,27 @@ local items = {
 }
 modal_menu_skim = Rectangle{size=screen.size,color = "black",opacity=0}
 modal_menu = Group{name = "Modal Menu",x=40,y=60}
-modal_menu_grid = make_grid(items,100,100,90,70)
+modal_menu_grid = make_grid(items,100,100,80,110):set{clip={-120,-120,1100,742}}
 
+modal_menu_scrollbar = Group{
+    x = 1800,
+    y = 160,
+    children = {
+        Rectangle{
+            name = "Track",
+            w = 4,
+            h = 600,
+            opacity = 100,
+        },
+        Rectangle{
+            name = "Grip",
+            w = 4,
+            h = 100,
+        },
+    }
+}
 modal_menu_grid.x = screen_w*3/4 - 130
-modal_menu_grid.y = 200
+modal_menu_grid.y = 220
 
 modal_menu_bg = Sprite{
     sheet = assets,
@@ -220,16 +237,17 @@ modal_menu:add(
     }:set{x = 80,y=100},
     --]]
     modal_menu_grid,
+    modal_menu_scrollbar,
     make_wide_button("Complete"):set{x=30,y=850},
     make_wide_button("Cancel"):set{x = 400,y=850}
 )
 
 modal_menu.opacity = 0
-
+local again = false
 function modal_menu:focus(f)
-    screen:add(modal_menu)
+    if modal_menu.parent == nil then screen:add(modal_menu) end
     modal_menu:raise_to_top()
-    dolater(function()
+    --dolater(function()
     modal_menu.z = -400
     modal_menu:animate{
         duration = 250*dur_mult,
@@ -239,13 +257,18 @@ function modal_menu:focus(f)
         duration = 300*dur_mult,
         mode = "EASE_OUT_BACK",
         z = 0,
-        on_completed = f
+        on_completed = function()
+            if again then
+                modal_menu:unfocus()
+            end
+            return f and f()
+        end
     }
     modal_menu_skim:animate{
         duration = 250*dur_mult,
         opacity = 150,
     }
-    end)
+    --end)
 end
 function modal_menu:unfocus(f)
     modal_menu:animate{
@@ -253,7 +276,12 @@ function modal_menu:unfocus(f)
         opacity = 0,
         z = -400,
         on_completed = function()
-            modal_menu:unparent()
+            if again then
+                modal_menu:focus()
+            else
+                modal_menu:unparent()
+                cards:grab_key_focus()
+            end
             return f and f()
         end
     }
@@ -265,16 +293,17 @@ end
 
 modal_menu.key_events = {
     [keys.OK] = function()
-        modal_menu:unfocus(
-            function()
-                cards:grab_key_focus()
-            end
-        )
+        modal_menu:unfocus()
         screen:grab_key_focus()
+    end,
+    [keys.RED] = function()
+        again = not again
+
+        return again and modal_menu:unfocus()
     end,
 }
 function modal_menu:on_key_down(k)
-    return self.key_events[k] and self.key_events[k]()
+    return (not again or k == keys.RED) and self.key_events[k] and self.key_events[k]()
 end
 --modal_menu.z = -100
 
@@ -686,4 +715,60 @@ grid.key_events[keys.BACK] = function()
     }
     screen:grab_key_focus()
 
+end
+
+local FPS_group
+do
+    FPS_group = Group{name="FPS_group"}
+    local MAX_COUNTS=10 -- 10 second rolling window for average
+    local FPS = Text {
+        font = "Comfortaa Thin 75px",
+        text = "FPS:",
+        position = { 50, 20 },
+        color = "white"
+    }
+    local FPS_num = Text {
+        font = FPS.font,
+        text = "17.9",
+        position = { 50 + 10 + FPS.w, 20 },
+        width = FPS.w * 1.4, color = "white",
+        alignment = "RIGHT",
+        wrap = true
+    }
+    local framecount = { 0 }
+    local frame_ticker = Timeline
+    {
+        duration = 1000,
+        loop=true,
+        on_new_frame = function()
+            framecount[#framecount] = framecount[#framecount] + 1
+        end,
+        on_completed = function()
+            local num_counts = #framecount
+            local framesum = 0
+            for _,frames in ipairs(framecount) do framesum = framesum + frames end
+            FPS_num.text = string.format("%2.1f", framesum/num_counts)
+            if(num_counts > MAX_COUNTS) then
+                table.remove(framecount, 1) -- delete the oldest entry
+            end
+            table.insert(framecount,0) -- start a new time period
+        end,
+    }
+    FPS_group:add(FPS,FPS_num)
+    screen:add(FPS_group)
+
+    frame_ticker:start()
+
+end
+
+do
+    local key_events = {
+        [keys.YELLOW] = function()
+            FPS_group[FPS_group.is_visible and "hide" or "show"](FPS_group)
+        end,
+    }
+
+    function screen:on_key_down(k)
+        return key_events[k] and key_events[k]()
+    end
 end

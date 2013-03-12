@@ -47,6 +47,9 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
             instance:add(item)
 
             entries[r][c] = item
+
+            if r == 4 then item.opacity = 127 end
+
         end
     end
 

@@ -194,7 +194,7 @@ local function make_side(cards)--w,h,bg_color)
 
     for i,card in ipairs(cards) do
         instance:add(card:set{
-                x = (card_src_w+50)*(i-1),
+                x = (card_src_w+50)*(i-1)+40,
                 y = 100,
             })
     end
@@ -207,13 +207,13 @@ r1 = make_side{
     make_icon_card{
         {text="3D WORLD",     src="title-icon-3d-world.png"},
         {text="Settings",     src="icon-settings.png"},
-        {text="Now & Hot",    src="icon-now-hot.png"},
-        {text="Search",       src="icon-search.png"},
-        {text="Input List",   src="icon-input-list.png"},
+        {text="Easy Map",     src="icon-lg-easy-map.png"},
+        {text="nPoint",       src="icon-lg-npoint.png"},
+        {text="Astronaut",    src="icon-lg-astronaut.png"},
         {text="3d On",        src="icon-3d-on.png"},
-        {text="TV Guide",     src="icon-tv-guide.png"},
-        {text="User Guide",   src="icon-user-guide.png"},
-        {text="Internet",     src="icon-internet.png"},
+        {text="Netflix",       src="icon-netflix.png"},
+        {text="Youtube",       src="icon-youtube.png"},
+        {text="Accuweather",   src="icon-accuweather.png"},
     },
     make_icon_card{
         {text="GAMES",        src="title-icon-game.png"},
@@ -223,20 +223,31 @@ r1 = make_side{
         {text="Input List",   src="icon-input-list.png"},
         {text="3d On",        src="icon-3d-on.png"},
         {text="TV Guide",     src="icon-tv-guide.png"},
-        {text="User Guide",   src="icon-user-guide.png"},
         {text="Internet",     src="icon-internet.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
     },
     make_icon_card{
         {text="MY CARD",      src="title-icon-my-card.png"},
-        {text="Settings",     src="icon-settings.png"},
-        {text="Now & Hot",    src="icon-now-hot.png"},
-        {text="Search",       src="icon-search.png"},
-        {text="Input List",   src="icon-input-list.png"},
-        {text="3d On",        src="icon-3d-on.png"},
-        {text="TV Guide",     src="icon-tv-guide.png"},
+        {text="Accuweather",   src="icon-accuweather.png"},
+        {text="Skype",         src="icon-skype.png"},
+        {text="Facebook",      src="icon-facebook.png"},
+        {text="Mable",        src="icon-lg-mable.png"},
+        {text="Adobe TV",     src="icon-lg-adobetvb.png"},
+        {text="iVillage",     src="icon-lg-ivillage.png"},
         {text="User Guide",   src="icon-user-guide.png"},
-        {text="Internet",     src="icon-internet.png"},
+        {text="TED",           src="icon-ted.png"},
     },
+    make_icon_card{
+        {text="MY CARD",      src="title-icon-my-card.png"},
+        {text="Adobe TV",      src="icon-lg-adobetvb.png"},
+        {text="Skype",         src="icon-skype.png"},
+        {text="Quick Menu",    src="icon-quick-menu.png"},
+        {text="Mable",        src="icon-lg-mable.png"},
+        {text="Adobe TV",     src="icon-lg-adobetvb.png"},
+        {text="Now & Hot",    src="icon-now-hot.png"},
+        {text="User Guide",   src="icon-user-guide.png"},
+        {text="TED",           src="icon-ted.png"},
+    }:set{opacity = 127},
 }:set{opacity=0}
 r2 = make_side{
     make_live_card{
@@ -275,7 +286,7 @@ r2 = make_side{
         {text="TV Guide",     src="icon-tv-guide.png"},
         {text="User Guide",   src="icon-user-guide.png"},
         {text="Internet",     src="icon-internet.png"},
-    },
+    }:set{opacity = 127},
 }
 --r2 = make_side(w,h,bg.color)
 
@@ -292,6 +303,7 @@ local phase_one, phase_two
 local animating = false
 local curr_r = r2
 local next_r = r1
+local again = false
 function cube:rotate(outgoing,incoming,direction)
     if animating then return end
     g:add(incoming)
@@ -381,10 +393,13 @@ function cube:rotate(outgoing,incoming,direction)
             curr_r = incoming
             next_r = outgoing
             outgoing:unparent()
+
+            return again and cube:rotate(curr_r,next_r,direction)
         end
         phase_two:start()
     end
-    dolater(phase_one.start,phase_one)
+    phase_one:start()
+    --dolater(phase_one.start,phase_one)
 end
 
 
@@ -405,10 +420,15 @@ local key_events = {
     [keys.Left] = function()
         cube:rotate(curr_r,next_r,"LEFT")
     end,
+    [keys.RED] = function()
+        again = not again
+
+        return again and cube:rotate(curr_r,next_r,"LEFT")
+    end,
 }
 cube.key_events = key_events
 function cube:on_key_down(k)
-    return key_events[k] and key_events[k]()
+    return (not again or k == keys.RED) and key_events[k] and key_events[k]()
 end
 
 return cube
