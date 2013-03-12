@@ -94,7 +94,6 @@ function editor.text(uiText)
     uiText:grab_key_focus()
 
     function uiText:on_key_down(key,u,t,m)
-
     	if key == keys.Return then 
 			uiText:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
@@ -106,6 +105,11 @@ function editor.text(uiText)
 			if(total > uiText.h) then 
 				uiText.h = total 
 			end 
+        end
+
+        _VE_.repUIInfo(uiText)
+
+    	if key == keys.Return then 
 			return true
 	    end 
 
@@ -304,6 +308,13 @@ local function contentsNameAssign(v)
                     item = contentsNameAssign(item)
                 end 
             end 
+        elseif itemType == "MenuButton" then 
+            local sz = v.items.length
+            for i=1, sz, 1 do 
+                print (v.items[i].name)
+                v.items[i] = contentsNameAssign(v.items[i])
+                print (v.items[i].name)
+            end
         end 
     end 
 
@@ -335,9 +346,14 @@ function editor.duplicate(gid)
 		    end 
 
 			uiTypeStr = util.getTypeStr(v) 
+            --print (uiTypeStr)
 
             if hdr.uiElementCreate_map[uiTypeStr] then
+                --dumptable(v.attributes)
                 uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
+                --print ("Here 222")
+                --print (uiDuplicate)
+                --print (uiTypeStr)
             end 
 
             uiDuplicate.position = {v.x + 20, v.y +20}
@@ -363,6 +379,10 @@ function editor.duplicate(gid)
                 end 
             end 
         ]]
+            if uiTypeStr == "LayoutManager" then 
+                uiDuplicate.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+            end 
+
 
 		    screen_ui.n_selected(v)
             util.addIntoLayer(uiDuplicate)

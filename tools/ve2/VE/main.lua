@@ -933,7 +933,7 @@ _VE_.openFile = function(path)
          string.find(j.name, "a_m") == nil and 
          string.find(j.name, "border") == nil 
         then 
-            for l,m in ipairs(j.children) do 
+            for l,m in ipairs(j.children) do  
 
                 m.created = false
                 if m.subscribe_to then  
@@ -945,6 +945,30 @@ _VE_.openFile = function(path)
                 if uiTypeStr == "LayoutManager" then 
                     m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
+
+                if uiTypeStr == "Widget_Text" then 
+                    function m:on_key_down(key)
+    	                if key == keys.Return then 
+			                m:set{cursor_visible = false}
+        	                screen.grab_key_focus(screen)
+			                m:set{editable= false}
+			                local text_len = string.len(m.text) 
+			                local font_len = string.len(m.font) 
+	                        local font_sz = tonumber(string.sub(m.font, font_len - 3, font_len -2))	
+			                local total = math.floor((font_sz * text_len / m.w) * font_sz *2/3) 
+			                if(total > m.h) then 
+				                m.h = total 
+			                end 
+                        end
+
+                        _VE_.repUIInfo(m)
+                
+    	                if key == keys.Return then 
+			                return true
+	                    end 
+                    end 
+                end 
+
                 m.extra.mouse_handler = false
                 util.create_mouse_event_handler(m, uiTypeStr)
                 if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" or uiTypeStr == "DialogBox" then
@@ -1473,7 +1497,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
---yugi
     _VE_.refreshDone()
     _VE_.openInspector(uiInstance.gid, false)
     _VE_.repUIInfo(uiInstance)
