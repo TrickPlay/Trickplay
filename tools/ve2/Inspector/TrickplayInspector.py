@@ -492,7 +492,6 @@ class TrickplayInspector(QWidget):
         self.curLayerName = None
         self.curLayerGid = None
         self.curItemGid = None
-        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector:", None, QApplication.UnicodeUTF8)) 
         self.layerName = {}
         self.layerGid = {}
@@ -515,13 +514,9 @@ class TrickplayInspector(QWidget):
         self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
 
         self.ui.deleteScreen.clicked.connect(self.removeScreen)
-        #QObject.connect(self.ui.deleteScreen, SIGNAL('clicked()'), self.removeScreen)
         self.ui.screenCombo.currentIndexChanged.connect(self.screenChanged)
-        #QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
         self.ui.screenCombo.activated.connect(self.screenActivated)
-        #QObject.connect(self.ui.screenCombo, SIGNAL('activated(int)'), self.screenActivated)
         self.ui.screenCombo.editTextChanged.connect(self.screenEditTextChanged)
-        #QObject.connect(self.ui.screenCombo, SIGNAL('editTextChanged(const QString)'), self.screenEditTextChanged)
 
         #self.ui.property.setModel(self.propertyModel)
 
@@ -822,6 +817,12 @@ class TrickplayInspector(QWidget):
                 def handler():
                     if not self.preventChanges:
                         self.preventChanges = True
+                        db = QFontDatabase()
+                        db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
+                        for family in db.families():
+                            print family, "***"
+                            
+
                         fontDialog = QFontDialog()
                         fontDialog.setCurrentFont(defaultFont)
                         font, ok = fontDialog.getFont(defaultFont)
@@ -1393,7 +1394,6 @@ class TrickplayInspector(QWidget):
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top:0px;padding-bottom:0px;font-size:12px;}")
 
-        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
 
     def screen_json(self):
         #[{"Default":["Layer1","Layer2"], "New":["Layer2"]}]
@@ -1502,7 +1502,7 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
 
-        #print("selectionChaged begin")
+        #print("selectionChaged !!!!!!!!!!!!!!!!!!!!!!")
         
         if self.preventChanges:
             return
@@ -1575,7 +1575,6 @@ class TrickplayInspector(QWidget):
                         self.propertyFill(tempdata)
                         self.editable = True
                         self.curLayerName = self.layerName[(item.tabdata['gid'])] 
-                        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(item.tabdata['name'])+") : "+item.text(), None, QApplication.UnicodeUTF8))
                     self.preventChanges = False
                     return
@@ -1597,13 +1596,11 @@ class TrickplayInspector(QWidget):
                 
             if self.curData.has_key('gid') == True:
                 if self.curData.has_key('name') == False:
-                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
                 elif self.curData['name'][:5] == "Layer":
                     self.curLayerName = self.curData['name']
                     self.curLayerGid = self.curData['gid']
                     self.curItemGid = self.curData['gid']
-                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
                 elif self.layerName[(self.curData['gid'])] : 
                     self.curLayerName = self.layerName[(self.curData['gid'])] 
@@ -1611,17 +1608,15 @@ class TrickplayInspector(QWidget):
                     self.curItemGid = self.curData['gid']
 
                 try :
-                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
                     if len(self.ui.inspector.selectedIndexes()) > 2 :
                         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                         self.ui.property.clear()
                     else:
                         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
-                        #self.propertyFill(self.curData)
+                        self.propertyFill(self.curData)
                         self.editable = True
                         
                 except: #if multiSelect == "true":
-                    #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.property.clear()
 
@@ -1848,7 +1843,6 @@ class TrickplayInspector(QWidget):
 
         self.LayerName = {}
         self.curLayerName = None
-        #self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
         self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector:" , None, QApplication.UnicodeUTF8))
             
             
