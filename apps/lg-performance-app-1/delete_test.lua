@@ -15,7 +15,13 @@ local function make_icon(item)
     local w = r.w
     local h = r.h
 
-    local t = Text{text = item.text,font = ICON_FONT, color = "white",y = r.h,x=r.w/2}
+    local t = Text{
+        text = item.text,
+        font = ICON_FONT,
+        color = "white",
+        y = r.h,
+        x=r.w/2
+    }
 
     t.anchor_point = {t.w/2,0}
 
@@ -24,16 +30,16 @@ local function make_icon(item)
     local grabbed = false
     local last_x, last_y,orig_x,orig_y
     function instance:on_button_down(x,y)
-        instance:grab_pointer()
+        self:grab_pointer()
         grabbed = true
         last_y = y
         last_x = x
-        orig_y = instance.y
-        orig_x = instance.x
+        orig_y = self.y
+        orig_x = self.x
     end
     function instance:on_motion( x,y )
         if grabbed then
-            instance:move_by(x-last_x,y-last_y)
+            self:move_by(x-last_x,y-last_y)
             last_x = x
             last_y = y
         end
@@ -41,7 +47,7 @@ local function make_icon(item)
     function instance:on_button_up(x,y)
         if grabbed then
             grabbed = false
-            instance:ungrab_pointer()
+            self:ungrab_pointer()
 
             if
                 x > recycle_bin.x and
@@ -49,12 +55,12 @@ local function make_icon(item)
                 y > recycle_bin.y and
                 y < recycle_bin.y + recycle_bin.h then
 
-                instance.parent:delete(
-                    instance.r,instance.c
+                self.parent:delete(
+                    self.r,self.c
                 )
 
             else
-                instance:animate{
+                self:animate{
                     duration = 100,
                     x = orig_x,
                     y = orig_y,
@@ -107,9 +113,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
         deleting = true
 
-        local sliding_left = Group()
-        local wrapping_around = Group()
-        instance:add(sliding_left,wrapping_around)
         local dur = .5
         local properties = {}
 
@@ -138,8 +141,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                     end
                 elseif c == 1 then
                     --these wrap around
-                    --item:unparent()
-                    --wrapping_around:add(item)
                     table.insert(
                         properties,
                         {
@@ -183,8 +184,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                     end
                 else
                     --these slide left
-                    --item:unparent()
-                    --sliding_left:add(item)
                     table.insert(
                         properties,
                         {
@@ -206,32 +205,31 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             duration = deletion_duration*dur_mult,
             properties = properties
         }
+        properties = nil
 ---[=[
         function a.timeline.on_completed()
 
-            if entries[d_r][d_c].parent then
-                entries[d_r][d_c]:unparent()
-            end
-            for c=d_c+1,#entries[d_r] do
-                entries[d_r][c-1] = entries[d_r][c]
-                position_entry(entries[d_r][c-1],d_r,c-1)
-            end
+            --unparent the entry the is being deleted and
+            --shift the indices of all the entries
+            --the row of the deleted entry is handled separately
+            table.remove(entries[d_r],d_c):unparent()
+            print("num rows",#entries,#entries[1])
+
+            --all the rows below
             for r=d_r+1,#entries do
-                entries[r-1][#entries[r-1]] = entries[r][1]
-                position_entry(
-                    entries[r-1][#entries[r-1]],r-1,#entries[r-1]
-                )
-                for c=2,#entries[r] do
-                    entries[r][c-1] = entries[r][c]
-                    position_entry(entries[r][c-1],r,c-1)
-                end
+                --the left most index wraps around to the row above
+                --all the others are shifted left
+                entries[r-1][#entries[r-1]+1] = table.remove(entries[r],1)
+                print("num cols",r-1,#entries[r-1])
             end
 
-            entries[#entries][#entries[#entries]] = nil
+            --if the deletion caused the last row to be empty, set to nil
             if #entries[#entries] == 0 then entries[#entries] = nil end
 
 
+
             -----------------------------------------------------------
+            --if there are only 2 rows left, add 2 more
             if #entries < 3 then
                 local new_rows = {
                     {
@@ -260,6 +258,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                     },
                 }
                 for r,row in ipairs(new_rows) do
+                    --need to add 2 to append to the end of the existing rows
                     r = r + 2
                     entries[r] = {}
                     for c,item in ipairs(row) do
@@ -373,6 +372,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     function instance:on_key_down(k)
         return (not again or k == keys.RED) and key_events[k] and key_events[k]()
     end
+
+    eee = entries
     return instance
 
 end
