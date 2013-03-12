@@ -89,6 +89,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             instance:add(item)
 
             entries[r][c] = item
+
+            if r == 4 then item.opacity = 127 end
         end
     end
 
@@ -96,8 +98,14 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     instance.anchor_point = {w/2,0}
 
     local deletion_duration = 250
+    local deleting = false
+    local again = false
     function instance:delete(d_r,d_c,n)
         n = n or 1
+
+        if deleting then return end
+
+        deleting = true
 
         local sliding_left = Group()
         local wrapping_around = Group()
@@ -158,6 +166,21 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             },
                         }
                     )
+                    if r == 4 then --hooray hardcoding
+                        table.insert(
+                            properties,
+                            {
+                                source = item,
+                                name   = "opacity",
+                                keys   = {
+                                    {0.0,    "EASE_OUT_CIRC",item.opacity},
+                                    {t_start,"EASE_OUT_CIRC",item.opacity},
+                                    {t_end,  "EASE_OUT_CIRC",         255},
+                                    {1.0,    "EASE_OUT_CIRC",         255},
+                                },
+                            }
+                        )
+                    end
                 else
                     --these slide left
                     --item:unparent()
@@ -206,11 +229,61 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
             entries[#entries][#entries[#entries]] = nil
             if #entries[#entries] == 0 then entries[#entries] = nil end
-            if n > 1 then
+
+
+            -----------------------------------------------------------
+            if #entries < 3 then
+                local new_rows = {
+                    {
+                        {text="Google Earth",  src="icon-google-earth.png"},
+                        {text="Forky",         src="icon-forky.png"},
+                        {text="LG Smart",      src="icon-lg-smart.png"},
+                        {text="3D World",      src="icon-3d-on.png"},
+                        {text="Nat Geo",       src="icon-national-geo.png"},
+                        {text="Gystle",        src="icon-gystle.png"},
+                        {text="Netflix",       src="icon-netflix.png"},
+                        {text="NHL",           src="icon-nhl.png"},
+                        {text="O2",            src="icon-o2.png"},
+                        {text="Simplelink",    src="icon-simple-link.png"},
+                    },
+                    {
+                        {text="Quick Menu",    src="icon-quick-menu.png"},
+                        {text="Netflix",       src="icon-netflix.png"},
+                        {text="Youtube",       src="icon-youtube.png"},
+                        {text="Accuweather",   src="icon-accuweather.png"},
+                        {text="Skype",         src="icon-skype.png"},
+                        {text="Facebook",      src="icon-facebook.png"},
+                        {text="Adobe TV",      src="icon-lg-adobetvb.png"},
+                        {text="TED",           src="icon-ted.png"},
+                        {text="MLB",           src="icon-mlb.png"},
+                        {text="Orange",        src="icon-orange.png"},
+                    },
+                }
+                for r,row in ipairs(new_rows) do
+                    r = r + 2
+                    entries[r] = {}
+                    for c,item in ipairs(row) do
+
+                        item = make_icon(item,cell_w,cell_h)
+
+                        position_entry(item,r,c)
+
+                        instance:add(item)
+
+                        entries[r][c] = item
+
+                        if r == 4 then item.opacity = 127 end
+                    end
+                end
+            end
+            -----------------------------------------------------------
+            deleting = false
+
+            if again then
                 dolater(
                     instance.delete,
                     instance,
-                    d_r,d_c,n-1
+                    d_r,d_c--,n-1
                 )
             end
         end
@@ -277,16 +350,28 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             end
         end,
         [keys.Right] = function()
+
             if entries[sel_r][sel_c+1] then
                 sel_c = sel_c+1
                 move_hl()
                 return true
             end
         end,
+        [keys.RED] = function()
+            if again then
+                again = false
+            else
+                again = true
+                sel_r = 1
+                sel_c = 1
+                move_hl()
+                instance:delete(sel_r,sel_c,20)
+            end
+        end,
     }
     instance.key_events = key_events
     function instance:on_key_down(k)
-        return key_events[k] and key_events[k]()
+        return (not again or k == keys.RED) and key_events[k] and key_events[k]()
     end
     return instance
 
