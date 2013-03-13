@@ -1,10 +1,10 @@
 app=
 {
     id          = "com.trickplay.lg-performance",
-    release     = "1",
-    version     = "1",
+    release     = "2",
+    version     = "1.1",
     name        = "LG Performance Test",
-    author      = "Pablo Pissanetzky",
+    author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
 }
 
