@@ -1114,19 +1114,19 @@ local objCodeGen = function(contents, layer, lowLayer, obj)
     print (contents, layer, lowLayer, obj.name, obj.widget_type) 
 
     if obj.widget_type == "Button" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_pressed = function() end\n\t"
         contents = contents..lowLayer..".elements."..obj.name..".on_released = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     elseif obj.widget_type == "CheckBox" or obj.widget_type == "RadioButton" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_selection = function() end\n\t"
         contents = contents..lowLayer..".elements."..obj.name..".on_deselection = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     elseif obj.widget_type == "ToastAlert" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_completed = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     end 
 
     return contents 
