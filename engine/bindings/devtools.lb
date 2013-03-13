@@ -6,6 +6,20 @@
 #include "clutter_util.h"
 #include "images.h"
 #include "app_resource.h"
+#include <sys/resource.h>
+#include <stdio.h>
+#include <errno.h>
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "DEVTOOLS"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      true
+
+#include "log.h"
+
+//=============================================================================
+
 
 //-----------------------------------------------------------------------------
 // __gc metamethod for markers
@@ -15,6 +29,163 @@ static int marker_gc( lua_State * L )
     g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
     return 0;
 }
+
+//-----------------------------------------------------------------------------
+// CPU load counter
+
+static void timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y)
+{
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_usec < y->tv_usec)
+    {
+        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+        y->tv_usec -= 1000000 * nsec;
+        y->tv_sec += nsec;
+    }
+    if (x->tv_usec - y->tv_usec > 1000000)
+    {
+        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+        y->tv_usec += 1000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait.
+    tv_usec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_usec = x->tv_usec - y->tv_usec;
+}
+
+
+class CPU
+{
+public:
+
+    static void toggle( TPContext * ctx )
+    {
+        static char key = 0;
+        CPU * cpu = ( CPU * ) ctx->get_internal( & key);
+
+        if ( cpu )
+        {
+            ctx->add_internal( & key , 0 , 0 );
+        }
+        else
+        {
+            ctx->add_internal( & key , new CPU(ctx->get_stage()) , destroy );
+        }
+    }
+
+private:
+
+    static void destroy( gpointer me )
+    {
+        delete ( CPU * ) me;
+    }
+
+    ClutterActor *stage;
+
+    CPU(ClutterActor *stg) :
+    stage( stg )
+    {
+        source = clutter_threads_add_repaint_func( on_tick , this , 0 );
+
+        timer = g_timer_new();
+
+        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        clutter_actor_set_x( CLUTTER_ACTOR( text ), 1300 );
+        clutter_actor_set_name( CLUTTER_ACTOR( text ), "CPU Counter" );
+
+        g_object_ref_sink( text );
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
+
+        time = 0;
+        min_cpu = 100;
+        max_cpu = 0;
+    }
+
+    ~CPU()
+    {
+        if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
+        {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
+        }
+
+        g_object_unref( text );
+
+        clutter_threads_remove_repaint_func( source );
+
+        g_timer_destroy( timer );
+    }
+
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( CPU *) me )->tick();
+
+        return TRUE;
+    }
+
+    void tick()
+    {
+        gfloat t = g_timer_elapsed( timer , 0 );
+
+        time += t;
+
+        if ( time >= 0.5 )
+        {
+            struct rusage my_usage;
+
+            if(getrusage(RUSAGE_SELF, &my_usage))
+            {
+                tplog("GETRUSAGE FAILED: %d - %s",errno, strerror(errno));
+            }
+
+            struct timeval diff;
+            timeval_subtract(&diff, &my_usage.ru_utime, &old.ru_utime);
+            memcpy(&old, &my_usage, sizeof(old));
+
+            float cpu = 100.0 * ((float)(diff.tv_sec) + ((float)(diff.tv_usec))/(1000000.0)) / time;
+
+            if(cpu > 1 && cpu < 100)
+            {
+                min_cpu = std::min( min_cpu , cpu );
+                max_cpu = std::max( max_cpu , cpu );
+            }
+
+            g_snprintf( buffer , sizeof( buffer ) , "%3.2f/%3.2f/%3.2f" , min_cpu , cpu, max_cpu );
+
+            clutter_text_set_text( text , buffer );
+
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
+            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
+
+            time = 0;
+        }
+
+        g_timer_start( timer );
+    }
+
+    ClutterText *   text;
+    guint           source;
+    GTimer *        timer;
+    gfloat          time;
+    struct rusage   old;
+    gfloat          min_cpu;
+    gfloat          max_cpu;
+    char            buffer[256];
+};
+
 
 //-----------------------------------------------------------------------------
 // FPS Counter
@@ -56,6 +227,7 @@ private:
         timer = g_timer_new();
 
         text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        clutter_actor_set_name( CLUTTER_ACTOR( text ), "FPS Counter" );
 
         g_object_ref_sink( text );
 
@@ -172,6 +344,7 @@ private:
     stage( stg )
     {
         texture = clutter_texture_new();
+        clutter_actor_set_name( texture, "FPS Graph" );
 
         g_object_ref_sink( texture );
 
@@ -747,6 +920,30 @@ global devtools [[ void * ]]
     fps()
         [[
             FPS::toggle( App::get( L )->get_context() );
+        ]];
+
+    /*
+        Function: cpu
+
+        The cpu() function toggles a running cpu (utime/wallclock) rate in the format: MIN CURRENT MAX, where MIN is the application's minumum cpu rate since the cpu() function was last invoked, CURRENT is the application's current cpu rate, and MAX is the application's maximum cpu rate since the cpu() function was last invoked.
+
+        Each call to the cpu() function toggles the display cpu off/on.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *Code Example:* Toggle cpu-measuring a running application
+
+            (code)
+            devtools:cpu()
+            (end)
+
+    */
+
+    cpu()
+        [[
+            CPU::toggle( App::get( L )->get_context() );
         ]];
 
 	/*
