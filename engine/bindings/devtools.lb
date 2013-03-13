@@ -134,8 +134,6 @@ private:
     short_timer(short_time),
     long_timer(long_time)
     {
-        source = g_timeout_add_seconds( 1 , on_tick , this );
-
         text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
         clutter_text_set_line_wrap( text, true );
         clutter_text_set_line_alignment( text, PANGO_ALIGN_RIGHT );
@@ -151,6 +149,8 @@ private:
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
 #endif
         getrusage(RUSAGE_SELF, &old);
+
+        source = g_timeout_add_seconds( 1 , on_tick , this );
 
         timer = g_timer_new();
     }
@@ -262,8 +262,6 @@ private:
     {
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
 
-        timer = g_timer_new();
-
         text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
         clutter_actor_set_name( CLUTTER_ACTOR( text ), "FPS Counter" );
 
@@ -276,6 +274,10 @@ private:
 #endif
 
         frames = 0;
+
+        u_source = g_timeout_add_seconds( 1 , on_update , this );
+
+        timer = g_timer_new();
     }
 
     ~FPS()
@@ -291,48 +293,51 @@ private:
 
         g_object_unref( text );
 
+        g_source_remove( u_source );
         clutter_threads_remove_repaint_func( source );
 
         g_timer_destroy( timer );
     }
 
-    static gboolean on_tick( gpointer me )
+    static gboolean on_update( gpointer me )
     {
-        ( ( FPS *) me )->tick();
+        ( ( FPS *) me )->update();
 
         return TRUE;
     }
 
-    void tick()
+    void update()
     {
         gfloat t = g_timer_elapsed( timer , 0 );
 
-        ++frames;
-
-        if ( t >= 1.0 )
-        {
-            gfloat fps = frames / t;
+        gfloat fps = frames / t;
         short_timer.add(fps);
         long_timer.add(fps);
 
         g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , fps , short_timer.avg() , long_timer.avg() );
 
-            clutter_text_set_text( text , buffer );
+        clutter_text_set_text( text , buffer );
 
 #ifdef CLUTTER_VERSION_1_10
-            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+        clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
 #else
-            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+        clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
 #endif
 
-            frames = 0;
-            g_timer_start( timer );
-        }
+        frames = 0;
+        g_timer_start( timer );
+    }
 
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( FPS *) me )->frames++;
+
+        return TRUE;
     }
 
     ClutterText *   text;
     guint           source;
+    guint           u_source;
     GTimer *        timer;
     int             frames;
     RRD             short_timer;
