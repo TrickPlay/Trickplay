@@ -1286,13 +1286,21 @@ _VE_.white = function()
 end
 
 _VE_.setHGuideY = function(y)
-    selected_guideline.y = y - 10 
-    util.close_guideInspector()
+    if y ~= nil then 
+        selected_guideline.y = y - 10 
+        util.close_guideInspector()
+    else 
+        util.close_guideInspector()
+    end
 end 
 
 _VE_.setVGuideX = function(x)
-    selected_guideline.x = x - 10 
-    util.close_guideInspector()
+    if x ~= nil then 
+        selected_guideline.x = x - 10 
+        util.close_guideInspector()
+    else
+        util.close_guideInspector()
+    end
 end 
 
 _VE_.deleteGuideLine = function()
