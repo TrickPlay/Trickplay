@@ -105,7 +105,7 @@ class CPU
 {
 public:
 
-    static void toggle( TPContext * ctx )
+    static void toggle( TPContext * ctx, unsigned short_time, unsigned long_time )
     {
         static char key = 0;
         CPU * cpu = ( CPU * ) ctx->get_internal( & key);
@@ -116,7 +116,7 @@ public:
         }
         else
         {
-            ctx->add_internal( & key , new CPU(ctx->get_stage()) , destroy );
+            ctx->add_internal( & key , new CPU(ctx->get_stage(), short_time, long_time) , destroy );
         }
     }
 
@@ -129,10 +129,10 @@ private:
 
     ClutterActor *stage;
 
-    CPU(ClutterActor *stg) :
+    CPU(ClutterActor *stg, unsigned short_time, unsigned long_time) :
     stage( stg ),
-    _15sec(15),
-    _30sec(30)
+    short_timer(short_time),
+    long_timer(long_time)
     {
         source = g_timeout_add_seconds( 1 , on_tick , this );
 
@@ -197,10 +197,10 @@ private:
 
         float cpu = 100.0 * ((float)(diff.tv_sec) + ((float)(diff.tv_usec))/(1000000.0)) / t;
 
-        _15sec.add(cpu);
-        _30sec.add(cpu);
+        short_timer.add(cpu);
+        long_timer.add(cpu);
 
-        g_snprintf( buffer , sizeof( buffer ) , "%3.2f/%3.2f/%3.2f" , cpu , _15sec.avg(), _30sec.avg() );
+        g_snprintf( buffer , sizeof( buffer ) , "%3.2f/%3.2f/%3.2f" , cpu , short_timer.avg(), long_timer.avg() );
 
         clutter_text_set_text( text , buffer );
 
@@ -217,8 +217,8 @@ private:
     guint           source;
     GTimer *        timer;
     struct rusage   old;
-    RRD             _15sec;
-    RRD             _30sec;
+    RRD             short_timer;
+    RRD             long_timer;
     char            buffer[256];
 };
 
@@ -230,7 +230,7 @@ class FPS
 {
 public:
 
-    static void toggle( TPContext * ctx )
+    static void toggle( TPContext * ctx, unsigned short_time, unsigned long_time )
     {
         static char key = 0;
 
@@ -242,7 +242,7 @@ public:
         }
         else
         {
-            ctx->add_internal( & key , new FPS(ctx->get_stage()) , destroy );
+            ctx->add_internal( & key , new FPS(ctx->get_stage(), short_time, long_time) , destroy );
         }
     }
 
@@ -255,10 +255,10 @@ private:
 
     ClutterActor *stage;
 
-    FPS(ClutterActor *stg) :
+    FPS(ClutterActor *stg, unsigned short_time, unsigned long_time ) :
     stage( stg ),
-    _15sec(15),
-    _30sec(30)
+    short_timer(short_time),
+    long_timer(long_time)
     {
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
 
@@ -312,10 +312,10 @@ private:
         if ( t >= 1.0 )
         {
             gfloat fps = frames / t;
-            _15sec.add(fps);
-            _30sec.add(fps);
+        short_timer.add(fps);
+        long_timer.add(fps);
 
-            g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , fps , _15sec.avg() , _30sec.avg() );
+        g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , fps , short_timer.avg() , long_timer.avg() );
 
             clutter_text_set_text( text , buffer );
 
@@ -335,8 +335,8 @@ private:
     guint           source;
     GTimer *        timer;
     int             frames;
-    RRD             _15sec;
-    RRD             _30sec;
+    RRD             short_timer;
+    RRD             long_timer;
     char            buffer[256];
 };
 
@@ -933,11 +933,15 @@ global devtools [[ void * ]]
     /*
         Function: fps
 
-        The fps() function toggles a running fps (frames per second) rate in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the fps() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the fps() function was last invoked.
+        The fps() function toggles a running fps (frames per second) rate counter overlayed on top of the screen.  It will display the current fps, short-term average, and long-term average.
 
         Each call to the fps() function toggles the display fps off/on.
 
-        *Arguments:* None
+        *Arguments:*
+
+            short_time - How many seconds is the short-term average covering? Default 5 seconds.
+
+            long_time - How many seconds is the long-term average covering? Default 30 seconds.
 
         *Return Value:* None
 
@@ -949,19 +953,23 @@ global devtools [[ void * ]]
 
     */
 
-    fps()
+    fps(int short_time=5, int long_time=30)
         [[
-            FPS::toggle( App::get( L )->get_context() );
+            FPS::toggle( App::get( L )->get_context(), short_time, long_time );
         ]];
 
     /*
         Function: cpu
 
-        The cpu() function toggles a running cpu (utime/wallclock) rate in the format: MIN CURRENT MAX, where MIN is the application's minumum cpu rate since the cpu() function was last invoked, CURRENT is the application's current cpu rate, and MAX is the application's maximum cpu rate since the cpu() function was last invoked.
+        The cpu() function toggles a running cpu (userspace seconds per wallclock seconds) rate counter overlayed on top of the screen.  It will display the current cpu, short-term average, and long-term average.
 
         Each call to the cpu() function toggles the display cpu off/on.
 
-        *Arguments:* None
+        *Arguments:*
+
+            short_time - How many seconds is the short-term average covering? Default 5 seconds.
+
+            long_time - How many seconds is the long-term average covering? Default 30 seconds.
 
         *Return Value:* None
 
@@ -973,9 +981,9 @@ global devtools [[ void * ]]
 
     */
 
-    cpu()
+    cpu(int short_time=5, int long_time=30)
         [[
-            CPU::toggle( App::get( L )->get_context() );
+            CPU::toggle( App::get( L )->get_context(), short_time, long_time );
         ]];
 
 	/*
