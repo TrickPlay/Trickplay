@@ -183,13 +183,16 @@ class TrickplayEmulatorManager(QWidget):
 
 				        if self.GLI_dialog.exec_():
 				            new_positon = self.GLInspector_ui.spinBox.value()
-				            if luaCmd =="openV_GLI":
-				                inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
-				            else:
-				                inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
-				            print inputCmd
-				            self.trickplay.write(inputCmd+"\n")
-				            self.trickplay.waitForBytesWritten()
+				        else:
+				            new_positon = "nil"
+				        if luaCmd =="openV_GLI":
+				            inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
+				        else:
+				            inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
+				        print inputCmd
+				        self.trickplay.write(inputCmd+"\n")
+				        self.trickplay.waitForBytesWritten()
+
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
 				    elif luaCmd == "repUIInfo":
