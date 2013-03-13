@@ -17,6 +17,126 @@ static int marker_gc( lua_State * L )
 }
 
 //-----------------------------------------------------------------------------
+// FPS Counter
+
+class FPS
+{
+public:
+
+    static void toggle( TPContext * ctx )
+    {
+        static char key = 0;
+
+        FPS * fps = ( FPS * ) ctx->get_internal( & key );
+
+        if ( fps )
+        {
+            ctx->add_internal( & key , 0 , 0 );
+        }
+        else
+        {
+            ctx->add_internal( & key , new FPS(ctx->get_stage()) , destroy );
+        }
+    }
+
+private:
+
+    static void destroy( gpointer me )
+    {
+        delete ( FPS * ) me;
+    }
+
+    ClutterActor *stage;
+
+    FPS(ClutterActor *stg) :
+    stage( stg )
+    {
+        source = clutter_threads_add_repaint_func( on_tick , this , 0 );
+
+        timer = g_timer_new();
+
+        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+
+        g_object_ref_sink( text );
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
+
+        time = 0;
+        frames = 0;
+        min_fps = 60;
+        max_fps = 0;
+    }
+
+    ~FPS()
+    {
+        if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
+        {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
+        }
+
+        g_object_unref( text );
+
+        clutter_threads_remove_repaint_func( source );
+
+        g_timer_destroy( timer );
+    }
+
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( FPS *) me )->tick();
+
+        return TRUE;
+    }
+
+    void tick()
+    {
+        gfloat t = g_timer_elapsed( timer , 0 );
+
+        time += t;
+        ++frames;
+
+        if ( time >= 0.5 )
+        {
+            gfloat fps = frames / time;
+            min_fps = std::min( min_fps , fps );
+            max_fps = std::max( max_fps , fps );
+
+            g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , min_fps , fps , max_fps );
+
+            clutter_text_set_text( text , buffer );
+
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
+            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
+
+            time = 0;
+            frames = 0;
+        }
+
+        g_timer_start( timer );
+    }
+
+    ClutterText *   text;
+    guint           source;
+    GTimer *        timer;
+    gfloat          time;
+    int             frames;
+    gfloat          min_fps;
+    gfloat          max_fps;
+    char            buffer[256];
+};
+
+//-----------------------------------------------------------------------------
 // Graph that shows how long it takes to draw each frame.
 
 class Graph
@@ -83,21 +203,6 @@ private:
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
 
         timer = g_timer_new();
-
-        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
-
-        g_object_ref_sink( text );
-
-#ifdef CLUTTER_VERSION_1_10
-        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
-#endif
-
-        time = 0;
-        frames = 0;
-        min_fps = 60;
-        max_fps = 0;
     }
 
     ~Graph()
@@ -106,16 +211,12 @@ private:
         {
 #ifdef CLUTTER_VERSION_1_10
             clutter_actor_remove_child( parent, texture );
-            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
 #else
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
-
-            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
 #endif
         }
 
         g_object_unref( texture );
-        g_object_unref( text );
 
         g_free( bar );
 
@@ -173,29 +274,6 @@ private:
         clutter_actor_raise_top( texture );
 #endif
 
-        time += t;
-        ++frames;
-
-        if ( time >= 0.5 )
-        {
-            gfloat fps = frames / time;
-            min_fps = std::min( min_fps , fps );
-            max_fps = std::max( max_fps , fps );
-
-            g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , min_fps , fps , max_fps );
-
-            clutter_text_set_text( text , buffer );
-
-#ifdef CLUTTER_VERSION_1_10
-            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
-#else
-            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
-#endif
-
-            time = 0;
-            frames = 0;
-        }
-
         g_timer_start( timer );
     }
 
@@ -204,15 +282,9 @@ private:
     guchar *        bar;
     guchar *        white_bar;
     ClutterActor *  texture;
-    ClutterText *   text;
     gint            x;
     guint           source;
     GTimer *        timer;
-    gfloat          time;
-    int             frames;
-    gfloat          min_fps;
-    gfloat          max_fps;
-    char            buffer[256];
 };
 
 static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
@@ -629,28 +701,52 @@ global devtools [[ void * ]]
             }
         ]];
 
-	/*
-		Function: graph
+    /*
+        Function: graph
 
-		The graph() function toggles a running graph at the bottom of the screen depicting the amount of CPU usage of the running application and, at the top of the screen, the application's fps (frames per second) rate is shown in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the graph() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the graph() function was last invoked.
+        The graph() function toggles a running graph at the bottom of the screen depicting the amount of CPU usage of the running application and, at the top of the screen, the application's fps (frames per second) rate is shown in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the graph() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the graph() function was last invoked.
 
-		Each call to the graph() function toggles the display graph off/on.
+        Each call to the graph() function toggles the display graph off/on.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*Code Example:* Toggle graphing a running application
+        *Code Example:* Toggle graphing a running application
 
-			(code)
-			devtools:graph()
-			(end)
+            (code)
+            devtools:graph()
+            (end)
 
-	*/
+    */
 
     graph()
         [[
             Graph::toggle( App::get( L )->get_context() );
+        ]];
+
+    /*
+        Function: fps
+
+        The fps() function toggles a running fps (frames per second) rate in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the fps() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the fps() function was last invoked.
+
+        Each call to the fps() function toggles the display fps off/on.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *Code Example:* Toggle fps-measuring a running application
+
+            (code)
+            devtools:fps()
+            (end)
+
+    */
+
+    fps()
+        [[
+            FPS::toggle( App::get( L )->get_context() );
         ]];
 
 	/*
