@@ -557,9 +557,12 @@ cards.key_events[keys.OK] = function()
     )
     screen:grab_key_focus()
 end
+local my_apps_to_cube_repeat = false
 cards.key_events[keys.Down] = function()
-    screen:add(my_apps_top)
-    my_apps_top:raise_to_top()
+    if my_apps_top.parent == nil then
+        screen:add(my_apps_top)
+        my_apps_top:raise_to_top()
+    end
     local a = Animator{
         duration = 400*dur_mult,
         mode = "EASE_OUT_SINE",
@@ -631,7 +634,11 @@ cards.key_events[keys.Down] = function()
         }
     }
     function a.timeline.on_completed()
-            grid:grab_key_focus()
+            if my_apps_to_cube_repeat then
+                grid.key_events[keys.BACK]()
+            else
+                grid:grab_key_focus()
+            end
     end
     a:start()
     --[[
@@ -674,9 +681,19 @@ cards.key_events[keys.Down] = function()
     }
     end)
 --]]
-    screen:grab_key_focus()
+    if not my_apps_to_cube_repeat then screen:grab_key_focus() end
 end
 
+cards.key_events[keys.GREEN] = function()
+    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
+
+    return my_apps_to_cube_repeat and cards.key_events[keys.Down]()
+end
+grid.key_events[keys.GREEN] = function()
+    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
+
+    return my_apps_to_cube_repeat and grid.key_events[keys.BACK]()
+end
 grid.key_events[keys.BACK] = function()
     ---[[ beginning the conversion over to an Animator
     local a = Animator{
@@ -750,8 +767,13 @@ grid.key_events[keys.BACK] = function()
         }
     }
     function a.timeline.on_completed()
-            my_apps_top:unparent()
-            g:grab_key_focus()
+            if my_apps_to_cube_repeat then
+                cards.key_events[keys.Down]()
+            else
+
+                my_apps_top:unparent()
+                g:grab_key_focus()
+            end
     end
     a:start()
     --[[
@@ -795,7 +817,7 @@ grid.key_events[keys.BACK] = function()
         y = 0,
     }
     --]]
-    screen:grab_key_focus()
+    if not my_apps_to_cube_repeat then screen:grab_key_focus() end
 
 end
 
