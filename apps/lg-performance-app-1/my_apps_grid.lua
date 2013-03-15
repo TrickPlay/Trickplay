@@ -1,32 +1,24 @@
 
-local icon_font = "Lato 40px"
-local screen_w = screen.w
 
-local recycle_bin = Image{src="recycle bin.png"}
-screen:add(recycle_bin)
 -------------------------------------------------------------
 local function make_icon(item)
     local instance = Group()
 
-    local r = Sprite{sheet = assets,id=item.src}
-    --r.w = r.w*3/2
-    --r.h = r.h*3/2
+    local s = Sprite{sheet = assets,id=item.src}
 
-    local w = r.w
-    local h = r.h
-
-    local t = Text{
-        text = item.text,
-        font = ICON_FONT,
+    local t   = Text{
+        text  = item.text,
+        font  = ICON_FONT,
         color = "white",
-        y = r.h,
-        x=r.w/2
+        y = s.h,
+        x = s.w/2
     }
 
     t.anchor_point = {t.w/2,0}
 
-    instance:add(r,t)
+    instance:add(s,t)
 
+    --Mouse/MMR Events
     local grabbed = false
     local last_x, last_y,orig_x,orig_y
     function instance:on_button_down(x,y)
@@ -39,7 +31,7 @@ local function make_icon(item)
     end
     function instance:on_motion( x,y )
         if grabbed then
-            self:move_by(x-last_x,y-last_y)
+            self:move_by( x-last_x, y-last_y )
             last_x = x
             last_y = y
         end
@@ -73,17 +65,22 @@ end
 
 
 -------------------------------------------------------------
+-- The Constructor for the 'My Apps' Grid
 return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
     local instance = Group()
 
     local entries = {}
+    ----------------------------------------------------------
+    --positions each item according to row/col
     local function position_entry(item,r,c)
         item.x = (cell_w+x_spacing)*(c-1)
         item.y = (cell_h+y_spacing)*(r-1)
-        item.r = r
-        item.c = c
+        --item.r = r
+        --item.c = c
     end
+    ----------------------------------------------------------
+    --create all the items
     for r,row in ipairs(items) do
         entries[r] = {}
         for c,item in ipairs(row) do
@@ -96,6 +93,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
             entries[r][c] = item
 
+            --the last visible row needs to be at half opacity
             if r == 4 then item.opacity = 127 end
         end
     end
@@ -103,6 +101,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     local w = (cell_w+x_spacing)*#entries[1]-x_spacing
     instance.anchor_point = {w/2,0}
 
+    ----------------------------------------------------------
     local deletion_duration = 250
     local deleting = false
     local again = false
@@ -141,6 +140,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                     end
                 elseif c == 1 then
                     --these wrap around
+                    item:raise_to_top()
                     table.insert(
                         properties,
                         {
@@ -167,6 +167,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             },
                         }
                     )
+                    --set items coming in from the last visible row to full opacity
                     if r == 4 then --hooray hardcoding
                         table.insert(
                             properties,
@@ -202,31 +203,25 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         end
 
         local a = Animator{
-            duration = deletion_duration*dur_mult,
+            duration   = deletion_duration*dur_mult,
             properties = properties
         }
-        properties = nil
----[=[
         function a.timeline.on_completed()
 
             --unparent the entry the is being deleted and
             --shift the indices of all the entries
             --the row of the deleted entry is handled separately
             table.remove(entries[d_r],d_c):unparent()
-            print("num rows",#entries,#entries[1])
 
             --all the rows below
             for r=d_r+1,#entries do
                 --the left most index wraps around to the row above
                 --all the others are shifted left
                 entries[r-1][#entries[r-1]+1] = table.remove(entries[r],1)
-                print("num cols",r-1,#entries[r-1])
             end
 
             --if the deletion caused the last row to be empty, set to nil
             if #entries[#entries] == 0 then entries[#entries] = nil end
-
-
 
             -----------------------------------------------------------
             --if there are only 2 rows left, add 2 more
@@ -279,17 +274,13 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             deleting = false
 
             if again then
-                dolater(
-                    instance.delete,
-                    instance,
-                    d_r,d_c--,n-1
-                )
+                instance:delete(d_r,d_c)
+
             end
-        end
---]=]
-        dolater(a.start,a)
+        end        a:start()
     end
 
+    ----------------------------------------------------------
     function instance:make_icons_reactive()
         for i,row in ipairs(entries) do
             for i,icon in ipairs(row) do
@@ -298,20 +289,23 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         end
     end
 
+    ----------------------------------------------------------
+    --Create the highlight that traverses the icons
     local sel_r = 1
     local sel_c = 1
+
     local hl  = Sprite{
+        name  = "My Apps Highlight",
         sheet = assets,
         id    = "focus-block.png",
         opacity = 0,
-        x = entries[sel_r][sel_c].x+55,
-        y = entries[sel_r][sel_c].y+70,
+        w       = (cell_w+x_spacing),
+        h       = (cell_h+x_spacing),
     }
     instance.hl = hl
-    hl.w = (cell_w+x_spacing)
-    hl.h = (cell_h+x_spacing)
     hl.anchor_point = {hl.w/2,hl.h/2}
     instance:add(hl)
+    --sets the position of the highlight to sel_r,sel_c
     local function move_hl()
         hl:stop_animation()
         hl:animate{
@@ -321,10 +315,22 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             y = entries[sel_r][sel_c].y+70,
         }
     end
+    move_hl()
+    ----------------------------------------------------------
+    --key events
     local key_events = {
         [keys.OK] = function()
             if entries[1][2] then
                 instance:delete(sel_r,sel_c)
+                if sel_r == #entries and sel_c == #entries[#entries] then
+                    if  sel_c == 1 then
+                        sel_r = sel_r-1
+                        sel_c = #entries[sel_r-1]
+                    else
+                        sel_c = sel_c - 1
+                    end
+                    move_hl()
+                end
             end
         end,
         [keys.Up] = function()
@@ -364,16 +370,20 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                 sel_r = 1
                 sel_c = 1
                 move_hl()
-                instance:delete(sel_r,sel_c,20)
+                if not deleting then instance:delete(sel_r,sel_c,20) end
             end
         end,
     }
     instance.key_events = key_events
     function instance:on_key_down(k)
-        return (not again or k == keys.RED) and key_events[k] and key_events[k]()
+        --block the event if the deletion animation is repeating
+        return (not again or k == keys.RED) and
+            --block the even if the animation to the cube is repeating
+            (not my_apps_to_cube_repeat  or k == keys.GREEN) and
+            --otherwise call the event, if there is an event setup
+            key_events[k] and key_events[k]()
     end
 
-    eee = entries
     return instance
 
 end
