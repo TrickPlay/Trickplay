@@ -1,4 +1,4 @@
-
+--Used by the modal menu
 -------------------------------------------------------------
 
 local function make_icon(item)
@@ -6,12 +6,8 @@ local function make_icon(item)
 
     local r = Sprite{sheet = assets,id=item.src}
     local checkbox = Sprite{sheet=assets,id="checkbox.png"}
-    --checkbox.w = checkbox.w*3/2
-    --checkbox.h = checkbox.h*3/2
-    checkbox.x = -checkbox.w
 
-    --r.w = r.w*3/2
-    --r.h = r.h*3/2
+    checkbox.x = -checkbox.w
 
     local t = Text{text = item.text,font = ICON_FONT, color = "white",y = r.h,x=r.w/2}
 

@@ -6,103 +6,43 @@ assets = SpriteSheet{
     map = "assets/images.json"
 }
 
-FONT = "Lato"
-ICON_FONT = FONT.." 24px"
+dur_mult = 1
+
+FONT            = "LG Display"
+ICON_FONT       = FONT.." 24px"
 CARD_TITLE_FONT = FONT.." 30px"
-TITLE_FONT = FONT.." Bold 60px"
---dumptable(assets:get_ids())
---dofile("delete_test")
+TITLE_FONT      = FONT.." Bold 60px"
+
+-------------------------------------------------------------
+--load the other files
+
 make_grid = dofile('make_grid')
 
-dur_mult = 1
---[[
-Sprite = function(t)
+local cube              = dofile("cube")
 
-    t.src = "assets/"..t.id
-    return Image(t)
-end
---]]
---[=[]]
--------------------------------------------------------------
-local items = {}
-for i=1,4 do
-    items[i] = {}
-    for j=1,10 do
-        items[i][j] = "Icon "..i.." "..j
-    end
-end
-grid = make_grid(items,100,100,80,80)
-grid:make_icons_reactive()
-grid.x = screen_w/2
-grid.y = 400
-screen:add(grid)
---]=]
+local make_modal_menu   = dofile("modal_menu")
+
+local my_apps_top       = dofile("my_apps_top_bar")
+
+local make_my_apps_grid = dofile("my_apps_grid")
+
+local top_bar           = dofile("top_bar")
 
 -------------------------------------------------------------
-function make_wide_button(text)
-    local instance = Group{name=text.." Button"}
-
-    local unfocused = Sprite{sheet=assets,id="button-default.png"}
-    local   focused = Sprite{sheet=assets,id="button-focus.png"  }
-
-
-    local text = Text{
-        text = text,
-        font = CARD_TITLE_FONT,
-        color = "black",
-        x = focused.w/2,
-        y = focused.h/2,
-    }
-    text.anchor_point = {text.w/2,text.h/2}
-
-    instance:add(unfocused,focused,text)
-
-    local as = AnimationState {
-        duration = 250*dur_mult,
-        mode = "EASE_OUT_SINE",
-        transitions = {
-            {
-                source = "*",
-                target = "focus",
-                keys = {
-                    { focused,   "opacity", 255 },
-                    { unfocused, "opacity",   0 },
-                },
-            },
-            {
-                source = "*",
-                target = "unfocus",
-                keys = {
-                    { focused,   "opacity",   0 },
-                    { unfocused, "opacity", 255 },
-                },
-            },
-        },
-    }
-
-    function instance:focus(self)
-        as.state = "focus"
-    end
-
-    function instance:unfocus(self)
-        as.state = "unfocus"
-    end
-    as:warp("unfocus")
-
-    return instance
-end
+-- create all the on screen entities
 -------------------------------------------------------------
-local bg = Sprite{
+
+--Background Gradient
+local bg  = Sprite{
+    name  = "Background Gradient",
     sheet = assets,
-    id="bg-gradient.png",
-    size = screen.size,
+    id    = "bg-gradient.png",
+    size  = screen.size,
 }
 
-local cards = dofile("cube_test")
-
-
 --------------------------------------------------------------
-local items = {
+-- Create the Modal Menu
+local modal_menu_items = {
     {
         {text="Input List",    src="icon-input-list.png"},
         {text="Settings",      src="icon-settings.png"},
@@ -140,177 +80,16 @@ local items = {
         {text="Accuweather",   src="icon-accuweather.png"},
     },
 }
-modal_menu_skim = Rectangle{size=screen.size,color = "black",opacity=0}
-modal_menu = Group{name = "Modal Menu",x=40,y=60}
-modal_menu_grid = make_grid(items,100,100,80,110):set{clip={-120,-120,1100,742}}
 
-modal_menu_scrollbar = Group{
-    x = 1800,
-    y = 160,
-    children = {
-        Rectangle{
-            name = "Track",
-            w = 4,
-            h = 600,
-            opacity = 100,
-        },
-        Rectangle{
-            name = "Grip",
-            w = 4,
-            h = 100,
-        },
-    }
-}
-modal_menu_grid.x = screen_w*3/4 - 130
-modal_menu_grid.y = 220
+modal_menu, modal_menu_skim =
 
-modal_menu_bg = Sprite{
-    sheet = assets,
-    id = "bg-create-my-card.png",
-    x  = -20,
-    y  = -20,
-}
---modal_menu_bg.w = screen_w-modal_menu.x*2--modal_menu_bg.w*3/2
---modal_menu_bg.h = screen_h-modal_menu.y*2--modal_menu_bg.h*3/2
-modal_menu:add(
-    modal_menu_bg,
-    Text{
-        text = "Create my own Card",
-        font = TITLE_FONT,
-        color = "white",
-        x     = 30,
-        y     = 30,
+    make_modal_menu(modal_menu_items)
 
-    },
-    Group{
-                x  = 100,
-                y  = 120,
-        children = {
-            Sprite{
-                sheet = assets,
-                id = "card-my.png",
-                w  = 357*3/2,
-                h  = 438*3/2,
-            },
-            Sprite{
-                sheet = assets,
-                id = "title-icon-my-card.png",
-                x  = 10,
-                y  = 10,
-                --w  = 30*3/2,
-                --h  = 29*3/2,
-            },
-            Text{
-                text = "My Card 1",
-                font = CARD_TITLE_FONT,
-                color = "black",
-                x     = 10,
-                y     = 60,
-            },
-            Text{
-                text = "Select the App",
-                font = CARD_TITLE_FONT,
-                color = "999999",
-                x     = 170,
-                y     = 330,
-            },
-            Text{
-                text = "or drag the App to this Area",
-                font = CARD_TITLE_FONT,
-                color = "999999",
-                x     = 80,
-                y     = 370,
-            },
-        }
-    },
-    --[[
-    make_icon_card{
-        {text="My Card 1",    src="title-icon-my-card.png"},
-        {text="", src="icon-settings.png"},
-        {text="", src="icon-now-hot.png"},
-        {text="", src="icon-search.png"},
-        {text="Select the App or drag the App to this Area", src="icon-lg-cloud.png"},
-        {text="", src="icon-3d-on.png"},
-        {text="", src="icon-tv-guide.png"},
-        {text="", src="icon-user-guide.png"},
-        {text="", src="icon-internet.png"},
-    }:set{x = 80,y=100},
-    --]]
-    modal_menu_grid,
-    modal_menu_scrollbar,
-    make_wide_button("Complete"):set{x=30,y=850},
-    make_wide_button("Cancel"):set{x = 400,y=850}
-)
-
-modal_menu.opacity = 0
-local again = false
-function modal_menu:focus(f)
-    if modal_menu.parent == nil then screen:add(modal_menu) end
-    modal_menu:raise_to_top()
-    --dolater(function()
-    modal_menu.z = -400
-    modal_menu:animate{
-        duration = 250*dur_mult,
-        opacity = 255,
-    }
-    modal_menu:animate{
-        duration = 300*dur_mult,
-        mode = "EASE_OUT_BACK",
-        z = 0,
-        on_completed = function()
-            if again then
-                modal_menu:unfocus()
-            end
-            return f and f()
-        end
-    }
-    modal_menu_skim:animate{
-        duration = 250*dur_mult,
-        opacity = 150,
-    }
-    --end)
-end
-function modal_menu:unfocus(f)
-    modal_menu:animate{
-        duration = 250*dur_mult,
-        opacity = 0,
-        z = -400,
-        on_completed = function()
-            if again then
-                modal_menu:focus()
-            else
-                modal_menu:unparent()
-                cards:grab_key_focus()
-            end
-            return f and f()
-        end
-    }
-    modal_menu_skim:animate{
-        duration = 250*dur_mult,
-        opacity = 0,
-    }
-end
-
-modal_menu.key_events = {
-    [keys.OK] = function()
-        modal_menu:unfocus()
-        screen:grab_key_focus()
-    end,
-    [keys.RED] = function()
-        again = not again
-
-        return again and modal_menu:unfocus()
-    end,
-}
-function modal_menu:on_key_down(k)
-    return (not again or k == keys.RED) and self.key_events[k] and self.key_events[k]()
-end
---modal_menu.z = -100
-
-controllers:start_pointer()
 -------------------------------------------------------------
---]=]
+-- Make the pieces that sit below the cube
+-- These objects also expand to create the 'My Apps' screen
 
+local btm = Group()
 
 local btm_row_tab = Group()
 local btm_row_backing = Sprite{
@@ -336,7 +115,9 @@ local btm_row_backing_text = Text{
 }
 btm_row_backing_text.anchor_point = {btm_row_backing_text.w/2,0}
 btm_row_tab:add(btm_row_backing,btm_row_backing_text)
-local items = {
+-------------------------------------------------------------
+-- Create the my apps grid
+local my_apps_items = {
     {
         {text="Input List",    src="icon-input-list.png"},
         {text="Settings",      src="icon-settings.png"},
@@ -375,7 +156,7 @@ local items = {
     },
     {
         {text="Picasa",        src="icon-picasa.png"},
-        {text="Twitter",       src="icon-twitter.png"},
+        {text="AP",            src="icon-ap.png"},
         {text="Mable",         src="icon-lg-mable.png"},
         {text="N Point",       src="icon-lg-npoint.png"},
         {text="iVillage",      src="icon-lg-ivillage.png"},
@@ -386,183 +167,68 @@ local items = {
         {text="Astronaut",     src="icon-lg-astronaut.png"},
     },
 }
-local grid = dofile("delete_test")(items,75,75,105,120)
+
+local grid = make_my_apps_grid(my_apps_items,75,75,105,120)
 grid.x = screen.w/2
 grid.y = 930
 
-local btm = Group()
 btm:add(btm_row_gradient,btm_row_tab,grid)
 
 --------------------------------------------------------------
+-- Add everything to the screen
 
-local my_apps_top = Group{
-    name="my_apps_top",
-    opacity=0,z=300,
-    --x_rotation={90,0,-150},
-    anchor_point = {screen_w/2,200},
-    position = {screen_w/2,200},
-}
-
-do
-    local icon = Sprite{
-        sheet=assets,
-        id="icon-top-my-apps.png",
-        x = 30,
-        y = 20,
-    }
-    icon.w = icon.w*3/2
-    icon.h = icon.h*3/2
-
-    local my_apps_text = Text{
-        text = "MY APPS",
-        color = "white",
-        font = TITLE_FONT,
-        x = icon.x + icon.w+10,
-        y = icon.y-5
-    }
-
-    local pip = Sprite{
-        sheet=assets,
-        id="my-apps-mad-men.png",
-        x = 100,
-        y =  90,
-    }
-    pip.w = pip.w*3/2
-    pip.h = pip.h*3/2
-
-    local prog_bar = Sprite{
-        sheet=assets,
-        id="my-apps-progress-bar-whole.png",
-        x = 800,
-        y = 300,
-    }
-    prog_bar.w = prog_bar.w*3/2
-    prog_bar.h = prog_bar.h*3/2
-
-    local hdd_usb = Sprite{
-        sheet=assets,
-        id="button-hdd-usb-default.png",
-        x = 1150,
-        y = 280,
-    }
-    hdd_usb.w = hdd_usb.w*3/2
-    hdd_usb.h = hdd_usb.h*3/2
-
-    local lrg_btn = Sprite{
-        sheet=assets,
-        id="button-recently-added.png",
-        x = hdd_usb.x+hdd_usb.w+20,
-        y = hdd_usb.y,
-    }
-    lrg_btn.w = lrg_btn.w*3/2
-    lrg_btn.h = lrg_btn.h*3/2
-
-    local lrg_btn_text = Text{
-        text = "Recently Added",
-        font = CARD_TITLE_FONT,
-        color = "black",
-        x = lrg_btn.x+lrg_btn.w/2,
-        y = lrg_btn.y+lrg_btn.h/2,
-    }
-    lrg_btn_text.anchor_point = {lrg_btn_text.w/2,lrg_btn_text.h/2}
-
-    local lrg_btn_arrow = Sprite{
-        sheet=assets,
-        id="arrow-small-buttons.png",
-        x = lrg_btn.x+lrg_btn.w-50,
-        y = lrg_btn.y+lrg_btn.h/2,
-    }
-    lrg_btn_arrow.w = lrg_btn_arrow.w*3/2
-    lrg_btn_arrow.h = lrg_btn_arrow.h*3/2
-    lrg_btn_arrow.anchor_point = {lrg_btn_arrow.w/2,lrg_btn_arrow.h/2}
-
-    local banner = Sprite{
-        sheet=assets,
-        id="ad-banner-lg-my-apps.png",
-        x = 780,
-        y = 120,
-    }
-    banner.w = banner.w*3/2
-    banner.h = banner.h*3/2
-
-
-    my_apps_top:add(icon,my_apps_text,pip,prog_bar,hdd_usb,lrg_btn,lrg_btn_text,lrg_btn_arrow,banner)
-end
---------------------------------------------------------------
-
-local top_bar = Group()
-
-local top_items = {
-    Sprite{
-        sheet = assets,
-        id = "top-icon-connection-on.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-icon-edit.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-bar-line-separator.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-icon-search.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-icon-notice.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-icon-logout.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-bar-line-separator.png",
-    },
-    Sprite{
-        sheet = assets,
-        id = "top-icon-exit.png",
-    },
-}
-
-top_bar:add(unpack(top_items))
-
-for i=1,#top_items do
-    local v =top_items[i]
-
-    v.anchor_point = {0,v.h/2}
-    if v.id == "top-bar-line-separator.png" then
-        v.w = v.w*3/2
-        v.h = v.h*3/2
-    end
-    v.x = i == 1 and 0 or (top_items[i-1].x+top_items[i-1].w+20)--(i-1)*(v.w+20)
-end
-
-top_bar.x = screen.w - top_items[#top_items].x - 100
-top_bar.y = 60
-
-screen:add(bg,cards,btm,top_bar,modal_menu_skim)
+screen:add(bg,cube,btm,top_bar,modal_menu_skim)
 
 
 --------------------------------------------------------------
+-- Add key events for screen-to-screen transitions
 
-dolater(cards.grab_key_focus,cards)
-
-cards.key_events[keys.OK] = function()
-    modal_menu:focus(function()
+cube.key_events[keys.OK] = function()
+    modal_menu:focus(cube,function()
             modal_menu:grab_key_focus()
         end
     )
     screen:grab_key_focus()
 end
-local my_apps_to_cube_repeat = false
-cards.key_events[keys.Down] = function()
+
+--------------------------------------------------------------
+-- Green causes the animation from the 'My Apps' screen to the
+-- 'Cube' screen to repeat
+my_apps_to_cube_repeat = false
+my_apps_to_cube_animating = false
+
+--pressing green from either screen will cause it to repeat
+cube.key_events[keys.GREEN] = function()
+
+    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
+
+    return my_apps_to_cube_repeat and
+        not my_apps_to_cube_animating and
+        cube.key_events[keys.Down]()
+end
+
+grid.key_events[keys.GREEN] = function()
+
+    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
+
+    return my_apps_to_cube_repeat and
+        not my_apps_to_cube_animating and
+        grid.key_events[keys.BACK]()
+end
+
+
+--------------------------------------------------------------
+cube.key_events[keys.Down] = function()
+
+    --Don't animate if this transition if it's already animating
+    if my_apps_to_cube_animating then return end
+    my_apps_to_cube_animating = true
+
     if my_apps_top.parent == nil then
         screen:add(my_apps_top)
         my_apps_top:raise_to_top()
     end
+
     local a = Animator{
         duration = 400*dur_mult,
         mode = "EASE_OUT_SINE",
@@ -592,18 +258,18 @@ cards.key_events[keys.Down] = function()
                 },
             },
             {
-                source = g,
+                source = cube,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", g.opacity},
+                    {0.0,"EASE_OUT_SINE", cube.opacity},
                     {1.0,"EASE_OUT_SINE",   0},
                 },
             },
             {
-                source = g,
+                source = cube,
                 name   = "z",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", g.z},
+                    {0.0,"EASE_OUT_SINE", cube.z},
                     {1.0,"EASE_OUT_SINE", -400},
                 },
             },
@@ -634,68 +300,28 @@ cards.key_events[keys.Down] = function()
         }
     }
     function a.timeline.on_completed()
-            if my_apps_to_cube_repeat then
-                grid.key_events[keys.BACK]()
-            else
-                grid:grab_key_focus()
-            end
+        my_apps_to_cube_animating = false
+
+        --if repeating, then fire off the reciprocal animation
+        if my_apps_to_cube_repeat then
+            grid.key_events[keys.BACK]()
+        --give the key focus to the 'My Apps' screen
+        else
+            grid:grab_key_focus()
+        end
     end
     a:start()
-    --[[
-    dolater(function()
-    bg:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        h = 375
-    }
-    my_apps_top:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 255,
-        --x_rotation = 0,
-        z=0,
-    }
-    btm_row_tab:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 0,
-    }
-    g:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 0,
-        z = -400,
-    }
-    grid.hl:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 255,
-    }
-    btm:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        y = -515,
-        on_completed = function()
-            grid:grab_key_focus()
-        end,
-    }
-    end)
---]]
+
+    --Steal the key focus if not repeating
     if not my_apps_to_cube_repeat then screen:grab_key_focus() end
 end
 
-cards.key_events[keys.GREEN] = function()
-    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
-
-    return my_apps_to_cube_repeat and cards.key_events[keys.Down]()
-end
-grid.key_events[keys.GREEN] = function()
-    my_apps_to_cube_repeat = not my_apps_to_cube_repeat
-
-    return my_apps_to_cube_repeat and grid.key_events[keys.BACK]()
-end
 grid.key_events[keys.BACK] = function()
-    ---[[ beginning the conversion over to an Animator
+
+    --Don't animate if this transition if it's already animating
+    if my_apps_to_cube_animating then return end
+    my_apps_to_cube_animating = true
+
     local a = Animator{
         duration = 400*dur_mult,
         mode = "EASE_OUT_SINE",
@@ -725,18 +351,18 @@ grid.key_events[keys.BACK] = function()
                 },
             },
             {
-                source = g,
+                source = cube,
                 name   = "opacity",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", g.opacity},
+                    {0.0,"EASE_OUT_SINE", cube.opacity},
                     {1.0,"EASE_OUT_SINE", 255},
                 },
             },
             {
-                source = g,
+                source = cube,
                 name   = "z",
                 keys   = {
-                    {0.0,"EASE_OUT_SINE", g.z},
+                    {0.0,"EASE_OUT_SINE", cube.z},
                     {1.0,"EASE_OUT_SINE",    0},
                 },
             },
@@ -767,56 +393,22 @@ grid.key_events[keys.BACK] = function()
         }
     }
     function a.timeline.on_completed()
-            if my_apps_to_cube_repeat then
-                cards.key_events[keys.Down]()
-            else
+        my_apps_to_cube_animating = false
 
-                my_apps_top:unparent()
-                g:grab_key_focus()
-            end
+        --if repeating, then fire off the reciprocal animation
+        if my_apps_to_cube_repeat then
+            cube.key_events[keys.Down]()
+        --give the key focus to the 'My Apps' screen
+        else
+            my_apps_top:unparent()
+            cube:grab_key_focus()
+        end
     end
     a:start()
-    --[[
-    bg:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        h = screen_h
-    }
-    my_apps_top:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 0,
-        --x_rotation = -90,
-        z=300,
-        on_completed = function()
-            my_apps_top:unparent()
-        end,
-    }
-    btm_row_tab:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 255,
-    }
-    g:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 255,
-        z = -0,
-        on_completed = function()
-            g:grab_key_focus()
-        end,
-    }
-    grid.hl:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        opacity = 0,
-    }
-    btm:animate{
-        mode = "EASE_OUT_SINE",
-        duration = 250*dur_mult,
-        y = 0,
-    }
-    --]]
+
+    --Steal the key focus if not repeating
     if not my_apps_to_cube_repeat then screen:grab_key_focus() end
 
 end
+
+dolater(cube.grab_key_focus,cube)

@@ -1,46 +1,48 @@
 local cube = Group()
 
-local card_src = Sprite{sheet = assets,id="card.png"}
-local live_card_src = Sprite{sheet = assets,id="card-live.png"}
-local card_reflection_src = Sprite{sheet = assets,id="card-shadow.png"}
-local card_src_w = card_src.w
-local card_src_h = card_src.h
-local live_card_src_w = live_card_src.w*3/2
-local live_card_src_h = live_card_src.h*3/2
+local card_src              = Sprite{sheet = assets,id="card.png"}
+local live_card_src         = Sprite{sheet = assets,id="card-live.png"}
+local card_reflection_src   = Sprite{sheet = assets,id="card-shadow.png"}
+local card_src_w            = card_src.w
+local card_src_h            = card_src.h
+local live_card_src_w       = live_card_src.w*3/2 --This asset wasn't full HD
+local live_card_src_h       = live_card_src.h*3/2
 local card_reflection_src_w = card_reflection_src.w
 local card_reflection_src_h = card_reflection_src.h
 
-card_src = nil
+card_src            = nil
+live_card_src       = nil
 card_reflection_src = nil
 
-w = screen.w
-h = 700
+local w = screen.w
+local h = 700
+local end_angle = 90
 
-end_angle = 90
 
+-------------------------------------------------------
+-- Constructors
+-------------------------------------------------------
 
+--Constructors for the icons within the cards
 local function first_card_icon(item_data)
     local instance = Group()
 
     local icon = Sprite{sheet = assets,id=item_data.src,x=5,y=5}
 
-    --icon.w = icon.w*3/2
-    --icon.h = icon.h*3/2
-
-    local title = Text{
-        text = item_data.text,
-        font = CARD_TITLE_FONT,
-        w     = card_src_w/3-10,
-        wrap  = true,
+    local title   = Text{
+        text      = item_data.text,
+        font      = CARD_TITLE_FONT,
+        w         = card_src_w/3-10,
+        wrap      = true,
         wrap_mode = "WORD_CHAR",
-        color = "black",
-        x     = icon.x,
-        y     = icon.y+icon.h+5,
+        color     = "black",
+        x         = icon.x,
+        y         = icon.y+icon.h+5,
     }
     local more = Text{
-        text = "More...",
-        font = ICON_FONT,
-        color = "666666",
+        text   = "More...",
+        font   = ICON_FONT,
+        color  = "666666",
     }
     more.x = card_src_w/3 - more.w
     more.y = card_src_h/3 - more.h
@@ -54,10 +56,13 @@ local function make_card_icon(item)
 
     local r = Sprite{sheet = assets,id=item.src}
 
-    --r.w = r.w*3/2
-    --r.h = r.h*3/2
-
-    local t = Text{text = item.text,font = ICON_FONT, color = "666666",y = r.h,x=r.w/2}
+    local t   = Text{
+        text  = item.text,
+        font  = ICON_FONT,
+        color = "666666",
+        x     = r.w/2,
+        y     = r.h,
+    }
 
     t.anchor_point = {t.w/2,0}
 
@@ -66,6 +71,8 @@ local function make_card_icon(item)
     return instance
 
 end
+---------------------------------------------------------------------
+-- Constructors for the cards that sit on the sides of the cube
 function make_icon_card(items_data)
 
     local n_rows = 3
@@ -97,13 +104,15 @@ function make_icon_card(items_data)
         }
     }
 
-    local items={{}}
+    local items={ {} }
+
+    --the top left icon is different
     local icon = first_card_icon(items_data[1])
 
-    items[1][1] =icon
+    items[1][1] = icon
     instance:add(icon)
 
-    for i=2,#items_data do
+    for i = 2,#items_data do
         if i%n_cols == 1 then
             items[#items+1] = {}
         end
@@ -120,9 +129,11 @@ function make_icon_card(items_data)
     return instance
 
 end
+--The left most card in the initial screen
 local function make_live_card(item_data)
 
     local pip = Sprite{
+        name = "Picture in Picture",
         sheet = assets,
         id = "live-image.png",
     }
@@ -136,15 +147,13 @@ local function make_live_card(item_data)
         id = "ad-worldnews-abc.png",
     }
 
-    --ad.w = ad.w*3/2-10
-    --ad.h = ad.h*3/2+10
     ad.w = ad.w-20
     ad.x = 2
     ad.y = card_src_h-ad.h+26
 
     local instance = Group{
-        name="Card",
-        children={
+        name       = "Card",
+        children   = {
             Sprite{
                 sheet = assets,
                 id = "card-live.png",
@@ -185,7 +194,9 @@ local function make_live_card(item_data)
     return instance
 
 end
-local function make_side(cards)--w,h,bg_color)
+-------------------------------------------------------
+--Make one side of the cube
+local function make_side(cards)
     local instance = Group{
         anchor_point={w/2,h/2},
         clip = {0,0,screen_w,screen_h}
@@ -193,24 +204,26 @@ local function make_side(cards)--w,h,bg_color)
 
 
     for i,card in ipairs(cards) do
-        instance:add(card:set{
+        instance:add(
+            card:set{
                 x = (card_src_w+50)*(i-1)+40,
                 y = 100,
-            })
+            }
+        )
     end
     return instance
 end
 
-
---r1 = make_side(w,h,bg.color)
+-------------------------------------------------------
+-- Call the constructors to make the 2 sides of the cube
 r1 = make_side{
     make_icon_card{
-        {text="3D WORLD",     src="title-icon-3d-world.png"},
-        {text="Settings",     src="icon-settings.png"},
-        {text="Easy Map",     src="icon-lg-easy-map.png"},
-        {text="nPoint",       src="icon-lg-npoint.png"},
-        {text="Astronaut",    src="icon-lg-astronaut.png"},
-        {text="3d On",        src="icon-3d-on.png"},
+        {text="3D WORLD",      src="title-icon-3d-world.png"},
+        {text="Settings",      src="icon-settings.png"},
+        {text="Easy Map",      src="icon-lg-easy-map.png"},
+        {text="nPoint",        src="icon-lg-npoint.png"},
+        {text="Astronaut",     src="icon-lg-astronaut.png"},
+        {text="3d On",         src="icon-3d-on.png"},
         {text="Netflix",       src="icon-netflix.png"},
         {text="Youtube",       src="icon-youtube.png"},
         {text="Accuweather",   src="icon-accuweather.png"},
@@ -228,27 +241,29 @@ r1 = make_side{
     },
     make_icon_card{
         {text="MY CARD",      src="title-icon-my-card.png"},
-        {text="Accuweather",   src="icon-accuweather.png"},
-        {text="Skype",         src="icon-skype.png"},
-        {text="Facebook",      src="icon-facebook.png"},
+        {text="Accuweather",  src="icon-accuweather.png"},
+        {text="Skype",        src="icon-skype.png"},
+        {text="Facebook",     src="icon-facebook.png"},
         {text="Mable",        src="icon-lg-mable.png"},
         {text="Adobe TV",     src="icon-lg-adobetvb.png"},
         {text="iVillage",     src="icon-lg-ivillage.png"},
         {text="User Guide",   src="icon-user-guide.png"},
-        {text="TED",           src="icon-ted.png"},
+        {text="TED",          src="icon-ted.png"},
     },
     make_icon_card{
         {text="MY CARD",      src="title-icon-my-card.png"},
-        {text="Adobe TV",      src="icon-lg-adobetvb.png"},
-        {text="Skype",         src="icon-skype.png"},
-        {text="Quick Menu",    src="icon-quick-menu.png"},
+        {text="Adobe TV",     src="icon-lg-adobetvb.png"},
+        {text="Skype",        src="icon-skype.png"},
+        {text="Quick Menu",   src="icon-quick-menu.png"},
         {text="Mable",        src="icon-lg-mable.png"},
         {text="Adobe TV",     src="icon-lg-adobetvb.png"},
         {text="Now & Hot",    src="icon-now-hot.png"},
         {text="User Guide",   src="icon-user-guide.png"},
-        {text="TED",           src="icon-ted.png"},
+        {text="TED",          src="icon-ted.png"},
     }:set{opacity = 127},
+
 }:set{opacity=0}
+
 r2 = make_side{
     make_live_card{
         title = "11-1 LGC HD The Blue Earth",
@@ -288,29 +303,34 @@ r2 = make_side{
         {text="Internet",     src="icon-internet.png"},
     }:set{opacity = 127},
 }
---r2 = make_side(w,h,bg.color)
 
-g = Group{
-    position={screen.w/2,h/2+50}
-}
+cube:add(r2)
+cube.position={screen.w/2,h/2+50}
 
-
-g:add(r2)
-cube:add(bg,g)
-
-
+-------------------------------------------------------
+--The cube rotation animation
 local phase_one, phase_two
 local animating = false
 local curr_r = r2
 local next_r = r1
 local again = false
 function cube:rotate(outgoing,incoming,direction)
+
     if animating then return end
-    g:add(incoming)
     animating = true
+
+    --add the incoming side
+    cube:add(incoming)
+    incoming:lower_to_bottom()
+
+    --prepare the rotation point of the animation
     outgoing.y_rotation={ 0,0,-w/2}
-    incoming.y_rotation={(direction == "LEFT" and -end_angle or end_angle),0,-w/2}
+    incoming.y_rotation={
+        (direction == "LEFT" and -end_angle or end_angle),0,-w/2
+    }
     incoming.opacity = 0
+
+    --the first half of the animation
     phase_one = Animator{
         duration = 400*dur_mult,
         properties = {
@@ -339,17 +359,19 @@ function cube:rotate(outgoing,incoming,direction)
                 },
             },
             {
-                source = g,
+                source = cube,
                 name   = "z",
                 keys   = {
-                    {0.0,"EASE_IN_OUT_QUAD", 0},
-                    {1.0,"EASE_IN_OUT_QUAD", -w/2},
+                    {0.0,"EASE_IN_OUT_SINE", 0},
+                    {1.0,"EASE_IN_OUT_SINE", -w/2},
                 },
             },
         }
     }
     function phase_one.timeline.on_completed()
+
         incoming:raise_to_top()
+        --the second half of the animation
         phase_two = Animator{
             duration = 400*dur_mult,
             properties = {
@@ -370,19 +392,19 @@ function cube:rotate(outgoing,incoming,direction)
                     },
                 },
                 {
-                    source = g,
-                    name   = "z",
-                    keys   = {
-                        {0.0,"EASE_IN_OUT_QUAD", -w/2},
-                        {1.0,"EASE_IN_OUT_QUAD",  0},
-                    },
-                },
-                {
                     source = outgoing,
                     name   = "opacity",
                     keys   = {
                         {0.0,"EASE_OUT_SINE", 255},
                         {1.0,"EASE_OUT_SINE",   0},
+                    },
+                },
+                {
+                    source = cube,
+                    name   = "z",
+                    keys   = {
+                        {0.0,"EASE_IN_OUT_SINE", -w/2},
+                        {1.0,"EASE_IN_OUT_SINE",  0},
                     },
                 },
             }
@@ -394,24 +416,16 @@ function cube:rotate(outgoing,incoming,direction)
             next_r = outgoing
             outgoing:unparent()
 
+            --repeat if RED was pressed
             return again and cube:rotate(curr_r,next_r,direction)
         end
         phase_two:start()
     end
     phase_one:start()
-    --dolater(phase_one.start,phase_one)
 end
 
-
-
-
-
-
-
-
-
-
-
+-------------------------------------------------------
+-- Key events for the cube
 
 local key_events = {
     [keys.Right] = function()
@@ -423,12 +437,21 @@ local key_events = {
     [keys.RED] = function()
         again = not again
 
-        return again and cube:rotate(curr_r,next_r,"LEFT")
+        return again and not animating and
+            cube:rotate(curr_r,next_r,"LEFT")
     end,
 }
+
 cube.key_events = key_events
+
 function cube:on_key_down(k)
-    return (not again or k == keys.RED) and key_events[k] and key_events[k]()
+
+    --block the event if the rotation animation is repeating
+    return (not again or k == keys.RED) and
+        --block the even if the animation to 'My Apps' is repeating
+        (not my_apps_to_cube_repeat  or k == keys.GREEN) and
+        --otherwise call the event, if there is an event setup
+        key_events[k] and key_events[k]()
 end
 
 return cube
