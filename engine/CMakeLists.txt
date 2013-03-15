@@ -331,6 +331,14 @@ endif( TP_FORCE_VERIFICATION )
 
 #------------------------------------------------------------------------------
 
+if ( TP_UNLICENSED_TIMEOUT )
+
+    add_definitions( -DTP_UNLICENSED_TIMEOUT="${TP_UNLICENSED_TIMEOUT}" )
+
+endif( TP_UNLICENSED_TIMEOUT )
+
+#------------------------------------------------------------------------------
+
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
 list(REMOVE_DUPLICATES ENGINE_INCLUDE_DIRS)
