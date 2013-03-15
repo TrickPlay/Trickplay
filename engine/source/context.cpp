@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <sstream>
+#include <stdlib.h>
 
 #include <execinfo.h>
 #include <cxxabi.h>
@@ -45,6 +46,46 @@
 
 static int g_argc     = 0;
 static char ** g_argv = 0;
+
+#ifdef TP_UNLICENSED_TIMEOUT
+static gboolean unlicensed_timeout_cb( gpointer _stage )
+{
+    static ClutterActor *texture = NULL;
+    ClutterActor *stage = CLUTTER_ACTOR ( _stage );
+
+    if(NULL == texture)
+    {
+        // Handle timeout here
+        // We will just insert a big semi-opaque TrickPlay logo image, stick it on top of everything in Clutter
+
+        texture = clutter_text_new_full("LG Display bold 20px", "TrickPlay - DEBUG - " TP_GIT_VERSION, clutter_color_get_static(CLUTTER_COLOR_YELLOW));
+        clutter_actor_set_name( texture, "Unlicensed Scrim" );
+
+        g_object_ref_sink( texture );
+
+        clutter_actor_set_position(texture,clutter_actor_get_width(stage), clutter_actor_get_height(stage));
+        clutter_actor_set_translation(texture,-clutter_actor_get_width(texture),-clutter_actor_get_height(texture),0);
+
+    //    guchar * t = g_new0( guchar , 4 * width * height );
+
+    //    clutter_texture_set_from_rgb_data( CLUTTER_TEXTURE( texture ) , t , TRUE , width , height , 4 * width , 4 , CLUTTER_TEXTURE_NONE , 0 );
+
+    //    g_free( t );
+
+        clutter_actor_add_child( stage, texture );
+    }
+
+    if(CLUTTER_ACTOR_IS_VISIBLE(texture))
+    {
+        clutter_actor_hide(texture);
+    } else {
+        clutter_actor_show(texture);
+        clutter_actor_set_child_above_sibling( stage, texture, NULL );
+    }
+
+    return TRUE;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -815,6 +856,15 @@ int TPContext::run()
         //.................................................................
 
         Action::post( new RunningAction( this ) );
+
+        //.................................................................
+        // Schedule unlicensed timeout if called for
+#ifdef TP_UNLICENSED_TIMEOUT
+        unsigned long unlicensed_timeout = ::strtoul(TP_UNLICENSED_TIMEOUT, NULL, 0);
+        g_warning("SETTING UNLICENSED TIMEOUT FOR %lu SECONDS", unlicensed_timeout);
+
+        g_timeout_add_seconds(unlicensed_timeout, unlicensed_timeout_cb, (gpointer)stage);
+#endif
 
         //.................................................................
         // Dip into the loop
