@@ -400,8 +400,6 @@ private:
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
 #endif
 
-        clutter_actor_set_name( texture , "graph" );
-
         bar = g_new0( guchar , 4 * height );
 
         white_bar = g_new( guchar , 4 * height );
