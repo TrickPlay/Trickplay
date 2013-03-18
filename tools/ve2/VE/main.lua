@@ -1511,6 +1511,25 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
 end
 
+_VE_.imageNameChange = function(org, new)
+
+
+    for m,n in ipairs (screen.children) do
+        if n.name then
+        if string.find(n.name, "Layer") ~= nil and 
+         string.find(n.name, "a_m") == nil and 
+         string.find(n.name, "border") == nil 
+        then 
+            for q,w in ipairs (n.children) do 
+                if w.widget_type == "Widget_Sprite" and w.id == org then 
+                    w.id = new 
+                end 
+            end
+        end
+        end
+    end 
+end 
+
 _VE_.selectUIElement = function(gid, multiSel)
     local org_shift = shift
     if multiSel == true then

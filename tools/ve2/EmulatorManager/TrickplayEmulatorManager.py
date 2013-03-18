@@ -111,6 +111,7 @@ class TrickplayEmulatorManager(QWidget):
 				break
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
+			print ".............."+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
@@ -154,7 +155,6 @@ class TrickplayEmulatorManager(QWidget):
 
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
-				    #print s[:15]
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "screenLoc":
@@ -239,13 +239,10 @@ class TrickplayEmulatorManager(QWidget):
 				        self.imgData = json.loads(s[9:])
 				        self.fscontentMoveBlock = True 
 				        self.filesystem.buildImageTree(self.imgData)
-				        if self.filesystem.orgCnt >= self.filesystem.idCnt and self.filesystem.imageCommand is not "replace":
-				            #print self.filesystem.orgCnt, self.filesystem.idCnt 
-				            #print "less images files are found in the new imges.json" 
+				        if self.filesystem.orgCnt >= self.filesystem.idCnt and not self.filesystem.imageCommand in ["replace", ""]:
 				            self.main.errorMsg("No new image file was added !")
 
-				        if self.filesystem.imageCommand == "replace":
-				            self.filesystem.imageCommand = ""
+				        self.filesystem.imageCommand = ""
 				        self.fscontentMoveBlock = False 
 				    else:
 				        pass

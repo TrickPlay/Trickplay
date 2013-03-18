@@ -319,7 +319,6 @@ class MainWindow(QMainWindow):
             if self.importCmd is "assets" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
-
         else : 
             if self.bar is not None:
                 self.bar.hide()
@@ -349,6 +348,7 @@ class MainWindow(QMainWindow):
 
     def importAssets(self):
         self.importCmd = "assets"
+        self._ifilesystem.imageCommand = "assets"
         path = -1 
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
@@ -518,6 +518,7 @@ class MainWindow(QMainWindow):
 
     def importSkins(self):
         self.importCmd = "skins"
+        self._ifilesystem.imageCommand = "skins"
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
@@ -604,6 +605,7 @@ class MainWindow(QMainWindow):
             self.run()
             self.command = "openProject"
             self.inspector.screens = {"_AllScreens":[],"Default":[]}
+
         return True
 
     def saveProject(self):

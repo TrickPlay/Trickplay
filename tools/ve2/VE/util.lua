@@ -501,24 +501,37 @@ function util.is_available (name)
     return true
 end
 
+local function change_image_name (uiTypeStr)
+    local imgFileName, i, j
+    i, j = string.find(uiTypeStr, ".png")
+        
+    if i ~= nil then 
+        imgFileName = string.sub(uiTypeStr, 1, i-1)
+    end 
+    imgFileName = string.gsub(imgFileName, "/", "_S_")
+    imgFileName = string.gsub(imgFileName, "%.", "_P_")
+    imgFileName = string.gsub(imgFileName, "-", "_D_")
+    imgFileName = string.lower(string.sub(imgFileName, 1,1))..string.sub(imgFileName, 2, -1)
+
+    return imgFileName
+end 
+
 function util.assign_right_name (uiInstance, uiTypeStr)
     uiTypeStr = (uiTypeStr:sub(1, 1):upper()..uiTypeStr:sub(2, -1))
     if hdr.uiNum_map[uiTypeStr] == nil then
-        local imgFileName, i, j
-        i, j = string.find(uiTypeStr, ".png")
+        local imgFileName
         
-        if i ~= nil then 
-            imgFileName = string.sub(uiTypeStr, 1, i-1)
-        end 
+        imgFileName = change_image_name(uiTypeStr)
+
         if hdr.uiNum_map[imgFileName] == nil then
             hdr.uiNum_map[imgFileName] = 0 
         end 
 
-        while  util.is_available(imgFileName.."-"..hdr.uiNum_map[imgFileName]) == false do 
+        while  util.is_available(imgFileName.."_"..hdr.uiNum_map[imgFileName]) == false do 
             hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
         end 
 
-        uiInstance.name = imgFileName.."-"..hdr.uiNum_map[imgFileName]
+        uiInstance.name = imgFileName.."_"..hdr.uiNum_map[imgFileName]
         hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
 
     else 
