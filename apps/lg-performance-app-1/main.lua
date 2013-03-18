@@ -16,8 +16,6 @@ TITLE_FONT      = FONT.." Bold 60px"
 -------------------------------------------------------------
 --load the other files
 
-make_grid = dofile('make_grid')
-
 local cube              = dofile("cube")
 
 local make_modal_menu   = dofile("modal_menu")
