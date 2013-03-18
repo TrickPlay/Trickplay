@@ -92,6 +92,11 @@ class RRD
         if(count) return sum/count; else return 0.0;
     }
 
+    bool is_full() const
+    {
+        return _size_bucket == count;
+    }
+
     private:
         float *bucket;
         unsigned _size_bucket;
@@ -203,6 +208,14 @@ private:
         g_snprintf( buffer , sizeof( buffer ) , "%3.2f/%3.2f/%3.2f" , cpu , short_timer.avg(), long_timer.avg() );
 
         clutter_text_set_text( text , buffer );
+        if(long_timer.is_full())
+        {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_GREEN ) );
+        } else if(short_timer.is_full()) {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_YELLOW ) );
+        } else {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
+        }
 
 #ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
@@ -317,6 +330,14 @@ private:
         g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , fps , short_timer.avg() , long_timer.avg() );
 
         clutter_text_set_text( text , buffer );
+        if(long_timer.is_full())
+        {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_GREEN ) );
+        } else if(short_timer.is_full()) {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_YELLOW ) );
+        } else {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
+        }
 
 #ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
