@@ -241,6 +241,8 @@ class TrickplayImageFileSystem(QWidget):
         f = open(self.main.imageJsonFile, 'w')
         f.write(jsonFileContents.replace(org, new))
         f.close()
+
+        self.main.sendLuaCommand("imageNameChange", '_VE_.imageNameChange("'+org+'", "'+new+'")')
         self.imageCommand = "replace"
         self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
@@ -337,7 +339,7 @@ class TrickplayImageFileSystem(QWidget):
 			dir_name = self.ndirUi.folder_name.text()
 			new_path = newFolderParent+dir_name+"/"
 			#orgId = str(item.whatsThis(0))
-			if self.isDir(orgId) == True: #[len(orgId)-1:] == "/":
+			if self.isDir(orgId) == True: 
 			    orgId = "}\n\t],"
 			    newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
 			else:
@@ -346,27 +348,12 @@ class TrickplayImageFileSystem(QWidget):
 			self.imageJsonItemSub(orgId, newFolderInfo) 
             
     def fileItemChanged(self, item, col):
-        #if self.main._emulatorManager.fscontentMoveBlock == True :
-            #return
-        #print "fileItemChanged"
         orgId = str(item.whatsThis(0))
         newId = self.getDir(orgId)+str(item.text(0))
 
         self.imageJsonItemSub(orgId, newId) 
 
-        """
-        #jsonFileContents = os.read(self.main.imageJsonFile)
-        f = open(self.main.imageJsonFile)
-        jsonFileContents = f.read()
-
-        #os.write(self.main.imageJsonFile, jsonFileContents.replace(orgId, newId))
-        f = open(self.main.imageJsonFile, 'w')
-        f.write(jsonFileContents.replace(orgId, newId))
-        f.close()
-        """
-
     def buildImageTree(self,  data, styleIndex=None):
-
         # Clear Image File System Tree
         self.orgCnt = self.idCnt 
 
@@ -374,13 +361,11 @@ class TrickplayImageFileSystem(QWidget):
         self.idCnt = 0 
 
         #self.ui.fileSystemTree.setColumnCount(2)
-        # Init variables 
         items = []
         folders = {}
         self.data = data
 
         for imageData in data:
-            #folders = {}
             cnt = 0
             
             for imageFile in imageData['sprites']:
@@ -443,8 +428,7 @@ class TrickplayImageFileSystem(QWidget):
                     self.topWhatsThis = imageFile['id']
                     self.ui.fileSystemTree.addTopLevelItem(j)
                 cnt = cnt + 1
-
-            self.idCnt = self.idCnt + cnt
+                self.idCnt = self.idCnt + cnt
 
         return 
         
