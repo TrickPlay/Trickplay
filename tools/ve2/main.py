@@ -566,6 +566,8 @@ class MainWindow(QMainWindow):
             self.command = "newProject"
             self.menuCommand = "newProject"
             self._ifilesystem.ui.fileSystemTree.clear()
+            self._ifilesystem.orgCnt = 0
+            self._ifilesystem.idCnt = 0
 
             while self.inspector.ui.screenCombo.count() > 0 :
                 curIdx = self.inspector.ui.screenCombo.currentIndex()

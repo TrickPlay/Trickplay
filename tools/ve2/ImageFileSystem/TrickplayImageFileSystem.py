@@ -242,7 +242,8 @@ class TrickplayImageFileSystem(QWidget):
         f.write(jsonFileContents.replace(org, new))
         f.close()
 
-        self.main.sendLuaCommand("imageNameChange", '_VE_.imageNameChange("'+org+'", "'+new+'")')
+        if org and new :
+            self.main.sendLuaCommand("imageNameChange", '_VE_.imageNameChange("'+str(org)+'", "'+str(new)+'")')
         self.imageCommand = "replace"
         self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
