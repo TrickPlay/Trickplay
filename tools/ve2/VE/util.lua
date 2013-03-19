@@ -511,7 +511,16 @@ local function change_image_name (uiTypeStr)
     imgFileName = string.gsub(imgFileName, "/", "_S_")
     imgFileName = string.gsub(imgFileName, "%.", "_P_")
     imgFileName = string.gsub(imgFileName, "-", "_D_")
-    imgFileName = string.lower(string.sub(imgFileName, 1,1))..string.sub(imgFileName, 2, -1)
+    
+    local lowerChar, capitalChar, n
+    lowerChar, n = string.gsub(string.sub(imgFileName, 1,1), "%l", "Y") 
+    capitalChar, n = string.gsub(string.sub(imgFileName, 1,1), "%u", "Y") 
+
+    if lowerCase == "Y" or capitalChar == "Y"then 
+        imgFileName = string.lower(string.sub(imgFileName, 1,1))..string.sub(imgFileName, 2, -1)
+    else 
+        imgFileName = "_"..imgFileName
+    end
 
     return imgFileName
 end 
