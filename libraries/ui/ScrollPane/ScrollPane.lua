@@ -44,6 +44,13 @@ ScrollPane = setmetatable(
                         vertical.enabled   = v
                     end
                 end,
+                contents_offset = function(instance,_ENV)
+                    return function(oldf,self)
+                        local x,y = unpack(pane.contents_offset)
+
+                        return {x,y}
+                    end
+                end,
                 w = function(instance,_ENV)
                     return nil,--function(oldf,self) return w     end,
                     function(oldf,self,v)
@@ -178,6 +185,7 @@ ScrollPane = setmetatable(
 
                         t.contents = self.contents
 
+                        t.contents_offset = instance.contents_offset
                         t.pane_w = instance.pane_w
                         t.pane_h = instance.pane_h
                         t.virtual_x = instance.virtual_x
