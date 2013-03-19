@@ -22,6 +22,13 @@ ClippingRegion = setmetatable(
         },
         public = {
             properties = {
+                contents_offset = function(instance,_ENV)
+                    return function(oldf,self)
+                        local b = bg.borders
+
+                        return {b[1],b[2]}
+                    end
+                end,
                 w = function(instance,_ENV)
                     return function(oldf,self) return w     end,
                     function(oldf,self,v)
@@ -140,6 +147,7 @@ ClippingRegion = setmetatable(
                     return function(oldf,self)
                         local t = oldf(self)
 
+                        t.contents_offset = instance.contents_offset
                         t.virtual_x = instance.virtual_x
                         t.virtual_y = instance.virtual_y
                         t.virtual_w = instance.virtual_w
@@ -246,9 +254,9 @@ ClippingRegion = setmetatable(
             WL_parent_redirect[contents] = instance
 
             restyle = true
-            new_w = true
-            new_h = true
-            reclip = true
+            new_w   = true
+            new_h   = true
+            reclip  = true
             --public attributes, set to false if there is no default
             w = 400
             h = 400

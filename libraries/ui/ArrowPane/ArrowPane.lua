@@ -62,6 +62,18 @@ ArrowPane = setmetatable(
 
                     end
                 end,
+                contents_offset = function(instance,_ENV)
+                    return function(oldf,self)
+                        local x,y = unpack(pane.contents_offset)
+
+                        return {
+                            ((self.horizontal_arrows_are_visible) and
+                            (x+left.w) or x),
+                            ((self.vertical_arrows_are_visible) and
+                            (y+up.h) or y)
+                        }
+                    end
+                end,
                 w = function(instance,_ENV)
                     return nil,
                     function(oldf,self,v)
@@ -177,7 +189,7 @@ ArrowPane = setmetatable(
                         t.number_of_cols       = nil
                         t.number_of_rows       = nil
                         t.vertical_alignment   = nil
-            			 t.horizontal_alignment = nil
+                        t.horizontal_alignment = nil
                         t.vertical_spacing     = nil
                         t.horizontal_spacing   = nil
                         t.cell_h               = nil
@@ -186,6 +198,7 @@ ArrowPane = setmetatable(
 
                        -- t.contents = self.contents
 
+                        t.contents_offset = instance.contents_offset
                         t.pane_w    = instance.pane_w
                         t.pane_h    = instance.pane_h
                         t.virtual_x = instance.virtual_x

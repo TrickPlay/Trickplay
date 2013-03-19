@@ -150,6 +150,31 @@ TabBar = setmetatable(
                         tab_pane.enabled = v
                     end
                 end,
+                contents_offset = function(instance,_ENV)
+                    return function(oldf,self)
+--dumptable(rbg.items[rbg.selected].contents.contents_offset)
+                        --[[
+                        local x,y = unpack(
+                            panes[rbg.selected] and
+                            panes[rbg.selected].contents_offset or
+                            {0,0}
+                        )
+
+                        return {
+                            ((tab_location == "left") and
+                            (x+tab_w) or x),
+                            ((tab_location == "top") and
+                            (y+tab_h) or y)
+                        }
+                        --]]
+                        return {
+                            ((tab_location == "left") and
+                            (tab_w) or 0),
+                            ((tab_location == "top") and
+                            (tab_h) or 0)
+                        }
+                    end
+                end,
                 pane_w = function(instance,_ENV) -- TODO check need for these upvals
                     return function(oldf) return   pane_w     end,
                     function(oldf,self,v)
@@ -290,6 +315,7 @@ TabBar = setmetatable(
 
                         t.style = instance.style.name
 
+                        t.contents_offset = instance.contents_offset
                         t.tab_w  = instance.tab_w
                         t.tab_h  = instance.tab_h
                         t.pane_w = instance.pane_w
@@ -616,7 +642,7 @@ TabBar = setmetatable(
 
             setup_object(self,instance,_ENV)
 
-            dumptable(get_children(instance))
+            --dumptable(get_children(instance))
             return instance, _ENV
 
         end
