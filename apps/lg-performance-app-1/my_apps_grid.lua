@@ -319,11 +319,18 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     ----------------------------------------------------------
     --key events
     local key_events = {
+        --delete the selected icon
         [keys.OK] = function()
+            --if there more than one left
             if entries[1][2] then
                 instance:delete(sel_r,sel_c)
+                --if you are deleting to icon at the very end,
+                --then move the highlight to the next one
                 if sel_r == #entries and sel_c == #entries[#entries] then
+                    --if the last icon is in the leftmost column
                     if  sel_c == 1 then
+                        --then the highlight needs to wrap around to
+                        --the rightmost columns
                         sel_r = sel_r-1
                         sel_c = #entries[sel_r-1]
                     else

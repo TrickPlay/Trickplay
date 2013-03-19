@@ -2,9 +2,7 @@
 screen:show()
 screen_w = screen.w
 screen_h = screen.h
-assets = SpriteSheet{
-    map = "assets/images.json"
-}
+assets = SpriteSheet{ map = "assets/images.json" }
 
 dur_mult = 1
 
@@ -79,40 +77,44 @@ local modal_menu_items = {
     },
 }
 
-modal_menu, modal_menu_skim =
+local modal_menu, modal_menu_skim =
 
     make_modal_menu(modal_menu_items)
 
 -------------------------------------------------------------
 -- Make the pieces that sit below the cube
--- These objects also expand to create the 'My Apps' screen
+-- These objects also slide up to create the 'My Apps' screen
 
 local btm = Group()
 
 local btm_row_tab = Group()
 local btm_row_backing = Sprite{
     sheet = assets,
-    id="main-bar.png",
-    w = screen.w,
-    h = 152*1920/1280,
+    id    = "main-bar.png",
+    w     = screen_w,
+    h     = 152*1920/1280,
 }
 btm_row_tab.y = screen.h-btm_row_backing.h
+
 local btm_row_gradient = Sprite{
     sheet = assets,
-    id="gradient-my-apps.png",
-    w = screen.w,
+    id    = "gradient-my-apps.png",
+    w     = screen.w,
 }
 btm_row_gradient.h = btm_row_gradient.h*3/2
 btm_row_gradient.y = btm_row_tab.y+35
+
 local btm_row_backing_text = Text{
-    text = "More",
-    font = CARD_TITLE_FONT,
+    text  = "More",
+    font  = CARD_TITLE_FONT,
     color = "white",
-    x  = screen.w/2,
-    y  = 15,
+    x     = screen.w/2,
+    y     = 15,
 }
 btm_row_backing_text.anchor_point = {btm_row_backing_text.w/2,0}
+
 btm_row_tab:add(btm_row_backing,btm_row_backing_text)
+
 -------------------------------------------------------------
 -- Create the my apps grid
 local my_apps_items = {
@@ -180,12 +182,10 @@ screen:add(bg,cube,btm,top_bar,modal_menu_skim)
 
 --------------------------------------------------------------
 -- Add key events for screen-to-screen transitions
+--------------------------------------------------------------
 
 cube.key_events[keys.OK] = function()
-    modal_menu:focus(cube,function()
-            modal_menu:grab_key_focus()
-        end
-    )
+    modal_menu:focus(cube)
     screen:grab_key_focus()
 end
 
@@ -216,6 +216,8 @@ end
 
 
 --------------------------------------------------------------
+-- Pressing DOWN from the cube causes the 'My Apps' screen to
+-- slide up
 cube.key_events[keys.Down] = function()
 
     --Don't animate if this transition if it's already animating
@@ -314,6 +316,9 @@ cube.key_events[keys.Down] = function()
     if not my_apps_to_cube_repeat then screen:grab_key_focus() end
 end
 
+--------------------------------------------------------------
+-- Press BACK from the 'My Apps' Screen causes the screen to slide
+-- down and the cube to animate in
 grid.key_events[keys.BACK] = function()
 
     --Don't animate if this transition if it's already animating

@@ -1,7 +1,6 @@
 local my_apps_top = Group{
     name="my_apps_top",
     opacity=0,z=300,
-    --x_rotation={90,0,-150},
     anchor_point = {screen_w/2,200},
     position = {screen_w/2,200},
 }

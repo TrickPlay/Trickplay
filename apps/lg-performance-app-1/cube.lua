@@ -216,7 +216,7 @@ end
 
 -------------------------------------------------------
 -- Call the constructors to make the 2 sides of the cube
-r1 = make_side{
+local r1 = make_side{
     make_icon_card{
         {text="3D WORLD",      src="title-icon-3d-world.png"},
         {text="Settings",      src="icon-settings.png"},
@@ -264,7 +264,7 @@ r1 = make_side{
 
 }:set{opacity=0}
 
-r2 = make_side{
+local r2 = make_side{
     make_live_card{
         title = "11-1 LGC HD The Blue Earth",
         sub_t = "PM 10:20 - 11:20",
