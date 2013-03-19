@@ -1,3 +1,7 @@
+--------------------------------------------------------------
+-- Constructors for peices of the modal menu
+
+--makes the buttons at the bottom of the modal menu
 local function make_wide_button(text)
     local instance = Group{name=text.." Button"}
 
@@ -52,7 +56,7 @@ local function make_wide_button(text)
 end
 
 -------------------------------------------------------------
-
+--used by make_grid to create each of its elements
 local function make_icon(item)
     local instance = Group()
 
@@ -73,6 +77,7 @@ end
 
 
 -------------------------------------------------------------
+--makes the grid of icons on the right side of the modal menu
 local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
 
     local instance = Group()
@@ -84,6 +89,7 @@ local function make_grid(items,cell_w,cell_h,x_spacing,y_spacing)
         item.r = r
         item.c = c
     end
+
     for r,row in ipairs(items) do
         entries[r] = {}
         for c,item in ipairs(row) do
@@ -206,21 +212,25 @@ return function ( items )
                 },
             }
         },
-        make_wide_button("Complete"):set{x=30,y=850},
-        make_wide_button("Cancel"):set{x = 400,y=850}
+        make_wide_button("Complete"):set{x =  30,y = 850},
+        make_wide_button("Cancel"  ):set{x = 400,y = 850}
     )
 
     modal_menu.opacity = 0
 
     --------------------------------------------------------------
+    -- Methods for animating the menu in and out
 
     local loop = false
     local prev_menu
-    function modal_menu:focus(called_from,f)
+
+    function modal_menu:focus(called_from)
+
         prev_menu = called_from
+
         if modal_menu.parent == nil then screen:add(modal_menu) end
         modal_menu:raise_to_top()
-        --dolater(function()
+
         modal_menu.z = -400
         modal_menu:animate{
             duration = 250*dur_mult,
@@ -233,17 +243,18 @@ return function ( items )
             on_completed = function()
                 if loop then
                     modal_menu:unfocus()
+                else
+                    modal_menu:grab_key_focus()
                 end
-                return f and f()
             end
         }
         modal_menu_skim:animate{
             duration = 250*dur_mult,
             opacity = 150,
         }
-        --end)
+
     end
-    function modal_menu:unfocus(f)
+    function modal_menu:unfocus()
         modal_menu:animate{
             duration = 250*dur_mult,
             opacity = 0,
@@ -255,15 +266,16 @@ return function ( items )
                     modal_menu:unparent()
                     prev_menu:grab_key_focus()
                 end
-                return f and f()
             end
         }
         modal_menu_skim:animate{
             duration = 250*dur_mult,
-            opacity = 0,
+            opacity  = 0,
         }
     end
 
+    --------------------------------------------------------------
+    -- Key events
     modal_menu.key_events = {
         [keys.OK] = function()
             modal_menu:unfocus()
