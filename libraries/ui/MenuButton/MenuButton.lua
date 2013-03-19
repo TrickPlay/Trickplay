@@ -68,7 +68,7 @@ MenuButton = setmetatable(
 
                             if type(item) == "table" and item.type then
 
-                                item = _G[item.type](item)
+                                item = _ENV[item.type](item)
 
                             elseif type(item) ~= "userdata" and item.__types__.actor then
 

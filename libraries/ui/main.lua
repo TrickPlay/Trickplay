@@ -9,7 +9,7 @@ dofile("load_json.lua")
 --add_verbosity("ArrayManager")
 
 
-dofile("TabBar/test.lua")
+dofile("MenuButton/test.lua")
 --[[
 wg = WL.Widget_Group{name='wg'}
 
