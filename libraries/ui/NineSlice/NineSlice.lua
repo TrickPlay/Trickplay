@@ -1,4 +1,3 @@
-NINESLICE = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -33,20 +32,20 @@ NineSlice = setmetatable(
     {},
     {
         __index = function(self,k)
-            
+
             return getmetatable(self)[k]
-            
+
         end,
         __call = function(self,p)
-            
+
             self = self:declare()
             print("post-declare, pre-set")
-            
+
             self:set(p or {})
-            
+
             print("post-set, pre-return")
             return self
-            
+
         end,
         subscriptions = {
         },
@@ -65,35 +64,35 @@ NineSlice = setmetatable(
                 end,
                 w = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)
                         new_sz = true
                     end
                 end,
                 width = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)
                         new_sz = true
                     end
                 end,
                 h = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)
                         new_sz = true
                     end
                 end,
                 height = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)
                         new_sz = true
                     end
                 end,
                 size = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)
                         new_sz = true
                     end
@@ -103,7 +102,7 @@ NineSlice = setmetatable(
                 end,
                 cells = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         print("setting NS.cells = ",v)
                         mesg("DEBUG",{0,2},"setting cell",v)
                         if type(v) == "table" then
@@ -128,7 +127,7 @@ NineSlice = setmetatable(
                         end
                         oldf(self,ns_cells)
                         find_mins(ns_cells)
-                        
+
                         new_sz = true
                     end
                 end,
@@ -143,7 +142,7 @@ NineSlice = setmetatable(
                     right_col_w = 0
                     top_row_h   = 0
                     btm_row_h   = 0
-                    
+
                     for i = 1, 3 do
                         if left_col_w  < ns_cells[i][1].w then left_col_w  = ns_cells[i][1].w end
                         if right_col_w < ns_cells[i][3].w then right_col_w = ns_cells[i][3].w end
@@ -162,31 +161,31 @@ NineSlice = setmetatable(
             end,
             update = function(instance,_ENV)
                 return function()
-                
-                    
+
+
                     --print("start singleNS update", instance.gid,"sz",instance.w,instance.h)
                     if flag_for_redraw then
                         --print("\t redraw",state)
                         flag_for_redraw = false
-                        
+
                         instance.cells = state
                     end
                     ---[[
                     if  not setting_size and new_sz then
                         print("\t resize, mis:",instance.min_w,instance.min_h)
                         new_sz = false
-                        
+
                         setting_size = true
                         print(instance.w , instance.min_w)
                         set_inner_size( instance.cells,
-                             instance.w >= instance.min_w and 
+                             instance.w >= instance.min_w and
                             (instance.w  - instance.min_w) or 0,
-                            
-                             instance.h >= instance.min_h and 
+
+                             instance.h >= instance.min_h and
                             (instance.h  - instance.min_h) or 0
                         )
                         print(instance.w , instance.min_w)
-                        
+
                         setting_size = false
                     end
                     lm_update()
@@ -196,8 +195,8 @@ NineSlice = setmetatable(
                 end
             end,
         },
-        
-        
+
+
         declare = function(self,parameters)
             print("SNS LM:declare()")
             local instance, _ENV = LayoutManager:declare{
@@ -208,12 +207,12 @@ NineSlice = setmetatable(
                 horizontal_spacing = 0,
             }
             print("SNS LM:declare() after",instance.gid)
-            
+
             style_flags = {
                 border = "flag_for_redraw",
                 fill_colors = "flag_for_redraw"
             }
-            
+
             lm_update = update
             print("declared")
             on_entries_changed = function(self)
@@ -233,7 +232,7 @@ NineSlice = setmetatable(
             --[[
             do
                 local mt = getmetatable(instance.cells)
-                
+
                 mt.functions.insert       = function() end
                 mt.functions.remove       = function() end
                 mt.setters.size           = function() end
@@ -241,38 +240,38 @@ NineSlice = setmetatable(
                 mt.setters.number_of_cols = function() end
             end
             --]]
-            
+
             local getter, setter
-        
+
             left_col_w  = 0
             right_col_w = 0
             top_row_h   = 0
             btm_row_h   = 0
             flag_for_redraw = true
-            
+
             for name,f in pairs(self.private) do
                 _ENV[name] = f(instance,_ENV)
             end
-            
-            
+
+
             for name,f in pairs(self.public.properties) do
                 getter, setter = f(instance,_ENV)
                 override_property( instance, name,
                     getter, setter
                 )
-                
+
             end
-            
+
             for name,f in pairs(self.public.functions) do
-                
+
                 override_function( instance, name, f(instance,_ENV) )
-                
+
             end
-            
+
             for t,f in pairs(self.subscriptions) do
                 instance:subscribe_to(t,f(instance,_ENV))
             end
-            
+
             return instance,_ENV
         end,
     }

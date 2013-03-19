@@ -1,4 +1,3 @@
-SCROLLPANE = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -9,25 +8,25 @@ ScrollPane = setmetatable(
     {},
     {
         __index = function(self,k)
-            
+
             return getmetatable(self)[k]
-            
+
         end,
         __call = function(self,p)
-            
+
             return self:declare():set(p or {})
-            
+
         end,
         subscriptions = {
             --[[
             ["style"] = function(instance,_ENV)
                 return function()
-                    
+
                     instance.style.arrow:subscribe_to(         nil, arrow_on_changed )
                     instance.style.arrow.colors:subscribe_to(  nil, arrow_colors_on_changed )
                     instance.style.border:subscribe_to(        nil, pane_on_changed )
                     instance.style.fill_colors:subscribe_to(   nil, pane_on_changed )
-                    
+
                     arrow_on_changed()
                     arrow_colors_on_changed()
                 end
@@ -40,14 +39,14 @@ ScrollPane = setmetatable(
                     return function(oldf,...) return oldf(...) end,
                     function(oldf,self,v)
                         oldf(self,v)
-                        
+
                         horizontal.enabled = v
                         vertical.enabled   = v
                     end
                 end,
                 w = function(instance,_ENV)
                     return nil,--function(oldf,self) return w     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)--w = v
                         reclip = true
                         new_w  = true
@@ -55,7 +54,7 @@ ScrollPane = setmetatable(
                 end,
                 width = function(instance,_ENV)
                     return nil,--function(oldf,self) return w     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)--w = v
                         reclip = true
                         new_w  = true
@@ -63,7 +62,7 @@ ScrollPane = setmetatable(
                 end,
                 h = function(instance,_ENV)
                     return nil,--function(oldf,self) return h     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)--h = v
                         reclip = true
                         new_h  = true
@@ -71,7 +70,7 @@ ScrollPane = setmetatable(
                 end,
                 height = function(instance,_ENV)
                     return nil,--function(oldf,self) return h     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)--h = v
                         reclip = true
                         new_h  = true
@@ -79,7 +78,7 @@ ScrollPane = setmetatable(
                 end,
                 size = function(instance,_ENV)
                     return nil,--function(oldf,self) return {w,h} end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         oldf(self,v)--w = v[1]
                         --h = v[2]
                         reclip = true
@@ -97,48 +96,48 @@ ScrollPane = setmetatable(
                 end,
                 virtual_x = function(instance,_ENV)
                     return function(oldf) return pane.virtual_x     end,
-                    function(oldf,self,v) 
-                        pane.virtual_x = v 
+                    function(oldf,self,v)
+                        pane.virtual_x = v
                         horizontal.progress = v/(pane.virtual_w - pane.w)
                     end
                 end,
                 virtual_y = function(instance,_ENV)
                     return function(oldf) return pane.virtual_y     end,
-                    function(oldf,self,v) 
-                        pane.virtual_y = v 
+                    function(oldf,self,v)
+                        pane.virtual_y = v
                         vertical.progress = v/(pane.virtual_h - pane.h)
                     end
                 end,
                 pane_w = function(instance,_ENV)
                     return function(oldf) return pane.w     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         horizontal.track_w = v
                         horizontal.grip_w  = v/10
-                        pane.w = v 
-                        new_w = true 
+                        pane.w = v
+                        new_w = true
                     end
                 end,
                 pane_h = function(instance,_ENV)
                     return function(oldf) return pane.h     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         vertical.track_h   = v
                         vertical.grip_h    = v/10
-                        pane.h = v  
-                        new_h = true 
+                        pane.h = v
+                        new_h = true
                     end
                 end,
                 slider_thickness = function(instance,_ENV)
                     return function(oldf) return slider_thickness     end,
-                    function(oldf,self,v) 
-            
+                    function(oldf,self,v)
+
                         horizontal.track_h = v
                         horizontal.grip_h  = v
                         vertical.track_w   = v
                         vertical.grip_w    = v
-                        slider_thickness   = v 
+                        slider_thickness   = v
                         find_width         = true
                         find_height        = true
-                        --TODO - set a flag like this: new_h = true 
+                        --TODO - set a flag like this: new_h = true
                     end
                 end,
                 arrow_move_by = function(instance,_ENV)
@@ -147,13 +146,13 @@ ScrollPane = setmetatable(
                 end,
                 sets_x_to = function(instance,_ENV)
                     return function(oldf) return pane.x_offset end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         pane.x_offset = v
                     end
                 end,
                 sets_y_to = function(instance,_ENV)
                     return function(oldf) return pane.y_offset     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         pane.y_offset = v
                     end
                 end,
@@ -162,9 +161,9 @@ ScrollPane = setmetatable(
                 end,
                 attributes = function(instance,_ENV)
                     return function(oldf,self)
-                    
+
                         local t = oldf(self)
-                        
+
                         t.number_of_cols       = nil
                         t.number_of_rows       = nil
                         t.vertical_alignment   = nil
@@ -174,30 +173,30 @@ ScrollPane = setmetatable(
                         t.cell_h               = nil
                         t.cell_w               = nil
                         t.cells                = nil
-                        
+
                         t.style = instance.style
-                        
+
                         t.contents = self.contents
-                        
+
                         t.pane_w = instance.pane_w
                         t.pane_h = instance.pane_h
                         t.virtual_x = instance.virtual_x
                         t.virtual_y = instance.virtual_y
                         t.virtual_w = instance.virtual_w
                         t.virtual_h = instance.virtual_h
-                        
+
                         t.slider_thickness = instance.slider_thickness
-                        
+
                         t.children = {}
-                        
+
                         for i, child in ipairs(pane.children) do
                             t.children[i] = child.attributes
                         end
-                        
+
                         t.type = "ScrollPane"
-                        
+
                         return t
-                        
+
                     end
                 end,
                 children = function(instance,_ENV)
@@ -212,46 +211,46 @@ ScrollPane = setmetatable(
         },
         private = {
             pane_on_changed = function(instance,_ENV)
-                return function() 
+                return function()
                     pane.style:set(instance.style.attributes)
                 end
             end,
             update = function(instance,_ENV)
                 return function()
                     lm_update()
-                    
+
                     if  new_w then
                         new_w = false
-                        
+
                         if instance.virtual_w <= instance.pane_w then
                             horizontal:hide()
                         else
                             horizontal:show()
                         end
                     end
-                    
+
                     if  new_h then
                         new_h = false
-                        
+
                         if instance.virtual_h <= instance.pane_h then
                             vertical:hide()
                         else
                             vertical:show()
                         end
                     end
-                    
+
                 end
             end,
         },
         declare = function(self,parameters)
-            
+
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
-            
+
             local l_pane  = ClippingRegion()--{style = false}
             local l_horizontal = Slider()
             local l_vertical   = Slider{direction="vertical"}
-            
+
             local instance, _ENV = LayoutManager:declare{
                 number_of_rows = 2,
                 number_of_cols = 2,
@@ -261,16 +260,16 @@ ScrollPane = setmetatable(
                     { l_horizontal,        nil },
                 },
             }
-            
+
             WL_parent_redirect[l_pane] = instance
-            
+
             local getter, setter
-            
+
             pane       = l_pane
             horizontal = l_horizontal
             vertical   = l_vertical
-            
-            
+
+
             vertical:subscribe_to("progress",function()
                 pane.virtual_y = vertical.progress * (pane.virtual_h - pane.h)
             end)
@@ -285,35 +284,35 @@ ScrollPane = setmetatable(
     		up:add_mouse_handler("on_button_up", function()
     		    pane.virtual_y = pane.virtual_y - move_by
     		end)
-    		
+
     		down:add_mouse_handler("on_button_up", function()
     		    pane.virtual_y = pane.virtual_y + move_by
     		end)
-			
+
     		left:add_mouse_handler("on_button_up", function()
     		    pane.virtual_x = pane.virtual_x - move_by
     		end)
-			
+
 		    right:add_mouse_handler("on_button_up", function()
     	    	pane.virtual_x = pane.virtual_x + move_by
     		end)
             --]]
-            
+
             lm_update = update
             new_w = true
             new_h = true
             move_by = 10
             slider_thickness = 30
-            
+
             setup_object(self,instance,_ENV)
-            
+
             updating = true
             instance.pane_w           = pane.w
             instance.pane_h           = pane.h
             instance.slider_thickness = slider_thickness
             updating = false
             return instance, _ENV
-            
+
         end
     }
 )
