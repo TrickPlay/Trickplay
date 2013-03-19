@@ -137,6 +137,7 @@ OrbittingDots = setmetatable(
                         dot_size = v
 
                         reanchor_clones()
+                        flag_for_recalc_size = true
                     end
                 end,
                 num_dots = function(instance,_ENV)
@@ -171,14 +172,9 @@ OrbittingDots = setmetatable(
 
                         num = v
 
-                        reposition_clones()
+                        --reposition_clones()
+                        reposition = true
 
-                    end
-                end,
-                duration = function(instance,_ENV)
-                    return function(oldf) return load_timeline.duration     end,
-                    function(oldf,self,v)
-                        load_timeline.duration = v
                     end
                 end,
                 duration = function(instance,_ENV)
@@ -240,6 +236,23 @@ OrbittingDots = setmetatable(
                     end
                 end
             end,
+            recalc_size = function(instance,_ENV)
+                local new_w,new_h,cur_w,cur_h
+                return function()
+                    new_w = 0
+                    new_h = 0
+                    for i,d in ipairs(clones) do
+                        cur_w = d.x-d.anchor_point[1]+d.w
+                        cur_h = d.y-d.anchor_point[2]+d.h
+
+                        new_w = (new_w > cur_w) and new_w or cur_w
+                        new_h = (new_h > cur_h) and new_h or cur_h
+
+                    end
+                    w = new_w
+                    h = new_h
+                end
+            end,
             make_canvas = function(instance,_ENV)
                 return function()
 
@@ -294,19 +307,25 @@ OrbittingDots = setmetatable(
             end,
             update = function(instance,_ENV)
                 return function()
-                    if flag_for_redraw then
+                    if  flag_for_redraw then
                         flag_for_redraw = false
                         if canvas then
                             make_canvas()
                         else
                             resize_images()
                         end
+                        flag_for_recalc_size = true
                     end
-                    if reposition then
+                    if  reposition then
                         reposition = false
                         reposition_clones()
+                        flag_for_recalc_size = true
                     end
-                    if reanimate then
+                    if  flag_for_recalc_size then
+                        flag_for_recalc_size = false
+                        recalc_size()
+                    end
+                    if  reanimate then
                         reanimate = false
 
                         stop_animation = true
@@ -317,7 +336,7 @@ OrbittingDots = setmetatable(
                         stop_animation = false
                         load_timeline:stop()
                     end
-                    if start_animation then
+                    if  start_animation then
                         start_animation = false
                         load_timeline:start()
 
@@ -340,6 +359,7 @@ OrbittingDots = setmetatable(
             clones = {}
             canvas = true
             flag_for_redraw = true
+            flag_for_recalc_size = true
             load_timeline = Timeline{
                 loop =  true,
                 on_new_frame = function(tl,ms,p)
