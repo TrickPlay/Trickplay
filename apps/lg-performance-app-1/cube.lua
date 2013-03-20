@@ -380,12 +380,16 @@ function cube:rotate(outgoing,incoming,direction)
             },
         }
     }
+    local tl = rotate_animation.timeline
     --raise the incoming side to top halfway throught the animation
-    rotate_animation.timeline:add_marker("HALFWAY",rotate_animation.timeline.duration/2)
-    function rotate_animation.timeline.on_marker_reached(...)
+    tl:add_marker(
+        "HALFWAY",
+        tl.duration/2
+    )
+    function tl.on_marker_reached(...)
         incoming:raise_to_top()
     end
-    function rotate_animation.timeline.on_completed()
+    function tl.on_completed()
         animating = false
 
         curr_r = incoming
@@ -412,6 +416,7 @@ local key_events = {
         again = not again
 
         return again and not animating and
+
             cube:rotate(curr_r,next_r,"LEFT")
     end,
 }
