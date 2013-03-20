@@ -34,6 +34,7 @@ local bg  = Sprite{
     sheet = assets,
     id    = "bg-gradient.png",
     size  = screen.size,
+    opacity = 255*.6,
 }
 
 --------------------------------------------------------------
