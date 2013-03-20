@@ -1542,9 +1542,8 @@ _VE_.selectUIElement = function(gid, multiSel)
     end 
     shift = org_shift
 
-    if not (selected_objs == 1 and string.find(selected_objs[1], "Layer")) ~= nil and 
+    if not (#selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil) and 
        #selected_objs > 0 and selected_obj_cnt == 0 then 
-
         print "menuEnabled"
     end
     selected_obj_cnt = #selected_objs
@@ -1564,9 +1563,8 @@ _VE_.deselectUIElement = function(gid, multiSel)
     end
     shift = org_shift
 
-    if #selected_objs == 0 and selected_obj_cnt ~= 0 then 
-        print "menuDisabled"
-    elseif selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
+    if #selected_objs == 0 and selected_obj_cnt ~= 0 or 
+       #selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
         print "menuDisabled"
     end
     selected_obj_cnt = #selected_objs
