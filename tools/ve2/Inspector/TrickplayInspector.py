@@ -1598,6 +1598,7 @@ class TrickplayInspector(QWidget):
                 if self.curData.has_key('name') == False:
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: gid : "+str(self.curData['gid']), None, QApplication.UnicodeUTF8))
                 elif self.curData['name'][:5] == "Layer":
+                    #print ("Layer UI Element is selected, disabled main menu items ")
                     self.curLayerName = self.curData['name']
                     self.curLayerGid = self.curData['gid']
                     self.curItemGid = self.curData['gid']
@@ -1620,7 +1621,6 @@ class TrickplayInspector(QWidget):
                     self.ui.inspectorTitle.setText(QApplication.translate("TrickplayInspector", "  Inspector: Multi Objects Selected", None, QApplication.UnicodeUTF8))
                     self.ui.property.clear()
 
-            
             #print("selectionChaged end")
             self.preventChanges = False
     

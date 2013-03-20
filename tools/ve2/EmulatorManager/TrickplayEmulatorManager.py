@@ -157,6 +157,10 @@ class TrickplayEmulatorManager(QWidget):
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "menuEnabl":
+				        self.main.menuEnable()
+				    elif luaCmd == "menuDisab":
+				        self.main.menuDisable()
 				    elif luaCmd == "screenLoc":
 				        screenLoc = s[9:]
 				        sepPos = screenLoc.find(",")
