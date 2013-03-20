@@ -379,9 +379,9 @@ function editor.duplicate(gid)
                 end 
             end 
         ]]
-            if uiTypeStr == "LayoutManager" then 
-                uiDuplicate.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
-            end 
+            --if uiTypeStr == "LayoutManager" then 
+                --uiDuplicate.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+            --end 
 
 
 		    screen_ui.n_selected(v)
