@@ -4,7 +4,7 @@ screen_w = screen.w
 screen_h = screen.h
 assets = SpriteSheet{ map = "assets/images.json" }
 
-dur_mult = 1
+dur_mult = 10
 
 FONT            = "LG Display"
 ICON_FONT       = FONT.." 24px"
