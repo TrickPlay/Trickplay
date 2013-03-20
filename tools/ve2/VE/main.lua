@@ -1530,6 +1530,8 @@ _VE_.imageNameChange = function(org, new)
     end 
 end 
 
+local selected_obj_cnt 
+
 _VE_.selectUIElement = function(gid, multiSel)
     local org_shift = shift
     if multiSel == true then
@@ -1539,6 +1541,13 @@ _VE_.selectUIElement = function(gid, multiSel)
         screen_ui.selected(devtools:gid(gid))
     end 
     shift = org_shift
+
+    if not (selected_objs == 1 and string.find(selected_objs[1], "Layer")) ~= nil and 
+       #selected_objs > 0 and selected_obj_cnt == 0 then 
+
+        print "menuEnabled"
+    end
+    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.deselectAll = function()
@@ -1554,6 +1563,13 @@ _VE_.deselectUIElement = function(gid, multiSel)
         screen_ui.n_selected(devtools:gid(gid))
     end
     shift = org_shift
+
+    if #selected_objs == 0 and selected_obj_cnt ~= 0 then 
+        print "menuDisabled"
+    elseif selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
+        print "menuDisabled"
+    end
+    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.focusSettingMode = function(key)

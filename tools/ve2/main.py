@@ -254,6 +254,44 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
+    def menuEnable (self):
+        self.ui.action_left.setEnabled(True)
+        self.ui.action_right.setEnabled(True)
+        self.ui.action_top.setEnabled(True)
+        self.ui.action_bottom.setEnabled(True)
+        self.ui.action_horizontalCenter.setEnabled(True)
+        self.ui.action_verticalCenter.setEnabled(True)
+        self.ui.action_distributeHorizontally.setEnabled(True)
+        self.ui.action_distributeVertically.setEnabled(True)
+        self.ui.action_bring_to_front.setEnabled(True)
+        self.ui.action_bring_to_forward.setEnabled(True)
+        self.ui.action_send_to_back.setEnabled(True)
+        self.ui.action_send_backward.setEnabled(True)
+        self.ui.actionGroup.setEnabled(True)
+        self.ui.actionUngroup.setEnabled(True)
+        self.ui.actionClone.setEnabled(True)
+        self.ui.actionDuplicate.setEnabled(True)
+        self.ui.actionDelete.setEnabled(True)
+
+    def menuDisable (self):
+        self.ui.action_left.setDisabled(True)
+        self.ui.action_right.setDisabled(True)
+        self.ui.action_top.setDisabled(True)
+        self.ui.action_bottom.setDisabled(True)
+        self.ui.action_horizontalCenter.setDisabled(True)
+        self.ui.action_verticalCenter.setDisabled(True)
+        self.ui.action_distributeHorizontally.setDisabled(True)
+        self.ui.action_distributeVertically.setDisabled(True)
+        self.ui.action_bring_to_front.setDisabled(True)
+        self.ui.action_bring_to_forward.setDisabled(True)
+        self.ui.action_send_to_back.setDisabled(True)
+        self.ui.action_send_backward.setDisabled(True)
+        self.ui.actionGroup.setDisabled(True)
+        self.ui.actionUngroup.setDisabled(True)
+        self.ui.actionClone.setDisabled(True)
+        self.ui.actionDuplicate.setDisabled(True)
+        self.ui.actionDelete.setDisabled(True)
+
     def sendLuaCommand(self, selfCmd, inputCmd):
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
