@@ -330,7 +330,7 @@ function cube:rotate(outgoing,incoming,direction)
     }
     incoming.opacity = 0
 
-    --the first half of the animation
+    --the animation
     rotate_animation = Animator{
         duration = 800*dur_mult,
         properties = {
@@ -380,6 +380,7 @@ function cube:rotate(outgoing,incoming,direction)
             },
         }
     }
+    --raise the incoming side to top halfway throught the animation
     rotate_animation.timeline:add_marker("HALFWAY",rotate_animation.timeline.duration/2)
     function rotate_animation.timeline.on_marker_reached(...)
         incoming:raise_to_top()
