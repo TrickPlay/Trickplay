@@ -156,14 +156,53 @@ class MainWindow(QMainWindow):
 
 		#Arrange Menu
         QObject.connect(self.ui.action_left, SIGNAL("triggered()"),  self.left)
+        self.ui.action_left.setIconVisibleInMenu(True)
+        left_icon = QIcon()
+        left_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-left.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_left.setIcon(left_icon)
+
         QObject.connect(self.ui.action_right, SIGNAL("triggered()"),  self.right)
+        self.ui.action_right.setIconVisibleInMenu(True)
+        right_icon = QIcon()
+        right_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-right.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_right.setIcon(right_icon)
+
         QObject.connect(self.ui.action_top, SIGNAL("triggered()"),  self.top)
+        self.ui.action_top.setIconVisibleInMenu(True)
+        top_icon = QIcon()
+        top_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-top.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_top.setIcon(top_icon)
+
         QObject.connect(self.ui.action_bottom, SIGNAL("triggered()"),  self.bottom)
+        self.ui.action_bottom.setIconVisibleInMenu(True)
+        bottom_icon = QIcon()
+        bottom_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-bottom.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_bottom.setIcon(bottom_icon)
+
         QObject.connect(self.ui.action_horizontalCenter, SIGNAL("triggered()"),  self.horizontalCenter)
+        self.ui.action_horizontalCenter.setIconVisibleInMenu(True)
+        hCenter_icon = QIcon()
+        hCenter_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-hcenter.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_horizontalCenter.setIcon(hCenter_icon)
+
         QObject.connect(self.ui.action_verticalCenter, SIGNAL("triggered()"),  self.verticalCenter)
+        self.ui.action_verticalCenter.setIconVisibleInMenu(True)
+        vCenter_icon = QIcon()
+        vCenter_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-vcenter.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_verticalCenter.setIcon(vCenter_icon)
 
         QObject.connect(self.ui.action_distributeHorizontally, SIGNAL("triggered()"),  self.distributeHorizontal)
+        self.ui.action_distributeHorizontally.setIconVisibleInMenu(True)
+        distH_icon = QIcon()
+        distH_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-distributeh.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_distributeHorizontally.setIcon(distH_icon)
+
         QObject.connect(self.ui.action_distributeVertically, SIGNAL("triggered()"),  self.distributeVertical)
+        self.ui.action_distributeVertically.setIconVisibleInMenu(True)
+        distV_icon = QIcon()
+        distV_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-distributev.png"), QIcon.Disabled, QIcon.Off)
+        self.ui.action_distributeVertically.setIcon(distV_icon)
+
 
         QObject.connect(self.ui.action_bring_to_front, SIGNAL("triggered()"),  self.bringToFront)
         QObject.connect(self.ui.action_bring_to_forward, SIGNAL("triggered()"),  self.bringForward)
