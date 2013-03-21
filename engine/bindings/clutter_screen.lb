@@ -1,12 +1,15 @@
 module clutter_screen;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #if defined(CLUTTER_WINDOWING_GLX)
 #include "clutter/x11/clutter-x11.h"
 #elif defined(CLUTTER_WINDOWING_OSX)
 #include "clutter/osx/clutter-osx.h"
+#ifdef check
+// AppKit seems to pollute the global namespace with a "check" macro.
+#undef check
+#endif
 #endif
 #include "context.h"
 #include "clutter_util.h"
@@ -337,7 +340,6 @@ global screen [[ClutterActor*]] actor , container
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
             // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
-            NSRect screen_frame = [[stage_window screen] frame];
             frame.origin.x = x;
             [stage_window setFrameOrigin:frame.origin];
 #else
@@ -474,6 +476,22 @@ global screen [[ClutterActor*]] actor , container
 
             lua_pop(L,3);
         ]];
+
+    /***************************************
+    Property: name
+
+    The name property of the screen will be used for the window title if this is running in a windowed enviroment.  The name of the UIElement will not be changed though; it'll always remain as "screen"
+
+    The name property is used by the <Container.find_child> function when searching for a particular UIElement object stored in a Container.
+
+    *Default Setting:* screen
+
+    *See Also:* the <Container.find_child> function
+    */
+
+    string name
+        [[name=clutter_actor_get_name(self);]]
+        [[clutter_stage_set_title(CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ), name);]];
 
 
 

@@ -1,4 +1,3 @@
-ARROWPANE = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -19,27 +18,27 @@ ArrowPane = setmetatable(
     {},
     {
         __index = function(self,k)
-            
+
             return getmetatable(self)[k]
-            
+
         end,
         __call = function(self,p)
-            
+
             return self:declare():set(p or {})
-            
+
         end,
-        
-    
+
+
         subscriptions = {
             --[[
             ["style"] = function(instance,_ENV)
                 return function()
-                    
+
                     instance.style.arrow:subscribe_to(         nil, arrow_on_changed )
                     instance.style.arrow.colors:subscribe_to(  nil, arrow_colors_on_changed )
                     instance.style.border:subscribe_to(        nil, pane_on_changed )
                     instance.style.fill_colors:subscribe_to(   nil, pane_on_changed )
-                    
+
                     arrow_on_changed()
                     arrow_colors_on_changed()
                 end
@@ -53,12 +52,12 @@ ArrowPane = setmetatable(
                     return function(oldf,...) return oldf(...) end,
                     function(oldf,self,v)
                         oldf(self,v)
-                        
+
                         subscribe_to_sub_styles()
                         --TODO: double check this
-                        flag_for_redraw = true 
+                        flag_for_redraw = true
                         text_style_changed = true
-                        text_color_changed = true 
+                        text_color_changed = true
                     end
                 end,
                 --]]
@@ -66,44 +65,56 @@ ArrowPane = setmetatable(
                     return nil,
                     function(oldf,self,v)
                         oldf(self,v)
-                        
+
                         for _,arrow in pairs(arrows) do
                             arrow.enabled = v
                         end
-                        
+
+                    end
+                end,
+                contents_offset = function(instance,_ENV)
+                    return function(oldf,self)
+                        local x,y = unpack(pane.contents_offset)
+
+                        return {
+                            ((self.horizontal_arrows_are_visible) and
+                            (x+left.w) or x),
+                            ((self.vertical_arrows_are_visible) and
+                            (y+up.h) or y)
+                        }
                     end
                 end,
                 w = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         new_w  = true
                         oldf(self,v)
                     end
                 end,
                 width = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         new_w  = true
                         oldf(self,v)
                     end
                 end,
                 h = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         new_h  = true
                         oldf(self,v)
                     end
                 end,
                 height = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         new_h  = true
                         oldf(self,v)
                     end
                 end,
                 size = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         new_w  = true
                         new_h  = true
                         oldf(self,v)
@@ -139,42 +150,42 @@ ArrowPane = setmetatable(
                 end,
                 sets_x_to = function(instance,_ENV)
                     return function(oldf) return pane.x_offset end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         pane.x_offset = v
                     end
                 end,
                 sets_y_to = function(instance,_ENV)
                     return function(oldf) return pane.y_offset     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         pane.y_offset = v
                     end
                 end,
                 horizontal_arrows_are_visible = function(instance,_ENV)
-                    
+
                     return function(oldf) return instance.number_of_cols == 3 end,
-                    
-                    function(oldf,self,v) 
-                        
+
+                    function(oldf,self,v)
+
                         if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
-                        
+
                         horizontal_arrows_are_visible = v
-                        
+
                         new_w = (v == nil) and true or new_w
-                        
+
                     end
                 end,
                 vertical_arrows_are_visible = function(instance,_ENV)
-                    
+
                     return function(oldf) return instance.number_of_rows == 3 end,
-                    
-                    function(oldf,self,v) 
-                        
+
+                    function(oldf,self,v)
+
                         if type(v) ~= "boolean" or v == nil then error("Expected boolean or nil. Received "..tostring(v),2) end
-                        
+
                         vertical_arrows_are_visible = v
-                        
+
                         new_h = (v == nil) and true or new_h
-                        
+
                     end
                 end,
                 widget_type = function(instance,_ENV)
@@ -184,19 +195,20 @@ ArrowPane = setmetatable(
                     return function(oldf,self)
                         if self == nil then error("no",3) end
                         local t = oldf(self)
-						
+
                         t.number_of_cols       = nil
                         t.number_of_rows       = nil
                         t.vertical_alignment   = nil
-            			 t.horizontal_alignment = nil
+                        t.horizontal_alignment = nil
                         t.vertical_spacing     = nil
                         t.horizontal_spacing   = nil
                         t.cell_h               = nil
                         t.cell_w               = nil
                         t.cells                = nil
-                        
+
                        -- t.contents = self.contents
-            			
+
+                        t.contents_offset = instance.contents_offset
                         t.pane_w    = instance.pane_w
                         t.pane_h    = instance.pane_h
                         t.virtual_x = instance.virtual_x
@@ -204,15 +216,15 @@ ArrowPane = setmetatable(
                         t.virtual_w = instance.virtual_w
                         t.virtual_h = instance.virtual_h
                         t.arrow_move_by   = instance.arrow_move_by
-                        
+
                         t.children = {}
-                        
+
                         for i, child in ipairs(pane.children) do
                             t.children[i] = child.attributes
                         end
-                        
+
                         t.type = "ArrowPane"
-                        
+
                         return t
                     end
                 end,
@@ -229,7 +241,7 @@ ArrowPane = setmetatable(
         private = {
             --[[
             arrow_on_changed = function(instance,_ENV)
-                return function() 
+                return function()
                     print("\n\n\narrow_on_changed\n\n\n")
                     for _,arrow in pairs(arrows) do
                         arrow:set{
@@ -241,15 +253,15 @@ ArrowPane = setmetatable(
                             },
                         }
                     end
-                    
+
                     instance.horizontal_spacing = instance.style.arrow.offset
                     instance.vertical_spacing   = instance.style.arrow.offset
                 end
             end,
             arrow_colors_on_changed = function(instance,_ENV)
-                return function() 
+                return function()
                     for _,arrow in pairs(arrows) do
-                        arrow.style.fill_colors = 
+                        arrow.style.fill_colors =
                             instance.style.arrow.colors.attributes
                     end
                 end
@@ -307,8 +319,8 @@ ArrowPane = setmetatable(
                         }
                     end
                     lm_update()
-                    
-                    
+
+
                     if horizontal_arrows_are_visible == true and instance.number_of_cols == 1 then
                         if instance.number_of_rows == 1 then
                             instance.cells:insert_col(1,{left})
@@ -322,7 +334,7 @@ ArrowPane = setmetatable(
                         instance.cells:remove_col(1)
                     elseif new_w and horizontal_arrows_are_visible == nil then
                         new_w = false
-                        
+
                         if pane.virtual_w <= pane.w then
                             if instance.number_of_cols == 3 then
                                 instance.cells:remove_col(3)
@@ -340,7 +352,7 @@ ArrowPane = setmetatable(
                             end
                         end
                     end
-                    
+
                     if vertical_arrows_are_visible == true and instance.number_of_rows == 1 then
                         if instance.number_of_cols == 1 then
                             instance.cells:insert_row(1,{up})
@@ -353,9 +365,9 @@ ArrowPane = setmetatable(
                         instance.cells:remove_row(3)
                         instance.cells:remove_row(1)
                     elseif new_h and vertical_arrows_are_visible == nil then
-                        
+
                         new_h = false
-                                    
+
                         if pane.virtual_h <= pane.h then
                             if instance.number_of_rows == 3 then
                                 instance.cells:remove_row(3)
@@ -373,15 +385,15 @@ ArrowPane = setmetatable(
                             end
                         end
                     end
-                    
+
                 end
             end,
         },
         declare = function(self,parameters)
-            
+
             --local instance, _ENV = LayoutManager:declare()
             --local getter, setter
-            
+
             move_by = 10
             local l_pane  = ClippingRegion()
             local l_up    = Button:declare{
@@ -412,7 +424,7 @@ ArrowPane = setmetatable(
                 create_canvas = create_arrow("right"),
                 on_released = function() l_pane.virtual_x = l_pane.virtual_x + move_by end,
             }
-            
+
             local instance, _ENV = LayoutManager:declare{
                 children_want_focus = false,
                 number_of_rows = 3,
@@ -424,9 +436,9 @@ ArrowPane = setmetatable(
                     {    nil, l_down,     nil },
                 },
             }
-            
+
             WL_parent_redirect[l_pane] = instance
-            
+
             style_flags = {
                 border = "redraw_pane",
                 arrow = {
@@ -437,7 +449,7 @@ ArrowPane = setmetatable(
                 fill_colors = "redraw_pane"
             }
             local getter, setter
-            
+
             pane  = l_pane
             up    = l_up
             down  = l_down
@@ -445,7 +457,7 @@ ArrowPane = setmetatable(
             right = l_right
             _ENV.move_by = move_by
             redraw_buttons = true
-            
+
             instance:add_key_handler(keys.Up,       up.click)
             instance:add_key_handler(keys.Down,   down.click)
             instance:add_key_handler(keys.Left,   left.click)
@@ -454,15 +466,15 @@ ArrowPane = setmetatable(
     		up:add_mouse_handler("on_button_up", function()
     		    pane.virtual_y = pane.virtual_y - move_by
     		end)
-    		
+
     		down:add_mouse_handler("on_button_up", function()
     		    pane.virtual_y = pane.virtual_y + move_by
     		end)
-			
+
     		left:add_mouse_handler("on_button_up", function()
     		    pane.virtual_x = pane.virtual_x - move_by
     		end)
-			
+
 		    right:add_mouse_handler("on_button_up", function()
     	    	pane.virtual_x = pane.virtual_x + move_by
     		end)
@@ -478,11 +490,11 @@ ArrowPane = setmetatable(
             new_w = true
             new_h = true
             move_by = 10
-            
+
             setup_object(self,instance,_ENV)
-            
+
             return instance, _ENV
-            
+
         end
     }
 )

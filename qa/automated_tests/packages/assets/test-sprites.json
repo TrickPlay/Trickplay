@@ -1,0 +1,8 @@
+[{
+  "sprites": [
+    { "x": 1, "y": 1, "w": 300, "h": 300, "id": "alpha_channel1.png" },
+    { "x": 1, "y": 303, "w": 150, "h": 61, "id": "logo.png" },
+    { "x": 153, "y": 303, "w": 40, "h": 40, "id": "jack.jpg" }
+  ],
+  "img": "test-sprites-0.png"
+}]

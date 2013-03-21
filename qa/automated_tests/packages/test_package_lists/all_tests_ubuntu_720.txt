@@ -458,6 +458,11 @@
 "name": "10017_container_children.lua",
 "checksum": "2f02f0c77f8f15244453071f240333f3",
 "active": "true"
+},
+{
+"name": "10100_sprites.lua",
+"checksum": "079f8ad6b4545016392b41106591b174",
+"active": "true"
 }
 ]
 

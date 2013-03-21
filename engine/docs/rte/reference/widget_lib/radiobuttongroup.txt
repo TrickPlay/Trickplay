@@ -1,0 +1,85 @@
+
+/***************************************/
+Class: RadioButtonGroup
+
+	The RadioButtonGroup widget groups multiple <RadioButton> objects and ensures that only one object in the group is selected at any particular time.
+
+	To form a RadioButtonGroup, create the RadioButton objects and then add them to the group by specifying them either in the RadioButtonGroup constructor or by calling the RadioButtonGroup <insert> function.
+
+	*Code Example:* Create two RadioButton objects and add them to a RadioButtonGroup
+
+		(code)
+		-- Create two RadioButton objects
+		gRadio1 = WL.RadioButton( { size     = { 300, 50 },
+								    position = { 900, 300 },
+									label    = "Radio #1",
+		} )
+		gRadio2 = WL.RadioButton( { size     = { 300, 50 },
+								    position = { 900, 350 },
+									label    = "Radio #2",
+		} )
+
+		-- Select one of the buttons
+		gRadio2.selected = true
+
+		-- Add the RadioButton objects to the screen
+		screen:add( gRadio1, gRadio2 )
+
+		-- Create a RadioButtonGroup and add RadioButton objects to it
+		-- Note: The RadioButton objects are added to the screen; the RadioButtonGroup is not.
+		gRadioButtonGroup = WL.RadioButtonGroup( { items = { gRadio1, gRadio2 },
+												   name  = "MyFirstRadioButtonGroup",
+		} )
+
+		-- Alternatively, the RadioButton objects could be added to the
+		-- group by calling the insert() function.
+		gRadioButtonGroup:insert( gRadio1 )
+		gRadioButtonGroup:insert( gRadio2 )
+		(end)
+
+/***************************************/
+Constructor: RadioButtonGroup
+
+
+
+/***************************************/
+Property: items
+
+
+
+/***************************************/
+Property: name
+
+
+
+/***************************************/
+Property: selected
+
+
+
+/***************************************/
+Function: insert
+
+	*Prototype:*
+
+		(code)
+		insert( RadioButton )
+		(end)
+
+
+/***************************************/
+Function: remove
+
+	*Prototype:*
+
+		(code)
+		remove( RadioButton )
+		(end)
+
+
+/***************************************/
+Event: on_selection_change
+
+
+
+/***************************************/

@@ -1,8 +1,7 @@
 #ifndef __TRICKPLAY_PUSHTEXTURE_H__
 #define __TRICKPLAY_PUSHTEXTURE_H__
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include <clutter/clutter.h>
+#include "tp-clutter.h"
 #include <stdlib.h>
 #include "common.h"
 #include "app_resource.h"
@@ -19,81 +18,55 @@
 class PushTexture
 {
 public:
-    
-    class ReleaseLater : public Action
-    {
-        PushTexture * self;
-        
-        public: ReleaseLater( PushTexture * self ) : self( self ) {};
-        
-        protected: bool run()
-        {
-            self->release_texture();
-            return false;
-        }
-    };
-    
-    class PingAllLater : public Action
-    {
-        PushTexture * self;
-        
-        public: PingAllLater( PushTexture * self ) : self( self ) {};
-        
-        protected: bool run()
-        {
-            self->ping_all();
-            return false;
-        }
-    };
-    
+
+    // Allows some object to say to a PushTexture, "Ping me whenever you change"
+
     class PingMe
     {
         public:
-            typedef void (Callback)( PushTexture * source, void * target );
-            
-            PingMe() : source( NULL ), callback( NULL ), target( NULL ), async( true ) {};
+            typedef void (Callback)( PushTexture * instance, void * target );
+
+            PingMe() : instance( NULL ), callback( NULL ), target( NULL ) {}
             ~PingMe();
-            
-            void set( PushTexture * source, Callback * callback, void * target, bool async );
-            
+
+            // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
+
+            void assign( PushTexture * instance, Callback * callback, void * target, bool preload );
+
             friend class PushTexture;
-            
+
         private:
             void ping();
-            
-            PushTexture * source;
+
+            PushTexture * instance;
             Callback * callback;
             void * target;
-            bool async;
     };
-    
-    PushTexture() : cache( false ), all_pings_async( true ), texture( NULL ), can_signal( true ) {};
-    ~PushTexture();
-    
+
+    PushTexture() : failed( false ), texture( NULL ), real( false ) {}
+    virtual ~PushTexture();
+
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture );
+    void set_texture( CoglHandle texture, bool real, bool trigger );
     void get_dimensions( int * w, int * h );
     void ping_all();
-    void ping_all_later() { Action::post( new PingAllLater( this ) ); };
-    
-    friend class Subscription;
-    
-protected:
-    virtual void on_sync_change() = 0;
-    virtual void make_texture() = 0;
-    virtual void lost_texture() = 0;
-    
-    bool cache;
-    bool all_pings_async;
-    
-private:
-    void subscribe( PingMe * ping );
-    void unsubscribe( PingMe * ping );
+    bool is_real() { return real; }
+    bool is_failed() { return failed; }
     void release_texture();
-    
+
+protected:
+    virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
+    virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
+
+    bool failed;
     std::set< PingMe * > pings;
+
+private:
+    void subscribe( PingMe * ping, bool preload );
+    virtual void unsubscribe( PingMe * ping, bool release_now ) = 0;
+
     CoglHandle texture;
-    bool can_signal;
+    bool real;
 };
 
 #endif

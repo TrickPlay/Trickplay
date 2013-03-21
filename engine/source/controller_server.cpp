@@ -4,8 +4,7 @@
 #include <cstdlib>
 
 #include "libsoup/soup.h"
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "uriparser/Uri.h"
 
 #include "app.h"

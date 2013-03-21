@@ -1,0 +1,140 @@
+
+/***************************************/
+Class: CheckBox
+
+	The CheckBox widget implements a checkbox the user can interact with.
+
+	In addition to the properties and functions described on this page, the CheckBox data type also supports all the properties and functions defined in the <UIElement> interface and <Button> class.
+
+	*Code Example:* Create a CheckBox object, display it on the screen, and receive notification when the user toggles it.
+
+		(code)
+		-- **************************************
+		-- Load the Widget Library. This is necessary before creating any widget.
+		WL = dofile( "widgetlib/Widget_Library" )
+
+		-- Create a CheckBox object; make it reactive so it receives pointer/mouse events
+		checkbox = WL.CheckBox( { position       = { 100, 100 },
+							      label          = "My First CheckBox",
+								  reactive       = true,
+							      on_selection   = checkboxSelectHandler,
+								  on_deselection = checkboxDeselectHandler,
+		} )
+		if( checkbox == nil )then
+			print( "ERROR: Could not create CheckBox object" )
+			exit()
+		end
+
+		-- Add the CheckBox to the screen and show the screen
+		screen:add( checkbox )
+		screen:show()
+
+		-- Activate pointer/mouse events to all reactive objects
+		controllers:start_pointer()
+
+		-- **************************************
+		function checkboxSelectHandler()
+
+			-- This function is invoked when the user toggles the checkbox so it is selected
+			print( "The checkbox was selected." )
+		end
+
+		-- **************************************
+		function checkboxDeselectHandler()
+
+			-- This function is invoked when the user toggles the checkbox so it is deselected
+			print( "The checkbox was deselected." )
+
+		end
+		-- **************************************
+		(end)
+
+/***************************************/
+Constructor: CheckBox
+
+	The CheckBox() constructor creates a new CheckBox object. Initial property values can be specified in the constructor's argument.
+
+	*Prototype:*
+
+		(code)
+		CheckBox( table props = 0 )
+		(end)
+
+	*Arguments:*
+
+		props - optional table of CheckBox property settings.
+
+	*Return Value:* reference to the constructed CheckBox object. If an error occurred, returns nil.
+
+	*Code Example:* Create a new CheckBox object
+
+		(code)
+		myCheckBox = WidgetLibrary.CheckBox( { label    = "myCheckBox",
+										       size     = { 300, 50 },
+										       position = { 100, 100 },
+											   selected = true,
+		} )
+		if( myCheckBox == nil ){
+			print( "Error: Could not create CheckBox object" )
+		end
+		(end)
+
+	*See Also:* the <selected> property
+
+/***************************************/
+Property: selected
+
+	The selected property is a boolean flag indicating whether the CheckBox object is currently checked or unchecked (true=checked).
+
+	Setting the selected property in a TrickPlay application updates the object's display and fires the appropriate event (either the <on_selection> or the <on_deselection> event).
+
+	*Default Setting:* false, i.e., deselected
+
+	*See Also:* the <on_selection> and <on_deselection> events
+
+/***************************************/
+Property: icon_x_offset
+
+	The icon_x_offset property specifies the X-coordinate offset (relative to the object's <UIElement.position>) of the location at which to place the checkbox icon graphic. By setting the icon_x_offset (and related <icon_y_offset>), the checkbox graphic can be positioned to the right of the object's <Button.label> (or above the label or below it, etc.).
+
+	*Default Setting:* 0, i.e., checkbox graphic is positioned to the left of the object's label
+
+	*See Also:* the <icon_y_offset> property
+
+/***************************************/
+Property: icon_y_offset
+
+	The icon_y_offset property specifies the Y-coordinate offset (relative to the object's <UIElement.position>) of the location at which to place the checkbox icon graphic. By setting the icon_y_offset (and related <icon_x_offset>), the checkbox graphic can be positioned to the right of the object's <Button.label> (or above the label or below it, etc.).
+
+	*Default Setting:* 0, i.e., checkbox graphic is positioned to the left of the object's label
+
+	*See Also:* the <icon_x_offset> property
+
+/***************************************/
+Property: group
+
+	The group property specifies the <CheckBoxGroup> of which the CheckBox object is a member. If the object is not a member of a CheckBoxGroup, the property's value is nil. Refer to the <CheckBoxGroup> documentation for additional information.
+
+	*Default Setting:* nil, i.e., not a member of a CheckBoxGroup
+
+	*See Also:* the <CheckBoxGroup> class
+
+/***************************************/
+Event: on_selection
+
+	The on_selection event occurs whenever the CheckBox object is selected/checked. The object can be selected by either a user action or by a TrickPlay application setting the object's <selected> property to true.
+
+	*Code Example:* Refer to the Code Example at the top of this page
+
+	*See Also:* the <on_deselection> event
+
+/***************************************/
+Event: on_deselection
+
+	The on_deselection event occurs whenever the CheckBox object is deselected/unchecked. The object can be deselected by either a user action or by a TrickPlay application setting the object's <selected> property to false.
+
+	*Code Example:* Refer to the Code Example at the top of this page
+
+	*See Also:* the <on_selection> event
+
+/***************************************/

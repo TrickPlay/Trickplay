@@ -1,4 +1,3 @@
-TEXTINPUT = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -10,14 +9,14 @@ TextInput = setmetatable(
     {},
     {
         __index = function(self,k)
-            
+
             return getmetatable(self)[k]
-            
+
         end,
         __call = function(self,p)
-            
+
             return self:declare():set(p or {})
-            
+
         end,
         subscriptions = {
         },
@@ -41,8 +40,8 @@ TextInput = setmetatable(
                 end,
                 size = function(instance,_ENV)
                     return function(oldf) return {w,h}     end,
-                    function(oldf,self,v) 
-                        resize = true 
+                    function(oldf,self,v)
+                        resize = true
                         w = v[1]
                         h = v[2]
                     end
@@ -57,23 +56,23 @@ TextInput = setmetatable(
                 end,
                 text = function(instance,_ENV)
                     return function(oldf) return text.text end,
-                    function(oldf,self,v) 
-            
+                    function(oldf,self,v)
+
                         text.text = v
-                        
+
                     end
                 end,
                 widget_type = function(instance,_ENV)
                     return function() return "TextInput" end
                 end,
                 attributes = function(instance,_ENV)
-                    return function(oldf,self) 
+                    return function(oldf,self)
                         local t = oldf(self)
-                        
+
                         t.text = self.text
-                        
+
                         t.type = "TextInput"
-                        
+
                         return t
                     end
                 end,
@@ -83,7 +82,7 @@ TextInput = setmetatable(
         },
         private = {
             update = function(instance,_ENV)
-                return function() 
+                return function()
                     if  restyle_text then
                         restyle_text = false
                         text:set(instance.style.text:get_table())
@@ -116,30 +115,30 @@ TextInput = setmetatable(
                         text.w    = w - borders[1] - borders[2]
                         text.h    = h - borders[3] - borders[4]
                         --print("resizing2",w, instance.style.border.corner_radius*2)
-                        backing.w = w 
-                        backing.h = h 
+                        backing.w = w
+                        backing.h = h
                         print("resizing3",backing.w)
                         re_align = true
                     end
                     if  re_align then
                         re_align = false
                         text.anchor_point = {
-                            horizontal_alignment == "center" and text.w/2 or 
-                            horizontal_alignment == "right"  and text.w   or 
+                            horizontal_alignment == "center" and text.w/2 or
+                            horizontal_alignment == "right"  and text.w   or
                             horizontal_alignment == "left"   and 0            or
                             error("bad horizontal_alignment: "..tostring(horizontal_alignment),2),
-                            vertical_alignment == "center" and text.h/2 or 
-                            vertical_alignment == "bottom" and text.h   or 
+                            vertical_alignment == "center" and text.h/2 or
+                            vertical_alignment == "bottom" and text.h   or
                             vertical_alignment == "top"    and 0            or
                             error("bad vertical_alignment: "..tostring(vertical_alignment),2),
                         }
                         text.position = {
-                            horizontal_alignment == "center" and w/2 or 
-                            horizontal_alignment == "right"  and w - borders[2] or 
+                            horizontal_alignment == "center" and w/2 or
+                            horizontal_alignment == "right"  and w - borders[2] or
                             horizontal_alignment == "left"   and borders[1] or
                             error("bad horizontal_alignment: "..tostring(horizontal_alignment),2),
-                            vertical_alignment == "center" and h/2 or 
-                            vertical_alignment == "bottom" and h - borders[4] or 
+                            vertical_alignment == "center" and h/2 or
+                            vertical_alignment == "bottom" and h - borders[4] or
                             vertical_alignment == "top"    and borders[3] or
                             error("bad vertical_alignment: "..tostring(vertical_alignment),2),
                         }
@@ -148,22 +147,22 @@ TextInput = setmetatable(
             end,
         },
         declare = function(self,parameters)
-            
+
             parameters = parameters or {}
-            
+
             local instance, _ENV = Widget()
-            
+
             backing = NineSlice()
-            
+
             text = Text{
                 editable       = true,
                 single_line    = true,
                 cursor_visible = true,
                 reactive       = true,
             }
-            
+
             add(instance,backing,text)
-            
+
             w = 0
             h = 0
             horizontal_alignment = "left"
@@ -178,13 +177,13 @@ TextInput = setmetatable(
             }
             restyle_backing = true
             setup_object(self,instance,_ENV)
-            
+
             updating = true
             instance:set(parameters)
             updating = false
-            
+
             return instance, _ENV
-            
+
         end
     }
 )

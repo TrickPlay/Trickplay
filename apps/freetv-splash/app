@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.freetv-launcher",
+    release     = "1",
+    version     = "1.0",
+    name        = "FreeTV Launcher",
+    author      = "Craig and Alex",
+    copyright   = "© Trickplay Inc."
+}
+

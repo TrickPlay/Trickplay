@@ -130,12 +130,12 @@ guint Action::post( Action * action , int interval_ms )
     {
         tplog( "POSTING IDLE ACTION %p" , action );
 
-        return g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , destroy );
+        return action->cancel_handle = g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , destroy );
     }
 
     tplog( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
 
-    return g_timeout_add_full( TRICKPLAY_PRIORITY , guint( interval_ms ) , ( GSourceFunc ) run_internal , action , destroy );
+    return action->cancel_handle = g_timeout_add_full( TRICKPLAY_PRIORITY , guint( interval_ms ) , ( GSourceFunc ) run_internal , action , destroy );
 }
 
 void Action::push( GAsyncQueue * queue , Action * action )

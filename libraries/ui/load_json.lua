@@ -302,6 +302,8 @@ function load_layer(str)
 
         end
     end
-
+    
+    layer.objects = names
+    
     return layer
 end

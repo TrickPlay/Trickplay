@@ -10,70 +10,41 @@ if (UNIX AND NOT APPLE)
         # autogenerate dependency information
         set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-        # This is so we can put all the dependencies in a list.
-        # After this, we concatenate them.
+        # Below, extra package dependencies that are not shared libraries which can be auto-detected
 
-#       set( DEPS
-#
-#            "gstreamer0.10-ffmpeg"
-#            "gstreamer0.10-plugins-bad"
-#            "gstreamer0.10-plugins-good"
-#
-#            "libatk1.0-0"
-#            "libavahi-common3 (>= 0.6.25)"
-#            "libavahi-core6 (>= 0.6.25) | libavahi-core7"
-#            "libavahi-glib1(>= 0.6.25)"
-#            "libc6 (>= 2.7)"
-#            "libcairo2 (>= 1.4.10)"
-#            "libclutter-1.0-0 (>= 1.6.14)"
-#            "libclutter-gst-2.0-0"
-#            "libcurl3 (>=7.19.0) | libcurl4 (>=7.19.0)"
-#            "libexpat1"
-#            "libfontconfig1"
-#            "libfreetype6"
-#            "libgif4"
-#            "libglib2.0-0 (>= 2.18.0)"
-#            "libjpeg62"
-#            "libjson-glib-1.0-0 (>= 0.5.0)"
-#            "libossp-uuid15 | libossp-uuid16"
-#            "libpango1.0-0 (>= 1.20.0)"
-#            "libpng12-0"
-#            "libreadline6"
-#            "libsndfile1"
-#            "libsoup2.4-1"
-#            "libsqlite3-0 (>= 3.6.0)"
-#            "libssl0.9.8 | libssl1.0.0"
-#            "libtiff4"
-#            "libtiffxx0c2"
-#            "libupnp6"
-#            "liburiparser1"
-#            "libxml2"
-#            "libexif12"
-#       )
-#
-#       set( FIRST 1 )
-#
-#       foreach( D ${DEPS} )
-#
-#           if ( FIRST )
-#
-#               set( CPACK_DEBIAN_PACKAGE_DEPENDS "${D}" )
-#               unset( FIRST )
-#
-#           else ( FIRST )
-#
-#               set( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${D}" )
-#
-#           endif( FIRST )
-#
-#       endforeach( D )
+       set( DEPS
+
+            "python-qt4"
+
+       )
+
+       set( FIRST 1 )
+
+       foreach( D ${DEPS} )
+
+           if ( FIRST )
+
+               set( CPACK_DEBIAN_PACKAGE_DEPENDS "${D}" )
+               unset( FIRST )
+
+           else ( FIRST )
+
+               set( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${D}" )
+
+           endif( FIRST )
+
+       endforeach( D )
 
         string( TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE )
 
 
         # Get the architecture string from dpkg
 
-        execute_process(COMMAND dpkg --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(
+                            COMMAND dpkg --print-architecture
+                            OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+                            OUTPUT_STRIP_TRAILING_WHITESPACE
+                        )
 
         set(CPACK_GENERATOR DEB)
 

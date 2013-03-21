@@ -71,6 +71,7 @@ Group: Sample Applications {
 	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
 	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
 	File: Using 3D Assets (no auto-title, docs/tutorials/assets3d/doc.txt)
+	File: Using SpriteSheet (no auto-title, docs/tutorials/assets3dSprites/doc.txt)
 	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
 }
 
@@ -220,6 +221,14 @@ Group: Engine Reference {
 		}
 	}
 
+	Group: Widget Library {
+		File: Overview (no auto-title, docs/rte/reference/overview_widgetlib.txt)
+
+		Group: Classes {
+			File: Button (no auto-title, docs/rte/reference/widget_lib/button.txt)
+		}
+	}
+
 	Group: Index {
 		Index: Everything
         Class Index: Classes
@@ -275,16 +284,23 @@ Group: Development Tools {
       		File: ProgressBar and ProgressSpinner  (no auto-title, docs/devtools/editor/tutorial/progBarSpinner.txt)
 		}
 
-		Group: Reference {
-			Group: User Interface {
-				File: Button  (no auto-title, docs/devtools/editor/reference/button.txt)
-				File: ButtonPicker  (no auto-title, docs/devtools/editor/reference/buttonPicker.txt)
-         		File: CheckBox  (no auto-title, docs/devtools/editor/reference/checkBoxGroup.txt)
-         		File: ProgressBar  (no auto-title, docs/devtools/editor/reference/progBar.txt)
-         		File: ProgressSpinner  (no auto-title, docs/devtools/editor/reference/progSpinner.txt)
-         		File: RadioButtonGroup  (no auto-title, docs/devtools/editor/reference/radioButtonGroup.txt)
-			}
-		}
+#       With the Widget Library and the new Visual Editor, all these are obsolete
+#		Group: Reference {
+#			Group: User Interface {
+#				File: Button  (no auto-title, docs/devtools/editor/reference/button.txt)
+#				File: ButtonPicker  (no auto-title, docs/devtools/editor/reference/buttonPicker.txt)
+#        		File: CheckBox  (no auto-title, docs/devtools/editor/reference/checkBoxGroup.txt)
+#        		File: ProgressBar  (no auto-title, docs/devtools/editor/reference/progBar.txt)
+#         		File: ProgressSpinner  (no auto-title, docs/devtools/editor/reference/progSpinner.txt)
+#         		File: RadioButtonGroup  (no auto-title, docs/devtools/editor/reference/radioButtonGroup.txt)
+#			}
+#		}
 	}
-}
+
+    Group: Miscellaneous Tools {
+	    File: Stitcher (no auto-title, docs/devtools/misc/stitcher.txt)
+	}
+
+}  # Group: Development Tools
+
 

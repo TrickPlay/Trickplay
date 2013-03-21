@@ -5,8 +5,7 @@
 
 #define GL_GLEXT_PROTOTYPES
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include <clutter/clutter.h>
+#include "tp-clutter.h"
 
 //-----------------------------------------------------------------------------
 
