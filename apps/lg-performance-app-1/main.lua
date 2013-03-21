@@ -178,7 +178,7 @@ btm:add(btm_row_gradient,btm_row_tab,grid)
 --------------------------------------------------------------
 -- Add everything to the screen
 
-screen:add(bg,cube,btm,top_bar,modal_menu_skim)
+screen:add(cube,btm,top_bar,modal_menu_skim)
 
 
 --------------------------------------------------------------
