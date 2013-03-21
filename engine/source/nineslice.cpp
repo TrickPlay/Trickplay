@@ -1,6 +1,5 @@
 #include <math.h>
 #include "nineslice.h"
-#include "pushtexture.h"
 
 G_DEFINE_TYPE(NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT);
 
@@ -15,22 +14,17 @@ struct Slice
     {
         Slice * self = (Slice *) target;
         self->update();
-        self->loaded = true;
-        
-        if ( nineslice_effect_is_loaded( self->effect ) )
-        {
-            g_signal_emit_by_name( G_OBJECT( self->effect ), "load-finished", 0 );
-        }
     }
     
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ) {};
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ) {};
     ~Slice() { if ( material ) cogl_handle_unref( material ); }
     
     void set_sprite( Sprite * _sprite, bool async )
     {
         sprite = _sprite;
-        ping.set( sprite, Slice::on_ping, this, async );
-        update();
+        loaded = false;
+        done = !sprite;
+        ping.assign( sprite, Slice::on_ping, this, !async );
     }
     
     void update()
@@ -50,6 +44,14 @@ struct Slice
         }
         
         clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+        
+        loaded = sprite && sprite->is_real();
+        done = !sprite || sprite->is_real() || sprite->is_failed();
+        
+        if ( done )
+        {
+            nineslice_effect_signal_loaded_later( effect );
+        }
     }
     
     NineSliceEffect * effect;
@@ -57,11 +59,31 @@ struct Slice
     Sprite * sprite;
     PingMe ping;
     bool loaded;
+    bool done;
 };
 
 struct _NineSliceEffectPrivate {
     Slice * slices;
+    bool can_fire;
     gboolean tile[6];
+};
+
+class SignalLoadedLater : public Action
+{
+    NineSliceEffect * self;
+
+    public: SignalLoadedLater( NineSliceEffect * s ) : self( s ) { g_assert( s ); };
+
+    protected: bool run()
+    {
+        if ( nineslice_effect_is_done( self ) )
+        {
+            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", !nineslice_effect_is_loaded( self ) );
+        }
+        
+        self->priv->can_fire = true;
+        return false;
+    }
 };
 
 ClutterEffect * nineslice_effect_new()
@@ -75,20 +97,43 @@ void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, Sprite *
     effect->priv->slices[i].set_sprite( sprite, async );
 }
 
+bool nineslice_effect_is_done( NineSliceEffect * effect )
+{
+    Slice * slices = effect->priv->slices;
+    
+    for ( unsigned i = 0; i < 9; ++i )
+    {
+        if ( !slices[i].done )
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 bool nineslice_effect_is_loaded( NineSliceEffect * effect )
 {
     Slice * slices = effect->priv->slices;
-    bool loaded = true;
     
     for ( unsigned i = 0; i < 9; ++i )
     {
         if ( slices[i].sprite && !slices[i].loaded )
         {
-            loaded = false;
+            return false;
         }
     }
     
-    return loaded;
+    return true;
+}
+
+void nineslice_effect_signal_loaded_later( NineSliceEffect * effect )
+{
+    if ( effect->priv->can_fire )
+    {
+        effect->priv->can_fire = false;
+        Action::post( new SignalLoadedLater( effect ) );
+    }
 }
 
 bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i )
@@ -242,6 +287,7 @@ static void nineslice_effect_init ( NineSliceEffect * self )
 {
     self->priv = NINESLICE_EFFECT_GET_PRIVATE( self );
     
+    self->priv->can_fire = true;
     self->priv->slices = new Slice[9];
     
     for ( unsigned i = 0; i < 9; ++i )

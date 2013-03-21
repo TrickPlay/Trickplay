@@ -6,6 +6,20 @@
 #include "clutter_util.h"
 #include "images.h"
 #include "app_resource.h"
+#include <sys/resource.h>
+#include <stdio.h>
+#include <errno.h>
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "DEVTOOLS"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      true
+
+#include "log.h"
+
+//=============================================================================
+
 
 //-----------------------------------------------------------------------------
 // __gc metamethod for markers
@@ -15,6 +29,342 @@ static int marker_gc( lua_State * L )
     g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
     return 0;
 }
+
+//-----------------------------------------------------------------------------
+// CPU load counter
+
+static void timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y)
+{
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_usec < y->tv_usec)
+    {
+        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+        y->tv_usec -= 1000000 * nsec;
+        y->tv_sec += nsec;
+    }
+    if (x->tv_usec - y->tv_usec > 1000000)
+    {
+        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+        y->tv_usec += 1000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait.
+    tv_usec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_usec = x->tv_usec - y->tv_usec;
+}
+
+class RRD
+{
+    public:
+
+    RRD(unsigned size_bucket) :
+    _size_bucket(size_bucket),
+    _b(0),
+    sum(0.0),
+    count(0)
+    {
+        bucket = g_new0(float, size_bucket);
+    }
+
+    ~RRD()
+    {
+        g_free(bucket);
+    }
+
+    void add(float new_num)
+    {
+        // Throw out oldest number if full
+        if(count == _size_bucket) sum -= bucket[_b];
+        // Insert new number in its place
+        bucket[_b] = new_num;
+        // Add new number to the total
+        sum += new_num;
+        // Move the pointer
+        _b = (_b + 1) % _size_bucket;
+        // Don't overflow!
+        if(++count > _size_bucket) count = _size_bucket;
+    }
+
+    float avg() const
+    {
+        if(count) return sum/count; else return 0.0;
+    }
+
+    bool is_full() const
+    {
+        return _size_bucket == count;
+    }
+
+    private:
+        float *bucket;
+        unsigned _size_bucket;
+        unsigned _b;
+        float sum;
+        unsigned count;
+};
+
+
+class CPU
+{
+public:
+
+    static void toggle( TPContext * ctx, unsigned short_time, unsigned long_time )
+    {
+        static char key = 0;
+        CPU * cpu = ( CPU * ) ctx->get_internal( & key);
+
+        if ( cpu )
+        {
+            ctx->add_internal( & key , 0 , 0 );
+        }
+        else
+        {
+            ctx->add_internal( & key , new CPU(ctx->get_stage(), short_time, long_time) , destroy );
+        }
+    }
+
+private:
+
+    static void destroy( gpointer me )
+    {
+        delete ( CPU * ) me;
+    }
+
+    ClutterActor *stage;
+
+    CPU(ClutterActor *stg, unsigned short_time, unsigned long_time) :
+    stage( stg ),
+    short_timer(short_time),
+    long_timer(long_time)
+    {
+        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        clutter_text_set_line_wrap( text, true );
+        clutter_text_set_line_alignment( text, PANGO_ALIGN_RIGHT );
+        clutter_actor_set_x( CLUTTER_ACTOR( text ), clutter_actor_get_width( CLUTTER_ACTOR (stage) )/2 );
+        clutter_actor_set_width( CLUTTER_ACTOR( text ), clutter_actor_get_width( CLUTTER_ACTOR (stage) )/2 );
+        clutter_actor_set_name( CLUTTER_ACTOR( text ), "CPU Counter" );
+
+        g_object_ref_sink( text );
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
+        getrusage(RUSAGE_SELF, &old);
+
+        source = g_timeout_add_seconds( 1 , on_tick , this );
+
+        timer = g_timer_new();
+    }
+
+    ~CPU()
+    {
+        if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
+        {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
+        }
+
+        g_object_unref( text );
+
+        g_source_remove( source );
+
+        g_timer_destroy( timer );
+    }
+
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( CPU *) me )->tick();
+
+        return TRUE;
+    }
+
+    void tick()
+    {
+        gfloat t = g_timer_elapsed( timer , 0 );
+
+        struct rusage my_usage;
+
+        if(getrusage(RUSAGE_SELF, &my_usage))
+        {
+            tplog("GETRUSAGE FAILED: %d - %s",errno, strerror(errno));
+        }
+
+        struct timeval diff;
+        timeval_subtract(&diff, &my_usage.ru_utime, &old.ru_utime);
+        memcpy(&old, &my_usage, sizeof(old));
+
+        float cpu = 100.0 * ((float)(diff.tv_sec) + ((float)(diff.tv_usec))/(1000000.0)) / t;
+
+        short_timer.add(cpu);
+        long_timer.add(cpu);
+
+        g_snprintf( buffer , sizeof( buffer ) , "%3.2f/%3.2f/%3.2f" , cpu , short_timer.avg(), long_timer.avg() );
+
+        clutter_text_set_text( text , buffer );
+        if(long_timer.is_full())
+        {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_GREEN ) );
+        } else if(short_timer.is_full()) {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_YELLOW ) );
+        } else {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
+        }
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
+        clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
+
+        g_timer_start( timer );
+    }
+
+    ClutterText *   text;
+    guint           source;
+    GTimer *        timer;
+    struct rusage   old;
+    RRD             short_timer;
+    RRD             long_timer;
+    char            buffer[256];
+};
+
+
+//-----------------------------------------------------------------------------
+// FPS Counter
+
+class FPS
+{
+public:
+
+    static void toggle( TPContext * ctx, unsigned short_time, unsigned long_time )
+    {
+        static char key = 0;
+
+        FPS * fps = ( FPS * ) ctx->get_internal( & key );
+
+        if ( fps )
+        {
+            ctx->add_internal( & key , 0 , 0 );
+        }
+        else
+        {
+            ctx->add_internal( & key , new FPS(ctx->get_stage(), short_time, long_time) , destroy );
+        }
+    }
+
+private:
+
+    static void destroy( gpointer me )
+    {
+        delete ( FPS * ) me;
+    }
+
+    ClutterActor *stage;
+
+    FPS(ClutterActor *stg, unsigned short_time, unsigned long_time ) :
+    stage( stg ),
+    short_timer(short_time),
+    long_timer(long_time)
+    {
+        source = clutter_threads_add_repaint_func( on_tick , this , 0 );
+
+        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        clutter_actor_set_name( CLUTTER_ACTOR( text ), "FPS Counter" );
+
+        g_object_ref_sink( text );
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
+#else
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+#endif
+
+        frames = 0;
+
+        u_source = g_timeout_add_seconds( 1 , on_update , this );
+
+        timer = g_timer_new();
+    }
+
+    ~FPS()
+    {
+        if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
+        {
+#ifdef CLUTTER_VERSION_1_10
+            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
+#else
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
+#endif
+        }
+
+        g_object_unref( text );
+
+        g_source_remove( u_source );
+        clutter_threads_remove_repaint_func( source );
+
+        g_timer_destroy( timer );
+    }
+
+    static gboolean on_update( gpointer me )
+    {
+        ( ( FPS *) me )->update();
+
+        return TRUE;
+    }
+
+    void update()
+    {
+        gfloat t = g_timer_elapsed( timer , 0 );
+
+        gfloat fps = frames / t;
+        short_timer.add(fps);
+        long_timer.add(fps);
+
+        g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , fps , short_timer.avg() , long_timer.avg() );
+
+        clutter_text_set_text( text , buffer );
+        if(long_timer.is_full())
+        {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_GREEN ) );
+        } else if(short_timer.is_full()) {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_YELLOW ) );
+        } else {
+            clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
+        }
+
+#ifdef CLUTTER_VERSION_1_10
+        clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
+#else
+        clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+#endif
+
+        frames = 0;
+        g_timer_start( timer );
+    }
+
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( FPS *) me )->frames++;
+
+        return TRUE;
+    }
+
+    ClutterText *   text;
+    guint           source;
+    guint           u_source;
+    GTimer *        timer;
+    int             frames;
+    RRD             short_timer;
+    RRD             long_timer;
+    char            buffer[256];
+};
 
 //-----------------------------------------------------------------------------
 // Graph that shows how long it takes to draw each frame.
@@ -52,6 +402,7 @@ private:
     stage( stg )
     {
         texture = clutter_texture_new();
+        clutter_actor_set_name( texture, "FPS Graph" );
 
         g_object_ref_sink( texture );
 
@@ -70,8 +421,6 @@ private:
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
 #endif
 
-        clutter_actor_set_name( texture , "graph" );
-
         bar = g_new0( guchar , 4 * height );
 
         white_bar = g_new( guchar , 4 * height );
@@ -83,21 +432,6 @@ private:
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
 
         timer = g_timer_new();
-
-        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
-
-        g_object_ref_sink( text );
-
-#ifdef CLUTTER_VERSION_1_10
-        clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
-#endif
-
-        time = 0;
-        frames = 0;
-        min_fps = 60;
-        max_fps = 0;
     }
 
     ~Graph()
@@ -106,16 +440,12 @@ private:
         {
 #ifdef CLUTTER_VERSION_1_10
             clutter_actor_remove_child( parent, texture );
-            clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
 #else
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
-
-            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
 #endif
         }
 
         g_object_unref( texture );
-        g_object_unref( text );
 
         g_free( bar );
 
@@ -173,29 +503,6 @@ private:
         clutter_actor_raise_top( texture );
 #endif
 
-        time += t;
-        ++frames;
-
-        if ( time >= 0.5 )
-        {
-            gfloat fps = frames / time;
-            min_fps = std::min( min_fps , fps );
-            max_fps = std::max( max_fps , fps );
-
-            g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , min_fps , fps , max_fps );
-
-            clutter_text_set_text( text , buffer );
-
-#ifdef CLUTTER_VERSION_1_10
-            clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
-#else
-            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
-#endif
-
-            time = 0;
-            frames = 0;
-        }
-
         g_timer_start( timer );
     }
 
@@ -204,15 +511,9 @@ private:
     guchar *        bar;
     guchar *        white_bar;
     ClutterActor *  texture;
-    ClutterText *   text;
     gint            x;
     guint           source;
     GTimer *        timer;
-    gfloat          time;
-    int             frames;
-    gfloat          min_fps;
-    gfloat          max_fps;
-    char            buffer[256];
 };
 
 static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
@@ -629,28 +930,84 @@ global devtools [[ void * ]]
             }
         ]];
 
-	/*
-		Function: graph
+    /*
+        Function: graph
 
-		The graph() function toggles a running graph at the bottom of the screen depicting the amount of CPU usage of the running application and, at the top of the screen, the application's fps (frames per second) rate is shown in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the graph() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the graph() function was last invoked.
+        The graph() function toggles a running graph at the bottom of the screen depicting the amount of CPU usage of the running application and, at the top of the screen, the application's fps (frames per second) rate is shown in the format: MIN CURRENT MAX, where MIN is the application's minumum fps rate since the graph() function was last invoked, CURRENT is the application's current fps rate, and MAX is the application's maximum fps rate since the graph() function was last invoked.
 
-		Each call to the graph() function toggles the display graph off/on.
+        Each call to the graph() function toggles the display graph off/on.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*Code Example:* Toggle graphing a running application
+        *Code Example:* Toggle graphing a running application
 
-			(code)
-			devtools:graph()
-			(end)
+            (code)
+            devtools:graph()
+            (end)
 
-	*/
+    */
 
     graph()
         [[
             Graph::toggle( App::get( L )->get_context() );
+        ]];
+
+    /*
+        Function: fps
+
+        The fps() function toggles a running fps (frames per second) rate counter overlayed on top of the screen.  It will display the current fps, short-term average, and long-term average.
+
+        Each call to the fps() function toggles the display fps off/on.
+
+        *Arguments:*
+
+            short_time - How many seconds is the short-term average covering? Default 5 seconds.
+
+            long_time - How many seconds is the long-term average covering? Default 30 seconds.
+
+        *Return Value:* None
+
+        *Code Example:* Toggle fps-measuring a running application
+
+            (code)
+            devtools:fps()
+            (end)
+
+    */
+
+    fps(int short_time=5, int long_time=30)
+        [[
+            FPS::toggle( App::get( L )->get_context(), short_time, long_time );
+        ]];
+
+    /*
+        Function: cpu
+
+        The cpu() function toggles a running cpu (userspace seconds per wallclock seconds) rate counter overlayed on top of the screen.  It will display the current cpu, short-term average, and long-term average.
+
+        Each call to the cpu() function toggles the display cpu off/on.
+
+        *Arguments:*
+
+            short_time - How many seconds is the short-term average covering? Default 5 seconds.
+
+            long_time - How many seconds is the long-term average covering? Default 30 seconds.
+
+        *Return Value:* None
+
+        *Code Example:* Toggle cpu-measuring a running application
+
+            (code)
+            devtools:cpu()
+            (end)
+
+    */
+
+    cpu(int short_time=5, int long_time=30)
+        [[
+            CPU::toggle( App::get( L )->get_context(), short_time, long_time );
         ]];
 
 	/*

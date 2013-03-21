@@ -4,59 +4,45 @@ typedef PushTexture::PingMe PingMe;
 
 PushTexture::~PushTexture()
 {
-    if ( texture ) cogl_handle_unref( texture );
+    if ( texture )
+    {
+        cogl_handle_unref( texture );
+        texture = NULL;
+    }
+
+    failed = false;
+    real = false;
+
+    if ( !pings.empty() ) pings.clear();
 }
 
-void PushTexture::subscribe( PingMe * ping )
+void PushTexture::subscribe( PingMe * ping, bool preload )
 {
-    if ( !texture ) make_texture();
-    g_assert( texture );
-    
-    if ( all_pings_async && !ping->async )
-    {
-        all_pings_async = false;
-        on_sync_change();
-    }
-    
     pings.insert( ping );
-}
 
-void PushTexture::unsubscribe( PingMe * ping )
-{
-    pings.erase( ping );
-    
-    if ( !all_pings_async && !ping->async )
+    if ( real )
     {
-        all_pings_async = true;
-        for ( std::set< PingMe * >::iterator it = pings.begin(); it != pings.end(); ++it )
-        {
-            if ( !(* it)->async )
-            {
-                all_pings_async = false;
-                on_sync_change();
-                break;
-            }
-        }
+        g_assert( !failed );
+        ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
     }
-    
-    if ( can_signal && !cache && pings.empty() )
+    else
     {
-        Action::post( new PushTexture::ReleaseLater( this ) );
-        can_signal = false;
+        make_texture( preload ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
     }
 }
 
 void PushTexture::release_texture()
 {
-    if ( texture && !cache && pings.empty() )
+    if ( texture && pings.empty() )
     {
         cogl_handle_unref( texture );
+
+        failed = false;
+        real = false;
         texture = NULL;
         
         lost_texture();
     }
-    
-    can_signal = true;
 }
 
 void PushTexture::get_dimensions( int * w, int * h )
@@ -67,15 +53,20 @@ void PushTexture::get_dimensions( int * w, int * h )
 
 CoglHandle PushTexture::get_texture()
 {
-    static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
-    return texture ? texture : null_texture;
+    return texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture )
+void PushTexture::set_texture( CoglHandle _texture, bool _real, bool trigger )
 {
+    // failed and real are updated in Sprite and Source instances
+
     if ( texture ) cogl_handle_unref( texture );
     texture = _texture;
-    if ( texture ) cogl_handle_ref( texture );
+    // Skip cogl_handle_ref as it is done before calling set_texture
+    
+    real = texture && _real;
+
+    if ( trigger ) ping_all();
 }
 
 void PushTexture::ping_all()
@@ -88,25 +79,37 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::set( PushTexture * _source, Callback * _callback, void * _target, bool _async )
+void PingMe::assign( PushTexture * _instance, PingMe::Callback * _callback, void * _target, bool preload )
 {
-    if ( source ) source->unsubscribe( this );
-    
+    if ( instance == _instance )
+    {
+        callback = _callback;
+        target = _target;
+        return;
+    }
+
+    // Sprite instances will always have texture released immediately
+    // Source instances will have it released later when the app is running
+    if ( instance ) instance->unsubscribe( this, false );
+
     callback = _callback;
-    source = _source;
     target = _target;
-    async = _async;
-    
-    if ( source ) source->subscribe( this );
+    instance = _instance;
+
+    if ( instance ) instance->subscribe( this, preload );
 }
 
 PingMe::~PingMe()
 {
-    if ( source ) source->unsubscribe( this );
+    if ( instance ) instance->unsubscribe( this, true ); // Sprite release reference to Source
+
+    instance = NULL;
+    callback = NULL;
+    target = NULL;
 }
 
 
 void PingMe::ping()
 {
-    if ( callback ) callback( source, target );
+    if ( callback ) callback( instance, target );
 }

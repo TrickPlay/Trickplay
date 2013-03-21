@@ -1,8 +1,7 @@
 module clutter_container;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "util.h"
 #include "clutter_util.h"

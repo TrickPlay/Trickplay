@@ -39,6 +39,7 @@ if (NATURAL_DOCS)
             -xi ${PROJECT_SOURCE_DIR}/engine/public
             -xi ${PROJECT_SOURCE_DIR}/engine/source
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools/ide/tutorial
+			-xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools/editor/reference
             -o HTML ${PROJECT_BINARY_DIR}/docs/rte
             -p ${PROJECT_SOURCE_DIR}/engine/docs/rte/config
             -s Default Trickplay
@@ -67,7 +68,7 @@ if (NATURAL_DOCS)
         COMMAND ${NATURAL_DOCS}
 			-r
 			--highlight Off
-            -i ${PROJECT_SOURCE_DIR}/engine            
+            -i ${PROJECT_SOURCE_DIR}/engine
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/rte
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/internal
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/tutorials
@@ -95,8 +96,8 @@ if (NATURAL_DOCS)
 			-o HTML ${PROJECT_BINARY_DIR}/docs/internal
 			-p ${PROJECT_SOURCE_DIR}/engine/docs/internal/config
 			-s Default Trickplay
-	)		
-		
+	)
+
     add_custom_target(
         docs
         ALL
@@ -107,5 +108,5 @@ if (NATURAL_DOCS)
 			oem-docs
 			internal-docs
 	)
-    
+
 endif(NATURAL_DOCS)
