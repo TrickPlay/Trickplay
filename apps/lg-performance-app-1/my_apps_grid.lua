@@ -321,7 +321,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         --delete the selected icon
         [keys.OK] = function()
 
-            --if apps then apps:launch("com.lgi.dawn-ui") end
+            if apps then apps:launch("com.lgi.dawn-ui") end
             --if there more than one left
             if entries[1][2] then
                 instance:delete(sel_r,sel_c)
