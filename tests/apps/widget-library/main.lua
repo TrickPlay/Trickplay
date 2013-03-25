@@ -40,9 +40,8 @@ for i,file in ipairs(editor:readdir(absolute_path_to_test_app)) do
             }
         })
     end
-    tests_group:add(unpack(tests))
-
 end
+tests_group:add(unpack(tests))
 
 ---------------------------------------------------------------------
 local load_test_menu
