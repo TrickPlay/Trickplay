@@ -36,15 +36,15 @@ local core_dependencies = {
 }
 
 local load = function(file)
-    
+
     local f, err = loadfile(file)
-    
+
     --this prints out any syntax errors in the file
     if err then error(err) end
-    
+
     --call the loaded file
     f(WL_EXT,WL_ENV)
-    
+
 end
 
 for i,dep in ipairs(core_dependencies) do    load(pwd..dep)    end
@@ -77,34 +77,67 @@ local widget_dependencies = {
 
 local    load_dependencies
 function load_dependencies(w)
-    
+
     if WL_EXT[w] then return end
-    
+
     -- setting true is just a placeholder to prevent redundant calls
     -- to load_dependencies() which results in stack overflow
-    WL_EXT[w] = true 
-    
+    WL_EXT[w] = true
+
     --recursively load all dependencies
     for i,dep in ipairs(widget_dependencies[w]) do
-        
+
         if dep ~= w then   load_dependencies(dep)   end
-        
+
     end
-    
+
     load(pwd..w.."/"..w..".lua")
-    
+
 end
 
 local launch_recursive_load = function(w)
-    
+
     for i,dep in ipairs(widget_dependencies[w]) do
-        
+
         load_dependencies(dep)
-        
+
     end
-    
+
     --returns the requested widget
-    return  WL_EXT[w] 
+    return  WL_EXT[w]
+end
+
+--------------------------------------------------------------------------
+
+function WL_EXT:file_dependencies( widgets )
+    if type(widgets) ~= "table" then
+        error("Expected table of strings. Received "..type(widgets))
+    end
+
+    local dependencies_r = {}
+    for i,widget in ipairs(widgets) do
+        if type(widget) ~= "string" then
+            error("Expected table of strings. Received '"..
+                type(widget).."'' for table index: "..tostring(i))
+        end
+        if widget_dependencies[widget] == nil then
+            error("'"..widget.."' at index '"..tostring(i).."' is not a widget")
+        end
+        for i,widget in ipairs(widget_dependencies[widget]) do
+            dependencies_r[widget] = true
+        end
+
+    end
+
+    local dependencies = {}
+
+    for _,file in ipairs(core_dependencies) do
+        table.insert(dependencies,file)
+    end
+    for file,_ in pairs(dependencies_r) do
+        table.insert(dependencies,file.."/"..file..".lua")
+    end
+    return dependencies
 end
 
 --------------------------------------------------------------------------
@@ -118,13 +151,13 @@ return setmetatable(
             --widget_dependencies[k]   = something that can be loaded
             --launch_recursive_load(k) = load that 'something'
             return WL_EXT[k] or widget_dependencies[k] ~= nil and launch_recursive_load(k) or nil
-            
+
         end,
         __newindex =  function(t,k,v)
-            
+
             error("attempted to set the Widget_Library's index '"..
                 tostring(k).."' to '"..tostring(v).."'",2)
-            
+
         end,
     }
 )
