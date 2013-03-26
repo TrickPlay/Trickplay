@@ -1273,7 +1273,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     // Collect garbage every frame
 
     lua_gc_func = clutter_threads_add_repaint_func( lua_gc_every_frame, L, 0 );
-    lua_gc( L, LUA_GCGEN, 0 ); // Switch to generational colletor
+    lua_gc( L, LUA_GCGEN, 0 ); // Switch to generational collector
+    lua_gc( L, LUA_GCSETMAJORINC, 110 ); // Reduce threshold for major collection
 
     //.........................................................................
     // Run the script
