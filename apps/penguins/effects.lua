@@ -15,31 +15,35 @@ evFrame[fx] = function(self,d,ms)
 	d2 = 4^(d/1000)
 	b = levels.this.bank > 0
 	for k,v in ipairs(group.children) do
-		v.opacity = math.max(0,v.opacity+v.vo*d)
-		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then
-			v:free()
-		elseif v.vz or v.vo == -0.25 then
-			if v.vo == -0.125 then
-				v.vx = v.vx/d2 + dt
-				v.vy = v.vy/d2 + dt/4
-				v.vz = v.vz+dt
-			else
-				v.vy = v.vy + gravity*d/2
-			end
-			v.x = v.x + v.vx*d
-			v.y = v.y + v.vy*d
-			if v.vo ~= -0.25 then
-				v.z_rotation = {v.z_rotation[1]+v.vz*d,0,0}
-			else
-				v.scale = {v.scale[1]*s,v.scale[2]*s}
-			end
-		elseif v.vx then
-			v.scale = {v.scale[1]*s,v.scale[2]*s}
-		else
-			v.y = v.y + v.vy*d
-			v.t = v.t + d
-			v.scale = {v.scale[1]+d/800,1.5-(2*v.t/800-1)^2}
-		end
+        if(#(v.extra) == 0) then
+            v:free()
+        else
+    		v.opacity = math.max(0,v.opacity+v.vo*d)
+    		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then
+    			v:free()
+    		elseif v.vz or v.vo == -0.25 then
+    			if v.vo == -0.125 then
+    				v.vx = v.vx/d2 + dt
+    				v.vy = v.vy/d2 + dt/4
+    				v.vz = v.vz+dt
+    			else
+    				v.vy = v.vy + gravity*d/2
+    			end
+    			v.x = v.x + v.vx*d
+    			v.y = v.y + v.vy*d
+    			if v.vo ~= -0.25 then
+    				v.z_rotation = {v.z_rotation[1]+v.vz*d,0,0}
+    			else
+    				v.scale = {v.scale[1]*s,v.scale[2]*s}
+    			end
+    		elseif v.vx then
+    			v.scale = {v.scale[1]*s,v.scale[2]*s}
+    		else
+    			v.y = v.y + v.vy*d
+    			v.t = v.t + d
+    			v.scale = {v.scale[1]+d/800,1.5-(2*v.t/800-1)^2}
+    		end
+        end
 	end
 end
 
