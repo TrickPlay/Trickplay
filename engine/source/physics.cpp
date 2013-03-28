@@ -16,8 +16,8 @@
 namespace Physics
 {
 
-World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_meter )
-:
+World::World( lua_State* _LS , ClutterActor* _screen , float32 _pixels_per_meter )
+    :
     ppm( _pixels_per_meter ),
     z_for_y( false ),
     global_callbacks( 0 ),
@@ -54,9 +54,9 @@ World::~World()
 
     // Destroy the body wrappers
 
-    for( b2Body * body = world.GetBodyList(); body; )
+    for ( b2Body* body = world.GetBodyList(); body; )
     {
-        b2Body * next = body->GetNext();
+        b2Body* next = body->GetNext();
 
         Body::body_destroyed( body );
 
@@ -111,7 +111,7 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
     if ( ! to_deactivate.empty() )
     {
-        for( int i = 0; ! to_deactivate.empty() && i < 5; ++i )
+        for ( int i = 0; ! to_deactivate.empty() && i < 5; ++i )
         {
             to_deactivate.front()->SetActive( false );
 
@@ -121,7 +121,7 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
     if ( ! to_activate.empty() )
     {
-        for( int i = 0; ! to_activate.empty() && i < 5; ++i )
+        for ( int i = 0; ! to_activate.empty() && i < 5; ++i )
         {
             to_activate.front()->SetActive( true );
 
@@ -131,7 +131,7 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
     if ( ! to_destroy.empty() )
     {
-        for( int i = 0; ! to_destroy.empty() && i < 5; ++i )
+        for ( int i = 0; ! to_destroy.empty() && i < 5; ++i )
         {
             world.DestroyBody( to_destroy.front() );
 
@@ -141,7 +141,7 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
     world.Step( time_step , _velocity_iterations , _position_iterations );
 
-    for( b2Body * body = world.GetBodyList(); body; body = body->GetNext() )
+    for ( b2Body* body = world.GetBodyList(); body; body = body->GetNext() )
     {
         if ( ! body->IsAwake() || ! body->IsActive() )
         {
@@ -169,9 +169,9 @@ void World::idle()
 
     g_timer_start( timer );
 
-    UserData * ud = UserData::get_from_client( this );
+    UserData* ud = UserData::get_from_client( this );
 
-    for( int i = 0; i < iterations; ++i )
+    for ( int i = 0; i < iterations; ++i )
     {
         step( sixty , velocity_iterations , position_iterations );
 
@@ -189,14 +189,14 @@ void World::idle()
 
 gboolean World::on_idle( gpointer me )
 {
-    ( ( World * ) me )->idle();
+    ( ( World* ) me )->idle();
 
     return TRUE;
 }
 
 //.............................................................................
 
-int World::create_body( int element , int properties , const char * metatable )
+int World::create_body( int element , int properties , const char* metatable )
 {
     luaL_checktype( L , element , LUA_TUSERDATA );
     luaL_checktype( L , properties , LUA_TTABLE );
@@ -206,7 +206,7 @@ int World::create_body( int element , int properties , const char * metatable )
     //.........................................................................
     // Get the actor/source
 
-    ClutterActor * actor = ClutterUtil::user_data_to_actor( L , element );
+    ClutterActor* actor = ClutterUtil::user_data_to_actor( L , element );
 
     if ( ! actor )
     {
@@ -257,7 +257,7 @@ int World::create_body( int element , int properties , const char * metatable )
     //.........................................................................
     // Ready to create the body
 
-    b2Body * body = world.CreateBody( & bd );
+    b2Body* body = world.CreateBody( & bd );
 
     if ( ! body )
     {
@@ -298,7 +298,7 @@ int World::create_body( int element , int properties , const char * metatable )
     // Create the body wrapper for it. This sets up all the relationships and
     // user data pointers.
 
-    (void)new Body( this , body , actor );
+    ( void )new Body( this , body , actor );
 
     //.........................................................................
     // The body is attached to the actor and is ready to go. We get the actor
@@ -321,65 +321,79 @@ b2FixtureDef World::create_fixture_def( int properties )
     // Friction
 
     lua_getfield( L , properties , "friction" );
+
     if ( ! lua_isnil( L , -1 ) )
     {
         fd.friction = lua_tonumber( L , -1 );
     }
+
     lua_pop( L , 1 );
 
     //.........................................................................
     // Restitution aka bounce
 
     lua_getfield( L , properties , "restitution" );
+
     if ( ! lua_isnil( L , -1 ) )
     {
         fd.restitution = lua_tonumber( L , -1 );
     }
+
     lua_pop( L , 1 );
 
     lua_getfield( L , properties , "bounce" );
+
     if ( ! lua_isnil( L , -1 ) )
     {
         fd.restitution = lua_tonumber( L , -1 );
     }
+
     lua_pop( L , 1 );
 
     //.........................................................................
     // Density
 
     lua_getfield( L , properties , "density" );
+
     if ( ! lua_isnil( L , -1 ) )
     {
         fd.density = lua_tonumber( L , -1 );
     }
+
     lua_pop( L , 1 );
 
     //.........................................................................
     // Sensor
 
     lua_getfield( L , properties , "sensor" );
+
     if ( ! lua_isnil( L , -1 ) )
     {
         fd.isSensor = lua_toboolean( L , -1 );
     }
+
     lua_pop( L , 1 );
 
     //.........................................................................
     // Collision filter
 
     lua_getfield( L , properties , "filter" );
+
     if ( lua_istable( L , -1 ) )
     {
         int f = lua_gettop( L );
 
         lua_getfield( L , f , "group" );
+
         if ( ! lua_isnil( L , -1 ) )
         {
             fd.filter.groupIndex = lua_tointeger( L , -1 );
         }
+
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "category" );
+
         if ( lua_isnumber( L , -1 ) )
         {
             fd.filter.categoryBits = 1 << lua_tointeger( L , -1 );
@@ -392,27 +406,34 @@ b2FixtureDef World::create_fixture_def( int properties )
 
             lua_pushnil( L );
 
-            while( lua_next( L , t ) )
+            while ( lua_next( L , t ) )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
                     // Check in range
-                    lua_Integer cat = lua_tointeger(L, -1);
-                    if(cat < 0 || cat > 15)
+                    lua_Integer cat = lua_tointeger( L, -1 );
+
+                    if ( cat < 0 || cat > 15 )
                     {
-                        tpwarn("ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat);
-                    } else {
+                        tpwarn( "ATTEMPT TO SET CATEGORY %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= CATEGORY <= 15", cat );
+                    }
+                    else
+                    {
                         fd.filter.categoryBits |= 1 << cat;
                     }
                 }
+
                 lua_pop( L , 1 );
             }
         }
+
         // Guarantee that a fixture always has a non-zero category
-        if(0 == fd.filter.categoryBits) fd.filter.categoryBits = 1;
+        if ( 0 == fd.filter.categoryBits ) { fd.filter.categoryBits = 1; }
+
         lua_pop( L , 1 );
 
         lua_getfield( L , f , "mask" );
+
         if ( lua_isnumber( L , -1 ) )
         {
             fd.filter.maskBits = 1 << lua_tointeger( L , -1 );
@@ -425,36 +446,44 @@ b2FixtureDef World::create_fixture_def( int properties )
 
             lua_pushnil( L );
 
-            while( lua_next( L , t ) )
+            while ( lua_next( L , t ) )
             {
                 if ( lua_isnumber( L , -1 ) )
                 {
                     // Check in range
-                    lua_Integer cat = lua_tointeger(L, -1);
-                    if(cat < 0 || cat > 15)
+                    lua_Integer cat = lua_tointeger( L, -1 );
+
+                    if ( cat < 0 || cat > 15 )
                     {
-                        tpwarn("ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat);
-                    } else {
+                        tpwarn( "ATTEMPT TO SET MASK %d ON A FIXTURE'S FILTER NOT ALLOWED.  MUST BE 0 <= MASK <= 15", cat );
+                    }
+                    else
+                    {
                         fd.filter.maskBits |= 1 << cat;
                     }
                 }
+
                 lua_pop( L , 1 );
             }
         }
+
         lua_pop( L , 1 );
     }
+
     lua_pop( L , 1 );
 
     //.........................................................................
     // Shape
 
     lua_getfield( L , properties , "shape" );
+
     if ( lua_isuserdata( L , -1 ) )
     {
         lb_check_udata_type( L , -1 , "Shape" );
 
-        fd.shape = ( b2Shape * ) UserData::get_client( L , lua_gettop( L ) );
+        fd.shape = ( b2Shape* ) UserData::get_client( L , lua_gettop( L ) );
     }
+
     lua_pop( L , 1 );
 
     return fd;
@@ -462,7 +491,7 @@ b2FixtureDef World::create_fixture_def( int properties )
 
 //.............................................................................
 
-void World::push_contact( b2Contact * contact )
+void World::push_contact( b2Contact* contact )
 {
     g_assert( contact );
 
@@ -470,17 +499,17 @@ void World::push_contact( b2Contact * contact )
 
     contact->GetWorldManifold( & wm );
 
-    b2Fixture * fa = contact->GetFixtureA();
-    b2Fixture * fb = contact->GetFixtureB();
+    b2Fixture* fa = contact->GetFixtureA();
+    b2Fixture* fb = contact->GetFixtureB();
 
     int fixture_a_handle = fa ? GPOINTER_TO_INT( fa->GetUserData() ) : 0;
     int fixture_b_handle = fb ? GPOINTER_TO_INT( fb->GetUserData() ) : 0;
 
-    b2Body * ba = fa ? fa->GetBody() : 0;
-    b2Body * bb = fb ? fb->GetBody() : 0;
+    b2Body* ba = fa ? fa->GetBody() : 0;
+    b2Body* bb = fb ? fb->GetBody() : 0;
 
-    Body * ia = ba ? Body::get( ba ) : 0;
-    Body * ib = bb ? Body::get( bb ) : 0;
+    Body* ia = ba ? Body::get( ba ) : 0;
+    Body* ib = bb ? Body::get( bb ) : 0;
 
     int body_a_handle = ia ? ia->handle : 0;
     int body_b_handle = ib ? ib->handle : 0;
@@ -532,7 +561,7 @@ void World::push_contact( b2Contact * contact )
 
 //.............................................................................
 
-void World::push_contact_list( b2Contact * contact )
+void World::push_contact_list( b2Contact* contact )
 {
     if ( ! contact )
     {
@@ -544,7 +573,7 @@ void World::push_contact_list( b2Contact * contact )
 
     int i = 1;
 
-    for( b2Contact * c = contact; c ; c = c->GetNext() , ++i )
+    for ( b2Contact* c = contact; c ; c = c->GetNext() , ++i )
     {
         push_contact( c );
         lua_rawseti( L , -2 , i );
@@ -553,7 +582,7 @@ void World::push_contact_list( b2Contact * contact )
 
 //.............................................................................
 
-void World::push_contact_list( b2ContactEdge * contact_edge )
+void World::push_contact_list( b2ContactEdge* contact_edge )
 {
     if ( ! contact_edge )
     {
@@ -565,7 +594,7 @@ void World::push_contact_list( b2ContactEdge * contact_edge )
 
     int i = 1;
 
-    for ( b2ContactEdge * e = contact_edge; e ; e = e->next , ++i )
+    for ( b2ContactEdge* e = contact_edge; e ; e = e->next , ++i )
     {
         push_contact( e->contact );
         lua_rawseti( L , -2 , i );
@@ -593,7 +622,7 @@ void World::attach_global_callback( ContactCallback callback , bool attach )
 // Given a body, a callback type and whether to attach or detach the callback,
 // we update our body callback map.
 
-void World::attach_body_callback( Body * body , ContactCallback callback , bool attach )
+void World::attach_body_callback( Body* body , ContactCallback callback , bool attach )
 {
     g_assert( body );
 
@@ -652,7 +681,7 @@ void World::attach_body_callback( Body * body , ContactCallback callback , bool 
 //.............................................................................
 // Removes the entry for this b2Body from the callbacks map
 
-void World::detach_body_callbacks( b2Body * body )
+void World::detach_body_callbacks( b2Body* body )
 {
     if ( body )
     {
@@ -669,7 +698,7 @@ void World::detach_body_callbacks( b2Body * body )
 // If this b2Body is all good and wants this type of callback, we add its
 // Body * to the list.
 
-void World::add_contact_callback_body( b2Body * body , ContactCallback callback , BodyList & list )
+void World::add_contact_callback_body( b2Body* body , ContactCallback callback , BodyList& list )
 {
     if ( ! body )
     {
@@ -690,7 +719,7 @@ void World::add_contact_callback_body( b2Body * body , ContactCallback callback 
         {
             // If so and its Body is valid, add it to the list
 
-            if ( Body * b = Body::get( body ) )
+            if ( Body* b = Body::get( body ) )
             {
                 list.push_back( b );
             }
@@ -702,7 +731,7 @@ void World::add_contact_callback_body( b2Body * body , ContactCallback callback 
 // Creates a list of Body * for the two bodies in the contact, as long as they
 // want the callback and they are in good shape.
 
-World::BodyList World::get_contact_callback_bodies( b2Contact * contact , ContactCallback callback )
+World::BodyList World::get_contact_callback_bodies( b2Contact* contact , ContactCallback callback )
 {
     std::list<Physics::Body*> result;
 
@@ -716,7 +745,7 @@ World::BodyList World::get_contact_callback_bodies( b2Contact * contact , Contac
 //.............................................................................
 // Given a contact, callback and callback name, invokes all the right callbacks.
 
-void World::invoke_contact_callback( b2Contact * contact , ContactCallback callback , const char * name )
+void World::invoke_contact_callback( b2Contact* contact , ContactCallback callback , const char* name )
 {
     // Get a list of bodies that want this callback. The list will
     // have either 0, 1 or 2.
@@ -726,7 +755,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
     // If the list of bodies is empty and no one wants the global
     // callback, we bail right here
 
-    if ( ( ! ( global_callbacks & callback ) ) && bodies.empty() )
+    if ( ( !( global_callbacks & callback ) ) && bodies.empty() )
     {
         return;
     }
@@ -741,11 +770,11 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
 
     if ( ! bodies.empty() )
     {
-        for( BodyList::const_iterator it = bodies.begin(); it != bodies.end(); ++it )
+        for ( BodyList::const_iterator it = bodies.begin(); it != bodies.end(); ++it )
         {
             lua_pushvalue( L , c );
 
-            UserData::invoke_callbacks( G_OBJECT( (*it)->actor ) , name , 1 , 0 , L );
+            UserData::invoke_callbacks( G_OBJECT( ( *it )->actor ) , name , 1 , 0 , L );
 
             if ( callback == PRE_SOLVE_CONTACT )
             {
@@ -776,7 +805,7 @@ void World::invoke_contact_callback( b2Contact * contact , ContactCallback callb
 
 //.............................................................................
 
-void World::destroy_body_later( b2Body * body )
+void World::destroy_body_later( b2Body* body )
 {
     g_assert( body );
 
@@ -785,7 +814,7 @@ void World::destroy_body_later( b2Body * body )
 
 //.............................................................................
 
-void World::deactivate_body_later( b2Body * body )
+void World::deactivate_body_later( b2Body* body )
 {
     g_assert( body );
 
@@ -794,7 +823,7 @@ void World::deactivate_body_later( b2Body * body )
 
 //.............................................................................
 
-void World::activate_body_later( b2Body * body )
+void World::activate_body_later( b2Body* body )
 {
     g_assert( body );
 
@@ -804,28 +833,28 @@ void World::activate_body_later( b2Body * body )
 //=============================================================================
 // ContactListener callbacks
 
-void World::BeginContact( b2Contact * contact )
+void World::BeginContact( b2Contact* contact )
 {
     invoke_contact_callback( contact , BEGIN_CONTACT , "on_begin_contact" );
 }
 
 //.............................................................................
 
-void World::EndContact( b2Contact * contact )
+void World::EndContact( b2Contact* contact )
 {
     invoke_contact_callback( contact , END_CONTACT , "on_end_contact" );
 }
 
 //.............................................................................
 
-void World::PreSolve( b2Contact * contact , const b2Manifold * oldManifold )
+void World::PreSolve( b2Contact* contact , const b2Manifold* oldManifold )
 {
     invoke_contact_callback( contact , PRE_SOLVE_CONTACT , "on_pre_solve_contact" );
 }
 
 //.............................................................................
 
-void World::PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
+void World::PostSolve( b2Contact* contact , const b2ContactImpulse* impulse )
 {
     // TODO : should we pass the impulse too?
 
@@ -835,7 +864,7 @@ void World::PostSolve( b2Contact * contact , const b2ContactImpulse * impulse )
 //=========================================================================
 // DebugDraw callbacks
 
-void World::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+void World::DrawPolygon( const b2Vec2* vertices, int32 vertexCount, const b2Color& color )
 {
     g_assert( debug_cairo );
 
@@ -843,7 +872,7 @@ void World::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color
 
     for ( int i = 0; i < vertexCount; ++i )
     {
-        const b2Vec2 & v( vertices[ i ] );
+        const b2Vec2& v( vertices[ i ] );
 
         cairo_line_to( debug_cairo , v.x , v.y );
     }
@@ -854,7 +883,7 @@ void World::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color
     cairo_stroke( debug_cairo );
 }
 
-void World::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+void World::DrawSolidPolygon( const b2Vec2* vertices, int32 vertexCount, const b2Color& color )
 {
     g_assert( debug_cairo );
 
@@ -862,7 +891,7 @@ void World::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2
 
     for ( int i = 0; i < vertexCount; ++i )
     {
-        const b2Vec2 & v( vertices[ i ] );
+        const b2Vec2& v( vertices[ i ] );
 
         cairo_line_to( debug_cairo , v.x , v.y );
     }
@@ -872,7 +901,7 @@ void World::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2
     cairo_fill( debug_cairo );
 }
 
-void World::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color)
+void World::DrawCircle( const b2Vec2& center, float32 radius, const b2Color& color )
 {
     g_assert( debug_cairo );
 
@@ -883,7 +912,7 @@ void World::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& colo
     cairo_stroke( debug_cairo );
 }
 
-void World::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void World::DrawSolidCircle( const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color )
 {
     g_assert( debug_cairo );
 
@@ -893,7 +922,7 @@ void World::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& 
     cairo_fill( debug_cairo );
 }
 
-void World::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+void World::DrawSegment( const b2Vec2& p1, const b2Vec2& p2, const b2Color& color )
 {
     g_assert( debug_cairo );
 
@@ -905,7 +934,7 @@ void World::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color
     cairo_stroke( debug_cairo );
 }
 
-void World::DrawTransform(const b2Transform& xf)
+void World::DrawTransform( const b2Transform& xf )
 {
 #if 0
 
@@ -927,7 +956,7 @@ void World::DrawTransform(const b2Transform& xf)
 
 //=========================================================================
 
-gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world )
+gboolean World::on_debug_draw( ClutterCairoTexture* texture , cairo_t* cr , World* world )
 {
     world->debug_cairo = cr;
 
@@ -939,7 +968,7 @@ gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , Wo
             | b2Draw::e_aabbBit
             | b2Draw::e_pairBit
             | b2Draw::e_centerOfMassBit
-            );
+    );
 
     world->world.SetDebugDraw( world );
 
@@ -972,13 +1001,9 @@ void World::draw_debug( int opacity )
 
         clutter_actor_set_scale( debug_draw , sx , sy );
 
-        ClutterActor * parent = clutter_actor_get_parent( screen );
+        ClutterActor* parent = clutter_actor_get_parent( screen );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( parent, debug_draw );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , debug_draw );
-#endif
 
         g_object_ref( G_OBJECT( debug_draw ) );
     }
@@ -987,33 +1012,15 @@ void World::draw_debug( int opacity )
         clutter_cairo_texture_clear( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
     }
 
-#ifdef CLUTTER_VERSION_1_10
-    clutter_actor_set_child_above_sibling( clutter_actor_get_parent(screen), debug_draw, NULL );
-#else
-    clutter_actor_raise_top( debug_draw );
-#endif
+    clutter_actor_set_child_above_sibling( clutter_actor_get_parent( screen ), debug_draw, NULL );
 
     clutter_actor_set_opacity( debug_draw , opacity );
-
-#ifdef CLUTTER_VERSION_1_10
-
 
     gulong handler = g_signal_connect( debug_draw , "draw" , GCallback( on_debug_draw ) , this );
 
     clutter_cairo_texture_invalidate( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
 
     g_signal_handler_disconnect( debug_draw , handler );
-
-#else
-
-    cairo_t * c = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
-
-    on_debug_draw( CLUTTER_CAIRO_TEXTURE( debug_draw ) , c , this );
-
-    cairo_destroy( c );
-
-#endif
-
 }
 
 //.............................................................................
@@ -1027,15 +1034,11 @@ void World::clear_debug()
 
     g_assert( CLUTTER_IS_ACTOR( debug_draw ) );
 
-    ClutterActor * parent = clutter_actor_get_parent( debug_draw );
+    ClutterActor* parent = clutter_actor_get_parent( debug_draw );
 
     if ( parent )
     {
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_remove_child( parent, debug_draw );
-#else
-        clutter_container_remove( CLUTTER_CONTAINER( parent ) , debug_draw , NULL );
-#endif
     }
 
     g_object_unref( G_OBJECT( debug_draw ) );
@@ -1046,8 +1049,8 @@ void World::clear_debug()
 //.............................................................................
 // This wrapper is attached to the actor and is owned by the actor.
 
-Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
-:
+Body::Body( World* _world , b2Body* _body , ClutterActor* _actor )
+    :
     world( _world ),
     body( _body ),
     actor( _actor ),
@@ -1128,11 +1131,11 @@ Body::~Body()
 //.............................................................................
 // The b2Body may get destroyed when the world is destroyed...:)
 
-void Body::body_destroyed( b2Body * body )
+void Body::body_destroyed( b2Body* body )
 {
     tplog( "B2BODY BEING DESTROYED" );
 
-    if ( Body * self = Body::get( body ) )
+    if ( Body* self = Body::get( body ) )
     {
         tplog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
@@ -1149,28 +1152,28 @@ void Body::body_destroyed( b2Body * body )
 // The actor is being destroyed - that means that the b2Body will be destroyed
 // as well. This structure loses its body and actor members.
 
-void Body::destroy_actor_body( Body * self )
+void Body::destroy_actor_body( Body* self )
 {
     delete self;
 }
 
 //.............................................................................
 
-Body * Body::get( ClutterActor * actor )
+Body* Body::get( ClutterActor* actor )
 {
-    return ! actor ? 0 : ( Body * ) g_object_get_qdata( G_OBJECT( actor ) , get_actor_body_quark() );
+    return ! actor ? 0 : ( Body* ) g_object_get_qdata( G_OBJECT( actor ) , get_actor_body_quark() );
 }
 
 //.............................................................................
 
-Body * Body::get( b2Body * body )
+Body* Body::get( b2Body* body )
 {
-    return ! body ? 0 : ( Body * ) body->GetUserData();
+    return ! body ? 0 : ( Body* ) body->GetUserData();
 }
 
 //.............................................................................
 
-Body * Body::get_from_lua( lua_State * L , int index )
+Body* Body::get_from_lua( lua_State* L , int index )
 {
     return get( CLUTTER_ACTOR( UserData::get( L , index )->get_master() ) );
 }
@@ -1181,29 +1184,29 @@ void Body::synchronize_actor()
 {
     if ( actor && body )
     {
-        const b2Vec2 & pos( body->GetPosition() );
+        const b2Vec2& pos( body->GetPosition() );
 
         if ( world->z_for_y )
         {
-			clutter_actor_set_x( actor , world->world_to_screen( pos.x ) );
-			clutter_actor_set_depth( actor , - world->world_to_screen( pos.y ) );
+            clutter_actor_set_x( actor , world->world_to_screen( pos.x ) );
+            clutter_actor_set_depth( actor , - world->world_to_screen( pos.y ) );
 
-			clutter_actor_set_rotation( actor , CLUTTER_Y_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+            clutter_actor_set_rotation( actor , CLUTTER_Y_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
         }
         else
         {
-			clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
+            clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
 
-			clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+            clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
         }
     }
 }
 
 //.............................................................................
 
-void Body::synchronize_actor( b2Body * body )
+void Body::synchronize_actor( b2Body* body )
 {
-    if ( Body * b = Body::get( body ) )
+    if ( Body* b = Body::get( body ) )
     {
         b->synchronize_actor();
     }
@@ -1221,15 +1224,15 @@ void Body::synchronize_body()
 
         if ( world->z_for_y )
         {
-        	x = clutter_actor_get_x( actor );
-        	y = -clutter_actor_get_depth( actor );
-        	angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , 0 , 0 , 0 );
+            x = clutter_actor_get_x( actor );
+            y = -clutter_actor_get_depth( actor );
+            angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , 0 , 0 , 0 );
         }
         else
         {
-        	clutter_actor_get_position( actor , & x , & y );
+            clutter_actor_get_position( actor , & x , & y );
 
-        	angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
+            angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
         }
 
         x = world->screen_to_world( x );
@@ -1243,21 +1246,25 @@ void Body::synchronize_body()
 
 //.............................................................................
 
-void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
+void Body::actor_mapped_notify( GObject* , GParamSpec* , Body* self )
 {
     if ( self->actor && self->body )
     {
         bool mapped = CLUTTER_ACTOR_IS_MAPPED( self->actor );
 
 
-        if( !self->body->GetWorld()->IsLocked() )
+        if ( !self->body->GetWorld()->IsLocked() )
         {
             self->body->SetActive( mapped );
-        } else {
-            if( mapped )
+        }
+        else
+        {
+            if ( mapped )
             {
                 self->world->activate_body_later( self->body );
-            } else {
+            }
+            else
+            {
                 self->world->deactivate_body_later( self->body );
             }
         }
@@ -1273,20 +1280,20 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 
 //.............................................................................
 
-AABBQuery::AABBQuery( lua_State * _LS )
-:
+AABBQuery::AABBQuery( lua_State* _LS )
+    :
     L( _LS )
 {
     lua_newtable( L );
 }
 
 
-bool AABBQuery::ReportFixture( b2Fixture * fixture )
+bool AABBQuery::ReportFixture( b2Fixture* fixture )
 {
     int fixture_handle = GPOINTER_TO_INT( fixture->GetUserData() );
     int body_handle = 0;
 
-    if ( Body * body = Body::get( fixture->GetBody() ) )
+    if ( Body* body = Body::get( fixture->GetBody() ) )
     {
         body_handle = body->handle;
     }

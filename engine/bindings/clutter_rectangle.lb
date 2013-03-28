@@ -10,7 +10,7 @@ module clutter_rectangle;
 /***************************************
     Class: Rectangle
 
-	The Rectangle data type is a simple four-cornered rectangle.
+    The Rectangle data type is a simple four-cornered rectangle.
 
     In addition to the properties and functions described on this page, the Rectangle data type also supports all the properties and functions defined in the <UIElement> interface.
 */
@@ -19,41 +19,41 @@ class Rectangle [[ClutterActor*]] actor
 {
     Rectangle(table props = 0)
         [[
-        	// This call adds an extra ref to the created actor.
-        	// We do this to avoid triggering the toggle ref a bunch of
-        	// times during construction.
+            // This call adds an extra ref to the created actor.
+            // We do this to avoid triggering the toggle ref a bunch of
+            // times during construction.
 
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
-	    	ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
-	    	ClutterUtil::set_props_from_table(L,props);
-	    	g_object_unref( self );
+            ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
+            ClutterUtil::set_props_from_table(L,props);
+            g_object_unref( self );
         ]];
 
     ~Rectangle()
-		[[
-		]];
+        [[
+        ]];
 
 /***************************************
-	Property: color
+    Property: color
 
-	The color property specifies the object's fill color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+    The color property specifies the object's fill color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-	*Default Setting:* rgba(255,255,255,255)
+    *Default Setting:* rgba(255,255,255,255)
 
-	*Code Example:* Set rectangle's color using a table
+    *Code Example:* Set rectangle's color using a table
 
-		(code)
-		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
-		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
-		(end)
+        (code)
+        r.color = { 255, 0, 255 }       -- RGB values with default/opaque alpha
+        r.color = { 255, 0, 255, 100 }  -- RGB with explicit alpha
+        (end)
 
-	*Code Example:* Set rectangle's color using a string
+    *Code Example:* Set rectangle's color using a string
 
-		(code)
-		r.color = "#FF00FF"      -- RGB values with default 0xFF/opaque alpha
-		r.color = "#FF00FF40"    -- RGB values with explicit alpha
-		r.color = "#FF00FF"      -- RGB values, default alpha
-		(end)
+        (code)
+        r.color = "#FF00FF"      -- RGB values with default 0xFF/opaque alpha
+        r.color = "#FF00FF40"    -- RGB values with explicit alpha
+        r.color = "#FF00FF"      -- RGB values, default alpha
+        (end)
 */
 
     table color
@@ -69,13 +69,13 @@ class Rectangle [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Property: border_width
+    Property: border_width
 
-	The border_width property specifies the Rectangle's border in pixels.
+    The border_width property specifies the Rectangle's border in pixels.
 
-   	*Default Setting:* A border width of 0 pixels, i.e., no border.
+    *Default Setting:* A border width of 0 pixels, i.e., no border.
 
-   	*See Also:* the <border_color> property
+    *See Also:* the <border_color> property
 */
 
     int border_width
@@ -83,15 +83,15 @@ class Rectangle [[ClutterActor*]] actor
         [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
 
 /***************************************
-	Property: border_color
+    Property: border_color
 
-	The border_color property specifies the color of the Rectangle's border. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+    The border_color property specifies the color of the Rectangle's border. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-	For the border_color property to have an effect, the Rectangle's border_width property must be greater than 0.
+    For the border_color property to have an effect, the Rectangle's border_width property must be greater than 0.
 
-   	*Default Setting:* rgba(255,255,255,255)
+    *Default Setting:* rgba(255,255,255,255)
 
-   	*See Also:* the <border_width> property
+    *See Also:* the <border_width> property
 */
 
     table border_color

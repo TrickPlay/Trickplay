@@ -8,20 +8,20 @@ class HttpTrickplayApiSupport
 {
 public:
 
-	HttpTrickplayApiSupport( TPContext * context );
+    HttpTrickplayApiSupport( TPContext* context );
 
-	~HttpTrickplayApiSupport( );
+    ~HttpTrickplayApiSupport( );
 
 private:
 
-	HttpTrickplayApiSupport( const HttpTrickplayApiSupport & )
-	{}
+    HttpTrickplayApiSupport( const HttpTrickplayApiSupport& )
+    {}
 
-	TPContext * context;
+    TPContext* context;
 
-	typedef std::list<  HttpServer::RequestHandler * > HandlerList;
+    typedef std::list<  HttpServer::RequestHandler* > HandlerList;
 
-	HandlerList handlers;
+    HandlerList handlers;
 
 };
 

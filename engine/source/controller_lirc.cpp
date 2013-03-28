@@ -16,7 +16,7 @@
 
 //.............................................................................
 
-ControllerLIRC * ControllerLIRC::make( TPContext * context )
+ControllerLIRC* ControllerLIRC::make( TPContext* context )
 {
     g_assert( context );
 
@@ -32,8 +32,8 @@ ControllerLIRC * ControllerLIRC::make( TPContext * context )
 
 //.............................................................................
 
-ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _repeat )
-:
+ControllerLIRC::ControllerLIRC( TPContext* context , const char* uds , guint _repeat )
+    :
     connection( 0 ),
     controller( 0 ),
     timer( 0 ),
@@ -45,7 +45,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     //.........................................................................
     // Get the address of the Unix Domain Socket
 
-    GSocketAddress * socket_address = g_unix_socket_address_new( uds );
+    GSocketAddress* socket_address = g_unix_socket_address_new( uds );
 
     if ( ! socket_address )
     {
@@ -56,7 +56,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     //.........................................................................
     // Create a socket client and attempt to connect to the address
 
-    GSocketClient * client = g_socket_client_new();
+    GSocketClient* client = g_socket_client_new();
 
     connection = g_socket_client_connect( client , G_SOCKET_CONNECTABLE( socket_address ) , NULL , NULL );
 
@@ -74,7 +74,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     // Now, get the socket's input stream, create a data input stream from it
     // and start reading lines.
 
-    GDataInputStream * input_stream = g_data_input_stream_new( g_io_stream_get_input_stream( G_IO_STREAM( connection ) ) );
+    GDataInputStream* input_stream = g_data_input_stream_new( g_io_stream_get_input_stream( G_IO_STREAM( connection ) ) );
 
     g_assert( input_stream );
 
@@ -160,22 +160,22 @@ ControllerLIRC::~ControllerLIRC()
 
 //.............................................................................
 
-void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result , gpointer me )
+void ControllerLIRC::line_read( GObject* stream , GAsyncResult* result , gpointer me )
 {
     g_assert( stream );
     g_assert( result );
     g_assert( me );
 
-    ( ( ControllerLIRC * ) me )->line_read( stream , result );
+    ( ( ControllerLIRC* ) me )->line_read( stream , result );
 }
 
 //.............................................................................
 
-void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
+void ControllerLIRC::line_read( GObject* stream , GAsyncResult* result )
 {
-    GError * error = 0;
+    GError* error = 0;
 
-    char * line = g_data_input_stream_read_line_finish( G_DATA_INPUT_STREAM( stream ) , result , NULL , & error );
+    char* line = g_data_input_stream_read_line_finish( G_DATA_INPUT_STREAM( stream ) , result , NULL , & error );
 
     if ( error )
     {
@@ -208,7 +208,7 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
             }
         }
 
-        g_strfreev(parts);
+        g_strfreev( parts );
 
         g_free( line );
     }

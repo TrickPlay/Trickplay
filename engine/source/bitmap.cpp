@@ -14,13 +14,13 @@
 
 //.............................................................................
 
-Bitmap::Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags )
-:
+Bitmap::Bitmap( lua_State* L , const char* _src , bool _async , bool read_tags )
+    :
     src( _src ),
     image( 0 ),
     lsp( 0 )
 {
-    App * app = App::get( L );
+    App* app = App::get( L );
 
     g_assert( app );
 
@@ -60,14 +60,14 @@ Bitmap::~Bitmap()
 
 //.............................................................................
 
-Bitmap * Bitmap::get( lua_State * L , int index )
+Bitmap* Bitmap::get( lua_State* L , int index )
 {
     if ( ! lb_check_udata_type( L , index , "Bitmap" ) )
     {
         return 0;
     }
 
-    return ( Bitmap * ) UserData::get_client( L , index );
+    return ( Bitmap* ) UserData::get_client( L , index );
 }
 
 //.............................................................................
@@ -100,17 +100,17 @@ bool Bitmap::loaded() const
 
 //.............................................................................
 
-void Bitmap::callback( Image * image , gpointer me )
+void Bitmap::callback( Image* image , gpointer me )
 {
     tplog( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
 
-    Bitmap * self = ( Bitmap * ) me;
+    Bitmap* self = ( Bitmap* ) me;
 
     // Image will be null when it failed, otherwise, we take ownership of it
 
     self->image = image;
 
-    if ( lua_State * L = self->lsp->get_lua_state() )
+    if ( lua_State* L = self->lsp->get_lua_state() )
     {
         lua_pushboolean( L , image ? false : true );
         UserData::invoke_callbacks( self , "on_loaded" , 1 , 0 , L );
@@ -123,30 +123,31 @@ void Bitmap::destroy_notify( gpointer me )
 {
     tplog( "  UNREF %p" , me );
 
-    RefCounted::unref( ( RefCounted * ) me );
+    RefCounted::unref( ( RefCounted* ) me );
 }
 
 //.............................................................................
 
-Image * Bitmap::get_image( lua_State * L , int index )
+Image* Bitmap::get_image( lua_State* L , int index )
 {
-    if ( Bitmap * bitmap = Bitmap::get( L , index ) )
+    if ( Bitmap* bitmap = Bitmap::get( L , index ) )
     {
         return bitmap->image;
     }
+
     return 0;
 }
 
 //.............................................................................
 
-Image * Bitmap::get_image()
+Image* Bitmap::get_image()
 {
     return image;
 }
 
 //.............................................................................
 
-void Bitmap::set_image( Image * _image )
+void Bitmap::set_image( Image* _image )
 {
     if ( image )
     {

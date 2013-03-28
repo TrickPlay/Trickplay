@@ -46,99 +46,99 @@ namespace JPEGUtils
 
 //.............................................................................
 
-static int get_exif_orientation( ExifData * exif_data )
+static int get_exif_orientation( ExifData* exif_data )
 {
-	if ( ! exif_data->ifd[ EXIF_IFD_0 ] )
-	{
-		return 0;
-	}
+    if ( ! exif_data->ifd[ EXIF_IFD_0 ] )
+    {
+        return 0;
+    }
 
-	ExifEntry * entry = exif_content_get_entry( exif_data->ifd[ EXIF_IFD_0 ] , EXIF_TAG_ORIENTATION );
+    ExifEntry* entry = exif_content_get_entry( exif_data->ifd[ EXIF_IFD_0 ] , EXIF_TAG_ORIENTATION );
 
-	if ( ! entry )
-	{
-		return 0;
-	}
+    if ( ! entry )
+    {
+        return 0;
+    }
 
-	if ( ! entry->data || ! entry->size || entry->components != 1 )
-	{
-		return 0;
-	}
+    if ( ! entry->data || ! entry->size || entry->components != 1 )
+    {
+        return 0;
+    }
 
-	int result = 0;
+    int result = 0;
 
-	switch( entry->format )
-	{
-	case EXIF_FORMAT_SHORT:
-		result = exif_get_short( entry->data , exif_data_get_byte_order( exif_data ) );
-		break;
+    switch ( entry->format )
+    {
+        case EXIF_FORMAT_SHORT:
+            result = exif_get_short( entry->data , exif_data_get_byte_order( exif_data ) );
+            break;
 
-	case EXIF_FORMAT_SSHORT:
-		result = exif_get_sshort( entry->data , exif_data_get_byte_order( exif_data ) );
-		break;
+        case EXIF_FORMAT_SSHORT:
+            result = exif_get_sshort( entry->data , exif_data_get_byte_order( exif_data ) );
+            break;
 
-	default:
-		break;
-	}
+        default:
+            break;
+    }
 
-	if ( result <= 0 || result > 8 )
-	{
-		return 0;
-	}
+    if ( result <= 0 || result > 8 )
+    {
+        return 0;
+    }
 
-	return result;
+    return result;
 }
 
 //.............................................................................
 
-int get_exif_orientation( const char * filename )
+int get_exif_orientation( const char* filename )
 {
-	if ( ExifData * exif_data = exif_data_new_from_file( filename ) )
-	{
-		int result = get_exif_orientation( exif_data );
+    if ( ExifData* exif_data = exif_data_new_from_file( filename ) )
+    {
+        int result = get_exif_orientation( exif_data );
 
-		exif_data_unref( exif_data );
+        exif_data_unref( exif_data );
 
-		return result;
-	}
+        return result;
+    }
 
-	return 0;
+    return 0;
 }
 
 //.............................................................................
 
-int get_exif_orientation( const unsigned char * data , unsigned int size )
+int get_exif_orientation( const unsigned char* data , unsigned int size )
 {
-	if ( ExifData * exif_data = exif_data_new_from_data( data , size ) )
-	{
-		int result = get_exif_orientation( exif_data );
+    if ( ExifData* exif_data = exif_data_new_from_data( data , size ) )
+    {
+        int result = get_exif_orientation( exif_data );
 
-		exif_data_unref( exif_data );
+        exif_data_unref( exif_data );
 
-		return result;
-	}
+        return result;
+    }
 
-	return 0;
+    return 0;
 }
 
 //.............................................................................
 
 Rotator::Rotator( int _orientation , unsigned int _width , unsigned int _height , unsigned int _depth )
-:
-		orientation( _orientation ),
-		width( _width ),
-		height( _height ),
-		depth( _depth )
+    :
+    orientation( _orientation ),
+    width( _width ),
+    height( _height ),
+    depth( _depth )
 {}
 
 //.............................................................................
 
 Rotator::Rotator()
-:
-		orientation( 0 ),
-		width( 0 ),
-		height( 0 ),
-		depth( 0 )
+    :
+    orientation( 0 ),
+    width( 0 ),
+    height( 0 ),
+    depth( 0 )
 {}
 
 //.............................................................................

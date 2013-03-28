@@ -5,11 +5,11 @@
 #import <AppKit/AppKit.h>
 
 
-void osx_cursor_glue_set(int cursor)
+void osx_cursor_glue_set( int cursor )
 {
-    NSAutoreleasePool *autorelease_pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* autorelease_pool = [[NSAutoreleasePool alloc] init];
 
-    switch(cursor)
+    switch ( cursor )
     {
         case XC_bottom_side:
             [[NSCursor resizeDownCursor] set];

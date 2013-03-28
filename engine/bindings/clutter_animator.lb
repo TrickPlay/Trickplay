@@ -16,11 +16,7 @@ void Animator_started( ClutterTimeline * timeline , gpointer anim )
 
 void Animator_completed( ClutterTimeline * timeline , gpointer anim )
 {
-#ifdef CLUTTER_VERSION_1_10
     if ( clutter_timeline_get_repeat_count( timeline ) == 0 )
-#else
-    if ( ! clutter_timeline_get_loop( timeline ) )
-#endif
     {
         g_object_unref( anim );
     }

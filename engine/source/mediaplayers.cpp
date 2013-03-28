@@ -14,9 +14,9 @@
 #include "log.h"
 //=============================================================================
 
-MediaPlayer::Event * MediaPlayer::Event::make( Type type, int code, const gchar * message, const gchar * value )
+MediaPlayer::Event* MediaPlayer::Event::make( Type type, int code, const gchar* message, const gchar* value )
 {
-    Event * result = g_slice_new( Event );
+    Event* result = g_slice_new( Event );
     result->type = type;
     result->code = code;
     result->message = message ? g_strdup( message ) : NULL;
@@ -24,7 +24,7 @@ MediaPlayer::Event * MediaPlayer::Event::make( Type type, int code, const gchar 
     return result;
 }
 
-void MediaPlayer::Event::destroy( Event * event )
+void MediaPlayer::Event::destroy( Event* event )
 {
     g_assert( event );
     g_free( event->message );
@@ -42,7 +42,7 @@ void MediaPlayer::Event::destroy( Event * event )
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
 
-MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor constructor, Delegate * delegate )
+MediaPlayer* MediaPlayer::make( TPContext* context , TPMediaPlayerConstructor constructor, Delegate* delegate )
 {
     if ( !constructor )
     {
@@ -50,9 +50,9 @@ MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor 
         return NULL;
     }
 
-    Wrapper * wrapper = ( Wrapper * )g_malloc0( sizeof( Wrapper ) );
+    Wrapper* wrapper = ( Wrapper* )g_malloc0( sizeof( Wrapper ) );
 
-    TPMediaPlayer * mp = &wrapper->mp;
+    TPMediaPlayer* mp = &wrapper->mp;
 
     wrapper->marker = mp;
 
@@ -73,7 +73,7 @@ MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor 
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer::MediaPlayer( TPContext * c , Wrapper * w, Delegate * d )
+MediaPlayer::MediaPlayer( TPContext* c , Wrapper* w, Delegate* d )
     :
     context( c ),
     wrapper( w ),
@@ -142,10 +142,10 @@ MediaPlayer::~MediaPlayer()
 // Very pedantic, but better safe than sorry when these come from the outside
 // world.
 
-MediaPlayer * MediaPlayer::get( TPMediaPlayer * mp )
+MediaPlayer* MediaPlayer::get( TPMediaPlayer* mp )
 {
     g_assert( mp );
-    Wrapper * wrapper = ( Wrapper * )mp;
+    Wrapper* wrapper = ( Wrapper* )mp;
     g_assert( &wrapper->mp == mp );
     g_assert( wrapper->marker == mp );
     g_assert( wrapper->player );
@@ -156,7 +156,7 @@ MediaPlayer * MediaPlayer::get( TPMediaPlayer * mp )
 
 //-----------------------------------------------------------------------------
 
-TPMediaPlayer * MediaPlayer::get_mp()
+TPMediaPlayer* MediaPlayer::get_mp()
 {
     return &wrapper->mp;
 }
@@ -217,7 +217,7 @@ void MediaPlayer::reset()
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::load( const char * uri, const char * extra )
+int MediaPlayer::load( const char* uri, const char* extra )
 {
     MPLOCK;
 
@@ -225,7 +225,7 @@ int MediaPlayer::load( const char * uri, const char * extra )
 
     reset();
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( !mp->load )
     {
@@ -233,7 +233,7 @@ int MediaPlayer::load( const char * uri, const char * extra )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    gchar * unescaped_uri = g_uri_unescape_string( uri , 0 );
+    gchar* unescaped_uri = g_uri_unescape_string( uri , 0 );
 
     if ( ! unescaped_uri )
     {
@@ -263,9 +263,9 @@ int MediaPlayer::play()
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
-    if ( !( state&( TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    play CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -296,9 +296,9 @@ int MediaPlayer::seek( double seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    seek CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -327,9 +327,9 @@ int MediaPlayer::pause()
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING ) ) )
     {
         g_warning( "MP[%p]    pause CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -360,7 +360,7 @@ int MediaPlayer::set_playback_rate( int rate )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( rate == 0 )
     {
@@ -368,7 +368,7 @@ int MediaPlayer::set_playback_rate( int rate )
         return TP_MEDIAPLAYER_ERROR_BAD_PARAMETER;
     }
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING ) ) )
     {
         g_warning( "MP[%p]    set_playback_rate CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -393,15 +393,15 @@ int MediaPlayer::set_playback_rate( int rate )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_position( double * seconds )
+int MediaPlayer::get_position( double* seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( seconds );
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    get_position CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -428,15 +428,15 @@ int MediaPlayer::get_position( double * seconds )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_duration( double * seconds )
+int MediaPlayer::get_duration( double* seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( seconds );
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    get_duration CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -463,16 +463,16 @@ int MediaPlayer::get_duration( double * seconds )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_buffered_duration( double * start_seconds, double * end_seconds )
+int MediaPlayer::get_buffered_duration( double* start_seconds, double* end_seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( start_seconds );
     g_assert( end_seconds );
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    get_buffered_duration CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -499,16 +499,16 @@ int MediaPlayer::get_buffered_duration( double * start_seconds, double * end_sec
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_video_size( int * width, int * height )
+int MediaPlayer::get_video_size( int* width, int* height )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( width );
     g_assert( height );
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    get_video_size CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -535,11 +535,11 @@ int MediaPlayer::get_video_size( int * width, int * height )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_viewport_geometry( int * left, int * top, int * width, int * height )
+int MediaPlayer::get_viewport_geometry( int* left, int* top, int* width, int* height )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( left );
     g_assert( top );
@@ -571,7 +571,7 @@ int MediaPlayer::set_viewport_geometry( int left, int top, int width, int height
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( width < 0 )
     {
@@ -616,15 +616,15 @@ int MediaPlayer::reset_viewport_geometry( )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_media_type( int * type )
+int MediaPlayer::get_media_type( int* type )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( type );
 
-    if ( !( state&( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
+    if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
         g_warning( "MP[%p]    get_media_type CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
@@ -651,11 +651,11 @@ int MediaPlayer::get_media_type( int * type )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_audio_volume( double * volume )
+int MediaPlayer::get_audio_volume( double* volume )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( volume );
 
@@ -693,7 +693,7 @@ int MediaPlayer::set_audio_volume( double volume )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( !mp->set_audio_volume )
     {
@@ -723,11 +723,11 @@ int MediaPlayer::set_audio_volume( double volume )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::get_audio_mute( int * mute )
+int MediaPlayer::get_audio_mute( int* mute )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     g_assert( mute );
 
@@ -756,7 +756,7 @@ int MediaPlayer::set_audio_mute( int mute )
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( !mp->set_audio_mute )
     {
@@ -782,9 +782,9 @@ int MediaPlayer::set_audio_mute( int mute )
 
 //-----------------------------------------------------------------------------
 
-int MediaPlayer::play_sound( const char * uri )
+int MediaPlayer::play_sound( const char* uri )
 {
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( !mp->play_sound )
     {
@@ -802,11 +802,11 @@ int MediaPlayer::play_sound( const char * uri )
 }
 //-----------------------------------------------------------------------------
 
-void * MediaPlayer::get_viewport_texture()
+void* MediaPlayer::get_viewport_texture()
 {
     MPLOCK;
 
-    TPMediaPlayer * mp = get_mp();
+    TPMediaPlayer* mp = get_mp();
 
     if ( !mp->get_viewport_texture )
     {
@@ -836,7 +836,7 @@ void MediaPlayer::loaded()
 
 //-----------------------------------------------------------------------------
 
-void MediaPlayer::error( int code, const char * message )
+void MediaPlayer::error( int code, const char* message )
 {
     post_event( Event::make( Event::ERROR, code, message ) );
 }
@@ -850,7 +850,7 @@ void MediaPlayer::end_of_stream()
 
 //-----------------------------------------------------------------------------
 
-void MediaPlayer::tag_found( const char * name, const char * value )
+void MediaPlayer::tag_found( const char* name, const char* value )
 {
     post_event( Event::make( Event::TAG, 0, name, value ) );
 }
@@ -859,7 +859,7 @@ void MediaPlayer::tag_found( const char * name, const char * value )
 // Puts the event in the queue and adds an idle source that will process
 // events in the main thread
 
-void MediaPlayer::post_event( Event * event )
+void MediaPlayer::post_event( Event* event )
 {
     g_async_queue_push( queue, event );
 
@@ -871,7 +871,7 @@ void MediaPlayer::post_event( Event * event )
 
 gboolean MediaPlayer::process_events( gpointer data )
 {
-    ( ( MediaPlayer * )data )->process_events();
+    ( ( MediaPlayer* )data )->process_events();
     return FALSE;
 }
 
@@ -881,7 +881,7 @@ void MediaPlayer::process_events()
 {
     MPLOCK;
 
-    while ( Event * event = ( Event * )g_async_queue_try_pop( queue ) )
+    while ( Event* event = ( Event* )g_async_queue_try_pop( queue ) )
     {
         switch ( event->type )
         {
@@ -896,6 +896,7 @@ void MediaPlayer::process_events()
                         ( *it )->loaded( this );
                     }
                 }
+
                 break;
 
             case Event::ERROR:
@@ -922,6 +923,7 @@ void MediaPlayer::process_events()
                         ( *it )->error( this, event->code, event->message );
                     }
                 }
+
                 break;
 
             case Event::EOS:
@@ -935,6 +937,7 @@ void MediaPlayer::process_events()
                         ( *it )->end_of_stream( this );
                     }
                 }
+
                 break;
 
             case Event::TAG:
@@ -953,7 +956,7 @@ void MediaPlayer::process_events()
 
 void MediaPlayer::clear_events()
 {
-    while ( Event * event = ( Event * )g_async_queue_try_pop( queue ) )
+    while ( Event* event = ( Event* )g_async_queue_try_pop( queue ) )
     {
         Event::destroy( event );
     }
@@ -961,7 +964,7 @@ void MediaPlayer::clear_events()
 
 //-----------------------------------------------------------------------------
 
-void MediaPlayer::add_delegate( Delegate * delegate )
+void MediaPlayer::add_delegate( Delegate* delegate )
 {
     if ( !delegate )
     {
@@ -974,7 +977,7 @@ void MediaPlayer::add_delegate( Delegate * delegate )
 
 //-----------------------------------------------------------------------------
 
-void MediaPlayer::remove_delegate( Delegate * delegate )
+void MediaPlayer::remove_delegate( Delegate* delegate )
 {
     if ( !delegate )
     {
@@ -989,7 +992,7 @@ void MediaPlayer::remove_delegate( Delegate * delegate )
 // External callbacks
 //=============================================================================
 
-int tp_media_player_get_state( TPMediaPlayer * mp )
+int tp_media_player_get_state( TPMediaPlayer* mp )
 {
     tplog( "[%p] -> tp_media_player_get_state", mp );
     return MediaPlayer::get( mp )->get_state();
@@ -997,7 +1000,7 @@ int tp_media_player_get_state( TPMediaPlayer * mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_media_player_loaded( TPMediaPlayer * mp )
+void tp_media_player_loaded( TPMediaPlayer* mp )
 {
     tplog( "[%p] -> tp_media_player_loaded", mp );
     MediaPlayer::get( mp )->loaded();
@@ -1005,7 +1008,7 @@ void tp_media_player_loaded( TPMediaPlayer * mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_media_player_error( TPMediaPlayer * mp, int code, const char * message )
+void tp_media_player_error( TPMediaPlayer* mp, int code, const char* message )
 {
     tplog( "[%p] -> tp_media_player_error(%d,'%s')", mp, code, message );
     MediaPlayer::get( mp )->error( code, message );
@@ -1014,7 +1017,7 @@ void tp_media_player_error( TPMediaPlayer * mp, int code, const char * message )
 
 //-----------------------------------------------------------------------------
 
-void tp_media_player_end_of_stream( TPMediaPlayer * mp )
+void tp_media_player_end_of_stream( TPMediaPlayer* mp )
 {
     tplog( "[%p] -> tp_media_player_end_of_stream", mp );
     MediaPlayer::get( mp )->end_of_stream();
@@ -1022,9 +1025,10 @@ void tp_media_player_end_of_stream( TPMediaPlayer * mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_media_player_tag_found( TPMediaPlayer * mp, const char * name, const char * value )
+void tp_media_player_tag_found( TPMediaPlayer* mp, const char* name, const char* value )
 {
     tplog( "[%p] -> tp_media_player_tag_found('%s','%s')", mp, name, value );
+
     if ( name && value )
     {
         MediaPlayer::get( mp )->tag_found( name, value );

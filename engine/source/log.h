@@ -16,7 +16,7 @@
     include this file. If you do, the messages will be prefixed with [<domain>].
 */
 
-void _tplog( const char * domain , GLogLevelFlags level , const char * format , ... );
+void _tplog( const char* domain , GLogLevelFlags level , const char* format , ... );
 
 #ifndef TP_LOG_DOMAIN
 #define TP_LOG_DOMAIN ((gchar*)0)

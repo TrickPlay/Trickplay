@@ -10,27 +10,27 @@ class ControllerLIRC
 {
 public:
 
-    static ControllerLIRC * make( TPContext * context );
+    static ControllerLIRC* make( TPContext* context );
 
     ~ControllerLIRC();
 
 private:
 
-    ControllerLIRC( TPContext * context , const char * uds , guint repeat );
+    ControllerLIRC( TPContext* context , const char* uds , guint repeat );
 
-    static void line_read( GObject * stream , GAsyncResult * result , gpointer me );
+    static void line_read( GObject* stream , GAsyncResult* result , gpointer me );
 
-    void line_read( GObject * stream , GAsyncResult * result );
+    void line_read( GObject* stream , GAsyncResult* result );
 
     typedef std::map< String , int > KeyMap;
 
     KeyMap              key_map;
 
-    GSocketConnection * connection;
+    GSocketConnection* connection;
 
-    TPController *      controller;
+    TPController*       controller;
 
-    GTimer *            timer;
+    GTimer*             timer;
 
     gdouble             repeat;
 };

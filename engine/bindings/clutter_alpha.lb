@@ -17,150 +17,150 @@ static gdouble dummy_alpha( ClutterAlpha * self , gpointer )
     {
         return clutter_timeline_get_progress( t );
     }
-    
+
     return 0;
 }
-  
+
 ]]
 
 /*
     UndocumentedClass: Alpha
-    
+
     The Alpha class has been deprecated. All new code should use the Ease class, instead.
-    
+
     The Alpha class works in conjunction with a <Timeline> object to modify the Timeline's progress value to enable various animation ease-in and ease-out modes. (Note: The term "alpha" is also used to refer to an object's transparency/opacity setting, but the Alpha class and the alpha transparency setting are not in fact related in any way.)
-    
+
     By default, an animation progresses along a "linear" alpha mode; that is, the amount of movement between each frame is equal so that movement remains constant throughout the animation.
-    
+
     With an "ease in" alpha mode, less movement occurs between each frame in the beginning of the animation. The appearance is an animation that begins slowly before eventually arriving at its regular speed.
-    
+
     An "ease out" alpha mode has less between-frame movement at the end of the animation, giving an object the appearance of gradually slowing down.
-    
+
     It is possible to use both ease in and ease out in the same animation. The effect would be of an object slowly speeding up to its top speed and then gradually slowing down as it neared the animation's completion.
-    
+
     Several ease-in and ease-out alpha modes are predefined, and it is also possible to define custom alpha modes.
-    
+
     An Alpha object is always attached to a Timeline object. The Alpha object hooks into the <Timeline.progress> property that is used during processing of the <Timeline.on_new_frame> event handler. The progress property specifies the percentage of the animation that has completed. The Alpha object transforms the progress property's value to implement its various ease-in and ease-out modes. The transformed value can be retrieved from the Alpha object's <alpha> property.
-    
+
     *Code Example:* Create a Timeline animation using a predefined Alpha mode to affect the ease-in and ease-out.
-    
+
     (code)
     -- Create the Rectangle to animate
-   	movingRect = Rectangle{ position = { -100, 400 },
-	                        size = { 100, 100 },
-	                        color = { 225, 225, 0, 255 } }
+    movingRect = Rectangle{ position = { -100, 400 },
+                            size = { 100, 100 },
+                            color = { 225, 225, 0, 255 } }
 
-	-- Show it on the screen
-	screen:add( movingRect )
+    -- Show it on the screen
+    screen:add( movingRect )
 
-	-- Define Interval ranges for animating the Rectangle
-	acrossScreen = Interval( -100, 2020 )  -- moves along these X-axis coordinates
-	fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
+    -- Define Interval ranges for animating the Rectangle
+    acrossScreen = Interval( -100, 2020 )  -- moves along these X-axis coordinates
+    fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
 
-	-- Define an Alpha mode for the movement along the X-axis
-	-- Note: If desired, a second Alpha mode could be define and applied in the same manner on the rotation.
-	movementMode = Alpha{ mode = "EASE_IN_OUT_QUAD" }
-	
-	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
-							  loop = true,      -- loop forever
+    -- Define an Alpha mode for the movement along the X-axis
+    -- Note: If desired, a second Alpha mode could be define and applied in the same manner on the rotation.
+    movementMode = Alpha{ mode = "EASE_IN_OUT_QUAD" }
 
-		-- Event handler
-		on_new_frame = function( self, msecs, progress )
-		
-			-- X changes along range specified in acrossScreen and transformed by movementMode
-			-- Note: To use the transformed progress value, we access the alpha property from the
-			--       Alpha object, rather than the untransformed progress property.
-			movingRect.x = acrossScreen:get_value( movementMode.alpha )
-			
-			-- X rotation around range specified in fullCircle
-			movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
-		end
-	}
-	
-	-- Assign the Alpha mode to the Timeline object (Don't forget to do this!)
-	movementMode.timeline = movingRect_tl
+    -- Animate the Rectangle using a Timeline
+    movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
+                              loop = true,      -- loop forever
 
-	-- Start the Timeline animation
-	movingRect_tl:start()
-	(end)
-	
+        -- Event handler
+        on_new_frame = function( self, msecs, progress )
+
+            -- X changes along range specified in acrossScreen and transformed by movementMode
+            -- Note: To use the transformed progress value, we access the alpha property from the
+            --       Alpha object, rather than the untransformed progress property.
+            movingRect.x = acrossScreen:get_value( movementMode.alpha )
+
+            -- X rotation around range specified in fullCircle
+            movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
+        end
+    }
+
+    -- Assign the Alpha mode to the Timeline object (Don't forget to do this!)
+    movementMode.timeline = movingRect_tl
+
+    -- Start the Timeline animation
+    movingRect_tl:start()
+    (end)
+
 */
 
 class Alpha [[ClutterAlpha*]]
 {
     Alpha(table props = 0)
-	[[
-	    self=clutter_alpha_new();
-	    g_object_ref_sink(self);
-	    g_object_ref(self);
-	    self=lb_construct_gobject( ClutterAlpha , self );
-    	ClutterUtil::set_props_from_table(L,props);
-    	g_object_unref(self);
-	]];
+    [[
+        self=clutter_alpha_new();
+        g_object_ref_sink(self);
+        g_object_ref(self);
+        self=lb_construct_gobject( ClutterAlpha , self );
+        ClutterUtil::set_props_from_table(L,props);
+        g_object_unref(self);
+    ]];
 
-    
+
     ~Alpha()
-	[[
-	]];
-	
-	/*
-		UndocumentedProperty: timeline
-		
-		The timeline property references the Timeline object to which the Alpha object is attached. An Alpha object must be attached to a Timeline.
-		
-		With the Alpha object attached to a Timeline, the Timeline's progress property is used as the base value to be transformed in accordance with the specified Alpha mode. The transformed value is accessible from the <alpha> property when processing the Timeline's on_new_frame() event handler.
-		
-		*Default Setting:* nil
-		
-		*See Also:* the <mode> property
+    [[
+    ]];
 
-	*/
-	
+    /*
+        UndocumentedProperty: timeline
+
+        The timeline property references the Timeline object to which the Alpha object is attached. An Alpha object must be attached to a Timeline.
+
+        With the Alpha object attached to a Timeline, the Timeline's progress property is used as the base value to be transformed in accordance with the specified Alpha mode. The transformed value is accessible from the <alpha> property when processing the Timeline's on_new_frame() event handler.
+
+        *Default Setting:* nil
+
+        *See Also:* the <mode> property
+
+    */
+
     Timeline timeline
-		[[
+        [[
             ClutterUtil::wrap_timeline( L , clutter_alpha_get_timeline( self ) );
-		]]
-		[[
+        ]]
+        [[
             if ( ClutterTimeline * t = ClutterUtil::user_data_to_timeline( L , lua_gettop( L ) ) )
             {
                 clutter_alpha_set_timeline( self , t );
             }
-		]];
-		
-	/*
-		UndocumentedProperty: mode
-		
-		The mode property is a string value that defines the ease-in and ease-out behavior of the animation. Several predefined modes are built-in and can be assigned to the mode property. To define a custom mode, implement the desired behavior in the on_alpha() event handler. If using a custom mode, setting the Alpha object's mode property is not necessary.
-		
-		*Default Setting:* "CUSTOM_MODE"
-		
-		*Supported Modes:* The mode strings are case-sensitive.
-		
-		  "CUSTOM_MODE" - A custom alpha mode is implemented in the on_alpha() event handler. The default on_alpha() event handler simply returns an unmodified alpha value equal to the current progress value. This effectively implements a linear alpha mode.
-		  "LINEAR" - Linear
-		  "EASE_IN_QUAD", "EASE_OUT_QUAD", "EASE_IN_OUT_QUAD" - Ease in/out/both quadratic
-		  "EASE_IN_CUBIC", "EASE_OUT_CUBIC", "EASE_IN_OUT_CUBIC" - Ease in/out/both cubic
-		  "EASE_IN_QUART", "EASE_OUT_QUART", "EASE_IN_OUT_QUART" - Ease in/out/both quartic
-		  "EASE_IN_QUINT", "EASE_OUT_QUINT", "EASE_IN_OUT_QUINT" - Ease in/out/both quintic
-		  "EASE_IN_SINE", "EASE_OUT_SINE", "EASE_IN_OUT_SINE" - Ease in/out/both sinusoidal
-		  "EASE_IN_EXPO", "EASE_OUT_EXPO", "EASE_IN_OUT_EXPO" - Ease in/out/both exponential
-		  "EASE_IN_CIRC", "EASE_OUT_CIRC", "EASE_IN_OUT_CIRC" - Ease in/out/both circular
-		  "EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - Ease in/out/both elastic
-		  "EASE_IN_BACK", "EASE_OUT_BACK", "EASE_IN_OUT_BACK" - Ease in/out/both overshooting cubic
-		  "EASE_IN_BOUNCE", "EASE_OUT_BOUNCE", "EASE_IN_OUT_BOUNCE" - Ease in/out/both exponentially decaying parabolic
-		  
-		*Mode Graphic Depictions and Demos:*
-		
-		Each animation below demonstrates a single predefined Alpha mode. Except for the Alpha mode, all the animations are identical in that they move a sphere down the Y-axis. The Timeline's on_new_frame() event handler for the animations consists of a single line shown below. The referenced sphereInterval is merely an <Interval> object containing the Y-axis points of the top and bottom of each demo's rectangle.
-		
-		(code)
-		function sphereTL:on_new_frame( msecs, progress )
-			sphereImage.y = sphereInterval:get_value( sphereAlpha.alpha )
-		end
-		(end)
+        ]];
 
-		The graph below each animation depicts the effect the mode has on the animated property. The graph's horizontal axis represents the animation's duration. The top of the vertical axis is the animated property's starting value, while the bottom is the ending value. For each graph, the default "LINEAR" mode would be depicted as a straight line from the graph's top-left corner to its bottom-right corner.
+    /*
+        UndocumentedProperty: mode
+
+        The mode property is a string value that defines the ease-in and ease-out behavior of the animation. Several predefined modes are built-in and can be assigned to the mode property. To define a custom mode, implement the desired behavior in the on_alpha() event handler. If using a custom mode, setting the Alpha object's mode property is not necessary.
+
+        *Default Setting:* "CUSTOM_MODE"
+
+        *Supported Modes:* The mode strings are case-sensitive.
+
+          "CUSTOM_MODE" - A custom alpha mode is implemented in the on_alpha() event handler. The default on_alpha() event handler simply returns an unmodified alpha value equal to the current progress value. This effectively implements a linear alpha mode.
+          "LINEAR" - Linear
+          "EASE_IN_QUAD", "EASE_OUT_QUAD", "EASE_IN_OUT_QUAD" - Ease in/out/both quadratic
+          "EASE_IN_CUBIC", "EASE_OUT_CUBIC", "EASE_IN_OUT_CUBIC" - Ease in/out/both cubic
+          "EASE_IN_QUART", "EASE_OUT_QUART", "EASE_IN_OUT_QUART" - Ease in/out/both quartic
+          "EASE_IN_QUINT", "EASE_OUT_QUINT", "EASE_IN_OUT_QUINT" - Ease in/out/both quintic
+          "EASE_IN_SINE", "EASE_OUT_SINE", "EASE_IN_OUT_SINE" - Ease in/out/both sinusoidal
+          "EASE_IN_EXPO", "EASE_OUT_EXPO", "EASE_IN_OUT_EXPO" - Ease in/out/both exponential
+          "EASE_IN_CIRC", "EASE_OUT_CIRC", "EASE_IN_OUT_CIRC" - Ease in/out/both circular
+          "EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - Ease in/out/both elastic
+          "EASE_IN_BACK", "EASE_OUT_BACK", "EASE_IN_OUT_BACK" - Ease in/out/both overshooting cubic
+          "EASE_IN_BOUNCE", "EASE_OUT_BOUNCE", "EASE_IN_OUT_BOUNCE" - Ease in/out/both exponentially decaying parabolic
+
+        *Mode Graphic Depictions and Demos:*
+
+        Each animation below demonstrates a single predefined Alpha mode. Except for the Alpha mode, all the animations are identical in that they move a sphere down the Y-axis. The Timeline's on_new_frame() event handler for the animations consists of a single line shown below. The referenced sphereInterval is merely an <Interval> object containing the Y-axis points of the top and bottom of each demo's rectangle.
+
+        (code)
+        function sphereTL:on_new_frame( msecs, progress )
+            sphereImage.y = sphereInterval:get_value( sphereAlpha.alpha )
+        end
+        (end)
+
+        The graph below each animation depicts the effect the mode has on the animated property. The graph's horizontal axis represents the animation's duration. The top of the vertical axis is the animated property's starting value, while the bottom is the ending value. For each graph, the default "LINEAR" mode would be depicted as a straight line from the graph's top-left corner to its bottom-right corner.
 
 (see ModeQuad.gif)
 (see alphaQuad.png)
@@ -191,88 +191,88 @@ class Alpha [[ClutterAlpha*]]
 (see divSpacer.png)
 (see ModeBounce.gif)
 (see alphaBounce.png)
-		  
-		*See Also:* the <alpha> property and the <on_alpha> event handler
 
-	*/
-	
+        *See Also:* the <alpha> property and the <on_alpha> event handler
+
+    */
+
     string mode
-		[[
-		    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
-		    GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
-		    mode = (v?&(v->value_name[8]):"");
-		    g_type_class_unref(ec);	    
-		]]
-		[[
-		    GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
-		    std::string cm("CLUTTER_");
-		    cm+= mode;
-		    
-		    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
-		    
-		    if(!v)
-			return luaL_error(L,"Invalid alpha mode '%s'",mode);
-			
-		    clutter_alpha_set_mode(self,v->value);
-		    g_type_class_unref(ec);
-		]];
-	
-	/*
-		UndocumentedProperty: alpha
-		
-		The alpha property is a double value containing the transformed progress value from the associated Timeline object.
-		
-		If the alpha mode is "LINEAR" then the alpha value will be identical to the progress setting. Other modes will affect the progress value in varying manners, depending on the mode.
-		
-		The alpha property's value is calculated automatically and is accessible in the Timeline object's on_new_frame() event handler. Timeline objects that have an Alpha object attached to them should access the transformed progress setting stored in the alpha property rather than the untransformed progress property. A code example is given at the top of this section.
-		
-		*Default Setting:* 0
-		
-		*See Also:* the <mode> and <Timeline.progress> properties and the <Timeline.on_new_frame> event handler
+        [[
+            GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+            GEnumValue * v  = g_enum_get_value(ec,clutter_alpha_get_mode(self));
+            mode = (v?&(v->value_name[8]):"");
+            g_type_class_unref(ec);
+        ]]
+        [[
+            GEnumClass * ec = G_ENUM_CLASS(g_type_class_ref(CLUTTER_TYPE_ANIMATION_MODE));
+            std::string cm("CLUTTER_");
+            cm+= mode;
 
-	*/
-	
+            GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
+
+            if(!v)
+            return luaL_error(L,"Invalid alpha mode '%s'",mode);
+
+            clutter_alpha_set_mode(self,v->value);
+            g_type_class_unref(ec);
+        ]];
+
+    /*
+        UndocumentedProperty: alpha
+
+        The alpha property is a double value containing the transformed progress value from the associated Timeline object.
+
+        If the alpha mode is "LINEAR" then the alpha value will be identical to the progress setting. Other modes will affect the progress value in varying manners, depending on the mode.
+
+        The alpha property's value is calculated automatically and is accessible in the Timeline object's on_new_frame() event handler. Timeline objects that have an Alpha object attached to them should access the transformed progress setting stored in the alpha property rather than the untransformed progress property. A code example is given at the top of this section.
+
+        *Default Setting:* 0
+
+        *See Also:* the <mode> and <Timeline.progress> properties and the <Timeline.on_new_frame> event handler
+
+    */
+
     readonly double alpha
-		[[alpha=clutter_alpha_get_alpha(self);]];
-	
-	/*
-		UndocumentedEvent Handler: on_alpha
-		
-		The on_alpha() event handler implements a custom Alpha mode by transforming a received progress value to match a desired behavior. The on_alpha() handler is called immediately before the <Timeline.on_new_frame> event handler is fired. The transformed return value gets assigned to the Alpha object's <alpha> property for use in the subsequently fired on_new_frame() event handler.
-		
-		*Prototype:*
-		
-		(code)
-		double on_alpha( alphaObject, progress )
-		(end)
-		
-		*Arguments:*
-		
-		alphaObject - the Alpha object the event applies to
-		progress - a double value between 0 and 1, inclusive, specifying the percentage of the animation that has completed, e.g., a value of 0.50 indicates that 50% of the animation has completed.
-		
-		*Return Value:* double value containing the transformed progress value. This value will be accessible from the Alpha object's alpha property.
-		
-		By default, the on_alpha() handler simply returns the received progress argument, unchanged. This effectively implements a linear mode with constant, unchanging movement throughout the animation.
-		
-		It is required to implement the on_alpha() event handler only when defining a custom alpha mode. If the Alpha object's <mode> property is set to a predefined mode, the on_alpha() handler is unnecessary.
-		
-		*See Also:* the <mode> and the <alpha> properties
+        [[alpha=clutter_alpha_get_alpha(self);]];
 
-	*/
-    
+    /*
+        UndocumentedEvent Handler: on_alpha
+
+        The on_alpha() event handler implements a custom Alpha mode by transforming a received progress value to match a desired behavior. The on_alpha() handler is called immediately before the <Timeline.on_new_frame> event handler is fired. The transformed return value gets assigned to the Alpha object's <alpha> property for use in the subsequently fired on_new_frame() event handler.
+
+        *Prototype:*
+
+        (code)
+        double on_alpha( alphaObject, progress )
+        (end)
+
+        *Arguments:*
+
+        alphaObject - the Alpha object the event applies to
+        progress - a double value between 0 and 1, inclusive, specifying the percentage of the animation that has completed, e.g., a value of 0.50 indicates that 50% of the animation has completed.
+
+        *Return Value:* double value containing the transformed progress value. This value will be accessible from the Alpha object's alpha property.
+
+        By default, the on_alpha() handler simply returns the received progress argument, unchanged. This effectively implements a linear mode with constant, unchanging movement throughout the animation.
+
+        It is required to implement the on_alpha() event handler only when defining a custom alpha mode. If the Alpha object's <mode> property is set to a predefined mode, the on_alpha() handler is unnecessary.
+
+        *See Also:* the <mode> and the <alpha> properties
+
+    */
+
     callback on_alpha
-		[[
-		    clutter_alpha_set_func(self,dummy_alpha,0,0);
-		    if (on_alpha)
-		    {
-			clutter_alpha_set_func(
-			    self,
-			    Alpha_on_alpha,
-			    App::get(L)->ref_lua_state_proxy(),
-			    Alpha_on_alpha_destroy);
-		    }
-		]];	    
+        [[
+            clutter_alpha_set_func(self,dummy_alpha,0,0);
+            if (on_alpha)
+            {
+            clutter_alpha_set_func(
+                self,
+                Alpha_on_alpha,
+                App::get(L)->ref_lua_state_proxy(),
+                Alpha_on_alpha_destroy);
+            }
+        ]];
 }
 
 [[
@@ -285,22 +285,22 @@ void Alpha_on_alpha_destroy(gpointer lsp)
 gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp)
 {
     lua_State * L=((LuaStateProxy*)lsp)->get_lua_state();
-    
+
     if (!L)
     {
-		return 0;
+        return 0;
     }
-    
+
     lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
-    
+
     if ( UserData::invoke_callback( G_OBJECT( self ) , "on_alpha" , 1 , 1 , L ) )
     {
         gdouble result(lua_tonumber(L,-1));
         lua_pop(L,1);
-    
+
         return result;
     }
-    
+
     return 0;
 }
 ]]
