@@ -152,11 +152,7 @@ class Group [[ClutterActor*]] actor , container
 {
     Group(table props = 0 )
         [[
-#ifdef CLUTTER_VERSION_1_10
           	self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
-#else
-          	self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_group_new ) );
-#endif
 		    ClutterUtil::initialize_actor(L,self,GROUP_METATABLE);
 		    ClutterUtil::set_props_from_table(L,props);
 		    g_object_unref( self );

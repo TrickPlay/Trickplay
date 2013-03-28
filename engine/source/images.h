@@ -379,8 +379,6 @@ private:
         			bpp = 0;
         			break;
 
-#ifdef CLUTTER_VERSION_1_10
-
                 case COGL_PIXEL_FORMAT_RGBA_1010102:
                 case COGL_PIXEL_FORMAT_BGRA_1010102:
                 case COGL_PIXEL_FORMAT_ARGB_2101010:
@@ -391,8 +389,6 @@ private:
                 case COGL_PIXEL_FORMAT_ABGR_2101010_PRE:
                     bpp = 0;
                     break;
-#endif
-
         		}
 
         		width = w;

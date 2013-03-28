@@ -589,7 +589,6 @@ protected:
 
 	    ClutterGeometry g;
 
-#ifdef CLUTTER_VERSION_1_10
         gfloat x, y, width, height;
         clutter_actor_get_position( actor, &x, &y );
         clutter_actor_get_size( actor, &width, &height );
@@ -597,9 +596,6 @@ protected:
         g.y = y;
         g.width = width;
         g.height = height;
-#else
-	    clutter_actor_get_geometry( actor, & g );
-#endif
 
 	    const gchar * name = clutter_actor_get_name( actor );
 	    const gchar * type = ClutterUtil::get_actor_type( actor );
@@ -730,7 +726,6 @@ protected:
 	    if ( CLUTTER_IS_CONTAINER( actor ) )
 	    {
 	        info->indent += 2;
-#ifdef CLUTTER_VERSION_1_10
             ClutterActorIter iter;
             ClutterActor *child;
             clutter_actor_iter_init( &iter, actor );
@@ -738,16 +733,12 @@ protected:
             {
                 dump_actors(child, info);
             }
-#else
-	        clutter_container_foreach( CLUTTER_CONTAINER( actor ), dump_actors, info );
-#endif
 	        info->indent -= 2;
 	    }
 	}
 
     static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
     {
-#ifdef CLUTTER_VERSION_1_10
         ClutterActorIter iter;
         ClutterActor *check;
         clutter_actor_iter_init( &iter, parent );
@@ -759,22 +750,6 @@ protected:
                 return child;
             }
         }
-#else
-        GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
-
-        for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
-        {
-            ClutterActor *check = CLUTTER_ACTOR( item->data );
-
-            // Check if this one matches, or it contains child
-            if( check == child || check_children( check, child ) == child )
-            {
-                return child;
-            }
-        }
-
-        g_list_free( list );
-#endif
 
         // If nothing matched above, then return NULL
         return NULL;

@@ -269,11 +269,7 @@ private:
 
         failif( ! Images::load_texture( CLUTTER_TEXTURE( image ) , file_name ) , "FAILED TO LOAD LAYOUT IMAGE '%s'" , file_name );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( container, image );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( container ) , image );
-#endif
 
         mode.image = image;
     }
@@ -342,11 +338,7 @@ public:
 
     virtual void hide()
     {
-#ifndef CLUTTER_VERSION_1_10
-        clutter_actor_hide_all( get_container() );
-#else
         clutter_actor_hide( get_container() );
-#endif
     }
 
     virtual void show_for_field( const Keyboard::Form::Field & field ) = 0;
@@ -639,14 +631,7 @@ public:
     {
         g_assert( ok() );
 
-#ifndef CLUTTER_VERSION_1_10
-        clutter_actor_show_all( kb->typing_container );
-        clutter_actor_hide_all( kb->typing_focus );
-        clutter_actor_hide_all( kb->typing_layout );
-#else
         clutter_actor_show( kb->typing_container );
-#endif
-
         clutter_actor_show( kb->typing_focus );
         clutter_actor_show( kb->typing_layout );
         layouts.front().reset_mode();
@@ -826,25 +811,14 @@ public:
 
         field = & _field;
 
-#ifndef CLUTTER_VERSION_1_10
-        clutter_actor_show_all( kb->list_container );
-        clutter_actor_hide_all( kb->list_focus );
-        clutter_actor_hide_all( kb->list_layout );
-#else
         clutter_actor_show( kb->list_container );
-#endif
-
         clutter_actor_show( kb->list_focus );
         clutter_actor_show( kb->list_layout );
         clutter_actor_show( layout.get_mode().image );
 
         clutter_actor_hide( kb->current_field_value );
 
-#ifndef CLUTTER_VERSION_1_10
-        clutter_actor_hide_all( item_container );
-#else
         clutter_actor_hide(item_container );
-#endif
 
         clutter_actor_set_y( item_container , 0 );
 
@@ -858,11 +832,7 @@ public:
 
         gfloat item_width = clutter_actor_get_width( item_container );
 
-#ifdef CLUTTER_VERSION_1_10
         int existing = clutter_actor_get_n_children( item_container );
-#else
-        int existing = clutter_group_get_n_children( CLUTTER_GROUP( item_container ) );
-#endif
 
         int i = 0;
 
@@ -872,11 +842,7 @@ public:
 
             if ( i < existing )
             {
-#ifdef CLUTTER_VERSION_1_10
                 item = clutter_actor_get_child_at_index( item_container, i );
-#else
-                item = clutter_group_get_nth_child( CLUTTER_GROUP( item_container ) , i );
-#endif
             }
             else
             {
@@ -898,11 +864,7 @@ public:
 
                 clutter_text_set_ellipsize( CLUTTER_TEXT( item ) , PANGO_ELLIPSIZE_END );
 
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_add_child( item_container, item );
-#else
-                clutter_group_add( CLUTTER_GROUP( item_container ) , item );
-#endif
             }
 
             clutter_text_set_text( CLUTTER_TEXT( item ) , it->second.c_str() );
@@ -1442,11 +1404,7 @@ bool Keyboard::show_internal( lua_State * L , int form_index )
 
     clutter_actor_set_x( keyboard , x_in );
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_set_child_above_sibling( clutter_actor_get_parent( keyboard ), keyboard, NULL );
-#else
-    clutter_actor_raise_top( keyboard );
-#endif
 
     clutter_actor_show( keyboard );
 
@@ -1542,7 +1500,6 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
     }
     else if ( CLUTTER_IS_CONTAINER( actor ) )
     {
-#ifdef CLUTTER_VERSION_1_10
         ClutterActorIter iter;
         ClutterActor *child;
         clutter_actor_iter_init( &iter, actor );
@@ -1550,9 +1507,6 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
         {
             load_static_images( child, assets_path );
         }
-#else
-        clutter_container_foreach( CLUTTER_CONTAINER( actor ) , CLUTTER_CALLBACK( load_static_images ) , (gpointer)assets_path );
-#endif
     }
 }
 
@@ -1724,7 +1678,6 @@ Keyboard::Keyboard( TPContext * c )
 
     assets_path = keyboard_assets_path;
 
-#ifdef CLUTTER_VERSION_1_10
         ClutterActorIter iter;
         ClutterActor *child;
         clutter_actor_iter_init( &iter, keyboard );
@@ -1732,9 +1685,6 @@ Keyboard::Keyboard( TPContext * c )
         {
             load_static_images( child, keyboard_assets_path );
         }
-#else
-    clutter_container_foreach( CLUTTER_CONTAINER( keyboard ) , CLUTTER_CALLBACK( load_static_images ) , keyboard_assets_path );
-#endif
 
     // Get the width of the keyboard
 
@@ -1752,19 +1702,11 @@ Keyboard::Keyboard( TPContext * c )
 
     // Create a group to hold focus rings
 
-#ifdef CLUTTER_VERSION_1_10
     focus_rings = clutter_actor_new();
-#else
-    focus_rings = clutter_group_new();
-#endif
 
     clutter_actor_set_name( focus_rings , "focus-rings" );
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_add_child( keyboard, focus_rings );
-#else
-    clutter_container_add_actor( CLUTTER_CONTAINER( keyboard ) , focus_rings );
-#endif
 
     clutter_actor_hide( focus_rings );
 
@@ -1788,11 +1730,7 @@ Keyboard::Keyboard( TPContext * c )
 
     g_object_ref( keyboard );
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_add_child( stage, keyboard );
-#else
-    clutter_container_add( CLUTTER_CONTAINER( stage ) , keyboard , NULL );
-#endif
 
     clutter_actor_hide( keyboard );
 
@@ -1855,11 +1793,7 @@ ClutterActor * Keyboard::show_focus_ring( ClutterActor * container , const char 
 
             clutter_actor_set_name( source , name );
 
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_add_child( focus_rings, source );
-#else
-            clutter_container_add_actor( CLUTTER_CONTAINER( focus_rings ) , source );
-#endif
         }
 
         ring = clutter_clone_new( source );
@@ -1873,11 +1807,7 @@ ClutterActor * Keyboard::show_focus_ring( ClutterActor * container , const char 
 
         clutter_actor_set_name( ring , name );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( container, ring );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( container ) , ring );
-#endif
     }
 
     clutter_actor_set_position( ring , x , y );
@@ -2022,11 +1952,7 @@ bool Keyboard::build_field_list()
     //.........................................................................
     // See how many fields we already have in the field list container
 
-#ifdef CLUTTER_VERSION_1_10
     int existing_fields = clutter_actor_get_n_children( field_list_container );
-#else
-    int existing_fields = clutter_group_get_n_children( CLUTTER_GROUP( field_list_container ) );
-#endif
 
     int form_fields = form.fields.size();
 
@@ -2043,11 +1969,7 @@ bool Keyboard::build_field_list()
 
         if ( existing_fields > 0 )
         {
-#ifdef CLUTTER_VERSION_1_10
             ClutterActor * field = clutter_actor_get_first_child( field_list_container );
-#else
-            ClutterActor * field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , 0 );
-#endif
 
             top = existing_fields * ( clutter_actor_get_y( field ) + clutter_actor_get_height( field ) );
         }
@@ -2097,7 +2019,6 @@ bool Keyboard::build_field_list()
                 }
             }
 
-#ifdef CLUTTER_VERSION_1_10
             ClutterActorIter iter;
             ClutterActor *child;
             clutter_actor_iter_init( &iter, group );
@@ -2107,11 +2028,6 @@ bool Keyboard::build_field_list()
             }
 
             clutter_actor_add_child( field_list_container, group );
-#else
-            clutter_container_foreach( CLUTTER_CONTAINER( group ) , CLUTTER_CALLBACK( load_static_images ) , ( gpointer ) assets_path.c_str() );
-
-            clutter_container_add_actor( CLUTTER_CONTAINER( field_list_container ) , group );
-#endif
 
             gfloat y = clutter_actor_get_y( group );
 
@@ -2124,11 +2040,7 @@ bool Keyboard::build_field_list()
     //.........................................................................
     // Hide everything
 
-#ifndef CLUTTER_VERSION_1_10
-    clutter_actor_hide_all( field_list_container );
-#else
     clutter_actor_hide( field_list_container );
-#endif
 
     //.........................................................................
     // Now, set-up each field
@@ -2146,11 +2058,7 @@ bool Keyboard::build_field_list()
             ff.handler = typing_handler;
         }
 
-#ifdef CLUTTER_VERSION_1_10
         ClutterActor * field = clutter_actor_get_child_at_index( field_list_container, i );
-#else
-        ClutterActor * field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , i );
-#endif
 
         g_assert( field );
 
@@ -2237,19 +2145,11 @@ void Keyboard::switch_to_field( size_t field_index )
 
     // Make sure the container has the right number of fields
 
-#ifdef CLUTTER_VERSION_1_10
     g_assert( clutter_actor_get_n_children( field_list_container ) >= int( nfields ) );
 
     // Get the first field, so we can calculate the height of all fields
 
     ClutterActor * first_field = clutter_actor_get_first_child( field_list_container );
-#else
-    g_assert( clutter_group_get_n_children( CLUTTER_GROUP( field_list_container ) ) >= int( nfields ) );
-
-    // Get the first field, so we can calculate the height of all fields
-
-    ClutterActor * first_field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , 0 );
-#endif
 
     g_assert( first_field );
 
@@ -2282,11 +2182,7 @@ void Keyboard::switch_to_field( size_t field_index )
 
     for ( size_t i = 0; i < nfields; ++i )
     {
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_opacity( clutter_actor_get_child_at_index( field_list_container, i ) , i == field_index ? 255 : KB_UNFOCUSED_OPACITY );
-#else
-        clutter_actor_set_opacity( clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , i ) , i == field_index ? 255 : KB_UNFOCUSED_OPACITY );
-#endif
     }
 
     form.current_field = field_index;
@@ -2386,11 +2282,7 @@ void Keyboard::update_field_value()
 {
     const Form::Field & field( form.get_field() );
 
-#ifdef CLUTTER_VERSION_1_10
     ClutterActor * ff = clutter_actor_get_child_at_index( field_list_container, form.current_field );
-#else
-    ClutterActor * ff = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , form.current_field );
-#endif
 
     g_assert( ff );
 

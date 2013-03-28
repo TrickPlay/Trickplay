@@ -148,11 +148,7 @@ private:
 
         g_object_ref_sink( text );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
-#endif
         getrusage(RUSAGE_SELF, &old);
 
         source = g_timeout_add_seconds( 1 , on_tick , this );
@@ -164,11 +160,7 @@ private:
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
         {
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
-#else
-            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
-#endif
         }
 
         g_object_unref( text );
@@ -217,11 +209,7 @@ private:
             clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
         }
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
-#else
-        clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
-#endif
 
         g_timer_start( timer );
     }
@@ -280,11 +268,7 @@ private:
 
         g_object_ref_sink( text );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, CLUTTER_ACTOR(text) );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
-#endif
 
         frames = 0;
 
@@ -297,11 +281,7 @@ private:
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( CLUTTER_ACTOR( text ) ) )
         {
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_remove_child( parent, CLUTTER_ACTOR(text) );
-#else
-            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
-#endif
         }
 
         g_object_unref( text );
@@ -339,11 +319,7 @@ private:
             clutter_text_set_color( text, clutter_color_get_static( CLUTTER_COLOR_RED ) );
         }
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_child_above_sibling( stage, CLUTTER_ACTOR( text ), NULL );
-#else
-        clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
-#endif
 
         frames = 0;
         g_timer_start( timer );
@@ -415,11 +391,7 @@ private:
 
         g_free( t );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, texture );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
-#endif
 
         bar = g_new0( guchar , 4 * height );
 
@@ -438,11 +410,7 @@ private:
     {
         if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
         {
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_remove_child( parent, texture );
-#else
-            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
-#endif
         }
 
         g_object_unref( texture );
@@ -497,11 +465,7 @@ private:
 
         clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , white_bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_set_child_above_sibling( stage, texture, NULL );
-#else
-        clutter_actor_raise_top( texture );
-#endif
 
         g_timer_start( timer );
     }
@@ -518,7 +482,6 @@ private:
 
 static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
 {
-#ifdef CLUTTER_VERSION_1_10
     ClutterActorIter iter;
     ClutterActor *check;
     clutter_actor_iter_init( &iter, parent );
@@ -530,22 +493,6 @@ static ClutterActor * check_children( ClutterActor *parent, ClutterActor *child)
             return child;
         }
     }
-#else
-    GList * list = clutter_container_get_children( CLUTTER_CONTAINER( parent ) );
-
-    for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
-    {
-        ClutterActor *check = CLUTTER_ACTOR( item->data );
-
-        // Check if this one matches, or it contains child
-        if( check == child || check_children( check, child ) == child )
-        {
-            return child;
-        }
-    }
-
-    g_list_free( list );
-#endif
 
     // If nothing matched above, then return NULL
     return NULL;

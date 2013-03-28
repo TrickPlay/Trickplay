@@ -378,7 +378,6 @@ private:
 	    {
 			Array & children( object[ "children" ].as<Array>() );
 
-#ifdef CLUTTER_VERSION_1_10
             ClutterActorIter iter;
             ClutterActor *child;
             clutter_actor_iter_init( &iter, actor );
@@ -388,18 +387,6 @@ private:
 
 				dump_ui_actors( child , child_object );
            }
-#else
-			GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ) );
-
-			for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
-			{
-				Object & child_object( children.append().as<Object>() );
-
-				dump_ui_actors( CLUTTER_ACTOR( item->data ) , child_object );
-			}
-
-			g_list_free( list );
-#endif
 	    }
 	}
 };

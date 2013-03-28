@@ -353,12 +353,7 @@ Toast::Toast( TPContext * c )
 
     // Add the group to the stage
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_add_child( stage, group );
-#else
-    clutter_container_add( CLUTTER_CONTAINER( stage ) , group , NULL );
-#endif
-
 }
 
 //-----------------------------------------------------------------------------
@@ -412,11 +407,7 @@ bool Toast::show_internal( lua_State * L , const char * _title , const char * _p
 
     clutter_actor_set_opacity( group , 0 );
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_set_child_above_sibling( clutter_actor_get_parent( group ), group, NULL );
-#else
-    clutter_actor_raise_top( group );
-#endif
 
     clutter_actor_show( group );
 
@@ -535,14 +526,7 @@ void Toast::replace_background()
 
     ClutterActor * parent = clutter_actor_get_parent( background );
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_replace_child( parent, background, texture );
-#else
-    clutter_container_add_actor( CLUTTER_CONTAINER( parent ) , texture );
-    clutter_actor_lower( texture , background );
-
-    clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , background );
-#endif
 
     background = 0;
 }
