@@ -30,11 +30,7 @@ void Timeline_paused( ClutterTimeline * timeline , gpointer )
 
 void Timeline_completed( ClutterTimeline * timeline , gpointer )
 {
-#ifdef CLUTTER_VERSION_1_10
     if ( clutter_timeline_get_repeat_count( timeline ) == 0 )
-#else
-    if ( ! clutter_timeline_get_loop( timeline ) )
-#endif
     {
         g_object_unref( timeline );
     }
@@ -157,18 +153,10 @@ class Timeline [[ClutterTimeline*]]
 
     bool loop
 	[[
-#ifdef CLUTTER_VERSION_1_10
         loop=(clutter_timeline_get_repeat_count(self) == -1);
-#else
-	    loop=clutter_timeline_get_loop(self);
-#endif
 	]]
 	[[
-#ifdef CLUTTER_VERSION_1_10
         clutter_timeline_set_repeat_count(self, loop ? -1 : 0);
-#else
-	    clutter_timeline_set_loop(self,loop);
-#endif
 	]];
 
 /***************************************

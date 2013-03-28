@@ -184,14 +184,10 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 						case CLUTTER_SCROLL_LEFT: 	direction = TP_CONTROLLER_SCROLL_LEFT; break;
 						case CLUTTER_SCROLL_RIGHT: 	direction = TP_CONTROLLER_SCROLL_RIGHT; break;
 						
-#ifdef CLUTTER_VERSION_1_10
-
                         // In this case, we have to call clutter_event_get_scroll_delta which
                         // gives us x and y deltas. Our API can't handle this yet.
                         
 						case CLUTTER_SCROLL_SMOOTH: break;
-#endif
-						
                     }
 
                     if ( direction != -1 )

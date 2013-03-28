@@ -125,11 +125,7 @@ VersionMap get_versions()
 
     result[ "clutter" ].push_back( Util::format( "%d.%d.%d" , clutter_major_version , clutter_minor_version , clutter_micro_version ) );
     result[ "clutter" ].push_back( CLUTTER_VERSION_S );
-#ifdef CLUTTER_VERSION_1_10
     result[ "clutter" ].push_back( Util::format( "%s" , g_type_name(G_TYPE_FROM_INSTANCE(clutter_get_default_backend())) ) );
-#else
-    result[ "clutter" ].push_back( Util::format( "%s-%s" , CLUTTER_FLAVOUR, CLUTTER_COGL ) );
-#endif
 
     result[ "sndfile" ].push_back( sf_version_string() );
 

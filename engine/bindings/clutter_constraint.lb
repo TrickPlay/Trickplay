@@ -138,11 +138,9 @@ class BindConstraint [[ ClutterConstraint * ]] constraint
                 case CLUTTER_BIND_POSITION:
                     coordinate = "POSITION";
                     break;
-#ifdef CLUTTER_VERSION_1_10
                 case CLUTTER_BIND_ALL:
                     coordinate = "ALL";
                     break;
-#endif
                 default:
                     coordinate = "SIZE";
                     break;
@@ -175,12 +173,10 @@ class BindConstraint [[ ClutterConstraint * ]] constraint
             {
                 bc = CLUTTER_BIND_SIZE;
             }
-#ifdef CLUTTER_VERSION_1_10
             else if ( ! strcmp( coordinate, "ALL" ) )
             {
                 bc = CLUTTER_BIND_ALL;
             }
-#endif
             else
             {
                 luaL_error( L , "Invalid coordinate '%s' for BindConstraint : expecting 'X', 'Y', 'WIDTH', 'HEIGHT', 'POSITION' or 'SIZE'" , coordinate );

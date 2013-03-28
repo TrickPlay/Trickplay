@@ -1687,11 +1687,7 @@ bool Images::cache_has( const String & key )
 
 //=============================================================================
 
-#ifdef CLUTTER_VERSION_1_10
 #define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
-#else
-#define TP_COGL_TEXTURE(t) (t)
-#endif
 
 Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
 :

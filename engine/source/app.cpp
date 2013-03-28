@@ -372,11 +372,7 @@ protected:
         {
             if ( ClutterActor * parent = clutter_actor_get_parent( splash ) )
             {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_remove_child( parent, splash );
-#else
-                clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , splash );
-#endif
             }
         }
 
@@ -1046,11 +1042,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
         clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, splash );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
-#endif
 
         clutter_actor_show( stage );
 
@@ -1114,11 +1106,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     g_assert( stage );
 
-#ifdef CLUTTER_VERSION_1_10
     screen = clutter_actor_new();
-#else
-    screen = clutter_group_new();
-#endif
 
     g_assert( screen );
 
@@ -1306,11 +1294,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
         // By adding it to the stage, the ref is sunk, so we don't need
         // to unref it here.
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, screen );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
-#endif
 
         g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
@@ -1756,11 +1740,7 @@ void App::animate_in()
     // screen and unref it when the timeline completes.
     // unless TP_APP_ANIMATIONS_ENABLED is false
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_set_child_above_sibling( stage, screen, NULL );
-#else
-    clutter_actor_raise_top( screen );
-#endif
 
     clutter_actor_set_scale( screen, width / 1920, height / 1080 );
 
@@ -1775,11 +1755,7 @@ static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor
 
     if ( parent )
     {
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_remove_child( parent, actor );
-#else
-        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
-#endif
     }
    // Something is holding an extra ref.  We'll release it here, but this is wrong
    // We cannot find where the extra ref is being taken; our hope is de-reffing it

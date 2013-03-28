@@ -7,13 +7,8 @@
 #include "app_resource.h"
 #include "util.h"
 
-#ifdef CLUTTER_VERSION_1_10
 #define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
 #define TP_CoglTexture CoglTexture *
-#else
-#define TP_COGL_TEXTURE(t) (t)
-#define TP_CoglTexture CoglHandle
-#endif
 
 class PushTexture
 {
