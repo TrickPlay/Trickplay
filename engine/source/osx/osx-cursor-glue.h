@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void osx_cursor_glue_set(int cursor);
+    void osx_cursor_glue_set( int cursor );
 
 #ifdef __cplusplus
 }

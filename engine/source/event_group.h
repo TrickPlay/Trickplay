@@ -31,7 +31,7 @@ private:
 
     class IdleClosure;
 
-    GMutex     *    mutex;
+    GMutex*         mutex;
     std::set<guint> source_ids;
 };
 

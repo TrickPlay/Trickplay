@@ -15,25 +15,25 @@ class Tuner : public RefCounted
 {
 public:
 
-    Tuner( TunerList * list, TPContext * context , const char * name, TPChannelChangeCallback cb, void * data );
+    Tuner( TunerList* list, TPContext* context , const char* name, TPChannelChangeCallback cb, void* data );
 
-    TPTuner * get_tp_tuner();
+    TPTuner* get_tp_tuner();
 
     String get_name() const;
 
-    int tune_channel( const char *new_channel_uri );
+    int tune_channel( const char* new_channel_uri );
 
-    static int default_tune_channel( TPTuner * controller, const char *, void * );
+    static int default_tune_channel( TPTuner* controller, const char*, void* );
 
     class Delegate
     {
     public:
-    	virtual ~Delegate() {}
+        virtual ~Delegate() {}
     };
 
-    void add_delegate( Delegate * delegate );
+    void add_delegate( Delegate* delegate );
 
-    void remove_delegate( Delegate * delegate );
+    void remove_delegate( Delegate* delegate );
 
 protected:
 
@@ -41,16 +41,16 @@ protected:
 
 
 private:
-    TPTuner    *   tp_tuner;
+    TPTuner*       tp_tuner;
 
     String              name;
 
     TPChannelChangeCallback  cb;
-    void *              data;
+    void*               data;
 
     //.........................................................................
 
-    typedef std::set<Delegate *> DelegateSet;
+    typedef std::set<Delegate*> DelegateSet;
 
     DelegateSet     delegates;
 };
@@ -64,33 +64,33 @@ public:
 
     virtual ~TunerList();
 
-    TPTuner * add_tuner( TPContext * context , const char * name, TPChannelChangeCallback cb, void * data );
+    TPTuner* add_tuner( TPContext* context , const char* name, TPChannelChangeCallback cb, void* data );
 
-    void remove_tuner( TPTuner * tuner );
+    void remove_tuner( TPTuner* tuner );
 
     class Delegate
     {
     public:
-    	virtual ~Delegate() {}
+        virtual ~Delegate() {}
     };
 
-    void add_delegate( Delegate * delegate );
+    void add_delegate( Delegate* delegate );
 
-    void remove_delegate( Delegate * delegate );
+    void remove_delegate( Delegate* delegate );
 
-    typedef std::set<Tuner *> TunerSet;
+    typedef std::set<Tuner*> TunerSet;
 
     TunerSet get_tuners();
 
 private:
 
-    friend void tp_tuner_channel_changed( TPTuner * tuner, const char * new_channel);
+    friend void tp_tuner_channel_changed( TPTuner* tuner, const char* new_channel );
 
-    typedef std::set<TPTuner *> TPTunerSet;
+    typedef std::set<TPTuner*> TPTunerSet;
 
     TPTunerSet tuners;
 
-    typedef std::set<Delegate *> DelegateSet;
+    typedef std::set<Delegate*> DelegateSet;
 
     DelegateSet         delegates;
 

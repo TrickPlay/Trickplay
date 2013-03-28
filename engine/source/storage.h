@@ -11,41 +11,41 @@ extern "C"
 
 namespace Storage
 {
-    class LocalHash
-    {
-    public:
-        LocalHash();
-        ~LocalHash();
+class LocalHash
+{
+public:
+    LocalHash();
+    ~LocalHash();
 
-        String name;
+    String name;
 
-        void connect();
+    void connect();
 
-        String get( String & key );
-        void   put( String & key, String & value );
-        void   del( String & key );
+    String get( String& key );
+    void   put( String& key, String& value );
+    void   del( String& key );
 
-        // Remove all key/value pairs from the DB
-        void nuke();
+    // Remove all key/value pairs from the DB
+    void nuke();
 
-        // Transaction stuff
-        void begin();
-        void commit();
-        void abort();
+    // Transaction stuff
+    void begin();
+    void commit();
+    void abort();
 
-        // Flush to backing store
-        void flush();
+    // Flush to backing store
+    void flush();
 
-        // Count number of key/value pairs in the DB
-        uint64_t count();
+    // Count number of key/value pairs in the DB
+    uint64_t count();
 
-    protected:
-        TCHDB * db;
-    };
+protected:
+    TCHDB* db;
+};
 
 
-    // Count the number of records in the database
-    uint64_t count( LocalHash & db );
+// Count the number of records in the database
+uint64_t count( LocalHash& db );
 };
 
 #endif // _TRICKPLAY_STORAGE_H

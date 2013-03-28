@@ -10,7 +10,7 @@
 #include "images.h"
 
 #define APP_METADATA_FILENAME   "app"
-#define APP_MAIN_FILENAME		"main.lua"
+#define APP_MAIN_FILENAME       "main.lua"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -26,7 +26,7 @@ class LuaStateProxy : public RefCounted
 {
 public:
 
-    lua_State * get_lua_state();
+    lua_State* get_lua_state();
 
     bool is_valid();
 
@@ -34,13 +34,13 @@ public:
 
 private:
 
-    LuaStateProxy( lua_State * l );
+    LuaStateProxy( lua_State* l );
 
     virtual ~LuaStateProxy();
 
     void invalidate();
 
-    lua_State * L;
+    lua_State* L;
 };
 
 //-----------------------------------------------------------------------------
@@ -59,8 +59,8 @@ public:
         Action()
         {}
 
-        Action( const String & _description, const String & _uri, const String & _type )
-        :
+        Action( const String& _description, const String& _uri, const String& _type )
+            :
             description( _description ),
             uri( _uri ),
             type( _type )
@@ -93,20 +93,20 @@ public:
 
         String get_root_uri() const
         {
-        	return root_uri;
+            return root_uri;
         }
 
         String get_root_native_path() const
         {
-        	return root_native_path;
+            return root_native_path;
         }
 
-        bool set_root( const String & uri_or_native_path );
+        bool set_root( const String& uri_or_native_path );
 
     private:
 
-        String		root_uri;
-        String		root_native_path;
+        String      root_uri;
+        String      root_native_path;
     };
 
     //.........................................................................
@@ -115,16 +115,16 @@ public:
     struct LaunchInfo
     {
         LaunchInfo()
-        :
-        	debug( false )
+            :
+            debug( false )
         {}
 
-        LaunchInfo( const String & _caller,
-                const String & _action = String(),
-                const char * _uri = NULL,
-                const char * _type = NULL,
-                const char * _parameters = NULL )
-        :
+        LaunchInfo( const String& _caller,
+                const String& _action = String(),
+                const char* _uri = NULL,
+                const char* _type = NULL,
+                const char* _parameters = NULL )
+            :
             caller( _caller ),
             action( _action ),
             uri( _uri ? _uri : "" ),
@@ -139,63 +139,63 @@ public:
         String  type;
         String  parameters; // serialized Lua
 
-        bool	debug;
+        bool    debug;
     };
 
     //.........................................................................
     // Loads metadata for an app
 
-    static bool load_metadata( const char * app_path, Metadata & metadata );
+    static bool load_metadata( const char* app_path, Metadata& metadata );
 
-    static bool load_metadata_from_data( const gchar * data, Metadata & metadata );
+    static bool load_metadata_from_data( const gchar* data, Metadata& metadata );
 
     //.........................................................................
     // Scans application source directories for apps and adds them to the
     // database.
 
-    static void scan_app_sources( SystemDatabase * sysdb,
-                                  const char * app_sources,
-                                  const char * installed_apps_root,
-                                  bool force );
+    static void scan_app_sources( SystemDatabase* sysdb,
+            const char* app_sources,
+            const char* installed_apps_root,
+            bool force );
 
     //.........................................................................
 
-    static String get_data_directory( TPContext * context, const String & app_id );
+    static String get_data_directory( TPContext* context, const String& app_id );
 
     //.........................................................................
     // Loads an app
 
-    static App * load( TPContext * context, const Metadata & metadata, const LaunchInfo & launch );
+    static App* load( TPContext* context, const Metadata& metadata, const LaunchInfo& launch );
 
     //.........................................................................
     // Get the app from the Lua state
 
-    static App * get( lua_State * L );
+    static App* get( lua_State* L );
 
     //.........................................................................
     // Runs the app
 
-    typedef void ( * RunCallback )( App * app , int result );
+    typedef void ( * RunCallback )( App* app , int result );
 
-    void run( const StringSet & allowed_names , RunCallback run_callback );
+    void run( const StringSet& allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Get the metadata
 
-    const Metadata & get_metadata() const;
+    const Metadata& get_metadata() const;
 
     //.........................................................................
 
-    const String & get_id() const;
+    const String& get_id() const;
 
     //.........................................................................
 
-    const LaunchInfo & get_launch_info() const;
+    const LaunchInfo& get_launch_info() const;
 
     //.........................................................................
     // Get the context
 
-    TPContext * get_context();
+    TPContext* get_context();
 
     //.........................................................................
     // Get the app's data path
@@ -210,12 +210,12 @@ public:
     //.........................................................................
     // Get the cookie jar.
 
-    Network::CookieJar * get_cookie_jar();
+    Network::CookieJar* get_cookie_jar();
 
     //.........................................................................
     // Get the network for this app
 
-    Network * get_network();
+    Network* get_network();
 
     //.........................................................................
     // Get the user agent
@@ -225,26 +225,26 @@ public:
     //.........................................................................
     // Get the Lua state
 
-    lua_State * get_lua_state();
+    lua_State* get_lua_state();
 
     //.........................................................................
 
-    LuaStateProxy * ref_lua_state_proxy();
+    LuaStateProxy* ref_lua_state_proxy();
 
     //.........................................................................
     // Get the event group for the app
 
-    EventGroup * get_event_group();
+    EventGroup* get_event_group();
 
     //.........................................................................
     // ONLY FOR THE EDITOR - apps should not do this
 
-    bool change_app_path( const char * path );
+    bool change_app_path( const char* path );
 
     //.........................................................................
     // This returns the clutter actor for this app's screen
 
-    ClutterActor * get_screen() const;
+    ClutterActor* get_screen() const;
 
     //.........................................................................
     // This shows the app
@@ -258,23 +258,23 @@ public:
 
     //.........................................................................
 
-    class Debugger * get_debugger();
+    class Debugger* get_debugger();
 
     guint16 get_debugger_port();
 
     //.........................................................................
 
-    Image * load_image( const gchar * source , bool read_tags );
+    Image* load_image( const gchar* source , bool read_tags );
 
-    bool load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+    bool load_image_async( const gchar* source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
-    void audio_match( const String & json );
+    void audio_match( const String& json );
 
     //.........................................................................
 
-    const StringMap & get_globals() const
+    const StringMap& get_globals() const
     {
-    	return globals;
+        return globals;
     }
 
 protected:
@@ -283,7 +283,7 @@ protected:
 
 private:
 
-    App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );
+    App( TPContext* context, const Metadata& metadata, const String& data_path, const LaunchInfo& launch );
 
     //.........................................................................
 
@@ -291,7 +291,7 @@ private:
 
     friend class RunAction;
 
-    void run_part2( const StringSet & allowed_names , RunCallback run_callback );
+    void run_part2( const StringSet& allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Drop the cookie jar
@@ -301,18 +301,18 @@ private:
     //.........................................................................
     // Notification handler for profile switches
 
-    static void profile_notification_handler( TPContext * context , const char * subject, void * data );
+    static void profile_notification_handler( TPContext* context , const char* subject, void* data );
 
     void profile_switch();
 
     //.........................................................................
 
-    void secure_lua_state( const StringSet & allowed_names );
+    void secure_lua_state( const StringSet& allowed_names );
 
     //.........................................................................
     // Notification handler to forward everything to our listeners
 
-    static void forward_notification_handler( TPContext * context , const char * subject, void * data );
+    static void forward_notification_handler( TPContext* context , const char* subject, void* data );
 
     //.........................................................................
     // Gets called in an idle source to animate the screen out
@@ -322,7 +322,7 @@ private:
     //.........................................................................
     // The panic handler for Lua, it just prints the message and throws
 
-    static int lua_panic_handler( lua_State * L );
+    static int lua_panic_handler( lua_State* L );
 
     //.........................................................................
     // A handler for changes to the stage allocation (size)
@@ -331,24 +331,24 @@ private:
 
     //.........................................................................
 
-    static int global_tracker( lua_State * L );
+    static int global_tracker( lua_State* L );
 
     //.........................................................................
 
-    TPContext       *       context;
+    TPContext*              context;
     Metadata                metadata;
     String                  data_path;
-    lua_State       *       L;
-    LuaStateProxy     *     lua_state_proxy;
+    lua_State*              L;
+    LuaStateProxy*          lua_state_proxy;
     String                  user_agent;
-    Network        *        network;
-    EventGroup       *      event_group;
-    Network::CookieJar   *  cookie_jar;
-    ClutterActor *          screen;
+    Network*                network;
+    EventGroup*             event_group;
+    Network::CookieJar*     cookie_jar;
+    ClutterActor*           screen;
     LaunchInfo              launch;
     gulong                  stage_allocation_handler;
     guint                   lua_gc_func;
-    StringMap				globals;
+    StringMap               globals;
 
 #ifndef TP_PRODUCTION
 

@@ -84,146 +84,146 @@ public:
 
     //.........................................................................
 
-	class Request
-	{
-	public:
+    class Request
+    {
+    public:
 
-	    class Body
-	    {
-	    public:
+        class Body
+        {
+        public:
 
-	        virtual ~Body() {}
-	        virtual const char * get_data() const = 0;
-	        virtual gsize get_length() const = 0;
+            virtual ~Body() {}
+            virtual const char* get_data() const = 0;
+            virtual gsize get_length() const = 0;
 
-	    protected:
-	        Body() {}
-	    private:
-	        Body( const Body & ) {}
-	    };
+        protected:
+            Body() {}
+        private:
+            Body( const Body& ) {}
+        };
 
         enum Method { HTTP_GET , HTTP_POST , HTTP_PUT , HTTP_DELETE , HTTP_HEAD , OTHER };
 
         virtual ~Request() {}
 
         virtual Method get_method() const = 0;
-		virtual guint16 get_server_port( ) const = 0;
-		virtual String get_path( ) const = 0;
-		virtual URI get_uri() const = 0;
-		virtual String get_request_uri( ) const = 0;
-		virtual String get_header( const String & name ) const = 0;
-		virtual StringMultiMap get_headers( ) const = 0;
-		virtual StringList get_header_names( ) const = 0;
-		virtual StringMap get_parameters( ) const = 0;
-		virtual StringList get_parameter_names( ) const = 0;
-		virtual String get_parameter( const String& name ) const = 0;
-		virtual String get_content_type( ) const = 0;
-		virtual goffset get_content_length( ) const = 0;
-		virtual const Body & get_body() const = 0;
+        virtual guint16 get_server_port( ) const = 0;
+        virtual String get_path( ) const = 0;
+        virtual URI get_uri() const = 0;
+        virtual String get_request_uri( ) const = 0;
+        virtual String get_header( const String& name ) const = 0;
+        virtual StringMultiMap get_headers( ) const = 0;
+        virtual StringList get_header_names( ) const = 0;
+        virtual StringMap get_parameters( ) const = 0;
+        virtual StringList get_parameter_names( ) const = 0;
+        virtual String get_parameter( const String& name ) const = 0;
+        virtual String get_content_type( ) const = 0;
+        virtual goffset get_content_length( ) const = 0;
+        virtual const Body& get_body() const = 0;
 
-		virtual void print_headers() const = 0;
-		virtual void print_parameters() const = 0;
-
-	protected:
-		Request() {}
-	private:
-		Request( const Request & ) {}
-	};
-
-    //.........................................................................
-
-	class Response : public RefCounted
-	{
-	public:
-
-	    class StreamBody
-	    {
-	    public:
-	        virtual void append( const char * data , gsize size ) = 0;
-	        virtual void complete() = 0;
-	        virtual void cancel() = 0;
-	    protected:
-	        StreamBody() {}
-	        virtual ~StreamBody() {}
-	    private:
-	        StreamBody( const StreamBody & ) {}
-	    };
-
-	    class StreamWriter
-	    {
-	    public:
-	        virtual ~StreamWriter() {}
-	        virtual void write( StreamBody & body ) = 0;
-	    };
-
-		virtual void set_header( const String & name , const String & value ) = 0;
-	    virtual void set_response( const String & content_type , const char * data , gsize size ) = 0;
-        virtual void set_response( const String & content_type , const String & content ) = 0;
-	    virtual void set_status( ServerStatus status , const String & msg = String() ) = 0;
-	    virtual void set_content_type( const String & content_type ) = 0;
-	    virtual void set_content_length( goffset content_length ) = 0;
-	    virtual String get_content_type( ) const = 0;
-	    virtual void set_stream_writer( StreamWriter * stream_writer ) = 0;
-	    virtual bool respond_with_file_contents( const String & file_name_or_uri , const String & content_type = String() ) = 0;
-
-	    // pause increases the ref count on this response and returns a pointer to it.
-	    // This is so that you can defer processing of the response beyond the
-	    // handler callback.
-
-	    virtual Response * pause() = 0;
-
-	    virtual bool is_paused() const = 0;
-
-	    // Resume decreases the ref count and tells the server the response
-	    // is ready to be sent.
-
-	    virtual void resume() = 0;
-
-	protected:
-
-	    Response() {};
-
-	    virtual ~Response() {}
-
-	private:
-
-	    Response( const Response & ) {};
-	};
-
-    //.........................................................................
-
-	class RequestHandler
-    {
-    public:
-
-		RequestHandler();
-		RequestHandler( HttpServer * server , const String & path );
-
-	    virtual ~RequestHandler();
-
-	    virtual void handle_http_request( const Request & request , Response & response ) {}
-
-        virtual void handle_http_get    ( const Request & request , Response & response ) { handle_http_request( request , response ); }
-        virtual void handle_http_post   ( const Request & request , Response & response ) { handle_http_request( request , response ); }
-        virtual void handle_http_put    ( const Request & request , Response & response ) { handle_http_request( request , response ); }
-        virtual void handle_http_delete ( const Request & request , Response & response ) { handle_http_request( request , response ); }
-        virtual void handle_http_head   ( const Request & request , Response & response ) { handle_http_request( request , response ); }
+        virtual void print_headers() const = 0;
+        virtual void print_parameters() const = 0;
 
     protected:
-
-        HttpServer *	server;
-        String			path;
+        Request() {}
+    private:
+        Request( const Request& ) {}
     };
 
     //.........................................................................
 
-    HttpServer( guint16 port = 0 , GMainContext * context = 0 );
+    class Response : public RefCounted
+    {
+    public:
+
+        class StreamBody
+        {
+        public:
+            virtual void append( const char* data , gsize size ) = 0;
+            virtual void complete() = 0;
+            virtual void cancel() = 0;
+        protected:
+            StreamBody() {}
+            virtual ~StreamBody() {}
+        private:
+            StreamBody( const StreamBody& ) {}
+        };
+
+        class StreamWriter
+        {
+        public:
+            virtual ~StreamWriter() {}
+            virtual void write( StreamBody& body ) = 0;
+        };
+
+        virtual void set_header( const String& name , const String& value ) = 0;
+        virtual void set_response( const String& content_type , const char* data , gsize size ) = 0;
+        virtual void set_response( const String& content_type , const String& content ) = 0;
+        virtual void set_status( ServerStatus status , const String& msg = String() ) = 0;
+        virtual void set_content_type( const String& content_type ) = 0;
+        virtual void set_content_length( goffset content_length ) = 0;
+        virtual String get_content_type( ) const = 0;
+        virtual void set_stream_writer( StreamWriter* stream_writer ) = 0;
+        virtual bool respond_with_file_contents( const String& file_name_or_uri , const String& content_type = String() ) = 0;
+
+        // pause increases the ref count on this response and returns a pointer to it.
+        // This is so that you can defer processing of the response beyond the
+        // handler callback.
+
+        virtual Response* pause() = 0;
+
+        virtual bool is_paused() const = 0;
+
+        // Resume decreases the ref count and tells the server the response
+        // is ready to be sent.
+
+        virtual void resume() = 0;
+
+    protected:
+
+        Response() {};
+
+        virtual ~Response() {}
+
+    private:
+
+        Response( const Response& ) {};
+    };
+
+    //.........................................................................
+
+    class RequestHandler
+    {
+    public:
+
+        RequestHandler();
+        RequestHandler( HttpServer* server , const String& path );
+
+        virtual ~RequestHandler();
+
+        virtual void handle_http_request( const Request& request , Response& response ) {}
+
+        virtual void handle_http_get( const Request& request , Response& response ) { handle_http_request( request , response ); }
+        virtual void handle_http_post( const Request& request , Response& response ) { handle_http_request( request , response ); }
+        virtual void handle_http_put( const Request& request , Response& response ) { handle_http_request( request , response ); }
+        virtual void handle_http_delete( const Request& request , Response& response ) { handle_http_request( request , response ); }
+        virtual void handle_http_head( const Request& request , Response& response ) { handle_http_request( request , response ); }
+
+    protected:
+
+        HttpServer*     server;
+        String          path;
+    };
+
+    //.........................................................................
+
+    HttpServer( guint16 port = 0 , GMainContext* context = 0 );
 
     ~HttpServer();
 
-    void register_handler( const String & path , RequestHandler * handler );
+    void register_handler( const String& path , RequestHandler* handler );
 
-    void unregister_handler( const String & path );
+    void unregister_handler( const String& path );
 
     guint16 get_port() const;
 
@@ -237,8 +237,8 @@ private:
 
     struct HandlerUserData
     {
-        HandlerUserData( HttpServer * _server , RequestHandler * _handler )
-        :
+        HandlerUserData( HttpServer* _server , RequestHandler* _handler )
+            :
             server( _server ),
             handler( _handler )
         {
@@ -246,25 +246,25 @@ private:
             g_assert( handler );
         }
 
-        HttpServer *        server;
-        RequestHandler *    handler;
+        HttpServer*         server;
+        RequestHandler*     handler;
 
-        static void destroy( HandlerUserData * me )
+        static void destroy( HandlerUserData* me )
         {
             delete me;
         }
     };
 
     static void soup_server_callback(
-    		SoupServer *server,
-            SoupMessage *msg,
-            const char *path,
-            GHashTable *query,
-            SoupClientContext *client,
+            SoupServer* server,
+            SoupMessage* msg,
+            const char* path,
+            GHashTable* query,
+            SoupClientContext* client,
             gpointer user_data
-            );
+    );
 
-    SoupServer * server;
+    SoupServer* server;
 };
 
 

@@ -6,7 +6,7 @@
 
 namespace ConsoleCommands
 {
-	void add_all( TPContext * context );
+void add_all( TPContext* context );
 }
 
 #endif // _TRICKPLAY_CONSOLE_COMMANDS_H
