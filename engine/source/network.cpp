@@ -22,12 +22,12 @@
 // "Mozilla/5.0 (compatible) TrickPlay/1.23.0 (1.23.0-2-ga4240b5)"
 // tp version, tp git version
 
-#define TP_SIMPLE_UA	"Mozilla/5.0 (compatible) TrickPlay/%d.%d.%d (%s)"
+#define TP_SIMPLE_UA    "Mozilla/5.0 (compatible) TrickPlay/%d.%d.%d (%s)"
 
 // Mozilla/5.0 (compatible; en-US) TrickPlay/1.23.0 (com.trickplay.unit-tests/1; Desktop/0.0.0)
 // system language, system country, tp version, app id, app release, system name, system version
 
-#define TP_APP_UA		"Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)"
+#define TP_APP_UA       "Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)"
 
 //****************************************************************************
 // Internal structure to hold all the things we care about while we are
@@ -38,8 +38,8 @@ class Network::RequestClosure
 
 public:
 
-    RequestClosure( const Settings & _settings, const Request & req, CookieJar * cj )
-    :
+    RequestClosure( const Settings& _settings, const Request& req, CookieJar* cj )
+        :
         settings( _settings ),
         event_group( NULL ),
         request( req ),
@@ -62,14 +62,14 @@ public:
         set_id();
     }
 
-    RequestClosure( const Settings & _settings,
-            EventGroup * eg,
-            const Request & req,
-            CookieJar * cj,
+    RequestClosure( const Settings& _settings,
+            EventGroup* eg,
+            const Request& req,
+            CookieJar* cj,
             ResponseCallback cb,
             gpointer d,
             GDestroyNotify dn )
-    :
+        :
         settings( _settings ),
         event_group( eg ),
         request( req ),
@@ -91,15 +91,15 @@ public:
         set_id();
     }
 
-    RequestClosure( const Settings & _settings,
-            EventGroup * eg,
-            const Request & req,
-            CookieJar * cj,
+    RequestClosure( const Settings& _settings,
+            EventGroup* eg,
+            const Request& req,
+            CookieJar* cj,
             IncrementalResponseCallback icb,
             gpointer d,
             GDestroyNotify dn ,
             bool sync )
-    :
+        :
         settings( _settings ),
         event_group( eg ),
         request( req ),
@@ -143,7 +143,7 @@ public:
 
     guint                       id;
     Settings                    settings;
-    EventGroup         *        event_group;
+    EventGroup*                 event_group;
     Request                     request;
     ResponseCallback            callback;
     IncrementalResponseCallback incremental_callback;
@@ -152,8 +152,8 @@ public:
     Response                    response;
     bool                        got_body;
     size_t                      put_offset;
-    CookieJar         *         cookie_jar;
-    curl_slist *                headers;
+    CookieJar*                  cookie_jar;
+    curl_slist*                 headers;
     bool                        synchronized;
 
 private:
@@ -182,26 +182,26 @@ class Network::Event
 {
 public:
 
-    enum Type {QUIT, REQUEST,CANCEL};
+    enum Type {QUIT, REQUEST, CANCEL};
 
-    static Event * quit()
+    static Event* quit()
     {
         return new Event( QUIT );
     }
 
-    static Event * request( RequestClosure * rc )
+    static Event* request( RequestClosure* rc )
     {
         return new Event( rc );
     }
 
-    static Event * cancel( guint id )
+    static Event* cancel( guint id )
     {
         return new Event( CANCEL , id );
     }
 
     static void destroy( gpointer event )
     {
-        delete ( Event * )event;
+        delete( Event* )event;
     }
 
     ~Event()
@@ -212,9 +212,9 @@ public:
         }
     }
 
-    RequestClosure * steal_closure()
+    RequestClosure* steal_closure()
     {
-        RequestClosure * result = closure;
+        RequestClosure* result = closure;
         closure = NULL;
         return result;
     }
@@ -231,14 +231,14 @@ private:
         closure( NULL )
     {}
 
-    Event( RequestClosure * rc )
+    Event( RequestClosure* rc )
         :
         type( REQUEST ),
         id( 0 ),
         closure( rc )
     {}
 
-    RequestClosure * closure;
+    RequestClosure* closure;
 };
 
 
@@ -250,7 +250,7 @@ class Network::CookieJar : public RefCounted
 {
 public:
 
-    CookieJar( const char * fn )
+    CookieJar( const char* fn )
         :
         new_session( true ),
         file_name( fn ),
@@ -267,8 +267,8 @@ public:
 
         if ( g_file_test( fn, G_FILE_TEST_EXISTS ) )
         {
-            gchar * contents = NULL;
-            GError * error = NULL;
+            gchar* contents = NULL;
+            GError* error = NULL;
 
             g_file_get_contents( fn, &contents, NULL, &error );
 
@@ -279,11 +279,13 @@ public:
             }
             else
             {
-                gchar ** lines = g_strsplit( contents, "\n", 0 );
-                for ( gchar ** line = lines; *line; ++line )
+                gchar** lines = g_strsplit( contents, "\n", 0 );
+
+                for ( gchar** line = lines; *line; ++line )
                 {
                     cookies.push_back( String( *line ) );
                 }
+
                 g_strfreev( lines );
             }
 
@@ -291,14 +293,14 @@ public:
         }
     }
 
-    void set_cookie( const char * set_cookie_header )
+    void set_cookie( const char* set_cookie_header )
     {
         Util::GMutexLock lock( mutex );
 
         cookies.push_back( set_cookie_header );
     }
 
-    void add_cookies_to_handle( CURL * handle, bool clear_session = false )
+    void add_cookies_to_handle( CURL* handle, bool clear_session = false )
     {
         Util::GMutexLock lock( mutex );
 
@@ -342,7 +344,7 @@ private:
 
     void save()
     {
-        CURL * eh = curl_easy_init();
+        CURL* eh = curl_easy_init();
         add_cookies_to_handle( eh, true );
         curl_easy_setopt( eh, CURLOPT_COOKIEJAR, file_name.c_str() );
         // This causes curl to save all the cookies back to the file
@@ -353,7 +355,7 @@ private:
     bool        new_session;
     String      file_name;
     StringList  cookies;
-    GMutex   *  mutex;
+    GMutex*     mutex;
 };
 
 
@@ -368,10 +370,10 @@ Network::Request::Request()
     timeout_s( 30 ),
     redirect( true )
 {
-	set_default_user_agent();
+    set_default_user_agent();
 }
 
-Network::Request::Request( const String & _user_agent, const String & _url )
+Network::Request::Request( const String& _user_agent, const String& _url )
     :
     url( _url ),
     method( "GET" ),
@@ -379,16 +381,16 @@ Network::Request::Request( const String & _user_agent, const String & _url )
     redirect( true ),
     user_agent( _user_agent )
 {
-	set_default_user_agent();
+    set_default_user_agent();
 }
 
-void Network::Request::set_headers( const gchar * _headers )
+void Network::Request::set_headers( const gchar* _headers )
 {
     g_assert( _headers );
 
     StringVector lines( split_string( _headers , "\n" ) );
 
-    for( StringVector::const_iterator it = lines.begin(); it != lines.end(); ++it )
+    for ( StringVector::const_iterator it = lines.begin(); it != lines.end(); ++it )
     {
         StringVector parts( split_string( *it , ": " , 2 ) );
 
@@ -404,16 +406,16 @@ void Network::Request::set_headers( const gchar * _headers )
 
 void Network::Request::set_default_user_agent()
 {
-	if ( user_agent.empty() )
-	{
-	    gchar * ua = g_strdup_printf( TP_SIMPLE_UA,
-	                                  TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
-	                                  TP_GIT_VERSION );
+    if ( user_agent.empty() )
+    {
+        gchar* ua = g_strdup_printf( TP_SIMPLE_UA,
+                TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
+                TP_GIT_VERSION );
 
-	    user_agent = ua;
+        user_agent = ua;
 
-	    g_free( ua );
-	}
+        g_free( ua );
+    }
 }
 
 //*****************************************************************************
@@ -432,7 +434,7 @@ Network::Response::~Response()
     g_byte_array_unref( body );
 }
 
-Network::Response::Response( const Response & other )
+Network::Response::Response( const Response& other )
     :
     code( other.code ),
     headers( other.headers ),
@@ -443,7 +445,7 @@ Network::Response::Response( const Response & other )
     g_byte_array_ref( body );
 }
 
-const Network::Response & Network::Response::operator =( const Network::Response & other )
+const Network::Response& Network::Response::operator =( const Network::Response& other )
 {
     code = other.code;
     headers = other.headers;
@@ -456,7 +458,7 @@ const Network::Response & Network::Response::operator =( const Network::Response
     return * this;
 }
 
-const char * Network::Response::get_header( const String & name ) const
+const char* Network::Response::get_header( const String& name ) const
 {
     StringMultiMap::const_iterator it = headers.find( name );
 
@@ -469,14 +471,14 @@ void Network::Response::replace_body( gpointer data , gsize size )
 
     body = g_byte_array_sized_new( size );
 
-    g_byte_array_append( body , ( const guint8 * ) data , size );
+    g_byte_array_append( body , ( const guint8* ) data , size );
 }
 
 //*****************************************************************************
 // Settings
 
-Network::Settings::Settings( TPContext * context )
-:
+Network::Settings::Settings( TPContext* context )
+    :
     debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
     ssl_verify_peer( context->get_bool( TP_SSL_VERIFYPEER, true ) ),
     ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
@@ -490,7 +492,7 @@ class Network::IncrementalResponseClosure
 {
 public:
 
-    static void post( RequestClosure * closure , gpointer chunk , gsize size )
+    static void post( RequestClosure* closure , gpointer chunk , gsize size )
     {
         g_assert( closure );
         g_assert( chunk );
@@ -498,15 +500,15 @@ public:
 
         g_assert( closure->event_group );
 
-        IncrementalResponseClosure * self = new IncrementalResponseClosure( closure , chunk , size );
+        IncrementalResponseClosure* self = new IncrementalResponseClosure( closure , chunk , size );
 
         closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback , self , destroy );
     }
 
 private:
 
-    IncrementalResponseClosure( RequestClosure * closure , gpointer chunk , gsize size )
-    :
+    IncrementalResponseClosure( RequestClosure* closure , gpointer chunk , gsize size )
+        :
         callback( closure->incremental_callback ),
         response( closure->response ),
         user_data( closure->data )
@@ -520,12 +522,12 @@ private:
 
     static void destroy( gpointer self )
     {
-        delete ( IncrementalResponseClosure * ) self;
+        delete( IncrementalResponseClosure* ) self;
     }
 
     static gboolean response_callback( gpointer _self )
     {
-        IncrementalResponseClosure * self = ( IncrementalResponseClosure * ) _self;
+        IncrementalResponseClosure* self = ( IncrementalResponseClosure* ) _self;
 
         self->callback( self->response , self->response.body->data , self->response.body->len , false , self->user_data );
 
@@ -543,7 +545,7 @@ class Network::Thread
 {
 public:
 
-    Thread( GAsyncQueue * q )
+    Thread( GAsyncQueue* q )
         :
         queue( q ),
 #ifndef GLIB_VERSION_2_32
@@ -570,7 +572,7 @@ public:
 
     static gboolean response_callback( gpointer rc )
     {
-        RequestClosure * closure = ( RequestClosure * )rc;
+        RequestClosure* closure = ( RequestClosure* )rc;
 
         if ( closure->incremental_callback )
         {
@@ -589,12 +591,12 @@ public:
 
     static void request_closure_destroy( gpointer rc )
     {
-        delete ( RequestClosure * )rc;
+        delete( RequestClosure* )rc;
     }
     //.........................................................................
     // A request is finished, we set an idle source to run the response callback.
 
-    static void request_finished( RequestClosure * closure )
+    static void request_finished( RequestClosure* closure )
     {
         g_assert( closure->event_group );
         closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback, closure, request_closure_destroy );
@@ -603,7 +605,7 @@ public:
     //.........................................................................
     // A request failed, this just sets the right fields in the closure
 
-    static void request_failed( RequestClosure * closure, CURLcode c )
+    static void request_failed( RequestClosure* closure, CURLcode c )
     {
         closure->response.failed = true;
         closure->response.code = c;
@@ -619,11 +621,11 @@ public:
 
     // The last parameter is a pointer to a RequestClosure
 
-    static size_t curl_write_callback( void * ptr, size_t size, size_t nmemb, void * c )
+    static size_t curl_write_callback( void* ptr, size_t size, size_t nmemb, void* c )
     {
         g_assert( c );
         size_t result = size * nmemb;
-        RequestClosure * closure = ( RequestClosure * ) c;
+        RequestClosure* closure = ( RequestClosure* ) c;
 
         closure->got_body = true;
 
@@ -648,17 +650,17 @@ public:
         }
         else
         {
-            g_byte_array_append( closure->response.body, ( const guint8 * )ptr, result );
+            g_byte_array_append( closure->response.body, ( const guint8* )ptr, result );
         }
 
         return result;
     }
 
-    static size_t curl_read_callback( void * ptr, size_t size, size_t nmemb, void * c )
+    static size_t curl_read_callback( void* ptr, size_t size, size_t nmemb, void* c )
     {
         g_assert( c );
         size_t result = size * nmemb;
-        RequestClosure * closure = ( RequestClosure * ) c;
+        RequestClosure* closure = ( RequestClosure* ) c;
 
         if ( closure->request.body.length() == 0 )
         {
@@ -682,15 +684,15 @@ public:
         return left;
     }
 
-    static int curl_seek_callback(void * c, curl_off_t offset, int origin )
+    static int curl_seek_callback( void* c, curl_off_t offset, int origin )
     {
         g_assert( c );
 
-        RequestClosure * closure = ( RequestClosure * ) c;
+        RequestClosure* closure = ( RequestClosure* ) c;
 
         gssize new_offset = -1;
 
-        switch( origin )
+        switch ( origin )
         {
             case SEEK_SET:
                 new_offset = offset;
@@ -717,11 +719,11 @@ public:
         return CURL_SEEKFUNC_OK;
     }
 
-    static size_t curl_header_callback( void * ptr, size_t size, size_t nmemb, void * c )
+    static size_t curl_header_callback( void* ptr, size_t size, size_t nmemb, void* c )
     {
         g_assert( c );
         size_t result = size * nmemb;
-        RequestClosure * closure = ( RequestClosure * ) c;
+        RequestClosure* closure = ( RequestClosure* ) c;
 
         // The last header only has two bytes
 
@@ -733,7 +735,7 @@ public:
 
         else if ( !closure->got_body && result > 2 )
         {
-            String header( ( char * )ptr, result - 2 );
+            String header( ( char* )ptr, result - 2 );
 
             size_t sep = header.find( ':' );
 
@@ -743,7 +745,7 @@ public:
             {
                 closure->response.headers.clear();
 
-                gchar ** parts = g_strsplit( header.c_str(), " ", 3 );
+                gchar** parts = g_strsplit( header.c_str(), " ", 3 );
 
                 if ( g_strv_length( parts ) != 3 )
                 {
@@ -754,6 +756,7 @@ public:
                     closure->response.code = atoi( parts[1] );
                     closure->response.status = parts[2];
                 }
+
                 g_strfreev( parts );
             }
             else
@@ -763,7 +766,7 @@ public:
                     closure->cookie_jar->set_cookie( header.c_str() );
                 }
 
-                gchar ** parts = g_strsplit( header.c_str() , ":" , 2 );
+                gchar** parts = g_strsplit( header.c_str() , ":" , 2 );
 
                 if ( g_strv_length( parts ) != 2 )
                 {
@@ -783,9 +786,9 @@ public:
 
     // The SSL callback to set client certificates
 
-    static int ssl_client_cert_callback( SSL * ssl, X509 ** x509, EVP_PKEY ** pkey)
+    static int ssl_client_cert_callback( SSL* ssl, X509** x509, EVP_PKEY** pkey )
     {
-        SSL_CTX * ctx = SSL_get_SSL_CTX( ssl );
+        SSL_CTX* ctx = SSL_get_SSL_CTX( ssl );
 
         if ( ! ctx )
         {
@@ -793,7 +796,7 @@ public:
             return 0;
         }
 
-        RequestClosure * closure = ( RequestClosure * ) SSL_CTX_get_app_data( ctx );
+        RequestClosure* closure = ( RequestClosure* ) SSL_CTX_get_app_data( ctx );
 
         if ( ! closure )
         {
@@ -805,9 +808,9 @@ public:
 
         if ( ! closure->request.client_certificate_pem.empty() )
         {
-            BIO * bio = BIO_new_mem_buf( const_cast< char * >( closure->request.client_certificate_pem.c_str() ), -1 );
+            BIO* bio = BIO_new_mem_buf( const_cast< char* >( closure->request.client_certificate_pem.c_str() ), -1 );
 
-            X509 * cert = PEM_read_bio_X509( bio, x509, NULL, NULL );
+            X509* cert = PEM_read_bio_X509( bio, x509, NULL, NULL );
 
             if ( ! cert )
             {
@@ -825,9 +828,9 @@ public:
 
         if ( ! closure->request.client_private_key_pem.empty() )
         {
-            BIO * bio = BIO_new_mem_buf( const_cast< char * >( closure->request.client_private_key_pem.c_str() ), -1 );
+            BIO* bio = BIO_new_mem_buf( const_cast< char* >( closure->request.client_private_key_pem.c_str() ), -1 );
 
-            EVP_PKEY * key = PEM_read_bio_PrivateKey( bio, pkey, NULL, NULL );
+            EVP_PKEY* key = PEM_read_bio_PrivateKey( bio, pkey, NULL, NULL );
 
             if ( ! key )
             {
@@ -867,14 +870,14 @@ public:
 
     // The SSL callback
 
-    static CURLcode curl_ssl_ctx_callback( CURL * eh, void * sslctx , void * c )
+    static CURLcode curl_ssl_ctx_callback( CURL* eh, void* sslctx , void* c )
     {
-        SSL_CTX * ctx = ( SSL_CTX * )sslctx;
+        SSL_CTX* ctx = ( SSL_CTX* )sslctx;
 
         // If the request has a client certificate and a private key, we set
         // another callback to read them.
 
-        RequestClosure * closure = ( RequestClosure * ) c;
+        RequestClosure* closure = ( RequestClosure* ) c;
 
         if ( ! closure->request.client_certificate_pem.empty() && ! closure->request.client_private_key_pem.empty() )
         {
@@ -896,9 +899,9 @@ public:
 
 #define cc(f) if(CURLcode c=f) throw c
 
-    static CURL * create_easy_handle( RequestClosure * closure )
+    static CURL* create_easy_handle( RequestClosure* closure )
     {
-        CURL * eh = curl_easy_init();
+        CURL* eh = curl_easy_init();
         g_assert( eh );
 
         try
@@ -957,7 +960,7 @@ public:
             }
             else if ( closure->request.method == "HEAD" )
             {
-            	cc( curl_easy_setopt( eh, CURLOPT_NOBODY , 1 ) );
+                cc( curl_easy_setopt( eh, CURLOPT_NOBODY , 1 ) );
             }
             else if ( closure->request.method != "GET" )
             {
@@ -966,7 +969,7 @@ public:
 
             if ( closure->request.timeout_s > 0 )
             {
-            	int t = closure->request.timeout_s * 1000;
+                int t = closure->request.timeout_s * 1000;
 
                 cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, t ) );
             }
@@ -1002,11 +1005,11 @@ public:
 
         // Get the queue
 
-        GAsyncQueue * queue = ( GAsyncQueue * )q;
+        GAsyncQueue* queue = ( GAsyncQueue* )q;
 
         // Initialize the multi handle
 
-        CURLM * multi = curl_multi_init();
+        CURLM* multi = curl_multi_init();
         g_assert( multi );
 
         // Variables pulled out of the loop
@@ -1014,8 +1017,8 @@ public:
         long timeout;
         glong pop_wait;
         int running_handles = 0;
-        std::set<CURL *> handles;
-        Event * event;
+        std::set<CURL*> handles;
+        Event* event;
 
         while ( true )
         {
@@ -1045,13 +1048,13 @@ public:
             {
                 // Wait for a new request
 
-                event = ( Event *) Util::g_async_queue_timeout_pop( queue , pop_wait );
+                event = ( Event* ) Util::g_async_queue_timeout_pop( queue , pop_wait );
             }
             else
             {
                 // See if there is a new request but don't wait
 
-                event = ( Event * ) g_async_queue_try_pop( queue );
+                event = ( Event* ) g_async_queue_try_pop( queue );
             }
 
             if ( event )
@@ -1060,11 +1063,11 @@ public:
                 {
                     // Cleanup any handles that are still running
 
-                    for ( std::set<CURL *>::const_iterator it = handles.begin(); it != handles.end(); ++it )
+                    for ( std::set<CURL*>::const_iterator it = handles.begin(); it != handles.end(); ++it )
                     {
-                        CURL * eh = *it;
+                        CURL* eh = *it;
 
-                        RequestClosure * closure = NULL;
+                        RequestClosure* closure = NULL;
 
                         curl_easy_getinfo( eh, CURLINFO_PRIVATE, &closure );
                         curl_multi_remove_handle( multi, eh );
@@ -1086,11 +1089,11 @@ public:
                 {
                     // Initialize the new request
 
-                    RequestClosure * closure = event->steal_closure();
+                    RequestClosure* closure = event->steal_closure();
 
                     // Create the easy handle for it
 
-                    CURL * eh = create_easy_handle( closure );
+                    CURL* eh = create_easy_handle( closure );
 
                     if ( !eh )
                     {
@@ -1110,11 +1113,11 @@ public:
 
                     bool found = false;
 
-                    for ( std::set<CURL *>::iterator it = handles.begin(); it != handles.end(); ++it )
+                    for ( std::set<CURL*>::iterator it = handles.begin(); it != handles.end(); ++it )
                     {
-                        CURL * eh = * it;
+                        CURL* eh = * it;
 
-                        RequestClosure * closure = NULL;
+                        RequestClosure* closure = NULL;
 
                         curl_easy_getinfo( eh, CURLINFO_PRIVATE, & closure );
 
@@ -1166,7 +1169,7 @@ public:
 
                 if ( slow == -1 )
                 {
-                    if ( const char * e = g_getenv( "TP_NETWORK_DELAY" ) )
+                    if ( const char* e = g_getenv( "TP_NETWORK_DELAY" ) )
                     {
                         slow = atof( e );
                     }
@@ -1180,6 +1183,7 @@ public:
                 {
                     usleep( slow * G_USEC_PER_SEC );
                 }
+
 #endif
 
                 if ( result != CURLM_CALL_MULTI_PERFORM )
@@ -1195,18 +1199,18 @@ public:
 
             while ( true )
             {
-                CURLMsg * msg = curl_multi_info_read( multi, &msgs_in_queue );
+                CURLMsg* msg = curl_multi_info_read( multi, &msgs_in_queue );
 
                 if ( !msg )
                 {
                     break;
                 }
 
-                CURL * eh = msg->easy_handle;
+                CURL* eh = msg->easy_handle;
 
                 if ( msg->msg == CURLMSG_DONE )
                 {
-                    RequestClosure * closure = NULL;
+                    RequestClosure* closure = NULL;
 
                     curl_easy_getinfo( eh, CURLINFO_PRIVATE, &closure );
                     g_assert( closure );
@@ -1236,14 +1240,14 @@ public:
 
 private:
 
-    GAsyncQueue  *  queue;
-    GThread    *    thread;
+    GAsyncQueue*    queue;
+    GThread*        thread;
 };
 
 //*****************************************************************************
 
-Network::Network( const Settings & _settings, EventGroup * _event_group )
-:
+Network::Network( const Settings& _settings, EventGroup* _event_group )
+    :
     settings( _settings ),
     event_group( _event_group ),
     queue( g_async_queue_new_full( Event::destroy ) ),
@@ -1258,7 +1262,7 @@ Network::Network( const Settings & _settings, EventGroup * _event_group )
 //.............................................................................
 
 Network::Network()
-:
+    :
     event_group( 0 ),
     queue( g_async_queue_new_full( Event::destroy ) ),
     thread( 0 )
@@ -1295,18 +1299,18 @@ void Network::start()
 
 //.............................................................................
 
-String Network::format_user_agent( const char * language,
-                                   const char * country,
-                                   const char * app_id,
-                                   int app_release,
-                                   const char * system_name,
-                                   const char * system_version )
+String Network::format_user_agent( const char* language,
+        const char* country,
+        const char* app_id,
+        int app_release,
+        const char* system_name,
+        const char* system_version )
 {
-    gchar * ua = g_strdup_printf( TP_APP_UA,
-                                  language, country,
-                                  TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
-                                  app_id, app_release,
-                                  system_name, system_version );
+    gchar* ua = g_strdup_printf( TP_APP_UA,
+            language, country,
+            TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
+            app_id, app_release,
+            system_name, system_version );
 
     String result( ua );
 
@@ -1317,14 +1321,14 @@ String Network::format_user_agent( const char * language,
 
 //.............................................................................
 
-Network::CookieJar * Network::cookie_jar_new( const char * file_name )
+Network::CookieJar* Network::cookie_jar_new( const char* file_name )
 {
     return new CookieJar( file_name );
 }
 
 //.............................................................................
 
-Network::CookieJar * Network::cookie_jar_ref( CookieJar * cookie_jar )
+Network::CookieJar* Network::cookie_jar_ref( CookieJar* cookie_jar )
 {
     CookieJar::ref( cookie_jar );
     return cookie_jar;
@@ -1332,7 +1336,7 @@ Network::CookieJar * Network::cookie_jar_ref( CookieJar * cookie_jar )
 
 //.............................................................................
 
-Network::CookieJar * Network::cookie_jar_unref( CookieJar * cookie_jar )
+Network::CookieJar* Network::cookie_jar_unref( CookieJar* cookie_jar )
 {
     CookieJar::unref( cookie_jar );
     return NULL;
@@ -1340,11 +1344,11 @@ Network::CookieJar * Network::cookie_jar_unref( CookieJar * cookie_jar )
 
 //.............................................................................
 
-Network::Response Network::perform_request( const Request & request, CookieJar * cookie_jar )
+Network::Response Network::perform_request( const Request& request, CookieJar* cookie_jar )
 {
     RequestClosure closure( settings, request, cookie_jar );
 
-    CURL * eh = Thread::create_easy_handle( &closure );
+    CURL* eh = Thread::create_easy_handle( &closure );
 
     if ( eh )
     {
@@ -1363,11 +1367,11 @@ Network::Response Network::perform_request( const Request & request, CookieJar *
 
 //.............................................................................
 
-guint Network::perform_request_async( const Network::Request & request, Network::CookieJar * cookie_jar, Network::ResponseCallback callback, gpointer user, GDestroyNotify notify )
+guint Network::perform_request_async( const Network::Request& request, Network::CookieJar* cookie_jar, Network::ResponseCallback callback, gpointer user, GDestroyNotify notify )
 {
     start();
 
-    RequestClosure * rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify );
+    RequestClosure* rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify );
 
     guint id = rc->id;
 
@@ -1378,11 +1382,11 @@ guint Network::perform_request_async( const Network::Request & request, Network:
 
 //.............................................................................
 
-guint Network::perform_request_async_incremental( const Network::Request & request, Network::CookieJar * cookie_jar, Network::IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify , bool synchronized )
+guint Network::perform_request_async_incremental( const Network::Request& request, Network::CookieJar* cookie_jar, Network::IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify , bool synchronized )
 {
     start();
 
-    RequestClosure * rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify , synchronized );
+    RequestClosure* rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify , synchronized );
 
     guint id = rc->id;
 

@@ -20,7 +20,7 @@ class ControllerDiscoveryMDNS : public ControllerServer::Discovery
 {
 public:
 
-    ControllerDiscoveryMDNS( TPContext * context, const String & name, int port , int http_port );
+    ControllerDiscoveryMDNS( TPContext* context, const String& name, int port , int http_port );
 
     ~ControllerDiscoveryMDNS();
 
@@ -31,14 +31,14 @@ private:
 #if !defined(CLUTTER_WINDOWING_OSX)
     void rename();
 
-    void create_service( AvahiServer * server );
+    void create_service( AvahiServer* server );
 
-    static void avahi_server_callback( AvahiServer * server, AvahiServerState state, void * userdata );
-    static void avahi_entry_group_callback( AvahiServer * server, AvahiSEntryGroup * g, AvahiEntryGroupState state, void * userdata );
+    static void avahi_server_callback( AvahiServer* server, AvahiServerState state, void* userdata );
+    static void avahi_entry_group_callback( AvahiServer* server, AvahiSEntryGroup* g, AvahiEntryGroupState state, void* userdata );
 
-    AvahiGLibPoll *     poll;
-    AvahiServer *       server;
-    AvahiSEntryGroup *  group;
+    AvahiGLibPoll*      poll;
+    AvahiServer*        server;
+    AvahiSEntryGroup*   group;
 #else
     CFNetServiceRef        remote_service;
     CFNetServiceRef        http_service;

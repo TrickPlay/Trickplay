@@ -10,13 +10,13 @@ class Downloads
 {
 public:
 
-    Downloads( TPContext * context );
+    Downloads( TPContext* context );
 
     //.........................................................................
     // Starts a download. Returns zero if it failed to start. Otherwise,
     // returns an integer download identifier. The owner could be an app id
 
-    unsigned int start_download( const String & owner, const Network::Request & request, Network::CookieJar * cookie_jar );
+    unsigned int start_download( const String& owner, const Network::Request& request, Network::CookieJar* cookie_jar );
 
     //..........................................................................
     // Remove an entry for a download that is finished or failed.
@@ -31,7 +31,7 @@ public:
         enum InfoStatus { RUNNING, FAILED, FINISHED };
 
         Info()
-        :
+            :
             id( 0 ),
             status( FAILED ),
             content_length( 0 ),
@@ -41,8 +41,8 @@ public:
             code( 0 )
         {}
 
-        Info( unsigned int _id, const String & _owner, const String & _file_name )
-        :
+        Info( unsigned int _id, const String& _owner, const String& _file_name )
+            :
             id( _id ),
             owner( _owner ),
             file_name( _file_name ),
@@ -89,7 +89,7 @@ public:
             }
         }
 
-        void finished( const Network::Response & response )
+        void finished( const Network::Response& response )
         {
             status = response.failed ? FAILED : FINISHED;
 
@@ -118,7 +118,7 @@ public:
     //..........................................................................
     // Get the information for a download
 
-    bool get_download_info( unsigned int id, Info & info );
+    bool get_download_info( unsigned int id, Info& info );
 
     //..........................................................................
     // Delegate class, to get callbacks. Note that all delegates get callbacks
@@ -129,12 +129,12 @@ public:
     {
     public:
 
-        virtual void download_progress( const Info & info ) = 0;
-        virtual void download_finished( const Info & info ) = 0;
+        virtual void download_progress( const Info& info ) = 0;
+        virtual void download_finished( const Info& info ) = 0;
     };
 
-    void add_delegate( Delegate * delegate );
-    void remove_delegate( Delegate * delegate );
+    void add_delegate( Delegate* delegate );
+    void remove_delegate( Delegate* delegate );
 
 private:
 
@@ -143,8 +143,8 @@ private:
 
     struct Closure
     {
-        Closure( Downloads * _downloads, unsigned int _id, GFile * _file, GFileOutputStream * _stream )
-        :
+        Closure( Downloads* _downloads, unsigned int _id, GFile* _file, GFileOutputStream* _stream )
+            :
             downloads( _downloads ),
             id( _id ),
             file( _file ),
@@ -192,16 +192,16 @@ private:
 
         static void destroy( gpointer closure )
         {
-            delete ( Closure * )closure;
+            delete( Closure* )closure;
         }
 
-        Downloads *         downloads;
+        Downloads*          downloads;
         unsigned int        id;
-        GFile *             file;
-        GFileOutputStream * stream;
+        GFile*              file;
+        GFileOutputStream* stream;
         guint64             content_length;
         guint64             written;
-        GTimer *            timer;
+        GTimer*             timer;
     };
 
     //..........................................................................
@@ -210,9 +210,9 @@ private:
 
     struct Progress
     {
-        static Progress * make( Closure * closure )
+        static Progress* make( Closure* closure )
         {
-            Progress * result = g_slice_new( Progress );
+            Progress* result = g_slice_new( Progress );
 
             result->downloads = closure->downloads;
             result->id = closure->id;
@@ -228,7 +228,7 @@ private:
             g_slice_free( Progress, progress );
         }
 
-        Downloads *     downloads;
+        Downloads*      downloads;
         unsigned int    id;
         guint64         content_length;
         guint64         written;
@@ -242,7 +242,7 @@ private:
     // is not finished. When the request is finished, it gets called in the main
     // thread.
 
-    static bool incremental_callback( const Network::Response & response, gpointer body, guint len, bool finished, gpointer user );
+    static bool incremental_callback( const Network::Response& response, gpointer body, guint len, bool finished, gpointer user );
 
     String                  path;
     std::auto_ptr<Network>  network;
@@ -251,7 +251,7 @@ private:
     //..........................................................................
     // Map that holds information about each download, keyed by id
 
-    typedef std::map<unsigned int,Info> InfoMap;
+    typedef std::map<unsigned int, Info> InfoMap;
 
     InfoMap                 info_map;
 

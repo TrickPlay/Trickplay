@@ -70,14 +70,14 @@ class Timer [[timer*]]
 
     *Arguments:*
 
-		properties - table of Timer properties and settings
+        properties - table of Timer properties and settings
 
     *Return Value:* new Timer object
 
     *Code Examples:* Two methods of calling the Timer constructor are shown below.
 
         (code)
-		-- Define an on_timer event handler that subsequent Timer objects will use
+        -- Define an on_timer event handler that subsequent Timer objects will use
         function timerHandler( timer )
             print( "In on_timer event handler" )
         end
@@ -183,29 +183,29 @@ class Timer [[timer*]]
     [[self->stop();]];
 
 /***************************************
-	Function: add_ontimer_listener
+    Function: add_ontimer_listener
 
-	The add_ontimer_listener() function registers a handler function for <on_timer> events.
+    The add_ontimer_listener() function registers a handler function for <on_timer> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontimer_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontimer_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( timer )
-		(end)
+        (code)
+        boolean f( timer )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         timer - reference to the Timer object
 
     *Handler Return Value:* false to stop the Timer, otherwise true
 
-	*See Also:* the <on_timer> event and the <remove_ontimer_listener> function
+    *See Also:* the <on_timer> event and the <remove_ontimer_listener> function
 */
 
     int add_ontimer_listener(function f)
@@ -214,17 +214,17 @@ class Timer [[timer*]]
     ]];
 
 /***************************************
-	Function: remove_ontimer_listener
+    Function: remove_ontimer_listener
 
-	The remove_ontimer_listener() function unregisters the specified event handler.
+    The remove_ontimer_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ontimer_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ontimer_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ontimer_listener> function
+    *See Also:* the <add_ontimer_listener> function
 */
 
     remove_ontimer_listener(int ref )

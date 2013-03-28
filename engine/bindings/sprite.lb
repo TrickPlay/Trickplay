@@ -52,9 +52,9 @@ struct SpriteBinding
             can_fire = true;
         }
     }
-    
+
     const char * get_id() { return id; }
-    
+
     void set_id( const char * new_id )
     {
         g_assert( new_id );
@@ -202,15 +202,15 @@ void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L );
 /***************************************
     Class: Sprite
 
-	The Sprite data type references an image stored in a <SpriteSheet> object. Refer to the description of the <SpriteSheet> data type for additional information on the relationship between Sprite and SpriteSheet objects.
+    The Sprite data type references an image stored in a <SpriteSheet> object. Refer to the description of the <SpriteSheet> data type for additional information on the relationship between Sprite and SpriteSheet objects.
 
-	A Sprite object can reference any image contained in a SpriteSheet. The Sprite references a particular image by setting its <sheet> and <id> properties. The sheet property references a SpriteSheet object and the id property contains the unique string ID that identifies a particular image in the SpriteSheet. By changing the settings of the sheet and id properties, a Sprite object can bounce between multiple images quickly.
+    A Sprite object can reference any image contained in a SpriteSheet. The Sprite references a particular image by setting its <sheet> and <id> properties. The sheet property references a SpriteSheet object and the id property contains the unique string ID that identifies a particular image in the SpriteSheet. By changing the settings of the sheet and id properties, a Sprite object can bounce between multiple images quickly.
 
-	The Sprite data type is similar to the <Image> data type, but can be more efficient in circumstances where a large number of images must be loaded and processed by a TrickPlay application.
+    The Sprite data type is similar to the <Image> data type, but can be more efficient in circumstances where a large number of images must be loaded and processed by a TrickPlay application.
 
     In addition to the properties and functions described on this page, the Sprite data type also supports all the properties and functions defined in the <UIElement> interface.
 
-	*See Also:* the <SpriteSheet> data type
+    *See Also:* the <SpriteSheet> data type
 */
 
 class Sprite [[ClutterActor*]] actor
@@ -223,38 +223,38 @@ class Sprite [[ClutterActor*]] actor
 
     *Arguments:*
 
-		props - optional table of Sprite property settings.
+        props - optional table of Sprite property settings.
 
     *Return Value:* reference to the constructed Sprite object
 
-	*Code Example:* Create a Sprite object and reference various images on various SpriteSheet objects
+    *Code Example:* Create a Sprite object and reference various images on various SpriteSheet objects
 
-		(code)
-		-- Create a SpriteSheet object
-		imageSheet = SpriteSheet( { map = "animationFrames.json" } )
+        (code)
+        -- Create a SpriteSheet object
+        imageSheet = SpriteSheet( { map = "animationFrames.json" } )
 
-		-- Create a Sprite and initialize it to reference an image on the imageSheet
-		mainSprite = Sprite( { sheet = imageSheet,
-							   id    = "firstImage" } )
+        -- Create a Sprite and initialize it to reference an image on the imageSheet
+        mainSprite = Sprite( { sheet = imageSheet,
+                               id    = "firstImage" } )
 
-		-- Add the Sprite to the screen so it will be displayed
-		-- Note: Only need to do this one time for a Sprite object
-		screen:add( mainSprite )
+        -- Add the Sprite to the screen so it will be displayed
+        -- Note: Only need to do this one time for a Sprite object
+        screen:add( mainSprite )
 
-		...
-		-- Later in the program, reference another image on the sheet
-		-- Note: No need to add the Sprite to the screen again. When the screen
-		-- is updated, it will display the newly-referenced image.
-		mainSprite.id = "secondImage"
+        ...
+        -- Later in the program, reference another image on the sheet
+        -- Note: No need to add the Sprite to the screen again. When the screen
+        -- is updated, it will display the newly-referenced image.
+        mainSprite.id = "secondImage"
 
-		...
-		-- To reference an image on a different SpriteSheet, change the sheet
-		-- property, then set the id of the image on that sheet.
-		mainSprite.sheet = secondSheet			-- assign the SpriteSheet first
-		mainSprite.id    = "firstImage"			-- then set the desired image's ID
-		(end)
+        ...
+        -- To reference an image on a different SpriteSheet, change the sheet
+        -- property, then set the id of the image on that sheet.
+        mainSprite.sheet = secondSheet          -- assign the SpriteSheet first
+        mainSprite.id    = "firstImage"         -- then set the desired image's ID
+        (end)
 
-	*See Also:* the <sheet> and <id> properties
+    *See Also:* the <sheet> and <id> properties
 */
 
     Sprite( table props = 0 )
@@ -294,13 +294,13 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: sheet
 
-	The sheet property references a <SpriteSheet> object. To reference a particular image in the SpriteSheet, set the Sprite object's <id> property.
+    The sheet property references a <SpriteSheet> object. To reference a particular image in the SpriteSheet, set the Sprite object's <id> property.
 
-	If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
+    If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
 
-	*Default Setting:* nil
+    *Default Setting:* nil
 
-	*See Also:* the <id> property
+    *See Also:* the <id> property
 */
 
     SpriteSheet sheet
@@ -330,13 +330,13 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: id
 
-	The id property specifies the unique string ID of a particular image contained on a SpriteSheet.
+    The id property specifies the unique string ID of a particular image contained on a SpriteSheet.
 
-	If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
+    If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
 
-	*Default Setting:* nil
+    *Default Setting:* nil
 
-	*See Also:* the <sheet> property
+    *See Also:* the <sheet> property
 */
 
     string id
@@ -380,9 +380,9 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: loaded
 
-	The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image referenced by the object's <sheet> and <id> properties (true=success).
+    The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image referenced by the object's <sheet> and <id> properties (true=success).
 
-	Note: The loaded property cannot be used to determine the result or status of an asynchonously-loaded image. To receive status notification of an asynchronously-loaded image, register an <on_loaded> event handler.
+    Note: The loaded property cannot be used to determine the result or status of an asynchonously-loaded image. To receive status notification of an asynchronously-loaded image, register an <on_loaded> event handler.
 
     *Default Setting:* false
 
@@ -407,9 +407,9 @@ class Sprite [[ClutterActor*]] actor
 
     *Handler Prototype:*
 
-		(code)
-		f( loadedSprite, failed )
-		(end)
+        (code)
+        f( loadedSprite, failed )
+        (end)
 
     *Handler Arguments:*
 

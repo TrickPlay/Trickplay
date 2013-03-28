@@ -5,8 +5,8 @@
 
 //-----------------------------------------------------------------------------
 
-Downloads::Downloads( TPContext * context )
-:
+Downloads::Downloads( TPContext* context )
+    :
     path( context->get( TP_DOWNLOADS_PATH ) ),
     next_id( 1 )
 {
@@ -14,7 +14,7 @@ Downloads::Downloads( TPContext * context )
 
     g_assert( g_file_test( path.c_str(), G_FILE_TEST_IS_DIR ) );
 
-    EventGroup * event_group = new EventGroup();
+    EventGroup* event_group = new EventGroup();
 
     network.reset( new Network( context , event_group ) );
 
@@ -25,11 +25,11 @@ Downloads::Downloads( TPContext * context )
 
 //-----------------------------------------------------------------------------
 
-unsigned int Downloads::start_download( const String & owner, const Network::Request & request, Network::CookieJar * cookie_jar )
+unsigned int Downloads::start_download( const String& owner, const Network::Request& request, Network::CookieJar* cookie_jar )
 {
     // First, we need a file name for the download
 
-    gchar * dest_filename = g_build_filename( path.c_str(), "download.XXXXXX", NULL );
+    gchar* dest_filename = g_build_filename( path.c_str(), "download.XXXXXX", NULL );
 
     FreeLater free_later( dest_filename );
 
@@ -48,7 +48,7 @@ unsigned int Downloads::start_download( const String & owner, const Network::Req
 
     // Create the GFile for it
 
-    GFile * file = g_file_new_for_path( dest_filename );
+    GFile* file = g_file_new_for_path( dest_filename );
 
     if ( !file )
     {
@@ -59,9 +59,9 @@ unsigned int Downloads::start_download( const String & owner, const Network::Req
 
     // Get an output stream for the file
 
-    GError * error = NULL;
+    GError* error = NULL;
 
-    GFileOutputStream * stream = g_file_append_to( file, G_FILE_CREATE_NONE, NULL, &error );
+    GFileOutputStream* stream = g_file_append_to( file, G_FILE_CREATE_NONE, NULL, &error );
 
     if ( error )
     {
@@ -84,7 +84,7 @@ unsigned int Downloads::start_download( const String & owner, const Network::Req
 
     // Create the closure for the request
 
-    Closure * closure = new Closure( this, result, file, stream );
+    Closure* closure = new Closure( this, result, file, stream );
 
     // Start it!
 
@@ -107,7 +107,7 @@ bool Downloads::remove_download( unsigned int id, bool delete_file )
         {
             if ( delete_file )
             {
-                GFile * file = g_file_new_for_path( it->second.file_name.c_str() );
+                GFile* file = g_file_new_for_path( it->second.file_name.c_str() );
 
                 g_file_delete( file, NULL, NULL );
 
@@ -125,7 +125,7 @@ bool Downloads::remove_download( unsigned int id, bool delete_file )
 
 //-----------------------------------------------------------------------------
 
-bool Downloads::get_download_info( unsigned int id, Info & info )
+bool Downloads::get_download_info( unsigned int id, Info& info )
 {
     InfoMap::iterator it = info_map.find( id );
 
@@ -141,23 +141,23 @@ bool Downloads::get_download_info( unsigned int id, Info & info )
 
 //-----------------------------------------------------------------------------
 
-void Downloads::add_delegate( Delegate * delegate )
+void Downloads::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //-----------------------------------------------------------------------------
 
-void Downloads::remove_delegate( Delegate * delegate )
+void Downloads::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
 
 //-----------------------------------------------------------------------------
 
-bool Downloads::incremental_callback( const Network::Response & response, gpointer body, guint len, bool finished, gpointer user )
+bool Downloads::incremental_callback( const Network::Response& response, gpointer body, guint len, bool finished, gpointer user )
 {
-    Closure * closure = ( Closure * )user;
+    Closure* closure = ( Closure* )user;
 
     g_assert( closure );
     g_assert( closure->downloads );
@@ -171,11 +171,11 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
         // WE CANNOT TOUCH THE DOWNLOADS OBJECT HERE, SINCE IT IS NOT THREAD SAFE
 
-        GOutputStream * stream = G_OUTPUT_STREAM( closure->stream );
+        GOutputStream* stream = G_OUTPUT_STREAM( closure->stream );
 
         gsize written = 0;
 
-        GError * error = NULL;
+        GError* error = NULL;
 
         if ( !g_output_stream_write_all( stream, body, len, &written, NULL, &error ) )
         {
@@ -228,7 +228,7 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
         g_debug( "FINISHED DOWNLOAD %d : %s", closure->id, response.failed ? "FAILED" : "OK" );
 
 
-        Downloads * self = closure->downloads;
+        Downloads* self = closure->downloads;
 
         // Clean up the closure. If the request failed, this will delete the underlying file.
         // In either case, it frees the closure's file and stream members.
@@ -237,7 +237,7 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
         // Update the Info entry
 
-        Info & info = self->info_map[ closure->id ];
+        Info& info = self->info_map[ closure->id ];
 
         info.progress( closure->content_length, closure->written, g_timer_elapsed( closure->timer, NULL ) );
 
@@ -247,7 +247,7 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
         for ( DelegateSet::iterator it = self->delegates.begin(); it != self->delegates.end(); ++it )
         {
-            (*it)->download_finished( info );
+            ( *it )->download_finished( info );
         }
 
         // The closure will be deleted by its destroy notify
@@ -260,15 +260,15 @@ bool Downloads::incremental_callback( const Network::Response & response, gpoint
 
 gboolean Downloads::progress_callback( gpointer _progress )
 {
-    Progress * progress = ( Progress * )_progress;
+    Progress* progress = ( Progress* )_progress;
 
-    Downloads * self = progress->downloads;
+    Downloads* self = progress->downloads;
 
     InfoMap::iterator it = self->info_map.find( progress->id );
 
     if ( it != self->info_map.end() )
     {
-        Info & info = it->second;
+        Info& info = it->second;
 
         info.progress( progress->content_length, progress->written, progress->seconds );
 
@@ -285,7 +285,7 @@ gboolean Downloads::progress_callback( gpointer _progress )
 
         for ( DelegateSet::iterator dit = self->delegates.begin(); dit != self->delegates.end(); ++dit )
         {
-            (*dit)->download_progress( info );
+            ( *dit )->download_progress( info );
         }
     }
 

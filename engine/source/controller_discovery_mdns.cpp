@@ -6,7 +6,7 @@
 #include "controller_discovery_mdns.h"
 #include "util.h"
 
-ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const String & n, int _port , int _http_port )
+ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext* context, const String& n, int _port , int _http_port )
     :
     poll( NULL ),
     server( NULL ),
@@ -58,12 +58,12 @@ bool ControllerDiscoveryMDNS::is_ready() const
 
 void ControllerDiscoveryMDNS::rename()
 {
-    char * new_name = avahi_alternative_service_name( name.c_str() );
+    char* new_name = avahi_alternative_service_name( name.c_str() );
     name = new_name;
     avahi_free( new_name );
 }
 
-void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
+void ControllerDiscoveryMDNS::create_service( AvahiServer* server )
 {
     if ( !group )
     {
@@ -86,7 +86,7 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
                 // TODO: this could loop forever...maybe we should bail at some stage
 
                 ret = avahi_server_add_service( server, group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-                                                AvahiPublishFlags( 0 ), name.c_str(), TP_REMOTE_MDNS_SERVICE, NULL, NULL, port, NULL );
+                        AvahiPublishFlags( 0 ), name.c_str(), TP_REMOTE_MDNS_SERVICE, NULL, NULL, port, NULL );
 
                 if ( ret == AVAHI_ERR_COLLISION )
                 {
@@ -109,7 +109,7 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
                     // TODO: this could loop forever...maybe we should bail at some stage
 
                     ret = avahi_server_add_service( server, group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-                                                    AvahiPublishFlags( 0 ), name.c_str(), TP_HTTP_MDNS_SERVICE, NULL, NULL, http_port, NULL );
+                            AvahiPublishFlags( 0 ), name.c_str(), TP_HTTP_MDNS_SERVICE, NULL, NULL, http_port, NULL );
 
                     if ( ret == AVAHI_ERR_COLLISION )
                     {
@@ -128,21 +128,21 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
                 }
                 else
                 {
-					ret = avahi_s_entry_group_commit( group );
+                    ret = avahi_s_entry_group_commit( group );
 
-					if ( ret != AVAHI_OK )
-					{
-						g_warning( "FAILED TO COMMIT AVAHI SERVICE : %s", avahi_strerror( ret ) );
-					}
+                    if ( ret != AVAHI_OK )
+                    {
+                        g_warning( "FAILED TO COMMIT AVAHI SERVICE : %s", avahi_strerror( ret ) );
+                    }
                 }
             }
         }
     }
 }
 
-void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, AvahiServerState state, void * userdata )
+void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer* server, AvahiServerState state, void* userdata )
 {
-    ControllerDiscoveryMDNS * self = ( ControllerDiscoveryMDNS * )userdata;
+    ControllerDiscoveryMDNS* self = ( ControllerDiscoveryMDNS* )userdata;
 
     switch ( state )
     {
@@ -154,9 +154,9 @@ void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, Avahi
 
         case AVAHI_SERVER_COLLISION:
         {
-            char * new_name = avahi_alternative_host_name( avahi_server_get_host_name( server ) );
+            char* new_name = avahi_alternative_host_name( avahi_server_get_host_name( server ) );
 
-            (void)avahi_server_set_host_name( server, new_name );
+            ( void )avahi_server_set_host_name( server, new_name );
             avahi_free( new_name );
 
             // TODO : check ret
@@ -170,6 +170,7 @@ void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, Avahi
             {
                 avahi_s_entry_group_reset( self->group );
             }
+
             break;
         }
 
@@ -186,9 +187,9 @@ void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, Avahi
     }
 }
 
-void ControllerDiscoveryMDNS::avahi_entry_group_callback( AvahiServer * server, AvahiSEntryGroup * g, AvahiEntryGroupState state, void * userdata )
+void ControllerDiscoveryMDNS::avahi_entry_group_callback( AvahiServer* server, AvahiSEntryGroup* g, AvahiEntryGroupState state, void* userdata )
 {
-    ControllerDiscoveryMDNS * self = ( ControllerDiscoveryMDNS * )userdata;
+    ControllerDiscoveryMDNS* self = ( ControllerDiscoveryMDNS* )userdata;
 
     switch ( state )
     {

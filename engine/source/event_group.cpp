@@ -5,14 +5,14 @@ class EventGroup::IdleClosure
 {
 public:
 
-    static guint add_idle( EventGroup * eg, gint priority, GSourceFunc f, gpointer d, GDestroyNotify dn )
+    static guint add_idle( EventGroup* eg, gint priority, GSourceFunc f, gpointer d, GDestroyNotify dn )
     {
         return g_idle_add_full( priority, idle_callback, new IdleClosure( eg, f, d, dn ), destroy_callback );
     }
 
 private:
 
-    IdleClosure( EventGroup * eg, GSourceFunc f, gpointer d, GDestroyNotify dn )
+    IdleClosure( EventGroup* eg, GSourceFunc f, gpointer d, GDestroyNotify dn )
         :
         event_group( eg ),
         function( f ),
@@ -29,9 +29,9 @@ private:
 
     static gboolean idle_callback( gpointer ic )
     {
-        IdleClosure * closure = ( IdleClosure * )ic;
+        IdleClosure* closure = ( IdleClosure* )ic;
 
-        GSource * source = g_main_current_source();
+        GSource* source = g_main_current_source();
 
         guint id = g_source_get_id( source );
 
@@ -51,7 +51,7 @@ private:
 
     static void destroy_callback( gpointer ic )
     {
-        IdleClosure * closure = ( IdleClosure * )ic;
+        IdleClosure* closure = ( IdleClosure* )ic;
 
         if ( closure->destroy_notify )
         {
@@ -63,7 +63,7 @@ private:
 
 private:
 
-    EventGroup *    event_group;
+    EventGroup*     event_group;
     GSourceFunc     function;
     gpointer        data;
     GDestroyNotify  destroy_notify;
@@ -78,7 +78,7 @@ EventGroup::EventGroup()
 #endif
 {
 #ifdef GLIB_VERSION_2_32
-    g_mutex_init(mutex);
+    g_mutex_init( mutex );
 #endif
 }
 
@@ -88,7 +88,7 @@ EventGroup::~EventGroup()
 #ifndef GLIB_VERSION_2_32
     g_mutex_free( mutex );
 #else
-    g_mutex_clear(mutex);
+    g_mutex_clear( mutex );
     delete mutex;
 #endif
 }

@@ -11,9 +11,9 @@ class Keyboard
 {
 public:
 
-    static bool show( lua_State * L , int form_index );
+    static bool show( lua_State* L , int form_index );
 
-    static void hide( lua_State * L , bool skip_animation = false );
+    static void hide( lua_State* L , bool skip_animation = false );
 
 private:
 
@@ -21,34 +21,34 @@ private:
     friend class TypingHandler;
     friend class ListHandler;
 
-    Keyboard( TPContext * context );
+    Keyboard( TPContext* context );
 
     virtual ~Keyboard();
 
-    Keyboard( const Keyboard & )
+    Keyboard( const Keyboard& )
     {}
 
-    static Keyboard * get( TPContext * context , bool create );
+    static Keyboard* get( TPContext* context , bool create );
 
-    static void destroy( Keyboard * me );
+    static void destroy( Keyboard* me );
 
-    bool show_internal( lua_State * L , int form_index );
+    bool show_internal( lua_State* L , int form_index );
 
     void hide_internal( bool skip_animation );
 
     // Recursively loads all the static images
 
-    static void load_static_images( ClutterActor * actor , const gchar * assets_path );
+    static void load_static_images( ClutterActor* actor , const gchar* assets_path );
 
     // Finds an actor in the script and checks its type
 
-    static bool find_actor( ClutterScript * script , const gchar * id , GType type , ClutterActor * * actor );
+    static bool find_actor( ClutterScript* script , const gchar* id , GType type , ClutterActor * * actor );
 
     // Callbacks
 
-    static void on_finished_showing( ClutterAnimation * animation , ClutterActor * actor );
+    static void on_finished_showing( ClutterAnimation* animation , ClutterActor* actor );
 
-    static void on_finished_hiding( ClutterAnimation * animation , ClutterActor * actor );
+    static void on_finished_hiding( ClutterAnimation* animation , ClutterActor* actor );
 
     // Resets the keyboard
 
@@ -66,11 +66,11 @@ private:
 
     void move_to_next_field();
 
-    ClutterActor * show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y , bool set_it = true );
+    ClutterActor* show_focus_ring( ClutterActor* container , const char* name , gfloat x , gfloat y , bool set_it = true );
 
     void flash_focus();
 
-    void flash_button( const char * name , gfloat x , gfloat y );
+    void flash_button( const char* name , gfloat x , gfloat y );
 
     // Event handlers
 
@@ -78,9 +78,9 @@ private:
 
     void disconnect_event_handler();
 
-    static gboolean captured_event( ClutterActor * actor , ClutterEvent * event , Keyboard * me );
+    static gboolean captured_event( ClutterActor* actor , ClutterEvent* event , Keyboard* me );
 
-    gboolean on_event( ClutterActor * actor , ClutterEvent * event );
+    gboolean on_event( ClutterActor* actor , ClutterEvent* event );
 
     // Update the current field's value
 
@@ -94,7 +94,7 @@ private:
 
     void cancel();
 
-    TPContext * context;
+    TPContext* context;
 
     //-------------------------------------------------------------------------
     // Path to <resources>/keyboard
@@ -104,22 +104,22 @@ private:
     //-------------------------------------------------------------------------
     // All the actors we pull from the JSON UI definition
 
-    ClutterActor *  keyboard;
-    ClutterActor *  field_list_container;
-    ClutterActor *  bottom_container;
-    ClutterActor *  typing_container;
-    ClutterActor *  typing_focus;
-    ClutterActor *  typing_layout;
-    ClutterActor *  list_container;
-    ClutterActor *  list_layout;
-    ClutterActor *  list_focus;
-    ClutterActor *  current_field_caption;
-    ClutterActor *  current_field_value;
+    ClutterActor*   keyboard;
+    ClutterActor*   field_list_container;
+    ClutterActor*   bottom_container;
+    ClutterActor*   typing_container;
+    ClutterActor*   typing_focus;
+    ClutterActor*   typing_layout;
+    ClutterActor*   list_container;
+    ClutterActor*   list_layout;
+    ClutterActor*   list_focus;
+    ClutterActor*   current_field_caption;
+    ClutterActor*   current_field_value;
 
     //-------------------------------------------------------------------------
     // A container we add to hold all the focus rings
 
-    ClutterActor *  focus_rings;
+    ClutterActor*   focus_rings;
 
     //-------------------------------------------------------------------------
     // Stage x coordinates for when the keyboars is out (visible) and in (hidden)
@@ -154,7 +154,7 @@ private:
             typedef enum { TEXT , LIST , PASSWORD } Type;
 
             Field()
-            :
+                :
                 type( TEXT ) ,
                 handler( 0 ) ,
                 required( false ) ,
@@ -194,11 +194,12 @@ private:
                         }
                     }
                 }
+
                 return -1;
             }
 
             Type                type;
-            KeyboardHandler *   handler;
+            KeyboardHandler*    handler;
             String              id;
             String              caption;
             String              placeholder;
@@ -217,9 +218,9 @@ private:
 
         Form() : current_field( 0 ) {}
 
-        bool load_from_lua( lua_State * L , int n );
+        bool load_from_lua( lua_State* L , int n );
 
-        Field & get_field()
+        Field& get_field()
         {
             return fields[ current_field ];
         }
@@ -232,12 +233,12 @@ private:
 
     Form    form;
 
-    ClutterActor * focus;
+    ClutterActor* focus;
 
-    LuaStateProxy * lsp;
+    LuaStateProxy* lsp;
 
-    KeyboardHandler * typing_handler;
-    KeyboardHandler * list_handler;
+    KeyboardHandler* typing_handler;
+    KeyboardHandler* list_handler;
 };
 
 #endif // _TRICKPLAY_KEYBOARD_H

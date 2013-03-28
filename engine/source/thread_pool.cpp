@@ -108,7 +108,7 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::thread_function( gpointer _task, gpointer )
 {
-    Task * task = ( Task * ) _task;
+    Task* task = ( Task* ) _task;
 
     task->do_process();
 
@@ -119,7 +119,7 @@ void ThreadPool::thread_function( gpointer _task, gpointer )
 
 gboolean ThreadPool::idle_function( gpointer _task )
 {
-    Task * task = ( Task * ) _task;
+    Task* task = ( Task* ) _task;
 
     task->do_process_main_thread();
 
@@ -128,14 +128,14 @@ gboolean ThreadPool::idle_function( gpointer _task )
 
 //.............................................................................
 
-void ThreadPool::push_main_thread( Task * task )
+void ThreadPool::push_main_thread( Task* task )
 {
     g_idle_add_full( TRICKPLAY_PRIORITY, idle_function, task, destroy_task );
 }
 
 //.............................................................................
 
-void ThreadPool::push( Task * task )
+void ThreadPool::push( Task* task )
 {
     g_assert( task );
 
@@ -152,6 +152,6 @@ void ThreadPool::push( Task * task )
 
 void ThreadPool::destroy_task( gpointer task )
 {
-    delete ( Task * ) task;
+    delete( Task* ) task;
 }
 

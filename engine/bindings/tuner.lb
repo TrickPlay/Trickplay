@@ -41,7 +41,7 @@ interface Tuner [[TunerDelegate*]]
 
     *Arguments:*
 
-	    new_channel - A URI, the structure of which depends on the tuner implementation of the underlying platform.
+        new_channel - A URI, the structure of which depends on the tuner implementation of the underlying platform.
 
     *Return Value:* true if channel change was successful, otherwise false
 
@@ -55,30 +55,30 @@ interface Tuner [[TunerDelegate*]]
 
 
 /***************************************
-	Function: add_on_channel_changed_listener
+    Function: add_on_channel_changed_listener
 
-	The add_on_channel_changed_listener() function registers a handler function for <on_channel_changed> events.
+    The add_on_channel_changed_listener() function registers a handler function for <on_channel_changed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_on_channel_changed_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_on_channel_changed_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( tuner, new_channel )
-		(end)
+        (code)
+        f( tuner, new_channel )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-    	tuner - the Tuner device that has been changed
-    	new_channel - string URI of the channel that the tuner was changed to
+        tuner - the Tuner device that has been changed
+        new_channel - string URI of the channel that the tuner was changed to
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_channel_changed> event and the <remove_on_channel_changed_listener> function
+    *See Also:* the <on_channel_changed> event and the <remove_on_channel_changed_listener> function
 */
 
     int add_on_channel_changed_listener( function f )
@@ -87,17 +87,17 @@ interface Tuner [[TunerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_on_channel_changed_listener
+    Function: remove_on_channel_changed_listener
 
-	The remove_on_channel_changed_listener() function unregisters the specified event handler.
+    The remove_on_channel_changed_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_on_channel_changed_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_on_channel_changed_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_on_channel_changed_listener> function
+    *See Also:* the <add_on_channel_changed_listener> function
 */
 
     remove_on_channel_changed_listener( int ref )
@@ -110,7 +110,7 @@ interface Tuner [[TunerDelegate*]]
 
     The on_channel_changed event occurs when the channel for this tuner is changed externally.
 
-	*See Also:* the <add_on_channel_changed_listener> function
+    *See Also:* the <add_on_channel_changed_listener> function
 */
 
     function on_channel_changed

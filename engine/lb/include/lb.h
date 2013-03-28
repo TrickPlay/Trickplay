@@ -14,19 +14,19 @@
 // Like luaL_ref - takes the item at the top of the stack and adds
 // a weak ref to it. It pops the item and returns the ref.
 
-int lb_weak_ref( lua_State * L );
+int lb_weak_ref( lua_State* L );
 
 //.........................................................................
 // Like luaL_unref - takes the ref and removes it from the weak refs table.
 // If the ref is not valid, it does nothing.
 
-void lb_weak_unref( lua_State * L , int ref );
+void lb_weak_unref( lua_State* L , int ref );
 
 //.........................................................................
 // Pushes the value pointed to by the weak ref. If the ref is not valid, it
 // will push a nil.
 
-void lb_weak_deref( lua_State * L , int ref );
+void lb_weak_deref( lua_State* L , int ref );
 
 //.........................................................................
 
@@ -38,7 +38,7 @@ void lb_weak_deref( lua_State * L , int ref );
 // Pushes the value pointed to by the strong ref. If the ref is not valid, it
 // will push a nil.
 
-void lb_strong_deref( lua_State * L , int ref );
+void lb_strong_deref( lua_State* L , int ref );
 
 //.........................................................................
 
@@ -74,13 +74,13 @@ void lb_strong_deref( lua_State * L , int ref );
 
 //#define lb_wrap(L,self,metatable)    (assert(false),0)
 
-int lb_index(lua_State*L);
-int lb_newindex(lua_State*L);
-void lb_inherit(lua_State*L,const char*metatable);
-void lb_set_props_from_table(lua_State*L);
-void lb_chain(lua_State*L,int index,const char * metatable );
-bool lb_check_udata_type(lua_State*L,int index,const char * type, bool fail = true);
-void * lb_get_udata_check(lua_State*L,int index,const char * type);
+int lb_index( lua_State* L );
+int lb_newindex( lua_State* L );
+void lb_inherit( lua_State* L, const char* metatable );
+void lb_set_props_from_table( lua_State* L );
+void lb_chain( lua_State* L, int index, const char* metatable );
+bool lb_check_udata_type( lua_State* L, int index, const char* type, bool fail = true );
+void* lb_get_udata_check( lua_State* L, int index, const char* type );
 
 #define lb_checkany(L,i) (luaL_checkany(L,i),i)
 #define lb_optany(L,i,d) (lua_isnone(L,i)?d:i)
@@ -96,10 +96,10 @@ void * lb_get_udata_check(lua_State*L,int index,const char * type);
 #define lb_optnumber(L,i,d) ((lua_tonumber(L,i)?lua_tonumber(L,i):(lua_isnumber(L,i)?0:d)))
 #define lb_optstring(L,i,d) ((lua_isstring(L,i)?lua_tostring(L,i):d))
 #define lb_optbool(L,i,d) ((lua_isboolean(L,i)?lua_toboolean(L,i):d))
-const char *lb_optlstring(lua_State *L,int narg,const char *def, size_t *len);
+const char* lb_optlstring( lua_State* L, int narg, const char* def, size_t* len );
 
-int lb_is_allowed(lua_State*L,const char*name);
-void lb_allow(lua_State*L,const char*name);
+int lb_is_allowed( lua_State* L, const char* name );
+void lb_allow( lua_State* L, const char* name );
 
 // These macros help to ensure the Lua stack is in order when
 // we leave a function
@@ -116,18 +116,18 @@ void lb_allow(lua_State*L,const char*name);
 // This function takes a name and a loading function - it will use this function
 // to load the given global name when it is requested.
 
-void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader );
+void lb_set_lazy_loader( lua_State* L, const char* name , lua_CFunction loader );
 
 //.........................................................................
 
-int lb_get_extra(lua_State * L);
+int lb_get_extra( lua_State* L );
 
-int lb_set_extra(lua_State * L);
+int lb_set_extra( lua_State* L );
 
-void lb_setglobal( lua_State * L , const char * name );
+void lb_setglobal( lua_State* L , const char* name );
 
 //.........................................................................
 
-void lb_dump_table( lua_State * L );
+void lb_dump_table( lua_State* L );
 
 #endif // _TRICKPLAY_LB_H
