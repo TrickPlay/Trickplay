@@ -1787,10 +1787,6 @@ static void animate_out_completed( ClutterAnimation* anim , ClutterActor* actor 
         clutter_actor_remove_child( parent, actor );
     }
 
-    // Something is holding an extra ref.  We'll release it here, but this is wrong
-    // We cannot find where the extra ref is being taken; our hope is de-reffing it
-    // will one day cause a crash that we can then track down!
-    g_object_unref( G_OBJECT( actor ) );
     g_object_unref( G_OBJECT( actor ) );
 
     if ( anim ) { g_object_unref( G_OBJECT( anim ) ); }
