@@ -547,6 +547,29 @@ interface actor [[ClutterActor*]]
         [[ clutter_actor_set_height( self , height ); ]];
 
 /***************************************
+    Property: explicit_height
+
+    Has the height been explicitly set, or just calculated internally?
+*/
+
+    readonly bool explicit_height
+    [[
+        g_object_get(G_OBJECT(self), "natural-height-set", &explicit_height, NULL);
+    ]];
+
+/***************************************
+    Property: explicit_width
+
+    Has the width been explicitly set, or just calculated internally?
+*/
+
+    readonly bool explicit_width
+    [[
+        g_object_get(G_OBJECT(self), "natural-width-set", &explicit_width, NULL);
+    ]];
+
+
+/***************************************
     Property: size
 
     The size property is a table that specifies the object's width and height, respectively.
