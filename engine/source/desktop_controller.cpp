@@ -10,9 +10,9 @@
 #include "context.h"
 #include "desktop_controller.h"
 
-static int controller_execute_command( TPController * , unsigned int command , void * , void *context )
+static int controller_execute_command( TPController* , unsigned int command , void* , void* context )
 {
-    switch( command )
+    switch ( command )
     {
         case TP_CONTROLLER_COMMAND_START_POINTER:
             return 0;
@@ -21,21 +21,21 @@ static int controller_execute_command( TPController * , unsigned int command , v
             return 0;
 
         case TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR:
-        	clutter_stage_show_cursor( CLUTTER_STAGE( ((TPContext *)context)->get_stage() ) );
-        	return 0;
+            clutter_stage_show_cursor( CLUTTER_STAGE( ( ( TPContext* )context )->get_stage() ) );
+            return 0;
 
         case TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR:
-        	clutter_stage_hide_cursor( CLUTTER_STAGE( ((TPContext *)context)->get_stage() ) );
-        	return 0;
+            clutter_stage_hide_cursor( CLUTTER_STAGE( ( ( TPContext* )context )->get_stage() ) );
+            return 0;
 
         case TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR:
-        	return 2;
+            return 2;
     }
 
     return 1;
 }
 
-static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
+static void map_key( ClutterEvent* event , guint* keyval , gunichar* unicode )
 {
     * keyval = event->key.keyval;
     * unicode = event->key.unicode_value;
@@ -75,7 +75,7 @@ static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode 
 //
 // We also use this for mouse events.
 
-gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer controller )
+gboolean controller_keys( ClutterActor* actor, ClutterEvent* event, gpointer controller )
 {
     if ( event )
     {
@@ -85,24 +85,25 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                	switch( event->key.keyval )
-                	{
-                	case CLUTTER_F10:
-                		tp_controller_pointer_active( ( TPController * ) controller );
-                		break;
-                	case CLUTTER_F11:
-                		tp_controller_pointer_inactive( ( TPController * ) controller );
-                		break;
-                	}
+                    switch ( event->key.keyval )
+                    {
+                        case CLUTTER_F10:
+                            tp_controller_pointer_active( ( TPController* ) controller );
+                            break;
+
+                        case CLUTTER_F11:
+                            tp_controller_pointer_inactive( ( TPController* ) controller );
+                            break;
+                    }
 
                     guint keyval;
                     gunichar unicode;
 
                     map_key( event , & keyval , & unicode );
 
-                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+                    unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
 
-                    tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
+                    tp_controller_key_down( ( TPController* )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
 
@@ -118,26 +119,29 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     map_key( event , & keyval , & unicode );
 
-                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+                    unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
 
-                    tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
+                    tp_controller_key_up( ( TPController* )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
+
                 break;
             }
 
             case CLUTTER_MOTION:
             {
-                if ( !(event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                if ( !( event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    if ( tp_controller_wants_pointer_events( ( TPController* ) controller ) )
                     {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+                        unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
 
-                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y , modifiers );
+                        tp_controller_pointer_move( ( TPController* ) controller , event->motion.x , event->motion.y , modifiers );
                     }
+
                     return TRUE;
                 }
+
                 break;
             }
 
@@ -145,12 +149,13 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    if ( tp_controller_wants_pointer_events( ( TPController* ) controller ) )
                     {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+                        unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
 
-                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
+                        tp_controller_pointer_button_down( ( TPController* ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
+
                     return TRUE;
                 }
             }
@@ -159,12 +164,13 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             {
                 if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
                 {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    if ( tp_controller_wants_pointer_events( ( TPController* ) controller ) )
                     {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+                        unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
 
-                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
+                        tp_controller_pointer_button_up( ( TPController* ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
+
                     return TRUE;
                 }
             }
@@ -177,23 +183,27 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     int direction = -1;
 
-                    switch( event->scroll.direction )
+                    switch ( event->scroll.direction )
                     {
-						case CLUTTER_SCROLL_UP: 	direction = TP_CONTROLLER_SCROLL_UP; break;
-						case CLUTTER_SCROLL_DOWN: 	direction = TP_CONTROLLER_SCROLL_DOWN; break;
-						case CLUTTER_SCROLL_LEFT: 	direction = TP_CONTROLLER_SCROLL_LEFT; break;
-						case CLUTTER_SCROLL_RIGHT: 	direction = TP_CONTROLLER_SCROLL_RIGHT; break;
-						
-                        // In this case, we have to call clutter_event_get_scroll_delta which
-                        // gives us x and y deltas. Our API can't handle this yet.
-                        
-						case CLUTTER_SCROLL_SMOOTH: break;
+                        case CLUTTER_SCROLL_UP:     direction = TP_CONTROLLER_SCROLL_UP; break;
+
+                        case CLUTTER_SCROLL_DOWN:   direction = TP_CONTROLLER_SCROLL_DOWN; break;
+
+                        case CLUTTER_SCROLL_LEFT:   direction = TP_CONTROLLER_SCROLL_LEFT; break;
+
+                        case CLUTTER_SCROLL_RIGHT:  direction = TP_CONTROLLER_SCROLL_RIGHT; break;
+
+                            // In this case, we have to call clutter_event_get_scroll_delta which
+                            // gives us x and y deltas. Our API can't handle this yet.
+
+                        case CLUTTER_SCROLL_SMOOTH: break;
                     }
 
                     if ( direction != -1 )
                     {
-                    	tp_controller_scroll( ( TPController * ) controller , direction , modifiers );
+                        tp_controller_scroll( ( TPController* ) controller , direction , modifiers );
                     }
+
                     return TRUE;
                 }
             }
@@ -204,10 +214,11 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
             }
         }
     }
+
     return FALSE;
 }
 
-void install_desktop_controller( TPContext * context )
+void install_desktop_controller( TPContext* context )
 {
     // We add a controller for the keyboard in non-egl builds
 
@@ -216,10 +227,10 @@ void install_desktop_controller( TPContext * context )
     memset( & spec , 0 , sizeof( spec ) );
 
     spec.capabilities =
-    		TP_CONTROLLER_HAS_KEYS |
-    		TP_CONTROLLER_HAS_POINTER |
-    		TP_CONTROLLER_HAS_SCROLL |
-    		TP_CONTROLLER_HAS_POINTER_CURSOR;
+            TP_CONTROLLER_HAS_KEYS |
+            TP_CONTROLLER_HAS_POINTER |
+            TP_CONTROLLER_HAS_SCROLL |
+            TP_CONTROLLER_HAS_POINTER_CURSOR;
 
     spec.execute_command = controller_execute_command;
 
@@ -227,9 +238,9 @@ void install_desktop_controller( TPContext * context )
 
     // This controller won't leak because the controller list will free it
 
-    TPController * keyboard = tp_context_add_controller( context , "Keyboard", & spec , (void *)context );
+    TPController* keyboard = tp_context_add_controller( context , "Keyboard", & spec , ( void* )context );
 
-    ClutterActor * stage = context->get_stage();
+    ClutterActor* stage = context->get_stage();
 
     g_signal_connect( stage , "captured-event", ( GCallback ) controller_keys , keyboard );
 }

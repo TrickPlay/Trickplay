@@ -36,16 +36,16 @@ class ToastUpAction : public Action
 {
 public:
 
-    ToastUpAction( lua_State * L , Toast * _toast )
-    :
+    ToastUpAction( lua_State* L , Toast* _toast )
+        :
         lsp( App::get( L )->ref_lua_state_proxy() ),
         toast( _toast ),
         dismissed( false ),
         key_handler( 0 )
     {
-        if ( ClutterActor * stage = toast->context->get_stage() )
+        if ( ClutterActor* stage = toast->context->get_stage() )
         {
-            key_handler = g_signal_connect( G_OBJECT( stage  ) ,
+            key_handler = g_signal_connect( G_OBJECT( stage ) ,
                     "captured-event" ,
                     ( GCallback ) captured_event ,
                     this );
@@ -75,7 +75,7 @@ private:
 
     void disconnect_key_handler()
     {
-        if ( ClutterActor * stage = toast->context->get_stage() )
+        if ( ClutterActor* stage = toast->context->get_stage() )
         {
             if ( key_handler && g_signal_handler_is_connected( G_OBJECT( stage ) , key_handler ) )
             {
@@ -104,7 +104,7 @@ private:
         }
     }
 
-    static gboolean captured_event( ClutterActor * actor , ClutterEvent * event ,  ToastUpAction * me )
+    static gboolean captured_event( ClutterActor* actor , ClutterEvent* event ,  ToastUpAction* me )
     {
         if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TOAST_ACTION_KEY )
         {
@@ -116,7 +116,7 @@ private:
 
     bool selected()
     {
-        if ( lua_State * L = lsp->get_lua_state() )
+        if ( lua_State* L = lsp->get_lua_state() )
         {
             if ( UserData::invoke_global_callbacks( L , "screen" , "on_toast" , 0 , 1 ) )
             {
@@ -139,8 +139,8 @@ private:
         return false;
     }
 
-    LuaStateProxy * lsp;
-    Toast *         toast;
+    LuaStateProxy* lsp;
+    Toast*          toast;
     bool            dismissed;
     gulong          key_handler;
 };
@@ -148,9 +148,9 @@ private:
 
 //=============================================================================
 
-bool Toast::show( lua_State * L , const char * title , const char * prompt , Image * image )
+bool Toast::show( lua_State* L , const char* title , const char* prompt , Image* image )
 {
-    if ( Toast * toast = Toast::get( App::get( L )->get_context() , true ) )
+    if ( Toast* toast = Toast::get( App::get( L )->get_context() , true ) )
     {
         return toast->show_internal( L , title , prompt , image );
     }
@@ -160,9 +160,9 @@ bool Toast::show( lua_State * L , const char * title , const char * prompt , Ima
 
 //-----------------------------------------------------------------------------
 
-void Toast::hide( TPContext * context )
+void Toast::hide( TPContext* context )
 {
-    if ( Toast * toast = Toast::get( context , false ) )
+    if ( Toast* toast = Toast::get( context , false ) )
     {
         toast->hide_internal();
     }
@@ -170,13 +170,13 @@ void Toast::hide( TPContext * context )
 
 //-----------------------------------------------------------------------------
 
-Toast * Toast::get( TPContext * context , bool create )
+Toast* Toast::get( TPContext* context , bool create )
 {
     g_assert( context );
 
     static char key = 0;
 
-    Toast * result = ( Toast * ) context->get_internal( & key );
+    Toast* result = ( Toast* ) context->get_internal( & key );
 
     if ( ! result && create )
     {
@@ -190,15 +190,15 @@ Toast * Toast::get( TPContext * context , bool create )
 
 //-----------------------------------------------------------------------------
 
-void Toast::destroy( Toast * me )
+void Toast::destroy( Toast* me )
 {
     delete me;
 }
 
 //-----------------------------------------------------------------------------
 
-Toast::Toast( TPContext * c )
-:
+Toast::Toast( TPContext* c )
+    :
     context( c ),
     group( 0 ),
     background( 0 ),
@@ -207,17 +207,17 @@ Toast::Toast( TPContext * c )
     prompt( 0 ),
     hide_source( 0 )
 {
-    ClutterScript * script = 0;
+    ClutterScript* script = 0;
 
     // See if the context has a filename for the toast JSON
 
-    const char * path = context->get( TP_TOAST_JSON_PATH );
+    const char* path = context->get( TP_TOAST_JSON_PATH );
 
     if ( path )
     {
         script = clutter_script_new();
 
-        GError * error = 0;
+        GError* error = 0;
 
         clutter_script_load_from_file( script , path , & error );
 
@@ -240,7 +240,7 @@ Toast::Toast( TPContext * c )
     {
         script = clutter_script_new();
 
-        GError * error = 0;
+        GError* error = 0;
 
         clutter_script_load_from_data( script , default_toast_json , -1 , & error );
 
@@ -265,11 +265,11 @@ Toast::Toast( TPContext * c )
 
     free_later( script , g_object_unref );
 
-    GObject * go_group = 0;
-    GObject * go_background = 0;
-    GObject * go_title = 0;
-    GObject * go_prompt = 0;
-    GObject * go_image = 0;
+    GObject* go_group = 0;
+    GObject* go_background = 0;
+    GObject* go_title = 0;
+    GObject* go_prompt = 0;
+    GObject* go_image = 0;
 
     if ( 5 != clutter_script_get_objects( script ,
             "group" , & go_group ,
@@ -315,7 +315,7 @@ Toast::Toast( TPContext * c )
 
     // Get the stage and its dimensions
 
-    ClutterActor * stage = context->get_stage();
+    ClutterActor* stage = context->get_stage();
 
     gfloat stage_width;
     gfloat stage_height;
@@ -370,7 +370,7 @@ Toast::~Toast()
 
 //-----------------------------------------------------------------------------
 
-bool Toast::show_internal( lua_State * L , const char * _title , const char * _prompt , Image * _image )
+bool Toast::show_internal( lua_State* L , const char* _title , const char* _prompt , Image* _image )
 {
     // The toast was never completely created
 
@@ -455,9 +455,9 @@ void Toast::replace_background()
 
     clutter_actor_get_size( background , & w , & h );
 
-    cairo_surface_t * surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32 , w , h );
+    cairo_surface_t* surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32 , w , h );
 
-    cairo_t * cairo = cairo_create( surface );
+    cairo_t* cairo = cairo_create( surface );
 
     cairo_set_line_width( cairo , 4 );
 
@@ -467,17 +467,17 @@ void Toast::replace_background()
     w -= 4;
     h -= 4;
 
-    cairo_move_to(cairo,x+r,y);
-    cairo_line_to(cairo,x+w-r,y);
-    cairo_curve_to(cairo,x+w,y,x+w,y,x+w,y+r);
-    cairo_line_to(cairo,x+w,y+h-r);
-    cairo_curve_to(cairo,x+w,y+h,x+w,y+h,x+w-r,y+h);
-    cairo_line_to(cairo,x+r,y+h);
-    cairo_curve_to(cairo,x,y+h,x,y+h,x,y+h-r);
-    cairo_line_to(cairo,x,y+r);
-    cairo_curve_to(cairo,x,y,x,y,x+r,y);
+    cairo_move_to( cairo, x + r, y );
+    cairo_line_to( cairo, x + w - r, y );
+    cairo_curve_to( cairo, x + w, y, x + w, y, x + w, y + r );
+    cairo_line_to( cairo, x + w, y + h - r );
+    cairo_curve_to( cairo, x + w, y + h, x + w, y + h, x + w - r, y + h );
+    cairo_line_to( cairo, x + r, y + h );
+    cairo_curve_to( cairo, x, y + h, x, y + h, x, y + h - r );
+    cairo_line_to( cairo, x, y + r );
+    cairo_curve_to( cairo, x, y, x, y, x + r, y );
 
-    cairo_pattern_t * pattern = cairo_pattern_create_linear( 0 , 0 , 0 , h );
+    cairo_pattern_t* pattern = cairo_pattern_create_linear( 0 , 0 , 0 , h );
 
     cairo_pattern_add_color_stop_rgba( pattern , 0 , 0.5 , 0.5 , 0.5 , 0.80 );
     cairo_pattern_add_color_stop_rgba( pattern , 1 , 0 , 0 , 0 , 0.80 );
@@ -504,10 +504,10 @@ void Toast::replace_background()
     cairo_destroy( cairo );
 
 
-    ClutterActor * texture = clutter_texture_new();
+    ClutterActor* texture = clutter_texture_new();
 
-    CoglHandle cogl_texture = cogl_texture_new_from_data (
-            cairo_image_surface_get_width( surface),
+    CoglHandle cogl_texture = cogl_texture_new_from_data(
+            cairo_image_surface_get_width( surface ),
             cairo_image_surface_get_height( surface ),
             COGL_TEXTURE_NONE,
             CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
@@ -515,7 +515,7 @@ void Toast::replace_background()
             cairo_image_surface_get_stride( surface ),
             cairo_image_surface_get_data( surface ) );
 
-    clutter_texture_set_cogl_texture ( CLUTTER_TEXTURE( texture ) , cogl_texture );
+    clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ) , cogl_texture );
 
     cogl_handle_unref( cogl_texture );
 
@@ -524,7 +524,7 @@ void Toast::replace_background()
     clutter_actor_get_position( background , & x , & y );
     clutter_actor_set_position( texture , x , y );
 
-    ClutterActor * parent = clutter_actor_get_parent( background );
+    ClutterActor* parent = clutter_actor_get_parent( background );
 
     clutter_actor_replace_child( parent, background, texture );
 
@@ -533,7 +533,7 @@ void Toast::replace_background()
 
 //-----------------------------------------------------------------------------
 
-void Toast::set_image( Image * _image )
+void Toast::set_image( Image* _image )
 {
     if ( ! _image )
     {
@@ -570,7 +570,7 @@ void Toast::set_image( Image * _image )
 // You can put a different one in a file and set TP_TOAST_JSON_PATH
 // in the context.
 
-const char * Toast::default_toast_json =
+const char* Toast::default_toast_json =
 
         "["
         "    {"

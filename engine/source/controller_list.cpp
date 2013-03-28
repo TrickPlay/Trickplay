@@ -20,7 +20,7 @@
 
 struct TPController
 {
-    TPController( Controller * _controller, ControllerList * _list )
+    TPController( Controller* _controller, ControllerList* _list )
         :
         controller( _controller ),
         list( _list ),
@@ -29,7 +29,7 @@ struct TPController
         check( this );
     }
 
-    inline static void check( TPController * controller )
+    inline static void check( TPController* controller )
     {
         g_assert( controller );
         g_assert( controller->list );
@@ -41,9 +41,9 @@ struct TPController
         g_assert( controller->marker == controller );
     }
 
-    Controller     *    controller;
-    ControllerList   *  list;
-    TPController    *   marker;
+    Controller*         controller;
+    ControllerList*     list;
+    TPController*       marker;
 };
 
 //==============================================================================
@@ -69,13 +69,13 @@ struct Event
 
 public:
 
-    inline static Event * make( Type type, Controller * controller )
+    inline static Event* make( Type type, Controller* controller )
     {
         g_assert( controller );
 
         controller->ref();
 
-        Event * event = g_slice_new( Event );
+        Event* event = g_slice_new( Event );
 
         event->type = type;
         event->controller = controller;
@@ -95,23 +95,23 @@ public:
         return event;
     }
 
-    static void destroy( Event * event )
+    static void destroy( Event* event )
     {
         g_assert( event );
         g_assert( event->controller );
 
         switch ( event->type )
         {
-			case UI:
-			case ADVANCED_UI_EVENT:
-				g_free( event->ui.parameters );
-				break;
+            case UI:
+            case ADVANCED_UI_EVENT:
+                g_free( event->ui.parameters );
+                break;
 
-			case SUBMIT_IMAGE:
-			case SUBMIT_AUDIO_CLIP:
-				g_free( event->data.data );
-				g_free( event->data.mime_type );
-				break;
+            case SUBMIT_IMAGE:
+            case SUBMIT_AUDIO_CLIP:
+                g_free( event->data.data );
+                g_free( event->data.mime_type );
+                break;
 
             case STREAMING_VIDEO_CONNECTED:
                 g_free( event->streaming_video.address );
@@ -133,8 +133,8 @@ public:
                 g_free( event->streaming_video.arg );
                 break;
 
-			default:
-				break;
+            default:
+                break;
         };
 
         event->controller->unref();
@@ -142,9 +142,9 @@ public:
         g_slice_free( Event, event );
     }
 
-    inline static Event * make_key( Type type, Controller * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
+    inline static Event* make_key( Type type, Controller* controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
     {
-        Event * event = make( type, controller );
+        Event* event = make( type, controller );
 
         event->key.key_code = key_code;
         event->key.unicode = unicode;
@@ -153,9 +153,9 @@ public:
         return event;
     }
 
-    inline static Event * make_accelerometer( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    inline static Event* make_accelerometer( Controller* controller, double x, double y, double z , unsigned long int modifiers )
     {
-        Event * event = make( ACCELEROMETER, controller );
+        Event* event = make( ACCELEROMETER, controller );
 
         event->accelerometer.x = x;
         event->accelerometer.y = y;
@@ -165,9 +165,9 @@ public:
         return event;
     }
 
-    inline static Event * make_gyroscope( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    inline static Event* make_gyroscope( Controller* controller, double x, double y, double z , unsigned long int modifiers )
     {
-        Event * event = make( GYROSCOPE, controller );
+        Event* event = make( GYROSCOPE, controller );
 
         event->gyroscope.x = x;
         event->gyroscope.y = y;
@@ -177,9 +177,9 @@ public:
         return event;
     }
 
-    inline static Event * make_magnetometer( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    inline static Event* make_magnetometer( Controller* controller, double x, double y, double z , unsigned long int modifiers )
     {
-        Event * event = make( MAGNETOMETER, controller );
+        Event* event = make( MAGNETOMETER, controller );
 
         event->magnetometer.x = x;
         event->magnetometer.y = y;
@@ -189,9 +189,9 @@ public:
         return event;
     }
 
-    inline static Event * make_attitude( Controller * controller, double roll, double pitch, double yaw, unsigned long int modifiers )
+    inline static Event* make_attitude( Controller* controller, double roll, double pitch, double yaw, unsigned long int modifiers )
     {
-        Event * event = make( ATTITUDE, controller );
+        Event* event = make( ATTITUDE, controller );
 
         event->attitude.roll = roll;
         event->attitude.pitch = pitch;
@@ -201,9 +201,9 @@ public:
         return event;
     }
 
-    inline static Event * make_click_touch( Type type, Controller * controller, int button_or_finger, int x, int y , unsigned long int modifiers )
+    inline static Event* make_click_touch( Type type, Controller* controller, int button_or_finger, int x, int y , unsigned long int modifiers )
     {
-        Event * event = make( type, controller );
+        Event* event = make( type, controller );
 
         event->click_touch.button_or_finger = button_or_finger;
         event->click_touch.x = x;
@@ -213,90 +213,90 @@ public:
         return event;
     }
 
-    inline static Event * make_ui( Controller * controller, const char * parameters )
+    inline static Event* make_ui( Controller* controller, const char* parameters )
     {
-        Event * event = make( UI, controller );
+        Event* event = make( UI, controller );
 
         event->ui.parameters = g_strdup( parameters );
 
         return event;
     }
 
-    inline static Event * make_advanced_ui_event( Controller * controller, const char * json )
+    inline static Event* make_advanced_ui_event( Controller* controller, const char* json )
     {
-        Event * event = make( ADVANCED_UI_EVENT, controller );
+        Event* event = make( ADVANCED_UI_EVENT, controller );
 
         event->ui.parameters = g_strdup( json );
 
         return event;
     }
 
-    inline static Event * make_data( Type type, Controller * controller, const void * data, unsigned int size, const char * mime_type )
-	{
-		Event * event = make( type, controller );
-
-		event->data.data = g_memdup(data, size);
-		event->data.size = size;
-		event->data.mime_type = g_strdup(mime_type);
-
-		return event;
-	}
-
-    inline static Event * make_scroll( Controller * controller , int direction , unsigned long int modifiers )
+    inline static Event* make_data( Type type, Controller* controller, const void* data, unsigned int size, const char* mime_type )
     {
-    	Event * event = make( SCROLL , controller );
+        Event* event = make( type, controller );
 
-    	event->scroll.direction = direction;
+        event->data.data = g_memdup( data, size );
+        event->data.size = size;
+        event->data.mime_type = g_strdup( mime_type );
+
+        return event;
+    }
+
+    inline static Event* make_scroll( Controller* controller , int direction , unsigned long int modifiers )
+    {
+        Event* event = make( SCROLL , controller );
+
+        event->scroll.direction = direction;
         event->modifiers = modifiers;
 
         return event;
     }
 
-    inline static Event * make_streaming_video_connected( Controller * controller, const char * address )
+    inline static Event* make_streaming_video_connected( Controller* controller, const char* address )
     {
-        Event * event = make( STREAMING_VIDEO_CONNECTED, controller );
+        Event* event = make( STREAMING_VIDEO_CONNECTED, controller );
 
-        event->streaming_video.address = g_strdup(address);
+        event->streaming_video.address = g_strdup( address );
 
         return event;
     }
 
-    inline static Event * make_streaming_video_failed( Controller * controller, const char * address, const char * reason )
+    inline static Event* make_streaming_video_failed( Controller* controller, const char* address, const char* reason )
     {
-        Event * event = make( STREAMING_VIDEO_FAILED, controller );
+        Event* event = make( STREAMING_VIDEO_FAILED, controller );
 
-        event->streaming_video.address = g_strdup(address);
-        event->streaming_video.reason = g_strdup(reason);
+        event->streaming_video.address = g_strdup( address );
+        event->streaming_video.reason = g_strdup( reason );
 
         return event;
     }
 
-    inline static Event * make_streaming_video_dropped( Controller * controller, const char * address, const char * reason )
+    inline static Event* make_streaming_video_dropped( Controller* controller, const char* address, const char* reason )
     {
-        Event * event = make( STREAMING_VIDEO_DROPPED, controller );
+        Event* event = make( STREAMING_VIDEO_DROPPED, controller );
 
-        event->streaming_video.address = g_strdup(address);
-        event->streaming_video.reason = g_strdup(reason);
+        event->streaming_video.address = g_strdup( address );
+        event->streaming_video.reason = g_strdup( reason );
 
         return event;
     }
 
-    inline static Event * make_streaming_video_ended( Controller * controller, const char * address, const char * who )
+    inline static Event* make_streaming_video_ended( Controller* controller, const char* address, const char* who )
     {
-        Event * event = make( STREAMING_VIDEO_ENDED, controller );
+        Event* event = make( STREAMING_VIDEO_ENDED, controller );
 
-        event->streaming_video.address = g_strdup(address);
-        event->streaming_video.who = g_strdup(who);
+        event->streaming_video.address = g_strdup( address );
+        event->streaming_video.who = g_strdup( who );
 
         return event;
     }
 
-    inline static Event * make_streaming_video_status( Controller * controller, const char * status, const char * arg )
+    inline static Event* make_streaming_video_status( Controller* controller, const char* status, const char* arg )
     {
-        Event * event = make( STREAMING_VIDEO_STATUS, controller );
+        Event* event = make( STREAMING_VIDEO_STATUS, controller );
 
-        event->streaming_video.status = g_strdup(status);
-        event->streaming_video.arg = g_strdup(arg);
+        event->streaming_video.status = g_strdup( status );
+        event->streaming_video.arg = g_strdup( arg );
 
         return event;
     }
@@ -379,7 +379,7 @@ public:
                 break;
 
             case SUBMIT_AUDIO_CLIP:
-            	controller->submit_audio_clip( data.data, data.size, data.mime_type );
+                controller->submit_audio_clip( data.data, data.size, data.mime_type );
                 break;
 
             case CANCEL_IMAGE:
@@ -395,20 +395,20 @@ public:
                 break;
 
             case ADVANCED_UI_EVENT:
-            	controller->advanced_ui_event( ui.parameters );
-            	break;
+                controller->advanced_ui_event( ui.parameters );
+                break;
 
             case SCROLL:
-            	controller->scroll( scroll.direction , modifiers );
-            	break;
+                controller->scroll( scroll.direction , modifiers );
+                break;
 
             case POINTER_ACTIVE:
-            	controller->pointer_active();
-            	break;
+                controller->pointer_active();
+                break;
 
             case POINTER_INACTIVE:
-            	controller->pointer_inactive();
-            	break;
+                controller->pointer_inactive();
+                break;
 
             case STREAMING_VIDEO_CONNECTED:
                 controller->streaming_video_connected( streaming_video.address );
@@ -435,11 +435,11 @@ public:
 private:
 
     Type            type;
-    Controller   *  controller;
+    Controller*     controller;
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-    gsize          	create_time;
+    gsize           create_time;
 
 #endif
 
@@ -451,67 +451,67 @@ private:
         {
             unsigned int key_code;
             unsigned long int unicode;
-        }    						key;
+        }                           key;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     		accelerometer;
+        }                           accelerometer;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     		gyroscope;
+        }                           gyroscope;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     		magnetometer;
+        }                           magnetometer;
 
         struct
         {
             double roll;
             double pitch;
             double yaw;
-        }                     		attitude;
+        }                           attitude;
 
         struct
         {
             int button_or_finger;
             int x;
             int y;
-        }                        	click_touch;
+        }                           click_touch;
 
         struct
         {
-            char * parameters;
-        }							ui;
+            char* parameters;
+        }                           ui;
 
         struct
         {
-        	int direction;
-        }							scroll;
+            int direction;
+        }                           scroll;
 
         struct
         {
-        	void * data;
-        	unsigned int size;
-        	char * mime_type;
-        }							data;
+            void* data;
+            unsigned int size;
+            char* mime_type;
+        }                           data;
 
         struct
         {
-            char * address;
-            char * reason;
-            char * who;
-            char * status;
-            char * arg;
+            char* address;
+            char* reason;
+            char* who;
+            char* status;
+            char* arg;
         }                           streaming_video;
     };
 };
@@ -519,7 +519,7 @@ private:
 //==============================================================================
 
 
-Controller::Controller( ControllerList * _list, TPContext * _context , const char * _name, const TPControllerSpec * _spec, void * _data )
+Controller::Controller( ControllerList* _list, TPContext* _context , const char* _name, const TPControllerSpec* _spec, void* _data )
     :
     tp_controller( new TPController( this, _list ) ),
     connected( true ),
@@ -548,7 +548,7 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
 
     if ( spec.key_map )
     {
-        for ( TPControllerKeyMap * k = spec.key_map; k->your_key_code || k->trickplay_key_code; ++k )
+        for ( TPControllerKeyMap* k = spec.key_map; k->your_key_code || k->trickplay_key_code; ++k )
         {
             key_map[k->your_key_code] = k->trickplay_key_code;
         }
@@ -560,13 +560,13 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
 
     if ( spec.id )
     {
-    	id = spec.id;
+        id = spec.id;
 
-    	spec.id = 0;
+        spec.id = 0;
     }
     else
     {
-    	id = Util::make_v4_uuid();
+        id = Util::make_v4_uuid();
     }
 }
 
@@ -579,7 +579,7 @@ Controller::~Controller()
 
 //.............................................................................
 
-int Controller::default_execute_command( TPController * controller, unsigned int, void *, void * )
+int Controller::default_execute_command( TPController* controller, unsigned int, void*, void* )
 {
     // Failure
     return 1;
@@ -587,7 +587,7 @@ int Controller::default_execute_command( TPController * controller, unsigned int
 
 //.............................................................................
 
-TPController * Controller::get_tp_controller()
+TPController* Controller::get_tp_controller()
 {
     return tp_controller;
 }
@@ -608,7 +608,7 @@ unsigned long long Controller::get_capabilities() const
 
 //.............................................................................
 
-void Controller::get_input_size( unsigned int & width, unsigned int & height )
+void Controller::get_input_size( unsigned int& width, unsigned int& height )
 {
     width = spec.input_width;
     height = spec.input_height;
@@ -616,7 +616,7 @@ void Controller::get_input_size( unsigned int & width, unsigned int & height )
 
 //.............................................................................
 
-void Controller::get_ui_size( unsigned int & width, unsigned int & height )
+void Controller::get_ui_size( unsigned int& width, unsigned int& height )
 {
     width = spec.ui_width;
     height = spec.ui_height;
@@ -634,11 +634,11 @@ bool Controller::is_connected() const
 
 String Controller::get_key_map_file_name() const
 {
-    gchar * name_hash = g_compute_checksum_for_string( G_CHECKSUM_MD5 , name.c_str() , -1 );
+    gchar* name_hash = g_compute_checksum_for_string( G_CHECKSUM_MD5 , name.c_str() , -1 );
 
-    gchar * file_name = g_strdup_printf( "%s.map" , name_hash );
+    gchar* file_name = g_strdup_printf( "%s.map" , name_hash );
 
-    gchar * path = g_build_filename( context->get( TP_DATA_PATH ) , "controllers" , file_name , NULL );
+    gchar* path = g_build_filename( context->get( TP_DATA_PATH ) , "controllers" , file_name , NULL );
 
     String result( path );
 
@@ -672,7 +672,7 @@ void Controller::load_external_map()
     unsigned int a;
     unsigned int b;
 
-    while( std::getline( stream , line ) )
+    while ( std::getline( stream , line ) )
     {
         if ( std::istringstream( line ) >> a >> b )
         {
@@ -683,13 +683,13 @@ void Controller::load_external_map()
 
 //.............................................................................
 
-bool Controller::save_key_map( const KeyMap & km )
+bool Controller::save_key_map( const KeyMap& km )
 {
     FreeLater free_later;
 
     String file_name = get_key_map_file_name();
 
-    gchar * path = g_path_get_dirname( file_name.c_str() );
+    gchar* path = g_path_get_dirname( file_name.c_str() );
 
     free_later( path );
 
@@ -702,7 +702,7 @@ bool Controller::save_key_map( const KeyMap & km )
 
     stream.open( file_name.c_str() , std::ios_base::out | std::ios_base::trunc );
 
-    for( KeyMap::const_iterator it = km.begin(); it != km.end(); ++it )
+    for ( KeyMap::const_iterator it = km.begin(); it != km.end(); ++it )
     {
         stream << it->first << "\t" << it->second << "\n";
 
@@ -773,7 +773,7 @@ void Controller::key_down( unsigned int key_code, unsigned long int unicode , un
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->key_down( key_code, unicode , modifiers ) )
+        if ( !( *it )->key_down( key_code, unicode , modifiers ) )
         {
             inject = false;
         }
@@ -800,7 +800,7 @@ void Controller::key_up( unsigned int key_code, unsigned long int unicode , unsi
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->key_up( key_code, unicode , modifiers ) )
+        if ( !( *it )->key_up( key_code, unicode , modifiers ) )
         {
             inject = false;
         }
@@ -890,7 +890,7 @@ void Controller::pointer_move( int x, int y , unsigned long int modifiers )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_move( sx, sy , modifiers ) )
+        if ( !( *it )->pointer_move( sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -920,7 +920,7 @@ void Controller::pointer_button_down( int button, int x, int y , unsigned long i
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_button_down( button, sx, sy , modifiers ) )
+        if ( !( *it )->pointer_button_down( button, sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -950,7 +950,7 @@ void Controller::pointer_button_up( int button, int x, int y , unsigned long int
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_button_up( button, sx, sy , modifiers ) )
+        if ( !( *it )->pointer_button_up( button, sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -1050,7 +1050,7 @@ void Controller::scroll( int direction , unsigned long int modifiers )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->scroll( direction , modifiers ) )
+        if ( !( *it )->scroll( direction , modifiers ) )
         {
             inject = false;
         }
@@ -1064,7 +1064,7 @@ void Controller::scroll( int direction , unsigned long int modifiers )
 
 //.............................................................................
 
-void Controller::ui_event( const String & parameters )
+void Controller::ui_event( const String& parameters )
 {
     if ( !connected )
     {
@@ -1079,7 +1079,7 @@ void Controller::ui_event( const String & parameters )
 
 //.............................................................................
 
-void Controller::submit_image( void * data, unsigned int size, const char * mime_type )
+void Controller::submit_image( void* data, unsigned int size, const char* mime_type )
 {
     if ( !connected )
     {
@@ -1109,7 +1109,7 @@ void Controller::cancel_image( void )
 
 //.............................................................................
 
-void Controller::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
+void Controller::submit_audio_clip( void* data, unsigned int size, const char* mime_type )
 {
     if ( !connected )
     {
@@ -1157,7 +1157,7 @@ void Controller::advanced_ui_ready( void )
 
 //.............................................................................
 
-void Controller::advanced_ui_event( const char * json )
+void Controller::advanced_ui_event( const char* json )
 {
     if ( !connected )
     {
@@ -1172,7 +1172,7 @@ void Controller::advanced_ui_event( const char * json )
 
 //.............................................................................
 
-void Controller::streaming_video_connected( const char * address )
+void Controller::streaming_video_connected( const char* address )
 {
     if ( !connected )
     {
@@ -1187,7 +1187,7 @@ void Controller::streaming_video_connected( const char * address )
 
 //.............................................................................
 
-void Controller::streaming_video_failed( const char * address, const char * reason )
+void Controller::streaming_video_failed( const char* address, const char* reason )
 {
     if ( !connected )
     {
@@ -1202,7 +1202,7 @@ void Controller::streaming_video_failed( const char * address, const char * reas
 
 //.............................................................................
 
-void Controller::streaming_video_dropped( const char * address, const char * reason )
+void Controller::streaming_video_dropped( const char* address, const char* reason )
 {
     if ( !connected )
     {
@@ -1217,7 +1217,7 @@ void Controller::streaming_video_dropped( const char * address, const char * rea
 
 //.............................................................................
 
-void Controller::streaming_video_ended( const char * address, const char * who )
+void Controller::streaming_video_ended( const char* address, const char* who )
 {
     if ( !connected )
     {
@@ -1232,7 +1232,7 @@ void Controller::streaming_video_ended( const char * address, const char * who )
 
 //.............................................................................
 
-void Controller::streaming_video_status( const char * status, const char * arg )
+void Controller::streaming_video_status( const char* status, const char* arg )
 {
     if ( !connected )
     {
@@ -1247,14 +1247,14 @@ void Controller::streaming_video_status( const char * status, const char * arg )
 
 //.............................................................................
 
-void Controller::add_delegate( Delegate * delegate )
+void Controller::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //.............................................................................
 
-void Controller::remove_delegate( Delegate * delegate )
+void Controller::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
@@ -1271,12 +1271,12 @@ bool Controller::reset()
     g_atomic_int_set( & ts_touch_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_RESET,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_RESET,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::start_accelerometer( MotionFilter filter, double interval )
@@ -1307,10 +1307,10 @@ bool Controller::start_accelerometer( MotionFilter filter, double interval )
     parameters.interval = interval;
 
     bool accelerometer_started = spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_START_ACCELEROMETER,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_START_ACCELEROMETER,
+            &parameters,
+            data ) == 0;
 
     g_atomic_int_set( & ts_accelerometer_started , accelerometer_started ? 1 : 0 );
 
@@ -1322,13 +1322,13 @@ bool Controller::stop_accelerometer()
     g_atomic_int_set( & ts_accelerometer_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::start_gyroscope( double interval )
@@ -1346,10 +1346,10 @@ bool Controller::start_gyroscope( double interval )
     parameters.interval = interval;
 
     bool gyroscope_started = spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_START_GYROSCOPE,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_START_GYROSCOPE,
+            &parameters,
+            data ) == 0;
 
     g_atomic_int_set( & ts_gyroscope_started , gyroscope_started ? 1 : 0 );
 
@@ -1361,13 +1361,13 @@ bool Controller::stop_gyroscope()
     g_atomic_int_set( & ts_gyroscope_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_GYROSCOPE,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_GYROSCOPE,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::start_magnetometer( double interval )
@@ -1385,10 +1385,10 @@ bool Controller::start_magnetometer( double interval )
     parameters.interval = interval;
 
     bool magnetometer_started = spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_START_MAGNETOMETER,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_START_MAGNETOMETER,
+            &parameters,
+            data ) == 0;
 
     g_atomic_int_set( & ts_magnetometer_started , magnetometer_started ? 1 : 0 );
 
@@ -1400,13 +1400,13 @@ bool Controller::stop_magnetometer()
     g_atomic_int_set( & ts_magnetometer_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::start_attitude( double interval )
@@ -1424,10 +1424,10 @@ bool Controller::start_attitude( double interval )
     parameters.interval = interval;
 
     bool attitude_started = spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_START_ATTITUDE,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_START_ATTITUDE,
+            &parameters,
+            data ) == 0;
 
     g_atomic_int_set( & ts_attitude_started , attitude_started ? 1 : 0 );
 
@@ -1439,25 +1439,25 @@ bool Controller::stop_attitude()
     g_atomic_int_set( & ts_attitude_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_ATTITUDE,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_ATTITUDE,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::start_pointer()
 {
     bool pointer_started =
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_START_POINTER,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_START_POINTER,
+                    NULL,
+                    data ) == 0 );
 
     g_atomic_int_set( & ts_pointer_started , pointer_started ? 1 : 0 );
 
@@ -1469,55 +1469,55 @@ bool Controller::stop_pointer()
     g_atomic_int_set( & ts_pointer_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_POINTER,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_POINTER,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::show_pointer_cursor()
 {
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR,
+                    NULL,
+                    data ) == 0 );
 }
 
 bool Controller::hide_pointer_cursor()
 {
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR,
+                    NULL,
+                    data ) == 0 );
 }
 
-bool Controller::set_pointer_cursor( int x , int y , const String & image_uri )
+bool Controller::set_pointer_cursor( int x , int y , const String& image_uri )
 {
-	TPControllerSetPointerCursor parameters;
+    TPControllerSetPointerCursor parameters;
 
-	parameters.x = x;
-	parameters.y = y;
-	parameters.image_uri = image_uri.c_str();
+    parameters.x = x;
+    parameters.y = y;
+    parameters.image_uri = image_uri.c_str();
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR,
-              &parameters,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR,
+                    &parameters,
+                    data ) == 0 );
 
 }
 
@@ -1525,13 +1525,13 @@ bool Controller::set_pointer_cursor( int x , int y , const String & image_uri )
 bool Controller::start_touches()
 {
     bool touch_started =
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_START_TOUCHES,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_START_TOUCHES,
+                    NULL,
+                    data ) == 0 );
 
     g_atomic_int_set( & ts_touch_started , touch_started ? 1 : 0 );
 
@@ -1543,43 +1543,43 @@ bool Controller::stop_touches()
     g_atomic_int_set( & ts_touch_started , 0 );
 
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_TOUCHES,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_TOUCHES,
+                    NULL,
+                    data ) == 0 );
 }
 
-bool Controller::show_multiple_choice( const String & label, const StringPairList & choices )
+bool Controller::show_multiple_choice( const String& label, const StringPairList& choices )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_MULTIPLE_CHOICE ) || choices.empty() )
     {
         return false;
     }
 
-    GPtrArray * id_array = g_ptr_array_new();
-    GPtrArray * choice_array = g_ptr_array_new();
+    GPtrArray* id_array = g_ptr_array_new();
+    GPtrArray* choice_array = g_ptr_array_new();
 
     for ( StringPairList::const_iterator it = choices.begin(); it != choices.end(); ++it )
     {
-        g_ptr_array_add( id_array, ( void * )it->first.c_str() );
-        g_ptr_array_add( choice_array, ( void * )it->second.c_str() );
+        g_ptr_array_add( id_array, ( void* )it->first.c_str() );
+        g_ptr_array_add( choice_array, ( void* )it->second.c_str() );
     }
 
     TPControllerMultipleChoice parameters;
 
     parameters.label = label.c_str();
     parameters.count = choices.size();
-    parameters.ids = ( const char ** )id_array->pdata;
-    parameters.choices = ( const char ** )choice_array->pdata;
+    parameters.ids = ( const char** )id_array->pdata;
+    parameters.choices = ( const char** )choice_array->pdata;
 
     bool result = spec.execute_command(
-                      tp_controller,
-                      TP_CONTROLLER_COMMAND_SHOW_MULTIPLE_CHOICE,
-                      &parameters,
-                      data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_SHOW_MULTIPLE_CHOICE,
+            &parameters,
+            data ) == 0;
 
     g_ptr_array_free( id_array, FALSE );
     g_ptr_array_free( choice_array, FALSE );
@@ -1590,19 +1590,19 @@ bool Controller::show_multiple_choice( const String & label, const StringPairLis
 bool Controller::clear_ui()
 {
     return
-        ( connected ) &&
-        ( spec.capabilities &
-          ( TP_CONTROLLER_HAS_UI |
-            TP_CONTROLLER_HAS_MULTIPLE_CHOICE |
-            TP_CONTROLLER_HAS_TEXT_ENTRY ) ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_CLEAR_UI,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities &
+                    ( TP_CONTROLLER_HAS_UI |
+                            TP_CONTROLLER_HAS_MULTIPLE_CHOICE |
+                            TP_CONTROLLER_HAS_TEXT_ENTRY ) ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_CLEAR_UI,
+                    NULL,
+                    data ) == 0 );
 }
 
-bool Controller::set_ui_background( const String & resource, UIBackgroundMode mode )
+bool Controller::set_ui_background( const String& resource, UIBackgroundMode mode )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_UI ) )
     {
@@ -1629,13 +1629,13 @@ bool Controller::set_ui_background( const String & resource, UIBackgroundMode mo
     }
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND,
+            &parameters,
+            data ) == 0;
 }
 
-bool Controller::set_ui_image( const String & resource, int x, int y, int width, int height )
+bool Controller::set_ui_image( const String& resource, int x, int y, int width, int height )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_UI ) )
     {
@@ -1651,13 +1651,13 @@ bool Controller::set_ui_image( const String & resource, int x, int y, int width,
     parameters.height = height;
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_SET_UI_IMAGE,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_SET_UI_IMAGE,
+            &parameters,
+            data ) == 0;
 }
 
-bool Controller::play_sound( const String & resource, unsigned int loop )
+bool Controller::play_sound( const String& resource, unsigned int loop )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_SOUND ) )
     {
@@ -1670,27 +1670,27 @@ bool Controller::play_sound( const String & resource, unsigned int loop )
     parameters.loop = loop;
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_PLAY_SOUND,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_PLAY_SOUND,
+            &parameters,
+            data ) == 0;
 }
 
 bool Controller::stop_sound()
 {
     return
-        ( connected ) &&
-        ( spec.capabilities & TP_CONTROLLER_HAS_SOUND ) &&
-        ( spec.execute_command(
-              tp_controller,
-              TP_CONTROLLER_COMMAND_STOP_SOUND,
-              NULL,
-              data ) == 0 );
+            ( connected ) &&
+            ( spec.capabilities & TP_CONTROLLER_HAS_SOUND ) &&
+            ( spec.execute_command(
+                    tp_controller,
+                    TP_CONTROLLER_COMMAND_STOP_SOUND,
+                    NULL,
+                    data ) == 0 );
 }
 
-bool Controller::declare_resource( const String & resource, const String & uri , const String & group )
+bool Controller::declare_resource( const String& resource, const String& uri , const String& group )
 {
-    if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
+    if ( !connected || !( spec.capabilities & ( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
     {
         return false;
     }
@@ -1702,15 +1702,15 @@ bool Controller::declare_resource( const String & resource, const String & uri ,
     parameters.group = group.c_str();
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_DECLARE_RESOURCE,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_DECLARE_RESOURCE,
+            &parameters,
+            data ) == 0;
 }
 
-bool Controller::drop_resource_group( const String & group )
+bool Controller::drop_resource_group( const String& group )
 {
-    if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
+    if ( !connected || !( spec.capabilities & ( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
     {
         return false;
     }
@@ -1720,14 +1720,14 @@ bool Controller::drop_resource_group( const String & group )
     parameters.group = group.c_str();
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP,
+            &parameters,
+            data ) == 0;
 }
 
 
-bool Controller::enter_text( const String & label, const String & text )
+bool Controller::enter_text( const String& label, const String& text )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_TEXT_ENTRY ) )
     {
@@ -1740,13 +1740,13 @@ bool Controller::enter_text( const String & label, const String & text )
     parameters.text = text.c_str();
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_ENTER_TEXT,
-               &parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_ENTER_TEXT,
+            &parameters,
+            data ) == 0;
 }
 
-bool Controller::request_image( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource, const String & dialog_label, const String & cancel_label )
+bool Controller::request_image( unsigned int max_width , unsigned int max_height , bool edit , const String& mask_resource, const String& dialog_label, const String& cancel_label )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_IMAGES ) )
     {
@@ -1763,13 +1763,13 @@ bool Controller::request_image( unsigned int max_width , unsigned int max_height
     parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_REQUEST_IMAGE,
-               & parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_REQUEST_IMAGE,
+            & parameters,
+            data ) == 0;
 }
 
-bool Controller::request_audio_clip( const String & dialog_label, const String & cancel_label )
+bool Controller::request_audio_clip( const String& dialog_label, const String& cancel_label )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_AUDIO_CLIPS ) )
     {
@@ -1782,13 +1782,13 @@ bool Controller::request_audio_clip( const String & dialog_label, const String &
     parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP,
-               & parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP,
+            & parameters,
+            data ) == 0;
 }
 
-bool Controller::advanced_ui( const String & payload , String & result )
+bool Controller::advanced_ui( const String& payload , String& result )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ADVANCED_UI ) || payload.empty() )
     {
@@ -1802,10 +1802,10 @@ bool Controller::advanced_ui( const String & payload , String & result )
     parameters.free_result = 0;
 
     bool r = spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_ADVANCED_UI,
-               & parameters,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_ADVANCED_UI,
+            & parameters,
+            data ) == 0;
 
     if ( parameters.result )
     {
@@ -1828,10 +1828,10 @@ bool Controller::show_virtual_remote()
     }
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE,
-               0,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE,
+            0,
+            data ) == 0;
 }
 
 bool Controller::hide_virtual_remote()
@@ -1842,13 +1842,13 @@ bool Controller::hide_virtual_remote()
     }
 
     return spec.execute_command(
-               tp_controller,
-               TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE,
-               0,
-               data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE,
+            0,
+            data ) == 0;
 }
 
-bool Controller::streaming_video_start_call( const String & address )
+bool Controller::streaming_video_start_call( const String& address )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
     {
@@ -1856,13 +1856,13 @@ bool Controller::streaming_video_start_call( const String & address )
     }
 
     return spec.execute_command(
-                tp_controller,
-                TP_CONTROLLER_COMMAND_VIDEO_START_CALL,
-                (void *)address.c_str(),
-                data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_VIDEO_START_CALL,
+            ( void* )address.c_str(),
+            data ) == 0;
 }
 
-bool Controller::streaming_video_end_call( const String & address )
+bool Controller::streaming_video_end_call( const String& address )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_STREAMING_VIDEO ) )
     {
@@ -1870,10 +1870,10 @@ bool Controller::streaming_video_end_call( const String & address )
     }
 
     return spec.execute_command(
-                tp_controller,
-                TP_CONTROLLER_COMMAND_VIDEO_END_CALL,
-                (void *)address.c_str(),
-                data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_VIDEO_END_CALL,
+            ( void* )address.c_str(),
+            data ) == 0;
 }
 
 bool Controller::streaming_video_send_status()
@@ -1884,10 +1884,10 @@ bool Controller::streaming_video_send_status()
     }
 
     return spec.execute_command(
-                tp_controller,
-                TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS,
-                0,
-                data ) == 0;
+            tp_controller,
+            TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS,
+            0,
+            data ) == 0;
 }
 
 //==============================================================================
@@ -1897,7 +1897,7 @@ bool Controller::streaming_video_send_status()
 //-----------------------------------------------------------------------------
 
 ControllerList::ControllerList()
-:
+    :
     queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
     stopped( 0 )
 {
@@ -1942,7 +1942,7 @@ void ControllerList::post_event( gpointer event )
 
     if ( g_atomic_int_get( & stopped ) )
     {
-        Event::destroy( ( Event * ) event );
+        Event::destroy( ( Event* ) event );
     }
     else
     {
@@ -1958,9 +1958,9 @@ gboolean ControllerList::process_events( gpointer self )
 {
     g_assert( self );
 
-    ControllerList * list = ( ControllerList * )self;
+    ControllerList* list = ( ControllerList* )self;
 
-    while ( Event * event = ( Event * )g_async_queue_try_pop( list->queue ) )
+    while ( Event* event = ( Event* )g_async_queue_try_pop( list->queue ) )
     {
         event->process();
         Event::destroy( event );
@@ -1973,14 +1973,14 @@ gboolean ControllerList::process_events( gpointer self )
 // Most likely called in a different thread.
 // Adds the controller to our list and posts an event.
 
-TPController * ControllerList::add_controller( TPContext * context , const char * name, const TPControllerSpec * spec, void * data )
+TPController* ControllerList::add_controller( TPContext* context , const char* name, const TPControllerSpec* spec, void* data )
 {
     g_assert( name );
     g_assert( spec );
 
-    Controller * controller = new Controller( this , context , name , spec , data );
+    Controller* controller = new Controller( this , context , name , spec , data );
 
-    TPController * result = controller->get_tp_controller();
+    TPController* result = controller->get_tp_controller();
 
     post_event( Event::make( Event::ADDED, controller ) );
 
@@ -1991,7 +1991,7 @@ TPController * ControllerList::add_controller( TPContext * context , const char 
 // Most likely called in a different thread.
 // Removes the controller from the list and posts an event.
 
-void ControllerList::remove_controller( TPController * controller )
+void ControllerList::remove_controller( TPController* controller )
 {
     TPController::check( controller );
 
@@ -2001,7 +2001,7 @@ void ControllerList::remove_controller( TPController * controller )
 //.............................................................................
 // Called in main thread - to let delegates know that a new controller is here.
 
-void ControllerList::controller_added( Controller * controller )
+void ControllerList::controller_added( Controller* controller )
 {
     controllers.insert( controller->get_tp_controller() );
 
@@ -2013,7 +2013,7 @@ void ControllerList::controller_added( Controller * controller )
 
 //.............................................................................
 
-void ControllerList::controller_removed( Controller * controller )
+void ControllerList::controller_removed( Controller* controller )
 {
     controllers.erase( controller->get_tp_controller() );
 
@@ -2023,14 +2023,14 @@ void ControllerList::controller_removed( Controller * controller )
 
 //.............................................................................
 
-void ControllerList::add_delegate( Delegate * delegate )
+void ControllerList::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //.............................................................................
 
-void ControllerList::remove_delegate( Delegate * delegate )
+void ControllerList::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
@@ -2052,7 +2052,7 @@ ControllerList::ControllerSet ControllerList::get_controllers()
 
     for ( TPControllerSet::iterator it = controllers.begin(); it != controllers.end(); ++it )
     {
-        Controller * controller = ( *it )->controller;
+        Controller* controller = ( *it )->controller;
 
         if ( controller->is_connected() )
         {
@@ -2079,21 +2079,21 @@ void ControllerList::reset_all()
 //==============================================================================
 // External-facing functions. They all do a sanity check and then post an event.
 
-void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
+void tp_controller_key_down( TPController* controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make_key( Event::KEY_DOWN, controller->controller, key_code, unicode , modifiers ) );
 }
 
-void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
+void tp_controller_key_up( TPController* controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make_key( Event::KEY_UP, controller->controller, key_code, unicode , modifiers ) );
 }
 
-void tp_controller_accelerometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+void tp_controller_accelerometer( TPController* controller, double x, double y, double z , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2103,7 +2103,7 @@ void tp_controller_accelerometer( TPController * controller, double x, double y,
     }
 }
 
-void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+void tp_controller_gyroscope( TPController* controller, double x, double y, double z , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2113,7 +2113,7 @@ void tp_controller_gyroscope( TPController * controller, double x, double y, dou
     }
 }
 
-void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+void tp_controller_magnetometer( TPController* controller, double x, double y, double z , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2123,7 +2123,7 @@ void tp_controller_magnetometer( TPController * controller, double x, double y, 
     }
 }
 
-void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers )
+void tp_controller_attitude( TPController* controller, double roll, double pitch, double yaw , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2133,7 +2133,7 @@ void tp_controller_attitude( TPController * controller, double roll, double pitc
     }
 }
 
-void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers )
+void tp_controller_pointer_move( TPController* controller, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2143,7 +2143,7 @@ void tp_controller_pointer_move( TPController * controller, int x, int y , unsig
     }
 }
 
-void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers )
+void tp_controller_pointer_button_down( TPController* controller, int button, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2153,7 +2153,7 @@ void tp_controller_pointer_button_down( TPController * controller, int button, i
     }
 }
 
-void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers )
+void tp_controller_pointer_button_up( TPController* controller, int button, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2163,21 +2163,21 @@ void tp_controller_pointer_button_up( TPController * controller, int button, int
     }
 }
 
-void tp_controller_pointer_active( TPController * controller )
+void tp_controller_pointer_active( TPController* controller )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make( Event::POINTER_ACTIVE , controller->controller ) );
 }
 
-void tp_controller_pointer_inactive( TPController * controller )
+void tp_controller_pointer_inactive( TPController* controller )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make( Event::POINTER_INACTIVE , controller->controller ) );
 }
 
-void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
+void tp_controller_touch_down( TPController* controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2187,7 +2187,7 @@ void tp_controller_touch_down( TPController * controller, int finger, int x, int
     }
 }
 
-void tp_controller_touch_move( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
+void tp_controller_touch_move( TPController* controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2197,7 +2197,7 @@ void tp_controller_touch_move( TPController * controller, int finger, int x, int
     }
 }
 
-void tp_controller_touch_up( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
+void tp_controller_touch_up( TPController* controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
@@ -2207,87 +2207,87 @@ void tp_controller_touch_up( TPController * controller, int finger, int x, int y
     }
 }
 
-void tp_controller_scroll( TPController * controller, int direction , unsigned long int modifiers )
+void tp_controller_scroll( TPController* controller, int direction , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make_scroll( controller->controller , direction , modifiers ) );
 }
 
-void tp_controller_ui_event( TPController * controller, const char * parameters )
+void tp_controller_ui_event( TPController* controller, const char* parameters )
 {
     TPController::check( controller );
 
     controller->list->post_event( Event::make_ui( controller->controller, parameters ) );
 }
 
-int tp_controller_wants_accelerometer_events( TPController * controller )
+int tp_controller_wants_accelerometer_events( TPController* controller )
 {
     TPController::check( controller );
 
     return controller->controller->wants_accelerometer_events();
 }
 
-int tp_controller_wants_pointer_events( TPController * controller )
+int tp_controller_wants_pointer_events( TPController* controller )
 {
     TPController::check( controller );
 
     return controller->controller->wants_pointer_events();
 }
 
-int tp_controller_wants_touch_events( TPController * controller )
+int tp_controller_wants_touch_events( TPController* controller )
 {
     TPController::check( controller );
 
     return controller->controller->wants_touch_events();
 }
 
-void tp_controller_submit_image( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_image( TPController* controller, const void* data, unsigned int size, const char* mime_type )
 {
-	g_assert(data);
-	g_assert(size);
+    g_assert( data );
+    g_assert( size );
 
-	TPController::check( controller );
-	controller->list->post_event( Event::make_data( Event::SUBMIT_IMAGE, controller->controller, data, size, mime_type ) );
+    TPController::check( controller );
+    controller->list->post_event( Event::make_data( Event::SUBMIT_IMAGE, controller->controller, data, size, mime_type ) );
 }
 
-void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_audio_clip( TPController* controller, const void* data, unsigned int size, const char* mime_type )
 {
-	g_assert(data);
-	g_assert(size);
+    g_assert( data );
+    g_assert( size );
 
-	TPController::check( controller );
-	controller->list->post_event( Event::make_data( Event::SUBMIT_AUDIO_CLIP, controller->controller, data, size, mime_type ) );
+    TPController::check( controller );
+    controller->list->post_event( Event::make_data( Event::SUBMIT_AUDIO_CLIP, controller->controller, data, size, mime_type ) );
 }
 
-void tp_controller_cancel_image( TPController * controller )
+void tp_controller_cancel_image( TPController* controller )
 {
-    TPController::check(controller);
+    TPController::check( controller );
     controller->list->post_event( Event::make( Event::CANCEL_IMAGE, controller->controller ) );
 }
 
-void tp_controller_cancel_audio_clip( TPController * controller )
+void tp_controller_cancel_audio_clip( TPController* controller )
 {
-    TPController::check(controller);
+    TPController::check( controller );
     controller->list->post_event( Event::make( Event::CANCEL_AUDIO_CLIP, controller->controller ) );
 }
 
-void tp_controller_advanced_ui_ready( TPController * controller )
+void tp_controller_advanced_ui_ready( TPController* controller )
 {
-    TPController::check(controller);
+    TPController::check( controller );
     controller->list->post_event( Event::make( Event::ADVANCED_UI_READY, controller->controller ) );
 }
 
-void tp_controller_advanced_ui_event( TPController * controller , const char * json )
+void tp_controller_advanced_ui_event( TPController* controller , const char* json )
 {
-	g_assert( json );
+    g_assert( json );
 
-	TPController::check(controller);
+    TPController::check( controller );
     controller->list->post_event( Event::make_advanced_ui_event( controller->controller , json ) );
 }
 
 
-void tp_controller_streaming_video_connected( TPController * controller, const char * address )
+void tp_controller_streaming_video_connected( TPController* controller, const char* address )
 {
     g_assert( address );
 
@@ -2296,7 +2296,7 @@ void tp_controller_streaming_video_connected( TPController * controller, const c
     controller->list->post_event( Event::make_streaming_video_connected( controller->controller, address ) );
 }
 
-void tp_controller_streaming_video_failed( TPController * controller, const char * address, const char * reason )
+void tp_controller_streaming_video_failed( TPController* controller, const char* address, const char* reason )
 {
     g_assert( address );
     g_assert( reason );
@@ -2306,7 +2306,7 @@ void tp_controller_streaming_video_failed( TPController * controller, const char
     controller->list->post_event( Event::make_streaming_video_failed( controller->controller, address, reason ) );
 }
 
-void tp_controller_streaming_video_dropped( TPController * controller, const char * address, const char * reason )
+void tp_controller_streaming_video_dropped( TPController* controller, const char* address, const char* reason )
 {
     g_assert( address );
     g_assert( reason );
@@ -2316,7 +2316,7 @@ void tp_controller_streaming_video_dropped( TPController * controller, const cha
     controller->list->post_event( Event::make_streaming_video_dropped( controller->controller, address, reason ) );
 }
 
-void tp_controller_streaming_video_ended( TPController * controller, const char * address, const char * who )
+void tp_controller_streaming_video_ended( TPController* controller, const char* address, const char* who )
 {
     g_assert( address );
     g_assert( who );
@@ -2326,7 +2326,7 @@ void tp_controller_streaming_video_ended( TPController * controller, const char 
     controller->list->post_event( Event::make_streaming_video_ended( controller->controller, address, who ) );
 }
 
-void tp_controller_streaming_video_status( TPController * controller, const char * status, const char * arg )
+void tp_controller_streaming_video_status( TPController* controller, const char* status, const char* arg )
 {
     g_assert( status );
     g_assert( arg );

@@ -8,16 +8,16 @@
 
 // Returns the queue of profiler items for the current thread
 
-GQueue * Profiler::get_queue()
+GQueue* Profiler::get_queue()
 {
 #ifndef GLIB_VERSION_2_32
     static GStaticPrivate current_queue = G_STATIC_PRIVATE_INIT;
 
-    GQueue * queue = ( GQueue * ) g_static_private_get( & current_queue );
+    GQueue* queue = ( GQueue* ) g_static_private_get( & current_queue );
 #else
     static GPrivate current_queue = G_PRIVATE_INIT( ( GDestroyNotify ) g_queue_free );
 
-    GQueue * queue = ( GQueue * ) g_private_get( & current_queue );
+    GQueue* queue = ( GQueue* ) g_private_get( & current_queue );
 #endif
 
     if ( ! queue )
@@ -53,15 +53,15 @@ Profiler::EntryMap Profiler::entries;
 
 Profiler::ObjectMap Profiler::objects;
 
-Profiler::Profiler( const char * _name , int _type )
+Profiler::Profiler( const char* _name , int _type )
 {
     name = _name;
 
     type = _type;
 
-    GQueue * queue = get_queue();
+    GQueue* queue = get_queue();
 
-    if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
+    if ( Profiler* previous = ( Profiler* )g_queue_peek_tail( queue ) )
     {
         g_timer_stop( previous->timer );
     }
@@ -71,7 +71,7 @@ Profiler::Profiler( const char * _name , int _type )
     g_queue_push_tail( queue, this );
 }
 
-Profiler::Profiler( const Profiler & )
+Profiler::Profiler( const Profiler& )
 {
     g_assert( false );
 }
@@ -81,13 +81,13 @@ Profiler::~Profiler()
 {
     g_timer_stop( timer );
 
-    GQueue * queue = get_queue();
+    GQueue* queue = get_queue();
 
     g_assert( this == g_queue_pop_tail( queue ) );
 
     double elapsed = ( g_timer_elapsed( timer, NULL ) * 1000 );
 
-    if ( Profiler * previous = ( Profiler * )g_queue_peek_tail( queue ) )
+    if ( Profiler* previous = ( Profiler* )g_queue_peek_tail( queue ) )
     {
         g_timer_continue( previous->timer );
     }
@@ -96,7 +96,7 @@ Profiler::~Profiler()
 
     lock( true );
 
-    Entry & entry( entries[ name ] );
+    Entry& entry( entries[ name ] );
 
     entry.count += 1;
     entry.time += elapsed;
@@ -110,7 +110,7 @@ bool Profiler::compare( std::pair< String, Entry > a, std::pair< String, Entry >
     return a.second.time > b.second.time;
 }
 
-void Profiler::dump( EntryVector & v )
+void Profiler::dump( EntryVector& v )
 {
     // Sorts the vector in descending order by time taken
 
@@ -122,12 +122,12 @@ void Profiler::dump( EntryVector & v )
 
     std::vector< std::pair< String, Entry > >::const_iterator it;
 
-    for( it = v.begin(); it != v.end(); ++it )
+    for ( it = v.begin(); it != v.end(); ++it )
     {
         time += it->second.time;
     }
 
-    for( it = v.begin(); it != v.end(); ++it )
+    for ( it = v.begin(); it != v.end(); ++it )
     {
         g_info( "%40s %8d %8.1f %6.1f %6.1f %%",
                 it->first.c_str(),
@@ -165,12 +165,14 @@ void Profiler::dump()
 
     for ( EntryTypeMap::iterator it = entries_by_type.begin(); it != entries_by_type.end(); ++it )
     {
-        const char * t = "OTHER";
+        const char* t = "OTHER";
 
-        switch( it->first )
+        switch ( it->first )
         {
             case PROFILER_CALLS_FROM_LUA:   t = "CALLS FROM APP:"; break;
+
             case PROFILER_CALLS_TO_LUA:     t = "CALLS TO APP (CALLBACKS):"; break;
+
             case PROFILER_INTERNAL_CALLS:   t = "INTERNAL CALLS"; break;
         }
 
@@ -190,22 +192,22 @@ void Profiler::reset()
     lock( false );
 }
 
-void Profiler::created( const char * name, gpointer p )
+void Profiler::created( const char* name, gpointer p )
 {
     objects[ name ].created += 1;
 }
 
-void Profiler::destroyed( const char * name, gpointer p )
+void Profiler::destroyed( const char* name, gpointer p )
 {
     objects[ name ].destroyed += 1;
 }
 
 void Profiler::dump_objects()
 {
-	g_info( "%24s  %9s %9s %9s" , "type" , "created" , "destroyed" , "alive" );
-	g_info( "%24s--%9s-%9s-%9s" , "--------------------" , "---------" , "---------" , "---------" );
+    g_info( "%24s  %9s %9s %9s" , "type" , "created" , "destroyed" , "alive" );
+    g_info( "%24s--%9s-%9s-%9s" , "--------------------" , "---------" , "---------" , "---------" );
 
-    for( ObjectMap::const_iterator it = objects.begin(); it != objects.end(); ++it )
+    for ( ObjectMap::const_iterator it = objects.begin(); it != objects.end(); ++it )
     {
         g_info( "%24s  %9d %9d %9d",
                 it->first.c_str(),

@@ -8,7 +8,7 @@
 static gsize SERVER_BUFFER_SIZE = 128;
 //------------------------------------------------------------------------------
 
-Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
+Server::Server( guint16 p, Delegate* del, char acc, GError** error )
     :
     port( 0 ),
     listener( NULL ),
@@ -16,13 +16,13 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     accumulate( acc )
 {
 
-    GError * sub_error = NULL;
+    GError* sub_error = NULL;
 
     listener = g_socket_listener_new();
 
-    if( 0 != p )
+    if ( 0 != p )
     {
-        if(g_socket_listener_add_inet_port( listener, p, NULL, &sub_error ))
+        if ( g_socket_listener_add_inet_port( listener, p, NULL, &sub_error ) )
         {
             port = p;
         }
@@ -76,9 +76,9 @@ void Server::close_connection( gpointer connection )
 
 //------------------------------------------------------------------------------
 
-gssize Server::read( gpointer connection , void * buffer , gsize count )
+gssize Server::read( gpointer connection , void* buffer , gsize count )
 {
-    GInputStream * input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
+    GInputStream* input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
 
     if ( ! input_stream )
     {
@@ -99,14 +99,14 @@ gssize Server::read( gpointer connection , void * buffer , gsize count )
 
 //------------------------------------------------------------------------------
 
-bool Server::write( gpointer connection, const char * data , gssize size )
+bool Server::write( gpointer connection, const char* data , gssize size )
 {
-    GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
+    GOutputStream* output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
 
     // Try to write - if we fail, we close the stream, this should also cause
     // our read operation to fail, which will unref the stream.
 
-    GError * error = NULL;
+    GError* error = NULL;
 
     g_output_stream_write_all( output_stream, data, size < 0 ? strlen( data ) : size , NULL, NULL, &error );
 
@@ -127,11 +127,11 @@ bool Server::write( gpointer connection, const char * data , gssize size )
 
 //------------------------------------------------------------------------------
 
-bool Server::write_printf( gpointer connection, const char * format, ... )
+bool Server::write_printf( gpointer connection, const char* format, ... )
 {
     va_list args;
     va_start( args, format );
-    gchar * line = g_strdup_vprintf( format, args );
+    gchar* line = g_strdup_vprintf( format, args );
     va_end( args );
     bool result = write( connection, line );
     g_free( line );
@@ -140,17 +140,17 @@ bool Server::write_printf( gpointer connection, const char * format, ... )
 
 //------------------------------------------------------------------------------
 
-void Server::write_to_all( const char * data )
+void Server::write_to_all( const char* data )
 {
-	FreeLater free_later;
+    FreeLater free_later;
 
-	ConnectionSet tc;
+    ConnectionSet tc;
 
     for ( ConnectionSet::iterator it = connections.begin(); it != connections.end(); ++it )
     {
-    	tc.insert( *it );
+        tc.insert( *it );
 
-    	free_later( g_object_ref( *it ) , g_object_unref );
+        free_later( g_object_ref( *it ) , g_object_unref );
     }
 
     for ( ConnectionSet::iterator it = tc.begin(); it != tc.end(); ++it )
@@ -161,15 +161,15 @@ void Server::write_to_all( const char * data )
 
 //------------------------------------------------------------------------------
 
-bool Server::write_file( gpointer connection, const char * path, bool http_headers )
+bool Server::write_file( gpointer connection, const char* path, bool http_headers )
 {
     // Get the output stream for the connection
 
-    GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
+    GOutputStream* output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
 
     // Get the file
 
-    GFile * file = g_file_new_for_path( path );
+    GFile* file = g_file_new_for_path( path );
 
     if ( !file )
     {
@@ -178,7 +178,7 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
 
     // Get the input stream
 
-    GFileInputStream * input_stream = g_file_read( file, NULL, NULL );
+    GFileInputStream* input_stream = g_file_read( file, NULL, NULL );
 
     if ( !input_stream )
     {
@@ -190,11 +190,11 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
 
     if ( http_headers )
     {
-        GFileInfo * info = g_file_query_info( file,
-                                              G_FILE_ATTRIBUTE_STANDARD_SIZE,
-                                              G_FILE_QUERY_INFO_NONE,
-                                              NULL,
-                                              NULL );
+        GFileInfo* info = g_file_query_info( file,
+                G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                G_FILE_QUERY_INFO_NONE,
+                NULL,
+                NULL );
 
         if ( !info )
         {
@@ -211,7 +211,7 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
         // gio has GContentType, which uses xdgmime, but it relies on a system
         // database of mime types.
 
-        gchar * headers = g_strdup_printf( "HTTP/1.1 200 OK\r\nContent-Length: %"G_GOFFSET_FORMAT"\r\n\r\n", size );
+        gchar* headers = g_strdup_printf( "HTTP/1.1 200 OK\r\nContent-Length: %"G_GOFFSET_FORMAT"\r\n\r\n", size );
 
         g_output_stream_write_all( output_stream, headers, strlen( headers ), NULL, NULL, NULL );
 
@@ -220,13 +220,13 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
 
 
     g_output_stream_splice_async(
-        output_stream,
-        G_INPUT_STREAM( input_stream ),
-        G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE,
-        TRICKPLAY_PRIORITY,
-        NULL,
-        splice_callback,
-        NULL );
+            output_stream,
+            G_INPUT_STREAM( input_stream ),
+            G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE,
+            TRICKPLAY_PRIORITY,
+            NULL,
+            splice_callback,
+            NULL );
 
     g_object_unref( input_stream );
     g_object_unref( file );
@@ -243,11 +243,11 @@ guint16 Server::get_port() const
 
 //------------------------------------------------------------------------------
 
-void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer data )
+void Server::accept_callback( GObject* source, GAsyncResult* result, gpointer data )
 {
-    Server * server = ( Server * )data;
+    Server* server = ( Server* )data;
 
-    GSocketConnection * connection = g_socket_listener_accept_finish( G_SOCKET_LISTENER( source ), result, NULL, NULL );
+    GSocketConnection* connection = g_socket_listener_accept_finish( G_SOCKET_LISTENER( source ), result, NULL, NULL );
 
     if ( connection )
     {
@@ -257,7 +257,7 @@ void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer 
 
         // Get the remote address
 
-        gchar * remote_address = g_inet_address_to_string( g_inet_socket_address_get_address( G_INET_SOCKET_ADDRESS( g_socket_connection_get_remote_address( connection, NULL ) ) ) );
+        gchar* remote_address = g_inet_address_to_string( g_inet_socket_address_get_address( G_INET_SOCKET_ADDRESS( g_socket_connection_get_remote_address( connection, NULL ) ) ) );
 
         // Notify the delegate
 
@@ -274,7 +274,7 @@ void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer 
 
         // Get the input stream for the connection
 
-        GInputStream * input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
+        GInputStream* input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
 
         // Allocate an input buffer and stick it to the input stream
 
@@ -303,17 +303,17 @@ void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer 
 
 //------------------------------------------------------------------------------
 
-void Server::data_read_callback( GObject * source, GAsyncResult * result, gpointer data )
+void Server::data_read_callback( GObject* source, GAsyncResult* result, gpointer data )
 {
-    GInputStream * input_stream = G_INPUT_STREAM( source );
+    GInputStream* input_stream = G_INPUT_STREAM( source );
 
-    GSocketConnection * connection = G_SOCKET_CONNECTION( data );
+    GSocketConnection* connection = G_SOCKET_CONNECTION( data );
 
-    Server * server = ( Server * )g_object_get_data( G_OBJECT( data ), "tp-server" );
+    Server* server = ( Server* )g_object_get_data( G_OBJECT( data ), "tp-server" );
 
     // Finish the async read
 
-    GError * error = NULL;
+    GError* error = NULL;
 
     gsize bytes_read = g_input_stream_read_finish( input_stream, result, &error );
 
@@ -334,25 +334,25 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
     bool read_again = true;
 
-    gchar * buffer = ( gchar * )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
+    gchar* buffer = ( gchar* )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
 
-    buffer[bytes_read>SERVER_BUFFER_SIZE-1?SERVER_BUFFER_SIZE-1:bytes_read] = 0;
+    buffer[bytes_read > SERVER_BUFFER_SIZE - 1 ? SERVER_BUFFER_SIZE - 1 : bytes_read] = 0;
 
     if ( server->accumulate )
     {
-        GString * line = ( GString * )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
+        GString* line = ( GString* )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
 
         g_string_append( line, buffer );
 
-        gchar * s = line->str;
-        gchar * e = NULL;
+        gchar* s = line->str;
+        gchar* e = NULL;
 
         while ( ( *s ) && ( e = strchr( s, server->accumulate ) ) )
         {
             *e = 0;
             s = g_strstrip( s );
 
-//                g_debug("GOT DATA %p [%s]",connection,s);
+            //                g_debug("GOT DATA %p [%s]",connection,s);
 
             if ( server->delegate )
             {
@@ -384,11 +384,11 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
 //------------------------------------------------------------------------------
 
-void Server::connection_destroyed( gpointer data, GObject * connection )
+void Server::connection_destroyed( gpointer data, GObject* connection )
 {
     g_debug( "CONNECTION DESTROYED %p", connection );
 
-    Server * server = ( Server * )data;
+    Server* server = ( Server* )data;
 
     if ( server->delegate )
     {
@@ -400,12 +400,12 @@ void Server::connection_destroyed( gpointer data, GObject * connection )
 
 void Server::destroy_gstring( gpointer s )
 {
-    g_string_free( ( GString * )s, TRUE );
+    g_string_free( ( GString* )s, TRUE );
 }
 
 //------------------------------------------------------------------------------
 
-void Server::splice_callback( GObject * source, GAsyncResult * result, gpointer data )
+void Server::splice_callback( GObject* source, GAsyncResult* result, gpointer data )
 {
     g_output_stream_splice_finish( G_OUTPUT_STREAM( source ), result, NULL );
 }
