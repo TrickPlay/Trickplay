@@ -11,11 +11,11 @@
 #include "signature.h"
 #include "util.h"
 
-void fail( const gchar * format, ... )
+void fail( const gchar* format, ... )
 {
     va_list args;
     va_start( args, format );
-    gchar * s = g_strdup_vprintf( format, args );
+    gchar* s = g_strdup_vprintf( format, args );
     va_end( args );
 
     String result( s );
@@ -26,11 +26,11 @@ void fail( const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 
-bool verify_certificate( X509 * cert )
+bool verify_certificate( X509* cert )
 {
     g_assert( cert );
 
-    static const char * ca_certs[] =
+    static const char* ca_certs[] =
     {
         // This is the TrickPlay App Signing CA (self signed)
 
@@ -57,7 +57,7 @@ bool verify_certificate( X509 * cert )
 
     bool result = false;
 
-    X509_STORE * store = X509_STORE_new();
+    X509_STORE* store = X509_STORE_new();
 
     try
     {
@@ -68,16 +68,16 @@ bool verify_certificate( X509 * cert )
 
         // Add all of our CA certs to the store
 
-        for( const char * * pem = ca_certs; *pem; ++pem )
+        for ( const char * * pem = ca_certs; *pem; ++pem )
         {
-            BIO * bio = BIO_new_mem_buf( ( void * ) *pem, strlen( *pem ) );
+            BIO* bio = BIO_new_mem_buf( ( void* ) *pem, strlen( *pem ) );
 
             if ( ! bio )
             {
                 fail( "FAILED TO CREATE BIO FOR CA CERTIFICATE" );
             }
 
-            X509 * ca = PEM_read_bio_X509( bio, NULL, NULL, NULL );
+            X509* ca = PEM_read_bio_X509( bio, NULL, NULL, NULL );
 
             BIO_free( bio );
 
@@ -105,7 +105,7 @@ bool verify_certificate( X509 * cert )
         // We will need to account for the system time not being correct
         // and cert validation failing because of it.
 
-        X509_STORE_CTX * ctx = X509_STORE_CTX_new();
+        X509_STORE_CTX* ctx = X509_STORE_CTX_new();
 
         if ( ! ctx )
         {
@@ -122,7 +122,7 @@ bool verify_certificate( X509 * cert )
 
         result = verification_result != 0;
     }
-    catch( const String & e )
+    catch ( const String& e )
     {
         g_warning( "FAILED TO VALIDATE CERTIFICATE : %s", e.c_str() );
     }
@@ -139,7 +139,7 @@ bool verify_certificate( X509 * cert )
 // Returns the SHA1 fingerprint of the certificate in upper case hex.
 
 
-bool get_certificate_fingerprint( X509 * cert, String & fingerprint )
+bool get_certificate_fingerprint( X509* cert, String& fingerprint )
 {
     g_assert( cert );
 
@@ -158,7 +158,7 @@ bool get_certificate_fingerprint( X509 * cert, String & fingerprint )
 
     fingerprint.reserve( fingerprint_size * 2 );
 
-    for( unsigned int i = 0; i < fingerprint_size; ++i )
+    for ( unsigned int i = 0; i < fingerprint_size; ++i )
     {
 
         // WARNING: Fingerprints will be incorrect if sprintf is broken
@@ -173,17 +173,17 @@ bool get_certificate_fingerprint( X509 * cert, String & fingerprint )
 
 //-----------------------------------------------------------------------------
 
-bool get_certificate_subject_name( X509 * cert, String & subject_name )
+bool get_certificate_subject_name( X509* cert, String& subject_name )
 {
     g_assert( cert );
 
     bool result = false;
 
-    X509_NAME * name = X509_get_subject_name( cert );
+    X509_NAME* name = X509_get_subject_name( cert );
 
     if ( name )
     {
-        BIO * bio = BIO_new( BIO_s_mem() );
+        BIO* bio = BIO_new( BIO_s_mem() );
 
         if ( bio )
         {
@@ -223,11 +223,11 @@ bool get_certificate_subject_name( X509 * cert, String & subject_name )
 //
 // Any failure will throw a String exception.
 
-bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature::Info & info, gsize & size )
+bool get_signature( std::istream& stream, gsize skip_trailing_bytes, Signature::Info& info, gsize& size )
 {
     g_assert( stream.good() );
 
-    static const char * TP_SIGN_MARKER = "tp-sign";
+    static const char* TP_SIGN_MARKER = "tp-sign";
 
     static int TP_SIGN_MARKER_LENGTH = strlen( TP_SIGN_MARKER );
 
@@ -282,7 +282,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     stream.seekg( - std::streamoff( TP_SIGN_MARKER_LENGTH + 1 + 8 + skip_trailing_bytes ), std::ios_base::end );
 
-    stream.read( ( char * ) sizes, 8 );
+    stream.read( ( char* ) sizes, 8 );
 
     if ( stream.fail() || stream.gcount() != 8 )
     {
@@ -295,7 +295,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     goffset data_size = stream_size - ( TP_SIGN_MARKER_LENGTH + 1 + 8 + cert_size + signature_size );
 
-//    g_debug( "SIGNATURE IS %u BYTES : CERT IS %u BYTES : DATA IS %" G_GOFFSET_FORMAT " BYTES", signature_size, cert_size, data_size );
+    //    g_debug( "SIGNATURE IS %u BYTES : CERT IS %u BYTES : DATA IS %" G_GOFFSET_FORMAT " BYTES", signature_size, cert_size, data_size );
 
     if ( data_size < 0 )
     {
@@ -339,14 +339,14 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Now, create a BIO to read the cert and get its public key
 
-    BIO * cert_bio = BIO_new_mem_buf( cert_pem, cert_size );
+    BIO* cert_bio = BIO_new_mem_buf( cert_pem, cert_size );
 
     if ( ! cert_bio )
     {
         fail( "FAILED TO CREATE BIO FOR CERTIFICATE" );
     }
 
-    X509 * cert = PEM_read_bio_X509( cert_bio, NULL, NULL, NULL );
+    X509* cert = PEM_read_bio_X509( cert_bio, NULL, NULL, NULL );
 
     BIO_free( cert_bio );
 
@@ -385,7 +385,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Get the public key
 
-    EVP_PKEY * public_key = X509_get_pubkey( cert );
+    EVP_PKEY* public_key = X509_get_pubkey( cert );
 
     X509_free( cert );
 
@@ -418,7 +418,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
     // Pass each chunk of data to EVP_VerifyUpdate
 
-    while( data_left > 0 )
+    while ( data_left > 0 )
     {
         std::streamsize to_read = std::min( data_left , BUFFER_SIZE );
 
@@ -443,7 +443,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
         data_left -= to_read;
     }
 
-    int verification_result = EVP_VerifyFinal( &evp_ctx, ( unsigned char * ) signature, signature_size, public_key );
+    int verification_result = EVP_VerifyFinal( &evp_ctx, ( unsigned char* ) signature, signature_size, public_key );
 
     EVP_MD_CTX_cleanup( &evp_ctx );
     EVP_PKEY_free( public_key );
@@ -475,7 +475,7 @@ bool get_signature( std::istream & stream, gsize skip_trailing_bytes, Signature:
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( std::istream & stream, Signature::Info::List & signatures, gsize * signature_length )
+bool Signature::get_signatures( std::istream& stream, Signature::Info::List& signatures, gsize* signature_length )
 {
     signatures.clear();
 
@@ -501,7 +501,7 @@ bool Signature::get_signatures( std::istream & stream, Signature::Info::List & s
 
         return true;
     }
-    catch( const String & e )
+    catch ( const String& e )
     {
         g_warning( "SIGNATURE VERIFICATION FAILED : %s", e.c_str() );
     }
@@ -511,7 +511,7 @@ bool Signature::get_signatures( std::istream & stream, Signature::Info::List & s
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( const gchar * filename, Signature::Info::List & signatures, gsize * signature_length )
+bool Signature::get_signatures( const gchar* filename, Signature::Info::List& signatures, gsize* signature_length )
 {
     std::ifstream stream;
 
@@ -533,9 +533,9 @@ bool Signature::get_signatures( const gchar * filename, Signature::Info::List & 
 
 //-----------------------------------------------------------------------------
 
-bool Signature::get_signatures( gpointer data, gsize size, Signature::Info::List & signatures, gsize * signature_length )
+bool Signature::get_signatures( gpointer data, gsize size, Signature::Info::List& signatures, gsize* signature_length )
 {
-    imstream stream( ( char * ) data, size );
+    imstream stream( ( char* ) data, size );
 
     return get_signatures( stream, signatures, signature_length );
 }

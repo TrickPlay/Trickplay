@@ -12,9 +12,9 @@
 
 #ifdef TP_HAS_READLINE
 
-static Console * readline_console = 0;
+static Console* readline_console = 0;
 
-void Console::readline_handler( char * line )
+void Console::readline_handler( char* line )
 {
     if ( line && strlen( line ) && readline_console )
     {
@@ -35,18 +35,18 @@ void Console::readline_handler( char * line )
 #include "log.h"
 //-----------------------------------------------------------------------------
 
-Console * Console::make( TPContext * context )
+Console* Console::make( TPContext* context )
 {
 #ifdef TP_PRODUCTION
     return 0;
 #else
 
     return new Console( context , context->get_bool( TP_CONSOLE_ENABLED, TP_CONSOLE_ENABLED_DEFAULT ),
-                           context->get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
+            context->get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
 #endif
 }
 
-Console::Console( TPContext * ctx, bool read_stdin, int port )
+Console::Console( TPContext* ctx, bool read_stdin, int port )
     :
     context( ctx ),
     L( NULL ),
@@ -85,9 +85,9 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
 
     if ( port )
     {
-        GError * error = NULL;
+        GError* error = NULL;
 
-        Server * new_server = new Server( port, this, '\n', &error );
+        Server* new_server = new Server( port, this, '\n', &error );
 
         if ( error )
         {
@@ -132,19 +132,19 @@ Console::~Console()
 
 }
 
-void Console::add_command_handler( CommandHandler handler, void * data )
+void Console::add_command_handler( CommandHandler handler, void* data )
 {
     handlers.push_back( CommandHandlerClosure( handler, data ) );
 }
 
-void Console::attach_to_lua( lua_State * l )
+void Console::attach_to_lua( lua_State* l )
 {
     L = l;
 }
 
 gboolean Console::read_data()
 {
-    GError * error = NULL;
+    GError* error = NULL;
 
     g_io_channel_read_line_string( channel, stdin_buffer, NULL, &error );
 
@@ -159,7 +159,7 @@ gboolean Console::read_data()
     return TRUE;
 }
 
-void Console::process_line( gchar * line )
+void Console::process_line( gchar* line )
 {
     // Removes leading and trailing white space in place
 
@@ -171,7 +171,7 @@ void Console::process_line( gchar * line )
         // slash, we split it into at most 2 parts - the command
         // and the rest of the line
 
-        gchar ** parts = g_strsplit( line + 1, " ", 2 );
+        gchar** parts = g_strsplit( line + 1, " ", 2 );
 
         if ( g_strv_length( parts ) >= 1 )
         {
@@ -215,6 +215,7 @@ void Console::process_line( gchar * line )
                     lua_getglobal( L, "print" );
                     // Move it before the results
                     lua_insert( L, lua_gettop( L ) - nargs );
+
                     // Call it
                     if ( lua_pcall( L, nargs, 0, 0 ) != 0 )
                     {
@@ -226,9 +227,9 @@ void Console::process_line( gchar * line )
     }
 }
 
-gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gpointer data )
+gboolean Console::channel_watch( GIOChannel* source, GIOCondition condition, gpointer data )
 {
-    Console * self = ( Console * ) data;
+    Console* self = ( Console* ) data;
 
     if ( ! self->enabled )
     {
@@ -250,22 +251,22 @@ gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gp
 #endif
 }
 
-void Console::connection_accepted( gpointer connection, const char * remote_address )
+void Console::connection_accepted( gpointer connection, const char* remote_address )
 {
     server->write_printf( connection, "WELCOME TO TrickPlay %d.%d.%d\n", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
     tplog( "ACCEPTED CONNECTION FROM %s", remote_address );
 }
 
-void Console::connection_data_received( gpointer connection, const char * data , gsize , bool * )
+void Console::connection_data_received( gpointer connection, const char* data , gsize , bool* )
 {
-    gchar * line = g_strdup( data );
+    gchar* line = g_strdup( data );
     process_line( line );
     g_free( line );
 }
 
-void Console::output_handler( const gchar * line, gpointer data )
+void Console::output_handler( const gchar* line, gpointer data )
 {
-    Console * console = ( Console * )data;
+    Console* console = ( Console* )data;
 
     if ( console->server.get() )
     {
@@ -293,6 +294,6 @@ void Console::disable()
 
 guint16 Console::get_port() const
 {
-	return server.get() ? server->get_port() : 0;
+    return server.get() ? server->get_port() : 0;
 }
 

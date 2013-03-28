@@ -50,7 +50,7 @@ struct Layout
     {
         Mode() : image( 0 ) {}
 
-        const Button * get_button_for_shortcut( const char * shortcut ) const
+        const Button* get_button_for_shortcut( const char* shortcut ) const
         {
             for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
             {
@@ -59,10 +59,11 @@ struct Layout
                     return & * it;
                 }
             }
+
             return 0;
         }
 
-        const Button * get_button_for_action( const String & action ) const
+        const Button* get_button_for_action( const String& action ) const
         {
             for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
             {
@@ -71,15 +72,16 @@ struct Layout
                     return & * it;
                 }
             }
+
             return 0;
         }
 
-        const Button * get_first_focus() const
+        const Button* get_first_focus() const
         {
             return get_button_for_action( first_focus );
         }
 
-        const Button * get_button_at( gfloat x , gfloat y ) const
+        const Button* get_button_at( gfloat x , gfloat y ) const
         {
             for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
             {
@@ -88,10 +90,11 @@ struct Layout
                     return & * it;
                 }
             }
+
             return 0;
         }
 
-        const Button * get_button_at( ClutterActor * focus ) const
+        const Button* get_button_at( ClutterActor* focus ) const
         {
             if ( ! focus )
             {
@@ -106,31 +109,31 @@ struct Layout
             return get_button_at( x , y );
         }
 
-        ClutterActor *  image;
+        ClutterActor*   image;
         String          first_focus;
         ButtonVector    buttons;
     };
 
     Layout() : current_mode( 0 ) {}
 
-    const Mode & get_mode() const
+    const Mode& get_mode() const
     {
         return modes[ current_mode ];
     }
 
-    const Mode & toggle_mode()
+    const Mode& toggle_mode()
     {
         current_mode = current_mode == 1 ? 0 : 1;
         return get_mode();
     }
 
-    const Mode & reset_mode()
+    const Mode& reset_mode()
     {
         current_mode = 0;
         return get_mode();
     }
 
-    bool load( const char * path , const char * assets_path , ClutterActor * container )
+    bool load( const char* path , const char* assets_path , ClutterActor* container )
     {
         g_assert( path );
         g_assert( assets_path );
@@ -145,7 +148,7 @@ struct Layout
 
             using namespace JSON;
 
-            lua_State * L = luaL_newstate();
+            lua_State* L = luaL_newstate();
 
             try
             {
@@ -158,7 +161,7 @@ struct Layout
 
                 failif( ! root.is<Object>() , "INVALID LAYOUT, EXPECTING AN OBJECT" );
 
-                Object & o( root.as<Object>() );
+                Object& o( root.as<Object>() );
 
                 failif( ! o[ "name" ].is<String>() , "MISISNG LAYOUT NAME" );
 
@@ -179,7 +182,7 @@ struct Layout
                     modes[ 1 ] = modes[ 0 ];
                 }
             }
-            catch( ... )
+            catch ( ... )
             {
                 lua_close( L );
                 throw;
@@ -189,7 +192,7 @@ struct Layout
 
             return true;
         }
-        catch( const String & e )
+        catch ( const String& e )
         {
             tpwarn( "%s" , e.c_str() );
             return false;
@@ -202,7 +205,7 @@ struct Layout
 
 private:
 
-    void load_mode( Mode & mode , JSON::Object & root , const char * assets_path , ClutterActor * container ) throw (String)
+    void load_mode( Mode& mode , JSON::Object& root , const char* assets_path , ClutterActor* container ) throw( String )
     {
         using namespace JSON;
 
@@ -211,19 +214,19 @@ private:
 
         failif( ! root[ "layout" ].is<Array>() , "INVALID LAYOUT" );
 
-        Array & a( root[ "layout" ].as<Array>() );
+        Array& a( root[ "layout" ].as<Array>() );
 
         for ( Array::Vector::iterator it = a.begin(); it != a.end(); ++it )
         {
             failif( ! it->is<Array>() , "LAYOUT MODE ENTRY IS NOT AN ARRAY" );
 
-            Array & e( it->as<Array>() );
+            Array& e( it->as<Array>() );
 
             failif( e.size() < 6 , "LAYOUT MODE ENTRY HAS LESS THAN 6 ELEMENTS" );
 
             mode.buttons.push_back( Layout::Button() );
 
-            Layout::Button & button( mode.buttons.back() );
+            Layout::Button& button( mode.buttons.back() );
 
             button.x = e[ 0 ].as_number();
             button.y = e[ 1 ].as_number();
@@ -259,10 +262,10 @@ private:
 
         failif( image_file_name.empty() , "INVALID IMAGE LAYOUT IMAGE" );
 
-        gchar * file_name = g_build_filename( assets_path , image_file_name.c_str() , NULL );
+        gchar* file_name = g_build_filename( assets_path , image_file_name.c_str() , NULL );
         free_later( file_name );
 
-        ClutterActor * image = clutter_texture_new();
+        ClutterActor* image = clutter_texture_new();
 
         g_object_ref_sink( image );
         free_later( image , g_object_unref );
@@ -281,7 +284,7 @@ private:
 struct Rect
 {
     Rect()
-    :
+        :
         x1( 0 ),
         y1( 0 ),
         x2( 0 ),
@@ -289,7 +292,7 @@ struct Rect
     {}
 
     Rect( gfloat cx , gfloat cy , gfloat w , gfloat h )
-    :
+        :
         x1( cx - w / 2 ),
         y1( cy - h / 2 ),
         x2( cx + w / 2 ),
@@ -304,9 +307,9 @@ struct Rect
         y2 = _y2;
     }
 
-    inline bool intersect( const Rect & b )
+    inline bool intersect( const Rect& b )
     {
-        return ! ( b.x1 > x2 || b.x2 < x1 || b.y1 > y2 || b.y2 < y1 );
+        return !( b.x1 > x2 || b.x2 < x1 || b.y1 > y2 || b.y2 < y1 );
     }
 
     inline bool contains( gfloat x , gfloat y )
@@ -326,8 +329,8 @@ class KeyboardHandler
 {
 public:
 
-    KeyboardHandler( Keyboard * keyboard )
-    :
+    KeyboardHandler( Keyboard* keyboard )
+        :
         kb( keyboard )
     {}
 
@@ -341,19 +344,19 @@ public:
         clutter_actor_hide( get_container() );
     }
 
-    virtual void show_for_field( const Keyboard::Form::Field & field ) = 0;
+    virtual void show_for_field( const Keyboard::Form::Field& field ) = 0;
 
     virtual void ensure_focus() = 0;
 
-    virtual bool on_event( ClutterEvent * event ) = 0;
+    virtual bool on_event( ClutterEvent* event ) = 0;
 
 protected:
 
-    virtual ClutterActor * get_container() = 0;
+    virtual ClutterActor* get_container() = 0;
 
-    void ensure_focus( const Layout::Mode & mode , ClutterActor * focus_container )
+    void ensure_focus( const Layout::Mode& mode , ClutterActor* focus_container )
     {
-        const Layout::Button * button = 0;
+        const Layout::Button* button = 0;
 
         // If something was already focused, see if there is a button in this layout
         // that lies in the same position - so we can focus this thing.
@@ -375,26 +378,30 @@ protected:
         kb->show_focus_ring( focus_container , button->focus_ring.c_str() , button->x , button->y );
     }
 
-    bool do_event_shortcut( ClutterEvent * event , const Layout::Mode & mode , Layout::Button const * * button )
+    bool do_event_shortcut( ClutterEvent* event , const Layout::Mode& mode , Layout::Button const * * button )
     {
         if ( event->any.type == CLUTTER_KEY_PRESS )
         {
             bool direct_press = false;
 
-            switch( event->key.keyval )
+            switch ( event->key.keyval )
             {
                 case TP_KEY_RED:
                     * button = mode.get_button_for_shortcut( "R" );
                     break;
+
                 case TP_KEY_GREEN:
                     * button = mode.get_button_for_shortcut( "G" );
                     break;
+
                 case TP_KEY_YELLOW:
                     * button = mode.get_button_for_shortcut( "Y" );
                     break;
+
                 case TP_KEY_BLUE:
                     * button = mode.get_button_for_shortcut( "B" );
                     break;
+
                 case TP_KEY_OK:
                     * button = mode.get_button_at( kb->focus );
                     direct_press = true;
@@ -403,63 +410,72 @@ protected:
 
             if ( * button )
             {
-                const String & action( ( * button )->action );
+                const String& action( ( * button )->action );
 
                 if ( action == "OSK_PREVIOUS" )
                 {
                     kb->move_to_previous_field();
+
                     if ( direct_press )
                     {
                         kb->flash_focus();
                     }
                     else
                     {
-                        kb->flash_button( (*button)->flasher.c_str() , (*button)->x , (*button)->y );
+                        kb->flash_button( ( *button )->flasher.c_str() , ( *button )->x , ( *button )->y );
                     }
+
                     return true;
                 }
 
                 if ( action == "OSK_NEXT" )
                 {
                     kb->move_to_next_field();
+
                     if ( direct_press )
                     {
                         kb->flash_focus();
                     }
                     else
                     {
-                        kb->flash_button( (*button)->flasher.c_str() , (*button)->x , (*button)->y );
+                        kb->flash_button( ( *button )->flasher.c_str() , ( *button )->x , ( *button )->y );
                     }
+
                     return true;
                 }
 
                 if ( action == "OSK_CANCEL" )
                 {
                     kb->cancel();
+
                     if ( direct_press )
                     {
                         kb->flash_focus();
                     }
+
                     return true;
                 }
 
                 if ( action == "OSK_SUBMIT" )
                 {
                     kb->submit();
+
                     if ( direct_press )
                     {
                         kb->flash_focus();
                     }
+
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     //-----------------------------------------------------------------------------
 
-    void show_focus_ring( ClutterActor * focus_container , const Layout::Button * button )
+    void show_focus_ring( ClutterActor* focus_container , const Layout::Button* button )
     {
         g_assert( focus_container );
 
@@ -478,7 +494,7 @@ protected:
 
     //-----------------------------------------------------------------------------
 
-    const Layout::Button * get_spatial_navigation_target( ClutterEvent * event , const Layout::Mode & mode )
+    const Layout::Button* get_spatial_navigation_target( ClutterEvent* event , const Layout::Mode& mode )
     {
         if ( ! kb->focus )
         {
@@ -489,7 +505,7 @@ protected:
 
         if ( event->any.type == CLUTTER_KEY_PRESS )
         {
-            switch( event->key.keyval )
+            switch ( event->key.keyval )
             {
                 case TP_KEY_UP:
                 case TP_KEY_DOWN:
@@ -526,7 +542,7 @@ protected:
 
         // Expand the rectangle in the given direction
 
-        switch( dir )
+        switch ( dir )
         {
             case TP_KEY_UP:
                 fr2.set( 0 , 0 , 1920 , fr.y1 );
@@ -553,10 +569,10 @@ protected:
 
         // To save the closest one
 
-        const Layout::Button * closest_button_by_dir = 0;
+        const Layout::Button* closest_button_by_dir = 0;
         gfloat closest_button_by_dir_distance = -1;
 
-        const Layout::Button * closest_button = 0;
+        const Layout::Button* closest_button = 0;
         gfloat closest_button_distance = -1;
 
         // Iterate over all the buttons in the layout
@@ -597,7 +613,7 @@ protected:
         return closest_button_by_dir ? closest_button_by_dir : closest_button;
     }
 
-    Keyboard * kb;
+    Keyboard* kb;
 };
 
 //=============================================================================
@@ -606,11 +622,11 @@ class TypingHandler : public KeyboardHandler
 {
 public:
 
-    TypingHandler( Keyboard * keyboard )
-    :
+    TypingHandler( Keyboard* keyboard )
+        :
         KeyboardHandler( keyboard )
     {
-        gchar * path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "keyboard-default.lua" , NULL );
+        gchar* path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "keyboard-default.lua" , NULL );
 
         layouts.push_back( Layout() );
 
@@ -627,7 +643,7 @@ public:
         return ! layouts.empty();
     }
 
-    virtual void show_for_field( const Keyboard::Form::Field & field )
+    virtual void show_for_field( const Keyboard::Form::Field& field )
     {
         g_assert( ok() );
 
@@ -645,9 +661,9 @@ public:
         KeyboardHandler::ensure_focus( layouts.front().get_mode() , kb->typing_focus );
     }
 
-    virtual bool on_event( ClutterEvent * event )
+    virtual bool on_event( ClutterEvent* event )
     {
-        const Layout::Button * button = 0;
+        const Layout::Button* button = 0;
 
         if ( KeyboardHandler::do_event_shortcut( event , layouts.front().get_mode() , & button ) )
         {
@@ -661,6 +677,7 @@ public:
             if ( button->action == "OSK_SHIFT" )
             {
                 toggle_shift();
+
                 if ( direct_press )
                 {
                     kb->flash_focus();
@@ -669,18 +686,19 @@ public:
                 {
                     kb->flash_button( button->flasher.c_str() , button->x , button->y );
                 }
+
                 return true;
             }
 
-            Keyboard::Form::Field & field( kb->form.get_field() );
+            Keyboard::Form::Field& field( kb->form.get_field() );
 
             if ( button->action == "OSK_BACKSPACE" )
             {
                 if ( ! field.value.empty() )
                 {
-                    gchar * s = g_strdup( field.value.c_str() );
+                    gchar* s = g_strdup( field.value.c_str() );
 
-                    gchar * p = g_utf8_find_prev_char( s , s + strlen( s ) );
+                    gchar* p = g_utf8_find_prev_char( s , s + strlen( s ) );
 
                     if ( p )
                     {
@@ -733,7 +751,7 @@ public:
 
 protected:
 
-    virtual ClutterActor * get_container()
+    virtual ClutterActor* get_container()
     {
         return kb->typing_container;
     }
@@ -765,11 +783,11 @@ class ListHandler : public KeyboardHandler
 {
 public:
 
-    ListHandler( Keyboard * keyboard )
-    :
+    ListHandler( Keyboard* keyboard )
+        :
         KeyboardHandler( keyboard )
     {
-        gchar * path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "list.lua" , NULL );
+        gchar* path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "list.lua" , NULL );
 
         loaded = layout.load( path , kb->assets_path.c_str() , kb->list_layout );
 
@@ -805,7 +823,7 @@ public:
         return loaded;
     }
 
-    virtual void show_for_field( const Keyboard::Form::Field & _field )
+    virtual void show_for_field( const Keyboard::Form::Field& _field )
     {
         g_assert( ok() );
 
@@ -818,7 +836,7 @@ public:
 
         clutter_actor_hide( kb->current_field_value );
 
-        clutter_actor_hide(item_container );
+        clutter_actor_hide( item_container );
 
         clutter_actor_set_y( item_container , 0 );
 
@@ -838,7 +856,7 @@ public:
 
         for ( StringPairVector::const_iterator it = field->choices.begin(); it != field->choices.end(); ++it , ++i )
         {
-            ClutterActor * item = 0;
+            ClutterActor* item = 0;
 
             if ( i < existing )
             {
@@ -904,7 +922,7 @@ public:
 
     virtual void ensure_focus()
     {
-        const Layout::Button * button = layout.get_mode().get_button_at( kb->focus );
+        const Layout::Button* button = layout.get_mode().get_button_at( kb->focus );
 
         if ( ! button || ( button && button->action == "item" ) )
         {
@@ -914,9 +932,9 @@ public:
         KeyboardHandler::show_focus_ring( kb->list_focus , button );
     }
 
-    virtual bool on_event( ClutterEvent * event )
+    virtual bool on_event( ClutterEvent* event )
     {
-        const Layout::Button * button = 0;
+        const Layout::Button* button = 0;
 
         if ( KeyboardHandler::do_event_shortcut( event , layout.get_mode() , & button ) )
         {
@@ -943,7 +961,7 @@ public:
                 kb->field_value_changed();
             }
 
-            const Layout::Button * target = 0;
+            const Layout::Button* target = 0;
 
             if ( kb->form.current_field == kb->form.fields.size() - 1 )
             {
@@ -963,7 +981,7 @@ public:
         }
 
 
-        const Layout::Button * target = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+        const Layout::Button* target = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
 
         if ( ! target )
         {
@@ -992,18 +1010,18 @@ public:
 
         if ( event->any.type == CLUTTER_KEY_PRESS )
         {
-            switch( event->key.keyval )
+            switch ( event->key.keyval )
             {
-                // Pressing left or right on a list item does nothing
+                    // Pressing left or right on a list item does nothing
 
                 case TP_KEY_LEFT:
                 case TP_KEY_RIGHT:
                     return true;
                     break;
 
-                // This will either focus the next item above it, scroll
-                // the list up or jump out of the list to the buttons
-                // above it.
+                    // This will either focus the next item above it, scroll
+                    // the list up or jump out of the list to the buttons
+                    // above it.
 
                 case TP_KEY_UP:
                 {
@@ -1031,7 +1049,7 @@ public:
                     --top_item;
                     --focused_item;
 
-                    if ( ClutterAnimation * an = clutter_actor_get_animation( item_container ) )
+                    if ( ClutterAnimation* an = clutter_actor_get_animation( item_container ) )
                     {
                         clutter_animation_completed( an );
                     }
@@ -1062,11 +1080,13 @@ public:
 
                         KeyboardHandler::show_focus_ring( kb->list_focus , item_buttons.back() );
                         target = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+
                         if ( target )
                         {
                             KeyboardHandler::show_focus_ring( kb->list_focus , target );
                             return true;
                         }
+
                         return true;
                     }
 
@@ -1085,7 +1105,7 @@ public:
                     ++top_item;
                     ++focused_item;
 
-                    if ( ClutterAnimation * an = clutter_actor_get_animation( item_container ) )
+                    if ( ClutterAnimation* an = clutter_actor_get_animation( item_container ) )
                     {
                         clutter_animation_completed( an );
                     }
@@ -1106,7 +1126,7 @@ public:
 
 protected:
 
-    virtual ClutterActor * get_container()
+    virtual ClutterActor* get_container()
     {
         return kb->list_container;
     }
@@ -1115,12 +1135,12 @@ private:
 
     bool                loaded;
     Layout              layout;
-    ClutterActor *      item_container;
+    ClutterActor*       item_container;
 
-    typedef std::vector< const Layout::Button * > Buttons;
+    typedef std::vector< const Layout::Button* > Buttons;
 
     Buttons                         item_buttons;
-    const Keyboard::Form::Field *   field;
+    const Keyboard::Form::Field*    field;
     int                             top_item;
     int                             focused_item;
     gfloat                          item_height;
@@ -1130,7 +1150,7 @@ private:
 
 //=============================================================================
 
-bool Keyboard::Form::load_from_lua( lua_State * L , int n )
+bool Keyboard::Form::load_from_lua( lua_State* L , int n )
 {
     fields.clear();
     current_field = 0;
@@ -1157,7 +1177,7 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
             {
                 fields.push_back( Field() );
 
-                Field & field( fields.back() );
+                Field& field( fields.back() );
 
                 int t = lua_gettop( L );
 
@@ -1176,9 +1196,10 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
                 // or is something we don't recognize.
 
                 lua_getfield( L , t , "type" );
+
                 if ( lua_really_isstring( L , -1 ) )
                 {
-                    const char * type = lua_tostring( L , -1 );
+                    const char* type = lua_tostring( L , -1 );
 
                     if ( ! strcmp( type , "list" ) )
                     {
@@ -1189,6 +1210,7 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
                         field.type = Field::PASSWORD;
                     }
                 }
+
                 lua_pop( L , 1 );
 
                 //.............................................................
@@ -1223,7 +1245,7 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
                 //.............................................................
 
-                switch( field.type )
+                switch ( field.type )
                 {
                     case Field::TEXT:
                         break;
@@ -1239,15 +1261,16 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
                         failif( ! lua_istable( L , -1 ) , "'choices' MUST BE A TABLE" );
                         String value;
                         lua_pushnil( L );
-                        while( lua_next( L , -2 ) )
+
+                        while ( lua_next( L , -2 ) )
                         {
                             if ( lua_istable( L , -1 ) )
                             {
                                 lua_rawgeti( L , -1 , 1 );
                                 lua_rawgeti( L , -2 , 2 );
 
-                                const char * k = lua_tostring( L , -2 );
-                                const char * v = lua_tostring( L , -1 );
+                                const char* k = lua_tostring( L , -2 );
+                                const char* v = lua_tostring( L , -1 );
 
                                 if ( k && v )
                                 {
@@ -1261,8 +1284,10 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
                                 lua_pop( L , 2 );
                             }
+
                             lua_pop( L , 1 );
                         }
+
                         lua_pop( L , 1 );
                         failif( field.choices.empty() , "'choices' MUST HAVE AT LEAST ONE VALID ENTRY" );
 
@@ -1280,10 +1305,12 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
                     {
                         lua_getfield( L , t , "password_char" );
                         gunichar pc = g_utf8_get_char_validated( lb_optstring( L , -1 , "\302\267" ) , -1 );
-                        if ( pc != ( gunichar ) -1 && pc != ( gunichar ) -2 )
+
+                        if ( pc != ( gunichar ) - 1 && pc != ( gunichar ) - 2 )
                         {
                             field.password_char = pc;
                         }
+
                         lua_pop( L , 1 );
                         break;
                     }
@@ -1298,7 +1325,7 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
             tpwarn( "FORM IS EMPTY" );
         }
     }
-    catch( const String & e )
+    catch ( const String& e )
     {
         fields.clear();
 
@@ -1319,20 +1346,21 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
 //=============================================================================
 
-bool Keyboard::show( lua_State * L , int form_index )
+bool Keyboard::show( lua_State* L , int form_index )
 {
-    if ( Keyboard * kb = Keyboard::get( App::get( L )->get_context() , true ) )
+    if ( Keyboard* kb = Keyboard::get( App::get( L )->get_context() , true ) )
     {
         return kb->show_internal( L , form_index );
     }
+
     return false;
 }
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::hide( lua_State * L , bool skip_animation )
+void Keyboard::hide( lua_State* L , bool skip_animation )
 {
-    if ( Keyboard * kb = Keyboard::get( App::get( L )->get_context() , false ) )
+    if ( Keyboard* kb = Keyboard::get( App::get( L )->get_context() , false ) )
     {
         kb->hide_internal( skip_animation );
     }
@@ -1340,13 +1368,13 @@ void Keyboard::hide( lua_State * L , bool skip_animation )
 
 //-----------------------------------------------------------------------------
 
-Keyboard * Keyboard::get( TPContext * context , bool create )
+Keyboard* Keyboard::get( TPContext* context , bool create )
 {
     g_assert( context );
 
     static char key = 0;
 
-    Keyboard * result = ( Keyboard * ) context->get_internal( & key );
+    Keyboard* result = ( Keyboard* ) context->get_internal( & key );
 
     if ( ! result && create )
     {
@@ -1360,14 +1388,14 @@ Keyboard * Keyboard::get( TPContext * context , bool create )
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::destroy( Keyboard * me )
+void Keyboard::destroy( Keyboard* me )
 {
     delete me;
 }
 
 //-----------------------------------------------------------------------------
 
-bool Keyboard::show_internal( lua_State * L , int form_index )
+bool Keyboard::show_internal( lua_State* L , int form_index )
 {
     if ( ! keyboard )
     {
@@ -1459,18 +1487,18 @@ void Keyboard::hide_internal( bool skip_animation )
         lsp->unref();
         lsp = 0;
     }
- }
+}
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::on_finished_showing( ClutterAnimation * animation , ClutterActor * actor )
+void Keyboard::on_finished_showing( ClutterAnimation* animation , ClutterActor* actor )
 {
     tplog2( "SHOWING!" );
 }
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::on_finished_hiding( ClutterAnimation * animation , ClutterActor * actor )
+void Keyboard::on_finished_hiding( ClutterAnimation* animation , ClutterActor* actor )
 {
     tplog2( "HIDDEN" );
 
@@ -1479,15 +1507,15 @@ void Keyboard::on_finished_hiding( ClutterAnimation * animation , ClutterActor *
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_path )
+void Keyboard::load_static_images( ClutterActor* actor , const gchar* assets_path )
 {
     if ( CLUTTER_IS_TEXTURE( actor ) )
     {
-        if ( const gchar * name = clutter_actor_get_name( actor ) )
+        if ( const gchar* name = clutter_actor_get_name( actor ) )
         {
-            gchar * base = g_build_filename( assets_path , name , NULL );
+            gchar* base = g_build_filename( assets_path , name , NULL );
 
-            gchar * filename = g_strdup_printf( "%s.png" , base );
+            gchar* filename = g_strdup_printf( "%s.png" , base );
 
             if ( ! Images::load_texture( CLUTTER_TEXTURE( actor ) , filename ) )
             {
@@ -1501,9 +1529,10 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
     else if ( CLUTTER_IS_CONTAINER( actor ) )
     {
         ClutterActorIter iter;
-        ClutterActor *child;
+        ClutterActor* child;
         clutter_actor_iter_init( &iter, actor );
-        while(clutter_actor_iter_next( &iter, &child ))
+
+        while ( clutter_actor_iter_next( &iter, &child ) )
         {
             load_static_images( child, assets_path );
         }
@@ -1512,13 +1541,13 @@ void Keyboard::load_static_images( ClutterActor * actor , const gchar * assets_p
 
 //-----------------------------------------------------------------------------
 
-bool Keyboard::find_actor( ClutterScript * script , const gchar * id , GType type , ClutterActor * * actor )
+bool Keyboard::find_actor( ClutterScript* script , const gchar* id , GType type , ClutterActor * * actor )
 {
     g_assert( script );
     g_assert( id );
     g_assert( actor );
 
-    if ( GObject * o = clutter_script_get_object( script , id ) )
+    if ( GObject* o = clutter_script_get_object( script , id ) )
     {
         if ( ! CLUTTER_IS_ACTOR( o ) || ! G_TYPE_CHECK_INSTANCE_TYPE( o , type ) )
         {
@@ -1537,8 +1566,8 @@ bool Keyboard::find_actor( ClutterScript * script , const gchar * id , GType typ
 
 //-----------------------------------------------------------------------------
 
-Keyboard::Keyboard( TPContext * c )
-:
+Keyboard::Keyboard( TPContext* c )
+    :
     context( c ),
     keyboard( 0 ),
     field_list_container( 0 ),
@@ -1570,23 +1599,24 @@ Keyboard::Keyboard( TPContext * c )
 
     // Get the engine's resources directory
 
-    const char * resources_path = context->get( TP_RESOURCES_PATH );
+    const char* resources_path = context->get( TP_RESOURCES_PATH );
     g_assert( resources_path );
 
     // Get the keyboard directory inside there
 
-    gchar * kp = g_build_filename( resources_path , "keyboard" , NULL );
+    gchar* kp = g_build_filename( resources_path , "keyboard" , NULL );
     keyboard_path = kp;
     g_free( kp );
 
     // Get the filename for the field list UI definition, and load the contents
     // of the file.
 
-    gchar * fp = g_build_filename( keyboard_path.c_str() , "field.json" , NULL );
+    gchar* fp = g_build_filename( keyboard_path.c_str() , "field.json" , NULL );
     free_later( fp );
-    gchar * contents = 0;
+    gchar* contents = 0;
     {
-        GError * error = 0;
+        GError* error = 0;
+
         if ( ! g_file_get_contents( fp , & contents , NULL , & error ) )
         {
             tpwarn( "FAILED TO LOAD FIELD UI DEFINITION : %s" , error->message );
@@ -1601,7 +1631,7 @@ Keyboard::Keyboard( TPContext * c )
 
     // Get the filename for the keyboard UI definition
 
-    gchar * keyboard_json_path = g_build_filename( keyboard_path.c_str() , "keyboard.json" , NULL );
+    gchar* keyboard_json_path = g_build_filename( keyboard_path.c_str() , "keyboard.json" , NULL );
     free_later( keyboard_json_path );
 
     // If it doesn't exist, not much we can do.
@@ -1615,10 +1645,10 @@ Keyboard::Keyboard( TPContext * c )
 
     // OK, let's load it
 
-    ClutterScript * script = clutter_script_new();
+    ClutterScript* script = clutter_script_new();
     free_later( script , g_object_unref );
 
-    GError * error = 0;
+    GError* error = 0;
 
     clutter_script_load_from_file( script , keyboard_json_path , & error );
 
@@ -1645,7 +1675,7 @@ Keyboard::Keyboard( TPContext * c )
             find_actor( script , "current-field-caption" , CLUTTER_TYPE_TEXT , & current_field_caption ) &&
             find_actor( script , "current-field-value" , CLUTTER_TYPE_TEXT , & current_field_value );
 
-    if ( ! ok  )
+    if ( ! ok )
     {
         keyboard = 0;
         return;
@@ -1657,7 +1687,7 @@ Keyboard::Keyboard( TPContext * c )
 
     // Get the stage and its dimensions
 
-    ClutterActor * stage = context->get_stage();
+    ClutterActor* stage = context->get_stage();
 
     gfloat stage_width;
     gfloat stage_height;
@@ -1673,18 +1703,19 @@ Keyboard::Keyboard( TPContext * c )
 
     // Load all the static images
 
-    gchar * keyboard_assets_path = g_build_filename( keyboard_path.c_str() , "assets" , NULL );
+    gchar* keyboard_assets_path = g_build_filename( keyboard_path.c_str() , "assets" , NULL );
     free_later( keyboard_assets_path );
 
     assets_path = keyboard_assets_path;
 
-        ClutterActorIter iter;
-        ClutterActor *child;
-        clutter_actor_iter_init( &iter, keyboard );
-        while(clutter_actor_iter_next( &iter, &child ))
-        {
-            load_static_images( child, keyboard_assets_path );
-        }
+    ClutterActorIter iter;
+    ClutterActor* child;
+    clutter_actor_iter_init( &iter, keyboard );
+
+    while ( clutter_actor_iter_next( &iter, &child ) )
+    {
+        load_static_images( child, keyboard_assets_path );
+    }
 
     // Get the width of the keyboard
 
@@ -1755,12 +1786,12 @@ Keyboard::~Keyboard()
 
     if ( typing_handler )
     {
-    	delete typing_handler;
+        delete typing_handler;
     }
 
     if ( list_handler )
     {
-    	delete list_handler;
+        delete list_handler;
     }
 }
 
@@ -1773,19 +1804,19 @@ void Keyboard::reset()
 
 //-----------------------------------------------------------------------------
 
-ClutterActor * Keyboard::show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y , bool set_it )
+ClutterActor* Keyboard::show_focus_ring( ClutterActor* container , const char* name , gfloat x , gfloat y , bool set_it )
 {
-    ClutterActor * ring = clutter_container_find_child_by_name( CLUTTER_CONTAINER( container ) , name );
+    ClutterActor* ring = clutter_container_find_child_by_name( CLUTTER_CONTAINER( container ) , name );
 
     if ( ! ring )
     {
-        ClutterActor * source = clutter_container_find_child_by_name( CLUTTER_CONTAINER( focus_rings ) , name );
+        ClutterActor* source = clutter_container_find_child_by_name( CLUTTER_CONTAINER( focus_rings ) , name );
 
         if ( ! source )
         {
             source = clutter_texture_new();
 
-            gchar * path = g_build_filename( assets_path.c_str() , name , NULL );
+            gchar* path = g_build_filename( assets_path.c_str() , name , NULL );
 
             Images::load_texture( CLUTTER_TEXTURE( source ) , path );
 
@@ -1833,7 +1864,7 @@ void Keyboard::flash_focus()
 {
     if ( focus )
     {
-        if ( ClutterAnimation * an = clutter_actor_get_animation( focus ) )
+        if ( ClutterAnimation* an = clutter_actor_get_animation( focus ) )
         {
             clutter_animation_completed( an );
         }
@@ -1851,14 +1882,14 @@ void Keyboard::flash_focus()
 
 //-----------------------------------------------------------------------------
 
-static void hide_on_completed( ClutterAnimation * animation , ClutterActor * actor )
+static void hide_on_completed( ClutterAnimation* animation , ClutterActor* actor )
 {
     clutter_actor_hide( actor );
 }
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::flash_button( const char * name , gfloat x , gfloat y )
+void Keyboard::flash_button( const char* name , gfloat x , gfloat y )
 {
     if ( ! focus || ! name )
     {
@@ -1881,7 +1912,7 @@ void Keyboard::flash_button( const char * name , gfloat x , gfloat y )
         return;
     }
 
-    ClutterActor * flasher = show_focus_ring( clutter_actor_get_parent( focus ) , name , x , y , false );
+    ClutterActor* flasher = show_focus_ring( clutter_actor_get_parent( focus ) , name , x , y , false );
 
     if ( flasher )
     {
@@ -1902,9 +1933,9 @@ void Keyboard::connect_event_handler()
 {
     disconnect_event_handler();
 
-    if ( ClutterActor * stage = context->get_stage() )
+    if ( ClutterActor* stage = context->get_stage() )
     {
-        event_handler = g_signal_connect( G_OBJECT( stage  ) , "captured-event" , ( GCallback ) captured_event , this );
+        event_handler = g_signal_connect( G_OBJECT( stage ) , "captured-event" , ( GCallback ) captured_event , this );
     }
 }
 
@@ -1912,7 +1943,7 @@ void Keyboard::connect_event_handler()
 
 void Keyboard::disconnect_event_handler()
 {
-    if ( ClutterActor * stage = context->get_stage() )
+    if ( ClutterActor* stage = context->get_stage() )
     {
         if ( event_handler && g_signal_handler_is_connected( G_OBJECT( stage ) , event_handler ) )
         {
@@ -1925,14 +1956,14 @@ void Keyboard::disconnect_event_handler()
 
 //-----------------------------------------------------------------------------
 
-gboolean Keyboard::captured_event( ClutterActor * actor , ClutterEvent * event , Keyboard * me )
+gboolean Keyboard::captured_event( ClutterActor* actor , ClutterEvent* event , Keyboard* me )
 {
     return me->on_event( actor , event );
 }
 
 //-----------------------------------------------------------------------------
 
-gboolean Keyboard::on_event( ClutterActor * actor , ClutterEvent * event )
+gboolean Keyboard::on_event( ClutterActor* actor , ClutterEvent* event )
 {
     if ( event->any.flags & CLUTTER_EVENT_FLAG_SYNTHETIC )
     {
@@ -1969,7 +2000,7 @@ bool Keyboard::build_field_list()
 
         if ( existing_fields > 0 )
         {
-            ClutterActor * field = clutter_actor_get_first_child( field_list_container );
+            ClutterActor* field = clutter_actor_get_first_child( field_list_container );
 
             top = existing_fields * ( clutter_actor_get_y( field ) + clutter_actor_get_height( field ) );
         }
@@ -1978,11 +2009,11 @@ bool Keyboard::build_field_list()
         {
             FreeLater free_later;
 
-            ClutterScript * script = clutter_script_new();
+            ClutterScript* script = clutter_script_new();
 
             free_later( script , g_object_unref );
 
-            GError * error = 0;
+            GError* error = 0;
 
             clutter_script_load_from_data( script , field_script.c_str() , -1 , & error );
 
@@ -1993,7 +2024,7 @@ bool Keyboard::build_field_list()
                 return false;
             }
 
-            ClutterActor * group = 0;
+            ClutterActor* group = 0;
 
             if ( ! find_actor( script , "field" , CLUTTER_TYPE_GROUP , & group ) )
             {
@@ -2020,9 +2051,10 @@ bool Keyboard::build_field_list()
             }
 
             ClutterActorIter iter;
-            ClutterActor *child;
+            ClutterActor* child;
             clutter_actor_iter_init( &iter, group );
-            while(clutter_actor_iter_next( &iter, &child ))
+
+            while ( clutter_actor_iter_next( &iter, &child ) )
             {
                 load_static_images( child, assets_path.c_str() );
             }
@@ -2047,7 +2079,7 @@ bool Keyboard::build_field_list()
 
     for ( int i = 0; i < form_fields; ++i )
     {
-        Form::Field & ff( form.fields[ i ] );
+        Form::Field& ff( form.fields[ i ] );
 
         if ( ff.type == Form::Field::LIST )
         {
@@ -2058,14 +2090,14 @@ bool Keyboard::build_field_list()
             ff.handler = typing_handler;
         }
 
-        ClutterActor * field = clutter_actor_get_child_at_index( field_list_container, i );
+        ClutterActor* field = clutter_actor_get_child_at_index( field_list_container, i );
 
         g_assert( field );
 
         //.....................................................................
         // Set the field caption
 
-        ClutterActor * caption = clutter_container_find_child_by_name( CLUTTER_CONTAINER( field ) , "caption" );
+        ClutterActor* caption = clutter_container_find_child_by_name( CLUTTER_CONTAINER( field ) , "caption" );
 
         g_assert( caption );
 
@@ -2074,7 +2106,7 @@ bool Keyboard::build_field_list()
         //.....................................................................
         // Set the value
 
-        ClutterActor * value = clutter_container_find_child_by_name( CLUTTER_CONTAINER( field ) , "value" );
+        ClutterActor* value = clutter_container_find_child_by_name( CLUTTER_CONTAINER( field ) , "value" );
 
         g_assert( value );
 
@@ -2140,7 +2172,7 @@ void Keyboard::switch_to_field( size_t field_index )
 
     for ( Form::FieldVector::const_iterator it = form.fields.begin(); it != form.fields.end(); ++it )
     {
-    	it->handler->hide();
+        it->handler->hide();
     }
 
     // Make sure the container has the right number of fields
@@ -2149,7 +2181,7 @@ void Keyboard::switch_to_field( size_t field_index )
 
     // Get the first field, so we can calculate the height of all fields
 
-    ClutterActor * first_field = clutter_actor_get_first_child( field_list_container );
+    ClutterActor* first_field = clutter_actor_get_first_child( field_list_container );
 
     g_assert( first_field );
 
@@ -2187,7 +2219,7 @@ void Keyboard::switch_to_field( size_t field_index )
 
     form.current_field = field_index;
 
-    Form::Field & field( form.get_field() );
+    Form::Field& field( form.get_field() );
 
     //.........................................................................
     // We center the field caption manually
@@ -2222,7 +2254,7 @@ void Keyboard::switch_to_field( size_t field_index )
         clutter_text_set_password_char( CLUTTER_TEXT( current_field_value ) , 0 );
     }
 
-    if ( ClutterActor * field_count = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "field-count" ) )
+    if ( ClutterActor* field_count = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "field-count" ) )
     {
         String count( Util::format( "%u / %u" , field_index + 1 , form.fields.size() ) );
         clutter_text_set_text( CLUTTER_TEXT( field_count ) , count.c_str() );
@@ -2266,7 +2298,7 @@ void Keyboard::field_value_changed()
 
     if ( lsp )
     {
-        if ( lua_State * L = lsp->get_lua_state() )
+        if ( lua_State* L = lsp->get_lua_state() )
         {
             lua_pushstring( L , form.get_field().id.c_str() );
             lua_pushstring( L , form.get_field().value.c_str() );
@@ -2280,15 +2312,15 @@ void Keyboard::field_value_changed()
 
 void Keyboard::update_field_value()
 {
-    const Form::Field & field( form.get_field() );
+    const Form::Field& field( form.get_field() );
 
-    ClutterActor * ff = clutter_actor_get_child_at_index( field_list_container, form.current_field );
+    ClutterActor* ff = clutter_actor_get_child_at_index( field_list_container, form.current_field );
 
     g_assert( ff );
 
     clutter_text_set_text( CLUTTER_TEXT( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "value" ) ) , field.get_display_value().c_str() );
 
-    if ( ClutterActor * placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "current-field-placeholder" ) )
+    if ( ClutterActor* placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "current-field-placeholder" ) )
     {
         if ( field.value.empty() && ! field.placeholder.empty() && field.type != Form::Field::LIST )
         {
@@ -2310,7 +2342,7 @@ void Keyboard::cancel()
 {
     if ( lsp )
     {
-        if ( lua_State * L = lsp->get_lua_state() )
+        if ( lua_State* L = lsp->get_lua_state() )
         {
             UserData::invoke_global_callbacks( L , "keyboard" , "on_cancel" , 0 , 0 );
         }
@@ -2325,11 +2357,11 @@ void Keyboard::submit()
 {
     // TODO: validate required fields
 
-	bool hide = true;
+    bool hide = true;
 
     if ( lsp )
     {
-        if ( lua_State * L = lsp->get_lua_state() )
+        if ( lua_State* L = lsp->get_lua_state() )
         {
             lua_newtable( L );
 
@@ -2342,18 +2374,19 @@ void Keyboard::submit()
 
             if ( UserData::invoke_global_callbacks( L , "keyboard" , "on_submit" , 1 , 1 , 1 ) )
             {
-            	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
-            	{
-            		hide = false;
-            	}
-           		lua_pop( L , 1 );
+                if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+                {
+                    hide = false;
+                }
+
+                lua_pop( L , 1 );
             }
         }
     }
 
     if ( hide )
     {
-    	hide_internal( false );
+        hide_internal( false );
     }
 }
 
