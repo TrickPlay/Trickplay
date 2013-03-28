@@ -5,11 +5,11 @@ module stopwatch;
 ]]
 
 /*
-	Class: Stopwatch
+    Class: Stopwatch
 
-	The Stopwatch class measures elapsed time in milliseconds. A Stopwatch object can be started, stopped, resumed or reset. The amount of elapsed time can be retrieved at any point.
-	
-	The Stopwatch class does not have the capability of firing an event or invoking a callback after a specific amount of time has expired; for such a capability, use the <Timer> class.
+    The Stopwatch class measures elapsed time in milliseconds. A Stopwatch object can be started, stopped, resumed or reset. The amount of elapsed time can be retrieved at any point.
+
+    The Stopwatch class does not have the capability of firing an event or invoking a callback after a specific amount of time has expired; for such a capability, use the <Timer> class.
 
 */
 
@@ -17,35 +17,35 @@ class Stopwatch [[GTimer*]]
 {
 
     /*
-    	Constructor: Stopwatch
-    	
-    	The Stopwatch constructor creates a new Stopwatch object and starts it running. To retrieve the amount of elapsed time since the Stopwatch started, access the <elapsed> or <elapsed_seconds> properties.
-    
-    	*Arguments:* None
-    	
-    	*Return Value:* new Stopwatch object
-    	
-    	*Code Example:* Create a new and running Stopwatch object
-    	
-    	(code)
-    	-- Create and start a new Stopwatch
-    	print( "Starting stopwatch..." )
-    	stopWatch = StopWatch()
-    	  .
-    	  .
-    	  .
-    	-- Stop the Stopwatch
-    	stopWatch:stop()
-    	
-    	-- Retrieve the amount of time elapsed since the Stopwatch started
-    	-- Note: If the Stopwatch had not been stopped, the elapsed_seconds property
-    	--       below would retrieve a slightly larger value than the elapsed property.
-    	print( "Elapsed time: ",
+        Constructor: Stopwatch
+
+        The Stopwatch constructor creates a new Stopwatch object and starts it running. To retrieve the amount of elapsed time since the Stopwatch started, access the <elapsed> or <elapsed_seconds> properties.
+
+        *Arguments:* None
+
+        *Return Value:* new Stopwatch object
+
+        *Code Example:* Create a new and running Stopwatch object
+
+        (code)
+        -- Create and start a new Stopwatch
+        print( "Starting stopwatch..." )
+        stopWatch = StopWatch()
+          .
+          .
+          .
+        -- Stop the Stopwatch
+        stopWatch:stop()
+
+        -- Retrieve the amount of time elapsed since the Stopwatch started
+        -- Note: If the Stopwatch had not been stopped, the elapsed_seconds property
+        --       below would retrieve a slightly larger value than the elapsed property.
+        print( "Elapsed time: ",
                               stopWatch.elapsed,         " milliseconds, ",
                               stopWatch.elapsed_seconds, " seconds." )
-    	(end)
-    	
-    	*See Also:* the <stop> and <start> functions
+        (end)
+
+        *See Also:* the <stop> and <start> functions
     */
 
     Stopwatch()
@@ -58,80 +58,80 @@ class Stopwatch [[GTimer*]]
             g_timer_destroy( self );
         ]];
 
-	/*
-		Property: elapsed
-		
-		The elapsed property contains the number of milliseconds that have elapsed since the Stopwatch started running. If the Stopwatch has been stopped, the property contains the amount of elapsed time that occurred while it was running.
-		
-		*See Also:* the <elapsed_seconds> property
+    /*
+        Property: elapsed
 
-	*/
-	
+        The elapsed property contains the number of milliseconds that have elapsed since the Stopwatch started running. If the Stopwatch has been stopped, the property contains the amount of elapsed time that occurred while it was running.
+
+        *See Also:* the <elapsed_seconds> property
+
+    */
+
     readonly double elapsed
         [[
             elapsed = g_timer_elapsed( self, NULL ) * 1000;
         ]];
 
-	/*
-		Property: elapsed_seconds
-		
-		The elapsed_seconds property contains the number of seconds, including fractional seconds, that have elapsed since the Stopwatch started running. If the Stopwatch has been stopped, the property contains the amount of elapsed time that occurred while it was running.
-		
-		*See Also:* the <elapsed> property
-	*/
-	
+    /*
+        Property: elapsed_seconds
+
+        The elapsed_seconds property contains the number of seconds, including fractional seconds, that have elapsed since the Stopwatch started running. If the Stopwatch has been stopped, the property contains the amount of elapsed time that occurred while it was running.
+
+        *See Also:* the <elapsed> property
+    */
+
     readonly double elapsed_seconds
         [[
             elapsed_seconds = g_timer_elapsed( self, NULL );
         ]];
 
-	/*
-		Function: start
-		
-		The start() function resets the tracking of elapsed time and starts the Stopwatch running; any previous elapsed time is cleared. The start() function can be called on either a running or stopped Stopwatch object. 
-		
-		The Stopwatch object begins running automatically when it is created. The start() function is necessary only to reset a new starting point or to restart a stopped Stopwatch.
-		
-		*Arguments:* None
-		
-		*Return Value:* None
-		
-		*See Also:* the <stop> and <continue> functions
-	*/
+    /*
+        Function: start
+
+        The start() function resets the tracking of elapsed time and starts the Stopwatch running; any previous elapsed time is cleared. The start() function can be called on either a running or stopped Stopwatch object.
+
+        The Stopwatch object begins running automatically when it is created. The start() function is necessary only to reset a new starting point or to restart a stopped Stopwatch.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <stop> and <continue> functions
+    */
 
     start()
         [[
             g_timer_start( self );
         ]];
 
-	/*
-		Function: stop
-		
-		The stop() function stops the tracking of elapsed time. The amount of elapsed time can be retrieved from the <elapsed> and <elapsed_seconds> properties. Tracking can be resumed or restarted by calling the <continue> or <start> functions, respectively.
-		
-		*Arguments:* None
-		
-		*Return Value:* None
-		
-		*See Also:* the <start> and <continue> functions
-	*/
+    /*
+        Function: stop
+
+        The stop() function stops the tracking of elapsed time. The amount of elapsed time can be retrieved from the <elapsed> and <elapsed_seconds> properties. Tracking can be resumed or restarted by calling the <continue> or <start> functions, respectively.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <start> and <continue> functions
+    */
 
     stop()
         [[
             g_timer_stop( self );
         ]];
 
-	/*
-		Function: continue
-		
-		The continue() function resumes a stopped Stopwatch. Elapsed time is added to the amount that elapsed previously. To clear and reset the elapsed time, use the <start> function.
-		
-		*Arguments:* None
-		
-		*Return Value:* None
-		
-		*See Also:* the <start> function
-	*/
+    /*
+        Function: continue
+
+        The continue() function resumes a stopped Stopwatch. Elapsed time is added to the amount that elapsed previously. To clear and reset the elapsed time, use the <start> function.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <start> function
+    */
 
     continue()
         [[

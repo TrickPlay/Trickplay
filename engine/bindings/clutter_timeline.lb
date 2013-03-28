@@ -50,43 +50,43 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
     *Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis.
 
     (code)
-	movingRect = Rectangle( { position = { -100, 400 },
-	                          size     = { 100, 100 },
-	   	                      color    = { 225, 225, 0, 255 },
-	} )
-	screen:add( movingRect )
+    movingRect = Rectangle( { position = { -100, 400 },
+                              size     = { 100, 100 },
+                              color    = { 225, 225, 0, 255 },
+    } )
+    screen:add( movingRect )
 
-	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline( { duration = 5000,  -- 5 seconds
-							    loop     = true,  -- loop forever
-	} )
+    -- Animate the Rectangle using a Timeline
+    movingRect_tl = Timeline( { duration = 5000,  -- 5 seconds
+                                loop     = true,  -- loop forever
+    } )
 
-	-- Define a handler for on_new_frame events
-	function onNewFrame( timeline, duration, progress )
-		-- X changes from -100 to 2020
-		movingRect.x = -100 + (2120 * progress)
+    -- Define a handler for on_new_frame events
+    function onNewFrame( timeline, duration, progress )
+        -- X changes from -100 to 2020
+        movingRect.x = -100 + (2120 * progress)
 
-		-- X rotation changes from 0 to 360
-		movingRect.x_rotation = { 360 * progress, 0, 0 }
-	end
+        -- X rotation changes from 0 to 360
+        movingRect.x_rotation = { 360 * progress, 0, 0 }
+    end
 
-	-- Register the handler for the on_new_frame event
-	movingRect_tl:add_onnewframe_listener( onNewFrame )
+    -- Register the handler for the on_new_frame event
+    movingRect_tl:add_onnewframe_listener( onNewFrame )
 
-	-- Show everything on the screen
-	screen:show()
+    -- Show everything on the screen
+    screen:show()
 
-	-- Start the Timeline animation
-	movingRect_tl:start()
+    -- Start the Timeline animation
+    movingRect_tl:start()
     (end)
 
-	*Code Example:* The source code for an <Expanded Timeline Demo> is listed at the end of this page. The program uses a single Timeline object to animate multiple properties of three rectangles.
+    *Code Example:* The source code for an <Expanded Timeline Demo> is listed at the end of this page. The program uses a single Timeline object to animate multiple properties of three rectangles.
 */
 
 class Timeline [[ClutterTimeline*]]
 {
     Timeline(table props = 0)
-	[[
+    [[
             self=clutter_timeline_new(1000);
             g_object_ref(self);
             self=lb_construct_gobject(ClutterTimeline,self);
@@ -98,296 +98,296 @@ class Timeline [[ClutterTimeline*]]
 
             g_object_unref(self);
 
-	]];
+    ]];
 
     ~Timeline()
-	[[
-	]];
-
-/***************************************
-	Property: duration
-
-	The duration property is an integer value specifying the length of the Timeline's animation in milliseconds.
-
-	While an animation is running, its duration property should not be modified. It is possible, however, to alter the duration of a looping animation in the Timeline object's <on_completed> event by following the steps shown below.
-
-	(code)
-	-- Define Timeline object
-	myTimeline = Timeline( { duration = 1000,
-	                         loop     = true,
-	                         ...other Timeline settings...,
-	} )
-
-	-- Define handler for on_completed events
-	function onCompletedHandler( timeline )
-		-- Change Timeline duration
-		timeline.duration = 2000
-
-		-- Stop and restart current animation. This reinitializes the duration.
-		timeline.stop()
-		timeline.start()
-	end
-
-	-- Hook handler into on_completed events
-	myTimeline:add_oncompleted_listener( onCompletedHandler )
-	(end)
-
-	*Default Setting:* 1000 milliseconds, i.e., one second
-
-	*See Also:* the <delay> and <loop> properties and the <on_completed> event
-*/
-
-    int duration
-	[[duration=clutter_timeline_get_duration(self);]]
-	[[clutter_timeline_set_duration(self,duration);]];
-
-/***************************************
-	Property: loop
-
-	The loop property is a boolean flag indicating whether or not the Timeline should loop infinitely (true = loop). A looping Timeline can be terminated by calling the <stop> function.
-
-	*Default Setting:* false, i.e., Timeline does not loop infinitely
-
-	*See Also:* the <duration> property and the <stop> function
-*/
-
-    bool loop
-	[[
-        loop=(clutter_timeline_get_repeat_count(self) == -1);
-	]]
-	[[
-        clutter_timeline_set_repeat_count(self, loop ? -1 : 0);
-	]];
-
-/***************************************
-	Property: delay
-
-	The delay property is an integer value specifying the number of milliseconds the Timeline should delay before starting. This is a one-time delay that precedes the initial running of the Timeline. If the Timeline loops, the delay does not occur at the start of subsequent iterations.
-
-	*Default Setting:* 0 milliseconds, i.e., no delay
-
-	*See Also:* the <duration> property and the <start> function
-*/
-
-    int delay
-	[[delay=clutter_timeline_get_delay(self);]]
-	[[clutter_timeline_set_delay(self,delay);]];
-
-/***************************************
-	Property: direction
-
-	The direction property is a string specifying the Timeline's direction.
-
-	The direction property can be set while the Timeline is running to change its direction.
-
-	*Supported Settings:* The direction string is case-sensitive.
-
-		FORWARD - The Timeline will move from its first frame to its last frame
-		BACKWARD - The Timeline will move from its last frame to its first frame
-
-	*Default Setting:* "FORWARD"
-
-	*See Also:* the <duration> property
-*/
-
-    string direction
-	[[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
-	[[
-	    static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
-	    clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
-	]];
-
-/***************************************
-	Property: elapsed
-
-	The elapsed property is an integer value specifying the number of milliseconds elapsed since the Timeline began its current iteration.
-
-	The elapsed property has a valid value only while the Timeline is running.
-
-	*Default Setting:* 0
-
-	*See Also:* the <duration> and <loop> properties
-*/
-
-    readonly int elapsed
-	[[elapsed=clutter_timeline_get_elapsed_time(self);]];
-
-/***************************************
-	Property: delta
-
-	The delta property is an integer value specifying the number of milliseconds since the last <on_new_frame> event. The delta value enables physics-based simulations that require knowledge of the exact amount of time elapsed since the previous callback.
-
-	The delta property contains a valid value only within the handler function of an on_new_frame event; outside the handler, the property's setting is undefined.
-
-	*Default Setting:* Undefined, valid only within an on_new_frame event handler
-
-	*See Also:* the <elapsed> and <duration> properties and the <on_new_frame> event
-*/
-
-    readonly int delta
-	[[delta=clutter_timeline_get_delta(self);]];
-
-/***************************************
-	Property: progress
-
-	The progress property is a double value between 0 and 1 that indicates the percentage of a running Timeline iteration that has completed. For example, a value of 0.10 indicates that 10% of the current iteration has completed.
-
-	The progress property has a valid value only while a Timeline is running. A program can determine if a Timeline is running by accessing the <is_playing> property.
-
-	*Default Setting:* Undefined, valid only while the Timeline is running
-
-	*See Also:* the <duration>, <elapsed> and <is_playing> properties
-*/
-
-    readonly double progress
-	[[progress=clutter_timeline_get_progress(self);]];
-
-/***************************************
-	Property: is_playing
-
-	The is_playing property is a boolean flag specifying whether or not the Timeline is currently running (true = running).
-
-	During the period when a running Timeline is paused, the is_playing property will be false until the Timeline resumes.
-
-	*Default Setting:* false
-
-	*See Also:* the <progress> property
-*/
-
-    readonly bool is_playing
-	[[is_playing=clutter_timeline_is_playing(self);]];
-
-/***************************************
-	Property: markers
-
-	The markers property is a table containing all the markers defined for the Timeline. Each entry in the table is a unique string specifying a marker name. If no markers are defined for the Timeline, the property is set to an empty table.
-
-	*Default Setting:* { }, i.e., an empty table
-
-	*See Also:* the <add_marker> and <list_markers> functions
-*/
-
-    readonly table markers
-	[[Timeline_list_markers(L);]];
-
-/***************************************
-	Function: reverse
-
-	The reverse() function toggles the direction of the Timeline, from either "FORWARD" to "BACKWARD" or vice versa. If the reverse() function is called when the Timeline is running, it will reverse direction and run all the way back to its opposite starting/ending point.
-
-	*Arguments:* None
-
-	*Return Value:* None
-
-	*See Also:* the <direction> property
-*/
-
-	reverse()
-	[[clutter_timeline_set_direction(self,
-			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
-			?CLUTTER_TIMELINE_BACKWARD
-			:CLUTTER_TIMELINE_FORWARD);]];
-
-/***************************************
-	Function: start
-
-	The start() function causes the Timeline to begin running and fire an <on_started> event.
-
-	If a <delay> has been defined, the delay counts down before the animation begins and the <on_started> event fires.
-
-	If a running Timeline has been paused, it can resume running by calling start() again.
-
-	*Arguments:* None
-
-	*Return Value:* None
-
-	*See Also:* the <on_started> event and the <pause> and <stop> functions
-*/
-
-    start()
-	[[
-	  clutter_timeline_start(self);
+    [[
     ]];
 
 /***************************************
-	Function: pause
+    Property: duration
 
-	The pause() function halts a running Timeline at its current position and fires an <on_paused> event.
+    The duration property is an integer value specifying the length of the Timeline's animation in milliseconds.
 
-	To resume the paused Timeline, call the start() function again; the Timeline will resume from the point at which it had been paused.
+    While an animation is running, its duration property should not be modified. It is possible, however, to alter the duration of a looping animation in the Timeline object's <on_completed> event by following the steps shown below.
 
-	*Arguments:* None
+    (code)
+    -- Define Timeline object
+    myTimeline = Timeline( { duration = 1000,
+                             loop     = true,
+                             ...other Timeline settings...,
+    } )
 
-	*Return Value:* None
+    -- Define handler for on_completed events
+    function onCompletedHandler( timeline )
+        -- Change Timeline duration
+        timeline.duration = 2000
 
-	*See Also:* the <on_paused> event and the <start> and <stop> functions
+        -- Stop and restart current animation. This reinitializes the duration.
+        timeline.stop()
+        timeline.start()
+    end
+
+    -- Hook handler into on_completed events
+    myTimeline:add_oncompleted_listener( onCompletedHandler )
+    (end)
+
+    *Default Setting:* 1000 milliseconds, i.e., one second
+
+    *See Also:* the <delay> and <loop> properties and the <on_completed> event
+*/
+
+    int duration
+    [[duration=clutter_timeline_get_duration(self);]]
+    [[clutter_timeline_set_duration(self,duration);]];
+
+/***************************************
+    Property: loop
+
+    The loop property is a boolean flag indicating whether or not the Timeline should loop infinitely (true = loop). A looping Timeline can be terminated by calling the <stop> function.
+
+    *Default Setting:* false, i.e., Timeline does not loop infinitely
+
+    *See Also:* the <duration> property and the <stop> function
+*/
+
+    bool loop
+    [[
+        loop=(clutter_timeline_get_repeat_count(self) == -1);
+    ]]
+    [[
+        clutter_timeline_set_repeat_count(self, loop ? -1 : 0);
+    ]];
+
+/***************************************
+    Property: delay
+
+    The delay property is an integer value specifying the number of milliseconds the Timeline should delay before starting. This is a one-time delay that precedes the initial running of the Timeline. If the Timeline loops, the delay does not occur at the start of subsequent iterations.
+
+    *Default Setting:* 0 milliseconds, i.e., no delay
+
+    *See Also:* the <duration> property and the <start> function
+*/
+
+    int delay
+    [[delay=clutter_timeline_get_delay(self);]]
+    [[clutter_timeline_set_delay(self,delay);]];
+
+/***************************************
+    Property: direction
+
+    The direction property is a string specifying the Timeline's direction.
+
+    The direction property can be set while the Timeline is running to change its direction.
+
+    *Supported Settings:* The direction string is case-sensitive.
+
+        FORWARD - The Timeline will move from its first frame to its last frame
+        BACKWARD - The Timeline will move from its last frame to its first frame
+
+    *Default Setting:* "FORWARD"
+
+    *See Also:* the <duration> property
+*/
+
+    string direction
+    [[direction=(clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD?"FORWARD":"BACKWARD");]]
+    [[
+        static const char * directions[3] = { "FORWARD" , "BACKWARD" , NULL };
+        clutter_timeline_set_direction(self,luaL_checkoption(L,-1,directions[0],directions)==0?CLUTTER_TIMELINE_FORWARD:CLUTTER_TIMELINE_BACKWARD);
+    ]];
+
+/***************************************
+    Property: elapsed
+
+    The elapsed property is an integer value specifying the number of milliseconds elapsed since the Timeline began its current iteration.
+
+    The elapsed property has a valid value only while the Timeline is running.
+
+    *Default Setting:* 0
+
+    *See Also:* the <duration> and <loop> properties
+*/
+
+    readonly int elapsed
+    [[elapsed=clutter_timeline_get_elapsed_time(self);]];
+
+/***************************************
+    Property: delta
+
+    The delta property is an integer value specifying the number of milliseconds since the last <on_new_frame> event. The delta value enables physics-based simulations that require knowledge of the exact amount of time elapsed since the previous callback.
+
+    The delta property contains a valid value only within the handler function of an on_new_frame event; outside the handler, the property's setting is undefined.
+
+    *Default Setting:* Undefined, valid only within an on_new_frame event handler
+
+    *See Also:* the <elapsed> and <duration> properties and the <on_new_frame> event
+*/
+
+    readonly int delta
+    [[delta=clutter_timeline_get_delta(self);]];
+
+/***************************************
+    Property: progress
+
+    The progress property is a double value between 0 and 1 that indicates the percentage of a running Timeline iteration that has completed. For example, a value of 0.10 indicates that 10% of the current iteration has completed.
+
+    The progress property has a valid value only while a Timeline is running. A program can determine if a Timeline is running by accessing the <is_playing> property.
+
+    *Default Setting:* Undefined, valid only while the Timeline is running
+
+    *See Also:* the <duration>, <elapsed> and <is_playing> properties
+*/
+
+    readonly double progress
+    [[progress=clutter_timeline_get_progress(self);]];
+
+/***************************************
+    Property: is_playing
+
+    The is_playing property is a boolean flag specifying whether or not the Timeline is currently running (true = running).
+
+    During the period when a running Timeline is paused, the is_playing property will be false until the Timeline resumes.
+
+    *Default Setting:* false
+
+    *See Also:* the <progress> property
+*/
+
+    readonly bool is_playing
+    [[is_playing=clutter_timeline_is_playing(self);]];
+
+/***************************************
+    Property: markers
+
+    The markers property is a table containing all the markers defined for the Timeline. Each entry in the table is a unique string specifying a marker name. If no markers are defined for the Timeline, the property is set to an empty table.
+
+    *Default Setting:* { }, i.e., an empty table
+
+    *See Also:* the <add_marker> and <list_markers> functions
+*/
+
+    readonly table markers
+    [[Timeline_list_markers(L);]];
+
+/***************************************
+    Function: reverse
+
+    The reverse() function toggles the direction of the Timeline, from either "FORWARD" to "BACKWARD" or vice versa. If the reverse() function is called when the Timeline is running, it will reverse direction and run all the way back to its opposite starting/ending point.
+
+    *Arguments:* None
+
+    *Return Value:* None
+
+    *See Also:* the <direction> property
+*/
+
+    reverse()
+    [[clutter_timeline_set_direction(self,
+            clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
+            ?CLUTTER_TIMELINE_BACKWARD
+            :CLUTTER_TIMELINE_FORWARD);]];
+
+/***************************************
+    Function: start
+
+    The start() function causes the Timeline to begin running and fire an <on_started> event.
+
+    If a <delay> has been defined, the delay counts down before the animation begins and the <on_started> event fires.
+
+    If a running Timeline has been paused, it can resume running by calling start() again.
+
+    *Arguments:* None
+
+    *Return Value:* None
+
+    *See Also:* the <on_started> event and the <pause> and <stop> functions
+*/
+
+    start()
+    [[
+      clutter_timeline_start(self);
+    ]];
+
+/***************************************
+    Function: pause
+
+    The pause() function halts a running Timeline at its current position and fires an <on_paused> event.
+
+    To resume the paused Timeline, call the start() function again; the Timeline will resume from the point at which it had been paused.
+
+    *Arguments:* None
+
+    *Return Value:* None
+
+    *See Also:* the <on_paused> event and the <start> and <stop> functions
 */
 
     pause()
-	[[clutter_timeline_pause(self);]];
+    [[clutter_timeline_pause(self);]];
 
 /***************************************
-	Function: stop
+    Function: stop
 
-	The stop() function halts a running Timeline and resets the Timeline to its starting position. The properties of all animating objects, however, remain at whatever intermediate values they were at when the animation was stopped. The stop() function does *not* cause an <on_completed> event to fire.
+    The stop() function halts a running Timeline and resets the Timeline to its starting position. The properties of all animating objects, however, remain at whatever intermediate values they were at when the animation was stopped. The stop() function does *not* cause an <on_completed> event to fire.
 
-	*Arguments:* None
+    *Arguments:* None
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <start> and <pause> functions
+    *See Also:* the <start> and <pause> functions
 */
 
     stop()
-	[[clutter_timeline_stop(self);]];
+    [[clutter_timeline_stop(self);]];
 
 /***************************************
-	Function: rewind
+    Function: rewind
 
-	The rewind() function moves the animation back to its original starting position. If the Timeline is running, it will continue running from its new position.
+    The rewind() function moves the animation back to its original starting position. If the Timeline is running, it will continue running from its new position.
 
-	*Arguments:* None
+    *Arguments:* None
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <start> and <stop> functions
+    *See Also:* the <start> and <stop> functions
 */
 
     rewind()
-	[[clutter_timeline_rewind(self);]];
+    [[clutter_timeline_rewind(self);]];
 
 /***************************************
-	Function: skip
+    Function: skip
 
-	The skip() function moves the Timeline ahead a specified number of milliseconds.
+    The skip() function moves the Timeline ahead a specified number of milliseconds.
 
-	*Arguments:*
+    *Arguments:*
 
-		msecs - positive integer value specifying the number of milliseconds to advance along the Timeline
+        msecs - positive integer value specifying the number of milliseconds to advance along the Timeline
 
-	*Return Value:* None
+    *Return Value:* None
 
-	To skip to a specific time on the Timeline, use the advance() function.
+    To skip to a specific time on the Timeline, use the advance() function.
 
-	It is not possible to skip backwards along the Timeline by specifying a negative number of milliseconds. Instead, use the advance() function or define a marker for the desired position and then call advance_to_marker().
+    It is not possible to skip backwards along the Timeline by specifying a negative number of milliseconds. Instead, use the advance() function or define a marker for the desired position and then call advance_to_marker().
 
-	*See Also:* the <advance> and <advance_to_marker> functions
+    *See Also:* the <advance> and <advance_to_marker> functions
 */
 
     skip(int msecs)
-	[[
-	   if ( msecs < 0 )
-	   {
-	       luaL_error( L , "Duration argument to Timeline:skip must be positive." );
-	   }
-	   else
-	   {
+    [[
+       if ( msecs < 0 )
+       {
+           luaL_error( L , "Duration argument to Timeline:skip must be positive." );
+       }
+       else
+       {
            guint elapsed = clutter_timeline_get_elapsed_time( self );
            guint duration = clutter_timeline_get_duration( self );
 
-    	   switch( clutter_timeline_get_direction( self ) )
-    	   {
-    	       case CLUTTER_TIMELINE_FORWARD:
+           switch( clutter_timeline_get_direction( self ) )
+           {
+               case CLUTTER_TIMELINE_FORWARD:
                    if ( msecs + elapsed > duration )
                    {
                        msecs = duration - elapsed;
@@ -400,38 +400,38 @@ class Timeline [[ClutterTimeline*]]
                        msecs = ( duration - ( duration - elapsed ) ) -1;
                    }
                    break;
-    	   }
+           }
 
-    	   clutter_timeline_skip( self , msecs );
-    	}
-	]];
+           clutter_timeline_skip( self , msecs );
+        }
+    ]];
 
 /***************************************
-	Function: advance
+    Function: advance
 
-	The advance() function moves the current position to a time specified in milliseconds since the Timeline's beginning. Any non-negative time along the Timeline can be specified, including zero.
+    The advance() function moves the current position to a time specified in milliseconds since the Timeline's beginning. Any non-negative time along the Timeline can be specified, including zero.
 
-	*Arguments:*
+    *Arguments:*
 
-		msecs - non-negative integer value specifying the number of milliseconds along the Timeline at which to set the current position
+        msecs - non-negative integer value specifying the number of milliseconds along the Timeline at which to set the current position
 
-	*Return Value:* None
+    *Return Value:* None
 
-	An <on_new_frame> event is not immediately fired following a call to advance().
+    An <on_new_frame> event is not immediately fired following a call to advance().
 
-	To advance a specific number of milliseconds on the Timeline, use the skip() function.
+    To advance a specific number of milliseconds on the Timeline, use the skip() function.
 
-	*See Also:* the <skip> and <advance_to_marker> functions
+    *See Also:* the <skip> and <advance_to_marker> functions
 */
 
     advance(int msecs)
-	[[
-	   if ( msecs < 0 )
-	   {
-	       luaL_error( L , "Duration argument to Timeline:advance must be positive." );
-	   }
-	   else
-	   {
+    [[
+       if ( msecs < 0 )
+       {
+           luaL_error( L , "Duration argument to Timeline:advance must be positive." );
+       }
+       else
+       {
            int duration = clutter_timeline_get_duration( self );
 
            if ( msecs > duration )
@@ -439,196 +439,196 @@ class Timeline [[ClutterTimeline*]]
                msecs = duration;
            }
 
-	       clutter_timeline_advance(self,msecs);
-	   }
+           clutter_timeline_advance(self,msecs);
+       }
 
-	]];
+    ]];
 
 /***************************************
-	Function: add_marker
+    Function: add_marker
 
-	The add_marker() function defines a named marker that is attached to a specific time on the Timeline. During the running of the Timeline's animation, when the marked time is reached, an <on_marker_reached> event is fired.
+    The add_marker() function defines a named marker that is attached to a specific time on the Timeline. During the running of the Timeline's animation, when the marked time is reached, an <on_marker_reached> event is fired.
 
-	*Arguments:*
+    *Arguments:*
 
-		name - unique string name of the marker
-		msecs - time position in milliseconds from start of Timeline at which to add the marker. This value does not include any initial delay.
+        name - unique string name of the marker
+        msecs - time position in milliseconds from start of Timeline at which to add the marker. This value does not include any initial delay.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	Each marker defined for the object must have a unique name. If a marker with the specified name already exists on the Timeline, the new marker replaces the existing marker, as shown below.
-
-	(code)
-	someTimeline:add_marker( "myMarker", 1000 )  -- sets myMarker at 1000 milliseconds
-	someTimeline:add_marker( "myMarker", 2000 )  -- replaces existing myMarker; myMarker now set at 2000 msecs
-	(end)
-
-	A table of defined markers can be retrieved from the <markers> property. The animation can jump to a particular marker by calling the <advance_to_marker> function. A marker can be removed by calling the <remove_marker> function.
-
-	*Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis. It also places  markers at one-second intervals along the Timeline and defines an on_marker_reached event handler to output an informational message to the console every time a marker is hit during the animation.
+    Each marker defined for the object must have a unique name. If a marker with the specified name already exists on the Timeline, the new marker replaces the existing marker, as shown below.
 
     (code)
-   	-- Create the Rectangle to animate
-	movingRect = Rectangle( { position = { -100, 400 },
-	                          size     = { 100, 100 },
-	                          color    = { 225, 225, 0, 255 },
-	} )
-	screen:add( movingRect )
+    someTimeline:add_marker( "myMarker", 1000 )  -- sets myMarker at 1000 milliseconds
+    someTimeline:add_marker( "myMarker", 2000 )  -- replaces existing myMarker; myMarker now set at 2000 msecs
+    (end)
 
-	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline( { duration = 5000,  	-- 5 seconds
-							    loop    = true,     -- loop forever
-	} )
+    A table of defined markers can be retrieved from the <markers> property. The animation can jump to a particular marker by calling the <advance_to_marker> function. A marker can be removed by calling the <remove_marker> function.
 
-	-- Define and register an on_marker_reached event handler
-	function onMarkerReachedHandler( timeline, name, duration )
-		-- Print an informational message
-		print( "In on_marker_reached(): Name = ", name, ", time = ", msecs )
-	end
-	movingRect_tl:add_onmarkerreached_listener( onMarkerReachedHandler )
+    *Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis. It also places  markers at one-second intervals along the Timeline and defines an on_marker_reached event handler to output an informational message to the console every time a marker is hit during the animation.
 
-	-- Define and register an on_new_frame event handler
-	function onNewFrameHandler( timeline, duration, progress )
-		-- X changes from -100 to 2020
-		movingRect.x = -100 + (2120 * progress)
-		-- X rotation changes from 0 to 360
-		movingRect.x_rotation = { 360 * progress, 0, 0 }
-	end
-	movingRect_tl:add_onnewframe_listener( onNewFrameHandler )
+    (code)
+    -- Create the Rectangle to animate
+    movingRect = Rectangle( { position = { -100, 400 },
+                              size     = { 100, 100 },
+                              color    = { 225, 225, 0, 255 },
+    } )
+    screen:add( movingRect )
 
-	-- Define Timeline markers at one-second intervals
-	movingRect_tl:add_marker( "Marker1000", 1000 )
-	movingRect_tl:add_marker( "Marker2000", 2000 )
-	movingRect_tl:add_marker( "Marker3000", 3000 )
-	movingRect_tl:add_marker( "Marker4000", 4000 )
+    -- Animate the Rectangle using a Timeline
+    movingRect_tl = Timeline( { duration = 5000,    -- 5 seconds
+                                loop    = true,     -- loop forever
+    } )
 
-	-- Show everything onscreen
-	screen:show()
+    -- Define and register an on_marker_reached event handler
+    function onMarkerReachedHandler( timeline, name, duration )
+        -- Print an informational message
+        print( "In on_marker_reached(): Name = ", name, ", time = ", msecs )
+    end
+    movingRect_tl:add_onmarkerreached_listener( onMarkerReachedHandler )
 
-	-- Start the Timeline animation
-	movingRect_tl:start()
-   	(end)
+    -- Define and register an on_new_frame event handler
+    function onNewFrameHandler( timeline, duration, progress )
+        -- X changes from -100 to 2020
+        movingRect.x = -100 + (2120 * progress)
+        -- X rotation changes from 0 to 360
+        movingRect.x_rotation = { 360 * progress, 0, 0 }
+    end
+    movingRect_tl:add_onnewframe_listener( onNewFrameHandler )
 
-	*See Also:* the <markers> property, the <remove_marker> and <advance_to_marker> functions and the <on_marker_reached> event
+    -- Define Timeline markers at one-second intervals
+    movingRect_tl:add_marker( "Marker1000", 1000 )
+    movingRect_tl:add_marker( "Marker2000", 2000 )
+    movingRect_tl:add_marker( "Marker3000", 3000 )
+    movingRect_tl:add_marker( "Marker4000", 4000 )
+
+    -- Show everything onscreen
+    screen:show()
+
+    -- Start the Timeline animation
+    movingRect_tl:start()
+    (end)
+
+    *See Also:* the <markers> property, the <remove_marker> and <advance_to_marker> functions and the <on_marker_reached> event
 */
 
     add_marker(string name,int msecs)
-	[[
-	   if ( clutter_timeline_has_marker( self , name ) )
-	   {
-	       clutter_timeline_remove_marker( self , name );
-	   }
+    [[
+       if ( clutter_timeline_has_marker( self , name ) )
+       {
+           clutter_timeline_remove_marker( self , name );
+       }
 
-	   clutter_timeline_add_marker_at_time( self , name , msecs );
-	]];
+       clutter_timeline_add_marker_at_time( self , name , msecs );
+    ]];
 
 /***************************************
-	Function: remove_marker
+    Function: remove_marker
 
-	The remove_marker() function removes the specified marker from the Timeline. If no marker with the specified name is found, the function has no effect. The <has_marker> function can be used to determine whether a particular marker name is attached to the Timeline.
+    The remove_marker() function removes the specified marker from the Timeline. If no marker with the specified name is found, the function has no effect. The <has_marker> function can be used to determine whether a particular marker name is attached to the Timeline.
 
-	*Arguments:*
+    *Arguments:*
 
-		name - string name of the marker to remove
+        name - string name of the marker to remove
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <markers> property and the <add_marker> function
+    *See Also:* the <markers> property and the <add_marker> function
 */
 
     remove_marker(string name)
-	[[clutter_timeline_remove_marker(self,name);]];
+    [[clutter_timeline_remove_marker(self,name);]];
 
 /***************************************
-	Function: has_marker
+    Function: has_marker
 
-	The has_marker() function returns a boolean value specifying whether or not a specified marker name has been defined (true = is defined).
+    The has_marker() function returns a boolean value specifying whether or not a specified marker name has been defined (true = is defined).
 
-	The name-comparison operation is case-sensitive.
+    The name-comparison operation is case-sensitive.
 
-	*Arguments:*
+    *Arguments:*
 
-		name - string name of the marker to search for
+        name - string name of the marker to search for
 
-	*Return Value:* Returns true if marker exists, else returns false.
+    *Return Value:* Returns true if marker exists, else returns false.
 
-	*See Also:* the <markers> property and the <add_marker> function
+    *See Also:* the <markers> property and the <add_marker> function
 */
 
     bool has_marker(string name)
-	[[result=clutter_timeline_has_marker(self,name);]];
+    [[result=clutter_timeline_has_marker(self,name);]];
 
 /***************************************
-	Function: advance_to_marker
+    Function: advance_to_marker
 
-	The advance_to_marker() function moves the animation to the specified marker and fires an <on_marker_reached> event. The advance_to_marker() function can move the animation to any time point on the Timeline.
+    The advance_to_marker() function moves the animation to the specified marker and fires an <on_marker_reached> event. The advance_to_marker() function can move the animation to any time point on the Timeline.
 
-	*Arguments:*
+    *Arguments:*
 
-		name - string name of the marker. The string must match a defined marker exactly, including case.
+        name - string name of the marker. The string must match a defined marker exactly, including case.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_marker> function and the <on_marker_reached> event
+    *See Also:* the <add_marker> function and the <on_marker_reached> event
 */
 
     advance_to_marker(string name)
-	[[clutter_timeline_advance_to_marker(self,name);]];
+    [[clutter_timeline_advance_to_marker(self,name);]];
 
 /***************************************
-   	Function: list_markers
+    Function: list_markers
 
-   	The list_markers() function returns a table of markers that have been defined for a specified time. If no time is specified, the returned table contains all the markers defined for the Timeline.
+    The list_markers() function returns a table of markers that have been defined for a specified time. If no time is specified, the returned table contains all the markers defined for the Timeline.
 
-   	*Arguments:*
+    *Arguments:*
 
-   		msecs - time position in milliseconds for which to retrieve markers. Optional.
+        msecs - time position in milliseconds for which to retrieve markers. Optional.
 
-   	*Return Value:* Table of marker name strings defined for the specified time. If no time was specified, the table contains all the markers defined for the Timeline.
+    *Return Value:* Table of marker name strings defined for the specified time. If no time was specified, the table contains all the markers defined for the Timeline.
 
-   	*See Also:* the <add_marker> function and the <markers> property
+    *See Also:* the <add_marker> function and the <markers> property
 */
 
     table list_markers(int msecs = -1)
-	[[
-	    gsize len;
-	    gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
-	    gchar** m = markers;
-	    lua_newtable(L);
-	    for(int i=1;len;--len,++m,++i)
-	    {
-		lua_pushstring(L,*m);
-		lua_rawseti(L,-2,i);
-	    }
-	    g_strfreev(markers);
-	]];
+    [[
+        gsize len;
+        gchar** markers=clutter_timeline_list_markers(self,msecs,&len);
+        gchar** m = markers;
+        lua_newtable(L);
+        for(int i=1;len;--len,++m,++i)
+        {
+        lua_pushstring(L,*m);
+        lua_rawseti(L,-2,i);
+        }
+        g_strfreev(markers);
+    ]];
 
 /***************************************
-	Function: add_onnewframe_listener
+    Function: add_onnewframe_listener
 
-	The add_onnewframe_listener() function registers a handler function for <on_new_frame> events.
+    The add_onnewframe_listener() function registers a handler function for <on_new_frame> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onnewframe_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onnewframe_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( timeline, elapsed, progress )
-		(end)
+        (code)
+        f( timeline, elapsed, progress )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		timeline - Timeline object the event applies to
-		elapsed - integer value specifying the elapsed time in milliseconds from the animation's start. The same value will be in the object's <elapsed> property.
-		progress - double value between 0 and 1 that indicates the percentage of the current Timeline iteration that has completed. The same value will be in the object's <progress> property.
+        timeline - Timeline object the event applies to
+        elapsed - integer value specifying the elapsed time in milliseconds from the animation's start. The same value will be in the object's <elapsed> property.
+        progress - double value between 0 and 1 that indicates the percentage of the current Timeline iteration that has completed. The same value will be in the object's <progress> property.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_new_frame> event and the <remove_onnewframe_listener> function
+    *See Also:* the <on_new_frame> event and the <remove_onnewframe_listener> function
 */
 
     int add_onnewframe_listener( function f )
@@ -642,17 +642,17 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: remove_onnewframe_listener
+    Function: remove_onnewframe_listener
 
-	The remove_onnewframe_listener() function unregisters the specified event handler.
+    The remove_onnewframe_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onnewframe_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onnewframe_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onnewframe_listener> function and the <on_new_frame> event
+    *See Also:* the <add_onnewframe_listener> function and the <on_new_frame> event
 */
 
     remove_onnewframe_listener( int ref )
@@ -661,29 +661,29 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: add_onstarted_listener
+    Function: add_onstarted_listener
 
-	The add_onstarted_listener() function registers a handler function for <on_started> events.
+    The add_onstarted_listener() function registers a handler function for <on_started> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstarted_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstarted_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( timeline )
-		(end)
+        (code)
+        f( timeline )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		timeline - Timeline object the event applies to
+        timeline - Timeline object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_started> event and the <remove_onstarted_listener> function
+    *See Also:* the <on_started> event and the <remove_onstarted_listener> function
 */
 
     int add_onstarted_listener( function f )
@@ -697,17 +697,17 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: remove_onstarted_listener
+    Function: remove_onstarted_listener
 
-	The remove_onstarted_listener() function unregisters the specified event handler.
+    The remove_onstarted_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstarted_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstarted_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstarted_listener> function and the <on_started> event
+    *See Also:* the <add_onstarted_listener> function and the <on_started> event
 */
 
     remove_onstarted_listener( int ref )
@@ -716,29 +716,29 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: add_oncompleted_listener
+    Function: add_oncompleted_listener
 
-	The add_oncompleted_listener() function registers a handler function for <on_completed> events.
+    The add_oncompleted_listener() function registers a handler function for <on_completed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( timeline )
-		(end)
+        (code)
+        f( timeline )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		timeline - Timeline object the event applies to
+        timeline - Timeline object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_completed> event and the <remove_oncompleted_listener> function
+    *See Also:* the <on_completed> event and the <remove_oncompleted_listener> function
 */
 
     int add_oncompleted_listener( function f )
@@ -752,17 +752,17 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: remove_oncompleted_listener
+    Function: remove_oncompleted_listener
 
-	The remove_oncompleted_listener() function unregisters the specified event handler.
+    The remove_oncompleted_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncompleted_listener> function and the <on_completed> event
+    *See Also:* the <add_oncompleted_listener> function and the <on_completed> event
 */
 
     remove_oncompleted_listener( int ref )
@@ -771,29 +771,29 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: add_onpaused_listener
+    Function: add_onpaused_listener
 
-	The add_onpaused_listener() function registers a handler function for <on_paused> events.
+    The add_onpaused_listener() function registers a handler function for <on_paused> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpaused_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpaused_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( timeline )
-		(end)
+        (code)
+        f( timeline )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		timeline - Timeline object the event applies to
+        timeline - Timeline object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_paused> event and the <remove_onpaused_listener> function
+    *See Also:* the <on_paused> event and the <remove_onpaused_listener> function
 */
 
     int add_onpaused_listener( function f )
@@ -807,17 +807,17 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: remove_onpaused_listener
+    Function: remove_onpaused_listener
 
-	The remove_onpaused_listener() function unregisters the specified event handler.
+    The remove_onpaused_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpaused_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpaused_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpaused_listener> function and the <on_paused> event
+    *See Also:* the <add_onpaused_listener> function and the <on_paused> event
 */
 
     remove_onpaused_listener( int ref )
@@ -826,33 +826,33 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: add_onmarkerreached_listener
+    Function: add_onmarkerreached_listener
 
-	The add_onmarkerreached_listener() function registers a handler function for <on_marker_reached> events.
+    The add_onmarkerreached_listener() function registers a handler function for <on_marker_reached> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmarkerreached_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmarkerreached_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( timeline, name, elapsed )
-		(end)
+        (code)
+        f( timeline, name, elapsed )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		timeline - Timeline object the event applies to
-		name - string name of the marker reached
-		elapsed - integer specifying the elapsed time in milliseconds from the animation's beginning. The same value will be in the object's <elapsed> property.
+        timeline - Timeline object the event applies to
+        name - string name of the marker reached
+        elapsed - integer specifying the elapsed time in milliseconds from the animation's beginning. The same value will be in the object's <elapsed> property.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* To see an example of an on_marker_reached event handler, refer to the code example in the <add_marker> function
+    *Code Example:* To see an example of an on_marker_reached event handler, refer to the code example in the <add_marker> function
 
-	*See Also:* the <on_marker_reached> event and the <remove_onmarkerreached_listener> function
+    *See Also:* the <on_marker_reached> event and the <remove_onmarkerreached_listener> function
 */
 
     int add_onmarkerreached_listener( function f )
@@ -866,17 +866,17 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Function: remove_onmarkerreached_listener
+    Function: remove_onmarkerreached_listener
 
-	The remove_onmarkerreached_listener() function unregisters the specified event handler.
+    The remove_onmarkerreached_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onmarkerreached_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onmarkerreached_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onmarkerreached_listener> function and the <on_marker_reached> event
+    *See Also:* the <add_onmarkerreached_listener> function and the <on_marker_reached> event
 */
 
     remove_onmarkerreached_listener( int ref )
@@ -885,11 +885,11 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Event: on_new_frame
+    Event: on_new_frame
 
-	The on_new_frame event occurs (in theory) for each frame of the animation, enabling the program to update the animation's settings to appropriate values based upon the current position within the animation. In reality, the handler is called as often as possible during the running of the animation and will vary depending primarily upon the underlying hardware.
+    The on_new_frame event occurs (in theory) for each frame of the animation, enabling the program to update the animation's settings to appropriate values based upon the current position within the animation. In reality, the handler is called as often as possible during the running of the animation and will vary depending primarily upon the underlying hardware.
 
-	*See Also:* the <add_onnewframe_listener> function
+    *See Also:* the <add_onnewframe_listener> function
 */
 
     function on_new_frame
@@ -906,11 +906,11 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Event: on_started
+    Event: on_started
 
-	The on_started event occurs when the Timeline is started. If a <delay> has been defined, the handler is called after the delay has expired.
+    The on_started event occurs when the Timeline is started. If a <delay> has been defined, the handler is called after the delay has expired.
 
-	*See Also:* the <add_onstarted_listener> and <start> functions
+    *See Also:* the <add_onstarted_listener> and <start> functions
 */
 
     function on_started
@@ -927,11 +927,11 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-   	Event: on_completed
+    Event: on_completed
 
-   	The on_completed event occurs each time the Timeline completes a single iteration. If the object's <loop> property is false, the Timeline performs a single iteration; otherwise, it loops infinitely or until it's stopped explicitly by calling the stop() function.
+    The on_completed event occurs each time the Timeline completes a single iteration. If the object's <loop> property is false, the Timeline performs a single iteration; otherwise, it loops infinitely or until it's stopped explicitly by calling the stop() function.
 
-	*See Also:* the <add_oncompleted_listener> function
+    *See Also:* the <add_oncompleted_listener> function
 */
 
     function on_completed
@@ -948,11 +948,11 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Event: on_paused
+    Event: on_paused
 
-	The on_paused event occurs when a running Timeline is paused by calling the pause() function.
+    The on_paused event occurs when a running Timeline is paused by calling the pause() function.
 
-	*See Also:* the <add_onpaused_listener> and <pause> functions
+    *See Also:* the <add_onpaused_listener> and <pause> functions
 */
 
     function on_paused
@@ -969,11 +969,11 @@ class Timeline [[ClutterTimeline*]]
         ]];
 
 /***************************************
-	Event: on_marker_reached
+    Event: on_marker_reached
 
-	The on_marker_reached event occurs when a running Timeline arrives at a defined marker.
+    The on_marker_reached event occurs when a running Timeline arrives at a defined marker.
 
-	*See Also:* the <add_onmarkerreached_listener> function
+    *See Also:* the <add_onmarkerreached_listener> function
 */
 
     function on_marker_reached
@@ -1025,259 +1025,259 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 ]]
 
 /*
-	Routine: Expanded Timeline Demo
+    Routine: Expanded Timeline Demo
 
-	The following source listing demonstrates a Timeline object that animates multiple properties of three rectangles. In addition to the Timeline class, the program uses the <Interval> utility class to ease the calculation of each property's in-between value during the animation. Finally, each rectangle's starting and ending positions change randomly for each iteration through the animation, so the animation is different each time it's run. Extensive comments within the code provide complete explanations. A sample of the resulting animation is shown below.
+    The following source listing demonstrates a Timeline object that animates multiple properties of three rectangles. In addition to the Timeline class, the program uses the <Interval> utility class to ease the calculation of each property's in-between value during the animation. Finally, each rectangle's starting and ending positions change randomly for each iteration through the animation, so the animation is different each time it's run. Extensive comments within the code provide complete explanations. A sample of the resulting animation is shown below.
 
 (see expandedTimeline.gif)
 
-	(code)
-	-- Expanded Timeline Demo Animation
+    (code)
+    -- Expanded Timeline Demo Animation
 
-	-- ********************************
-	-- Globals
+    -- ********************************
+    -- Globals
 
-	-- Constants
-	DEMO_SIZE = 300		-- size of demoArea
-	SIZE      = 30		-- size of animated rectangle
+    -- Constants
+    DEMO_SIZE = 300     -- size of demoArea
+    SIZE      = 30      -- size of animated rectangle
 
-	-- ********************************
-	function
-	rectNewFrameEvent( animationTL, msecs, progress )
+    -- ********************************
+    function
+    rectNewFrameEvent( animationTL, msecs, progress )
 
-		-- This event handler is hooked to the Timeline's on_new_frame event. It is called
-		-- intermittently while the animation runs. It is responsible for determining the current
-		-- property values for each animated property based upon the current progress of the
-		-- animation. Every Timeline-based animation must have an on_new_frame event handler.
-		--
-		-- For this animation, each rectangle is animated along its X and Y coordinates and is
-		-- rotated along the Z-axis. The starting and ending ranges for each animated property
-		-- have been assigned to Interval objects, so the Interval performs all the calculations
-		-- to determine a property's current value.
+        -- This event handler is hooked to the Timeline's on_new_frame event. It is called
+        -- intermittently while the animation runs. It is responsible for determining the current
+        -- property values for each animated property based upon the current progress of the
+        -- animation. Every Timeline-based animation must have an on_new_frame event handler.
+        --
+        -- For this animation, each rectangle is animated along its X and Y coordinates and is
+        -- rotated along the Z-axis. The starting and ending ranges for each animated property
+        -- have been assigned to Interval objects, so the Interval performs all the calculations
+        -- to determine a property's current value.
 
-		-- Determine each rectangle's current position
-		rectRed.position   = { rectRedRangeX:get_value( progress ),   rectRedRangeY:get_value( progress ) }
-		rectGreen.position = { rectGreenRangeX:get_value( progress ), rectGreenRangeY:get_value( progress ) }
-		rectBlue.position  = { rectBlueRangeX:get_value( progress ),  rectBlueRangeY:get_value( progress ) }
+        -- Determine each rectangle's current position
+        rectRed.position   = { rectRedRangeX:get_value( progress ),   rectRedRangeY:get_value( progress ) }
+        rectGreen.position = { rectGreenRangeX:get_value( progress ), rectGreenRangeY:get_value( progress ) }
+        rectBlue.position  = { rectBlueRangeX:get_value( progress ),  rectBlueRangeY:get_value( progress ) }
 
-		-- Rotate each rectangle
-		local zRotation = rectRangeRotation:get_value( progress )
-		rectRed.z_rotation   = { zRotation, 0, 0 }
-		rectGreen.z_rotation = { zRotation, 0, 0 }
-		rectBlue.z_rotation  = { zRotation, 0, 0 }
+        -- Rotate each rectangle
+        local zRotation = rectRangeRotation:get_value( progress )
+        rectRed.z_rotation   = { zRotation, 0, 0 }
+        rectGreen.z_rotation = { zRotation, 0, 0 }
+        rectBlue.z_rotation  = { zRotation, 0, 0 }
 
-	end  -- rectNewFrameEvent
+    end  -- rectNewFrameEvent
 
-	-- ********************************
-	function
-	rectCompletedEvent( animationTL )
+    -- ********************************
+    function
+    rectCompletedEvent( animationTL )
 
-		-- This event handler is hooked to the Timeline's on_completed event. It is called
-		-- when the animation completes, and can perform any desired operations, such as object
-		-- clean-up, etc. Animations that have no completion requirements need not implement
-		-- this handler.
-		--
-		-- For this demo, another iteration of the animation will be started. This entails
-		-- getting new starting and ending positions for each rectangle, assigning them to the
-		-- Interval objects to ease property calculations in the on_new_frame event handler,
-		-- positioning the rectangles to their new starting positions, and finally, starting
-		-- the animation. Notice that the original Timeline and Interval objects are simply
-		-- re-used with new starting and ending positions plugged into them.
+        -- This event handler is hooked to the Timeline's on_completed event. It is called
+        -- when the animation completes, and can perform any desired operations, such as object
+        -- clean-up, etc. Animations that have no completion requirements need not implement
+        -- this handler.
+        --
+        -- For this demo, another iteration of the animation will be started. This entails
+        -- getting new starting and ending positions for each rectangle, assigning them to the
+        -- Interval objects to ease property calculations in the on_new_frame event handler,
+        -- positioning the rectangles to their new starting positions, and finally, starting
+        -- the animation. Notice that the original Timeline and Interval objects are simply
+        -- re-used with new starting and ending positions plugged into them.
 
-		-- Determine new starting and ending animation positions
-		rectRedAnimationPositions   = getAnimationPositions()
-		rectGreenAnimationPositions = getAnimationPositions()
-		rectBlueAnimationPositions  = getAnimationPositions()
+        -- Determine new starting and ending animation positions
+        rectRedAnimationPositions   = getAnimationPositions()
+        rectGreenAnimationPositions = getAnimationPositions()
+        rectBlueAnimationPositions  = getAnimationPositions()
 
-		-- Update Interval objects with new animated X and Y coordinates
-		rectRedRangeX.from   = rectRedAnimationPositions[ 1 ]
-		rectRedRangeX.to     = rectRedAnimationPositions[ 3 ]
-		rectRedRangeY.from   = rectRedAnimationPositions[ 2 ]
-		rectRedRangeY.to     = rectRedAnimationPositions[ 4 ]
-		rectGreenRangeX.from = rectGreenAnimationPositions[ 1 ]
-		rectGreenRangeX.to   = rectGreenAnimationPositions[ 3 ]
-		rectGreenRangeY.from = rectGreenAnimationPositions[ 2 ]
-		rectGreenRangeY.to   = rectGreenAnimationPositions[ 4 ]
-		rectBlueRangeX.from  = rectBlueAnimationPositions[ 1 ]
-		rectBlueRangeX.to    = rectBlueAnimationPositions[ 3 ]
-		rectBlueRangeY.from  = rectBlueAnimationPositions[ 2 ]
-		rectBlueRangeY.to    = rectBlueAnimationPositions[ 4 ]
+        -- Update Interval objects with new animated X and Y coordinates
+        rectRedRangeX.from   = rectRedAnimationPositions[ 1 ]
+        rectRedRangeX.to     = rectRedAnimationPositions[ 3 ]
+        rectRedRangeY.from   = rectRedAnimationPositions[ 2 ]
+        rectRedRangeY.to     = rectRedAnimationPositions[ 4 ]
+        rectGreenRangeX.from = rectGreenAnimationPositions[ 1 ]
+        rectGreenRangeX.to   = rectGreenAnimationPositions[ 3 ]
+        rectGreenRangeY.from = rectGreenAnimationPositions[ 2 ]
+        rectGreenRangeY.to   = rectGreenAnimationPositions[ 4 ]
+        rectBlueRangeX.from  = rectBlueAnimationPositions[ 1 ]
+        rectBlueRangeX.to    = rectBlueAnimationPositions[ 3 ]
+        rectBlueRangeY.from  = rectBlueAnimationPositions[ 2 ]
+        rectBlueRangeY.to    = rectBlueAnimationPositions[ 4 ]
 
-		-- Place rectangles in their starting positions
-		positionRects()
+        -- Place rectangles in their starting positions
+        positionRects()
 
-		-- Start animation again
-		animationTL:start()
+        -- Start animation again
+        animationTL:start()
 
-	end  -- rectCompletedEvent
+    end  -- rectCompletedEvent
 
-	-- ********************************
-	function
-	getAnimationPositions()
+    -- ********************************
+    function
+    getAnimationPositions()
 
-		-- This function generates random starting and ending X and Y positions for the
-		-- objects that will be animated.
-		--
-		-- Positions are always just outside of the demoArea space. They can start from
-		-- any side and end on any different side.
-		--
-		-- The function returns a table in the format { startX, startY, endX, endY }
+        -- This function generates random starting and ending X and Y positions for the
+        -- objects that will be animated.
+        --
+        -- Positions are always just outside of the demoArea space. They can start from
+        -- any side and end on any different side.
+        --
+        -- The function returns a table in the format { startX, startY, endX, endY }
 
-		-- Constants representing the four sides of the demoArea
-		local TOP, RIGHT, BOTTOM, LEFT = 1, 2, 3, 4
+        -- Constants representing the four sides of the demoArea
+        local TOP, RIGHT, BOTTOM, LEFT = 1, 2, 3, 4
 
-		-- Determine starting and ending sides (each must be a different side)
-		local startSide, endSide = 1, 1
-		while( startSide == endSide ) do
-			startSide = math.random( 4 )
-			endSide   = math.random( 4 )
-		end
+        -- Determine starting and ending sides (each must be a different side)
+        local startSide, endSide = 1, 1
+        while( startSide == endSide ) do
+            startSide = math.random( 4 )
+            endSide   = math.random( 4 )
+        end
 
-		-- Determine starting and ending X and Y coordinates
-		local rangeLower = SIZE / 2
-		local rangeUpper = DEMO_SIZE - (SIZE / 2)
-		local startX = math.random( rangeLower, rangeUpper )
-		local startY = math.random( rangeLower, rangeUpper )
-		local endX   = math.random( rangeLower, rangeUpper )
-		local endY   = math.random( rangeLower, rangeUpper )
+        -- Determine starting and ending X and Y coordinates
+        local rangeLower = SIZE / 2
+        local rangeUpper = DEMO_SIZE - (SIZE / 2)
+        local startX = math.random( rangeLower, rangeUpper )
+        local startY = math.random( rangeLower, rangeUpper )
+        local endX   = math.random( rangeLower, rangeUpper )
+        local endY   = math.random( rangeLower, rangeUpper )
 
-		-- Depending on the starting and ending side, some coordinates will require adjustment
-		if( startSide == TOP ) then
-			-- Force Y coordinate
-			startY = -(SIZE / 2)
-		end
-		if( endSide == TOP ) then
-			-- Force Y coordinate
-			endY = -(SIZE / 2)
-		end
-		if( startSide == LEFT ) then
-			-- Force X coordinate
-			startX = -(SIZE / 2)
-		end
-		if( endSide == LEFT ) then
-			-- Force X coordinate
-			endX = -(SIZE / 2)
-		end
-		if( startSide == RIGHT ) then
-			-- Force X coordinate
-			startX = DEMO_SIZE + (SIZE / 2)
-		end
-		if( endSide == RIGHT ) then
-			-- Force X coordinate
-			endX = DEMO_SIZE + (SIZE / 2)
-		end
-		if( startSide == BOTTOM ) then
-			-- Force Y coordinate
-			startY = DEMO_SIZE + (SIZE / 2)
-		end
-		if( endSide == BOTTOM ) then
-			-- Force Y coordinate
-			endY = DEMO_SIZE + (SIZE / 2)
-		end
+        -- Depending on the starting and ending side, some coordinates will require adjustment
+        if( startSide == TOP ) then
+            -- Force Y coordinate
+            startY = -(SIZE / 2)
+        end
+        if( endSide == TOP ) then
+            -- Force Y coordinate
+            endY = -(SIZE / 2)
+        end
+        if( startSide == LEFT ) then
+            -- Force X coordinate
+            startX = -(SIZE / 2)
+        end
+        if( endSide == LEFT ) then
+            -- Force X coordinate
+            endX = -(SIZE / 2)
+        end
+        if( startSide == RIGHT ) then
+            -- Force X coordinate
+            startX = DEMO_SIZE + (SIZE / 2)
+        end
+        if( endSide == RIGHT ) then
+            -- Force X coordinate
+            endX = DEMO_SIZE + (SIZE / 2)
+        end
+        if( startSide == BOTTOM ) then
+            -- Force Y coordinate
+            startY = DEMO_SIZE + (SIZE / 2)
+        end
+        if( endSide == BOTTOM ) then
+            -- Force Y coordinate
+            endY = DEMO_SIZE + (SIZE / 2)
+        end
 
-		-- Return "calculated" positions
-		return { startX, startY, endX, endY }
+        -- Return "calculated" positions
+        return { startX, startY, endX, endY }
 
-	end  -- getAnimationPositions()
+    end  -- getAnimationPositions()
 
-	-- ********************************
-	function
-	positionRects()
+    -- ********************************
+    function
+    positionRects()
 
-		-- Position the three rectangles to their starting animation positions
-		rectRed.position   = { rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 2 ] }
-		rectGreen.position = { rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 2 ] }
-		rectBlue.position  = { rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 2 ] }
+        -- Position the three rectangles to their starting animation positions
+        rectRed.position   = { rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 2 ] }
+        rectGreen.position = { rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 2 ] }
+        rectBlue.position  = { rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 2 ] }
 
-	end  -- positionRects()
+    end  -- positionRects()
 
-	-- ********************************
-	-- Program entry point
+    -- ********************************
+    -- Program entry point
 
-	-- Create a screen background
-	bckgnd = Canvas( 1920, 1080 )
-	bckgnd:set_source_color( { 70, 100, 130, 255 } )      -- nice blue
-	bckgnd:paint()
-	bckgndImage      = bckgnd:Image()
-	bckgndImage.name = "Background"
-	screen:add( bckgndImage )
+    -- Create a screen background
+    bckgnd = Canvas( 1920, 1080 )
+    bckgnd:set_source_color( { 70, 100, 130, 255 } )      -- nice blue
+    bckgnd:paint()
+    bckgndImage      = bckgnd:Image()
+    bckgndImage.name = "Background"
+    screen:add( bckgndImage )
 
-	-- Demo area X and Y position, near screen center
-	local DEMO_X, DEMO_Y = 800, 300
+    -- Demo area X and Y position, near screen center
+    local DEMO_X, DEMO_Y = 800, 300
 
-	-- Create a rectangular demo area and add it to the screen
-	demoArea = Rectangle( { position     = { DEMO_X, DEMO_Y },
-    	            	    size         = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
-    	            		color        = { 100, 100, 100, 255 },
-    	            		border_color = { 0, 0, 0, 255 },
-    	            		border_width = 4,
-    	            		name         = "demoArea",
-    	            		opacity      = 255,
-	} )
-	screen:add( demoArea )
+    -- Create a rectangular demo area and add it to the screen
+    demoArea = Rectangle( { position     = { DEMO_X, DEMO_Y },
+                            size         = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
+                            color        = { 100, 100, 100, 255 },
+                            border_color = { 0, 0, 0, 255 },
+                            border_width = 4,
+                            name         = "demoArea",
+                            opacity      = 255,
+    } )
+    screen:add( demoArea )
 
-	-- Create a Group for the demo area for clipping purposes and add it to the screen
-	demoGroup = Group( { position = { DEMO_X, DEMO_Y }, -- must overlay demoArea rectangle
-	                     size     = { DEMO_SIZE + 8, DEMO_SIZE + 8 },
-	                     name     = "demoGroup",
-	                     clip     = { 4, 4, DEMO_SIZE, DEMO_SIZE },  -- clip within demoArea's borders
-	} )
-	screen:add( demoGroup )
+    -- Create a Group for the demo area for clipping purposes and add it to the screen
+    demoGroup = Group( { position = { DEMO_X, DEMO_Y }, -- must overlay demoArea rectangle
+                         size     = { DEMO_SIZE + 8, DEMO_SIZE + 8 },
+                         name     = "demoGroup",
+                         clip     = { 4, 4, DEMO_SIZE, DEMO_SIZE },  -- clip within demoArea's borders
+    } )
+    screen:add( demoGroup )
 
-	-- Define three rectangles to animate and add them to the demoGroup
-	rectRed   = Rectangle( { size         = { SIZE, SIZE },
-	                         color        = { 250, 0, 0, 255 },
-	                         anchor_point = { SIZE / 2, SIZE / 2 },
-	                         name         = "rectRed",
-	} )
-	rectGreen = Rectangle( { size         = { SIZE, SIZE },
-							 color        = { 0, 250, 0, 255 },
-							 anchor_point = { SIZE / 2, SIZE / 2 },
-							 name         = "rectGreen",
-	} )
-	rectBlue  = Rectangle( { size         = { SIZE, SIZE },
-	                         color        = { 0, 0, 250, 255 },
-	                         anchor_point = { SIZE / 2, SIZE / 2 },
-	                         name         = "rectBlue",
-	} )
-	demoGroup:add( rectRed, rectGreen, rectBlue )
+    -- Define three rectangles to animate and add them to the demoGroup
+    rectRed   = Rectangle( { size         = { SIZE, SIZE },
+                             color        = { 250, 0, 0, 255 },
+                             anchor_point = { SIZE / 2, SIZE / 2 },
+                             name         = "rectRed",
+    } )
+    rectGreen = Rectangle( { size         = { SIZE, SIZE },
+                             color        = { 0, 250, 0, 255 },
+                             anchor_point = { SIZE / 2, SIZE / 2 },
+                             name         = "rectGreen",
+    } )
+    rectBlue  = Rectangle( { size         = { SIZE, SIZE },
+                             color        = { 0, 0, 250, 255 },
+                             anchor_point = { SIZE / 2, SIZE / 2 },
+                             name         = "rectBlue",
+    } )
+    demoGroup:add( rectRed, rectGreen, rectBlue )
 
-	-- Determine starting and ending positions for each rectangle
-	-- Each variable is in the format { startX, startY, endX, endY }
-	rectRedAnimationPositions   = getAnimationPositions()
-	rectGreenAnimationPositions = getAnimationPositions()
-	rectBlueAnimationPositions  = getAnimationPositions()
+    -- Determine starting and ending positions for each rectangle
+    -- Each variable is in the format { startX, startY, endX, endY }
+    rectRedAnimationPositions   = getAnimationPositions()
+    rectGreenAnimationPositions = getAnimationPositions()
+    rectBlueAnimationPositions  = getAnimationPositions()
 
-	-- Create Interval objects for all the animated X and Y coordinates
-	-- Note: These objects are re-used and reset for each iteration through the animation
-	rectRedRangeX   = Interval( rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 3 ] )
-	rectRedRangeY   = Interval( rectRedAnimationPositions[ 2 ],   rectRedAnimationPositions[ 4 ] )
-	rectGreenRangeX = Interval( rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 3 ] )
-	rectGreenRangeY = Interval( rectGreenAnimationPositions[ 2 ], rectGreenAnimationPositions[ 4 ] )
-	rectBlueRangeX  = Interval( rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 3 ] )
-	rectBlueRangeY  = Interval( rectBlueAnimationPositions[ 2 ],  rectBlueAnimationPositions[ 4 ] )
+    -- Create Interval objects for all the animated X and Y coordinates
+    -- Note: These objects are re-used and reset for each iteration through the animation
+    rectRedRangeX   = Interval( rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 3 ] )
+    rectRedRangeY   = Interval( rectRedAnimationPositions[ 2 ],   rectRedAnimationPositions[ 4 ] )
+    rectGreenRangeX = Interval( rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 3 ] )
+    rectGreenRangeY = Interval( rectGreenAnimationPositions[ 2 ], rectGreenAnimationPositions[ 4 ] )
+    rectBlueRangeX  = Interval( rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 3 ] )
+    rectBlueRangeY  = Interval( rectBlueAnimationPositions[ 2 ],  rectBlueAnimationPositions[ 4 ] )
 
-	-- Create Interval object for the rectangle's Z-rotation
-	-- Each rectangle shares this object
-	rectRangeRotation = Interval( 0, 1080 )  -- rotate three times (360x3)
+    -- Create Interval object for the rectangle's Z-rotation
+    -- Each rectangle shares this object
+    rectRangeRotation = Interval( 0, 1080 )  -- rotate three times (360x3)
 
-	-- Place rectangles at their starting positions
-	positionRects()
+    -- Place rectangles at their starting positions
+    positionRects()
 
-	-- Create the animation Timeline object
-	animationTL = Timeline( { duration = 2000 } )
+    -- Create the animation Timeline object
+    animationTL = Timeline( { duration = 2000 } )
 
-	-- Hook the event handlers into their events
-	animationTL:add_onnewframe_listener( rectNewFrameEvent )
-	animationTL:add_oncompleted_listener( rectCompletedEvent )
+    -- Hook the event handlers into their events
+    animationTL:add_onnewframe_listener( rectNewFrameEvent )
+    animationTL:add_oncompleted_listener( rectCompletedEvent )
 
-	-- Show the screen
-	screen:show()
+    -- Show the screen
+    screen:show()
 
-	-- Start the animation
-	animationTL:start()
+    -- Start the animation
+    animationTL:start()
 
-	-- ********************************
-	(end)
+    -- ********************************
+    (end)
 
 */

@@ -11,38 +11,38 @@
 
 (see keyboard.png)
 
-	*Basic Operation*
+    *Basic Operation*
 
-	A form is defined by specifying its fields. Afterward, it is displayed by calling the keyboard variable's <show> function. The user can fill in the form by using the remote control and the form's on-screen keyboard. Upon completion, the user can exit the form by pressing either the Cancel button or the Submit button. If Cancel is pressed, the keyboard variable's <on_cancel> event is fired. If Submit is pressed, an <on_submit> event is fired. Whenever the current field's value changes, the program receives notification via an <on_field_changed> event.
+    A form is defined by specifying its fields. Afterward, it is displayed by calling the keyboard variable's <show> function. The user can fill in the form by using the remote control and the form's on-screen keyboard. Upon completion, the user can exit the form by pressing either the Cancel button or the Submit button. If Cancel is pressed, the keyboard variable's <on_cancel> event is fired. If Submit is pressed, an <on_submit> event is fired. Whenever the current field's value changes, the program receives notification via an <on_field_changed> event.
 
-	*Defining a Form*
+    *Defining a Form*
 
-	A form is a Lua table of fields. Each field is itself another Lua table. A field table consists of properties and settings. A property's setting is always a string, so it must be surrounded by single or double quotation marks. The order the fields are defined in the form is the order they will be displayed.
+    A form is a Lua table of fields. Each field is itself another Lua table. A field table consists of properties and settings. A property's setting is always a string, so it must be surrounded by single or double quotation marks. The order the fields are defined in the form is the order they will be displayed.
 
-	Every form must have the following fields.
+    Every form must have the following fields.
 
-	id - a unique string identifying the field, such as "A", "1", "Name", etc.
-	caption - label displayed before the field. It cannot be an empty string.
+    id - a unique string identifying the field, such as "A", "1", "Name", etc.
+    caption - label displayed before the field. It cannot be an empty string.
 
-	Some simple forms are shown below.
+    Some simple forms are shown below.
 
-	(code)
-	-- Form with one field
-	minimalForm  = { { id = "01", caption = "Name" } }
+    (code)
+    -- Form with one field
+    minimalForm  = { { id = "01", caption = "Name" } }
 
-	-- Form with two fields
-	expandedForm = { { id = "01", caption = "Name" },
-	                 { id = "02", caption = "Address" }
-	               }
-	(end)
+    -- Form with two fields
+    expandedForm = { { id = "01", caption = "Name" },
+                     { id = "02", caption = "Address" }
+                   }
+    (end)
 
-	A form may also include the following optional fields.
+    A form may also include the following optional fields.
 
-	type - the field's type. Supported types are described below. The default type is "text".
-	value - the field's starting value specified as a string. The default starting value is an empty field.
-	placeholder - a string displayed in the field area of the on-screen keyboard when the field is empty. The placeholder can be used to suggest to the user the kind of input expected, such as "Enter a number between 1-10". The placeholder field applies to fields of type "text" and "password" only. A field's default placeholder is an empty string.
+    type - the field's type. Supported types are described below. The default type is "text".
+    value - the field's starting value specified as a string. The default starting value is an empty field.
+    placeholder - a string displayed in the field area of the on-screen keyboard when the field is empty. The placeholder can be used to suggest to the user the kind of input expected, such as "Enter a number between 1-10". The placeholder field applies to fields of type "text" and "password" only. A field's default placeholder is an empty string.
 
-	The supported field types are described below.
+    The supported field types are described below.
 
     "text" - a standard text field. An on-screen keyboard is displayed beneath the form. The user can enter input by using the remote control. If no field type is explicitly defined, the field defaults to a type of "text".
     "password" - same as a Text field, but all input characters are displayed as ASCII 0xB7 (centered dot) characters, by default. The displayed password character can be redefined by the password_char property described below.
@@ -61,84 +61,84 @@
 
     (code)
     sampleForm = {
-	    -- Define a standard text field where the user enters his name
-    	{ id          = "01",
-    	  caption     = "Name:",
-    	  placeholder = "Enter your user name",
+        -- Define a standard text field where the user enters his name
+        { id          = "01",
+          caption     = "Name:",
+          placeholder = "Enter your user name",
         },
 
-    	-- Define a password field; use an asterisk as the password char
-    	{ id            = "02",
-    	  caption       = "Password:",
-    	  type          = "password",
-    	  password_char = "*",
-    	  placeholder   = "Enter a password",
+        -- Define a password field; use an asterisk as the password char
+        { id            = "02",
+          caption       = "Password:",
+          type          = "password",
+          password_char = "*",
+          placeholder   = "Enter a password",
         },
 
-    	-- Define a list field, including possible values
-    	{ id      = "03",
-    	  caption = "Access Type:",
-    	  type    = "list",
-    	  choices = {
-    	  	  { "01", "Global access" },
-    	  	  { "02", "Local access" },
-    	  	  { "03", "Temporary access" },
-    	  	  { "04", "Private access" },
-    	  	  { "05", "VIP access" },
-    	  },
-    	  value   = "05"  -- Make "VIP access" the starting value
-    	},
+        -- Define a list field, including possible values
+        { id      = "03",
+          caption = "Access Type:",
+          type    = "list",
+          choices = {
+              { "01", "Global access" },
+              { "02", "Local access" },
+              { "03", "Temporary access" },
+              { "04", "Private access" },
+              { "05", "VIP access" },
+          },
+          value   = "05"  -- Make "VIP access" the starting value
+        },
     }
     (end)
 
-	*Processing a Form*
+    *Processing a Form*
 
-	To display the form and get user input, pass the form to the keyboard's show() function.
+    To display the form and get user input, pass the form to the keyboard's show() function.
 
-	(code)
-	keyboard:show( sampleForm )
-	(end)
+    (code)
+    keyboard:show( sampleForm )
+    (end)
 
-	For the program to receive notifications whenever a field's value has changed, it can register a handler for <on_field_changed> events. An example handler is shown below.
+    For the program to receive notifications whenever a field's value has changed, it can register a handler for <on_field_changed> events. An example handler is shown below.
 
-		(code)
-		-- Define an on_field_changed event handler
-		function handleOnFieldChanged( keybrd, id, value )
-			-- Output a message to the TrickPlay Console
-			print( "Field ID:", id, ", New Value:", value )
-		end
+        (code)
+        -- Define an on_field_changed event handler
+        function handleOnFieldChanged( keybrd, id, value )
+            -- Output a message to the TrickPlay Console
+            print( "Field ID:", id, ", New Value:", value )
+        end
 
-		-- Register handler with keyboard variable
-		changeHandler = keyboard:add_onfieldchanged_listener( handleOnFieldChanged )
-		(end)
+        -- Register handler with keyboard variable
+        changeHandler = keyboard:add_onfieldchanged_listener( handleOnFieldChanged )
+        (end)
 
-	For the program to receive notification when the user exits the form by pressing the Cancel button, it can register a handler for <on_cancel> events, as shown below.
+    For the program to receive notification when the user exits the form by pressing the Cancel button, it can register a handler for <on_cancel> events, as shown below.
 
-		(code)
-		-- Define an on_cancel event handler
-		function handleOnCancel( keybrd )
-			print( "User cancelled the form" )
-		end
+        (code)
+        -- Define an on_cancel event handler
+        function handleOnCancel( keybrd )
+            print( "User cancelled the form" )
+        end
 
-		-- Register handler with keyboard variable
-		cancelHandler = keyboard:add_oncancel_listener( hookOnCancel )
-		(end)
+        -- Register handler with keyboard variable
+        cancelHandler = keyboard:add_oncancel_listener( hookOnCancel )
+        (end)
 
-	For the program to receive notification when the user exits the form by pressing the Submit button, it can register a handler for <on_submit> events.
+    For the program to receive notification when the user exits the form by pressing the Submit button, it can register a handler for <on_submit> events.
 
-		(code)
-		-- Define an on_submit event handler
-		function handleOnSubmit( keybrd, results )
-			-- Print the final settings of each field
-			print( "User accepted the form" )
-			for id, setting in pairs( results ) do
-				print( "Field ID:", id, ", Setting:", setting )
-			end
-		end
+        (code)
+        -- Define an on_submit event handler
+        function handleOnSubmit( keybrd, results )
+            -- Print the final settings of each field
+            print( "User accepted the form" )
+            for id, setting in pairs( results ) do
+                print( "Field ID:", id, ", Setting:", setting )
+            end
+        end
 
-		-- Register handler with keyboard variable
-		submitHandler = keyboard:add_onsubmit_listener( hookOnSubmit )
-		(end)
+        -- Register handler with keyboard variable
+        submitHandler = keyboard:add_onsubmit_listener( hookOnSubmit )
+        (end)
 */
 
 global keyboard [[ void * ]]
@@ -151,9 +151,9 @@ global keyboard [[ void * ]]
 /***************************************
     Function: show
 
-	The show() function displays a form and accepts user input.
+    The show() function displays a form and accepts user input.
 
-	Refer to the discussion at the beginning of this page for complete information about processing forms with the keyboard variable.
+    Refer to the discussion at the beginning of this page for complete information about processing forms with the keyboard variable.
 
     *Arguments:*
 
@@ -161,7 +161,7 @@ global keyboard [[ void * ]]
 
     *Return Value:* Boolean flag indicating the success or failure of presenting the form (true=success)
 
-	*See Also:* the <on_cancel> and <on_submit> events
+    *See Also:* the <on_cancel> and <on_submit> events
 */
 
     bool show( table form )
@@ -170,23 +170,23 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: add_onfieldchanged_listener
+    Function: add_onfieldchanged_listener
 
-	The add_onfieldchanged_listener() function registers a handler function for <on_field_changed> events.
+    The add_onfieldchanged_listener() function registers a handler function for <on_field_changed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onfieldchanged_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onfieldchanged_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( keyboard, id, value )
-		(end)
+        (code)
+        f( keyboard, id, value )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         keyboard - the keyboard global variable
         id - string id of the changed field
@@ -194,7 +194,7 @@ global keyboard [[ void * ]]
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_field_changed> event and the <remove_onfieldchanged_listener> function
+    *See Also:* the <on_field_changed> event and the <remove_onfieldchanged_listener> function
 */
 
     int add_onfieldchanged_listener( function f )
@@ -203,17 +203,17 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: remove_onfieldchanged_listener
+    Function: remove_onfieldchanged_listener
 
-	The remove_onfieldchanged_listener() function unregisters the specified event handler.
+    The remove_onfieldchanged_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onfieldchanged_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onfieldchanged_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onfieldchanged_listener> function
+    *See Also:* the <add_onfieldchanged_listener> function
 */
 
     remove_onfieldchanged_listener( int ref )
@@ -222,29 +222,29 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: add_oncancel_listener
+    Function: add_oncancel_listener
 
-	The add_oncancel_listener() function registers a handler function for <on_cancel> events.
+    The add_oncancel_listener() function registers a handler function for <on_cancel> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncancel_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncancel_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( keyboard )
-		(end)
+        (code)
+        f( keyboard )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         keyboard - the keyboard global variable
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_cancel> event and the <remove_oncancel_listener> function
+    *See Also:* the <on_cancel> event and the <remove_oncancel_listener> function
 */
 
     int add_oncancel_listener( function f )
@@ -253,17 +253,17 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: remove_oncancel_listener
+    Function: remove_oncancel_listener
 
-	The remove_oncancel_listener() function unregisters the specified event handler.
+    The remove_oncancel_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncancel_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncancel_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncancel_listener> function
+    *See Also:* the <add_oncancel_listener> function
 */
 
     remove_oncancel_listener( int ref )
@@ -272,30 +272,30 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: add_onsubmit_listener
+    Function: add_onsubmit_listener
 
-	The add_onsubmit_listener() function registers a handler function for <on_submit> events.
+    The add_onsubmit_listener() function registers a handler function for <on_submit> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onsubmit_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onsubmit_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( keyboard, results )
-		(end)
+        (code)
+        boolean f( keyboard, results )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         keyboard - the keyboard global variable
-       	results - table of key-value pairs for each field in the form. The key will contain the field's string ID and the value will contain the field's final string setting. For fields of type "list," the value will be the string ID of a possible value contained in the field's choices table. For any blank field, the value will be an empty string.
+        results - table of key-value pairs for each field in the form. The key will contain the field's string ID and the value will contain the field's final string setting. For fields of type "list," the value will be the string ID of a possible value contained in the field's choices table. For any blank field, the value will be an empty string.
 
     *Handler Return Value:* Boolean flag indicating whether to remove the keyboard from the display or leave it visible (true=remove keyboard). This enables a program to validate the user input and, if necessary, to leave the keyboard visible for additional editing.
 
-	*See Also:* the <on_submit> event and the <remove_onsubmit_listener> function
+    *See Also:* the <on_submit> event and the <remove_onsubmit_listener> function
 */
 
     int add_onsubmit_listener( function f )
@@ -304,17 +304,17 @@ global keyboard [[ void * ]]
         ]];
 
 /***************************************
-	Function: remove_onsubmit_listener
+    Function: remove_onsubmit_listener
 
-	The remove_onsubmit_listener() function unregisters the specified event handler.
+    The remove_onsubmit_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onsubmit_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onsubmit_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onsubmit_listener> function
+    *See Also:* the <add_onsubmit_listener> function
 */
 
     remove_onsubmit_listener( int ref )
@@ -341,9 +341,9 @@ global keyboard [[ void * ]]
 /***************************************
     Event: on_cancel
 
-	The on_cancel event occurs when the user exits a form by pressing its Cancel button.
+    The on_cancel event occurs when the user exits a form by pressing its Cancel button.
 
-	*See Also:* the <add_oncancel_listener> function
+    *See Also:* the <add_oncancel_listener> function
 */
 
     function on_cancel
@@ -359,7 +359,7 @@ global keyboard [[ void * ]]
 
     The on_submit event occurs when the user exits a form by pressing its Submit button.
 
-	*See Also:* the <add_onsubmit_listener> function
+    *See Also:* the <add_onsubmit_listener> function
 */
 
     function on_submit
