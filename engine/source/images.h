@@ -348,6 +348,9 @@ private:
         		case COGL_PIXEL_FORMAT_RGBA_5551:
         		case COGL_PIXEL_FORMAT_RGBA_4444_PRE:
         		case COGL_PIXEL_FORMAT_RGBA_5551_PRE:
+#ifdef CLUTTER_VERSION_1_14
+                case COGL_PIXEL_FORMAT_DEPTH_16:
+#endif
         			bpp = 2;
         			break;
 
@@ -364,6 +367,10 @@ private:
         		case COGL_PIXEL_FORMAT_BGRA_8888_PRE:
         		case COGL_PIXEL_FORMAT_ARGB_8888_PRE:
         		case COGL_PIXEL_FORMAT_ABGR_8888_PRE:
+#ifdef CLUTTER_VERSION_1_14
+                case COGL_PIXEL_FORMAT_DEPTH_32:
+                case COGL_PIXEL_FORMAT_DEPTH_24_STENCIL_8:
+#endif
         			bpp = 4;
         			break;
 
