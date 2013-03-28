@@ -9,6 +9,7 @@
 #include <sys/resource.h>
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 
 //=============================================================================
 
@@ -193,6 +194,10 @@ private:
         memcpy(&old, &my_usage, sizeof(old));
 
         float cpu = 100.0 * ((float)(diff.tv_sec) + ((float)(diff.tv_usec))/(1000000.0)) / t;
+
+        // Now adjust for number of CPUs
+
+        cpu /= sysconf(_SC_NPROCESSORS_ONLN);
 
         short_timer.add(cpu);
         long_timer.add(cpu);
