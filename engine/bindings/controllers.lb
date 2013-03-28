@@ -5,11 +5,11 @@
 
 #==============================================================================
 /*
-	Global: controllers
+    Global: controllers
 
-	The TrickPlay SDK libraries enable a program to access external devices, such as a TV remote control and keyboard. Access to a connected iPhone and iPad is also available.
+    The TrickPlay SDK libraries enable a program to access external devices, such as a TV remote control and keyboard. Access to a connected iPhone and iPad is also available.
 
-	Access to connected devices is provided by the controllers global variable. A program can have the controllers variable notify the program when a new device connects to the system by hooking the controller's <on_controller_connected> event. The controllers variable also enables a program to enumerate the list of all connected devices by accessing its <connected> property.
+    Access to connected devices is provided by the controllers global variable. A program can have the controllers variable notify the program when a new device connects to the system by hooking the controller's <on_controller_connected> event. The controllers variable also enables a program to enumerate the list of all connected devices by accessing its <connected> property.
 
 */
 
@@ -26,21 +26,21 @@ global controllers [[ControllerListDelegate*]]
         ]];
 
 /***************************************
-   	Property: connected
+    Property: connected
 
-   	The connected property maintains a table of connected external devices. Each entry in the table is a <Controller> object. The connected table can be retrieved, but entries cannot be added or removed from it.
+    The connected property maintains a table of connected external devices. Each entry in the table is a <Controller> object. The connected table can be retrieved, but entries cannot be added or removed from it.
 
-   	*Code Example:* Output the name of each connected device
+    *Code Example:* Output the name of each connected device
 
-    	(code)
-    	-- Iterate through each connected external device
-    	print( "Connected devices:" )
-    	for i, device in ipairs( controllers.connected ) do
-    		print( "   ", device.name )
-    	end
-    	(end)
+        (code)
+        -- Iterate through each connected external device
+        print( "Connected devices:" )
+        for i, device in ipairs( controllers.connected ) do
+            print( "   ", device.name )
+        end
+        (end)
 
-   	*See Also:* the <Controller> interface
+    *See Also:* the <Controller> interface
 */
 
     readonly table connected
@@ -49,58 +49,58 @@ global controllers [[ControllerListDelegate*]]
         ]];
 
 /***************************************
-	Function: start_pointer
+    Function: start_pointer
 
     The start_pointer() function instructs all connected devices to start sending pointer events if such events are applicable to the device, such as with a mouse. Events will be directed to objects, such as a Rectangle or Image, provided the object has its <UIElement.reactive> property set to true. Pointer events include <UIElement.on_button_down>, <UIElement.on_motion>, <UIElement.on_enter> and many others. Refer to the events described in the <UIElement> section for complete details.
 
-	*Arguments:* None
+    *Arguments:* None
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*Code Example:* Instruct connected devices to send pointer events. Handle the on_enter and on_leave events to output a simple message.
+    *Code Example:* Instruct connected devices to send pointer events. Handle the on_enter and on_leave events to output a simple message.
 
-		(code)
-		-- Define an on_enter event handler
-		-- Both rectangles will use this handler
-		function hookOnEnter( self, x, y )
-			-- Device pointer has entered the object's display space
-			print( "Pointer is over ", self.name )
-		end
+        (code)
+        -- Define an on_enter event handler
+        -- Both rectangles will use this handler
+        function hookOnEnter( self, x, y )
+            -- Device pointer has entered the object's display space
+            print( "Pointer is over ", self.name )
+        end
 
-		-- Define an on_leave event handler; used by both rectangles
-		function hookOnLeave( self, x, y )
-			-- Device pointer has left the object's display space
-			print( "Pointer has left ", self.name )
-		end
+        -- Define an on_leave event handler; used by both rectangles
+        function hookOnLeave( self, x, y )
+            -- Device pointer has left the object's display space
+            print( "Pointer has left ", self.name )
+        end
 
-		-- Define two rectangles of different colors, hook them into the events,
-		-- and add them to the screen.
-		goldRect = Rectangle( { name     = "GoldRect",
-		                        position = { 100, 100 },
-		                        color    = "Gold",
-		                        size     = { 100, 100 },
-		                        reactive = true,
-		} )
-		goldRect:add_onenter_listener( hookOnEnter )
-		goldRect:add_onleave_listener( hookOnLeave )
-		screen:add( goldRect )
+        -- Define two rectangles of different colors, hook them into the events,
+        -- and add them to the screen.
+        goldRect = Rectangle( { name     = "GoldRect",
+                                position = { 100, 100 },
+                                color    = "Gold",
+                                size     = { 100, 100 },
+                                reactive = true,
+        } )
+        goldRect:add_onenter_listener( hookOnEnter )
+        goldRect:add_onleave_listener( hookOnLeave )
+        screen:add( goldRect )
 
-		blueRect = Rectangle( { name     = "BlueRect",
-		                        position = { 400, 100 },
-		                        color    = "DodgerBlue",
-		                        size     = { 100, 100 },
-		                        reactive = true,
-		} )
-		blueRect:add_onenter_listener( hookOnEnter )
-		blueRect:add_onleave_listener( hookOnLeave )
-		screen:add( blueRect )
+        blueRect = Rectangle( { name     = "BlueRect",
+                                position = { 400, 100 },
+                                color    = "DodgerBlue",
+                                size     = { 100, 100 },
+                                reactive = true,
+        } )
+        blueRect:add_onenter_listener( hookOnEnter )
+        blueRect:add_onleave_listener( hookOnLeave )
+        screen:add( blueRect )
 
-		-- Show the screen
-		screen:show()
+        -- Show the screen
+        screen:show()
 
-		-- Enable pointer events
-		controllers:start_pointer()
-		(end)
+        -- Enable pointer events
+        controllers:start_pointer()
+        (end)
 */
 
     start_pointer()
@@ -109,42 +109,42 @@ global controllers [[ControllerListDelegate*]]
         ]];
 
 /***************************************
-	Function: add_oncontrollerconnected_listener
+    Function: add_oncontrollerconnected_listener
 
-	The add_oncontrollerconnected_listener() function registers a handler function for <on_controller_connected> events.
+    The add_oncontrollerconnected_listener() function registers a handler function for <on_controller_connected> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncontrollerconnected_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncontrollerconnected_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controllers, controller )
-		(end)
+        (code)
+        f( controllers, controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		controllers - the <controllers> global variable
-   		controller - the connected <Controller> object
+        controllers - the <controllers> global variable
+        controller - the connected <Controller> object
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-   	*Code Example:* Print a message whenever a new device connects to the system
+    *Code Example:* Print a message whenever a new device connects to the system
 
-   		(code)
-   		-- Define the event handler
-   		function hookOnConnected( controllers, controller )
-   			print( "The ", controller.name, " controller has connected." )
-   		end
+        (code)
+        -- Define the event handler
+        function hookOnConnected( controllers, controller )
+            print( "The ", controller.name, " controller has connected." )
+        end
 
-   		-- Hook the handler into controllers
-   		controllers:add_oncontrollerconnected_listener( hookOnConnected )
-   		(end)
+        -- Hook the handler into controllers
+        controllers:add_oncontrollerconnected_listener( hookOnConnected )
+        (end)
 
-	*See Also:* the <on_controller_connected> event and the <remove_oncontrollerconnected_listener> function
+    *See Also:* the <on_controller_connected> event and the <remove_oncontrollerconnected_listener> function
 */
 
     int add_oncontrollerconnected_listener( function f )
@@ -153,17 +153,17 @@ global controllers [[ControllerListDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_oncontrollerconnected_listener
+    Function: remove_oncontrollerconnected_listener
 
-	The remove_oncontrollerconnected_listener() function unregisters the specified event handler.
+    The remove_oncontrollerconnected_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncontrollerconnected_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncontrollerconnected_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncontrollerconnected_listener> function and the <on_controller_connected> event
+    *See Also:* the <add_oncontrollerconnected_listener> function and the <on_controller_connected> event
 */
 
     remove_oncontrollerconnected_listener( int ref )
@@ -173,11 +173,11 @@ global controllers [[ControllerListDelegate*]]
 }
 
 /***************************************
-   	Event: on_controller_connected
+    Event: on_controller_connected
 
-   	The on_controller_connected event occurs whenever a new device connects to the system.
+    The on_controller_connected event occurs whenever a new device connects to the system.
 
-   	*See Also:* the <add_oncontrollerconnected_listener> function and the <Controller> interface
+    *See Also:* the <add_oncontrollerconnected_listener> function and the <Controller> interface
 */
 
     function on_controller_connected

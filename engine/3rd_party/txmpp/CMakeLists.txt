@@ -64,7 +64,7 @@ ENDIF ( PKG_CONFIG_FOUND )
 
 include( FindThreads )
 if(CMAKE_USE_PTHREADS_INIT)
-	add_definitions( -D_POSIX_THREADS )
+    add_definitions( -D_POSIX_THREADS )
 endif(CMAKE_USE_PTHREADS_INIT)
 list( APPEND TXMPP_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} )
 

@@ -33,154 +33,154 @@ struct interval
 
     (code)
     -- Create the Rectangle to animate
-   	movingRect = Rectangle{ position = { -100, 400 },
-	                        size     = { 100, 100 },
-	                        color    = { 225, 225, 0, 255 },
-	}
+    movingRect = Rectangle{ position = { -100, 400 },
+                            size     = { 100, 100 },
+                            color    = { 225, 225, 0, 255 },
+    }
 
-	-- Show it on the screen
-	screen:add( movingRect )
+    -- Show it on the screen
+    screen:add( movingRect )
 
-	-- Define Interval ranges for animating the Rectangle
-	acrossScreen = Interval( -100, 2020 )  -- points along X-axis
-	fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
+    -- Define Interval ranges for animating the Rectangle
+    acrossScreen = Interval( -100, 2020 )  -- points along X-axis
+    fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
 
-	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
-							  loop     = true,  -- loop forever
-	}
+    -- Animate the Rectangle using a Timeline
+    movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
+                              loop     = true,  -- loop forever
+    }
 
-	-- Handler for on_new_frame events: Updates the Rectangle's location and rotation
-	function moveRect( self, msecs, progress )
-		-- X changes along range specified in acrossScreen
-		movingRect.x = acrossScreen:get_value( progress )
+    -- Handler for on_new_frame events: Updates the Rectangle's location and rotation
+    function moveRect( self, msecs, progress )
+        -- X changes along range specified in acrossScreen
+        movingRect.x = acrossScreen:get_value( progress )
 
-		-- X rotation around range specified in fullCircle
-		movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
-	end
+        -- X rotation around range specified in fullCircle
+        movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
+    end
 
-	-- Hook the Timeline into on_new_frame event
-	movingRect_tl:add_onnewframe_listener( moveRect )
+    -- Hook the Timeline into on_new_frame event
+    movingRect_tl:add_onnewframe_listener( moveRect )
 
-	-- Show the screen
-	screen:show()
+    -- Show the screen
+    screen:show()
 
-	-- Start the Timeline animation
-	movingRect_tl:start()
+    -- Start the Timeline animation
+    movingRect_tl:start()
     (end)
 */
 
 class Interval [[interval*]]
 {
-	/*
-		Constructor: Interval
+    /*
+        Constructor: Interval
 
-		The Interval constructor creates a new Interval object with defined starting and ending range values.
+        The Interval constructor creates a new Interval object with defined starting and ending range values.
 
-		Range values can be positive or negative, and can move in either direction (low-to-high or high-to-low).
+        Range values can be positive or negative, and can move in either direction (low-to-high or high-to-low).
 
-		*Arguments:*
+        *Arguments:*
 
-		from - double value specifying the range's starting value
-		to -  double value specifying the range's ending value
+        from - double value specifying the range's starting value
+        to -  double value specifying the range's ending value
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*Code Example:* Create and use an Interval object with a range of 0-360
+        *Code Example:* Create and use an Interval object with a range of 0-360
 
-		(code)
-		-- Create a new Interval object with a range of 0-360
-		fullCircle = Interval( 0, 360 )
+        (code)
+        -- Create a new Interval object with a range of 0-360
+        fullCircle = Interval( 0, 360 )
 
-		-- In response to a Timeline's on_new_frame event, use the Interval object to convert
-		-- the Timeline's progress value to its corresponding Interval range.
-		function rotateObject( self, msecs, progress )
-			-- Convert progress percentage to number of degrees of rotation in circle
-			num_degrees = fullCircle:get_value( progress )
+        -- In response to a Timeline's on_new_frame event, use the Interval object to convert
+        -- the Timeline's progress value to its corresponding Interval range.
+        function rotateObject( self, msecs, progress )
+            -- Convert progress percentage to number of degrees of rotation in circle
+            num_degrees = fullCircle:get_value( progress )
 
-			-- Rotate object the appropriate number of degrees
-			self.z_rotation = { num_degrees, 0, 0 }
-		end
-		myTimeline:add_onnewframe_listener( rotateObject )
-		(end)
+            -- Rotate object the appropriate number of degrees
+            self.z_rotation = { num_degrees, 0, 0 }
+        end
+        myTimeline:add_onnewframe_listener( rotateObject )
+        (end)
 
-		*See Also:* the <get_value> function and the <Timeline.on_new_frame> event
-	*/
+        *See Also:* the <get_value> function and the <Timeline.on_new_frame> event
+    */
 
     Interval( double from, double to )
-		[[
-		    self = lb_construct( interval , new interval(from,to) );
-		]];
+        [[
+            self = lb_construct( interval , new interval(from,to) );
+        ]];
 
     ~Interval()
-		[[
-		    delete self;
-		]];
+        [[
+            delete self;
+        ]];
 
-	/*
-		Property: from
+    /*
+        Property: from
 
-		The from property is a double value specifying the Interval range's starting value.
+        The from property is a double value specifying the Interval range's starting value.
 
-		The range's starting value is initially set when the Interval object is created. Setting the from property enables the starting value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
+        The range's starting value is initially set when the Interval object is created. Setting the from property enables the starting value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
 
-		To change the range's ending value, set the <to> property.
+        To change the range's ending value, set the <to> property.
 
-		*Default Value:* Starting value specified in object's constructor
+        *Default Value:* Starting value specified in object's constructor
 
-		*See Also:* the Interval constructor and the <to> property
-	*/
+        *See Also:* the Interval constructor and the <to> property
+    */
 
     double from
-		[[from=self->a;]]
-		[[self->a=from;]];
+        [[from=self->a;]]
+        [[self->a=from;]];
 
-	/*
-		Property: to
+    /*
+        Property: to
 
-		The to property is a double value specifying the Interval range's ending value.
+        The to property is a double value specifying the Interval range's ending value.
 
-		The range's ending value is initially set when the Interval object is created. Setting the to property enables the ending value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
+        The range's ending value is initially set when the Interval object is created. Setting the to property enables the ending value to be changed when a Timeline's range changes or when a new Timeline with a different range is created.
 
-		To change the range's starting value, set the <from> property
+        To change the range's starting value, set the <from> property
 
-		*Default Value:* Ending value specified in object's constructor
+        *Default Value:* Ending value specified in object's constructor
 
-		*See Also:* the Interval constructor and the <from> property
-	*/
+        *See Also:* the Interval constructor and the <from> property
+    */
 
     double to
-		[[to=self->b;]]
-		[[self->b=to;]];
+        [[to=self->b;]]
+        [[self->b=to;]];
 
-	/*
-		Function: get_value
+    /*
+        Function: get_value
 
-		The get_value() function converts a percentage progress indicator to the correlating value within the object's defined range. The percentage progress indicator is a double value between 0 and 1, inclusive.
+        The get_value() function converts a percentage progress indicator to the correlating value within the object's defined range. The percentage progress indicator is a double value between 0 and 1, inclusive.
 
-		*Argument:*
+        *Argument:*
 
-			factor - double value specifying the percentage of progress completed. Must be a value between 0 and 1, inclusive.
+            factor - double value specifying the percentage of progress completed. Must be a value between 0 and 1, inclusive.
 
-		*Return Value:* Double value specifying the correlating range value
+        *Return Value:* Double value specifying the correlating range value
 
-		*Code Example:*
+        *Code Example:*
 
-			(code)
-			range = Interval( -20, 20 )
-			print( "Range value when 50% complete = ", range:get_value( 0.5 )
+            (code)
+            range = Interval( -20, 20 )
+            print( "Range value when 50% complete = ", range:get_value( 0.5 )
 
-			-- The code statements above will print:
-			--   Range value when 50% complete = 0
-			(end)
+            -- The code statements above will print:
+            --   Range value when 50% complete = 0
+            (end)
 
-		*See Also:* the Interval constructor and the <from> and <to> properties
-	*/
+        *See Also:* the Interval constructor and the <from> and <to> properties
+    */
 
     double get_value(double factor)
-		[[
-		    result=(factor*(self->b-self->a))+self->a;
-		]];
+        [[
+            result=(factor*(self->b-self->a))+self->a;
+        ]];
 
 }
 

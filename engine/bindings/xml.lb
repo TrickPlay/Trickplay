@@ -42,13 +42,13 @@ public:
 
     bool parse(UserData * ud,const char * xml,size_t xml_len,bool finished)
     {
-    	UserData::Handle * handle = UserData::Handle::make(ud,this);
+        UserData::Handle * handle = UserData::Handle::make(ud,this);
         XML_SetUserData(parser,handle);
         bool result = XML_Parse(parser,xml,xml_len,finished);
         UserData::Handle::destroy( handle );
         if (finished)
         {
-        	reset();
+            reset();
         }
         return result;
     }
@@ -61,8 +61,8 @@ protected:
     static void end_element_handler(void *userData,const XML_Char *name);
     static void character_data_handler(void *userData,const XML_Char *s,int len);
 
-	static void start_namespace_handler(void *userData,const XML_Char *prefix,const XML_Char *uri);
-	static void end_namespace_handler(void *userData,const XML_Char *prefix);
+    static void start_namespace_handler(void *userData,const XML_Char *prefix,const XML_Char *uri);
+    static void end_namespace_handler(void *userData,const XML_Char *prefix);
 
 
 private:
@@ -74,198 +74,198 @@ private:
 ]]
 
 /***************************************
-	Class: XMLParser
+    Class: XMLParser
 
-	The XMLParser class parses XML text. XMLParser is an event-based sequential-access parser, like the SAX and Expat XML parsers. As each XML element is parsed, an appropriate event is fired.
+    The XMLParser class parses XML text. XMLParser is an event-based sequential-access parser, like the SAX and Expat XML parsers. As each XML element is parsed, an appropriate event is fired.
 
-	To parse an XML file, the following steps are taken.
+    To parse an XML file, the following steps are taken.
 
-		- Define the event handlers
-		- Create an XMLParser object and register the event handlers
-		- Pass the XML data to the XMLParser object
+        - Define the event handlers
+        - Create an XMLParser object and register the event handlers
+        - Pass the XML data to the XMLParser object
 
-	As the XML data is parsed, the event handlers are invoked. The handlers can process the recognized XML in any desired manner. The parsing of XML data using XMLParser is demonstrated in the following sections.
+    As the XML data is parsed, the event handlers are invoked. The handlers can process the recognized XML in any desired manner. The parsing of XML data using XMLParser is demonstrated in the following sections.
 
-	Define the Event Handlers:
+    Define the Event Handlers:
 
-	The XMLParser class supports the following events.
+    The XMLParser class supports the following events.
 
-		on_start_element - occurs when a new XML element is started
-		on_end_element - occurs when the end of an XML element is encountered
-		on_character_data - occurs when XML character data is encountered
-		on_start_namespace - occurs when a new namespace is started
-		on_end_namespace - occurs when the end of a namespace is encountered
+        on_start_element - occurs when a new XML element is started
+        on_end_element - occurs when the end of an XML element is encountered
+        on_character_data - occurs when XML character data is encountered
+        on_start_namespace - occurs when a new namespace is started
+        on_end_namespace - occurs when the end of a namespace is encountered
 
-	Every event need not have a handler registered to it; only those events the application is interested in need to be handled. For demonstration purposes, the sample program will register handlers for all the supported events. The event handlers defined below simply output the XML content they receive from the parser.
+    Every event need not have a handler registered to it; only those events the application is interested in need to be handled. For demonstration purposes, the sample program will register handlers for all the supported events. The event handlers defined below simply output the XML content they receive from the parser.
 
-	(code)
-	-- XMLParser event handler definitions
-	-- on_start_element Handler
-	function handleElementStart( parser, element, attribs )
-		print( "New Element: ", element )
-		for attrib, value in pairs( attribs ) do
-			print( "  ", attrib, "=", value )
-		end
-	end
+    (code)
+    -- XMLParser event handler definitions
+    -- on_start_element Handler
+    function handleElementStart( parser, element, attribs )
+        print( "New Element: ", element )
+        for attrib, value in pairs( attribs ) do
+            print( "  ", attrib, "=", value )
+        end
+    end
 
-	-- on_end_element Handler
-	function handleElementEnd( parser, element )
-		print( "Closed Element: ", element )
-	end
+    -- on_end_element Handler
+    function handleElementEnd( parser, element )
+        print( "Closed Element: ", element )
+    end
 
-	-- on_character_data Handler
-	function handleCharData( parser, data )
-		print( "Char Data: ", data )
-	end
+    -- on_character_data Handler
+    function handleCharData( parser, data )
+        print( "Char Data: ", data )
+    end
 
-	-- on_start_namespace Handler
-	function handleNamespaceNew( parser, prefix, uri )
-		print( "New Namespace: ", prefix, ", URI: ", uri )
-	end
+    -- on_start_namespace Handler
+    function handleNamespaceNew( parser, prefix, uri )
+        print( "New Namespace: ", prefix, ", URI: ", uri )
+    end
 
-	-- on_end_namespace Handler
-	function handleNamespaceEnd( parser, prefix )
-		print( "Closed Namespace: ", prefix )
-	end
-	(end)
+    -- on_end_namespace Handler
+    function handleNamespaceEnd( parser, prefix )
+        print( "Closed Namespace: ", prefix )
+    end
+    (end)
 
-	Create an XMLParser Object and Register the Event Handlers:
+    Create an XMLParser Object and Register the Event Handlers:
 
-	The XMLParser constructor can accept various optional arguments. The character encoding attribute can be specified in either the constructor or in the object's <encoding> property, as shown below.
+    The XMLParser constructor can accept various optional arguments. The character encoding attribute can be specified in either the constructor or in the object's <encoding> property, as shown below.
 
-	(code)
-	-- Specify encoding method in constructor
-	parser = XMLParser( "UTF-8" )
+    (code)
+    -- Specify encoding method in constructor
+    parser = XMLParser( "UTF-8" )
 
-	-- Specify encoding method in property
-	parser = XMLParser()
-	parser.encoding = "UTF-8"
-	(end)
+    -- Specify encoding method in property
+    parser = XMLParser()
+    parser.encoding = "UTF-8"
+    (end)
 
-	The constructor can also instruct the parser to fire events when namespace definitions are encountered in the XML data. By default, namespace definitions do not cause events. Note: There is no property to enable namespace processing, so if namespace events are desired, they must be enabled in the constructor. The code segment below enables namespace events.
+    The constructor can also instruct the parser to fire events when namespace definitions are encountered in the XML data. By default, namespace definitions do not cause events. Note: There is no property to enable namespace processing, so if namespace events are desired, they must be enabled in the constructor. The code segment below enables namespace events.
 
-	(code)
-	-- Specify encoding method and enable namespace events
-	parser = XMLParser( "UTF-8", true )
-	(end)
+    (code)
+    -- Specify encoding method and enable namespace events
+    parser = XMLParser( "UTF-8", true )
+    (end)
 
-	The constructor can also accept a table of property initializations, as shown below.
+    The constructor can also accept a table of property initializations, as shown below.
 
-	(code)
-	-- Create parser object and initialize it
-	parser = XMLParser( { encoding = "UTF-8"} )
-	(end)
+    (code)
+    -- Create parser object and initialize it
+    parser = XMLParser( { encoding = "UTF-8"} )
+    (end)
 
-	Note: When a table of property initializations is passed to the constructor, Lua syntax restrictions prohibit the enabling of namespace events. If namespace events are desired, use one of the other constructor formats. The code below enables namespace events and registers all the event handlers defined earlier to the parser. The demonstration program uses this code segment.
+    Note: When a table of property initializations is passed to the constructor, Lua syntax restrictions prohibit the enabling of namespace events. If namespace events are desired, use one of the other constructor formats. The code below enables namespace events and registers all the event handlers defined earlier to the parser. The demonstration program uses this code segment.
 
-	(code)
-	-- Create parser and enable namespace events
-	parser = XMLParser( "UTF-8", true )
+    (code)
+    -- Create parser and enable namespace events
+    parser = XMLParser( "UTF-8", true )
 
-	-- Register event handlers
-	parser:add_onstartelement_listener( handleElementStart )
-	parser:add_onendelement_listener( handleElementEnd )
-	parser:add_oncharacterdata_listener( handleCharData )
-	parser:add_onstartnamespace_listener( handleNamespaceNew )
-	parser:add_onendnamespace_listener( handleNamespaceEnd )
-	(end)
+    -- Register event handlers
+    parser:add_onstartelement_listener( handleElementStart )
+    parser:add_onendelement_listener( handleElementEnd )
+    parser:add_oncharacterdata_listener( handleCharData )
+    parser:add_onstartnamespace_listener( handleNamespaceNew )
+    parser:add_onendnamespace_listener( handleNamespaceEnd )
+    (end)
 
-	Parse the XML Data:
+    Parse the XML Data:
 
-	Where the XML data comes from will depend upon the application. For example, it may arrive from an HTTP connection, or it may exist in an external file, or it may be embedded in the program itself. For the example program, the XML data listed below will be processed. The XML is very simple, but contains all the possible elements that the parser can identify, including a namespace definition. This XML data is embedded in the program as a Lua long string.
+    Where the XML data comes from will depend upon the application. For example, it may arrive from an HTTP connection, or it may exist in an external file, or it may be embedded in the program itself. For the example program, the XML data listed below will be processed. The XML is very simple, but contains all the possible elements that the parser can identify, including a namespace definition. This XML data is embedded in the program as a Lua long string.
 
-	(code)
-	-- Define some XML
-	xml = [[
-		<Person xmlns:people='http://www.trickplay.com'>
-			<Name class="VIP">
-				<First>John</First>
-				<Last>Smith</Last>
-			</Name>
-			<Address type="mailing" security="private">
-				<Add01>P.O. Box 567</Add01>
-				<City>Palo Alto</City>
-				<State>CA</State>
-				<ZIP>94306</ZIP>
-			</Address>
-		</Person>
-	]]
-	(end)
+    (code)
+    -- Define some XML
+    xml = [[
+        <Person xmlns:people='http://www.trickplay.com'>
+            <Name class="VIP">
+                <First>John</First>
+                <Last>Smith</Last>
+            </Name>
+            <Address type="mailing" security="private">
+                <Add01>P.O. Box 567</Add01>
+                <City>Palo Alto</City>
+                <State>CA</State>
+                <ZIP>94306</ZIP>
+            </Address>
+        </Person>
+    ]]
+    (end)
 
-	The XML data is passed to the XMLParser's <parse> function. The parse() function can be called a single time, passing it all the XML data, or it can be invoked multiple times, passing only a portion of the XML data on each call. The example program passes the entire XML string to the parse() function in a single call, as shown below.
+    The XML data is passed to the XMLParser's <parse> function. The parse() function can be called a single time, passing it all the XML data, or it can be invoked multiple times, passing only a portion of the XML data on each call. The example program passes the entire XML string to the parse() function in a single call, as shown below.
 
-	(code)
-	-- Parse the XML content
-	if( parser:parse( xml ) == false )then
-		print( "XML was not parsed successfully" )
-	end
-	(end)
+    (code)
+    -- Parse the XML content
+    if( parser:parse( xml ) == false )then
+        print( "XML was not parsed successfully" )
+    end
+    (end)
 
-	As the XML data is parsed and each XML component is encountered, the individual event handlers are invoked. The output of the example event handlers is shown below.
+    As the XML data is parsed and each XML component is encountered, the individual event handlers are invoked. The output of the example event handlers is shown below.
 
-	(code)
-	New Namespace:  people , URI:  http://www.trickplay.com
-	New Element:  Person
+    (code)
+    New Namespace:  people , URI:  http://www.trickplay.com
+    New Element:  Person
 
-	New Element:  Name
-	   class = VIP
+    New Element:  Name
+       class = VIP
 
-	New Element:  First
-	Char Data:  John
-	Closed Element:  First
+    New Element:  First
+    Char Data:  John
+    Closed Element:  First
 
-	New Element:  Last
-	Char Data:  Smith
-	Closed Element:  Last
+    New Element:  Last
+    Char Data:  Smith
+    Closed Element:  Last
 
-	Closed Element:  Name
+    Closed Element:  Name
 
-	New Element:  Address
-	   security = private
-	   type = mailing
+    New Element:  Address
+       security = private
+       type = mailing
 
-	New Element:  Add01
-	Char Data:  P.O. Box 567
-	Closed Element:  Add01
+    New Element:  Add01
+    Char Data:  P.O. Box 567
+    Closed Element:  Add01
 
-	New Element:  City
-	Char Data:  Palo Alto
-	Closed Element:  City
+    New Element:  City
+    Char Data:  Palo Alto
+    Closed Element:  City
 
-	New Element:  State
-	Char Data:  CA
-	Closed Element:  State
+    New Element:  State
+    Char Data:  CA
+    Closed Element:  State
 
-	New Element:  ZIP
-	Char Data:  94306
-	Closed Element:  ZIP
+    New Element:  ZIP
+    Char Data:  94306
+    Closed Element:  ZIP
 
-	Closed Element:  Address
+    Closed Element:  Address
 
-	Closed Element:  Person
-	Closed Namespace:  people
-	(end)
+    Closed Element:  Person
+    Closed Namespace:  people
+    (end)
 */
 
 class XMLParser [[Parser*]]
 {
 /***************************************
-	Constructor: XMLParser
+    Constructor: XMLParser
 
-	The XMLParser() constructor creates an XMLParser object that can be used to parse XML data.
+    The XMLParser() constructor creates an XMLParser object that can be used to parse XML data.
 
-	Refer to the discussion at the beginning of this topic for a description of creating an XMLParser object.
+    Refer to the discussion at the beginning of this topic for a description of creating an XMLParser object.
 
-	*Arguments:*
+    *Arguments:*
 
-		encoding - string specifying the text encoding of the XML data. For the list of supported encoding attributes, refer to the <encoding> property. The encoding argument is optional.
-		expand_namespaces - boolean flag indicating whether or not the parser should fire events when namespaces are defined and closed (true=fire namespace events). The expand_namespaces argument is optional. By default, namespace events do not occur.
+        encoding - string specifying the text encoding of the XML data. For the list of supported encoding attributes, refer to the <encoding> property. The encoding argument is optional.
+        expand_namespaces - boolean flag indicating whether or not the parser should fire events when namespaces are defined and closed (true=fire namespace events). The expand_namespaces argument is optional. By default, namespace events do not occur.
 
-	*Return Value:* a new XMLParser object
+    *Return Value:* a new XMLParser object
 
-	*Code Example:* Refer to the discussion at the beginning of this topic for code samples that construct new XMLParser objects
+    *Code Example:* Refer to the discussion at the beginning of this topic for code samples that construct new XMLParser objects
 
-	*See Also:* the <encoding> property and <parse> function
+    *See Also:* the <encoding> property and <parse> function
 */
 
     XMLParser(string encoding=NULL,bool expand_namespaces=false)
@@ -278,10 +278,10 @@ class XMLParser [[Parser*]]
                 lb_set_props_from_table(L);
                 lua_pop(L,1);
             }
-		    else if (encoding)
-		    {
-			    self->set_encoding(encoding);
-		    }
+            else if (encoding)
+            {
+                self->set_encoding(encoding);
+            }
         ]];
 
     ~XMLParser()
@@ -290,18 +290,18 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Property: encoding
+    Property: encoding
 
-   	The encoding property is a string that specifies the character encoding of the XML data.
+    The encoding property is a string that specifies the character encoding of the XML data.
 
-   	Supported encoding methods are listed below.
+    Supported encoding methods are listed below.
 
-	   	- "UTF-8"
-    	- "UTF-16"
-    	- "ISO-8859-1"
-    	- "US-ASCII"
+        - "UTF-8"
+        - "UTF-16"
+        - "ISO-8859-1"
+        - "US-ASCII"
 
-   	*See Also:* the <parse> function
+    *See Also:* the <parse> function
 */
 
     string encoding
@@ -313,20 +313,20 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Function: parse
+    Function: parse
 
-   	The parse() function accepts XML text data and parses it, generating events as individual components are encountered.
+    The parse() function accepts XML text data and parses it, generating events as individual components are encountered.
 
-   	The parse() function can be called multiple times, passing a portion of the total XML data with each call, or it can be passed the entire XML data in a single call.
+    The parse() function can be called multiple times, passing a portion of the total XML data with each call, or it can be passed the entire XML data in a single call.
 
-   	*Arguments:*
+    *Arguments:*
 
-   		xml - string containing XML text data. This string may contain a portion of the total XML data.
-   		finished - boolean flag indicating whether or not the xml argument contains the last chunk of data (true=no subsequent data). If additional XML data will be processed, the finished argument should be set to false. If not specified, the default value is true (no subsequent data).
+        xml - string containing XML text data. This string may contain a portion of the total XML data.
+        finished - boolean flag indicating whether or not the xml argument contains the last chunk of data (true=no subsequent data). If additional XML data will be processed, the finished argument should be set to false. If not specified, the default value is true (no subsequent data).
 
-   	*Return Value:* If the XML data was parsed successfully, returns true. Otherwise, returns false.
+    *Return Value:* If the XML data was parsed successfully, returns true. Otherwise, returns false.
 
-   	*See Also:* the <finish> function
+    *See Also:* the <finish> function
 */
 
     bool parse(lstring xml,bool finished=true)
@@ -335,17 +335,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Function: finish
+    Function: finish
 
-   	The finish() function informs the parser that no additional XML data will be submitted.
+    The finish() function informs the parser that no additional XML data will be submitted.
 
-   	Note: The finish() function does not need to be called if the parse() function's finished argument is set to true.
+    Note: The finish() function does not need to be called if the parse() function's finished argument is set to true.
 
-   	*Arguments:* None
+    *Arguments:* None
 
-   	*Return Value:* If the XML data was parsed successfully, returns true. Otherwise, returns false.
+    *Return Value:* If the XML data was parsed successfully, returns true. Otherwise, returns false.
 
-   	*See Also:* the <parse> function
+    *See Also:* the <parse> function
 */
 
     bool finish()
@@ -355,33 +355,33 @@ class XMLParser [[Parser*]]
 
 
 /***************************************
-	Function: add_onstartelement_listener
+    Function: add_onstartelement_listener
 
-	The add_onstartelement_listener() function registers a handler function for <on_start_element> events.
+    The add_onstartelement_listener() function registers a handler function for <on_start_element> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstartelement_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstartelement_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( parser, element, attributes )
-		(end)
+        (code)
+        f( parser, element, attributes )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		parser - XMLParser object that parsed the XML data
-   		element - string containing the new element
-   		attributes - table containing the attributes, if any, specified with the new element
+        parser - XMLParser object that parsed the XML data
+        element - string containing the new element
+        attributes - table containing the attributes, if any, specified with the new element
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example at the top of this page for a demonstration of hooking the on_start_element event
+    *Code Example:* See the code example at the top of this page for a demonstration of hooking the on_start_element event
 
-	*See Also:* the <on_start_element> event and the <remove_onstartelement_listener> function
+    *See Also:* the <on_start_element> event and the <remove_onstartelement_listener> function
 */
 
     int add_onstartelement_listener( function f )
@@ -390,17 +390,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: remove_onstartelement_listener
+    Function: remove_onstartelement_listener
 
-	The remove_onstartelement_listener() function unregisters the specified event handler.
+    The remove_onstartelement_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstartelement_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstartelement_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstartelement_listener> function and the <on_start_element> event
+    *See Also:* the <add_onstartelement_listener> function and the <on_start_element> event
 */
 
     remove_onstartelement_listener( int ref )
@@ -409,32 +409,32 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: add_onendelement_listener
+    Function: add_onendelement_listener
 
-	The add_onendelement_listener() function registers a handler function for <on_end_element> events.
+    The add_onendelement_listener() function registers a handler function for <on_end_element> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendelement_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendelement_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( parser, element )
-		(end)
+        (code)
+        f( parser, element )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		parser - XMLParser object that parsed the XML data
-   		element - string containing the closed element
+        parser - XMLParser object that parsed the XML data
+        element - string containing the closed element
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example at the top of this page for a demonstration of hooking the on_end_element event
+    *Code Example:* See the code example at the top of this page for a demonstration of hooking the on_end_element event
 
-	*See Also:* the <on_end_element> event and the <remove_onendelement_listener> function
+    *See Also:* the <on_end_element> event and the <remove_onendelement_listener> function
 */
 
     int add_onendelement_listener( function f )
@@ -443,17 +443,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: remove_onendelement_listener
+    Function: remove_onendelement_listener
 
-	The remove_onendelement_listener() function unregisters the specified event handler.
+    The remove_onendelement_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onendelement_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onendelement_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onendelement_listener> function and the <on_end_element> event
+    *See Also:* the <add_onendelement_listener> function and the <on_end_element> event
 */
 
     remove_onendelement_listener( int ref )
@@ -462,32 +462,32 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: add_oncharacterdata_listener
+    Function: add_oncharacterdata_listener
 
-	The add_oncharacterdata_listener() function registers a handler function for <on_character_data> events.
+    The add_oncharacterdata_listener() function registers a handler function for <on_character_data> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncharacterdata_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncharacterdata_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( parser, data )
-		(end)
+        (code)
+        f( parser, data )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		parser - XMLParser object that parsed the XML data
-   		data - string containing the character data
+        parser - XMLParser object that parsed the XML data
+        data - string containing the character data
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example at the top of this page for a demonstration of hooking the on_character_data event
+    *Code Example:* See the code example at the top of this page for a demonstration of hooking the on_character_data event
 
-	*See Also:* the <on_character_data> event and the <remove_oncharacterdata_listener> function
+    *See Also:* the <on_character_data> event and the <remove_oncharacterdata_listener> function
 */
 
     int add_oncharacterdata_listener( function f )
@@ -496,17 +496,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: remove_oncharacterdata_listener
+    Function: remove_oncharacterdata_listener
 
-	The remove_oncharacterdata_listener() function unregisters the specified event handler.
+    The remove_oncharacterdata_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncharacterdata_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncharacterdata_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncharacterdata_listener> function and the <on_character_data> event
+    *See Also:* the <add_oncharacterdata_listener> function and the <on_character_data> event
 */
 
     remove_oncharacterdata_listener( int ref )
@@ -515,33 +515,33 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: add_onstartnamespace_listener
+    Function: add_onstartnamespace_listener
 
-	The add_onstartnamespace_listener() function registers a handler function for <on_start_namespace> events.
+    The add_onstartnamespace_listener() function registers a handler function for <on_start_namespace> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstartnamespace_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstartnamespace_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( parser, prefix, uri )
-		(end)
+        (code)
+        f( parser, prefix, uri )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		parser - XMLParser object that parsed the XML data
-   		prefix - string containing the namespace prefix
-   		uri - string containing the namespace URI
+        parser - XMLParser object that parsed the XML data
+        prefix - string containing the namespace prefix
+        uri - string containing the namespace URI
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example at the top of this page for a demonstration of hooking the on_start_namespace event
+    *Code Example:* See the code example at the top of this page for a demonstration of hooking the on_start_namespace event
 
-	*See Also:* the <on_start_namespace> event and the <remove_onstartnamespace_listener> function
+    *See Also:* the <on_start_namespace> event and the <remove_onstartnamespace_listener> function
 */
 
     int add_onstartnamespace_listener( function f )
@@ -550,17 +550,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: remove_onstartnamespace_listener
+    Function: remove_onstartnamespace_listener
 
-	The remove_onstartnamespace_listener() function unregisters the specified event handler.
+    The remove_onstartnamespace_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstartnamespace_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstartnamespace_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstartnamespace_listener> function and the <on_start_namespace> event
+    *See Also:* the <add_onstartnamespace_listener> function and the <on_start_namespace> event
 */
 
     remove_onstartnamespace_listener( int ref )
@@ -569,32 +569,32 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: add_onendnamespace_listener
+    Function: add_onendnamespace_listener
 
-	The add_onendnamespace_listener() function registers a handler function for <on_end_namespace> events.
+    The add_onendnamespace_listener() function registers a handler function for <on_end_namespace> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendnamespace_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendnamespace_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( parser, prefix )
-		(end)
+        (code)
+        f( parser, prefix )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-   		parser - XMLParser object that parsed the XML data
-   		prefix - string containing the namespace prefix
+        parser - XMLParser object that parsed the XML data
+        prefix - string containing the namespace prefix
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example at the top of this page for a demonstration of hooking the on_end_namespace event
+    *Code Example:* See the code example at the top of this page for a demonstration of hooking the on_end_namespace event
 
-	*See Also:* the <on_end_namespace> event and the <remove_onendnamespace_listener> function
+    *See Also:* the <on_end_namespace> event and the <remove_onendnamespace_listener> function
 */
 
     int add_onendnamespace_listener( function f )
@@ -603,17 +603,17 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-	Function: remove_onendnamespace_listener
+    Function: remove_onendnamespace_listener
 
-	The remove_onendnamespace_listener() function unregisters the specified event handler.
+    The remove_onendnamespace_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onendnamespace_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onendnamespace_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onendnamespace_listener> function and the <on_end_namespace> event
+    *See Also:* the <add_onendnamespace_listener> function and the <on_end_namespace> event
 */
 
     remove_onendnamespace_listener( int ref )
@@ -622,11 +622,11 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Event: on_start_element
+    Event: on_start_element
 
-   	The on_start_element event occurs whenever a new XML element is encountered.
+    The on_start_element event occurs whenever a new XML element is encountered.
 
-   	*See Also:* the <add_onstartelement_listener> function and the <on_end_element> event
+    *See Also:* the <add_onstartelement_listener> function and the <on_end_element> event
 */
 
     function on_start_element
@@ -638,11 +638,11 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Event: on_end_element
+    Event: on_end_element
 
-   	The on_end_element event occurs whenever an XML element is closed.
+    The on_end_element event occurs whenever an XML element is closed.
 
-   	*See Also:* the <add_onendelement_listener> function and the <on_start_element> event
+    *See Also:* the <add_onendelement_listener> function and the <on_start_element> event
 */
 
     function on_end_element
@@ -654,11 +654,11 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Event: on_character_data
+    Event: on_character_data
 
-   	The on_character_data event occurs when character data is encountered. The event is fired after all character data associated with the element has been accumulated.
+    The on_character_data event occurs when character data is encountered. The event is fired after all character data associated with the element has been accumulated.
 
-	*See Also:* the <add_oncharacterdata_listener> function
+    *See Also:* the <add_oncharacterdata_listener> function
 */
 
     function on_character_data
@@ -670,13 +670,13 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Event: on_start_namespace
+    Event: on_start_namespace
 
-   	The on_start_namespace event occurs when a new namespace definition is encountered.
+    The on_start_namespace event occurs when a new namespace definition is encountered.
 
-   	By default, namespace events are not generated. To enable namespace events, set the XMLParser constructor's expand_namespaces argument to true.
+    By default, namespace events are not generated. To enable namespace events, set the XMLParser constructor's expand_namespaces argument to true.
 
-	*See Also:* the <add_onstartnamespace_listener> function
+    *See Also:* the <add_onstartnamespace_listener> function
 */
 
     function on_start_namespace
@@ -688,13 +688,13 @@ class XMLParser [[Parser*]]
         ]];
 
 /***************************************
-   	Event: on_end_namespace
+    Event: on_end_namespace
 
-   	The on_end_namespace event occurs when a namespace goes out of scope.
+    The on_end_namespace event occurs when a namespace goes out of scope.
 
-   	By default, namespace events are not generated. To enable namespace events, set the XMLParser constructor's expand_namespaces argument to true.
+    By default, namespace events are not generated. To enable namespace events, set the XMLParser constructor's expand_namespaces argument to true.
 
-	*See Also:* the <add_onendnamespace_listener> function
+    *See Also:* the <add_onendnamespace_listener> function
 */
 
     function on_end_namespace
@@ -723,7 +723,7 @@ void Parser::flush_character_data(lua_State * L)
 
 void Parser::start_element_handler(void *userData,const XML_Char *name,const XML_Char **atts)
 {
-	UserData::Handle * handle = UserData::Handle::get( userData );
+    UserData::Handle * handle = UserData::Handle::get( userData );
 
     Parser * self=( Parser * ) handle->get_user();
 
@@ -744,7 +744,7 @@ void Parser::start_element_handler(void *userData,const XML_Char *name,const XML
 
 void Parser::end_element_handler(void *userData,const XML_Char *name)
 {
-	UserData::Handle * handle = UserData::Handle::get( userData );
+    UserData::Handle * handle = UserData::Handle::get( userData );
 
     Parser * self=( Parser * ) handle->get_user();
 
@@ -758,7 +758,7 @@ void Parser::end_element_handler(void *userData,const XML_Char *name)
 
 void Parser::character_data_handler(void *userData,const XML_Char *s,int len)
 {
-	UserData::Handle * handle = UserData::Handle::get( userData );
+    UserData::Handle * handle = UserData::Handle::get( userData );
 
     Parser * self=( Parser * ) handle->get_user();
 
@@ -767,7 +767,7 @@ void Parser::character_data_handler(void *userData,const XML_Char *s,int len)
 
 void Parser::start_namespace_handler(void *userData,const XML_Char *prefix,const XML_Char *uri)
 {
-	UserData::Handle * handle = UserData::Handle::get( userData );
+    UserData::Handle * handle = UserData::Handle::get( userData );
 
     Parser * self=( Parser * ) handle->get_user();
 
@@ -781,7 +781,7 @@ void Parser::start_namespace_handler(void *userData,const XML_Char *prefix,const
 
 void Parser::end_namespace_handler(void *userData,const XML_Char *prefix)
 {
-	UserData::Handle * handle = UserData::Handle::get( userData );
+    UserData::Handle * handle = UserData::Handle::get( userData );
 
     Parser * self=( Parser * ) handle->get_user();
 

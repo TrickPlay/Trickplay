@@ -1,101 +1,101 @@
 
 /***************************************
 
-	Interface: URLResponse
+    Interface: URLResponse
 
-	The URLResponse interface provides access to response information for an HTTP request placed via a <URLRequest> object.
+    The URLResponse interface provides access to response information for an HTTP request placed via a <URLRequest> object.
 
-	A URLResponse object is returned by the <URLRequest.perform> function or passed as an argument to the registered handlers of <URLRequest.on_complete> or <URLRequest.on_response_chunk> events. A TrickPlay application cannot create a URLResponse object directly; it must use the object provided by the URLRequest functions.
-
-****************************************
-	Property: code
-
-	The code property is an integer value specifying either the HTTP status code (such as 200 for success) or, if the request failed, an error code.
-
-	*Code Example:* In an on_complete event handler, access the response code
-
-		(code)
-    	-- Define on_complete event handler
-    	function handleResponse( httpRequest, httpResponse )
-    		-- Output response code
-    		print( "Response received, code =", httpResponse.code )
-    	end
-		(end)
-
-	*See Also:* the <status> property
+    A URLResponse object is returned by the <URLRequest.perform> function or passed as an argument to the registered handlers of <URLRequest.on_complete> or <URLRequest.on_response_chunk> events. A TrickPlay application cannot create a URLResponse object directly; it must use the object provided by the URLRequest functions.
 
 ****************************************
-	Property: status
+    Property: code
 
-	The status property is a string containing the HTTP status message (such as "OK" for success) or, if the request failed, an error message.
+    The code property is an integer value specifying either the HTTP status code (such as 200 for success) or, if the request failed, an error code.
 
-	*Code Example:* In an on_complete event handler, display the response code and status message
+    *Code Example:* In an on_complete event handler, access the response code
 
-		(code)
-    	-- Define on_complete event handler
-    	function handleResponse( httpRequest, httpResponse )
-    		-- Output response code
-    		print( "Response received, code =", httpResponse.code, "\n" )
+        (code)
+        -- Define on_complete event handler
+        function handleResponse( httpRequest, httpResponse )
+            -- Output response code
+            print( "Response received, code =", httpResponse.code )
+        end
+        (end)
 
-    		-- Output response status or error message
-    		print( httpResponse.status )
-    	end
-		(end)
-
-	*See Also:* the <code> property
+    *See Also:* the <status> property
 
 ****************************************
-	Property: failed
+    Property: status
 
-	The failed property is a boolean flag indicating whether or not the HTTP request was processed (true=not processed).
+    The status property is a string containing the HTTP status message (such as "OK" for success) or, if the request failed, an error message.
 
-	Note: A request may be processed unsuccessfully, such as with "File not found"/HTTP error 404, but the failed property will still be false because the request was indeed processed.
+    *Code Example:* In an on_complete event handler, display the response code and status message
 
-	*See Also:* the <code> property
+        (code)
+        -- Define on_complete event handler
+        function handleResponse( httpRequest, httpResponse )
+            -- Output response code
+            print( "Response received, code =", httpResponse.code, "\n" )
 
-****************************************
-	Property: headers
+            -- Output response status or error message
+            print( httpResponse.status )
+        end
+        (end)
 
-	The headers property contains a table of response header entries for the HTTP request. Each header entry is itself another table containing a name/value pair. The contents of a sample headers property table is shown below.
-
-		(code)
-		{ { "Content-Length", "3451" },
-		  { "Content-Type", "text/html" },
-		  { "Server", "Apache" }
-		}
-		(end)
-
-		If a TrickPlay application wishes to process the headers property, maximum efficiency can be achieved by copying the table to a local variable before processing.
-
-	*Code Example:* In an on_complete event handler, display the contents of the headers table
-
-		(code)
-	    -- Define on_complete event handler
-    	function handleResponse( httpRequest, httpResponse )
-    		print( "Response received, code = ", httpResponse.code )
-
-    		-- Output the headers, copying to local variable first
-    		local headers = httpResponse.headers
-			dumptable( headers )
-    	end
-    	(end)
-
-	*See Also:* the <body> property
+    *See Also:* the <code> property
 
 ****************************************
-	Property: length
+    Property: failed
 
-	The length property is an integer value specifying the length in bytes of the string contained in the <body> property. This is a convenience property to save a TrickPlay application from having to measure the body string itself.
+    The failed property is a boolean flag indicating whether or not the HTTP request was processed (true=not processed).
 
-	*See Also:* the <body> property
+    Note: A request may be processed unsuccessfully, such as with "File not found"/HTTP error 404, but the failed property will still be false because the request was indeed processed.
+
+    *See Also:* the <code> property
 
 ****************************************
-	Property: body
+    Property: headers
 
-	The body property is a string containing the response body for an HTTP request. Note: This string may contain embedded NULL characters.
+    The headers property contains a table of response header entries for the HTTP request. Each header entry is itself another table containing a name/value pair. The contents of a sample headers property table is shown below.
 
-	When the HTTP request is sent via the <URLRequest.stream> function, a portion of the response body is received in each <URLRequest.on_response_chunk> event. When the <URLRequest.on_complete> event finally occurs at the request's completion, the body property will be nil.
+        (code)
+        { { "Content-Length", "3451" },
+          { "Content-Type", "text/html" },
+          { "Server", "Apache" }
+        }
+        (end)
 
-	*See Also:* the <length> and <headers> properties
+        If a TrickPlay application wishes to process the headers property, maximum efficiency can be achieved by copying the table to a local variable before processing.
+
+    *Code Example:* In an on_complete event handler, display the contents of the headers table
+
+        (code)
+        -- Define on_complete event handler
+        function handleResponse( httpRequest, httpResponse )
+            print( "Response received, code = ", httpResponse.code )
+
+            -- Output the headers, copying to local variable first
+            local headers = httpResponse.headers
+            dumptable( headers )
+        end
+        (end)
+
+    *See Also:* the <body> property
+
+****************************************
+    Property: length
+
+    The length property is an integer value specifying the length in bytes of the string contained in the <body> property. This is a convenience property to save a TrickPlay application from having to measure the body string itself.
+
+    *See Also:* the <body> property
+
+****************************************
+    Property: body
+
+    The body property is a string containing the response body for an HTTP request. Note: This string may contain embedded NULL characters.
+
+    When the HTTP request is sent via the <URLRequest.stream> function, a portion of the response body is received in each <URLRequest.on_response_chunk> event. When the <URLRequest.on_complete> event finally occurs at the request's completion, the body property will be nil.
+
+    *See Also:* the <length> and <headers> properties
 
 */

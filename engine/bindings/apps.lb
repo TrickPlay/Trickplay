@@ -98,8 +98,8 @@ public:
         lua_pushstring(L,info.path.c_str());
         lua_setfield(L,-2,"path");
 
-		lua_pushstring(L,  info.name.c_str());
-		lua_setfield(L, -2, "name");
+        lua_pushstring(L,  info.name.c_str());
+        lua_setfield(L, -2, "name");
 
         lua_pushstring(L,info.version.c_str());
         lua_setfield(L,-2,"version");
@@ -112,8 +112,8 @@ public:
 
         for ( StringSet::const_iterator fit = info.fingerprints.begin(); fit != info.fingerprints.end(); ++fit, ++i )
         {
-        	lua_pushstring(L,fit->c_str() );
-        	lua_rawseti(L,-2,i);
+            lua_pushstring(L,fit->c_str() );
+            lua_rawseti(L,-2,i);
         }
 
         lua_setfield(L,-2,"fingerprints");
@@ -179,7 +179,7 @@ global apps [[Apps*]]
             {
                 lua_pushstring(L,it->id.c_str());
 
-				self->push_app_info( *it );
+                self->push_app_info( *it );
 
                 lua_settable(L,-3);
             }
@@ -189,7 +189,7 @@ global apps [[Apps*]]
     # Returns a table listing all the apps for the current profile
 
     table get_for_current_profile()
-    	[[
+        [[
             SystemDatabase::AppInfo::List list = self->get_context()->get_db()->get_apps_for_current_profile();
 
             lua_newtable(L);
@@ -198,11 +198,11 @@ global apps [[Apps*]]
             {
                 lua_pushstring(L,it->id.c_str());
 
-				self->push_app_info( *it );
+                self->push_app_info( *it );
 
                 lua_settable(L,-3);
             }
-    	]];
+        ]];
 
     #..........................................................................
     # Returns true if the app is in the system database. If check_metadata is
@@ -258,10 +258,10 @@ global apps [[Apps*]]
 
     int download_and_install_app( string app_id, string app_name, bool locked, string url, table required_fingerprints = 0,table extra = 0 )
         [[
-        	StringSet fingerprints;
+            StringSet fingerprints;
 
-        	if ( required_fingerprints )
-        	{
+            if ( required_fingerprints )
+            {
                 lua_pushnil( L );
 
                 while ( lua_next( L, required_fingerprints ) )
@@ -277,7 +277,7 @@ global apps [[Apps*]]
                     }
                     lua_pop( L, 1 );
                 }
-        	}
+            }
 
 
             StringMap extra_map;
