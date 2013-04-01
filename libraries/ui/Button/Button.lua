@@ -417,7 +417,7 @@ Button = setmetatable(
         parameters = parameters or {}
 
         local instance, _ENV = Widget()
-        print("button",_ENV)
+        --print("button",_ENV)
         ----------------------------------------------------------------------------
         --Key events
         function instance:on_key_focus_in()    instance.focused = true  end
