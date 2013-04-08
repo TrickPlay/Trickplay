@@ -908,7 +908,8 @@ _VE_.openFile = function(path)
     VL.load_styles(style) 
 
     local layer = readfile(layers_file)
-    layer = string.sub(layer, 2, string.len(layer)-1)
+    --layer = string.sub(layer, 2, string.len(layer)-1)
+    layer = json:stringify(json:parse(layer)[1])
     
     if layer == nil then
         error("Layer '"..layers_file.."' does not exist.",2)

@@ -287,9 +287,16 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 if t == "DialogBox" then 
 								    uiInstance.y = uiInstance.y - c.separator_y
                                 elseif t == "ArrowPane" then 
-                                    print("ArrowPane's new contents x, y should be set (the arrow size and offset)")
                                     --uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
+                                    if c.contents_offset[1] then 
+                                        print ("xxxxx")
+                                        uiInstance.x = uiInstance.x - c.contents_offset[1]
+                                    end 
                                     --uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
+                                    if c.contents_offset[2] then 
+                                        print ("yyyyy")
+                                        uiInstance.y = uiInstance.y - c.contents_offset[2]
+                                    end 
                                 elseif t == "ScrollPane" then 
                                     uiInstance.x = uiInstance.x + c.virtual_x 
                                     uiInstance.y = uiInstance.y + c.virtual_y
