@@ -11,7 +11,7 @@
 
 struct TPTuner
 {
-    TPTuner( Tuner * _tuner, TunerList * _list )
+    TPTuner( Tuner* _tuner, TunerList* _list )
         :
         tuner( _tuner ),
         list( _list ),
@@ -20,7 +20,7 @@ struct TPTuner
         check( this );
     }
 
-    inline static void check( TPTuner * tuner )
+    inline static void check( TPTuner* tuner )
     {
         g_assert( tuner );
         g_assert( tuner->list );
@@ -32,14 +32,14 @@ struct TPTuner
         g_assert( tuner->marker == tuner );
     }
 
-    Tuner     *    tuner;
-    TunerList   *  list;
-    TPTuner    *   marker;
+    Tuner*         tuner;
+    TunerList*     list;
+    TPTuner*       marker;
 };
 
 //.............................................................................
 
-Tuner::Tuner( TunerList * _list, TPContext * _context , const char * _name, TPChannelChangeCallback _cb, void * _data )
+Tuner::Tuner( TunerList* _list, TPContext* _context , const char* _name, TPChannelChangeCallback _cb, void* _data )
     :
     tp_tuner( new TPTuner( this, _list ) ),
     name( _name ),
@@ -64,7 +64,7 @@ Tuner::~Tuner()
 
 //.............................................................................
 
-int Tuner::default_tune_channel( TPTuner * tuner, const char *, void * )
+int Tuner::default_tune_channel( TPTuner* tuner, const char*, void* )
 {
     // Failure
     return 1;
@@ -72,7 +72,7 @@ int Tuner::default_tune_channel( TPTuner * tuner, const char *, void * )
 
 //.............................................................................
 
-TPTuner * Tuner::get_tp_tuner()
+TPTuner* Tuner::get_tp_tuner()
 {
     return tp_tuner;
 }
@@ -86,21 +86,21 @@ String Tuner::get_name() const
 
 //.............................................................................
 
-int Tuner::tune_channel( const char *new_channel_uri )
+int Tuner::tune_channel( const char* new_channel_uri )
 {
     return cb( tp_tuner, new_channel_uri, data );
 }
 
 //.............................................................................
 
-void Tuner::add_delegate( Delegate * delegate )
+void Tuner::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //.............................................................................
 
-void Tuner::remove_delegate( Delegate * delegate )
+void Tuner::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
@@ -108,28 +108,28 @@ void Tuner::remove_delegate( Delegate * delegate )
 
 //.............................................................................
 
-void tp_tuner_channel_changed( TPTuner * tuner, const char * new_channel)
+void tp_tuner_channel_changed( TPTuner* tuner, const char* new_channel )
 {
-    g_debug("SOMEONE TOLD US THE CHANNEL CHANGED ON %p TO %s", tuner, new_channel);
+    g_debug( "SOMEONE TOLD US THE CHANNEL CHANGED ON %p TO %s", tuner, new_channel );
     return;
 }
 
 
-TPTuner * TunerList::add_tuner( TPContext * context , const char * name, TPChannelChangeCallback cb, void * data )
+TPTuner* TunerList::add_tuner( TPContext* context , const char* name, TPChannelChangeCallback cb, void* data )
 {
     g_assert( name );
     g_assert( cb );
 
-    Tuner * tuner = new Tuner( this , context , name , cb , data );
+    Tuner* tuner = new Tuner( this , context , name , cb , data );
 
-    TPTuner * result = tuner->get_tp_tuner();
+    TPTuner* result = tuner->get_tp_tuner();
 
     tuners.insert( result );
 
     return result;
 }
 
-void TunerList::remove_tuner( TPTuner * tuner )
+void TunerList::remove_tuner( TPTuner* tuner )
 {
     TPTuner::check( tuner );
 
@@ -155,14 +155,14 @@ TunerList::~TunerList()
 
 //.............................................................................
 
-void TunerList::add_delegate( Delegate * delegate )
+void TunerList::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //.............................................................................
 
-void TunerList::remove_delegate( Delegate * delegate )
+void TunerList::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
@@ -175,7 +175,7 @@ TunerList::TunerSet TunerList::get_tuners()
 
     for ( TPTunerSet::iterator it = tuners.begin(); it != tuners.end(); ++it )
     {
-        Tuner * tuner = ( *it )->tuner;
+        Tuner* tuner = ( *it )->tuner;
 
         result.insert( tuner );
     }

@@ -1,11 +1,11 @@
 #include <cstdlib>
 #include <sstream>
+#include <stdlib.h>
 
 #include <execinfo.h>
 #include <cxxabi.h>
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig/fontconfig.h"
@@ -45,7 +45,49 @@
 //-----------------------------------------------------------------------------
 
 static int g_argc     = 0;
-static char ** g_argv = 0;
+static char** g_argv = 0;
+
+#ifdef TP_UNLICENSED_TIMEOUT
+static gboolean unlicensed_timeout_cb( gpointer _stage )
+{
+    static ClutterActor* texture = NULL;
+    ClutterActor* stage = CLUTTER_ACTOR( _stage );
+
+    if ( NULL == texture )
+    {
+        // Handle timeout here
+        // We will just insert a big semi-opaque TrickPlay logo image, stick it on top of everything in Clutter
+
+        texture = clutter_text_new_full( "LG Display bold 20px", "TrickPlay - DEBUG - " TP_GIT_VERSION, clutter_color_get_static( CLUTTER_COLOR_YELLOW ) );
+        clutter_actor_set_name( texture, "Unlicensed Scrim" );
+
+        g_object_ref_sink( texture );
+
+        clutter_actor_set_position( texture, clutter_actor_get_width( stage ), clutter_actor_get_height( stage ) );
+        clutter_actor_set_translation( texture, -clutter_actor_get_width( texture ), -clutter_actor_get_height( texture ), 0 );
+
+        //    guchar * t = g_new0( guchar , 4 * width * height );
+
+        //    clutter_texture_set_from_rgb_data( CLUTTER_TEXTURE( texture ) , t , TRUE , width , height , 4 * width , 4 , CLUTTER_TEXTURE_NONE , 0 );
+
+        //    g_free( t );
+
+        clutter_actor_add_child( stage, texture );
+    }
+
+    if ( CLUTTER_ACTOR_IS_VISIBLE( texture ) )
+    {
+        clutter_actor_hide( texture );
+    }
+    else
+    {
+        clutter_actor_show( texture );
+        clutter_actor_set_child_above_sibling( stage, texture, NULL );
+    }
+
+    return TRUE;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -83,7 +125,7 @@ TPContext::~TPContext()
 {
     // Free all the internals by calling their destroy notify
 
-    for( InternalMap::iterator it = internals.begin(); it != internals.end(); ++ it )
+    for ( InternalMap::iterator it = internals.begin(); it != internals.end(); ++ it )
     {
         if ( it->second.second )
         {
@@ -94,7 +136,7 @@ TPContext::~TPContext()
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set( const char * key, const char * value )
+void TPContext::set( const char* key, const char* value )
 {
     g_assert( key );
 
@@ -110,7 +152,7 @@ void TPContext::set( const char * key, const char * value )
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set( const char * key, int value )
+void TPContext::set( const char* key, int value )
 {
     g_assert( key );
 
@@ -121,7 +163,7 @@ void TPContext::set( const char * key, int value )
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set( const char * key, const String & value )
+void TPContext::set( const char* key, const String& value )
 {
     g_assert( key );
 
@@ -129,7 +171,7 @@ void TPContext::set( const char * key, const String & value )
 }
 //-----------------------------------------------------------------------------
 
-const char * TPContext::get( const char * key, const char * def , bool default_if_empty ) const
+const char* TPContext::get( const char* key, const char* def , bool default_if_empty ) const
 {
     g_assert( key );
 
@@ -142,7 +184,7 @@ const char * TPContext::get( const char * key, const char * def , bool default_i
 
     if ( default_if_empty && it->second.empty() )
     {
-    	return def;
+        return def;
     }
 
     return it->second.c_str();
@@ -150,9 +192,9 @@ const char * TPContext::get( const char * key, const char * def , bool default_i
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::get_bool( const char * key, bool def ) const
+bool TPContext::get_bool( const char* key, bool def ) const
 {
-    const char * value = get( key );
+    const char* value = get( key );
 
     if ( !value )
     {
@@ -160,32 +202,33 @@ bool TPContext::get_bool( const char * key, bool def ) const
     }
 
     return ( !strcmp( value, "1" ) ||
-             !strcmp( value, "TRUE" ) ||
-             !strcmp( value, "true" ) ||
-             !strcmp( value, "YES" ) ||
-             !strcmp( value, "yes" ) ||
-             !strcmp( value, "Y" ) ||
-             !strcmp( value, "y" ) );
+            !strcmp( value, "TRUE" ) ||
+            !strcmp( value, "true" ) ||
+            !strcmp( value, "YES" ) ||
+            !strcmp( value, "yes" ) ||
+            !strcmp( value, "Y" ) ||
+            !strcmp( value, "y" ) );
 }
 
 //-----------------------------------------------------------------------------
 
-int TPContext::get_int( const char * key, int def ) const
+int TPContext::get_int( const char* key, int def ) const
 {
-    const char * value = get( key );
+    const char* value = get( key );
 
     if ( !value )
     {
         return def;
     }
+
     return atoi( value );
 }
 
 //-----------------------------------------------------------------------------
 
-int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
+int TPContext::console_command_handler( const char* command, const char* parameters, void* self )
 {
-    TPContext * context = ( TPContext * ) self;
+    TPContext* context = ( TPContext* ) self;
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
@@ -208,13 +251,13 @@ void TPContext::setup_fonts()
 
     String fonts_path;
 
-    if ( const char * fp = get( TP_FONTS_PATH , 0 , true ) )
+    if ( const char* fp = get( TP_FONTS_PATH , 0 , true ) )
     {
         fonts_path = Util::canonical_external_path( fp );
     }
     else
     {
-        gchar * s = g_build_filename( get( TP_RESOURCES_PATH ) , "fonts" , NULL );
+        gchar* s = g_build_filename( get( TP_RESOURCES_PATH ) , "fonts" , NULL );
 
         if ( g_file_test( s , G_FILE_TEST_EXISTS ) )
         {
@@ -232,7 +275,7 @@ void TPContext::setup_fonts()
     // We create a directory called "fonts" in our data directory. There,
     // we will have a tiny configuration file and the fontconfig cache.
 
-    gchar * font_cache_path = g_build_filename( get( TP_DATA_PATH ), "fonts", NULL );
+    gchar* font_cache_path = g_build_filename( get( TP_DATA_PATH ), "fonts", NULL );
     free_later( font_cache_path );
 
     if ( g_mkdir_with_parents( font_cache_path, 0700 ) != 0 )
@@ -242,12 +285,12 @@ void TPContext::setup_fonts()
 
     // We write the configuration file that sets the cache directory
 
-    gchar * font_conf_file_name = g_build_filename( font_cache_path, "fonts.conf", NULL );
+    gchar* font_conf_file_name = g_build_filename( font_cache_path, "fonts.conf", NULL );
     free_later( font_conf_file_name );
 
     if ( !g_file_test( font_conf_file_name, G_FILE_TEST_EXISTS ) )
     {
-        gchar * conf = g_strdup_printf( "<fontconfig><cachedir>%s</cachedir></fontconfig>", font_cache_path );
+        gchar* conf = g_strdup_printf( "<fontconfig><cachedir>%s</cachedir></fontconfig>", font_cache_path );
         g_file_set_contents( font_conf_file_name, conf, -1, NULL );
         g_free( conf );
     }
@@ -257,17 +300,17 @@ void TPContext::setup_fonts()
     // This is here ONLY so that FC_DEBUG will work; so we can troubleshoot
     // font problems
 
-    (void) FcInitLoadConfig();
+    ( void ) FcInitLoadConfig();
 
 #endif
 
-    FcConfig * config = FcConfigCreate();
+    FcConfig* config = FcConfigCreate();
 
     g_assert( config );
 
     // Parse and load our tiny configuration file
 
-    if ( FcConfigParseAndLoad( config, ( const FcChar8 * )font_conf_file_name, FcTrue ) == FcFalse )
+    if ( FcConfigParseAndLoad( config, ( const FcChar8* )font_conf_file_name, FcTrue ) == FcFalse )
     {
         g_warning( "FAILED TO PARSE FONTCONFIG CONFIGURATION FILE" );
     }
@@ -275,20 +318,20 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
-        const char * ap = get( TP_APP_SOURCES );
+        const char* ap = get( TP_APP_SOURCES );
 
-		g_debug( "ADDING APP PATH '%s' TO FONT PATH", ap );
+        g_debug( "ADDING APP PATH '%s' TO FONT PATH", ap );
 
-		int added = 0;
+        int added = 0;
 
-		if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) ap ) == FcFalse )
-		{
-			g_warning( "FAILED TO ADD FONT PATH '%s'" , ap );
-		}
-		else
-		{
-			++added;
-		}
+        if ( FcConfigAppFontAddDir( config, ( const FcChar8* ) ap ) == FcFalse )
+        {
+            g_warning( "FAILED TO ADD FONT PATH '%s'" , ap );
+        }
+        else
+        {
+            ++added;
+        }
 
         g_debug( "FONT PATHS ARE '%s'", fonts_path.c_str() );
 
@@ -296,37 +339,37 @@ void TPContext::setup_fonts()
         // a long time the first time around. Once the cache exists, it will
         // be very quick.
 
-		gchar ** paths = g_strsplit( fonts_path.c_str() , ";" , 0 );
+        gchar** paths = g_strsplit( fonts_path.c_str() , ";" , 0 );
 
-		for ( gchar ** p = paths; *p; ++p )
-		{
-			gchar * path = g_strstrip( *p );
+        for ( gchar** p = paths; *p; ++p )
+        {
+            gchar* path = g_strstrip( *p );
 
-			g_debug( "ADDING FONT PATH '%s'", path );
+            g_debug( "ADDING FONT PATH '%s'", path );
 
-			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) path ) == FcFalse )
-			{
-				g_warning( "FAILED TO ADD FONT PATH '%s'" , path );
-			}
-			else
-			{
-			    ++added;
-			}
-		}
+            if ( FcConfigAppFontAddDir( config, ( const FcChar8* ) path ) == FcFalse )
+            {
+                g_warning( "FAILED TO ADD FONT PATH '%s'" , path );
+            }
+            else
+            {
+                ++added;
+            }
+        }
 
         g_strfreev( paths );
 
-		if( added )
-		{
-			// This transfers ownership of the config object over to FC, so we
-			// don't have to destroy it or unref it.
+        if ( added )
+        {
+            // This transfers ownership of the config object over to FC, so we
+            // don't have to destroy it or unref it.
 
-			FcConfigSetCurrent( config );
+            FcConfigSetCurrent( config );
 
-			config = NULL;
+            config = NULL;
 
-			g_debug( "FONT CONFIGURATION COMPLETE" );
-		}
+            g_debug( "FONT CONFIGURATION COMPLETE" );
+        }
     }
 
     // If something went wrong, we destroy the config
@@ -341,12 +384,12 @@ void TPContext::setup_fonts()
 // This one deals with the ESCAPE and EXIT keys to exit the current app. If the current
 // app is the first one, this will also exit from the call to tp_context_run.
 
-gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
+gboolean TPContext::escape_handler( ClutterActor* actor, ClutterEvent* event, gpointer _context )
 {
     if ( event && (
-             ( event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) ) ||
-             event->any.type == CLUTTER_DELETE
-         )
+            ( event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) ) ||
+            event->any.type == CLUTTER_DELETE
+            )
        )
     {
         // In production builds, the ESCAPE key is not used - it just passes through
@@ -357,9 +400,10 @@ gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, 
         {
             return FALSE;
         }
+
 #endif
 
-        TPContext * context = ( TPContext * ) _context;
+        TPContext* context = ( TPContext* ) _context;
 
         if ( ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
         {
@@ -378,11 +422,11 @@ gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, 
 
 // This one deals with tilde to reload current app
 
-gboolean TPContext::tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::tilde_handler( ClutterActor* actor, ClutterEvent* event, gpointer context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
     {
-        ( ( TPContext * )context )->reload_app();
+        ( ( TPContext* )context )->reload_app();
 
         return TRUE;
     }
@@ -400,12 +444,12 @@ gboolean TPContext::tilde_handler ( ClutterActor * actor, ClutterEvent * event, 
 
 static gpointer paint_profiler = 0;
 
-static void before_paint( ClutterActor * actor , gpointer )
+static void before_paint( ClutterActor* actor , gpointer )
 {
     paint_profiler = PROFILE_START( "PAINT" , PROFILER_INTERNAL_CALLS );
 }
 
-static void after_paint( ClutterActor * actor , gpointer )
+static void after_paint( ClutterActor* actor , gpointer )
 {
     PROFILE_STOP( paint_profiler );
 }
@@ -418,8 +462,8 @@ class RunningAction : public Action
 {
 public:
 
-    RunningAction( TPContext * _context )
-    :
+    RunningAction( TPContext* _context )
+        :
         context( _context )
     {}
 
@@ -432,14 +476,14 @@ private:
         return false;
     }
 
-    TPContext * context;
+    TPContext* context;
 };
 
 //-----------------------------------------------------------------------------
 // Sometimes the stage goes un-fullscreen when it shouldn't. This corrects
 // that.
 
-void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
+void stage_unfullscreen( ClutterStage* stage , gpointer user_data )
 {
     clutter_stage_set_fullscreen( stage , TRUE );
 }
@@ -450,76 +494,80 @@ void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
 
 static void do_handshake()
 {
-	static const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
+    static const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
 
-	gchar code[4];
-	gchar suffix[4];
+    gchar code[4];
+    gchar suffix[4];
 
-	for(int i=0; i<3; i++)
-	{
-		code[i] = g_random_int_range( 'A', 'Z' );
-		suffix[i] = code[i] + HANDSHAKE_PREFIX[i] - 'A';
-		if(suffix[i] > 'Z')
-		{
-			suffix[i] -= 26;
-		}
-	}
+    for ( int i = 0; i < 3; i++ )
+    {
+        code[i] = g_random_int_range( 'A', 'Z' );
+        signed int my_result = code[i] + HANDSHAKE_PREFIX[i] - 'A';
 
-	code[3] = '\0';
-	suffix[3] = '\0';
+        if ( my_result > 'Z' )
+        {
+            my_result -= 26;
+        }
 
-	gchar response[7];
+        suffix[i] = my_result;
+    }
 
-	memset( response , 0 , sizeof( response ) );
+    code[3] = '\0';
+    suffix[3] = '\0';
 
-	gchar * url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
+    gchar response[7];
 
-	{
-		Network::Request  rq;
+    memset( response , 0 , sizeof( response ) );
 
-		rq.url = url;
-		rq.timeout_s = 10;
-		rq.redirect = true;
+    gchar* url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
 
-		Network::Response r( Network().perform_request( rq , 0 ) );
+    {
+        Network::Request  rq;
 
-		if ( ! r.failed && r.code == 200 && r.body && r.body->len >= 6 )
-		{
-			memmove( response , r.body->data , 6 );
-		}
-	}
+        rq.url = url;
+        rq.timeout_s = 10;
+        rq.redirect = true;
 
-	if ( 6 != strlen( response ) )
-	{
-		memset( response , 0 , sizeof( response ) );
+        Network::Response r( Network().perform_request( rq , 0 ) );
 
-		g_warning("Network auto-verification failed.  Please use manual verification below.");
+        if ( ! r.failed && r.code == 200 && r.body && r.body->len >= 6 )
+        {
+            memmove( response , r.body->data , 6 );
+        }
+    }
 
-		g_info("Visit the URL: %s" , url );
+    if ( 6 != strlen( response ) )
+    {
+        memset( response , 0 , sizeof( response ) );
 
-		g_info("Now please type the code it gives back: ");
+        g_warning( "Network auto-verification failed.  Please use manual verification below." );
 
-		fgets(response, 7, stdin);
-	}
+        g_info( "Visit the URL: %s" , url );
 
-	g_free( url );
+        g_info( "Now please type the code it gives back: " );
 
-	for(int i=0; i<3; i++)
-	{
-		char result = response[3+i] - response[i];
-		if(result < 0)
-		{
-			result += 26;
-		}
+        fgets( response, 7, stdin );
+    }
 
-		if((result + 'A') != code[i])
-		{
-			g_critical("YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.",code[i],response[3+i]);
-			fflush(stdout);
-			fflush(stderr);
-			abort();
-		}
-	}
+    g_free( url );
+
+    for ( int i = 0; i < 3; i++ )
+    {
+        signed int result = response[3 + i] - response[i];
+
+        if ( result < 0 )
+        {
+            result += 26;
+        }
+
+        if ( ( result + 'A' ) != code[i] )
+        {
+            g_critical( "YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.", code[i], response[3 + i] );
+            fflush( stdout );
+            fflush( stderr );
+            abort();
+        }
+    }
 }
 #endif
 
@@ -538,7 +586,7 @@ int TPContext::run()
     int result = TP_RUN_OK;
 
 #ifdef TP_FORCE_VERIFICATION
-	do_handshake();
+    do_handshake();
 #endif
 
     //.........................................................................
@@ -575,8 +623,8 @@ int TPContext::run()
 
     {
         bool force = get_bool( TP_SCAN_APP_SOURCES, TP_SCAN_APP_SOURCES_DEFAULT );
-        const char * app_sources = get( TP_APP_SOURCES );
-        gchar * installed_root = g_build_filename( get( TP_DATA_PATH ), "apps", NULL );
+        const char* app_sources = get( TP_APP_SOURCES );
+        gchar* installed_root = g_build_filename( get( TP_DATA_PATH ), "apps", NULL );
 
         if ( force || get( TP_APP_ID ) )
         {
@@ -605,7 +653,7 @@ int TPContext::run()
 
     http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
 
-	set( TP_HTTP_PORT, http_server->get_port() );
+    set( TP_HTTP_PORT, http_server->get_port() );
 
     http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
@@ -623,7 +671,7 @@ int TPContext::run()
         String name;
         String stored_name = sysdb->get_string( TP_CONTROLLERS_NAME );
 
-        const char * new_name = get( TP_CONTROLLERS_NAME );
+        const char* new_name = get( TP_CONTROLLERS_NAME );
 
         if ( new_name )
         {
@@ -649,7 +697,7 @@ int TPContext::run()
         controller_server = new ControllerServer( this, name, get_int( TP_CONTROLLERS_PORT, TP_CONTROLLERS_PORT_DEFAULT ) );
     }
 
-	//.........................................................................
+    //.........................................................................
     // LIRC controller
 
     controller_lirc = ControllerLIRC::make( this );
@@ -682,15 +730,15 @@ int TPContext::run()
     //.........................................................................
     // Set default size and color for the stage
 
-	g_info( "GRABBING CLUTTER LOCK...");
+    g_info( "GRABBING CLUTTER LOCK..." );
 
-	clutter_threads_enter ();
+    clutter_threads_enter();
 
     g_info( "INITIALIZING STAGE..." );
 
     stage = clutter_stage_new();
 
-    g_assert(stage != NULL);
+    g_assert( stage != NULL );
 
     int display_width = get_int( TP_SCREEN_WIDTH );
     int display_height = get_int( TP_SCREEN_HEIGHT );
@@ -720,11 +768,7 @@ int TPContext::run()
     color.blue = 0;
     color.alpha = 0;
 
-#ifdef CLUTTER_VERSION_1_10
-	clutter_actor_set_background_color( stage, &color );
-#else
-    clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
-#endif
+    clutter_actor_set_background_color( stage, &color );
 
     clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , true );
 
@@ -765,11 +809,13 @@ int TPContext::run()
     //.........................................................................
     // connect to gameservice server
 #ifdef TP_WITH_GAMESERVICE
+
     if ( get_bool( TP_GAMESERVICE_ENABLED ) )
     {
-		libgameservice::setGameServiceXmppDomain(get(TP_GAMESERVICE_DOMAIN));
-		gameservice_support = new GameServiceSupport(this);
+        libgameservice::setGameServiceXmppDomain( get( TP_GAMESERVICE_DOMAIN ) );
+        gameservice_support = new GameServiceSupport( this );
     }
+
 #endif
     //.........................................................................
 
@@ -782,7 +828,7 @@ int TPContext::run()
 
     g_info( "LOADING APP..." );
 
-    App * app = 0;
+    App* app = 0;
 
     result = load_app( & app );
 
@@ -791,10 +837,10 @@ int TPContext::run()
 
 #ifndef TP_PRODUCTION
 
-    	// Output a machine-readable JSON string with all
-    	// the "control" ports.
+        // Output a machine-readable JSON string with all
+        // the "control" ports.
 
-    	g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
+        g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
 
 #endif
 
@@ -805,7 +851,7 @@ int TPContext::run()
 
         if ( run_app )
         {
-        	app->run( app_allowed[ first_app_id ] , app_run_callback );
+            app->run( app_allowed[ first_app_id ] , app_run_callback );
         }
 
         app->unref();
@@ -815,6 +861,15 @@ int TPContext::run()
         //.................................................................
 
         Action::post( new RunningAction( this ) );
+
+        //.................................................................
+        // Schedule unlicensed timeout if called for
+#ifdef TP_UNLICENSED_TIMEOUT
+        unsigned long unlicensed_timeout = ::strtoul( TP_UNLICENSED_TIMEOUT, NULL, 0 );
+        g_warning( "SETTING UNLICENSED TIMEOUT FOR %lu SECONDS", unlicensed_timeout );
+
+        g_timeout_add_seconds( unlicensed_timeout, unlicensed_timeout_cb, ( gpointer )stage );
+#endif
 
         //.................................................................
         // Dip into the loop
@@ -901,11 +956,8 @@ int TPContext::run()
     //.....................................................................
     // Clean up the stage
 
-#ifdef CLUTTER_VERSION_1_10
-	clutter_actor_remove_all_children( stage );
-#else
-    clutter_group_remove_all( CLUTTER_GROUP( stage ) );
-#endif
+    clutter_actor_remove_all_children( stage );
+
     //.....................................................................
     // Shutdown the app
 
@@ -989,12 +1041,12 @@ int TPContext::run()
     // Not running any more
 
 
-	g_debug("DESTROYING STAGE...");
-	clutter_actor_destroy( stage );
+    g_debug( "DESTROYING STAGE..." );
+    clutter_actor_destroy( stage );
 
 
-	g_debug("RELEASING CLUTTER LOCK...");
-	clutter_threads_leave ();
+    g_debug( "RELEASING CLUTTER LOCK..." );
+    clutter_threads_leave();
 
     is_running = false;
 
@@ -1015,13 +1067,13 @@ String TPContext::make_fake_app()
     {
         FreeLater free_later;
 
-        gchar * app_path = g_build_filename( data_directory.c_str(), "source", NULL );
+        gchar* app_path = g_build_filename( data_directory.c_str(), "source", NULL );
 
         free_later( app_path );
 
         if ( 0 == g_mkdir_with_parents( app_path, 0700 ) )
         {
-            gchar * app = g_build_filename( app_path, "app", NULL );
+            gchar* app = g_build_filename( app_path, "app", NULL );
 
             free_later( app );
 
@@ -1030,7 +1082,7 @@ String TPContext::make_fake_app()
                 g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1,attributes={'nolauncher'}}", -1, NULL );
             }
 
-            gchar * main = g_build_filename( app_path, "main.lua", NULL );
+            gchar* main = g_build_filename( app_path, "main.lua", NULL );
 
             free_later( main );
 
@@ -1052,7 +1104,7 @@ String TPContext::make_fake_app()
 
 //-----------------------------------------------------------------------------
 
-int TPContext::load_app( App ** app )
+int TPContext::load_app( App** app )
 {
     PROFILER( "TPContext::load_app" , PROFILER_INTERNAL_CALLS );
 
@@ -1061,23 +1113,25 @@ int TPContext::load_app( App ** app )
     // If an app id was specified, we will try to find the app by id, in the
     // system database
 
-    const char * app_id = get( TP_APP_ID );
+    const char* app_id = get( TP_APP_ID );
 
     if ( app_id )
     {
         app_path = sysdb->get_app_path( app_id );
+
         if ( app_path.empty() )
         {
             g_warning( "FAILED TO FIND %s IN THE SYSTEM DATABASE", app_id );
             return TP_RUN_APP_NOT_FOUND;
         }
+
         set( TP_APP_PATH, app_path );
     }
     else
     {
         // Get the base path for the app
 
-        const char * ap = get( TP_APP_PATH );
+        const char* ap = get( TP_APP_PATH );
 
         if ( ! ap )
         {
@@ -1121,7 +1175,7 @@ int TPContext::load_app( App ** app )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path )
+int TPContext::launch_app( const char* app_id, const App::LaunchInfo& launch , bool id_is_path )
 {
     String app_path = id_is_path ? app_id : get_db()->get_app_path( app_id );
 
@@ -1137,7 +1191,7 @@ int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch ,
         return TP_RUN_APP_CORRUPT;
     }
 
-    App * new_app = App::load( this, md, launch );
+    App* new_app = App::load( this, md, launch );
 
     if ( !new_app )
     {
@@ -1152,9 +1206,9 @@ int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch ,
 
 //-----------------------------------------------------------------------------
 
-void TPContext::app_run_callback( App * app , int result )
+void TPContext::app_run_callback( App* app , int result )
 {
-    TPContext * context = app->get_context();
+    TPContext* context = app->get_context();
 
     String id( app->get_id() );
 
@@ -1197,7 +1251,7 @@ void TPContext::close_app()
     }
     else
     {
-        App * new_app = NULL;
+        App* new_app = NULL;
 
         load_app( &new_app );
 
@@ -1232,9 +1286,9 @@ void TPContext::close_current_app()
 
 void TPContext::reload_app()
 {
-	close_current_app();
+    close_current_app();
 
-    App * new_app = NULL;
+    App* new_app = NULL;
 
     load_app( &new_app );
 
@@ -1272,18 +1326,18 @@ void TPContext::quit()
     }
     else
     {
-    	g_idle_add_full( TRICKPLAY_PRIORITY , delayed_quit, 0 , 0 );
+        g_idle_add_full( TRICKPLAY_PRIORITY , delayed_quit, 0 , 0 );
     }
 }
 
 //-----------------------------------------------------------------------------
 
-void TPContext::add_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data )
+void TPContext::add_console_command_handler( const char* command, TPConsoleCommandHandler handler, void* data )
 {
     console_command_handlers.insert( std::make_pair( String( command ), ConsoleCommandHandlerClosure( handler, data ) ) );
 }
 
-void TPContext::remove_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data )
+void TPContext::remove_console_command_handler( const char* command, TPConsoleCommandHandler handler, void* data )
 {
     std::pair<ConsoleCommandHandlerMultiMap::iterator, ConsoleCommandHandlerMultiMap::iterator>
 
@@ -1306,16 +1360,16 @@ class LogHandlerAction : public Action
 {
 public:
 
-	LogHandlerAction( gchar * _line , const TPContext::OutputHandlerSet & _handlers )
-	:
-		line( _line ),
-		handlers( _handlers )
-	{}
+    LogHandlerAction( gchar* _line , const TPContext::OutputHandlerSet& _handlers )
+        :
+        line( _line ),
+        handlers( _handlers )
+    {}
 
-	virtual ~LogHandlerAction()
-	{
-		g_free( line );
-	}
+    virtual ~LogHandlerAction()
+    {
+        g_free( line );
+    }
 
 protected:
 
@@ -1326,18 +1380,18 @@ protected:
             it->first( line, it->second );
         }
 
-    	return false;
+        return false;
     }
 
 private:
 
-	gchar * 					line;
-	TPContext::OutputHandlerSet handlers;
+    gchar*                      line;
+    TPContext::OutputHandlerSet handlers;
 };
 
 //-----------------------------------------------------------------------------
 
-void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
+void TPContext::log_handler( const gchar* log_domain, GLogLevelFlags log_level, const gchar* message, gpointer self )
 {
     static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT , BARE } verbose = CHECK;
 
@@ -1345,7 +1399,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         verbose = NORMAL;
 
-        if ( const gchar * e = g_getenv( "TP_LOG" ) )
+        if ( const gchar* e = g_getenv( "TP_LOG" ) )
         {
             if ( ! strcmp( e , "engine" ) )
             {
@@ -1365,12 +1419,12 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             }
             else if ( ! strcmp( e , "bare" ) )
             {
-            	verbose = BARE;
+                verbose = BARE;
             }
         }
     }
 
-    switch( verbose )
+    switch ( verbose )
     {
         case NORMAL:
             break;
@@ -1380,12 +1434,18 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
 
         case ENGINE:
             if ( log_level == G_LOG_LEVEL_MESSAGE )
+            {
                 return;
+            }
+
             break;
 
         case APP:
             if ( log_level != G_LOG_LEVEL_MESSAGE )
-               return;
+            {
+                return;
+            }
+
             break;
 
         case APP_RAW:
@@ -1394,18 +1454,19 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
                 fprintf( stderr, "%s\n", message );
                 fflush( stderr );
             }
+
             return;
 
         case BARE:
-        	fprintf( stderr , "%s\n" , message );
-        	fflush( stderr );
-        	return;
+            fprintf( stderr , "%s\n" , message );
+            fflush( stderr );
+            return;
 
         default:
             break;
     }
 
-    gchar * line = 0;
+    gchar* line = 0;
 
     // This is before a context is created, so we just print out the message
 
@@ -1421,7 +1482,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
 
     else
     {
-        TPContext * context = ( TPContext * )self;
+        TPContext* context = ( TPContext* )self;
 
         bool output = true;
 
@@ -1474,7 +1535,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_log_handler( TPLogHandler handler, void * data )
+void TPContext::set_log_handler( TPLogHandler handler, void* data )
 {
     g_assert( !running() );
 
@@ -1484,39 +1545,39 @@ void TPContext::set_log_handler( TPLogHandler handler, void * data )
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader , void * data )
+void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader , void* data )
 {
-	g_assert( !running() );
-	g_assert( loader );
+    g_assert( !running() );
+    g_assert( loader );
 
-	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
+    resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const
+bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader* loader , void * * user_data ) const
 {
-	if ( ! get_bool( TP_RESOURCE_LOADER_ENABLED , true ) )
-	{
-		return false;
-	}
+    if ( ! get_bool( TP_RESOURCE_LOADER_ENABLED , true ) )
+    {
+        return false;
+    }
 
-	ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
+    ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
 
-	if ( it == resource_loaders.end() )
-	{
-		return false;
-	}
+    if ( it == resource_loaders.end() )
+    {
+        return false;
+    }
 
-	* loader = it->second.first;
-	* user_data = it->second.second;
+    * loader = it->second.first;
+    * user_data = it->second.second;
 
-	return true;
+    return true;
 }
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_request_handler( const char * subject, TPRequestHandler handler, void * data )
+void TPContext::set_request_handler( const char* subject, TPRequestHandler handler, void* data )
 {
     request_handlers[String( subject )] = RequestHandlerClosure( handler, data );
 }
@@ -1537,7 +1598,7 @@ void TPContext::remove_output_handler( OutputHandler handler, gpointer data )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::request( const char * subject )
+int TPContext::request( const char* subject )
 {
     RequestHandlerMap::const_iterator it = request_handlers.find( String( subject ) );
 
@@ -1551,15 +1612,15 @@ void TPContext::load_external_configuration()
 {
     if ( get_bool( TP_CONFIG_FROM_ENV, TP_CONFIG_FROM_ENV_DEFAULT ) )
     {
-        gchar ** env = g_listenv();
+        gchar** env = g_listenv();
 
-        for ( gchar ** e = env; *e; ++e )
+        for ( gchar** e = env; *e; ++e )
         {
             if ( g_str_has_prefix( *e, "TP_" ) )
             {
-                if ( const gchar * v = g_getenv( *e ) )
+                if ( const gchar* v = g_getenv( *e ) )
                 {
-                    gchar * k = g_strstrip( ( *e ) + 3 );
+                    gchar* k = g_strstrip( ( *e ) + 3 );
 
                     g_info( "ENV:%s=%s", k, v );
                     set( k, v );
@@ -1572,16 +1633,16 @@ void TPContext::load_external_configuration()
 
     FreeLater free_later;
 
-    const char * file_name = get( TP_CONFIG_FROM_FILE );
+    const char* file_name = get( TP_CONFIG_FROM_FILE );
 
     // Giving an empty file name for the config file disables
     // processing of all config files.
 
     if ( file_name && ( 0 == strlen( file_name ) ) )
-	{
-		g_warning( "CONFIG FILE DISABLED" );
-		return;
-	}
+    {
+        g_warning( "CONFIG FILE DISABLED" );
+        return;
+    }
 
     // If a specific file name was given and it does not exist, we
     // bail with an error. If no file name was given and the default one
@@ -1600,7 +1661,7 @@ void TPContext::load_external_configuration()
         {
             // See if there is one in the user's home directory
 
-            const gchar * home = g_getenv( "HOME" );
+            const gchar* home = g_getenv( "HOME" );
 
             if ( ! home )
             {
@@ -1612,7 +1673,7 @@ void TPContext::load_external_configuration()
                 }
             }
 
-            gchar * path = g_build_filename( home , TP_CONFIG_FROM_FILE_DEFAULT , NULL );
+            gchar* path = g_build_filename( home , TP_CONFIG_FROM_FILE_DEFAULT , NULL );
 
             free_later( path );
 
@@ -1629,13 +1690,13 @@ void TPContext::load_external_configuration()
 
     // Now open the Lua state
 
-    lua_State * L = luaL_newstate();
+    lua_State* L = luaL_newstate();
 
     const luaL_Reg lualibs[] =
     {
 
-// TODO: Not sure if these should be enabled all the time - they would give us
-// some interesting capabilities.
+        // TODO: Not sure if these should be enabled all the time - they would give us
+        // some interesting capabilities.
 
 #if 1
 
@@ -1652,10 +1713,10 @@ void TPContext::load_external_configuration()
         { NULL, NULL }
     };
 
-    for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
+    for ( const luaL_Reg* lib = lualibs; lib->func; ++lib )
     {
-        luaL_requiref(L, lib->name, lib->func, 1);
-        lua_pop(L, 1);  /* remove lib */
+        luaL_requiref( L, lib->name, lib->func, 1 );
+        lua_pop( L, 1 ); /* remove lib */
     }
 
     //.....................................................................
@@ -1665,14 +1726,14 @@ void TPContext::load_external_configuration()
 
     if ( g_argc && g_argv )
     {
-        for( int i = 1; i < g_argc; ++i )
+        for ( int i = 1; i < g_argc; ++i )
         {
             lua_pushstring( L , g_argv[ i ] );
             lua_rawseti( L , -2 , i );
         }
     }
 
-    gchar * d = g_path_get_dirname( file_name );
+    gchar* d = g_path_get_dirname( file_name );
 
     if ( ! strcmp( d , "." ) )
     {
@@ -1706,7 +1767,7 @@ void TPContext::load_external_configuration()
 
     // Pull these names from the globals
 
-    const char * names[] =
+    const char* names[] =
     {
         TP_APP_SOURCES,
         TP_SCAN_APP_SOURCES,
@@ -1773,7 +1834,7 @@ void TPContext::load_external_configuration()
 
         if ( ! lua_isnil( L, -1 ) )
         {
-            const char * value = lua_tostring( L, -1 );
+            const char* value = lua_tostring( L, -1 );
 
             if ( ! value && lua_isboolean( L , -1 ) )
             {
@@ -1787,6 +1848,7 @@ void TPContext::load_external_configuration()
                 set( * name, value );
             }
         }
+
         lua_pop( L, 1 );
     }
 
@@ -1807,21 +1869,21 @@ void TPContext::validate_configuration()
 
     // TP_APP_PATH
 
-    const char * app_path = get( TP_APP_PATH );
+    const char* app_path = get( TP_APP_PATH );
 
     if ( app_path )
     {
-    	String app_path_s = Util::canonical_external_path( app_path , false );
+        String app_path_s = Util::canonical_external_path( app_path , false );
 
-    	if ( ! app_path_s.empty() )
-    	{
-    		set( TP_APP_PATH , app_path_s );
-    	}
+        if ( ! app_path_s.empty() )
+        {
+            set( TP_APP_PATH , app_path_s );
+        }
     }
 
     // TP_SYSTEM_LANGUAGE
 
-    const char * language = get( TP_SYSTEM_LANGUAGE );
+    const char* language = get( TP_SYSTEM_LANGUAGE );
 
     if ( !language )
     {
@@ -1839,7 +1901,7 @@ void TPContext::validate_configuration()
 
     // SYSTEM COUNTRY
 
-    const char * country = get( TP_SYSTEM_COUNTRY );
+    const char* country = get( TP_SYSTEM_COUNTRY );
 
     if ( !country )
     {
@@ -1883,7 +1945,7 @@ void TPContext::validate_configuration()
 
     String data_path = Util::canonical_external_path( get( TP_DATA_PATH , g_get_tmp_dir() , true ) );
 
-    gchar * full_data_path = g_build_filename( data_path.c_str() , "trickplay" , NULL );
+    gchar* full_data_path = g_build_filename( data_path.c_str() , "trickplay" , NULL );
 
     if ( g_mkdir_with_parents( full_data_path , 0700 ) != 0 )
     {
@@ -1898,7 +1960,7 @@ void TPContext::validate_configuration()
 
     // DOWNLOADS PATH
 
-    gchar * default_downloads_path = g_build_filename( get( TP_DATA_PATH ) , "downloads" , NULL );
+    gchar* default_downloads_path = g_build_filename( get( TP_DATA_PATH ) , "downloads" , NULL );
 
     String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , default_downloads_path , true ) );
 
@@ -1931,17 +1993,17 @@ void TPContext::validate_configuration()
 
     // RESOURCES PATH
 
-    const char * resources_path = get( TP_RESOURCES_PATH , 0 , true );
+    const char* resources_path = get( TP_RESOURCES_PATH , 0 , true );
 
     if ( ! resources_path )
     {
         if ( g_file_test( TP_DEFAULT_RESOURCES_PATH , G_FILE_TEST_IS_DIR ) )
         {
-        	resources_path = TP_DEFAULT_RESOURCES_PATH;
+            resources_path = TP_DEFAULT_RESOURCES_PATH;
         }
         else
         {
-        	resources_path = "resources";
+            resources_path = "resources";
         }
     }
 
@@ -1952,35 +2014,39 @@ void TPContext::validate_configuration()
     // gameservice configuration variable validation
     if ( !get( TP_GAMESERVICE_ENABLED ) )
     {
-        set( TP_GAMESERVICE_ENABLED,  TP_GAMESERVICE_ENABLED_DEFAULT);
+        set( TP_GAMESERVICE_ENABLED,  TP_GAMESERVICE_ENABLED_DEFAULT );
     }
+
     g_debug( "USING TP_GAMESERVICE_ENABLED: '%s'", get( TP_GAMESERVICE_ENABLED ) );
 
     if ( get( TP_GAMESERVICE_ENABLED ) )
     {
-		if ( !get( TP_GAMESERVICE_DOMAIN ) )
-		{
-			set( TP_GAMESERVICE_DOMAIN,  TP_GAMESERVICE_DOMAIN_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_DOMAIN: '%s'", get( TP_GAMESERVICE_DOMAIN ) );
+        if ( !get( TP_GAMESERVICE_DOMAIN ) )
+        {
+            set( TP_GAMESERVICE_DOMAIN,  TP_GAMESERVICE_DOMAIN_DEFAULT );
+        }
 
-		if ( !get( TP_GAMESERVICE_HOST ) )
-		{
-			set( TP_GAMESERVICE_HOST,  TP_GAMESERVICE_HOST_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_HOST: '%s'", get( TP_GAMESERVICE_HOST ) );
+        g_debug( "USING TP_GAMESERVICE_DOMAIN: '%s'", get( TP_GAMESERVICE_DOMAIN ) );
 
-		if ( !get( TP_GAMESERVICE_PORT, 0 ) )
-		{
-			set( TP_GAMESERVICE_PORT,  TP_GAMESERVICE_PORT_DEFAULT);
-		}
-		g_debug( "USING TP_GAMESERVICE_PORT: '%s'", get( TP_GAMESERVICE_PORT ) );
+        if ( !get( TP_GAMESERVICE_HOST ) )
+        {
+            set( TP_GAMESERVICE_HOST,  TP_GAMESERVICE_HOST_DEFAULT );
+        }
+
+        g_debug( "USING TP_GAMESERVICE_HOST: '%s'", get( TP_GAMESERVICE_HOST ) );
+
+        if ( !get( TP_GAMESERVICE_PORT, 0 ) )
+        {
+            set( TP_GAMESERVICE_PORT,  TP_GAMESERVICE_PORT_DEFAULT );
+        }
+
+        g_debug( "USING TP_GAMESERVICE_PORT: '%s'", get( TP_GAMESERVICE_PORT ) );
     }
 
 
     // Allowed secure objects
 
-    const gchar * allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
+    const gchar* allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
 
     if ( allowed_config )
     {
@@ -2017,7 +2083,7 @@ void TPContext::validate_configuration()
 
 //-----------------------------------------------------------------------------
 
-gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message )
+gchar* TPContext::format_log_line( const gchar* log_domain, GLogLevelFlags log_level, const gchar* message )
 {
     gulong ms = timestamp();
 
@@ -2043,12 +2109,12 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
         }
     }
 
-    const char * level = "OTHER";
+    const char* level = "OTHER";
 
-    const char * color_start = "";
-    const char * color_end = SAFE_ANSI_COLOR_RESET;
+    const char* color_start = "";
+    const char* color_end = SAFE_ANSI_COLOR_RESET;
 
-	gboolean dump_stack = false;
+    gboolean dump_stack = false;
 
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
@@ -2084,87 +2150,99 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     }
 
 #ifndef TP_PRODUCTION
-	if(dump_stack)
-	{
-         void* callstack[128];
-         int i, frames = backtrace(callstack, 128);
-         char** strs = backtrace_symbols(callstack, frames);
 
-         // Skip frames which are the logging functions
-         for (i = 4; i < frames; ++i) {
-			char *begin_name = 0, *end_name = 0, *begin_offset = 0, *end_offset = 0;
+    if ( dump_stack )
+    {
+        void* callstack[128];
+        int i, frames = backtrace( callstack, 128 );
+        char** strs = backtrace_symbols( callstack, frames );
+
+        // Skip frames which are the logging functions
+        for ( i = 4; i < frames; ++i )
+        {
+            char* begin_name = 0, *end_name = 0, *begin_offset = 0, *end_offset = 0;
 
 #if !defined(CLUTTER_WINDOWING_OSX)
-			// find parentheses and +address offset surrounding the mangled name:
-			// ./module(function+0x15c) [0x8048a6d]
-			for (char *p = strs[i]; *p; ++p)
-			{
-				if (*p == '(')
-					begin_name = p+1;
-				else if (*p == '+')
-				{
-					end_name = p-1;
-					begin_offset = p+1;
-					*p = '\0';
-				}
-				else if (*p == ')' && begin_offset) {
-					end_offset = p-1;
-					*p = '\0';
-					break;
-				}
-			}
+
+            // find parentheses and +address offset surrounding the mangled name:
+            // ./module(function+0x15c) [0x8048a6d]
+            for ( char* p = strs[i]; *p; ++p )
+            {
+                if ( *p == '(' )
+                {
+                    begin_name = p + 1;
+                }
+                else if ( *p == '+' )
+                {
+                    end_name = p - 1;
+                    begin_offset = p + 1;
+                    *p = '\0';
+                }
+                else if ( *p == ')' && begin_offset )
+                {
+                    end_offset = p - 1;
+                    *p = '\0';
+                    break;
+                }
+            }
+
 #else
-			// find "+ offset" at end of the line and mangled name just before it
-			// x   module                           0x000000010bec0d1f _function + 751
-			end_offset = strrchr(strs[i], '\0');
-			char *plus = strrchr(strs[i], '+');
-			begin_offset = plus+2;
-			end_name  = plus-1;
-			*end_name = '\0';
-			begin_name = strrchr(strs[i], ' ');
-			begin_name++;
+            // find "+ offset" at end of the line and mangled name just before it
+            // x   module                           0x000000010bec0d1f _function + 751
+            end_offset = strrchr( strs[i], '\0' );
+            char* plus = strrchr( strs[i], '+' );
+            begin_offset = plus + 2;
+            end_name  = plus - 1;
+            *end_name = '\0';
+            begin_name = strrchr( strs[i], ' ' );
+            begin_name++;
 #endif
 
-			if (begin_name && begin_offset && end_offset
-				&& begin_name < begin_offset)
-			{
-				int status;
-                char* funcname = abi::__cxa_demangle(begin_name,
-                                                NULL, NULL, &status);
-				if (status == 0) {
-					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s+%s\n",
-							 log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C++", color_end, funcname, begin_offset);
-				}
-				else {
-					// demangling failed. Output function name as a C function with
-					// no arguments.
-					fprintf(stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s()+%s\n",
-							log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C", color_end, begin_name, begin_offset);
-				}
+            if ( begin_name && begin_offset && end_offset
+                    && begin_name < begin_offset )
+            {
+                int status;
+                char* funcname = abi::__cxa_demangle( begin_name,
+                        NULL, NULL, &status );
 
-                free(funcname);
-			}
-			else
-			{
-				// couldn't parse the line? print the whole line.
-             fprintf(stderr,"[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n", log_domain, g_thread_self(), hour, min, sec, ms, color_start, "STACK", color_end, strs[i]);
-         }
-		}
-         free(strs);
-	 }
+                if ( status == 0 )
+                {
+                    fprintf( stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s+%s\n",
+                            log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C++", color_end, funcname, begin_offset );
+                }
+                else
+                {
+                    // demangling failed. Output function name as a C function with
+                    // no arguments.
+                    fprintf( stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s()+%s\n",
+                            log_domain, g_thread_self(), hour, min, sec, ms, color_start, "C", color_end, begin_name, begin_offset );
+                }
+
+                free( funcname );
+            }
+            else
+            {
+                // couldn't parse the line? print the whole line.
+                fprintf( stderr, "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n", log_domain, g_thread_self(), hour, min, sec, ms, color_start, "STACK", color_end, strs[i] );
+            }
+        }
+
+        free( strs );
+    }
+
 #endif
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
-                            log_domain,
-                            g_thread_self() ,
-                            hour , min , sec , ms ,
-                            color_start , level , color_end ,
-                            message );
+            log_domain,
+            g_thread_self() ,
+            hour , min , sec , ms ,
+            color_start , level , color_end ,
+            message );
 }
 
 //-----------------------------------------------------------------------------
 
-ClutterActor * TPContext::get_stage() const
+ClutterActor* TPContext::get_stage() const
 {
     g_assert( stage );
     return stage;
@@ -2172,7 +2250,7 @@ ClutterActor * TPContext::get_stage() const
 
 //-----------------------------------------------------------------------------
 
-SystemDatabase * TPContext::get_db() const
+SystemDatabase* TPContext::get_db() const
 {
     g_assert( sysdb );
     return sysdb;
@@ -2180,7 +2258,7 @@ SystemDatabase * TPContext::get_db() const
 
 //-----------------------------------------------------------------------------
 
-Downloads * TPContext::get_downloads() const
+Downloads* TPContext::get_downloads() const
 {
     g_assert( downloads );
     return downloads;
@@ -2188,7 +2266,7 @@ Downloads * TPContext::get_downloads() const
 
 //-----------------------------------------------------------------------------
 
-Installer * TPContext::get_installer() const
+Installer* TPContext::get_installer() const
 {
     g_assert( installer );
     return installer;
@@ -2196,7 +2274,7 @@ Installer * TPContext::get_installer() const
 
 //-----------------------------------------------------------------------------
 
-HttpServer * TPContext::get_http_server() const
+HttpServer* TPContext::get_http_server() const
 {
     g_assert( http_server );
     return http_server;
@@ -2204,7 +2282,7 @@ HttpServer * TPContext::get_http_server() const
 
 //-----------------------------------------------------------------------------
 
-Console * TPContext::get_console() const
+Console* TPContext::get_console() const
 {
     return console;
 }
@@ -2212,7 +2290,7 @@ Console * TPContext::get_console() const
 //-----------------------------------------------------------------------------
 
 #ifdef TP_WITH_GAMESERVICE
-GameServiceSupport * TPContext::get_gameservice() const
+GameServiceSupport* TPContext::get_gameservice() const
 {
     return gameservice_support;
 }
@@ -2244,14 +2322,14 @@ bool TPContext::profile_switch( int id )
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer * TPContext::get_default_media_player()
+MediaPlayer* TPContext::get_default_media_player()
 {
     return media_player;
 }
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delegate )
+MediaPlayer* TPContext::create_new_media_player( MediaPlayer::Delegate* delegate )
 {
     if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
     {
@@ -2266,21 +2344,21 @@ MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delega
 
 //-----------------------------------------------------------------------------
 
-ControllerList * TPContext::get_controller_list()
+ControllerList* TPContext::get_controller_list()
 {
     return &controller_list;
 }
 
 //-----------------------------------------------------------------------------
 
-TunerList * TPContext::get_tuner_list()
+TunerList* TPContext::get_tuner_list()
 {
     return &tuner_list;
 }
 
 //-----------------------------------------------------------------------------
 
-Image * TPContext::load_icon( const gchar * path )
+Image* TPContext::load_icon( const gchar* path )
 {
     PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );
 
@@ -2291,14 +2369,14 @@ Image * TPContext::load_icon( const gchar * path )
     //.........................................................................
     // First, we read the contents of the original file
 
-    gchar * contents = NULL;
+    gchar* contents = NULL;
     gsize content_length = 0;
 
-    GFile * file = g_file_new_for_commandline_arg( path );
+    GFile* file = g_file_new_for_commandline_arg( path );
 
     if ( ! g_file_load_contents( file , 0 , & contents , & content_length , 0 , 0 ) )
     {
-    	g_object_unref( G_OBJECT( file ) );
+        g_object_unref( G_OBJECT( file ) );
 
         return 0;
     }
@@ -2311,28 +2389,28 @@ Image * TPContext::load_icon( const gchar * path )
     //.........................................................................
     // Now, we compute an md5 hash of the contents
 
-    gchar * data_hash = g_compute_checksum_for_string( hash_type, contents, content_length );
+    gchar* data_hash = g_compute_checksum_for_string( hash_type, contents, content_length );
 
     free_later( data_hash );
 
     //.........................................................................
     // Compute a hash for the full path to the file
 
-    gchar * path_hash = g_compute_checksum_for_string( hash_type, path, -1 );
+    gchar* path_hash = g_compute_checksum_for_string( hash_type, path, -1 );
 
     free_later( path_hash );
 
     //.........................................................................
     // See if we have an entry in the icon cache for this path
 
-    gchar * icon_cache_path = g_build_filename( get( TP_DATA_PATH ), "icons", NULL );
+    gchar* icon_cache_path = g_build_filename( get( TP_DATA_PATH ), "icons", NULL );
 
     free_later( icon_cache_path );
 
     //.........................................................................
     // This is the file name for the raw file
 
-    gchar * icon_file_path = g_build_filename( icon_cache_path, path_hash, NULL );
+    gchar* icon_file_path = g_build_filename( icon_cache_path, path_hash, NULL );
 
     free_later( icon_file_path );
 
@@ -2340,12 +2418,12 @@ Image * TPContext::load_icon( const gchar * path )
     // We also have an info file that has the data hash, width, height, pitch
     // and depth for the image.
 
-    gchar * info_file_name = g_strdup_printf( "%s.info", icon_file_path );
+    gchar* info_file_name = g_strdup_printf( "%s.info", icon_file_path );
 
     free_later( info_file_name );
 
 
-    gchar * info_contents = NULL;
+    gchar* info_contents = NULL;
 
     gsize info_length = 0;
 
@@ -2354,7 +2432,7 @@ Image * TPContext::load_icon( const gchar * path )
         free_later( info_contents );
 
 
-        gchar * actual_data_hash = g_new0( gchar , info_length + 1 );
+        gchar* actual_data_hash = g_new0( gchar , info_length + 1 );
 
         free_later( actual_data_hash );
 
@@ -2368,7 +2446,7 @@ Image * TPContext::load_icon( const gchar * path )
             {
                 PROFILER( "TPContext::load_icon(load raw)" , PROFILER_INTERNAL_CALLS );
 
-                gchar * raw_contents = NULL;
+                gchar* raw_contents = NULL;
 
                 gsize length = 0;
 
@@ -2388,7 +2466,7 @@ Image * TPContext::load_icon( const gchar * path )
     // If we got here, we need to create the icon file because it doesn't exist,
     // doesn't match or we had a problem reading the information.
 
-    Image * image = Image::decode( contents, content_length, path );
+    Image* image = Image::decode( contents, content_length, path );
 
     if ( image )
     {
@@ -2406,7 +2484,7 @@ Image * TPContext::load_icon( const gchar * path )
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %u %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() , image->pm_alpha() );
+            gchar* info = g_strdup_printf( "%s %u %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() , image->pm_alpha() );
 
             free_later( info );
 
@@ -2414,7 +2492,7 @@ Image * TPContext::load_icon( const gchar * path )
             {
                 // Now we save the raw icon
 
-                g_file_set_contents( icon_file_path, ( const gchar * )image->pixels(), length, NULL );
+                g_file_set_contents( icon_file_path, ( const gchar* )image->pixels(), length, NULL );
             }
         }
 
@@ -2497,15 +2575,15 @@ class AudioMatchAction : public Action
 {
 public:
 
-    AudioMatchAction( TPContext * _context , const gchar * _json )
-    :
+    AudioMatchAction( TPContext* _context , const gchar* _json )
+        :
         context( _context ),
         json( _json )
     {}
 
     virtual bool run()
     {
-        if ( App * app = context->get_current_app() )
+        if ( App* app = context->get_current_app() )
         {
             app->audio_match( json );
         }
@@ -2515,15 +2593,15 @@ public:
 
 private:
 
-    TPContext * context;
+    TPContext* context;
     String      json;
 };
 
-void TPContext::audio_detection_match( const gchar * json )
+void TPContext::audio_detection_match( const gchar* json )
 {
-    JsonParser * parser = json_parser_new();
+    JsonParser* parser = json_parser_new();
 
-    GError * error = 0;
+    GError* error = 0;
 
     bool valid = json_parser_load_from_data( parser , json , -1 , & error );
 
@@ -2547,114 +2625,101 @@ void TPContext::load_background()
 {
 #ifndef TP_PRODUCTION
 
-	if ( const gchar * resources_path = get( TP_RESOURCES_PATH , 0 , true ) )
-	{
-		gchar * path = g_build_filename( resources_path , "background.jpg" , NULL );
+    if ( const gchar* resources_path = get( TP_RESOURCES_PATH , 0 , true ) )
+    {
+        gchar* path = g_build_filename( resources_path , "background.jpg" , NULL );
 
-		FreeLater free_later( path );
+        FreeLater free_later( path );
 
-		if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
-		{
-			return;
-		}
+        if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
+        {
+            return;
+        }
 
-		if ( Image * image = Image::decode( path , false ) )
-		{
-			ClutterActor * bg = clutter_texture_new();
+        if ( Image* image = Image::decode( path , false ) )
+        {
+            ClutterActor* bg = clutter_texture_new();
 
-			clutter_actor_set_name( bg , "background" );
+            clutter_actor_set_name( bg , "background" );
 
-			Images::load_texture( CLUTTER_TEXTURE( bg ) , image );
+            Images::load_texture( CLUTTER_TEXTURE( bg ) , image );
 
-			delete image;
+            delete image;
 
-			gint iw;
-			gint ih;
+            gint iw;
+            gint ih;
 
-			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
+            clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
 
-	        gfloat width;
-	        gfloat height;
+            gfloat width;
+            gfloat height;
 
-	        clutter_actor_get_size( stage , & width , & height );
+            clutter_actor_get_size( stage , & width , & height );
 
-	        clutter_actor_set_scale( bg , width / iw , height / ih );
+            clutter_actor_set_scale( bg , width / iw , height / ih );
 
-#ifdef CLUTTER_VERSION_1_10
-			clutter_actor_add_child( stage, bg );
-#else
-	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
-#endif
+            clutter_actor_add_child( stage, bg );
 
-	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
-		}
-	}
+            g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free );
+        }
+    }
 
 #endif
 }
 
-String TPContext::get_control_message( App * app ) const
+String TPContext::get_control_message( App* app ) const
 {
-	app = app ? app : current_app;
+    app = app ? app : current_app;
 
-	JSON::Object control;
+    JSON::Object control;
 
-	guint16 port;
+    guint16 port;
 
-	if ( ( port = http_server->get_port() ) )
-	{
-		control[ "http" ] = port;
-	}
+    if ( ( port = http_server->get_port() ) )
+    {
+        control[ "http" ] = port;
+    }
 
-	if ( ( port = console ? console->get_port() : 0 ) )
-	{
-		control[ "console" ] = port;
-	}
+    if ( ( port = console ? console->get_port() : 0 ) )
+    {
+        control[ "console" ] = port;
+    }
 
-	if ( app )
-	{
-		if ( Debugger * debugger = app->get_debugger() )
-		{
-			if ( ( port = debugger->get_server_port() ) )
-			{
-				control[ "debugger" ] = port;
-			}
-		}
-	}
+    if ( app )
+    {
+        if ( Debugger* debugger = app->get_debugger() )
+        {
+            if ( ( port = debugger->get_server_port() ) )
+            {
+                control[ "debugger" ] = port;
+            }
+        }
+    }
 
-	if ( controller_server )
-	{
-		if ( ( port = controller_server->get_port() ) )
-		{
-			control[ "controllers" ] = port;
-		}
-	}
+    if ( controller_server )
+    {
+        if ( ( port = controller_server->get_port() ) )
+        {
+            control[ "controllers" ] = port;
+        }
+    }
 
-	return control.stringify();
+    return control.stringify();
 }
 
 //=============================================================================
 // External-facing functions
 //=============================================================================
 
-void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
+void tp_init_version( int* argc, char** * argv, int major_version, int minor_version, int patch_version )
 {
-#ifndef CLUTTER_VERSION_1_10
-    if ( !g_thread_supported() )
-    {
-        g_thread_init( NULL );
-    }
-
-	clutter_threads_init ();
-#endif
-
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
             patch_version == TP_PATCH_VERSION ) )
     {
         g_warning( "TRICKPLAY VERSION MISMATCH : HOST (%d.%d.%d) : LIBRARY (%d.%d.%d)",
-                   major_version, minor_version, patch_version,
-                   TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
+                major_version, minor_version, patch_version,
+                TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
     }
 
 
@@ -2685,14 +2750,14 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
 
 //-----------------------------------------------------------------------------
 
-TPContext * tp_context_new()
+TPContext* tp_context_new()
 {
     return new TPContext();
 }
 
 //-----------------------------------------------------------------------------
 
-void tp_context_free( TPContext * context )
+void tp_context_free( TPContext* context )
 {
     g_assert( context );
     g_assert( !context->running() );
@@ -2702,7 +2767,7 @@ void tp_context_free( TPContext * context )
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set( TPContext * context, const char * key, const char * value )
+void tp_context_set( TPContext* context, const char* key, const char* value )
 {
     g_assert( context );
 
@@ -2711,7 +2776,7 @@ void tp_context_set( TPContext * context, const char * key, const char * value )
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_int( TPContext * context, const char * key, int value )
+void tp_context_set_int( TPContext* context, const char* key, int value )
 {
     g_assert( context );
 
@@ -2720,18 +2785,18 @@ void tp_context_set_int( TPContext * context, const char * key, int value )
 
 //-----------------------------------------------------------------------------
 
-const char * tp_context_get( TPContext * context, const char * key )
+const char* tp_context_get( TPContext* context, const char* key )
 {
     g_assert( context );
 
-    if(!strcmp(key, "sekrit-stage")) return (const char *)context->get_stage();
+    if ( !strcmp( key, "sekrit-stage" ) ) { return ( const char* )context->get_stage(); }
 
     return context->get( key );
 }
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_user_data( TPContext * context , void * user_data )
+void tp_context_set_user_data( TPContext* context , void* user_data )
 {
     g_assert( context );
 
@@ -2740,7 +2805,7 @@ void tp_context_set_user_data( TPContext * context , void * user_data )
 
 //-----------------------------------------------------------------------------
 
-void * tp_context_get_user_data( TPContext * context )
+void* tp_context_get_user_data( TPContext* context )
 {
     g_assert( context );
 
@@ -2749,7 +2814,7 @@ void * tp_context_get_user_data( TPContext * context )
 
 //-----------------------------------------------------------------------------
 
-void tp_context_add_notification_handler( TPContext * context, const char * subject, TPNotificationHandler handler, void * data )
+void tp_context_add_notification_handler( TPContext* context, const char* subject, TPNotificationHandler handler, void* data )
 {
     g_assert( context );
 
@@ -2758,7 +2823,7 @@ void tp_context_add_notification_handler( TPContext * context, const char * subj
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data )
+void tp_context_set_request_handler( TPContext* context, const char* subject, TPRequestHandler handler, void* data )
 {
     g_assert( context );
 
@@ -2767,7 +2832,7 @@ void tp_context_set_request_handler( TPContext * context, const char * subject, 
 
 //-----------------------------------------------------------------------------
 
-void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data )
+void tp_context_add_console_command_handler( TPContext* context, const char* command, TPConsoleCommandHandler handler, void* data )
 {
     g_assert( context );
 
@@ -2776,7 +2841,7 @@ void tp_context_add_console_command_handler( TPContext * context, const char * c
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data )
+void tp_context_set_log_handler( TPContext* context, TPLogHandler handler, void* data )
 {
     g_assert( context );
 
@@ -2785,16 +2850,16 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
+void tp_context_set_resource_loader( TPContext* context , unsigned int type , TPResourceLoader loader, void* data )
 {
-	g_assert( context );
+    g_assert( context );
 
-	context->set_resource_loader( type , loader , data );
+    context->set_resource_loader( type , loader , data );
 }
 
 //-----------------------------------------------------------------------------
 
-int tp_context_run( TPContext * context )
+int tp_context_run( TPContext* context )
 {
     g_assert( context );
 
@@ -2803,7 +2868,7 @@ int tp_context_run( TPContext * context )
 
 //-----------------------------------------------------------------------------
 
-void tp_context_quit( TPContext * context )
+void tp_context_quit( TPContext* context )
 {
     g_assert( context );
 
@@ -2814,7 +2879,7 @@ void tp_context_quit( TPContext * context )
 // Media player
 //-----------------------------------------------------------------------------
 
-void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayerConstructor constructor )
+void tp_context_set_media_player_constructor( TPContext* context, TPMediaPlayerConstructor constructor )
 {
     g_assert( context );
 
@@ -2825,26 +2890,26 @@ void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayer
 // Tuners
 //-----------------------------------------------------------------------------
 
-TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, TPChannelChangeCallback cb, void *data )
+TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback cb, void* data )
 {
-	g_assert( context );
+    g_assert( context );
 
-	return context->tuner_list.add_tuner( context, name, cb, data );
+    return context->tuner_list.add_tuner( context, name, cb, data );
 }
 
-void tp_context_remove_tuner( TPContext * context, TPTuner * tuner )
+void tp_context_remove_tuner( TPContext* context, TPTuner* tuner )
 {
-	g_assert( context );
-	g_assert( tuner );
+    g_assert( context );
+    g_assert( tuner );
 
-	context->tuner_list.remove_tuner( tuner );
+    context->tuner_list.remove_tuner( tuner );
 }
 
 //-----------------------------------------------------------------------------
 // Controllers
 //-----------------------------------------------------------------------------
 
-TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data )
+TPController* tp_context_add_controller( TPContext* context, const char* name, const TPControllerSpec* spec, void* data )
 {
     g_assert( context );
 
@@ -2853,7 +2918,7 @@ TPController * tp_context_add_controller( TPContext * context, const char * name
 
 //-----------------------------------------------------------------------------
 
-void tp_context_remove_controller( TPContext * context, TPController * controller )
+void tp_context_remove_controller( TPContext* context, TPController* controller )
 {
     g_assert( context );
 
@@ -2864,7 +2929,7 @@ void tp_context_remove_controller( TPContext * context, TPController * controlle
 // Image Decoder
 //-----------------------------------------------------------------------------
 
-void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user )
+void tp_context_set_image_decoder( TPContext* context, TPImageDecoder decoder, void* user )
 {
     g_assert( context );
     g_assert( decoder );

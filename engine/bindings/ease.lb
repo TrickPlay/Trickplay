@@ -1,8 +1,7 @@
 module ease;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "clutter_alpha_mode.h"
 
 typedef double (*EaseFunc)(double);
@@ -35,89 +34,89 @@ struct Ease
 
     (code)
     -- Create the Rectangle to animate
-   	movingRect = Rectangle{ position = { -100, 400 },
-	                        size = { 100, 100 },
-	                        color = { 225, 225, 0, 255 } }
+    movingRect = Rectangle{ position = { -100, 400 },
+                            size = { 100, 100 },
+                            color = { 225, 225, 0, 255 } }
 
-	-- Show it on the screen
-	screen:add( movingRect )
+    -- Show it on the screen
+    screen:add( movingRect )
 
-	-- Define Interval ranges for animating the Rectangle
-	acrossScreen = Interval( -100, 2020 )  -- moves along these X-axis coordinates
-	fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
+    -- Define Interval ranges for animating the Rectangle
+    acrossScreen = Interval( -100, 2020 )  -- moves along these X-axis coordinates
+    fullCircle   = Interval( 0, 360 )      -- degrees rotation around X-axis
 
-	-- Define an Ease transition for the movement along the X-axis
-	-- Note: If desired, a second Ease transition could be defined and applied in the same manner on the rotation.
-	easeTransition = Ease( "EASE_IN_OUT_QUAD" )
+    -- Define an Ease transition for the movement along the X-axis
+    -- Note: If desired, a second Ease transition could be defined and applied in the same manner on the rotation.
+    easeTransition = Ease( "EASE_IN_OUT_QUAD" )
 
-	-- Animate the Rectangle using a Timeline
-	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
-							  loop     = true,  -- loop forever
-	}
+    -- Animate the Rectangle using a Timeline
+    movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
+                              loop     = true,  -- loop forever
+    }
 
-	-- Handler for on_new_frame events: Updates the Rectangle's location and rotation
-	function moveRect( self, msecs, progress )
-		-- X changes along range specified in acrossScreen and modified by easeTransition
-		movingRect.x = acrossScreen:get_value( easeTransition:get_value( progress ) )
+    -- Handler for on_new_frame events: Updates the Rectangle's location and rotation
+    function moveRect( self, msecs, progress )
+        -- X changes along range specified in acrossScreen and modified by easeTransition
+        movingRect.x = acrossScreen:get_value( easeTransition:get_value( progress ) )
 
-		-- X rotation around range specified in fullCircle
-		movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
-	end
+        -- X rotation around range specified in fullCircle
+        movingRect.x_rotation = { fullCircle:get_value( progress ), 0, 0 }
+    end
 
-	-- Hook the Timeline into on_new_frame event
-	movingRect_tl:add_onnewframe_listener( moveRect )
+    -- Hook the Timeline into on_new_frame event
+    movingRect_tl:add_onnewframe_listener( moveRect )
 
-	-- Show everything
-	screen:show()
+    -- Show everything
+    screen:show()
 
-	-- Start the Timeline animation
-	movingRect_tl:start()
-	(end)
+    -- Start the Timeline animation
+    movingRect_tl:start()
+    (end)
 */
 
 /***************************************
-	Constructor: Ease
+    Constructor: Ease
 
-	The Ease() constructor creates and initializes a new Ease object.
+    The Ease() constructor creates and initializes a new Ease object.
 
-	*Prototype:*
+    *Prototype:*
 
-		(code)
-		Ease( ease_transition_type )
-		(end)
+        (code)
+        Ease( ease_transition_type )
+        (end)
 
-	*Argument:*
+    *Argument:*
 
-		ease_transition_type - string specifying one of the supported ease transition types. The ease transition types are described below. A transition type must be specified; there is no default transition type.
+        ease_transition_type - string specifying one of the supported ease transition types. The ease transition types are described below. A transition type must be specified; there is no default transition type.
 
-	*Supported Ease Transition Types* The ease transition type strings are case-sensitive.
+    *Supported Ease Transition Types* The ease transition type strings are case-sensitive.
 
-	  "LINEAR" - Linear
-	  "EASE_IN_QUAD",    "EASE_OUT_QUAD",    "EASE_IN_OUT_QUAD" - Ease in/out/both quadratic
-	  "EASE_IN_CUBIC",   "EASE_OUT_CUBIC",   "EASE_IN_OUT_CUBIC" - Ease in/out/both cubic
-	  "EASE_IN_QUART",   "EASE_OUT_QUART",   "EASE_IN_OUT_QUART" - Ease in/out/both quartic
-	  "EASE_IN_QUINT",   "EASE_OUT_QUINT",   "EASE_IN_OUT_QUINT" - Ease in/out/both quintic
-	  "EASE_IN_SINE",    "EASE_OUT_SINE",    "EASE_IN_OUT_SINE" - Ease in/out/both sinusoidal
-	  "EASE_IN_EXPO",    "EASE_OUT_EXPO",    "EASE_IN_OUT_EXPO" - Ease in/out/both exponential
-	  "EASE_IN_CIRC",    "EASE_OUT_CIRC",    "EASE_IN_OUT_CIRC" - Ease in/out/both circular
-	  "EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - Ease in/out/both elastic
-	  "EASE_IN_BACK",    "EASE_OUT_BACK",    "EASE_IN_OUT_BACK" - Ease in/out/both overshooting cubic
-	  "EASE_IN_BOUNCE",  "EASE_OUT_BOUNCE",  "EASE_IN_OUT_BOUNCE" - Ease in/out/both exponentially decaying parabolic
+      "LINEAR" - Linear
+      "EASE_IN_QUAD",    "EASE_OUT_QUAD",    "EASE_IN_OUT_QUAD" - Ease in/out/both quadratic
+      "EASE_IN_CUBIC",   "EASE_OUT_CUBIC",   "EASE_IN_OUT_CUBIC" - Ease in/out/both cubic
+      "EASE_IN_QUART",   "EASE_OUT_QUART",   "EASE_IN_OUT_QUART" - Ease in/out/both quartic
+      "EASE_IN_QUINT",   "EASE_OUT_QUINT",   "EASE_IN_OUT_QUINT" - Ease in/out/both quintic
+      "EASE_IN_SINE",    "EASE_OUT_SINE",    "EASE_IN_OUT_SINE" - Ease in/out/both sinusoidal
+      "EASE_IN_EXPO",    "EASE_OUT_EXPO",    "EASE_IN_OUT_EXPO" - Ease in/out/both exponential
+      "EASE_IN_CIRC",    "EASE_OUT_CIRC",    "EASE_IN_OUT_CIRC" - Ease in/out/both circular
+      "EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - Ease in/out/both elastic
+      "EASE_IN_BACK",    "EASE_OUT_BACK",    "EASE_IN_OUT_BACK" - Ease in/out/both overshooting cubic
+      "EASE_IN_BOUNCE",  "EASE_OUT_BOUNCE",  "EASE_IN_OUT_BOUNCE" - Ease in/out/both exponentially decaying parabolic
 
-	*Transition Graphic Depictions and Demos:*
+    *Transition Graphic Depictions and Demos:*
 
-	Each animation below demonstrates a single Ease transition type. Except for the transition type, all the animations shown below are identical in that they move a sphere down the Y-axis. The <Timeline.on_new_frame> event handler for the animations consists of a single line shown below. The referenced sphereInterval is merely an <Interval> object containing the Y-axis points of the top and bottom of each demo's rectangle.
+    Each animation below demonstrates a single Ease transition type. Except for the transition type, all the animations shown below are identical in that they move a sphere down the Y-axis. The <Timeline.on_new_frame> event handler for the animations consists of a single line shown below. The referenced sphereInterval is merely an <Interval> object containing the Y-axis points of the top and bottom of each demo's rectangle.
 
-		(code)
-		sphereEase     = Ease( "EASE_IN_QUART" )
-		sphereInterval = Interval( RECT_TOP, RECT_BOTTOM )
+        (code)
+        sphereEase     = Ease( "EASE_IN_QUART" )
+        sphereInterval = Interval( RECT_TOP, RECT_BOTTOM )
 
-		function onNewFrameHandler( msecs, progress )
-			sphereImage.y = sphereInterval:get_value( sphereEase:get_value( progress ) )
-		end
-		(end)
+        function onNewFrameHandler( msecs, progress )
+            sphereImage.y = sphereInterval:get_value( sphereEase:get_value( progress ) )
+        end
+        (end)
 
-		The graph below each animation depicts the effect the ease transition has on the animated property. The graph's horizontal axis represents the animation's duration. The top of the vertical axis is the animated property's starting value, while the bottom is the ending value. For example, the "LINEAR" transition would be depicted as a straight line from the graph's top-left corner to its bottom-right corner.
+        The graph below each animation depicts the effect the ease transition has on the animated property. The graph's horizontal axis represents the animation's duration. The top of the vertical axis is the animated property's starting value, while the bottom is the ending value. For example, the "LINEAR" transition would be depicted as a straight line from the graph's top-left corner to its bottom-right corner.
 
 (see ModeQuad.gif)
 (see alphaQuad.png)
@@ -220,45 +219,45 @@ class Ease [[Ease *]]
 
 
 /***************************************
-	Function: get_value
+    Function: get_value
 
-	The get_value() function applies the object's ease transition to a specified progress argument.
+    The get_value() function applies the object's ease transition to a specified progress argument.
 
-	*Arguments:*
+    *Arguments:*
 
-		progress - double value between 0-1, inclusive. This argument can be the progress argument received by some animation event handlers, such as those hooked into the <Timeline.on_new_frame> event. It can also be any value that represents the percentage of progress/completion within a particular range. A code example using a Timeline animation event handler is described at the top of this page. An example using a range of values is shown below.
+        progress - double value between 0-1, inclusive. This argument can be the progress argument received by some animation event handlers, such as those hooked into the <Timeline.on_new_frame> event. It can also be any value that represents the percentage of progress/completion within a particular range. A code example using a Timeline animation event handler is described at the top of this page. An example using a range of values is shown below.
 
-	*Code Example:* Apply an ease transition to a range of values
+    *Code Example:* Apply an ease transition to a range of values
 
-	(code)
-	-- Define an ease-out transition
-	-- This will cause initial values to change quickly, but final values
-	-- will change very slowly, i.e., ease-out.
-	easeTransition = Ease( "EASE_OUT_EXPO" )
-	range          = Interval( 1, 100 )
+    (code)
+    -- Define an ease-out transition
+    -- This will cause initial values to change quickly, but final values
+    -- will change very slowly, i.e., ease-out.
+    easeTransition = Ease( "EASE_OUT_EXPO" )
+    range          = Interval( 1, 100 )
 
-	for i = range.from, range.to do
-		eased_i = range:get_value( easeTransition:get_value( i / 100 ) )
-		print( "i =", i, ", eased_i =", eased_i )
-	end
+    for i = range.from, range.to do
+        eased_i = range:get_value( easeTransition:get_value( i / 100 ) )
+        print( "i =", i, ", eased_i =", eased_i )
+    end
 
-	--[[
-	Code Output:
-		i = 1 , eased_i = 7.6297338378561
-		i = 2 , eased_i = 13.815494233684
-		i = 3 , eased_i = 19.587012760733
-		i = 4 , eased_i = 24.972029957735
-		...
-		i = 97 , eased_i = 99.88097334285
-		i = 98 , eased_i = 99.888944202007
-		i = 99 , eased_i = 99.896381276571
-		i = 100 , eased_i = 100
-	--]]
-	(end)
+    --[[
+    Code Output:
+        i = 1 , eased_i = 7.6297338378561
+        i = 2 , eased_i = 13.815494233684
+        i = 3 , eased_i = 19.587012760733
+        i = 4 , eased_i = 24.972029957735
+        ...
+        i = 97 , eased_i = 99.88097334285
+        i = 98 , eased_i = 99.888944202007
+        i = 99 , eased_i = 99.896381276571
+        i = 100 , eased_i = 100
+    --]]
+    (end)
 
-	*Return Value:* Modified double value after applying ease transition
+    *Return Value:* Modified double value after applying ease transition
 
-	*See Also:* the <Timeline> and <Interval> classes
+    *See Also:* the <Timeline> and <Interval> classes
 */
 
     double get_value( double progress )

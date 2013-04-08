@@ -9,9 +9,9 @@ class Bitmap : public RefCounted
 {
 public:
 
-    Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags );
+    Bitmap( lua_State* L , const char* _src , bool _async , bool read_tags );
 
-    static Bitmap * get( lua_State * L , int index );
+    static Bitmap* get( lua_State* L , int index );
 
     guint width() const;
     guint height() const;
@@ -19,13 +19,13 @@ public:
 
     bool loaded() const;
 
-    Image * get_image();
+    Image* get_image();
 
-    static Image * get_image( lua_State * L , int index );
+    static Image* get_image( lua_State* L , int index );
 
     // Bitmap takes ownership of the image
 
-    void set_image( Image * image );
+    void set_image( Image* image );
 
 protected:
 
@@ -33,13 +33,13 @@ protected:
 
 private:
 
-    static void callback( Image * image , gpointer me );
+    static void callback( Image* image , gpointer me );
 
     static void destroy_notify( gpointer me );
 
     String          src;
-    Image *         image;
-    LuaStateProxy * lsp;
+    Image*          image;
+    LuaStateProxy* lsp;
 };
 
 

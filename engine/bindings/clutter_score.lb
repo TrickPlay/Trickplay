@@ -1,8 +1,7 @@
 module clutter_score;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "util.h"
 #include "clutter_util.h"
@@ -50,25 +49,25 @@ screen:add( bckgndImage )
 
 -- Create a rectangular demo area
 demoArea = Rectangle( { color        = { 100, 100, 100, 255 },
-						border_color = { 0, 0, 0, 255 },
-						border_width = 4,
-						name         = "demoArea",
-						position     = { 96, 96, 0 },
-						size         = { 308, 308 },
-						opacity      = 255,
+                        border_color = { 0, 0, 0, 255 },
+                        border_width = 4,
+                        name         = "demoArea",
+                        position     = { 96, 96, 0 },
+                        size         = { 308, 308 },
+                        opacity      = 255,
 } )
 screen:add( demoArea )
 
 -- Create clone demo areas
 demoArea2 = Clone( { source   = demoArea,
-				     name     = "demoArea2",
-				     position = { 421, 96, 0 },
+                     name     = "demoArea2",
+                     position = { 421, 96, 0 },
 } )
 screen:add( demoArea2 )
 
 demoArea3 = Clone( { source   = demoArea,
-				     name     = "demoArea3",
-				     position = { 746, 96, 0 },
+                     name     = "demoArea3",
+                     position = { 746, 96, 0 },
 } )
 screen:add( demoArea3 )
 
@@ -88,14 +87,14 @@ screen:add( sphereImage )
 
 -- Create clone sphere images
 sphereImage2 = Clone( { source   = sphereImage,
-				        name     = "Sphere2",
-				        position = { 555, 100, 0 },
+                        name     = "Sphere2",
+                        position = { 555, 100, 0 },
 } )
 screen:add( sphereImage2 )
 
 sphereImage3 = Clone( { source   = sphereImage,
-				        name     = "Sphere3",
-				        position = { 880, 100, 0 },
+                        name     = "Sphere3",
+                        position = { 880, 100, 0 },
 } )
 screen:add( sphereImage3 )
 
@@ -117,17 +116,17 @@ spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30
 
 -- Define handlers for each Timeline's on_new_frame events and hook them into the events
 function moveSphere1( timeline, duration, progress )
-	sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
+    sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
 end
 sphereTL:add_onnewframe_listener( moveSphere1 )
 
 function moveSphere2( timeline, duration, progress )
-	sphereImage2.y = sphereInterval:get_value( sphereEase2:get_value( progress ) )
+    sphereImage2.y = sphereInterval:get_value( sphereEase2:get_value( progress ) )
 end
 sphereTL2:add_onnewframe_listener( moveSphere2 )
 
 function moveSphere3( timeline, duration, progress )
-	sphereImage3.y = sphereInterval:get_value( sphereEase3:get_value( progress ) )
+    sphereImage3.y = sphereInterval:get_value( sphereEase3:get_value( progress ) )
 end
 sphereTL3:add_onnewframe_listener( moveSphere3 )
 
@@ -154,142 +153,142 @@ The sequentially-running animations created by the example code are shown below.
 class Score [[ClutterScore*]]
 {
     Score(table props = 0)
-	[[
-		self=clutter_score_new();
-		g_object_ref(self);
-		self=lb_construct_gobject(ClutterScore,self);
-    	ClutterUtil::set_props_from_table(L,props);
+    [[
+        self=clutter_score_new();
+        g_object_ref(self);
+        self=lb_construct_gobject(ClutterScore,self);
+        ClutterUtil::set_props_from_table(L,props);
 
-    	g_signal_connect( self , "started" , ( GCallback ) Score_started , 0 );
+        g_signal_connect( self , "started" , ( GCallback ) Score_started , 0 );
         g_signal_connect( self , "completed" , ( GCallback ) Score_completed , 0 );
 
-    	g_object_unref(self);
-	]];
-
-    ~Score()
-	[[
-	]];
-
-	/*
-		Property: loop
-
-		The loop property is a boolean flag indicating whether or not the Score should loop until it is explicitly stopped (true=loop infinitely).
-
-		If the Score loops, the object's <on_completed> event is fired at the completion of each cycle through the Score.
-
-		*Default Setting:* false, i.e., do not loop
-
-		*See Also:* the <on_completed> event
-	*/
-
-    bool loop
-	[[loop=clutter_score_get_loop(self);]]
-	[[clutter_score_set_loop(self,loop);]];
-
-	/*
-		Property: is_playing
-
-		The is_playing property is a boolean flag indicating whether or not the Score is currently running (true=is running).
-
-		During the period when the Score is paused, the is_playing property will be false until the Score is resumed.
-
-		To start a Score or to resume a paused Score, call the object's start() function.
-
-		*Default Setting:* false, i.e., Score is not running
-
-		*See Also:* the <start> function
-	*/
-
-    readonly bool is_playing
-	[[is_playing=clutter_score_is_playing(self);]];
-
-	/*
-		Function: start
-
-		The start() function causes the Score to begin running. All the Score's Timeline animations that have no parent will begin running. If the Score has been paused, calling the start() function causes the Score to resume.
-
-		Calling the start() function causes the Score's on_started() event handler to be called.
-
-		*Arguments:* None
-
-		*Return Value:* None
-
-		*See Also:* the <pause> function and the <on_started> event
-	*/
-
-    start()
-	[[
-	  clutter_score_start(self);
+        g_object_unref(self);
     ]];
 
-	/*
-		Function: pause
+    ~Score()
+    [[
+    ]];
 
-		The pause() function halts a running Score at its current position and invokes the <on_paused> event.
+    /*
+        Property: loop
 
-		To resume a paused Score, call the start() function again; the Score's animations will resume from the point at which they had been paused. Note: Calling start() to resume a paused Score causes the <on_started> event to fire.
+        The loop property is a boolean flag indicating whether or not the Score should loop until it is explicitly stopped (true=loop infinitely).
 
-		*Arguments:* None
+        If the Score loops, the object's <on_completed> event is fired at the completion of each cycle through the Score.
 
-		*Return Value:* None
+        *Default Setting:* false, i.e., do not loop
 
-		*See Also:* the <start> function and the <on_paused> event
-	*/
+        *See Also:* the <on_completed> event
+    */
+
+    bool loop
+    [[loop=clutter_score_get_loop(self);]]
+    [[clutter_score_set_loop(self,loop);]];
+
+    /*
+        Property: is_playing
+
+        The is_playing property is a boolean flag indicating whether or not the Score is currently running (true=is running).
+
+        During the period when the Score is paused, the is_playing property will be false until the Score is resumed.
+
+        To start a Score or to resume a paused Score, call the object's start() function.
+
+        *Default Setting:* false, i.e., Score is not running
+
+        *See Also:* the <start> function
+    */
+
+    readonly bool is_playing
+    [[is_playing=clutter_score_is_playing(self);]];
+
+    /*
+        Function: start
+
+        The start() function causes the Score to begin running. All the Score's Timeline animations that have no parent will begin running. If the Score has been paused, calling the start() function causes the Score to resume.
+
+        Calling the start() function causes the Score's on_started() event handler to be called.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <pause> function and the <on_started> event
+    */
+
+    start()
+    [[
+      clutter_score_start(self);
+    ]];
+
+    /*
+        Function: pause
+
+        The pause() function halts a running Score at its current position and invokes the <on_paused> event.
+
+        To resume a paused Score, call the start() function again; the Score's animations will resume from the point at which they had been paused. Note: Calling start() to resume a paused Score causes the <on_started> event to fire.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <start> function and the <on_paused> event
+    */
     pause()
-	[[clutter_score_pause(self);]];
+    [[clutter_score_pause(self);]];
 
-	/*
-		Function: stop
+    /*
+        Function: stop
 
-		The stop() function halts a running Score and resets the Score to its starting position. The stop() function does *not* cause the on_completed event to be fired.
+        The stop() function halts a running Score and resets the Score to its starting position. The stop() function does *not* cause the on_completed event to be fired.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*See Also:* the <start> and <pause> functions
-	*/
+        *See Also:* the <start> and <pause> functions
+    */
 
     stop()
-	[[
-	   clutter_score_stop(self);
-	   ClutterUtil::keep_alive( self , false );
-	]];
+    [[
+       clutter_score_stop(self);
+       ClutterUtil::keep_alive( self , false );
+    ]];
 
-	/*
-		Function: rewind
+    /*
+        Function: rewind
 
-		The rewind() function resets the Score back to its starting position. If the Score is running, it will continue running from its new position.
+        The rewind() function resets the Score back to its starting position. If the Score is running, it will continue running from its new position.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*See Also:* the <start> and <stop> functions
-	*/
+        *See Also:* the <start> and <stop> functions
+    */
 
     rewind()
-	[[clutter_score_rewind(self);]];
+    [[clutter_score_rewind(self);]];
 
-	/*
-		Function: append
+    /*
+        Function: append
 
-		The append() function attaches a Timeline object to the Score and optionally defines a parent for the newly-attached Timeline. When the parent Timeline finishes running, it will trigger the running of the newly-attached Timeline. The specified parent Timeline must already be attached to the Score. If no parent is specified, the newly-attached Timeline will begin running when the Score is started by a call to start().
+        The append() function attaches a Timeline object to the Score and optionally defines a parent for the newly-attached Timeline. When the parent Timeline finishes running, it will trigger the running of the newly-attached Timeline. The specified parent Timeline must already be attached to the Score. If no parent is specified, the newly-attached Timeline will begin running when the Score is started by a call to start().
 
-		*Arguments:*
+        *Arguments:*
 
-			parent - Timeline object to act as "parent" to newly-attached Timeline. The parent Timeline must already be attached to the Score. If the newly-attached Timeline should begin running as soon as the Score starts running, the parent argument should be nil.
-			timeline - Timeline object to attach to Score
+            parent - Timeline object to act as "parent" to newly-attached Timeline. The parent Timeline must already be attached to the Score. If the newly-attached Timeline should begin running as soon as the Score starts running, the parent argument should be nil.
+            timeline - Timeline object to attach to Score
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*See Also:* the <start> function
-	*/
+        *See Also:* the <start> function
+    */
 
     append(Timeline parent=0, Timeline timeline)
-	[[
-	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
-	    ClutterTimeline *p = NULL;
+    [[
+        ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
+        ClutterTimeline *p = NULL;
         if(parent != 0)
         {
             p = ClutterUtil::user_data_to_timeline(L,parent);
@@ -314,29 +313,29 @@ class Score [[ClutterScore*]]
     [[clutter_score_remove_all(self);]];
 
 /***************************************
-	Function: add_onstarted_listener
+    Function: add_onstarted_listener
 
-	The add_onstarted_listener() function registers a handler function for <on_started> events.
+    The add_onstarted_listener() function registers a handler function for <on_started> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstarted_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstarted_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( self )
-		(end)
+        (code)
+        f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		self - Score object the event applies to
+        self - Score object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_started> event and the <start> and <remove_onstarted_listener> functions
+    *See Also:* the <on_started> event and the <start> and <remove_onstarted_listener> functions
 */
 
     int add_onstarted_listener( function f )
@@ -350,17 +349,17 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Function: remove_onstarted_listener
+    Function: remove_onstarted_listener
 
-	The remove_onstarted_listener() function unregisters the specified event handler.
+    The remove_onstarted_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstarted_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstarted_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstarted_listener> function and the <on_started> event
+    *See Also:* the <add_onstarted_listener> function and the <on_started> event
 */
 
     remove_onstarted_listener( int ref )
@@ -369,29 +368,29 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Function: add_oncompleted_listener
+    Function: add_oncompleted_listener
 
-	The add_oncompleted_listener() function registers a handler function for <on_completed> events.
+    The add_oncompleted_listener() function registers a handler function for <on_completed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncompleted_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( self )
-		(end)
+        (code)
+        f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		self - Score object the event applies to
+        self - Score object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_completed> event, the <loop> property, and the <stop> and <remove_oncompleted_listener> functions
+    *See Also:* the <on_completed> event, the <loop> property, and the <stop> and <remove_oncompleted_listener> functions
 */
 
     int add_oncompleted_listener( function f )
@@ -405,17 +404,17 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Function: remove_oncompleted_listener
+    Function: remove_oncompleted_listener
 
-	The remove_oncompleted_listener() function unregisters the specified event handler.
+    The remove_oncompleted_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncompleted_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncompleted_listener> function and the <on_completed> event
+    *See Also:* the <add_oncompleted_listener> function and the <on_completed> event
 */
 
     remove_oncompleted_listener( int ref )
@@ -424,29 +423,29 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Function: add_onpaused_listener
+    Function: add_onpaused_listener
 
-	The add_onpaused_listener() function registers a handler function for <on_paused> events.
+    The add_onpaused_listener() function registers a handler function for <on_paused> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpaused_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpaused_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( self )
-		(end)
+        (code)
+        f( self )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		self - Score object the event applies to
+        self - Score object the event applies to
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_paused> event and the <pause> and <remove_onpaused_listener> functions
+    *See Also:* the <on_paused> event and the <pause> and <remove_onpaused_listener> functions
 
 */
 
@@ -461,17 +460,17 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Function: remove_onpaused_listener
+    Function: remove_onpaused_listener
 
-	The remove_onpaused_listener() function unregisters the specified event handler.
+    The remove_onpaused_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpaused_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpaused_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpaused_listener> function and the <on_paused> event
+    *See Also:* the <add_onpaused_listener> function and the <on_paused> event
 
 */
 
@@ -481,11 +480,11 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Event: on_started
+    Event: on_started
 
-	The on_started event occurs when the Score starts running or resumes running following a pause.
+    The on_started event occurs when the Score starts running or resumes running following a pause.
 
-	*See Also:* the <start> and <add_onstarted_listener> function
+    *See Also:* the <start> and <add_onstarted_listener> function
 */
 
     function on_started
@@ -502,11 +501,11 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-   	Event: on_completed
+    Event: on_completed
 
-   	The on_completed event occurs each time the Score completes a single iteration of all its attached Timelines.
+    The on_completed event occurs each time the Score completes a single iteration of all its attached Timelines.
 
-	*See Also:* the <add_oncompleted_listener> function
+    *See Also:* the <add_oncompleted_listener> function
 */
 
     function on_completed
@@ -523,11 +522,11 @@ class Score [[ClutterScore*]]
         ]];
 
 /***************************************
-	Event: on_paused
+    Event: on_paused
 
-	The on_paused event occurs when a running Score is paused by calling its pause() function.
+    The on_paused event occurs when a running Score is paused by calling its pause() function.
 
-	*See Also:* the <pause> and <add_onpaused_listener> functions
+    *See Also:* the <pause> and <add_onpaused_listener> functions
 */
 
     function on_paused

@@ -64,7 +64,7 @@ ENDIF ( PKG_CONFIG_FOUND )
 
 include( FindThreads )
 if(CMAKE_USE_PTHREADS_INIT)
-	add_definitions( -D_POSIX_THREADS )
+    add_definitions( -D_POSIX_THREADS )
 endif(CMAKE_USE_PTHREADS_INIT)
 list( APPEND TXMPP_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} )
 
@@ -198,6 +198,12 @@ list( APPEND
 )
 
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+include( CheckCXXCompilerFlag )
+CHECK_CXX_COMPILER_FLAG("-x c++" LUA_BUILD_FORCE_CXX)
+if(LUA_BUILD_FORCE_CXX)
+    add_definitions("-x c++")
+endif(LUA_BUILD_FORCE_CXX)
 
 set_source_files_properties(
 

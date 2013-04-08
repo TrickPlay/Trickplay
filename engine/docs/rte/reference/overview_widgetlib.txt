@@ -1,0 +1,27 @@
+
+Title: Widget Library
+
+The TrickPlay SDK provides a library of Lua widgets, such as Button and CheckBox, that enables and simplifies the creation of sophisticated user interfaces.
+
+To use the Widget Library, all the files stored in the libraries/ui directory, including the contents of all the subdirectories, must be copied into the TrickPlay application's app bundle. For example, the following commands entered on the Linux command line will create a new subdirectory called widgetlib and copy the Widget Library files into it. Note: The exact file locations will differ for other computers.
+
+	(code)
+	cd ~/myApp
+	mkdir widgetlib
+	cp -r ~/trickplay/libraries/ui/* ./widgetlib/
+	(end)
+
+Before constructing the first widget, the TrickPlay application must load the Widget Library by calling the Lua <dofile> function. The function's return value should be saved in a variable and used as a prefix in subsequent calls to the library. The example code statements below demonstrate how to load the Widget Library and create a Button widget.
+
+	(code)
+	-- Load the Widget Library. This is necessary before creating the first widget.
+	-- Save the function's return value for subsequent calls to the library.
+	WL = dofile( "widgetlib/Widget_Library" )
+
+	-- Create a Button object
+	button = WL.Button( { position = { 100, 100 },
+	                      label    = "My First Widget",
+	} )
+	(end)
+
+For additional information about the Widget Library, refer to the documentation for each individual Widget.

@@ -20,7 +20,7 @@ typedef struct _NineSliceEffectPrivate NineSliceEffectPrivate;
 struct _NineSliceEffect
 {
     ClutterEffect parent_instance;
-    NineSliceEffectPrivate * priv;
+    NineSliceEffectPrivate* priv;
 };
 
 struct _NineSliceEffectClass
@@ -28,18 +28,21 @@ struct _NineSliceEffectClass
     ClutterEffectClass parent_class;
 };
 
-ClutterEffect * nineslice_effect_new();
+ClutterEffect* nineslice_effect_new();
 
-void nineslice_effect_set_sprite( NineSliceEffect * effect, unsigned i, SpriteSheet::Sprite * sprite, bool async );
+void nineslice_effect_set_sprite( NineSliceEffect* effect, unsigned i, SpriteSheet::Sprite* sprite, bool async );
 
-bool nineslice_effect_is_loaded( NineSliceEffect * effect );
-void nineslice_effect_check_loaded( NineSliceEffect * effect );
+bool nineslice_effect_is_done( NineSliceEffect* effect );
+bool nineslice_effect_is_loaded( NineSliceEffect* effect );
+void nineslice_effect_signal_loaded_later( NineSliceEffect* effect );  // fires "load_finished" signal if true
 
-bool nineslice_effect_get_tile( NineSliceEffect * effect, unsigned i );
-void nineslice_effect_get_tile( NineSliceEffect * effect, gboolean tile[6] );
-void nineslice_effect_set_tile( NineSliceEffect * effect, unsigned i, bool t, bool guess );
-void nineslice_effect_set_tile( NineSliceEffect * effect, gboolean tile[6] );
+// There are 6 tile parameters (see nineslice.lb); set/get them individually or as an array
 
-std::vector< int > * nineslice_effect_get_borders( NineSliceEffect * effect );
+bool nineslice_effect_get_tile( NineSliceEffect* effect, unsigned i );
+void nineslice_effect_get_tile( NineSliceEffect* effect, gboolean tile[6] );
+void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess );
+void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] );
+
+std::vector< int >* nineslice_effect_get_borders( NineSliceEffect* effect );
 
 #endif

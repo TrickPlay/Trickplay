@@ -1,8 +1,7 @@
 module clutter_animator;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "util.h"
 #include "clutter_util.h"
 
@@ -17,11 +16,7 @@ void Animator_started( ClutterTimeline * timeline , gpointer anim )
 
 void Animator_completed( ClutterTimeline * timeline , gpointer anim )
 {
-#ifdef CLUTTER_VERSION_1_10
     if ( clutter_timeline_get_repeat_count( timeline ) == 0 )
-#else
-    if ( ! clutter_timeline_get_loop( timeline ) )
-#endif
     {
         g_object_unref( anim );
     }

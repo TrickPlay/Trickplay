@@ -7,14 +7,14 @@ class SocketDelegate : public TrickPlay::Socket::Delegate
 {
 public:
 
-	SocketDelegate( lua_State * _LS )
-	:
-		L( _LS )
-	{
-		socket.set_delegate( this );
-	}
+    SocketDelegate( lua_State * _LS )
+    :
+        L( _LS )
+    {
+        socket.set_delegate( this );
+    }
 
-	TrickPlay::Socket socket;
+    TrickPlay::Socket socket;
 
     virtual void on_connected();
 
@@ -30,42 +30,42 @@ public:
 
 private:
 
-	lua_State * L;
+    lua_State * L;
 };
 
 ]]
 
 class Socket [[ SocketDelegate * ]]
 {
-	Socket()
-		[[
-			self = lb_construct( SocketDelegate , new SocketDelegate( L ) );
-		]];
+    Socket()
+        [[
+            self = lb_construct( SocketDelegate , new SocketDelegate( L ) );
+        ]];
 
-	~Socket()
-		[[
-			delete self;
-		]];
+    ~Socket()
+        [[
+            delete self;
+        ]];
 
-	readonly bool is_connected
-		[[
-			is_connected = self->socket.is_connected();
-		]];
+    readonly bool is_connected
+        [[
+            is_connected = self->socket.is_connected();
+        ]];
 
-	connect( string host_and_port, int default_port = 80 )
-		[[
-			self->socket.connect( host_and_port, default_port );
-		]];
+    connect( string host_and_port, int default_port = 80 )
+        [[
+            self->socket.connect( host_and_port, default_port );
+        ]];
 
-	disconnect()
-		[[
-			self->socket.disconnect();
-		]];
+    disconnect()
+        [[
+            self->socket.disconnect();
+        ]];
 
-	write( lstring data )
-		[[
-			self->socket.write( ( const guint8 * ) data, data_len );
-		]];
+    write( lstring data )
+        [[
+            self->socket.write( ( const guint8 * ) data, data_len );
+        ]];
 
     function on_connected
         [[
@@ -184,7 +184,7 @@ void SocketDelegate::on_connected()
 
 void SocketDelegate::on_connect_failed()
 {
-	lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_connect_failed",0,0);
+    lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_connect_failed",0,0);
 }
 
 void SocketDelegate::on_disconnected()
@@ -199,8 +199,8 @@ void SocketDelegate::on_write_failed()
 
 void SocketDelegate::on_data_read( const guint8 * data, gsize count )
 {
-	lua_pushlstring( L, ( const char * ) data, count );
-	lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_data_read",1,0);
+    lua_pushlstring( L, ( const char * ) data, count );
+    lb_invoke_callbacks(L,this,"SOCKET_METATABLE","on_data_read",1,0);
 }
 
 void SocketDelegate::on_read_failed()

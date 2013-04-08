@@ -3,8 +3,7 @@
 #include <fstream>
 #include <algorithm>
 
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "libexif/exif-data.h"
 
 #include "common.h"
@@ -26,9 +25,9 @@
 
 //=============================================================================
 
-static ThreadPool * get_images_threadpool( bool destroy = false )
+static ThreadPool* get_images_threadpool( bool destroy = false )
 {
-    static ThreadPool * tp = 0;
+    static ThreadPool* tp = 0;
 
     if ( destroy )
     {
@@ -56,8 +55,8 @@ class ExternalDecoder : public Images::Decoder
 {
 public:
 
-    ExternalDecoder( TPContext * _context , TPImageDecoder _decoder, gpointer _decoder_data )
-    :
+    ExternalDecoder( TPContext* _context , TPImageDecoder _decoder, gpointer _decoder_data )
+        :
         context( _context ),
         decoder( _decoder ),
         decoder_data( _decoder_data )
@@ -70,12 +69,12 @@ public:
         return context->get_bool( TP_IMAGE_DECODER_ENABLED , true );
     }
 
-    virtual const char * name()
+    virtual const char* name()
     {
         return "External Decoder";
     }
 
-    virtual int decode( gpointer data, gsize size, TPImage * image )
+    virtual int decode( gpointer data, gsize size, TPImage* image )
     {
         if ( ! enabled() )
         {
@@ -121,7 +120,7 @@ public:
         return result;
     }
 
-    virtual int decode( const char * filename, TPImage * image )
+    virtual int decode( const char* filename, TPImage* image )
     {
         if ( ! enabled() )
         {
@@ -187,7 +186,7 @@ public:
             return TP_IMAGE_DECODE_FAILED;
         }
 
-        gchar * buffer = g_new( gchar, pos );
+        gchar* buffer = g_new( gchar, pos );
 
         if ( ! buffer )
         {
@@ -212,7 +211,7 @@ public:
 
 private:
 
-    TPContext *     context;
+    TPContext*      context;
     TPImageDecoder  decoder;
     gpointer        decoder_data;
 };
@@ -220,9 +219,9 @@ private:
 //=============================================================================
 // Wraps around a TPImage to make it a little safer
 
-Image * Image::make( const TPImage & image )
+Image* Image::make( const TPImage& image )
 {
-    Image *img = new Image( g_slice_dup( TPImage,  &image ) );
+    Image* img = new Image( g_slice_dup( TPImage,  &image ) );
 
     // This next line is superfluous but helps clang realize we're not leaking that buffer
     img->image->pixels = image.pixels;
@@ -232,15 +231,15 @@ Image * Image::make( const TPImage & image )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::decode( gpointer data, gsize size, bool read_tags , const gchar * content_type )
+Image* Image::decode( gpointer data, gsize size, bool read_tags , const gchar* content_type )
 {
-    TPImage * image = Images::decode_image( data, size, content_type );
+    TPImage* image = Images::decode_image( data, size, content_type );
 
-    Image * result = image ? new Image( image ) : 0;
+    Image* result = image ? new Image( image ) : 0;
 
     if ( result && read_tags )
     {
-    	result->load_tags( data , size );
+        result->load_tags( data , size );
     }
 
     return result;
@@ -248,15 +247,15 @@ Image * Image::decode( gpointer data, gsize size, bool read_tags , const gchar *
 
 //-----------------------------------------------------------------------------
 
-Image * Image::decode( const gchar * filename , bool read_tags )
+Image* Image::decode( const gchar* filename , bool read_tags )
 {
-    TPImage * image = Images::decode_image( filename );
+    TPImage* image = Images::decode_image( filename );
 
-    Image * result = image ? new Image( image ) : 0;
+    Image* result = image ? new Image( image ) : 0;
 
     if ( result && read_tags )
     {
-    	result->load_tags( filename );
+        result->load_tags( filename );
     }
 
     return result;
@@ -264,18 +263,18 @@ Image * Image::decode( const gchar * filename , bool read_tags )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::screenshot( ClutterActor *stage )
+Image* Image::screenshot( ClutterActor* stage )
 {
     TPImage image;
 
     if ( ! stage )
     {
-    	return 0;
+        return 0;
     }
 
     if ( ! CLUTTER_ACTOR_IS_VISIBLE( stage ) )
     {
-    	return 0;
+        return 0;
     }
 
     gfloat width;
@@ -293,9 +292,9 @@ Image * Image::screenshot( ClutterActor *stage )
     // The alpha component of the stage is meaningless, so we set it
     // to 255 for every pixel.
 
-    guchar * p = ( guchar * ) image.pixels + 3;
+    guchar* p = ( guchar* ) image.pixels + 3;
 
-    for ( int i = 0; i < width * height ; ++i , p += 4  )
+    for ( int i = 0; i < width * height ; ++i , p += 4 )
     {
         *p = 255;
     }
@@ -320,8 +319,8 @@ Image::Image()
 
 //-----------------------------------------------------------------------------
 
-Image::Image( TPImage * _image )
-:
+Image::Image( TPImage* _image )
+    :
     image( _image )
 {
     g_assert( image );
@@ -329,7 +328,7 @@ Image::Image( TPImage * _image )
 
 //-----------------------------------------------------------------------------
 
-Image::Image( const Image & )
+Image::Image( const Image& )
 {
     g_assert( false );
 }
@@ -344,7 +343,7 @@ Image::~Image()
 
 //-----------------------------------------------------------------------------
 
-Image * Image::make( cairo_surface_t * surface )
+Image* Image::make( cairo_surface_t* surface )
 {
     g_assert( surface );
 
@@ -353,7 +352,7 @@ Image * Image::make( cairo_surface_t * surface )
         return 0;
     }
 
-    guint8 * source = ( guint8 * ) cairo_image_surface_get_data( surface );
+    guint8* source = ( guint8* ) cairo_image_surface_get_data( surface );
 
     if ( ! source )
     {
@@ -377,27 +376,27 @@ Image * Image::make( cairo_surface_t * surface )
         return 0;
     }
 
-    guint8 * destination = ( guint8 * ) result.pixels;
+    guint8* destination = ( guint8* ) result.pixels;
 
     int source_stride = cairo_image_surface_get_stride( surface );
 
     for ( unsigned int r = 0; r < result.height; ++r )
     {
-        guint8 * source_pixel = source;
-        guint8 * dest_pixel = destination;
+        guint8* source_pixel = source;
+        guint8* dest_pixel = destination;
 
         for ( unsigned int c = 0; c < result.width; ++c , source_pixel += 4 )
         {
 #if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
-            *(dest_pixel++) = source_pixel[2];
-            *(dest_pixel++) = source_pixel[1];
-            *(dest_pixel++) = source_pixel[0];
-            *(dest_pixel++) = source_pixel[3];
+            *( dest_pixel++ ) = source_pixel[2];
+            *( dest_pixel++ ) = source_pixel[1];
+            *( dest_pixel++ ) = source_pixel[0];
+            *( dest_pixel++ ) = source_pixel[3];
 #else
-            *(dest_pixel++) = source_pixel[1];
-            *(dest_pixel++) = source_pixel[2];
-            *(dest_pixel++) = source_pixel[3];
-            *(dest_pixel++) = source_pixel[0];
+            *( dest_pixel++ ) = source_pixel[1];
+            *( dest_pixel++ ) = source_pixel[2];
+            *( dest_pixel++ ) = source_pixel[3];
+            *( dest_pixel++ ) = source_pixel[0];
 #endif
         }
 
@@ -410,9 +409,9 @@ Image * Image::make( cairo_surface_t * surface )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::convert_to_cairo_argb32() const
+Image* Image::convert_to_cairo_argb32() const
 {
-    TPImage * result = g_slice_new0( TPImage );
+    TPImage* result = g_slice_new0( TPImage );
 
     result->bgr = FALSE;
     result->depth = 4;
@@ -423,55 +422,55 @@ Image * Image::convert_to_cairo_argb32() const
     result->free_image = 0;
     result->pm_alpha = 1;
 
-    guint8 * dest_pixel = ( guint8 * ) result->pixels;
+    guint8* dest_pixel = ( guint8* ) result->pixels;
 
-    const guint8 * source_pixel;
+    const guint8* source_pixel;
 
     double mult;
 
     for ( unsigned int r = 0; r < image->height; ++r )
     {
-        source_pixel = ( ( const guint8 * ) image->pixels ) + ( image->pitch * r );
+        source_pixel = ( ( const guint8* ) image->pixels ) + ( image->pitch * r );
 
         for ( unsigned int c = 0; c < image->width; ++c )
         {
             if ( image->depth == 3 )
             {
 #if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
-                *(dest_pixel++) = source_pixel[2];
-                *(dest_pixel++) = source_pixel[1];
-                *(dest_pixel++) = source_pixel[0];
-                *(dest_pixel++) = 255;
+                *( dest_pixel++ ) = source_pixel[2];
+                *( dest_pixel++ ) = source_pixel[1];
+                *( dest_pixel++ ) = source_pixel[0];
+                *( dest_pixel++ ) = 255;
 #else
-                *(dest_pixel++) = 255;
-                *(dest_pixel++) = source_pixel[0];
-                *(dest_pixel++) = source_pixel[1];
-                *(dest_pixel++) = source_pixel[2];
+                *( dest_pixel++ ) = 255;
+                *( dest_pixel++ ) = source_pixel[0];
+                *( dest_pixel++ ) = source_pixel[1];
+                *( dest_pixel++ ) = source_pixel[2];
 #endif
                 source_pixel += 3;
             }
             else
             {
-            	if ( ! image->pm_alpha )
-            	{
-            		mult = source_pixel[ 3 ] / 255.0;
-            	}
-            	else
-            	{
-            		mult = 1;
-            	}
+                if ( ! image->pm_alpha )
+                {
+                    mult = source_pixel[ 3 ] / 255.0;
+                }
+                else
+                {
+                    mult = 1;
+                }
 
 #if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
 
-                *(dest_pixel++) = source_pixel[2] * mult;
-                *(dest_pixel++) = source_pixel[1] * mult;
-                *(dest_pixel++) = source_pixel[0] * mult;
-                *(dest_pixel++) = source_pixel[3];
+                *( dest_pixel++ ) = source_pixel[2] * mult;
+                *( dest_pixel++ ) = source_pixel[1] * mult;
+                *( dest_pixel++ ) = source_pixel[0] * mult;
+                *( dest_pixel++ ) = source_pixel[3];
 #else
-                *(dest_pixel++) = source_pixel[3];
-                *(dest_pixel++) = source_pixel[0] * mult;
-                *(dest_pixel++) = source_pixel[1] * mult;
-                *(dest_pixel++) = source_pixel[2] * mult;
+                *( dest_pixel++ ) = source_pixel[3];
+                *( dest_pixel++ ) = source_pixel[0] * mult;
+                *( dest_pixel++ ) = source_pixel[1] * mult;
+                *( dest_pixel++ ) = source_pixel[2] * mult;
 #endif
                 source_pixel += 4;
             }
@@ -485,13 +484,13 @@ Image * Image::convert_to_cairo_argb32() const
 
 String Image::checksum() const
 {
-    GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
+    GChecksum* ck = g_checksum_new( G_CHECKSUM_MD5 );
 
-    guchar * source;
+    guchar* source;
 
     for ( unsigned int r = 0; r < image->height; ++r )
     {
-        source = ( ( guchar * ) image->pixels ) + ( image->pitch * r );
+        source = ( ( guchar* ) image->pixels ) + ( image->pitch * r );
 
         g_checksum_update( ck , source , image->width * image->depth );
     }
@@ -505,28 +504,28 @@ String Image::checksum() const
 
 //-----------------------------------------------------------------------------
 
-static void surface_destroy_image( void * image )
+static void surface_destroy_image( void* image )
 {
-    delete ( Image * ) image;
+    delete( Image* ) image;
 }
 
 //-----------------------------------------------------------------------------
 
-cairo_surface_t * Image::cairo_surface() const
+cairo_surface_t* Image::cairo_surface() const
 {
-    Image * cairo_image = convert_to_cairo_argb32();
+    Image* cairo_image = convert_to_cairo_argb32();
 
     if ( ! cairo_image )
     {
         return 0;
     }
 
-    cairo_surface_t * surface = cairo_image_surface_create_for_data(
-        ( unsigned char * ) cairo_image->pixels(),
-        CAIRO_FORMAT_ARGB32,
-        cairo_image->width(),
-        cairo_image->height(),
-        cairo_image->pitch() );
+    cairo_surface_t* surface = cairo_image_surface_create_for_data(
+            ( unsigned char* ) cairo_image->pixels(),
+            CAIRO_FORMAT_ARGB32,
+            cairo_image->width(),
+            cairo_image->height(),
+            cairo_image->pitch() );
 
     if ( ! surface )
     {
@@ -547,11 +546,11 @@ cairo_surface_t * Image::cairo_surface() const
 
 //-----------------------------------------------------------------------------
 
-bool Image::write_to_png( const gchar * filename ) const
+bool Image::write_to_png( const gchar* filename ) const
 {
     bool result = false;
 
-    if ( cairo_surface_t * surface = this->cairo_surface() )
+    if ( cairo_surface_t* surface = this->cairo_surface() )
     {
         result = ( CAIRO_STATUS_SUCCESS == cairo_surface_write_to_png( surface , filename ) );
 
@@ -570,7 +569,7 @@ bool Image::is_packed() const
 
 //-----------------------------------------------------------------------------
 
-Image * Image::make_packed_copy() const
+Image* Image::make_packed_copy() const
 {
     if ( ! image )
     {
@@ -588,9 +587,9 @@ Image * Image::make_packed_copy() const
         return 0;
     }
 
-    const guint8 * source_row = ( const guint8 * ) image->pixels;
+    const guint8* source_row = ( const guint8* ) image->pixels;
 
-    guint8 * dest_row = ( guint8 * ) result.pixels;
+    guint8* dest_row = ( guint8* ) result.pixels;
 
     for ( unsigned int r = 0; r < result.height; ++r )
     {
@@ -605,7 +604,7 @@ Image * Image::make_packed_copy() const
 
 //-----------------------------------------------------------------------------
 
-Image * Image::make_copy() const
+Image* Image::make_copy() const
 {
     if ( ! image )
     {
@@ -635,19 +634,20 @@ void Image::flip_y()
     {
         return;
     }
+
     unsigned int pitch = image->pitch;
 
-    guint8 * top_row = ( guint8 * ) image->pixels;
-    guint8 * bot_row = top_row + ( pitch * ( image->height - 1 ) );
+    guint8* top_row = ( guint8* ) image->pixels;
+    guint8* bot_row = top_row + ( pitch * ( image->height - 1 ) );
 
-    guint8 * temp_row = ( guint8 * ) malloc( pitch );
+    guint8* temp_row = ( guint8* ) malloc( pitch );
 
     if ( ! temp_row )
     {
         return;
     }
 
-    while( bot_row > top_row )
+    while ( bot_row > top_row )
     {
         memcpy( temp_row , top_row , pitch );
         memcpy( top_row , bot_row , pitch );
@@ -668,20 +668,20 @@ void Image::flip_y()
     d = ((t >> 8) + t) >> 8;                    \
   } G_STMT_END
 
-void Image::premultiply_alpha( TPImage * image )
+void Image::premultiply_alpha( TPImage* image )
 {
-	g_assert( image );
+    g_assert( image );
 
     if ( image->depth != 4 || image->pm_alpha )
     {
         return;
     }
 
-    guint8 * row = ( guint8 * ) image->pixels;
+    guint8* row = ( guint8* ) image->pixels;
 
     for ( unsigned int r = 0; r < image->height; ++r )
     {
-        guint8 * p = row;
+        guint8* p = row;
 
         for ( unsigned int c = 0; c < image->width; ++c , p += 4 )
         {
@@ -691,9 +691,9 @@ void Image::premultiply_alpha( TPImage * image )
             unsigned int t2;
             unsigned int t3;
 
-            MULT(p[0] , a , t1 );
-            MULT(p[1] , a , t2 );
-            MULT(p[2] , a , t3 );
+            MULT( p[0] , a , t1 );
+            MULT( p[1] , a , t2 );
+            MULT( p[2] , a , t3 );
         }
 
         row += image->pitch;
@@ -706,14 +706,14 @@ void Image::premultiply_alpha( TPImage * image )
 
 void Image::premultiply_alpha( )
 {
-	premultiply_alpha( image );
+    premultiply_alpha( image );
 }
 
 //-----------------------------------------------------------------------------
 
-void Image::destroy( void * image )
+void Image::destroy( void* image )
 {
-    delete ( Image * ) image;
+    delete( Image* ) image;
 }
 
 //-----------------------------------------------------------------------------
@@ -723,7 +723,7 @@ class DecodeTask : public ThreadPool::Task
 public:
 
     DecodeTask( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
-    :
+        :
         image( 0 ),
         callback( _callback ),
         user( _user ),
@@ -756,7 +756,7 @@ public:
 
 protected:
 
-    Image *                     image;
+    Image*                      image;
 
 private:
 
@@ -771,11 +771,11 @@ class DecodeFileTask : public DecodeTask
 {
 public:
 
-    DecodeFileTask( const gchar * _filename , bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
-    :
+    DecodeFileTask( const gchar* _filename , bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+        :
         DecodeTask( _callback , _user , _destroy_notify ),
         filename( _filename ),
-    	read_tags( _read_tags )
+        read_tags( _read_tags )
     {
 
     }
@@ -788,7 +788,7 @@ public:
 private:
 
     String                      filename;
-    bool						read_tags;
+    bool                        read_tags;
 };
 
 //-----------------------------------------------------------------------------
@@ -797,8 +797,8 @@ class DecodeBufferTask : public DecodeTask
 {
 public:
 
-    DecodeBufferTask( GByteArray * _bytes , bool _read_tags , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
-    :
+    DecodeBufferTask( GByteArray* _bytes , bool _read_tags , const gchar* _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+        :
         DecodeTask( _callback , _user , _destroy_notify ),
         bytes( _bytes ),
         read_tags( _read_tags ),
@@ -819,14 +819,14 @@ public:
 
 private:
 
-    GByteArray *    bytes;
-    bool			read_tags;
+    GByteArray*     bytes;
+    bool            read_tags;
     String          content_type;
 };
 
 //-----------------------------------------------------------------------------
 
-void Image::decode_async( const gchar * filename , bool read_tags , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+void Image::decode_async( const gchar* filename , bool read_tags , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     g_assert( filename );
 
@@ -835,7 +835,7 @@ void Image::decode_async( const gchar * filename , bool read_tags , DecodeAsyncC
 
 //-----------------------------------------------------------------------------
 
-void Image::decode_async( GByteArray * bytes , bool read_tags , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+void Image::decode_async( GByteArray* bytes , bool read_tags , const gchar* content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     g_assert( bytes );
     g_assert( bytes->data );
@@ -848,238 +848,245 @@ void Image::decode_async( GByteArray * bytes , bool read_tags , const gchar * co
 
 typedef struct
 {
-	ExifData * 		exif_data;
-	JSON::Object * 	tags;
+    ExifData*      exif_data;
+    JSON::Object*  tags;
 
 } ExifClosure;
 
-static void foreach_exif_entry( ExifEntry * entry , void * _closure )
+static void foreach_exif_entry( ExifEntry* entry , void* _closure )
 {
-	if ( ! entry )
-	{
-		return;
-	}
+    if ( ! entry )
+    {
+        return;
+    }
 
-	//.........................................................................
-	// Bail out of types we don't handle
+    //.........................................................................
+    // Bail out of types we don't handle
 
-	switch( entry->format )
-	{
-	case EXIF_FORMAT_UNDEFINED:
-	case EXIF_FORMAT_FLOAT:
-	case EXIF_FORMAT_DOUBLE:
-		return;
-	default:
-		break;
-	}
+    switch ( entry->format )
+    {
+        case EXIF_FORMAT_UNDEFINED:
+        case EXIF_FORMAT_FLOAT:
+        case EXIF_FORMAT_DOUBLE:
+            return;
 
-	//.........................................................................
+        default:
+            break;
+    }
 
-	unsigned char component_size = exif_format_get_size( entry->format );
+    //.........................................................................
 
-	ExifIfd ifd = exif_content_get_ifd( entry->parent );
+    unsigned char component_size = exif_format_get_size( entry->format );
 
-	const char * tag_name = exif_tag_get_name_in_ifd( entry->tag , ifd );
+    ExifIfd ifd = exif_content_get_ifd( entry->parent );
 
-	if ( ! tag_name || ! entry->data || ! entry->size || ! component_size || ! entry->components )
-	{
-		return;
-	}
+    const char* tag_name = exif_tag_get_name_in_ifd( entry->tag , ifd );
 
-	//.........................................................................
-	// Add a prefix based on the IFD
+    if ( ! tag_name || ! entry->data || ! entry->size || ! component_size || ! entry->components )
+    {
+        return;
+    }
 
-	String name( tag_name );
+    //.........................................................................
+    // Add a prefix based on the IFD
 
-	switch( ifd )
-	{
-	case EXIF_IFD_0:
-		name = "IMAGE/" + name;
-		break;
-	case EXIF_IFD_1:
-		name = "THUMBNAIL/" + name;
-		break;
-	case EXIF_IFD_EXIF:
-		name = "EXIF/" + name;
-		break;
-	case EXIF_IFD_GPS:
-		name = "GPS/" + name;
-		break;
-	case EXIF_IFD_INTEROPERABILITY:
-		name = "INTEROP/" + name;
-		break;
-	default:
-		return;
-	}
+    String name( tag_name );
 
-	ExifClosure * closure = ( ExifClosure * ) _closure;
+    switch ( ifd )
+    {
+        case EXIF_IFD_0:
+            name = "IMAGE/" + name;
+            break;
 
-	JSON::Object * tags = closure->tags;
+        case EXIF_IFD_1:
+            name = "THUMBNAIL/" + name;
+            break;
 
-	//.........................................................................
-	// ASCII ones are easy
+        case EXIF_IFD_EXIF:
+            name = "EXIF/" + name;
+            break;
 
-	if ( entry->format == EXIF_FORMAT_ASCII )
-	{
-		(*tags)[ name ] = String( ( const char * ) entry->data , entry->size );
-		return;
-	}
+        case EXIF_IFD_GPS:
+            name = "GPS/" + name;
+            break;
 
-	//.........................................................................
+        case EXIF_IFD_INTEROPERABILITY:
+            name = "INTEROP/" + name;
+            break;
 
-	if ( ( entry->components * component_size ) != entry->size )
-	{
-		return;
-	}
+        default:
+            return;
+    }
 
-	ExifByteOrder byte_order = exif_data_get_byte_order( closure->exif_data );
+    ExifClosure* closure = ( ExifClosure* ) _closure;
 
-	const unsigned char * data = entry->data;
+    JSON::Object* tags = closure->tags;
 
-	JSON::Array array;
+    //.........................................................................
+    // ASCII ones are easy
 
-	for ( unsigned long i = 0; i < entry->components; ++i )
-	{
-		switch( entry->format )
-		{
-		case EXIF_FORMAT_BYTE:
-			array.append( JSON::Value( int( * data ) ) );
-			break;
+    if ( entry->format == EXIF_FORMAT_ASCII )
+    {
+        ( *tags )[ name ] = String( ( const char* ) entry->data , entry->size );
+        return;
+    }
 
-		case EXIF_FORMAT_SHORT:
-			array.append( JSON::Value( int( exif_get_short( data , byte_order ) ) ) );
-			break;
+    //.........................................................................
 
-		case EXIF_FORMAT_LONG:
-			array.append( JSON::Value( int( exif_get_long( data , byte_order ) ) ) );
-			break;
+    if ( ( entry->components * component_size ) != entry->size )
+    {
+        return;
+    }
 
-		case EXIF_FORMAT_SBYTE:
-			array.append( JSON::Value( int( * ( ( const char * ) data ) ) ) );
-			break;
+    ExifByteOrder byte_order = exif_data_get_byte_order( closure->exif_data );
 
-		case EXIF_FORMAT_SSHORT:
-			array.append( JSON::Value( exif_get_sshort( data , byte_order ) ) );
-			break;
+    const unsigned char* data = entry->data;
 
-		case EXIF_FORMAT_SLONG:
-			array.append( JSON::Value( exif_get_slong( data , byte_order ) ) );
-			break;
+    JSON::Array array;
 
-		// TODO: I don't like representing a rational number as a string with a slash,
+    for ( unsigned long i = 0; i < entry->components; ++i )
+    {
+        switch ( entry->format )
+        {
+            case EXIF_FORMAT_BYTE:
+                array.append( JSON::Value( int( * data ) ) );
+                break;
 
-		case EXIF_FORMAT_SRATIONAL:
-		{
-			ExifSRational r = exif_get_srational( data , byte_order );
-			array.append( Util::format("%ld/%ld" , r.numerator , r.denominator ) );
-			break;
-		}
+            case EXIF_FORMAT_SHORT:
+                array.append( JSON::Value( int( exif_get_short( data , byte_order ) ) ) );
+                break;
 
-		case EXIF_FORMAT_RATIONAL:
-		{
-			ExifRational r = exif_get_rational( data , byte_order );
-			array.append( Util::format("%lu/%lu" , r.numerator , r.denominator ) );
-			break;
-		}
-		default:
-			break;
-		}
+            case EXIF_FORMAT_LONG:
+                array.append( JSON::Value( int( exif_get_long( data , byte_order ) ) ) );
+                break;
 
-		data += component_size;
-	}
+            case EXIF_FORMAT_SBYTE:
+                array.append( JSON::Value( int( * ( ( const char* ) data ) ) ) );
+                break;
 
-	if ( array.size() == 1 )
-	{
-		(*tags)[ name ] = array[ 0 ];
-	}
-	else if ( array.size() > 1 )
-	{
-		(*tags)[ name ] = array;
-	}
+            case EXIF_FORMAT_SSHORT:
+                array.append( JSON::Value( exif_get_sshort( data , byte_order ) ) );
+                break;
+
+            case EXIF_FORMAT_SLONG:
+                array.append( JSON::Value( exif_get_slong( data , byte_order ) ) );
+                break;
+
+                // TODO: I don't like representing a rational number as a string with a slash,
+
+            case EXIF_FORMAT_SRATIONAL:
+            {
+                ExifSRational r = exif_get_srational( data , byte_order );
+                array.append( Util::format( "%ld/%ld" , r.numerator , r.denominator ) );
+                break;
+            }
+
+            case EXIF_FORMAT_RATIONAL:
+            {
+                ExifRational r = exif_get_rational( data , byte_order );
+                array.append( Util::format( "%lu/%lu" , r.numerator , r.denominator ) );
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        data += component_size;
+    }
+
+    if ( array.size() == 1 )
+    {
+        ( *tags )[ name ] = array[ 0 ];
+    }
+    else if ( array.size() > 1 )
+    {
+        ( *tags )[ name ] = array;
+    }
 }
 
 
-static void load_exif_tags( ExifData * ed , JSON::Object & tags )
+static void load_exif_tags( ExifData* ed , JSON::Object& tags )
 {
-	tplog2( "  LOADING EXIF TAGS" );
+    tplog2( "  LOADING EXIF TAGS" );
 
-	exif_data_set_option( ed , EXIF_DATA_OPTION_IGNORE_UNKNOWN_TAGS );
-	exif_data_set_option( ed , EXIF_DATA_OPTION_FOLLOW_SPECIFICATION );
+    exif_data_set_option( ed , EXIF_DATA_OPTION_IGNORE_UNKNOWN_TAGS );
+    exif_data_set_option( ed , EXIF_DATA_OPTION_FOLLOW_SPECIFICATION );
 
-	exif_data_fix( ed );
+    exif_data_fix( ed );
 
-	ExifClosure closure;
+    ExifClosure closure;
 
-	closure.exif_data = ed;
-	closure.tags = & tags;
+    closure.exif_data = ed;
+    closure.tags = & tags;
 
-	for ( int i = 0; i < EXIF_IFD_COUNT; ++i )
-	{
-		if ( ExifContent * c = ed->ifd[i] )
-		{
-			exif_content_foreach_entry( c , foreach_exif_entry , & closure );
-		}
-	}
+    for ( int i = 0; i < EXIF_IFD_COUNT; ++i )
+    {
+        if ( ExifContent* c = ed->ifd[i] )
+        {
+            exif_content_foreach_entry( c , foreach_exif_entry , & closure );
+        }
+    }
 
-	tplog2( "  LOADED EXIF TAGS" );
+    tplog2( "  LOADED EXIF TAGS" );
 }
 
 //-----------------------------------------------------------------------------
 
-void Image::load_tags( const gchar * filename )
+void Image::load_tags( const gchar* filename )
 {
-	g_assert( filename );
+    g_assert( filename );
 
-	if ( ExifData * ed = exif_data_new_from_file( filename ) )
-	{
-		load_exif_tags( ed , tags );
-		exif_data_unref( ed );
-	}
-	else
-	{
-		tplog2( "  FAILED TO LOAD TAGS" );
-	}
+    if ( ExifData* ed = exif_data_new_from_file( filename ) )
+    {
+        load_exif_tags( ed , tags );
+        exif_data_unref( ed );
+    }
+    else
+    {
+        tplog2( "  FAILED TO LOAD TAGS" );
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void Image::load_tags( gpointer data , gsize size )
 {
-	g_assert( data );
-	g_assert( size );
+    g_assert( data );
+    g_assert( size );
 
-	if ( ExifData * ed = exif_data_new_from_data( ( const unsigned char * ) data , size ) )
-	{
-		load_exif_tags( ed , tags );
-		exif_data_unref( ed );
-	}
-	else
-	{
-		tplog2( "  FAILED TO LOAD TAGS" );
-	}
+    if ( ExifData* ed = exif_data_new_from_data( ( const unsigned char* ) data , size ) )
+    {
+        load_exif_tags( ed , tags );
+        exif_data_unref( ed );
+    }
+    else
+    {
+        tplog2( "  FAILED TO LOAD TAGS" );
+    }
 }
 
 //-----------------------------------------------------------------------------
 
-const JSON::Object & Image::get_tags() const
+const JSON::Object& Image::get_tags() const
 {
-	return tags;
+    return tags;
 }
 
 //-----------------------------------------------------------------------------
 
-void Image::free_image_with_g_free( TPImage * image )
+void Image::free_image_with_g_free( TPImage* image )
 {
-	g_assert( image );
-	g_assert( image->pixels );
+    g_assert( image );
+    g_assert( image->pixels );
 
-	g_free( image->pixels );
+    g_free( image->pixels );
 }
 
 //=============================================================================
 
 Images::Images()
-:
+    :
     external_decoder( 0 ),
     cache( 0 )
 {
@@ -1089,10 +1096,10 @@ Images::Images()
     g_rec_mutex_init( &mutex );
 #endif
 
-    Decoder * png  = ImageDecoders::make_png_decoder();
-    Decoder * jpeg = ImageDecoders::make_jpeg_decoder();
-    Decoder * tiff = ImageDecoders::make_tiff_decoder();
-    Decoder * gif  = ImageDecoders::make_gif_decoder();
+    Decoder* png  = ImageDecoders::make_png_decoder();
+    Decoder* jpeg = ImageDecoders::make_jpeg_decoder();
+    Decoder* tiff = ImageDecoders::make_tiff_decoder();
+    Decoder* gif  = ImageDecoders::make_gif_decoder();
 
     // This is the default order of decoders. The most common
     // type should go first. This order may be affected
@@ -1156,7 +1163,7 @@ Images::~Images()
 
     if ( cache )
     {
-    	delete cache;
+        delete cache;
     }
 
 #ifndef GLIB_VERSION_2_32
@@ -1168,16 +1175,16 @@ Images::~Images()
 
 //-----------------------------------------------------------------------------
 
-Images::Images( const Images & )
+Images::Images( const Images& )
 {
     g_assert( false );
 }
 
 //-----------------------------------------------------------------------------
 
-Images * Images::get( bool destroy )
+Images* Images::get( bool destroy )
 {
-    static Images * self = NULL;
+    static Images* self = NULL;
 
     if ( ! destroy )
     {
@@ -1210,9 +1217,9 @@ void Images::shutdown()
 
 //-----------------------------------------------------------------------------
 
-void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
+void Images::set_external_decoder( TPContext* context , TPImageDecoder decoder, gpointer decoder_data )
 {
-    Images * self( Images::get(false) );
+    Images* self( Images::get( false ) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1227,9 +1234,9 @@ void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder,
 
 //-----------------------------------------------------------------------------
 
-Images::DecoderList Images::get_decoders( const char * _hint )
+Images::DecoderList Images::get_decoders( const char* _hint )
 {
-    Images * self( Images::get(false) );
+    Images* self( Images::get( false ) );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1271,7 +1278,7 @@ Images::DecoderList Images::get_decoders( const char * _hint )
 
 //-----------------------------------------------------------------------------
 
-TPImage * Images::decode_image( gpointer data, gsize size, const char * content_type )
+TPImage* Images::decode_image( gpointer data, gsize size, const char* content_type )
 {
     PROFILER( "Images::decode_image/data" , PROFILER_INTERNAL_CALLS );
 
@@ -1317,7 +1324,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
 //-----------------------------------------------------------------------------
 
-TPImage * Images::decode_image( const char * filename )
+TPImage* Images::decode_image( const char* filename )
 {
     PROFILER( "Images::decode_image/file" , PROFILER_INTERNAL_CALLS );
 
@@ -1369,7 +1376,7 @@ TPImage * Images::decode_image( const char * filename )
 
 //-----------------------------------------------------------------------------
 
-void Images::destroy_image( TPImage * image )
+void Images::destroy_image( TPImage* image )
 {
     if ( image )
     {
@@ -1391,14 +1398,14 @@ void Images::destroy_image( TPImage * image )
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x , guint y , guint w , guint h )
+void Images::load_texture( ClutterTexture* texture, TPImage* image , guint x , guint y , guint w , guint h )
 {
     PROFILER( "Images::load_texture/clutter" , PROFILER_INTERNAL_CALLS );
 
     g_assert( texture );
     g_assert( image );
 
-    const guchar * pixels = ( const guchar * ) image->pixels;
+    const guchar* pixels = ( const guchar* ) image->pixels;
 
     guint width = image->width;
     guint height = image->height;
@@ -1414,25 +1421,25 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
 
     if ( image->depth == 4 && image->pm_alpha )
     {
-    	flags = ( ClutterTextureFlags ) ( flags | CLUTTER_TEXTURE_RGB_FLAG_PREMULT );
+        flags = ( ClutterTextureFlags )( flags | CLUTTER_TEXTURE_RGB_FLAG_PREMULT );
     }
 
     clutter_texture_set_from_rgb_data(
-        texture,
-        pixels,
-        image->depth == 4,
-        width,
-        height,
-        image->pitch,
-        image->depth,
-        flags,
-        NULL );
+            texture,
+            pixels,
+            image->depth == 4,
+            width,
+            height,
+            image->pitch,
+            image->depth,
+            flags,
+            NULL );
 
 #ifndef TP_PRODUCTION
 
     ImageInfo info( image );
 
-    if ( w !=0 && h != 0 )
+    if ( w != 0 && h != 0 )
     {
         info.width = w;
         info.height = h;
@@ -1447,27 +1454,27 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
 
 //-----------------------------------------------------------------------------
 
-void Images::add_to_image_list( ClutterTexture * texture , bool cached )
+void Images::add_to_image_list( ClutterTexture* texture , bool cached )
 {
 #ifndef TP_PRODUCTION
 
-	g_assert( texture );
+    g_assert( texture );
 
-        if ( cached )
-        {
-            gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( texture ), "tp-src" );
-            const gchar * prepend = "* ";
+    if ( cached )
+    {
+        gchar* source = ( gchar* ) g_object_get_data( G_OBJECT( texture ), "tp-src" );
+        const gchar* prepend = "* ";
 
-            gint new_length = strlen( source ) + strlen( prepend ) + 2 ;
+        gint new_length = strlen( source ) + strlen( prepend ) + 2 ;
 
-            gchar * new_source = g_new( gchar , new_length );
+        gchar* new_source = g_new( gchar , new_length );
 
-            snprintf( new_source , new_length , "%s%s" , prepend , source );\
+        snprintf( new_source , new_length , "%s%s" , prepend , source ); \
 
-            g_object_set_data_full( G_OBJECT( texture ) , "tp-src" , new_source , g_free );
-        }
+        g_object_set_data_full( G_OBJECT( texture ) , "tp-src" , new_source , g_free );
+    }
 
-	add_to_image_list( texture , ImageInfo( texture ) );
+    add_to_image_list( texture , ImageInfo( texture ) );
 
 #endif
 }
@@ -1478,15 +1485,15 @@ void Images::add_to_image_list( ClutterTexture * texture , bool cached )
 
 //-----------------------------------------------------------------------------
 
-void Images::add_to_image_list( ClutterTexture * texture , const ImageInfo & info )
+void Images::add_to_image_list( ClutterTexture* texture , const ImageInfo& info )
 {
-	g_assert( texture );
+    g_assert( texture );
 
-	// If the image does not exist in our map, we add it and also set
+    // If the image does not exist in our map, we add it and also set
     // a weak ref so we know when it is destroyed. If it is already in
     // the map, we just update its information.
 
-    Images * self( Images::get() );
+    Images* self( Images::get() );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1508,9 +1515,9 @@ void Images::add_to_image_list( ClutterTexture * texture , const ImageInfo & inf
 // This gets called when an image is destroyed - we just remove it from
 // the map.
 
-void Images::texture_destroyed_notify( gpointer data, GObject * instance )
+void Images::texture_destroyed_notify( gpointer data, GObject* instance )
 {
-    Images * self = ( Images *) data;
+    Images* self = ( Images* ) data;
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1536,7 +1543,7 @@ void Images::dump()
 {
 #ifndef TP_PRODUCTION
 
-    Images * self( Images::get() );
+    Images* self( Images::get() );
 
     Util::GSRMutexLock lock( & self->mutex );
 
@@ -1554,7 +1561,7 @@ void Images::dump()
 
     for ( ImageVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
     {
-        gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
+        gchar* source = ( gchar* ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
 
         g_info( "  %3d) %4u x %-4u : %8.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
 
@@ -1572,12 +1579,12 @@ void Images::dump()
 
 void Images::dump_cache()
 {
-    Images * self( Images::get(false) );
+    Images* self( Images::get( false ) );
 
     if ( ! self->cache )
     {
-    	g_info( "Cache is disabled or empty." );
-    	return;
+        g_info( "Cache is disabled or empty." );
+        return;
     }
 
     self->cache->dump();
@@ -1585,7 +1592,7 @@ void Images::dump_cache()
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, const Image * image , guint x , guint y , guint w , guint h )
+void Images::load_texture( ClutterTexture* texture, const Image* image , guint x , guint y , guint w , guint h )
 {
     g_assert( image );
 
@@ -1594,9 +1601,9 @@ void Images::load_texture( ClutterTexture * texture, const Image * image , guint
 
 //-----------------------------------------------------------------------------
 
-bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, const char * content_type )
+bool Images::load_texture( ClutterTexture* texture, gpointer data, gsize size, const char* content_type )
 {
-    TPImage * image = decode_image( data, size, content_type );
+    TPImage* image = decode_image( data, size, content_type );
 
     if ( ! image )
     {
@@ -1612,9 +1619,9 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
 
 //-----------------------------------------------------------------------------
 
-bool Images::load_texture( ClutterTexture * texture, const char * filename )
+bool Images::load_texture( ClutterTexture* texture, const char* filename )
 {
-    TPImage * image = decode_image( filename );
+    TPImage* image = decode_image( filename );
 
     if ( ! image )
     {
@@ -1630,94 +1637,90 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
 
 //-----------------------------------------------------------------------------
 
-bool Images::cache_put( TPContext * context , const String & key , CoglHandle texture , const JSON::Object & tags )
+bool Images::cache_put( TPContext* context , const String& key , CoglHandle texture , const JSON::Object& tags )
 {
-	g_assert( context );
+    g_assert( context );
 
-	if ( texture == COGL_INVALID_HANDLE )
-	{
-		return false;
-	}
+    if ( texture == COGL_INVALID_HANDLE )
+    {
+        return false;
+    }
 
-	Images * self = Images::get(false);
+    Images* self = Images::get( false );
 
-	// If the cache has not been created yet, do so now
+    // If the cache has not been created yet, do so now
 
-	if ( ! self->cache )
-	{
-		int limit = context->get_int( TP_TEXTURE_CACHE_LIMIT , TP_TEXTURE_CACHE_LIMIT_DEFAULT );
+    if ( ! self->cache )
+    {
+        int limit = context->get_int( TP_TEXTURE_CACHE_LIMIT , TP_TEXTURE_CACHE_LIMIT_DEFAULT );
 
-		if ( limit <= 0 )
-		{
-			return false;
-		}
+        if ( limit <= 0 )
+        {
+            return false;
+        }
 
-		self->cache = new Cache( limit );
-	}
+        self->cache = new Cache( limit );
+    }
 
-	return self->cache->put( key , texture , tags );
+    return self->cache->put( key , texture , tags );
 }
 
 //-----------------------------------------------------------------------------
 
-CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
+CoglHandle Images::cache_get( const String& key , JSON::Object& tags )
 {
-	Images * self = Images::get(false);
+    Images* self = Images::get( false );
 
-	if ( ! self->cache )
-	{
-		return COGL_INVALID_HANDLE;
-	}
+    if ( ! self->cache )
+    {
+        return COGL_INVALID_HANDLE;
+    }
 
-	return self->cache->get( key , tags );
+    return self->cache->get( key , tags );
 }
 
 //-----------------------------------------------------------------------------
 
-bool Images::cache_has( const String & key )
+bool Images::cache_has( const String& key )
 {
-	Images * self = Images::get(false);
+    Images* self = Images::get( false );
 
-	if ( ! self->cache )
-	{
-		return false;
-	}
+    if ( ! self->cache )
+    {
+        return false;
+    }
 
-	return self->cache->has( key );
+    return self->cache->has( key );
 }
 
 //=============================================================================
 
-#ifdef CLUTTER_VERSION_1_10
 #define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
-#else
-#define TP_COGL_TEXTURE(t) (t)
-#endif
 
-Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
-:
+Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object& _tags )
+    :
     handle( cogl_handle_ref( _handle ) ),
     timestamp( ::timestamp() ),
     tags( _tags )
 {
-	// Size in MB
+    // Size in MB
 
-	size = ( cogl_texture_get_height( TP_COGL_TEXTURE( handle ) ) * cogl_texture_get_rowstride( TP_COGL_TEXTURE( handle ) ) ) / ( 1024.0 * 1024.0 );
+    size = ( cogl_texture_get_height( TP_COGL_TEXTURE( handle ) ) * cogl_texture_get_rowstride( TP_COGL_TEXTURE( handle ) ) ) / ( 1024.0 * 1024.0 );
 }
 
 Images::Cache::Entry::~Entry()
 {
-	cogl_handle_unref( handle );
+    cogl_handle_unref( handle );
 }
 
 void Images::Cache::Entry::update_timestamp()
 {
-	timestamp = ::timestamp();
+    timestamp = ::timestamp();
 }
 
 
 Images::Cache::Cache( int _limit )
-:
+    :
     limit( _limit ),
     size( 0 )
 {
@@ -1725,162 +1728,162 @@ Images::Cache::Cache( int _limit )
 
 Images::Cache::~Cache()
 {
-	for ( Map::iterator it = map.begin(); it != map.end(); ++it )
-	{
-		delete it->second;
-	}
+    for ( Map::iterator it = map.begin(); it != map.end(); ++it )
+    {
+        delete it->second;
+    }
 }
 
-bool Images::Cache::put( const String & key , CoglHandle texture , const JSON::Object & tags )
+bool Images::Cache::put( const String& key , CoglHandle texture , const JSON::Object& tags )
 {
-	// Arguments have already been checked
+    // Arguments have already been checked
 
-	Map::iterator it( map.find( key ) );
+    Map::iterator it( map.find( key ) );
 
-	// An entry exists for this key
+    // An entry exists for this key
 
-	if ( it != map.end() )
-	{
-		size -= it->second->size;
+    if ( it != map.end() )
+    {
+        size -= it->second->size;
 
-		delete it->second;
+        delete it->second;
 
-		map.erase( it );
+        map.erase( it );
 
-		tplog2( "CACHE REMOVED '%s' : SIZE = %1.2f" , key.c_str() , size );
-	}
+        tplog2( "CACHE REMOVED '%s' : SIZE = %1.2f" , key.c_str() , size );
+    }
 
-	Entry * entry = new Entry( texture , tags );
+    Entry* entry = new Entry( texture , tags );
 
-	if ( ! entry )
-	{
-		return false;
-	}
+    if ( ! entry )
+    {
+        return false;
+    }
 
-	map[ key ] = entry;
+    map[ key ] = entry;
 
-	size += entry->size;
+    size += entry->size;
 
-	tplog2( "CACHE ADDED '%s' : SIZE = %1.2f" , key.c_str() , size );
+    tplog2( "CACHE ADDED '%s' : SIZE = %1.2f" , key.c_str() , size );
 
-	if ( size > limit )
-	{
-		prune();
-	}
+    if ( size > limit )
+    {
+        prune();
+    }
 
-	return true;
+    return true;
 }
 
-CoglHandle Images::Cache::get( const String & key , JSON::Object & tags )
+CoglHandle Images::Cache::get( const String& key , JSON::Object& tags )
 {
-	Map::iterator it( map.find( key ) );
+    Map::iterator it( map.find( key ) );
 
-	if ( it == map.end() )
-	{
-		tplog2( "CACHE MISS FOR '%s'" , key.c_str() );
+    if ( it == map.end() )
+    {
+        tplog2( "CACHE MISS FOR '%s'" , key.c_str() );
 
-		return COGL_INVALID_HANDLE;
-	}
+        return COGL_INVALID_HANDLE;
+    }
 
-	it->second->update_timestamp();
+    it->second->update_timestamp();
 
-	tplog2( "CACHE HIT FOR '%s'" , key.c_str() );
+    tplog2( "CACHE HIT FOR '%s'" , key.c_str() );
 
-	tags = it->second->tags;
+    tags = it->second->tags;
 
-	return it->second->handle;
+    return it->second->handle;
 }
 
-bool Images::Cache::has( const String & key )
+bool Images::Cache::has( const String& key )
 {
-	return map.find( key ) != map.end();
+    return map.find( key ) != map.end();
 }
 
-bool Images::Cache::prune_sort( const PruneEntry & a , const PruneEntry & b )
+bool Images::Cache::prune_sort( const PruneEntry& a , const PruneEntry& b )
 {
-	return a.second->timestamp < b.second->timestamp;
+    return a.second->timestamp < b.second->timestamp;
 }
 
 void Images::Cache::prune()
 {
-	tplog2( "CACHE PRUNING : SIZE = %1.2f" , size );
+    tplog2( "CACHE PRUNING : SIZE = %1.2f" , size );
 
-	// Copy all of the entries to a vector
+    // Copy all of the entries to a vector
 
-	PruneVector v;
+    PruneVector v;
 
-	v.reserve( map.size() );
+    v.reserve( map.size() );
 
-	for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
-	{
-		v.push_back( PruneEntry( it->first , it->second ) );
-	}
+    for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
+    {
+        v.push_back( PruneEntry( it->first , it->second ) );
+    }
 
-	// Sort them in order of timestamp, oldest ones will be first
+    // Sort them in order of timestamp, oldest ones will be first
 
-	std::sort( v.begin() , v.end() , prune_sort );
+    std::sort( v.begin() , v.end() , prune_sort );
 
-	// Set our target cache size
+    // Set our target cache size
 
-	double target_size = limit * 0.70;
+    double target_size = limit * 0.70;
 
-	// Now, get rid of each one, until we reach our target size
+    // Now, get rid of each one, until we reach our target size
 
-	for ( PruneVector::const_iterator it = v.begin(); it != v.end() && size > target_size; ++it )
-	{
-		size -= it->second->size;
+    for ( PruneVector::const_iterator it = v.begin(); it != v.end() && size > target_size; ++it )
+    {
+        size -= it->second->size;
 
-		tplog2( "  DROPPED '%s' : SIZE = %1.2f" , it->first.c_str() , size );
+        tplog2( "  DROPPED '%s' : SIZE = %1.2f" , it->first.c_str() , size );
 
-		delete it->second;
+        delete it->second;
 
-		map.erase( it->first );
+        map.erase( it->first );
 
-	}
+    }
 
-	tplog2( "CACHE PRUNED : SIZE = %1.2f" , size );
+    tplog2( "CACHE PRUNED : SIZE = %1.2f" , size );
 }
 
 
 void Images::Cache::dump()
 {
-	// Copy all of the entries to a vector
+    // Copy all of the entries to a vector
 
-	PruneVector v;
+    PruneVector v;
 
-	v.reserve( map.size() );
+    v.reserve( map.size() );
 
-	for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
-	{
-		v.push_back( PruneEntry( it->first , it->second ) );
-	}
+    for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
+    {
+        v.push_back( PruneEntry( it->first , it->second ) );
+    }
 
-	// Sort them in order of timestamp, oldest ones will be first
+    // Sort them in order of timestamp, oldest ones will be first
 
-	std::sort( v.begin() , v.end() , prune_sort );
+    std::sort( v.begin() , v.end() , prune_sort );
 
-	double total = 0;
-	int i = 1;
+    double total = 0;
+    int i = 1;
 
-	g_info( "Texture cache:" );
+    g_info( "Texture cache:" );
 
-	if ( ! v.empty() )
-	{
-		double now = v.back().second->timestamp;
+    if ( ! v.empty() )
+    {
+        double now = v.back().second->timestamp;
 
-		for ( PruneVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
-		{
-			g_info( "  %3d) %4u x %-4u : %8.2f KB : %8.3f s : %s" ,
-					i ,
-					cogl_texture_get_width( TP_COGL_TEXTURE( it->second->handle ) ),
-					cogl_texture_get_height( TP_COGL_TEXTURE( it->second->handle ) ),
-					it->second->size * 1024.0,
-					( now - it->second->timestamp ) / 1000,
-					it->first.c_str() );
+        for ( PruneVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
+        {
+            g_info( "  %3d) %4u x %-4u : %8.2f KB : %8.3f s : %s" ,
+                    i ,
+                    cogl_texture_get_width( TP_COGL_TEXTURE( it->second->handle ) ),
+                    cogl_texture_get_height( TP_COGL_TEXTURE( it->second->handle ) ),
+                    it->second->size * 1024.0,
+                    ( now - it->second->timestamp ) / 1000,
+                    it->first.c_str() );
 
-			total += it->second->size;
-		}
-	}
+            total += it->second->size;
+        }
+    }
 
     g_info( "" );
     g_info( "%d texture(s), %1.2f MB (limit is %d MB)", --i, total , limit );

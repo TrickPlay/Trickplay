@@ -1,8 +1,7 @@
 module clutter_clone;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "util.h"
 #include "clutter_util.h"
@@ -11,17 +10,17 @@ module clutter_clone;
 /***************************************
     Class: Clone
 
-	The Clone data type provides a method for improving memory efficiency by eliminating resource duplication. A common instance of resource duplication occurs when the same image is used by multiple objects, with each object loading and maintaining its own	copy of the image. Using Clone objects, a single Image object can load the image and then multiple Clone objects can be created that share the Image object's resource. Although the image is shared, each Clone can position and transform the image as it pleases.
+    The Clone data type provides a method for improving memory efficiency by eliminating resource duplication. A common instance of resource duplication occurs when the same image is used by multiple objects, with each object loading and maintaining its own   copy of the image. Using Clone objects, a single Image object can load the image and then multiple Clone objects can be created that share the Image object's resource. Although the image is shared, each Clone can position and transform the image as it pleases.
 
-	Any data type that implements the UIElement properties and functions may be cloned, which includes the Text, Image, Rectangle, and even Group date types. (Bitmap and Canvas data types cannot be cloned.) When a Group object is cloned, all the children in the Group are also cloned.
+    Any data type that implements the UIElement properties and functions may be cloned, which includes the Text, Image, Rectangle, and even Group date types. (Bitmap and Canvas data types cannot be cloned.) When a Group object is cloned, all the children in the Group are also cloned.
 
-	Objects in the TrickPlay SDK typically provide the properties and functions defined in the UIElement interface and then add additional functionality to implement a unique class. For example, the Image object provides the properties and functions of UIElement and, on top of that, provides image-specific capabilities, such as functions to specify and load an image file. When an Image is cloned, the Image-specific properties and functions are shared by each derived Clone object, while the UIElement properties and functions remain unique for each Clone. This enables a Clone to manipulate the image in its own unique manner by setting UIElement properties and calling UIElement functions, while operating under the shared image-specific settings defined by its related Image object.
+    Objects in the TrickPlay SDK typically provide the properties and functions defined in the UIElement interface and then add additional functionality to implement a unique class. For example, the Image object provides the properties and functions of UIElement and, on top of that, provides image-specific capabilities, such as functions to specify and load an image file. When an Image is cloned, the Image-specific properties and functions are shared by each derived Clone object, while the UIElement properties and functions remain unique for each Clone. This enables a Clone to manipulate the image in its own unique manner by setting UIElement properties and calling UIElement functions, while operating under the shared image-specific settings defined by its related Image object.
 
-	As an example, assume the existence of one Image object and two Clone objects derived from it. Using the image loaded by the Image object, one of the Clone objects may scale the image and position it in a corner of the screen, while the other Clone may rotate the image and display it in an opposite corner. Both Clones utilize the same image loaded by their related Image object, but only a single instance of the image is loaded and stored in memory. Also, a change to the Image object's tile property--a property specific to Image objects and not part of UIElement--will affect the tile processing for both Clones.
+    As an example, assume the existence of one Image object and two Clone objects derived from it. Using the image loaded by the Image object, one of the Clone objects may scale the image and position it in a corner of the screen, while the other Clone may rotate the image and display it in an opposite corner. Both Clones utilize the same image loaded by their related Image object, but only a single instance of the image is loaded and stored in memory. Also, a change to the Image object's tile property--a property specific to Image objects and not part of UIElement--will affect the tile processing for both Clones.
 
-	A Clone object cannot modify the class-specific properties, nor call class-specific functions; attempting to do so will have no effect. For example, a Clone object derived from an Image object may not alter the Image.tile property.
+    A Clone object cannot modify the class-specific properties, nor call class-specific functions; attempting to do so will have no effect. For example, a Clone object derived from an Image object may not alter the Image.tile property.
 
-	It is possible to generate a Clone object from another Clone. Creating a Clone from another Clone is identical to creating a Clone from a non-Clone.For example, starting with an Image object, a Clone object is created from the Image, and a second Clone is then created from the first Clone. The second Clone object will operate in the exact same manner as if it had been derived from the Image object. Note: Creating a Clone from another Clone can sometimes exhibit unexpected behavior; this is a known issue.
+    It is possible to generate a Clone object from another Clone. Creating a Clone from another Clone is identical to creating a Clone from a non-Clone.For example, starting with an Image object, a Clone object is created from the Image, and a second Clone is then created from the first Clone. The second Clone object will operate in the exact same manner as if it had been derived from the Image object. Note: Creating a Clone from another Clone can sometimes exhibit unexpected behavior; this is a known issue.
 */
 
 class Clone [[ClutterActor*]] actor
@@ -33,59 +32,59 @@ class Clone [[ClutterActor*]] actor
             g_object_ref( self );
             self = lb_construct_gobject( ClutterActor , self );
 
-		    ClutterUtil::initialize_actor(L,self,CLONE_METATABLE);
-		    ClutterUtil::set_props_from_table(L,props);
-		    g_object_unref( self );
+            ClutterUtil::initialize_actor(L,self,CLONE_METATABLE);
+            ClutterUtil::set_props_from_table(L,props);
+            g_object_unref( self );
         ]];
 
     ~Clone()
-		[[
-		]];
+        [[
+        ]];
 
 /***************************************
-	Property: source
+    Property: source
 
-	The source property references the object from which the Clone was derived.
+    The source property references the object from which the Clone was derived.
 
-	Note that if the Clone was derived from another Clone, the source property will not reference its ultimate class-specific object with which it actually shares properties. For a function that handles this situation, see the code example below.
+    Note that if the Clone was derived from another Clone, the source property will not reference its ultimate class-specific object with which it actually shares properties. For a function that handles this situation, see the code example below.
 
-	*Code Example:* Function to return a Clone object's ultimate class-specific object
+    *Code Example:* Function to return a Clone object's ultimate class-specific object
 
-		(code)
-		function get_ultimate_ancestor( src )
-			-- Is this the top of the Clone chain?
-			-- If object does not have a source property (only Clone objects have a "natural" source property)...
-			if (src.source == nil)
-			   or
-			   -- ...or object has a source property, but it's self-created, as in our Text example below, then...
-			   ((src.source ~= nil) and (src.extra.source ~= nil)) then
-				-- ...this is the ultimate ancestor
-				return src
-			end
+        (code)
+        function get_ultimate_ancestor( src )
+            -- Is this the top of the Clone chain?
+            -- If object does not have a source property (only Clone objects have a "natural" source property)...
+            if (src.source == nil)
+               or
+               -- ...or object has a source property, but it's self-created, as in our Text example below, then...
+               ((src.source ~= nil) and (src.extra.source ~= nil)) then
+                -- ...this is the ultimate ancestor
+                return src
+            end
 
-			-- Call function recursively, passing source property of Clone
-			return( get_ultimate_ancestor( src.source ) )
-		end
+            -- Call function recursively, passing source property of Clone
+            return( get_ultimate_ancestor( src.source ) )
+        end
 
-		-- ***Code to exercise the function***
-		-- Create a Text object and several Clones in a "Clone chain"
-		t = Text{ name="Shezzbotz", text="Some text", font="sans 60px", color="ff0000" }
-		c1 = Clone{ name="Clone #1", source=t }
-		c2 = Clone{ name="Clone #2", source=c1 }
-		c3 = Clone{ name="Clone #3", source=c2 }
-		c4 = Clone{ name="Clone #4", source=c3 }
+        -- ***Code to exercise the function***
+        -- Create a Text object and several Clones in a "Clone chain"
+        t = Text{ name="Shezzbotz", text="Some text", font="sans 60px", color="ff0000" }
+        c1 = Clone{ name="Clone #1", source=t }
+        c2 = Clone{ name="Clone #2", source=c1 }
+        c3 = Clone{ name="Clone #3", source=c2 }
+        c4 = Clone{ name="Clone #4", source=c3 }
 
-		-- To make things ultra-nasty, we'll add a source property to the Text object and even set it to one of the clones
-		t.source = c2
+        -- To make things ultra-nasty, we'll add a source property to the Text object and even set it to one of the clones
+        t.source = c2
 
-		-- Display name of Clone #4's ultimate ancestor
-		print( "Name of Clone #4's ultimate ancestor: ", get_ultimate_ancestor( c4.source ).name )
-		(end)
+        -- Display name of Clone #4's ultimate ancestor
+        print( "Name of Clone #4's ultimate ancestor: ", get_ultimate_ancestor( c4.source ).name )
+        (end)
 */
 
     UIElement source
         [[
-	    	ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
+            ClutterUtil::wrap_concrete_actor(L,clutter_clone_get_source(CLUTTER_CLONE(self)));
         ]]
         [[
             if ( lua_isnil( L , 2 ) )

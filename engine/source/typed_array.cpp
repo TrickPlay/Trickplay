@@ -7,7 +7,7 @@
 //=============================================================================
 
 ArrayBuffer::ArrayBuffer( gulong _length )
-:
+    :
     data( g_new0( guint8 , _length ) ),
     length( _length )
 {
@@ -22,23 +22,23 @@ ArrayBuffer::~ArrayBuffer()
 
 //.............................................................................
 
-bool ArrayBuffer::is_array_buffer( lua_State * L , int index )
+bool ArrayBuffer::is_array_buffer( lua_State* L , int index )
 {
     return LB_GET_ARRAYBUFFER( L , index ) != 0;
 }
 
 //.............................................................................
 
-ArrayBuffer * ArrayBuffer::from_lua( lua_State * L , int index )
+ArrayBuffer* ArrayBuffer::from_lua( lua_State* L , int index )
 {
-	return LB_GET_ARRAYBUFFER( L , index );
+    return LB_GET_ARRAYBUFFER( L , index );
 }
 
 //.............................................................................
 
-void ArrayBuffer::push( lua_State * L )
+void ArrayBuffer::push( lua_State* L )
 {
-    if ( UserData * ud = UserData::get_from_client( this ) )
+    if ( UserData* ud = UserData::get_from_client( this ) )
     {
         ud->push_proxy();
 
@@ -50,7 +50,7 @@ void ArrayBuffer::push( lua_State * L )
         lua_pop( L , 1 );
     }
 
-    UserData * ud = UserData::make( L , "ArrayBuffer" );
+    UserData* ud = UserData::make( L , "ArrayBuffer" );
 
     luaL_getmetatable( L , "ARRAYBUFFER_METATABLE" );
 
@@ -73,7 +73,7 @@ void ArrayBuffer::push( lua_State * L )
 // Bad one
 
 TypedArray::TypedArray()
-:
+    :
     type( T_INT8 ),
     bpe( bytes_per_element( T_INT8 ) ),
     length( 0 ),
@@ -87,12 +87,12 @@ TypedArray::TypedArray()
 // New typed array with a new buffer to hold _length elements.
 
 TypedArray::TypedArray( Type _type , gulong _length )
-:
+    :
     type( _type ),
     bpe( bytes_per_element( _type ) ),
     length( _length ),
     offset( 0 ),
-    buffer( new ArrayBuffer( bpe * _length ) ),
+    buffer( new ArrayBuffer( bpe* _length ) ),
     bad( false )
 {
 }
@@ -101,8 +101,8 @@ TypedArray::TypedArray( Type _type , gulong _length )
 // New typed array with a new buffer to hold _source->length elements.
 // All elements from the source array are converted and copied into this one.
 
-TypedArray::TypedArray( Type _type , TypedArray * _source )
-:
+TypedArray::TypedArray( Type _type , TypedArray* _source )
+    :
     type( _type ),
     bpe( bytes_per_element( _type ) ),
     length( _source->length ),
@@ -120,8 +120,8 @@ TypedArray::TypedArray( Type _type , TypedArray * _source )
 // New typed array that references an existing buffer. The offset is in bytes from
 // the beginning of the buffer. Length is the number of elements for this typed array.
 
-TypedArray::TypedArray( Type _type , ArrayBuffer * _buffer , gulong _offset , gulong _length )
-:
+TypedArray::TypedArray( Type _type , ArrayBuffer* _buffer , gulong _offset , gulong _length )
+    :
     type( _type ),
     bpe( bytes_per_element( _type ) ),
     length( _length ),
@@ -192,14 +192,14 @@ TypedArray::~TypedArray()
 
 //.............................................................................
 
-guint8 * TypedArray::get( gulong index )
+guint8* TypedArray::get( gulong index )
 {
     if ( bad || index >= length )
     {
         return 0;
     }
 
-    g_assert(buffer);
+    g_assert( buffer );
 
     return buffer->get_data() + offset + ( bpe * index );
 }
@@ -208,7 +208,7 @@ guint8 * TypedArray::get( gulong index )
 // Copy elements from a source array of any type. dest_offset is
 // number of elements in this array.
 
-bool TypedArray::copy_from( TypedArray * source , gulong dest_offset )
+bool TypedArray::copy_from( TypedArray* source , gulong dest_offset )
 {
     g_assert( source );
 
@@ -217,7 +217,7 @@ bool TypedArray::copy_from( TypedArray * source , gulong dest_offset )
         return false;
     }
 
-    TypedArray * real_source = source;
+    TypedArray* real_source = source;
 
     // If this array and the source array share the same buffer,
     // we have to copy from the source to a temporary array and then
@@ -228,8 +228,8 @@ bool TypedArray::copy_from( TypedArray * source , gulong dest_offset )
         real_source = new TypedArray( source->type , source );
     }
 
-    guint8 * src = real_source->get( 0 );
-    guint8 * dst = get( dest_offset );
+    guint8* src = real_source->get( 0 );
+    guint8* dst = get( dest_offset );
 
     if ( ! src || ! dst )
     {
@@ -247,130 +247,209 @@ bool TypedArray::copy_from( TypedArray * source , gulong dest_offset )
         {
             case T_INT8:
             {
-                gint8 * s = ( gint8 * ) src;
-                switch( type )
+                gint8* s = ( gint8* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_UINT8:
             {
-                guint8 * s = ( guint8 * ) src;
-                switch( type )
+                guint8* s = ( guint8* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_INT16:
             {
-                gint16 * s = ( gint16 * ) src;
-                switch( type )
+                gint16* s = ( gint16* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_UINT16:
             {
-                guint16 * s = ( guint16 * ) src;
-                switch( type )
+                guint16* s = ( guint16* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_INT32:
             {
-                gint32 * s = ( gint32 * ) src;
-                switch( type )
+                gint32* s = ( gint32* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_UINT32:
             {
-                guint32 * s = ( guint32 * ) src;
-                switch( type )
+                guint32* s = ( guint32* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_FLOAT32:
             {
-                gfloat * s = ( gfloat * ) src;
-                switch( type )
+                gfloat* s = ( gfloat* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
+
             case T_FLOAT64:
             {
-                gdouble * s = ( gdouble * ) src;
-                switch( type )
+                gdouble* s = ( gdouble* ) src;
+
+                switch ( type )
                 {
-                    case T_INT8:    * ( ( gint8 *   ) dst ) = * s; break;
-                    case T_UINT8:   * ( ( guint8 *  ) dst ) = * s; break;
-                    case T_INT16:   * ( ( gint16 *  ) dst ) = * s; break;
-                    case T_UINT16:  * ( ( guint16 * ) dst ) = * s; break;
-                    case T_INT32:   * ( ( gint32 *  ) dst ) = * s; break;
-                    case T_UINT32:  * ( ( guint32 * ) dst ) = * s; break;
-                    case T_FLOAT32: * ( ( gfloat *  ) dst ) = * s; break;
-                    case T_FLOAT64: * ( ( gdouble * ) dst ) = * s; break;
+                    case T_INT8:    * ( ( gint8* ) dst ) = * s; break;
+
+                    case T_UINT8:   * ( ( guint8* ) dst ) = * s; break;
+
+                    case T_INT16:   * ( ( gint16* ) dst ) = * s; break;
+
+                    case T_UINT16:  * ( ( guint16* ) dst ) = * s; break;
+
+                    case T_INT32:   * ( ( gint32* ) dst ) = * s; break;
+
+                    case T_UINT32:  * ( ( guint32* ) dst ) = * s; break;
+
+                    case T_FLOAT32: * ( ( gfloat* ) dst ) = * s; break;
+
+                    case T_FLOAT64: * ( ( gdouble* ) dst ) = * s; break;
                 }
+
                 break;
             }
         }
@@ -391,7 +470,7 @@ bool TypedArray::copy_from( TypedArray * source , gulong dest_offset )
 // Create a new sub-array with the same type as this one and
 // sharing the same buffer.
 
-TypedArray * TypedArray::subarray( glong begin , glong end )
+TypedArray* TypedArray::subarray( glong begin , glong end )
 {
     if ( begin < 0 )
     {
@@ -425,7 +504,7 @@ TypedArray * TypedArray::subarray( glong begin , glong end )
 
     if ( new_length <= 0 )
     {
-        TypedArray * result = new TypedArray( type , buffer , offset + ( begin * bpe ) );
+        TypedArray* result = new TypedArray( type , buffer , offset + ( begin * bpe ) );
 
         result->bad = false;
         result->length = 0;
@@ -440,7 +519,7 @@ TypedArray * TypedArray::subarray( glong begin , glong end )
 
 //.............................................................................
 
-TypedArray * TypedArray::from_lua_table( lua_State * L , int index , Type type )
+TypedArray* TypedArray::from_lua_table( lua_State* L , int index , Type type )
 {
     g_assert( lua_istable( L , index ) );
 
@@ -448,34 +527,36 @@ TypedArray * TypedArray::from_lua_table( lua_State * L , int index , Type type )
 
     lua_pushnil( L );
 
-    while( lua_next( L , index ) )
+    while ( lua_next( L , index ) )
     {
         if ( lua_isnumber( L , -1 ) )
         {
             ++length;
         }
+
         lua_pop( L , 1 );
     }
 
-    TypedArray * result = new TypedArray( T_FLOAT32 , length );
+    TypedArray* result = new TypedArray( T_FLOAT32 , length );
 
-    gfloat * src = ( gfloat * ) result->get( 0 );
+    gfloat* src = ( gfloat* ) result->get( 0 );
 
     lua_pushnil( L );
 
-    while( lua_next( L , index ) )
+    while ( lua_next( L , index ) )
     {
         if ( lua_isnumber( L , -1 ) )
         {
             * src = lua_tonumber( L , -1 );
             ++src;
         }
+
         lua_pop( L , 1 );
     }
 
     if ( type != T_FLOAT32 )
     {
-        TypedArray * source = result;
+        TypedArray* source = result;
 
         result = new TypedArray( type , source );
 
@@ -488,7 +569,7 @@ TypedArray * TypedArray::from_lua_table( lua_State * L , int index , Type type )
 //.............................................................................
 // Makes one base on parameters on the Lua stack
 
-TypedArray * TypedArray::make( lua_State * L , Type type )
+TypedArray* TypedArray::make( lua_State* L , Type type )
 {
     // The newly created user data is at the top of the stack
 
@@ -517,9 +598,9 @@ TypedArray * TypedArray::make( lua_State * L , Type type )
 
     if ( lua_istable( L , 1 ) )
     {
-        TypedArray * source = TypedArray::from_lua_table( L , 1 );
+        TypedArray* source = TypedArray::from_lua_table( L , 1 );
 
-        TypedArray * result = new TypedArray( type , source );
+        TypedArray* result = new TypedArray( type , source );
 
         delete source;
 
@@ -534,7 +615,7 @@ TypedArray * TypedArray::make( lua_State * L , Type type )
 
         if ( is_typed_array( L , 1 ) )
         {
-            TypedArray * source = from_lua( L , 1 );
+            TypedArray* source = from_lua( L , 1 );
 
             if ( ! source )
             {
@@ -569,7 +650,7 @@ TypedArray * TypedArray::make( lua_State * L , Type type )
                 }
             }
 
-            ArrayBuffer * buffer = ArrayBuffer::from_lua( L , 1 );
+            ArrayBuffer* buffer = ArrayBuffer::from_lua( L , 1 );
 
             if ( ! buffer )
             {
@@ -589,17 +670,24 @@ TypedArray * TypedArray::make( lua_State * L , Type type )
 
 void TypedArray::dump()
 {
-    const char * t;
+    const char* t;
 
-    switch( type )
+    switch ( type )
     {
         case T_INT8:    t = "Int8"; break;
+
         case T_UINT8:   t = "Uint8"; break;
+
         case T_INT16:   t = "Int16"; break;
+
         case T_UINT16:  t = "Uint16"; break;
+
         case T_INT32:   t = "Int32"; break;
+
         case T_UINT32:  t = "Uint32"; break;
+
         case T_FLOAT32: t = "Float32"; break;
+
         case T_FLOAT64: t = "Float64"; break;
     }
 
@@ -612,20 +700,27 @@ void TypedArray::dump()
     g_debug( "Bad           : %s" , bad ? "true" : "false" );
     g_debug( "Contents" );
 
-    if ( guint8 * src = get( 0 ) )
+    if ( guint8* src = get( 0 ) )
     {
         for ( gulong i = 0; i < length; ++i )
         {
-            switch( type )
+            switch ( type )
             {
-                case T_INT8:    g_debug( "%lu: %d" , i , * ( ( gint8 * ) src ) ); break;
-                case T_UINT8:   g_debug( "%lu: %u" , i , * ( ( guint8 * ) src ) ); break;
-                case T_INT16:   g_debug( "%lu: %" G_GINT16_FORMAT  "" , i , * ( ( gint16 * ) src ) ); break;
-                case T_UINT16:  g_debug( "%lu: %" G_GUINT16_FORMAT "" , i , * ( ( guint16 * ) src ) ); break;
-                case T_INT32:   g_debug( "%lu: %" G_GINT32_FORMAT  "" , i , * ( ( gint32 * ) src ) ); break;
-                case T_UINT32:  g_debug( "%lu: %" G_GUINT32_FORMAT "" , i , * ( ( guint32 * ) src ) ); break;
-                case T_FLOAT32: g_debug( "%lu: %f" , i , * ( ( gfloat * ) src ) ); break;
-                case T_FLOAT64: g_debug( "%lu: %f" , i , * ( ( gdouble * ) src ) ); break;
+                case T_INT8:    g_debug( "%lu: %d" , i , * ( ( gint8* ) src ) ); break;
+
+                case T_UINT8:   g_debug( "%lu: %u" , i , * ( ( guint8* ) src ) ); break;
+
+                case T_INT16:   g_debug( "%lu: %" G_GINT16_FORMAT  "" , i , * ( ( gint16* ) src ) ); break;
+
+                case T_UINT16:  g_debug( "%lu: %" G_GUINT16_FORMAT "" , i , * ( ( guint16* ) src ) ); break;
+
+                case T_INT32:   g_debug( "%lu: %" G_GINT32_FORMAT  "" , i , * ( ( gint32* ) src ) ); break;
+
+                case T_UINT32:  g_debug( "%lu: %" G_GUINT32_FORMAT "" , i , * ( ( guint32* ) src ) ); break;
+
+                case T_FLOAT32: g_debug( "%lu: %f" , i , * ( ( gfloat* ) src ) ); break;
+
+                case T_FLOAT64: g_debug( "%lu: %f" , i , * ( ( gdouble* ) src ) ); break;
             }
 
             src += bpe;
@@ -635,13 +730,13 @@ void TypedArray::dump()
 
 //.............................................................................
 
-int TypedArray::metatable_index( lua_State * L )
+int TypedArray::metatable_index( lua_State* L )
 {
     if ( lua_isnumber( L , 2 ) )
     {
-        TypedArray * self( lb_get_self( L , TypedArray * ) );
+        TypedArray* self( lb_get_self( L , TypedArray* ) );
 
-        guint8 * src = self->get( lua_tointeger( L , 2 ) );
+        guint8* src = self->get( lua_tointeger( L , 2 ) );
 
         if ( ! src )
         {
@@ -651,14 +746,21 @@ int TypedArray::metatable_index( lua_State * L )
         {
             switch ( self->type )
             {
-                case TypedArray::T_INT8:    lua_pushinteger( L , * ( ( gint8 * ) src ) ); break;
-                case TypedArray::T_UINT8:   lua_pushinteger( L , * ( ( guint8 * ) src ) ); break;
-                case TypedArray::T_INT16:   lua_pushinteger( L , * ( ( gint16 * ) src ) ); break;
-                case TypedArray::T_UINT16:  lua_pushinteger( L , * ( ( guint16 * ) src ) ); break;
-                case TypedArray::T_INT32:   lua_pushinteger( L , * ( ( gint32 * ) src ) ); break;
-                case TypedArray::T_UINT32:  lua_pushinteger( L , * ( ( guint32 * ) src ) ); break;
-                case TypedArray::T_FLOAT32: lua_pushnumber( L , * ( ( gfloat * ) src ) ); break;
-                case TypedArray::T_FLOAT64: lua_pushnumber( L , * ( ( gdouble * ) src ) ); break;
+                case TypedArray::T_INT8:    lua_pushinteger( L , * ( ( gint8* ) src ) ); break;
+
+                case TypedArray::T_UINT8:   lua_pushinteger( L , * ( ( guint8* ) src ) ); break;
+
+                case TypedArray::T_INT16:   lua_pushinteger( L , * ( ( gint16* ) src ) ); break;
+
+                case TypedArray::T_UINT16:  lua_pushinteger( L , * ( ( guint16* ) src ) ); break;
+
+                case TypedArray::T_INT32:   lua_pushinteger( L , * ( ( gint32* ) src ) ); break;
+
+                case TypedArray::T_UINT32:  lua_pushinteger( L , * ( ( guint32* ) src ) ); break;
+
+                case TypedArray::T_FLOAT32: lua_pushnumber( L , * ( ( gfloat* ) src ) ); break;
+
+                case TypedArray::T_FLOAT64: lua_pushnumber( L , * ( ( gdouble* ) src ) ); break;
             }
         }
 
@@ -672,13 +774,13 @@ int TypedArray::metatable_index( lua_State * L )
 
 //.............................................................................
 
-int TypedArray::metatable_newindex( lua_State * L )
+int TypedArray::metatable_newindex( lua_State* L )
 {
     if ( lua_isnumber( L , 2 ) )
     {
-        TypedArray * self( lb_get_self( L , TypedArray * ) );
+        TypedArray* self( lb_get_self( L , TypedArray* ) );
 
-        guint8 * src = self->get( lua_tointeger( L , 2 ) );
+        guint8* src = self->get( lua_tointeger( L , 2 ) );
 
         if ( ! src )
         {
@@ -690,14 +792,21 @@ int TypedArray::metatable_newindex( lua_State * L )
 
             switch ( self->type )
             {
-                case TypedArray::T_INT8:    * ( ( gint8 * ) src )   = n; break;
-                case TypedArray::T_UINT8:   * ( ( guint8 * ) src )  = n; break;
-                case TypedArray::T_INT16:   * ( ( gint16 * ) src )  = n; break;
-                case TypedArray::T_UINT16:  * ( ( guint16 * ) src ) = n; break;
-                case TypedArray::T_INT32:   * ( ( gint32 * ) src )  = n; break;
-                case TypedArray::T_UINT32:  * ( ( guint32 * ) src ) = n; break;
-                case TypedArray::T_FLOAT32: * ( ( gfloat * ) src )  = n; break;
-                case TypedArray::T_FLOAT64: * ( ( gdouble * ) src ) = n; break;
+                case TypedArray::T_INT8:    * ( ( gint8* ) src )   = n; break;
+
+                case TypedArray::T_UINT8:   * ( ( guint8* ) src )  = n; break;
+
+                case TypedArray::T_INT16:   * ( ( gint16* ) src )  = n; break;
+
+                case TypedArray::T_UINT16:  * ( ( guint16* ) src ) = n; break;
+
+                case TypedArray::T_INT32:   * ( ( gint32* ) src )  = n; break;
+
+                case TypedArray::T_UINT32:  * ( ( guint32* ) src ) = n; break;
+
+                case TypedArray::T_FLOAT32: * ( ( gfloat* ) src )  = n; break;
+
+                case TypedArray::T_FLOAT64: * ( ( gdouble* ) src ) = n; break;
             }
         }
 
@@ -711,7 +820,7 @@ int TypedArray::metatable_newindex( lua_State * L )
 
 //.............................................................................
 
-void TypedArray::update_metatable( lua_State * L )
+void TypedArray::update_metatable( lua_State* L )
 {
     lua_getmetatable( L , -1 );
     lua_pushliteral( L , "__index" );
@@ -725,14 +834,14 @@ void TypedArray::update_metatable( lua_State * L )
 
 //.............................................................................
 
-bool TypedArray::is_typed_array( lua_State * L , int index )
+bool TypedArray::is_typed_array( lua_State* L , int index )
 {
     return LB_GET_TYPEDARRAY( L , index ) != 0;
 }
 
 //.............................................................................
 
-TypedArray * TypedArray::from_lua( lua_State * L , int index )
+TypedArray* TypedArray::from_lua( lua_State* L , int index )
 {
-	return LB_GET_TYPEDARRAY( L , index );
+    return LB_GET_TYPEDARRAY( L , index );
 }
