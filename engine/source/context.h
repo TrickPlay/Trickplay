@@ -25,32 +25,32 @@
 //-----------------------------------------------------------------------------
 // Default values
 
-#define TP_SYSTEM_LANGUAGE_DEFAULT      	"en"
-#define TP_SYSTEM_COUNTRY_DEFAULT       	"US"
-#define TP_SYSTEM_NAME_DEFAULT          	"Desktop"
-#define TP_SYSTEM_VERSION_DEFAULT       	"0.0.0"
-#define TP_SYSTEM_SN_DEFAULT            	"SN"
-#define TP_SCAN_APP_SOURCES_DEFAULT     	false
-#define TP_CONFIG_FROM_ENV_DEFAULT      	true
-#define TP_CONFIG_FROM_FILE_DEFAULT     	".trickplay"
-#define TP_CONSOLE_ENABLED_DEFAULT      	true
-#define TP_TELNET_CONSOLE_PORT_DEFAULT  	7777
-#define TP_CONTROLLERS_ENABLED_DEFAULT  	false
-#define TP_CONTROLLERS_PORT_DEFAULT     	0
-#define TP_SCREEN_WIDTH_DEFAULT         	960
-#define TP_SCREEN_HEIGHT_DEFAULT        	540
-#define TP_CONTROLLERS_NAME_DEFAULT     	"TrickPlay"
-#define TP_LIRC_ENABLED_DEFAULT         	true
-#define TP_LIRC_UDS_DEFAULT             	"/var/run/lirc/lircd"
-#define TP_LIRC_REPEAT_DEFAULT          	150
-#define TP_APP_PUSH_ENABLED_DEFAULT     	true
-#define TP_APP_PUSH_PORT_DEFAULT        	8888
-#define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
-#define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
-#define TP_GAMESERVICE_ENABLED_DEFAULT		false
-#define TP_GAMESERVICE_DOMAIN_DEFAULT	    "gameservice.trickplay.com"
-#define TP_GAMESERVICE_HOST_DEFAULT			"gameservice.gameservice.trickplay.com"
-#define TP_GAMESERVICE_PORT_DEFAULT			5222
+#define TP_SYSTEM_LANGUAGE_DEFAULT          "en"
+#define TP_SYSTEM_COUNTRY_DEFAULT           "US"
+#define TP_SYSTEM_NAME_DEFAULT              "Desktop"
+#define TP_SYSTEM_VERSION_DEFAULT           "0.0.0"
+#define TP_SYSTEM_SN_DEFAULT                "SN"
+#define TP_SCAN_APP_SOURCES_DEFAULT         false
+#define TP_CONFIG_FROM_ENV_DEFAULT          true
+#define TP_CONFIG_FROM_FILE_DEFAULT         ".trickplay"
+#define TP_CONSOLE_ENABLED_DEFAULT          true
+#define TP_TELNET_CONSOLE_PORT_DEFAULT      7777
+#define TP_CONTROLLERS_ENABLED_DEFAULT      false
+#define TP_CONTROLLERS_PORT_DEFAULT         0
+#define TP_SCREEN_WIDTH_DEFAULT             960
+#define TP_SCREEN_HEIGHT_DEFAULT            540
+#define TP_CONTROLLERS_NAME_DEFAULT         "TrickPlay"
+#define TP_LIRC_ENABLED_DEFAULT             true
+#define TP_LIRC_UDS_DEFAULT                 "/var/run/lirc/lircd"
+#define TP_LIRC_REPEAT_DEFAULT              150
+#define TP_APP_PUSH_ENABLED_DEFAULT         true
+#define TP_APP_PUSH_PORT_DEFAULT            8888
+#define TP_TEXTURE_CACHE_LIMIT_DEFAULT      0
+#define TP_MEDIAPLAYER_SCHEMES_DEFAULT      "rtsp"
+#define TP_GAMESERVICE_ENABLED_DEFAULT      false
+#define TP_GAMESERVICE_DOMAIN_DEFAULT       "gameservice.trickplay.com"
+#define TP_GAMESERVICE_HOST_DEFAULT         "gameservice.gameservice.trickplay.com"
+#define TP_GAMESERVICE_PORT_DEFAULT         5222
 
 // TODO: Don't like hard-coding this app id here
 
@@ -84,22 +84,22 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false ) const;
-    bool get_bool( const char * key, bool def = false ) const;
-    int get_int( const char * key, int def = 0 ) const;
+    const char* get( const char* key, const char* def = NULL , bool default_if_empty = false ) const;
+    bool get_bool( const char* key, bool def = false ) const;
+    int get_int( const char* key, int def = 0 ) const;
 
     //.........................................................................
     // Console command handlers
 
-    void add_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data );
+    void add_console_command_handler( const char* command, TPConsoleCommandHandler handler, void* data );
 
-    void remove_console_command_handler( const char * command, TPConsoleCommandHandler handler, void * data );
+    void remove_console_command_handler( const char* command, TPConsoleCommandHandler handler, void* data );
 
     //.........................................................................
     // Output handlers. They get everything before it is printed - so we can
     // support multiple consoles
 
-    typedef void ( *OutputHandler )( const gchar * output, gpointer data );
+    typedef void ( *OutputHandler )( const gchar* output, gpointer data );
 
     void add_output_handler( OutputHandler handler, gpointer data );
     void remove_output_handler( OutputHandler handler, gpointer data );
@@ -107,14 +107,14 @@ public:
     //.........................................................................
     // Media player
 
-    MediaPlayer * get_default_media_player();
+    MediaPlayer* get_default_media_player();
 
-    MediaPlayer * create_new_media_player( MediaPlayer::Delegate * delegate );
+    MediaPlayer* create_new_media_player( MediaPlayer::Delegate* delegate );
 
     //.........................................................................
     // Sends a request to the outside world
 
-    int request( const char * subject );
+    int request( const char* subject );
 
     //.........................................................................
 
@@ -126,12 +126,12 @@ public:
     //.........................................................................
     // The clutter stage
 
-    ClutterActor * get_stage() const;
+    ClutterActor* get_stage() const;
 
     //.........................................................................
     // The system database
 
-    SystemDatabase * get_db() const;
+    SystemDatabase* get_db() const;
 
     //.........................................................................
     // Switches profiles and handles all the associated notifications
@@ -141,7 +141,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path = false );
+    int launch_app( const char* app_id, const App::LaunchInfo& launch , bool id_is_path = false );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or
@@ -158,44 +158,44 @@ public:
 
     //.........................................................................
 
-    inline App * get_current_app()
+    inline App* get_current_app()
     {
         return current_app;
     }
 
     //.........................................................................
 
-    ControllerList * get_controller_list();
+    ControllerList* get_controller_list();
 
     //.........................................................................
 
-    TunerList * get_tuner_list();
+    TunerList* get_tuner_list();
 
     //.........................................................................
 
-    Downloads * get_downloads() const;
+    Downloads* get_downloads() const;
 
     //.........................................................................
 
-    Installer * get_installer() const;
+    Installer* get_installer() const;
 
     //.........................................................................
 
-    HttpServer * get_http_server() const;
+    HttpServer* get_http_server() const;
 
     //.........................................................................
 
-    Console * get_console() const;
+    Console* get_console() const;
 
     //.........................................................................
 
 #ifdef TP_WITH_GAMESERVICE
-    GameServiceSupport * get_gameservice() const;
+    GameServiceSupport* get_gameservice() const;
 #endif
 
     //.........................................................................
 
-    Image * load_icon( const gchar * path );
+    Image* load_icon( const gchar* path );
 
     //.........................................................................
 
@@ -219,17 +219,17 @@ public:
     // and just let the outside world give us contextual information. It could
     // come via TCP/IP from a set-top box, for example.
 
-    void audio_detection_match( const gchar * json );
+    void audio_detection_match( const gchar* json );
 
     //.........................................................................
     // Get a resource loader
 
-    bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+    bool get_resource_loader( unsigned int resource_type , TPResourceLoader* loader , void * * user_data ) const;
 
-    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
+    typedef std::pair<OutputHandler, void*>                    OutputHandlerClosure;
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
-    String get_control_message( App * app = 0 ) const;
+    String get_control_message( App* app = 0 ) const;
 
 private:
 
@@ -239,9 +239,9 @@ private:
     //.........................................................................
     // Setting configuration variables
 
-    void set( const char * key, const char * value );
-    void set( const char * key, int value );
-    void set( const char * key, const String & value );
+    void set( const char* key, const char* value );
+    void set( const char* key, int value );
+    void set( const char* key, const String& value );
 
     //.........................................................................
     // Loads configuration variables from the environment or a file
@@ -266,17 +266,17 @@ private:
     //.........................................................................
     // Load the app
 
-    int load_app( App ** app );
+    int load_app( App** app );
 
     //.........................................................................
     // A command handler to handle basic commands
 
-    static int console_command_handler( const char * command, const char * parameters, void * self );
+    static int console_command_handler( const char* command, const char* parameters, void* self );
 
     //.........................................................................
     // Formats a log line
 
-    static gchar * format_log_line( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message );
+    static gchar* format_log_line( const gchar* log_domain, GLogLevelFlags log_level, const gchar* message );
 
     //.........................................................................
     // Running and quitting the context
@@ -287,27 +287,27 @@ private:
     //.........................................................................
     // This launches a new app in an idle source
 
-    static void app_run_callback( App * app , int result );
+    static void app_run_callback( App* app , int result );
 
     static gboolean launch_app_callback( gpointer new_app );
 
     //.........................................................................
     // Log handler. This is what prints the messages in the outside world.
 
-    void set_log_handler( TPLogHandler handler, void * data );
+    void set_log_handler( TPLogHandler handler, void* data );
 
     // Our standard log handler if the one above is not set
 
-    static void log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self );
+    static void log_handler( const gchar* log_domain, GLogLevelFlags log_level, const gchar* message, gpointer self );
 
     //.........................................................................
     // Resource readers
-    void set_resource_loader( unsigned int resource_type , TPResourceLoader loader , void * user_data );
+    void set_resource_loader( unsigned int resource_type , TPResourceLoader loader , void* user_data );
 
     //.........................................................................
     // Request handlers
 
-    void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
+    void set_request_handler( const char* subject, TPRequestHandler handler, void* data );
 
     //.........................................................................
 
@@ -316,112 +316,112 @@ private:
     //.........................................................................
     // External functions are our friends
 
-    friend void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version );
-    friend TPContext * tp_context_new();
-    friend void tp_context_free( TPContext * context );
-    friend void tp_context_set( TPContext * context, const char * key, const char * value );
-    friend void tp_context_set_int( TPContext * context, const char * key, int value );
-    friend const char * tp_context_get( TPContext * context, const char * key );
-    friend void tp_context_set_user_data( TPContext * context , void * user_data );
-    friend void * tp_context_get_user_data( TPContext * context );
-    friend void tp_context_add_notification_handler( TPContext * context, const char * subject, TPNotificationHandler handler, void * data );
-    friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
-    friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
-    friend void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data );
-    friend void tp_context_set_resource_loader( TPContext * context, unsigned int type, TPResourceLoader loader, void * data);
-    friend void tp_context_key_event( TPContext * context, const char * key );
-    friend int tp_context_run( TPContext * context );
-    friend void tp_context_quit( TPContext * context );
+    friend void tp_init_version( int* argc, char** * argv, int major_version, int minor_version, int patch_version );
+    friend TPContext* tp_context_new();
+    friend void tp_context_free( TPContext* context );
+    friend void tp_context_set( TPContext* context, const char* key, const char* value );
+    friend void tp_context_set_int( TPContext* context, const char* key, int value );
+    friend const char* tp_context_get( TPContext* context, const char* key );
+    friend void tp_context_set_user_data( TPContext* context , void* user_data );
+    friend void* tp_context_get_user_data( TPContext* context );
+    friend void tp_context_add_notification_handler( TPContext* context, const char* subject, TPNotificationHandler handler, void* data );
+    friend void tp_context_set_request_handler( TPContext* context, const char* subject, TPRequestHandler handler, void* data );
+    friend void tp_context_add_console_command_handler( TPContext* context, const char* command, TPConsoleCommandHandler handler, void* data );
+    friend void tp_context_set_log_handler( TPContext* context, TPLogHandler handler, void* data );
+    friend void tp_context_set_resource_loader( TPContext* context, unsigned int type, TPResourceLoader loader, void* data );
+    friend void tp_context_key_event( TPContext* context, const char* key );
+    friend int tp_context_run( TPContext* context );
+    friend void tp_context_quit( TPContext* context );
 
-    friend void tp_context_set_media_player_constructor( TPContext * context, TPMediaPlayerConstructor constructor );
+    friend void tp_context_set_media_player_constructor( TPContext* context, TPMediaPlayerConstructor constructor );
 
-    friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
-    friend void tp_context_remove_controller( TPContext * context, TPController * controller );
+    friend TPController* tp_context_add_controller( TPContext* context, const char* name, const TPControllerSpec* spec, void* data );
+    friend void tp_context_remove_controller( TPContext* context, TPController* controller );
 
-    friend TPTuner * tp_context_add_tuner ( TPContext * context, const char *name, TPChannelChangeCallback cb, void *data );
-    friend void tp_context_remove_tuner( TPContext * context, TPTuner * tuner );
+    friend TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback cb, void* data );
+    friend void tp_context_remove_tuner( TPContext* context, TPTuner* tuner );
 
-    friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
+    friend TPAudioSampler* tp_context_get_audio_sampler( TPContext* context );
 
-    static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
+    static gboolean escape_handler( ClutterActor* actor, ClutterEvent* event, gpointer _context );
 
 #ifndef TP_PRODUCTION
 
-    static gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context );
+    static gboolean tilde_handler( ClutterActor* actor, ClutterEvent* event, gpointer context );
 
 #endif
 
 private:
 
-    TPContext( const TPContext & );
+    TPContext( const TPContext& );
 
     bool                        is_running;
 
-    ClutterActor *              stage;
+    ClutterActor*               stage;
 
     StringMap                   config;
 
-    SystemDatabase *            sysdb;
+    SystemDatabase*             sysdb;
 
-    ControllerServer *          controller_server;
+    ControllerServer*           controller_server;
 
     ControllerList              controller_list;
 
     TunerList                   tuner_list;
 
-    ControllerLIRC *            controller_lirc;
+    ControllerLIRC*             controller_lirc;
 
-    AppPushServer *             app_push_server;
+    AppPushServer*              app_push_server;
 
-    HttpServer *                http_server;
+    HttpServer*                 http_server;
 
-    Console *                   console;
+    Console*                    console;
 
-    Downloads *                 downloads;
+    Downloads*                  downloads;
 
-    Installer *                 installer;
+    Installer*                  installer;
 
-    App *                       current_app;
+    App*                        current_app;
 
 #ifdef TP_WITH_GAMESERVICE
-    GameServiceSupport * gameservice_support;
+    GameServiceSupport* gameservice_support;
 #endif
 
     String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
-    MediaPlayer *               media_player;
+    MediaPlayer*                media_player;
 
-    HttpTrickplayApiSupport * 	http_trickplay_api_support;
+    HttpTrickplayApiSupport*   http_trickplay_api_support;
 
     TPLogHandler                external_log_handler;
-    void *                      external_log_handler_data;
+    void*                       external_log_handler_data;
 
-    void *                      user_data;
+    void*                       user_data;
 
-    typedef std::pair<TPConsoleCommandHandler, void *>          ConsoleCommandHandlerClosure;
+    typedef std::pair<TPConsoleCommandHandler, void*>          ConsoleCommandHandlerClosure;
     typedef std::multimap<String, ConsoleCommandHandlerClosure> ConsoleCommandHandlerMultiMap;
 
     ConsoleCommandHandlerMultiMap                               console_command_handlers;
 
-    typedef std::pair<TPRequestHandler, void *>                 RequestHandlerClosure;
+    typedef std::pair<TPRequestHandler, void*>                 RequestHandlerClosure;
     typedef std::map<String, RequestHandlerClosure>             RequestHandlerMap;
 
     RequestHandlerMap                                           request_handlers;
 
     OutputHandlerSet                                            output_handlers;
 
-    typedef std::map<String,StringSet>                          AppAllowedMap;
+    typedef std::map<String, StringSet>                          AppAllowedMap;
 
     AppAllowedMap                                               app_allowed;
 
-    typedef std::pair<gpointer,GDestroyNotify>                  InternalPair;
-    typedef std::map<gpointer,InternalPair>                     InternalMap;
+    typedef std::pair<gpointer, GDestroyNotify>                  InternalPair;
+    typedef std::map<gpointer, InternalPair>                     InternalMap;
 
     InternalMap                                                 internals;
 
-    typedef std::pair<TPResourceLoader,void *>					ResourceLoaderClosure;
-    typedef std::map<unsigned int, ResourceLoaderClosure> 		ResourceLoaderMap;
+    typedef std::pair<TPResourceLoader, void*>                  ResourceLoaderClosure;
+    typedef std::map<unsigned int, ResourceLoaderClosure>       ResourceLoaderMap;
 
     ResourceLoaderMap                                           resource_loaders;
 };

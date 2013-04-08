@@ -47,9 +47,9 @@ public:
 
     };
 
-    void push( Task * task );
+    void push( Task* task );
 
-    static void push_main_thread( Task * task );
+    static void push_main_thread( Task* task );
 
 private:
 
@@ -59,7 +59,7 @@ private:
 
     static void destroy_task( gpointer task );
 
-    GThreadPool * pool;
+    GThreadPool* pool;
 };
 
 

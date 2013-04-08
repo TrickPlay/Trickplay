@@ -3,8 +3,7 @@ module physics_module;
 
 [[
 #include "Box2D/Box2D.h"
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "physics.h"
 #include "clutter_util.h"
@@ -1756,8 +1755,8 @@ interface Body [[ ClutterActor * ]]
     ...
     (end)
 
-	The illustrations below show the actions that occur when two objects collide.
-	
+    The illustrations below show the actions that occur when two objects collide.
+
 (see physics2dCollision1.png)
 (see physics2dCollision2.png)
 

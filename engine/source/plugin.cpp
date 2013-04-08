@@ -16,12 +16,12 @@
 namespace TrickPlay
 {
 
-gpointer Plugin::get_symbol( GModule * module , const char * name )
+gpointer Plugin::get_symbol( GModule* module , const char* name )
 {
-	g_assert( module );
-	g_assert( name );
+    g_assert( module );
+    g_assert( name );
 
-	gpointer result = 0;
+    gpointer result = 0;
 
     if ( ! g_module_symbol( module , name , & result ) )
     {
@@ -38,9 +38,9 @@ gpointer Plugin::get_symbol( GModule * module , const char * name )
     return result;
 }
 
-Plugin::List Plugin::scan( TPContext * context , const String & prefix , const StringList & symbols )
+Plugin::List Plugin::scan( TPContext* context , const String& prefix , const StringList& symbols )
 {
-	Plugin::List result;
+    Plugin::List result;
 
     if ( ! g_module_supported() )
     {
@@ -49,7 +49,7 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
         return result;
     }
 
-    const gchar * plugins_path = context->get( TP_PLUGINS_PATH );
+    const gchar* plugins_path = context->get( TP_PLUGINS_PATH );
 
     if ( ! plugins_path )
     {
@@ -60,12 +60,12 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
 
     if ( ! g_file_test( plugins_path , G_FILE_TEST_IS_DIR ) )
     {
-    	return result;
+        return result;
     }
 
-    GError * error = 0;
+    GError* error = 0;
 
-    GDir * dir = g_dir_open( plugins_path , 0 , & error );
+    GDir* dir = g_dir_open( plugins_path , 0 , & error );
 
     if ( ! dir )
     {
@@ -76,56 +76,56 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
         return result;
     }
 
-    for ( const gchar * name = g_dir_read_name( dir ); name ; name = g_dir_read_name( dir ) )
+    for ( const gchar* name = g_dir_read_name( dir ); name ; name = g_dir_read_name( dir ) )
     {
         if ( g_str_has_prefix( name , prefix.c_str() ) )
         {
             if ( ! g_str_has_suffix( name , ".config" ) )
             {
-                gchar * file_name = g_build_filename( plugins_path , name , NULL );
+                gchar* file_name = g_build_filename( plugins_path , name , NULL );
 
                 tplog( "FOUND PLUGIN %s" , file_name );
 
-                GModule * module = g_module_open( file_name , G_MODULE_BIND_LOCAL );
+                GModule* module = g_module_open( file_name , G_MODULE_BIND_LOCAL );
 
                 if ( 0 == module )
                 {
-                	tpwarn( "  FAILED TO OPEN : %s" , g_module_error() );
+                    tpwarn( "  FAILED TO OPEN : %s" , g_module_error() );
                 }
                 else
                 {
-                	tplog2( "  LOADED" );
+                    tplog2( "  LOADED" );
 
-                	StringList all_symbols( symbols );
+                    StringList all_symbols( symbols );
 
-                	all_symbols.push_front( TP_PLUGIN_SHUTDOWN );
-                	all_symbols.push_front( TP_PLUGIN_INITIALIZE );
+                    all_symbols.push_front( TP_PLUGIN_SHUTDOWN );
+                    all_symbols.push_front( TP_PLUGIN_INITIALIZE );
 
-                	GPointerMap symbols_found;
+                    GPointerMap symbols_found;
 
-                	for ( StringList::const_iterator it = all_symbols.begin(); it != all_symbols.end(); ++it )
-                	{
-                		const char * symbol_name = it->c_str();
+                    for ( StringList::const_iterator it = all_symbols.begin(); it != all_symbols.end(); ++it )
+                    {
+                        const char* symbol_name = it->c_str();
 
-                		if ( gpointer symbol = get_symbol( module , symbol_name ) )
-                		{
-                    		tplog2( "  FOUND SYMBOL '%s'" , symbol_name );
-                    		symbols_found[ symbol_name ] = symbol;
-                		}
-                		else
-                		{
-                			break;
-                		}
-                	}
+                        if ( gpointer symbol = get_symbol( module , symbol_name ) )
+                        {
+                            tplog2( "  FOUND SYMBOL '%s'" , symbol_name );
+                            symbols_found[ symbol_name ] = symbol;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
 
-                	if ( symbols_found.size() != all_symbols.size() )
-                	{
-                		g_module_close( module );
-                	}
-                	else
-                	{
-                		result.push_back( new Plugin( module , symbols_found ) );
-                	}
+                    if ( symbols_found.size() != all_symbols.size() )
+                    {
+                        g_module_close( module );
+                    }
+                    else
+                    {
+                        result.push_back( new Plugin( module , symbols_found ) );
+                    }
                 }
 
                 g_free( file_name );
@@ -138,111 +138,111 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
     return result;
 }
 
-Plugin::Plugin( GModule * _module , const GPointerMap & _symbols )
-:
+Plugin::Plugin( GModule* _module , const GPointerMap& _symbols )
+    :
     module( _module ),
     symbols( _symbols )
 {
-	g_assert( module );
+    g_assert( module );
 
-	TPPluginInitialize initialize = ( TPPluginInitialize ) get_symbol( TP_PLUGIN_INITIALIZE );
+    TPPluginInitialize initialize = ( TPPluginInitialize ) get_symbol( TP_PLUGIN_INITIALIZE );
 
-	shutdown = ( TPPluginShutdown ) get_symbol( TP_PLUGIN_SHUTDOWN );
+    shutdown = ( TPPluginShutdown ) get_symbol( TP_PLUGIN_SHUTDOWN );
 
-	g_assert( initialize );
-	g_assert( shutdown );
+    g_assert( initialize );
+    g_assert( shutdown );
 
-	// Load the configuration file for this plugin, if it exists
+    // Load the configuration file for this plugin, if it exists
 
-	gchar * config = 0;
+    gchar* config = 0;
 
-	if ( const gchar * file_name = g_module_name( module ) )
-	{
-		gchar * base_name = g_path_get_basename( file_name );
+    if ( const gchar* file_name = g_module_name( module ) )
+    {
+        gchar* base_name = g_path_get_basename( file_name );
 
-		if ( gchar * dot = g_strrstr( base_name , "." ) )
-		{
-			gchar * dir_name = g_path_get_dirname( file_name );
+        if ( gchar* dot = g_strrstr( base_name , "." ) )
+        {
+            gchar* dir_name = g_path_get_dirname( file_name );
 
-			String config_file_name;
+            String config_file_name;
 
-			config_file_name = dir_name;
-			config_file_name += G_DIR_SEPARATOR_S;
-			config_file_name += String( base_name , dot - base_name );
-			config_file_name += ".config";
+            config_file_name = dir_name;
+            config_file_name += G_DIR_SEPARATOR_S;
+            config_file_name += String( base_name , dot - base_name );
+            config_file_name += ".config";
 
-			if ( g_file_get_contents( config_file_name.c_str() , & config , 0 , 0 ) )
-			{
-				tplog2( "  CONFIG LOADED" );
-			}
-			else
-			{
-				config = 0;
-			}
+            if ( g_file_get_contents( config_file_name.c_str() , & config , 0 , 0 ) )
+            {
+                tplog2( "  CONFIG LOADED" );
+            }
+            else
+            {
+                config = 0;
+            }
 
-			g_free( dir_name );
-		}
+            g_free( dir_name );
+        }
 
-		g_free( base_name );
-	}
+        g_free( base_name );
+    }
 
-	// Now call its initialize function
+    // Now call its initialize function
 
-	memset( & info , 0 , sizeof( info ) );
+    memset( & info , 0 , sizeof( info ) );
 
-	tplog2( "  INITIALIZING..." );
+    tplog2( "  INITIALIZING..." );
 
-	initialize( & info , config );
+    initialize( & info , config );
 
-	g_free( config );
+    g_free( config );
 
-	tplog2( "  INITIALIZED" );
+    tplog2( "  INITIALIZED" );
 
-	info.name[ sizeof( info.name ) - 1 ] = 0;
-	info.version[ sizeof( info.version ) - 1 ] = 0;
+    info.name[ sizeof( info.name ) - 1 ] = 0;
+    info.version[ sizeof( info.version ) - 1 ] = 0;
 
-	tplog( "  NAME        : %s" , info.name );
-	tplog( "  VERSION     : %s" , info.version );
-	tplog( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
-	tplog( "  USER DATA   : %p" , info.user_data );
+    tplog( "  NAME        : %s" , info.name );
+    tplog( "  VERSION     : %s" , info.version );
+    tplog( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
+    tplog( "  USER DATA   : %p" , info.user_data );
 
-	if ( info.resident )
-	{
-		g_module_make_resident( module );
-	}
+    if ( info.resident )
+    {
+        g_module_make_resident( module );
+    }
 }
 
 Plugin::~Plugin()
 {
-	tplog2( "CLOSING '%s'..." , info.name );
+    tplog2( "CLOSING '%s'..." , info.name );
 
-	shutdown( info.user_data );
+    shutdown( info.user_data );
 
-	tplog2( "CLOSED" );
+    tplog2( "CLOSED" );
 
-	g_module_close( module );
+    g_module_close( module );
 }
 
-gpointer Plugin::get_symbol( const String & name ) const
+gpointer Plugin::get_symbol( const String& name ) const
 {
-	GPointerMap::const_iterator it = symbols.find( name );
+    GPointerMap::const_iterator it = symbols.find( name );
 
-	return it == symbols.end() ? 0 : it->second;
+    return it == symbols.end() ? 0 : it->second;
 }
 
 String Plugin::name() const
 {
-	return info.name;
+    return info.name;
 }
 
 String Plugin::version() const
 {
-	return info.version;
+    return info.version;
 }
 
 gpointer Plugin::user_data() const
 {
-	return info.user_data;
+    return info.user_data;
 }
 
 

@@ -4,8 +4,7 @@
 #include <cstdlib>
 
 #include "libsoup/soup.h"
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #include "uriparser/Uri.h"
 
 #include "app.h"
@@ -33,7 +32,7 @@
 
 //-----------------------------------------------------------------------------
 
-#define CONTROLLER_PROTOCOL_VERSION		"44"
+#define CONTROLLER_PROTOCOL_VERSION     "44"
 
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
@@ -46,16 +45,16 @@ gulong ControllerServer::ConnectionInfo::aui_next_id = 1;
 
 //-----------------------------------------------------------------------------
 
-ControllerServer::ControllerServer( TPContext * ctx, const String & name, int port )
+ControllerServer::ControllerServer( TPContext* ctx, const String& name, int port )
     :
     discovery_mdns( NULL ),
     discovery_upnp( NULL ),
     server( NULL ),
     context( ctx )
 {
-    GError * error = NULL;
+    GError* error = NULL;
 
-    Server * new_server = new Server( port, this, '\n', &error );
+    Server* new_server = new Server( port, this, '\n', &error );
 
     if ( error )
     {
@@ -69,7 +68,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
         tplog( "READY ON PORT %d", server->get_port() );
 
-        HttpServer * http_server = context->get_http_server();
+        HttpServer* http_server = context->get_http_server();
 
         http_server->register_handler( "/controllers" , this );
 
@@ -96,6 +95,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         {
             tplog( "UPNP DISCOVERY IS DISABLED" );
         }
+
 #endif
 
     }
@@ -127,21 +127,21 @@ bool ControllerServer::is_ready() const
 
 //-----------------------------------------------------------------------------
 
-int ControllerServer::execute_command( TPController * controller, unsigned int command, void * parameters, void * data )
+int ControllerServer::execute_command( TPController* controller, unsigned int command, void* parameters, void* data )
 {
     g_assert( data );
 
-    return ( ( ControllerServer * )data )->execute_command( controller, command, parameters );
+    return ( ( ControllerServer* )data )->execute_command( controller, command, parameters );
 }
 
-int ControllerServer::execute_command( TPController * controller, unsigned int command, void * parameters )
+int ControllerServer::execute_command( TPController* controller, unsigned int command, void* parameters )
 {
     if ( !server.get() )
     {
         return 1;
     }
 
-    ConnectionInfo * info = 0;
+    ConnectionInfo* info = 0;
 
     gpointer connection = 0;
 
@@ -170,9 +170,9 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_ACCELEROMETER   :
         {
-            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+            TPControllerStartMotion* sa = ( TPControllerStartMotion* )parameters;
 
-            const char * filter = "N";
+            const char* filter = "N";
 
             switch ( sa->filter )
             {
@@ -198,7 +198,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_GYROSCOPE  :
         {
-            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+            TPControllerStartMotion* sa = ( TPControllerStartMotion* )parameters;
 
             server->write_printf( connection, "SGY\t%f\n", sa->interval );
 
@@ -213,7 +213,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_MAGNETOMETER   :
         {
-            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+            TPControllerStartMotion* sa = ( TPControllerStartMotion* )parameters;
 
             server->write_printf( connection, "SMM\t%f\n", sa->interval );
 
@@ -228,7 +228,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_ATTITUDE   :
         {
-            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+            TPControllerStartMotion* sa = ( TPControllerStartMotion* )parameters;
 
             server->write_printf( connection, "SAT\t%f\n", sa->interval );
 
@@ -268,7 +268,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SHOW_MULTIPLE_CHOICE  :
         {
-            TPControllerMultipleChoice * mc = ( TPControllerMultipleChoice * )parameters;
+            TPControllerMultipleChoice* mc = ( TPControllerMultipleChoice* )parameters;
 
             String line;
 
@@ -297,9 +297,9 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND     :
         {
-            TPControllerSetUIBackground * sb = ( TPControllerSetUIBackground * )parameters;
+            TPControllerSetUIBackground* sb = ( TPControllerSetUIBackground* )parameters;
 
-            const char * mode = "S";
+            const char* mode = "S";
 
             switch ( sb->mode )
             {
@@ -319,14 +319,14 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SET_UI_IMAGE          :
         {
-            TPControllerSetUIImage * im = ( TPControllerSetUIImage * )parameters;
+            TPControllerSetUIImage* im = ( TPControllerSetUIImage* )parameters;
             server->write_printf( connection, "UG\t%s\t%d\t%d\t%d\t%d\n", im->resource, im->x, im->y, im->width, im->height );
             break;
         }
 
         case TP_CONTROLLER_COMMAND_PLAY_SOUND            :
         {
-            TPControllerPlaySound * ps = ( TPControllerPlaySound * )parameters;
+            TPControllerPlaySound* ps = ( TPControllerPlaySound* )parameters;
             server->write_printf( connection, "SS\t%s\t%u\n", ps->resource, ps->loop );
             break;
         }
@@ -339,16 +339,16 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_DECLARE_RESOURCE      :
         {
-            TPControllerDeclareResource * ds = ( TPControllerDeclareResource * )parameters;
+            TPControllerDeclareResource* ds = ( TPControllerDeclareResource* )parameters;
 
-            GFile * file = g_file_new_for_uri( ds->uri );
+            GFile* file = g_file_new_for_uri( ds->uri );
 
             bool native = g_file_is_native( file );
 
             g_object_unref( file );
 
 
-            const char * uri = 0;
+            const char* uri = 0;
             String path;
 
             if ( ! native )
@@ -368,7 +368,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
             if ( * uri == '/' )
             {
-            	++uri;
+                ++uri;
             }
 
             server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
@@ -377,7 +377,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP   :
         {
-            TPControllerDropResourceGroup * dg = ( TPControllerDropResourceGroup * ) parameters;
+            TPControllerDropResourceGroup* dg = ( TPControllerDropResourceGroup* ) parameters;
 
             drop_resource_group( connection , dg->group );
 
@@ -388,46 +388,46 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_ENTER_TEXT            :
         {
-            TPControllerEnterText * et = ( TPControllerEnterText * )parameters;
+            TPControllerEnterText* et = ( TPControllerEnterText* )parameters;
             server->write_printf( connection, "ET\t%s\t%s\n", et->label, et->text );
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_REQUEST_IMAGE	:
-		{
-		    TPControllerRequestImage * ri = ( TPControllerRequestImage * ) parameters;
-		    String path = start_post_endpoint( connection , PostInfo::IMAGE );
-			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\t%s\t%s\n" ,
-			        path.c_str() + 1 ,
-			        ri->max_width ,
-			        ri->max_height ,
-			        ri->edit ? 1 : 0 ,
-			        ri->mask ? ri->mask : "",
-			        ri->dialog_label ? ri->dialog_label : "",
-			        ri->cancel_label ? ri->cancel_label : "");
-			break;
-		}
+        case TP_CONTROLLER_COMMAND_REQUEST_IMAGE    :
+        {
+            TPControllerRequestImage* ri = ( TPControllerRequestImage* ) parameters;
+            String path = start_post_endpoint( connection , PostInfo::IMAGE );
+            server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\t%s\t%s\n" ,
+                    path.c_str() + 1 ,
+                    ri->max_width ,
+                    ri->max_height ,
+                    ri->edit ? 1 : 0 ,
+                    ri->mask ? ri->mask : "",
+                    ri->dialog_label ? ri->dialog_label : "",
+                    ri->cancel_label ? ri->cancel_label : "" );
+            break;
+        }
 
-        case TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP	:
-		{
-		    TPControllerRequestAudioClip * ra = ( TPControllerRequestAudioClip * ) parameters;
-            String path = start_post_endpoint( connection , PostInfo::AUDIO);
-			server->write_printf( connection, "AC\t%s\t%s\t%s\n" , path.c_str() + 1,
-			        ra->dialog_label ? ra->dialog_label : "",
-			        ra->cancel_label ? ra->cancel_label : "");
-			break;
-		}
+        case TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP   :
+        {
+            TPControllerRequestAudioClip* ra = ( TPControllerRequestAudioClip* ) parameters;
+            String path = start_post_endpoint( connection , PostInfo::AUDIO );
+            server->write_printf( connection, "AC\t%s\t%s\t%s\n" , path.c_str() + 1,
+                    ra->dialog_label ? ra->dialog_label : "",
+                    ra->cancel_label ? ra->cancel_label : "" );
+            break;
+        }
 
         case TP_CONTROLLER_COMMAND_VIDEO_START_CALL:
         {
-            const char *address = (const char *)parameters;
+            const char* address = ( const char* )parameters;
             server->write_printf( connection, "SVSC\t%s\n", address );
             break;
         }
 
         case TP_CONTROLLER_COMMAND_VIDEO_END_CALL:
         {
-            const char *address = (const char *)parameters;
+            const char* address = ( const char* )parameters;
             server->write_printf( connection, "SVEC\t%s\n", address );
             break;
         }
@@ -445,7 +445,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
                 return 4;
             }
 
-            TPControllerAdvancedUI * aui = ( TPControllerAdvancedUI * ) parameters;
+            TPControllerAdvancedUI* aui = ( TPControllerAdvancedUI* ) parameters;
 
             if ( ! server->write_printf( info->aui_connection , "%s\n" , aui->payload ) )
             {
@@ -456,13 +456,13 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
             gssize bytes_read;
 
-            GString * response = g_string_new( "" );
+            GString* response = g_string_new( "" );
 
-            gchar * new_line = 0;
+            gchar* new_line = 0;
 
             char buffer[256];
 
-            while( new_line == 0 )
+            while ( new_line == 0 )
             {
                 bytes_read = server->read( info->aui_connection , buffer , 256 );
 
@@ -490,13 +490,13 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         case TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE:
         {
             server->write( connection, "SV\n" );
-        	break;
+            break;
         }
 
         case TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE:
         {
             server->write( connection, "HV\n" );
-        	break;
+            break;
         }
 
         default:
@@ -512,7 +512,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
 //-----------------------------------------------------------------------------
 
-ControllerServer::ConnectionInfo * ControllerServer::find_connection( gpointer connection )
+ControllerServer::ConnectionInfo* ControllerServer::find_connection( gpointer connection )
 {
     ConnectionMap::iterator it = connections.find( connection );
 
@@ -521,20 +521,20 @@ ControllerServer::ConnectionInfo * ControllerServer::find_connection( gpointer c
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::connection_accepted( gpointer connection, const char * remote_address )
+void ControllerServer::connection_accepted( gpointer connection, const char* remote_address )
 {
     tplog( "ACCEPTED CONNECTION %p FROM %s", connection, remote_address );
 
     // This adds the connection to the map and sets its address at the same time
 
-    ConnectionInfo & info = connections[connection];
+    ConnectionInfo& info = connections[connection];
 
     info.address = remote_address;
 
     // Now, set a timer to disconnect the connection if it has not identified
     // itself within a few seconds
 
-    GSource * source = g_timeout_source_new( DISCONNECT_TIMEOUT_SEC * 1000 );
+    GSource* source = g_timeout_source_new( DISCONNECT_TIMEOUT_SEC * 1000 );
     g_source_set_callback( source, timed_disconnect_callback, new TimerClosure( connection, this ), NULL );
     g_source_attach( source, g_main_context_default() );
     g_source_unref( source );
@@ -548,9 +548,9 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
     // Check to see that the controller has reported a version
 
-    TimerClosure * tc = ( TimerClosure * )data;
+    TimerClosure* tc = ( TimerClosure* )data;
 
-    ConnectionInfo * ci = tc->self->find_connection( tc->connection );
+    ConnectionInfo* ci = tc->self->find_connection( tc->connection );
 
     if ( ci && !ci->version )
     {
@@ -571,7 +571,7 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
 void ControllerServer::connection_closed( gpointer connection )
 {
-    ConnectionInfo * info = find_connection( connection );
+    ConnectionInfo* info = find_connection( connection );
     gpointer aui_connection = NULL;
 
     if ( info && info->controller )
@@ -596,7 +596,7 @@ void ControllerServer::connection_closed( gpointer connection )
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read , bool * read_again )
+void ControllerServer::connection_data_received( gpointer connection, const char* line , gsize bytes_read , bool* read_again )
 {
     if ( ! strlen( line ) )
     {
@@ -610,7 +610,7 @@ void ControllerServer::connection_data_received( gpointer connection, const char
         return;
     }
 
-    gchar ** parts = g_strsplit( line, "\t", 0 );
+    gchar** parts = g_strsplit( line, "\t", 0 );
 
     process_command( connection, it->second, parts , read_again );
 
@@ -619,22 +619,22 @@ void ControllerServer::connection_data_received( gpointer connection, const char
 
 //-----------------------------------------------------------------------------
 
-static inline bool cmp2( const char * a, const char * b )
+static inline bool cmp2( const char* a, const char* b )
 {
     return ( a[0] == b[0] ) && ( a[1] == b[1] );
 }
 
-static inline bool cmp3( const char * a, const char * b )
+static inline bool cmp3( const char* a, const char* b )
 {
     return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] );
 }
 
-static inline bool cmp4( const char * a, const char * b )
+static inline bool cmp4( const char* a, const char* b )
 {
     return ( a[0] == b[0] ) && ( a[1] == b[1] ) && ( a[2] == b[2] ) && ( a[3] == b[3] );
 }
 
-void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
+void ControllerServer::process_command( gpointer connection, ConnectionInfo& info, gchar** parts , bool* read_again )
 {
     guint count = g_strv_length( parts );
 
@@ -643,7 +643,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         return;
     }
 
-    const gchar * cmd = parts[0];
+    const gchar* cmd = parts[0];
 
     if ( strlen( cmd ) < 2 )
     {
@@ -700,7 +700,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        const char * name = g_strstrip( parts[2] );
+        const char* name = g_strstrip( parts[2] );
 
         // Capability entries
 
@@ -710,7 +710,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         for ( guint i = 3; i < count; ++i )
         {
-            const gchar * cap = g_strstrip( parts[i] );
+            const gchar* cap = g_strstrip( parts[i] );
 
             size_t len = strlen( cap );
 
@@ -758,24 +758,24 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                     spec.capabilities |= TP_CONTROLLER_HAS_TEXT_ENTRY;
                 }
                 else if ( cmp2( cap, "PS" ) )
-				{
-					spec.capabilities |= TP_CONTROLLER_HAS_IMAGES;
-				}
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_IMAGES;
+                }
                 else if ( cmp2( cap, "AC" ) )
-				{
-					spec.capabilities |= TP_CONTROLLER_HAS_AUDIO_CLIPS;
-				}
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_AUDIO_CLIPS;
+                }
                 else if ( cmp2( cap , "UX" ) )
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ADVANCED_UI;
                 }
                 else if ( cmp2( cap , "VR" ) )
                 {
-                	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
+                    spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
                 }
                 else if ( cmp2( cap , "SV" ) )
                 {
-                	spec.capabilities |= TP_CONTROLLER_HAS_STREAMING_VIDEO;
+                    spec.capabilities |= TP_CONTROLLER_HAS_STREAMING_VIDEO;
                 }
                 else
                 {
@@ -794,7 +794,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 }
                 else if ( cmp2( cap , "ID" ) )
                 {
-                	spec.id = cap + 3;
+                    spec.id = cap + 3;
                 }
                 else
                 {
@@ -940,36 +940,38 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         // UI
         // UI <type> <txt>
 
-        if ( count < 2 || !info.controller || strlen(parts[1]) != 2)
+        if ( count < 2 || !info.controller || strlen( parts[1] ) != 2 )
         {
             return;
         }
 
         // Enter text or multiple-choice
-        if(cmp2( parts[1], "ET") || cmp2( parts[1], "MC"))
+        if ( cmp2( parts[1], "ET" ) || cmp2( parts[1], "MC" ) )
         {
-            if(count < 3)
+            if ( count < 3 )
             {
                 return;
             }
+
             tp_controller_ui_event( info.controller, parts[2] );
         }
         // Advanced UI event
-        else if (cmp2( parts[1] , "UX" ) )
+        else if ( cmp2( parts[1] , "UX" ) )
         {
-        	if ( count < 3 )
-        	{
-        		return;
-        	}
-        	tp_controller_advanced_ui_event( info.controller , parts[ 2 ] );
+            if ( count < 3 )
+            {
+                return;
+            }
+
+            tp_controller_advanced_ui_event( info.controller , parts[ 2 ] );
         }
         // Cancel image
-        else if(cmp2( parts[1], "CI"))
+        else if ( cmp2( parts[1], "CI" ) )
         {
             tp_controller_cancel_image( info.controller );
         }
         // Cancel audio
-        else if(cmp2( parts[1], "CA"))
+        else if ( cmp2( parts[1], "CA" ) )
         {
             tp_controller_cancel_audio_clip( info.controller );
         }
@@ -1073,7 +1075,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        ConnectionInfo * parent_info = 0;
+        ConnectionInfo* parent_info = 0;
 
         for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
         {
@@ -1180,11 +1182,11 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
 //-----------------------------------------------------------------------------
 
-String ControllerServer::start_serving_resource( gpointer connection , const String & native_uri , const String & group )
+String ControllerServer::start_serving_resource( gpointer connection , const String& native_uri , const String& group )
 {
     String path = group + ":" + native_uri;
 
-    gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
+    gchar* h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
 
     path = h;
 
@@ -1194,7 +1196,7 @@ String ControllerServer::start_serving_resource( gpointer connection , const Str
 
     tplog( "SERVING %s : %s" , path.c_str() , native_uri.c_str() );
 
-    ResourceInfo & info( resources[ path ] );
+    ResourceInfo& info( resources[ path ] );
 
     info.connection = connection;
     info.native_uri = native_uri;
@@ -1205,11 +1207,11 @@ String ControllerServer::start_serving_resource( gpointer connection , const Str
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::drop_resource_group( gpointer connection , const String & group )
+void ControllerServer::drop_resource_group( gpointer connection , const String& group )
 {
     for ( ResourceMap::iterator it = resources.begin(); it != resources.end(); )
     {
-        if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
+        if ( it->second.connection == connection && ( group.empty() || it->second.group == group ) )
         {
             tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.native_uri.c_str() );
 
@@ -1224,20 +1226,20 @@ void ControllerServer::drop_resource_group( gpointer connection , const String &
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::handle_http_get( const HttpServer::Request & request , HttpServer::Response & response )
+void ControllerServer::handle_http_get( const HttpServer::Request& request , HttpServer::Response& response )
 {
-	if ( request.get_path() == "/controllers" )
-	{
-		JSON::Object result;
+    if ( request.get_path() == "/controllers" )
+    {
+        JSON::Object result;
 
-		result[ "version" ] = CONTROLLER_PROTOCOL_VERSION;
-		result[ "port" ] = server->get_port();
+        result[ "version" ] = CONTROLLER_PROTOCOL_VERSION;
+        result[ "port" ] = server->get_port();
 
-		response.set_response( "application/json", result.stringify() );
-		response.set_status( HttpServer::HTTP_STATUS_OK );
+        response.set_response( "application/json", result.stringify() );
+        response.set_status( HttpServer::HTTP_STATUS_OK );
 
-		return;
-	}
+        return;
+    }
 
     ResourceMap::iterator it = resources.find( request.get_path() );
 
@@ -1268,11 +1270,13 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
     do
     {
         path = "/controllers";
-        switch(type)
+
+        switch ( type )
         {
             case PostInfo::AUDIO:
                 path += "/audio/";
                 break;
+
             case PostInfo::IMAGE:
                 path += "/image/";
                 break;
@@ -1280,11 +1284,11 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
 
         path += Util::random_string( 20 );
     }
-    while( post_map.find( path ) != post_map.end() );
+    while ( post_map.find( path ) != post_map.end() );
 
     tplog( "STARTED POST END POINT %s" , path.c_str() );
 
-    PostInfo & info( post_map[ path ] );
+    PostInfo& info( post_map[ path ] );
 
     info.connection = connection;
     info.type = type;
@@ -1311,7 +1315,7 @@ void ControllerServer::drop_post_endpoint( gpointer connection )
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
+void ControllerServer::handle_http_post( const HttpServer::Request& request , HttpServer::Response& response )
 {
     PostMap::iterator it = post_map.find( request.get_path() );
 
@@ -1320,14 +1324,14 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
         return;
     }
 
-    ConnectionInfo * info = find_connection( it->second.connection );
+    ConnectionInfo* info = find_connection( it->second.connection );
 
     if ( ! info )
     {
         return;
     }
 
-    const HttpServer::Request::Body & body( request.get_body() );
+    const HttpServer::Request::Body& body( request.get_body() );
 
     if ( ! body.get_data() || ! body.get_length() )
     {
@@ -1338,7 +1342,7 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
 
     String ct( request.get_content_type() );
 
-    const char * content_type = ct.empty() ? 0 : ct.c_str();
+    const char* content_type = ct.empty() ? 0 : ct.c_str();
 
     switch ( it->second.type )
     {
@@ -1358,6 +1362,6 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
 
 guint16 ControllerServer::get_port() const
 {
-	return server.get() ? server->get_port() : 0;
+    return server.get() ? server->get_port() : 0;
 }
 

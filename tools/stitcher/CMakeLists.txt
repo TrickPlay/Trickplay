@@ -39,7 +39,7 @@ target_link_libraries( stitcher
         ${GOBJECT2_LIBRARIES}
         ${JSON_GLIB_LIBRARIES}
         ${MAGICKCORE_LIBRARIES}
-		-lm
+        -lm
 )
 
 set_target_properties( stitcher
@@ -49,4 +49,4 @@ set_target_properties( stitcher
 )
 
 install(TARGETS stitcher RUNTIME DESTINATION bin)
-install(FILES stitcher.1 DESTINATION share/man/man1/)
+#install(FILES stitcher.1 DESTINATION share/man/man1/)

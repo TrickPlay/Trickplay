@@ -2,18 +2,19 @@
 #include <string.h>
 #include "glib.h"
 #include "gst/video/video.h"
+#include "clutter-gst/clutter-gst.h"
 
 #include "trickplay/audio-sampler.h"
 
-void * connect_audio_sampler( TPContext * context );
+void* connect_audio_sampler( TPContext* context );
 
-void disconnect_audio_sampler( void * sampler );
+void disconnect_audio_sampler( void* sampler );
 
 //=============================================================================
 
 typedef struct BufferInfo
 {
-    TPAudioSampler *    sampler;
+    TPAudioSampler*     sampler;
     TPAudioBuffer       buffer;
     gulong              probe_handler;
 }
@@ -21,25 +22,25 @@ BufferInfo;
 
 //=============================================================================
 
-static gboolean audio_buffer_received( GstPad * pad , GstBuffer * buffer , gpointer u_data );
+static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointer u_data );
 
 static void disconnect_probe( gpointer pad );
 
 //=============================================================================
 
-static GstElement * find_element_by_name( GstElement * bin , const char * name )
+static GstElement* find_element_by_name( GstElement* bin , const char* name )
 {
     g_assert( bin );
     g_assert( name );
 
-    GstElement * result = 0;
+    GstElement* result = 0;
 
     if ( ! GST_IS_BIN( bin ) )
     {
         return 0;
     }
 
-    GstIterator * it = gst_bin_iterate_recurse( GST_BIN( bin ) );
+    GstIterator* it = gst_bin_iterate_recurse( GST_BIN( bin ) );
 
     if ( ! it )
     {
@@ -50,33 +51,31 @@ static GstElement * find_element_by_name( GstElement * bin , const char * name )
 
     int done = FALSE;
 
-    GstElement * audio_convert = 0;
-
-    while( ! done )
+    while ( ! done )
     {
-        switch( gst_iterator_next( it , & el ) )
+        switch ( gst_iterator_next( it , & el ) )
         {
             case GST_ITERATOR_OK:
+            {
+                gchar* this_name = gst_element_get_name( GST_ELEMENT( el ) );
+
+                if ( this_name )
                 {
-                    gchar * this_name = gst_element_get_name( GST_ELEMENT( el ) );
-
-                    if ( this_name )
+                    if ( ! strcmp( name , this_name ) )
                     {
-                        if ( ! strcmp( name , this_name ) )
-                        {
-                            // Take an extra ref to it
+                        // Take an extra ref to it
 
-                            result = GST_ELEMENT( gst_object_ref( GST_OBJECT( el ) ) );
+                        result = GST_ELEMENT( gst_object_ref( GST_OBJECT( el ) ) );
 
-                            done = TRUE;
-                        }
-
-                        g_free( this_name );
+                        done = TRUE;
                     }
 
-                    gst_object_unref( GST_OBJECT( el ) );
+                    g_free( this_name );
                 }
-                break;
+
+                gst_object_unref( GST_OBJECT( el ) );
+            }
+            break;
 
 
             case GST_ITERATOR_RESYNC:
@@ -96,34 +95,34 @@ static GstElement * find_element_by_name( GstElement * bin , const char * name )
 
 //=============================================================================
 
-static GstPad * find_source_pad( GstElement * element )
+static GstPad* find_source_pad( GstElement* element )
 {
     g_assert( element );
 
-    GstIterator * it = gst_element_iterate_src_pads( element );
+    GstIterator* it = gst_element_iterate_src_pads( element );
 
     if ( ! it )
     {
         return 0;
     }
 
-    GstPad * result = 0;
+    GstPad* result = 0;
 
     gpointer pad = NULL;
 
     int done = FALSE;
 
-    while( ! done )
+    while ( ! done )
     {
-        switch( gst_iterator_next( it , & pad ) )
+        switch ( gst_iterator_next( it , & pad ) )
         {
             case GST_ITERATOR_OK:
-                {
-                    result = GST_PAD( pad );
+            {
+                result = GST_PAD( pad );
 
-                    done = TRUE;
-                }
-                break;
+                done = TRUE;
+            }
+            break;
 
             case GST_ITERATOR_RESYNC:
                 gst_iterator_resync( it );
@@ -142,12 +141,12 @@ static GstPad * find_source_pad( GstElement * element )
 
 //=============================================================================
 
-void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
+void connect_audio_sampler_old( TPContext* context , GstElement* pipeline )
 {
     g_assert( context );
     g_assert( pipeline );
 
-    const char * enabled = g_getenv( "TP_CMP_SAMPLE" );
+    const char* enabled = g_getenv( "TP_CMP_SAMPLE" );
 
     if ( ! enabled )
     {
@@ -162,7 +161,7 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
     //-------------------------------------------------------------------------
     // Find the audio converter element
 
-    GstElement * audio_convert = find_element_by_name( pipeline , "aconv" );
+    GstElement* audio_convert = find_element_by_name( pipeline , "aconv" );
 
     if ( ! audio_convert )
     {
@@ -173,7 +172,7 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
     //-------------------------------------------------------------------------
     // We got the audio convert element, get its source pad
 
-    GstPad * source_pad = find_source_pad( audio_convert );
+    GstPad* source_pad = find_source_pad( audio_convert );
 
     gst_object_unref( audio_convert );
 
@@ -188,7 +187,7 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
     //-------------------------------------------------------------------------
     // Get the caps for the source pad
 
-    GstCaps * caps = gst_pad_get_negotiated_caps( GST_PAD( source_pad ) );
+    GstCaps* caps = gst_pad_get_negotiated_caps( GST_PAD( source_pad ) );
 
     if ( ! caps )
     {
@@ -197,13 +196,13 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
         return;
     }
 
-    gchar * s = gst_caps_to_string( caps );
+    gchar* s = gst_caps_to_string( caps );
 
     g_debug( "AUDIO CAPS : %s" , s );
 
     g_free( s );
 
-    GstStructure * st = gst_caps_get_structure( caps , 0 );
+    GstStructure* st = gst_caps_get_structure( caps , 0 );
 
     if ( ! st )
     {
@@ -242,7 +241,7 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
         }
         else if ( endianness == 1234 && is_signed && width == 16 && depth == 16 )
         {
-            BufferInfo * info = g_new0( BufferInfo , 1 );
+            BufferInfo* info = g_new0( BufferInfo , 1 );
 
             info->sampler = tp_context_get_audio_sampler( context );
             info->buffer.sample_rate = rate;
@@ -277,7 +276,7 @@ void connect_audio_sampler_old( TPContext * context , GstElement * pipeline )
 
 //=============================================================================
 
-void disconnect_audio_sampler_old( GstElement * pipeline )
+void disconnect_audio_sampler_old( GstElement* pipeline )
 {
     g_object_set_data( G_OBJECT( pipeline ) , "tp-probe-pad" , NULL );
 }
@@ -288,9 +287,9 @@ static void disconnect_probe( gpointer _pad )
 {
     g_debug( "DISCONNECTING AUDIO SAMPLER" );
 
-    GstPad * pad = GST_PAD( _pad );
+    GstPad* pad = GST_PAD( _pad );
 
-    BufferInfo * info = ( BufferInfo * ) g_object_get_data( G_OBJECT( pad ) , "tp-buffer-info" );
+    BufferInfo* info = ( BufferInfo* ) g_object_get_data( G_OBJECT( pad ) , "tp-buffer-info" );
 
     if ( info && info->probe_handler )
     {
@@ -304,16 +303,16 @@ static void disconnect_probe( gpointer _pad )
 
 //=============================================================================
 
-static void free_samples( void * samples , void * gst_buffer )
+static void free_samples( void* samples , void* gst_buffer )
 {
     gst_buffer_unref( GST_BUFFER( gst_buffer ) );
 }
 
 //=============================================================================
 
-static gboolean audio_buffer_received( GstPad * pad , GstBuffer * buffer , gpointer u_data )
+static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointer u_data )
 {
-    BufferInfo * info = ( BufferInfo * ) u_data;
+    BufferInfo* info = ( BufferInfo* ) u_data;
 
     info->buffer.samples = GST_BUFFER_DATA( buffer );
     info->buffer.size = GST_BUFFER_SIZE( buffer );
@@ -328,11 +327,11 @@ static gboolean audio_buffer_received( GstPad * pad , GstBuffer * buffer , gpoin
 }
 
 
-void * connect_audio_sampler( TPContext * context )
+void* connect_audio_sampler( TPContext* context )
 {
     g_assert( context );
 
-    const char * enabled = g_getenv( "TP_CMP_SAMPLE" );
+    const char* enabled = g_getenv( "TP_CMP_SAMPLE" );
 
     if ( ! enabled )
     {
@@ -349,7 +348,7 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Create a pipeline
 
-    GstElement * pipeline = gst_pipeline_new( "tp-audio-sampler" );
+    GstElement* pipeline = gst_pipeline_new( "tp-audio-sampler" );
 
     if ( ! pipeline )
     {
@@ -360,9 +359,9 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Auto audio source and fakesink
 
-    GstElement * audio_source = gst_element_factory_make( "autoaudiosrc" , "src" );
+    GstElement* audio_source = gst_element_factory_make( "autoaudiosrc" , "src" );
 
-    GstElement * sink = gst_element_factory_make( "fakesink" , "sink" );
+    GstElement* sink = gst_element_factory_make( "fakesink" , "sink" );
 
 
     gst_bin_add_many( GST_BIN( pipeline ) , audio_source , sink , NULL );
@@ -382,7 +381,7 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Get the source pad for the audio source
 
-    GstPad * pad = gst_element_get_pad( audio_source , "src" );
+    GstPad* pad = gst_element_get_pad( audio_source , "src" );
 
     if ( ! pad )
     {
@@ -395,7 +394,7 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Get its caps
 
-    GstCaps * caps = gst_pad_get_negotiated_caps( GST_PAD( pad ) );
+    GstCaps* caps = gst_pad_get_negotiated_caps( GST_PAD( pad ) );
 
     if ( ! caps )
     {
@@ -409,13 +408,13 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Get details from the caps
 
-    gchar * s = gst_caps_to_string( caps );
+    gchar* s = gst_caps_to_string( caps );
 
     g_debug( "AUDIO CAPS : %s" , s );
 
     g_free( s );
 
-    GstStructure * st = gst_caps_get_structure( caps , 0 );
+    GstStructure* st = gst_caps_get_structure( caps , 0 );
 
     if ( ! st )
     {
@@ -467,7 +466,7 @@ void * connect_audio_sampler( TPContext * context )
     //.........................................................................
     // Populate the buffer info structure based on the caps.
 
-    BufferInfo * info = g_new0( BufferInfo , 1 );
+    BufferInfo* info = g_new0( BufferInfo , 1 );
 
     info->sampler = tp_context_get_audio_sampler( context );
     info->buffer.sample_rate = rate;
@@ -507,14 +506,14 @@ void * connect_audio_sampler( TPContext * context )
     return pipeline;
 }
 
-void disconnect_audio_sampler( void * sampler )
+void disconnect_audio_sampler( void* sampler )
 {
     if ( sampler == 0 )
     {
         return;
     }
 
-    GstElement * pipeline = GST_ELEMENT( sampler );
+    GstElement* pipeline = GST_ELEMENT( sampler );
 
     g_object_set_data( G_OBJECT( pipeline ) , "tp-probe-pad" , NULL );
 

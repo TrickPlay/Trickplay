@@ -14,25 +14,25 @@
 
 //=============================================================================
 
-bool recursive_delete_path( GFile * file )
+bool recursive_delete_path( GFile* file )
 {
     bool result = false;
 
-    GFileInfo * info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, NULL );
+    GFileInfo* info = g_file_query_info( file, "standard::*", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, NULL );
 
     if ( info )
     {
         if ( g_file_info_get_file_type( info ) == G_FILE_TYPE_DIRECTORY )
         {
-            GFileEnumerator * enumerator = g_file_enumerate_children( file, "standard::*", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, NULL );
+            GFileEnumerator* enumerator = g_file_enumerate_children( file, "standard::*", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, NULL );
 
             if ( enumerator )
             {
                 while ( true )
                 {
-                    GError * error = NULL;
+                    GError* error = NULL;
 
-                    GFileInfo * child_info = g_file_enumerator_next_file( enumerator, NULL, &error );
+                    GFileInfo* child_info = g_file_enumerator_next_file( enumerator, NULL, &error );
 
                     if ( ! child_info )
                     {
@@ -41,7 +41,7 @@ bool recursive_delete_path( GFile * file )
                         break;
                     }
 
-                    GFile * child = g_file_resolve_relative_path( file, g_file_info_get_name( child_info ) );
+                    GFile* child = g_file_resolve_relative_path( file, g_file_info_get_name( child_info ) );
 
                     bool child_deleted = recursive_delete_path( child );
 
@@ -61,7 +61,7 @@ bool recursive_delete_path( GFile * file )
 
         g_object_unref( G_OBJECT( info ) );
 
-        gchar * s = g_file_get_path( file );
+        gchar* s = g_file_get_path( file );
         g_debug( "DELETING '%s'", s );
         g_free( s );
 
@@ -75,9 +75,9 @@ bool recursive_delete_path( GFile * file )
 
 
 
-bool recursive_delete_path( const gchar * path )
+bool recursive_delete_path( const gchar* path )
 {
-    GFile * file = g_file_new_for_path( path );
+    GFile* file = g_file_new_for_path( path );
 
     bool result = recursive_delete_path( file );
 
@@ -92,8 +92,8 @@ class InstallAppTask : public ThreadPool::Task
 {
 public:
 
-    InstallAppTask( Installer * _installer, Installer::Info * _info )
-    :
+    InstallAppTask( Installer* _installer, Installer::Info* _info )
+        :
         installer( _installer ),
         info( * _info )
     {}
@@ -105,8 +105,8 @@ public:
     {
     public:
 
-        ProgressTask( Installer * _installer, const Installer::Info & _info )
-        :
+        ProgressTask( Installer* _installer, const Installer::Info& _info )
+            :
             installer( _installer ),
             info( _info )
         {}
@@ -118,7 +118,7 @@ public:
 
     private:
 
-        Installer *     installer;
+        Installer*      installer;
         Installer::Info info;
     };
 
@@ -187,16 +187,16 @@ public:
 
         bool result = false;
 
-        GFile * file = g_file_new_for_path( info.source_file.c_str() );
+        GFile* file = g_file_new_for_path( info.source_file.c_str() );
 
         if ( file )
         {
 
-            GFileIOStream * stream = g_file_open_readwrite( file, NULL, NULL );
+            GFileIOStream* stream = g_file_open_readwrite( file, NULL, NULL );
 
             if ( stream )
             {
-                GSeekable * seekable = G_SEEKABLE( stream );
+                GSeekable* seekable = G_SEEKABLE( stream );
 
                 if ( g_seekable_can_seek( seekable ) && g_seekable_can_truncate( seekable ) )
                 {
@@ -305,9 +305,9 @@ public:
                 {
                     // THIS IS PLATFORM SPECIFIC
 
-                    if ( ! ( entry.attr & S_IFDIR ) )
+                    if ( !( entry.attr & S_IFDIR ) )
                     {
-                        gchar * basename = g_path_get_basename( entry.name );
+                        gchar* basename = g_path_get_basename( entry.name );
 
                         if ( ! strcmp( basename , "app" ) )
                         {
@@ -343,7 +343,7 @@ public:
             // g_new0 serves to NULL-terminate the contents, which
             // load_metadata_from_data expects.
 
-            gchar * app_file_buffer = g_new0( gchar, app_file_uncompressed_size * 2 );
+            gchar* app_file_buffer = g_new0( gchar, app_file_uncompressed_size * 2 );
 
             if ( ! app_file_buffer )
             {
@@ -385,7 +385,7 @@ public:
             //      This puts it event closer to its final destination, but we would
             //      have to do more work to clean up. CHOOSING THIS ONE FOR NOW
 
-            gchar * unzip_path = g_build_filename( info.app_directory.c_str(), "installing", NULL );
+            gchar* unzip_path = g_build_filename( info.app_directory.c_str(), "installing", NULL );
 
             free_later( unzip_path );
 
@@ -420,8 +420,8 @@ public:
             // "foor/bar/app". We have to take all the files in the zip that
             // are in "foo/bar" and unzip them to our real destination.
 
-            gchar * app_file_zip_dirname = g_path_get_dirname( app_file_zip_path.c_str() );
-            g_assert(app_file_zip_dirname);
+            gchar* app_file_zip_dirname = g_path_get_dirname( app_file_zip_path.c_str() );
+            g_assert( app_file_zip_dirname );
 
             free_later( app_file_zip_dirname );
 
@@ -445,7 +445,7 @@ public:
 
             if ( slow == -1 )
             {
-                if ( const char * e = g_getenv( "TP_INSTALL_DELAY" ) )
+                if ( const char* e = g_getenv( "TP_INSTALL_DELAY" ) )
                 {
                     slow = atof( e );
                 }
@@ -474,7 +474,7 @@ public:
                     throw String( "FAILED TO GET ZIP ENTRY" );
                 }
 
-                gchar * destination_file_name = NULL;
+                gchar* destination_file_name = NULL;
 
                 if ( no_zip_root )
                 {
@@ -526,7 +526,7 @@ public:
 
             info.moved = false;
 
-            gchar * source_path = g_build_filename( info.app_directory.c_str(), "source", NULL );
+            gchar* source_path = g_build_filename( info.app_directory.c_str(), "source", NULL );
 
             free_later( source_path );
 
@@ -574,7 +574,7 @@ public:
 
             // Caller is also reponsible for getting rid of the original zip file.
         }
-        catch( const String & e )
+        catch ( const String& e )
         {
             g_warning( "FAILED TO INSTALL %s FROM %s : %s", info.app_id.c_str(), info.source_file.c_str(), e.c_str() );
 
@@ -595,14 +595,14 @@ public:
 
 private:
 
-    Installer *         installer;
+    Installer*          installer;
     Installer::Info     info;
 };
 
 //=============================================================================
 
-Installer::Installer( TPContext * _context )
-:
+Installer::Installer( TPContext* _context )
+    :
     context( _context ),
     next_id( 1 ),
     thread_pool( 2 )
@@ -622,14 +622,14 @@ Installer::~Installer()
 //-----------------------------------------------------------------------------
 
 guint Installer::download_and_install_app(
-        const String & owner,
-        const String & app_id,
-        const String & app_name,
+        const String& owner,
+        const String& app_id,
+        const String& app_name,
         bool locked,
-        const Network::Request & request,
-        Network::CookieJar * cookie_jar,
-        const StringSet & required_fingerprints,
-        const StringMap & extra )
+        const Network::Request& request,
+        Network::CookieJar* cookie_jar,
+        const StringSet& required_fingerprints,
+        const StringMap& extra )
 {
     guint download_id = context->get_downloads()->start_download( owner, request, cookie_jar );
 
@@ -648,29 +648,30 @@ guint Installer::download_and_install_app(
 
 //-----------------------------------------------------------------------------
 
-void Installer::add_delegate( Delegate * delegate )
+void Installer::add_delegate( Delegate* delegate )
 {
     delegates.insert( delegate );
 }
 
 //-----------------------------------------------------------------------------
 
-void Installer::remove_delegate( Delegate * delegate )
+void Installer::remove_delegate( Delegate* delegate )
 {
     delegates.erase( delegate );
 }
 
 //-----------------------------------------------------------------------------
 
-Installer::Info * Installer::get_info_for_download( guint download_id )
+Installer::Info* Installer::get_info_for_download( guint download_id )
 {
-    for( InfoMap::iterator it = info_map.begin(); it != info_map.end(); ++it )
+    for ( InfoMap::iterator it = info_map.begin(); it != info_map.end(); ++it )
     {
         if ( it->second.download_id == download_id )
         {
             return & it->second;
         }
     }
+
     return NULL;
 }
 
@@ -685,7 +686,7 @@ bool Installer::complete_install( guint id )
         return false;
     }
 
-    const Info & info( it->second );
+    const Info& info( it->second );
 
     if ( info.status != Info::FINISHED )
     {
@@ -760,7 +761,7 @@ void Installer::abandon_install( guint id )
         return;
     }
 
-    const Info & info( it->second );
+    const Info& info( it->second );
 
     if ( info.status == Info::FINISHED )
     {
@@ -774,7 +775,7 @@ void Installer::abandon_install( guint id )
 
 //-----------------------------------------------------------------------------
 
-Installer::Info * Installer::get_install( guint id )
+Installer::Info* Installer::get_install( guint id )
 {
     InfoMap::iterator it = info_map.find( id );
 
@@ -802,13 +803,13 @@ Installer::InfoList Installer::get_all_installs() const
 
 //-----------------------------------------------------------------------------
 
-void Installer::download_progress( const Downloads::Info & dl_info )
+void Installer::download_progress( const Downloads::Info& dl_info )
 {
-    if ( Info * info = get_info_for_download( dl_info.id ) )
+    if ( Info* info = get_info_for_download( dl_info.id ) )
     {
         info->percent_downloaded = dl_info.percent_downloaded();
 
-        for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+        for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
         {
             ( * dit )->download_progress( * info , dl_info );
         }
@@ -817,9 +818,9 @@ void Installer::download_progress( const Downloads::Info & dl_info )
 
 //-----------------------------------------------------------------------------
 
-void Installer::download_finished( const Downloads::Info & dl_info )
+void Installer::download_finished( const Downloads::Info& dl_info )
 {
-    Info * info = get_info_for_download( dl_info.id );
+    Info* info = get_info_for_download( dl_info.id );
 
     // It is not one of ours
 
@@ -832,7 +833,7 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
     // Tell the delegates that the download is done
 
-    for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+    for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
     {
         ( * dit )->download_finished( * info , dl_info );
     }
@@ -861,7 +862,7 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
             thread_pool.push( new InstallAppTask( this, info ) );
 
-            for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+            for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
             {
                 ( * dit )->install_progress( *info );
             }
@@ -878,7 +879,7 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
         // Tell the delegates that the installation is finished/failed
 
-        for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+        for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
         {
             ( * dit )->install_finished( * info );
         }
@@ -895,7 +896,7 @@ void Installer::download_finished( const Downloads::Info & dl_info )
 
 //-----------------------------------------------------------------------------
 
-void Installer::install_progress( const Installer::Info & progress )
+void Installer::install_progress( const Installer::Info& progress )
 {
     InfoMap::iterator it = info_map.find( progress.id );
 
@@ -906,7 +907,7 @@ void Installer::install_progress( const Installer::Info & progress )
         return;
     }
 
-    Info & info( it->second );
+    Info& info( it->second );
 
     if ( progress.status == Info::INSTALLING )
     {
@@ -914,7 +915,7 @@ void Installer::install_progress( const Installer::Info & progress )
 
         info.percent_installed = progress.percent_installed;
 
-        for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+        for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
         {
             ( * dit )->install_progress( info );
         }
@@ -948,7 +949,7 @@ void Installer::install_progress( const Installer::Info & progress )
 
         // Tell the delegates
 
-        for( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
+        for ( DelegateSet::iterator dit = delegates.begin(); dit != delegates.end(); ++dit )
         {
             ( * dit )->install_finished( info );
         }

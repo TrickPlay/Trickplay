@@ -22,7 +22,7 @@ namespace TrickPlay
 //.............................................................................
 
 Socket::Socket()
-:
+    :
     client( NULL ),
     connection( NULL ),
     input( NULL ),
@@ -46,7 +46,7 @@ Socket::~Socket()
 
 //.............................................................................
 
-void Socket::connect( const gchar * host_and_port, guint16 default_port )
+void Socket::connect( const gchar* host_and_port, guint16 default_port )
 {
     disconnect();
 
@@ -61,7 +61,7 @@ void Socket::disconnect()
 {
     if ( connection )
     {
-        tplog("SCHEDULING CLOSING STREAM");
+        tplog( "SCHEDULING CLOSING STREAM" );
 
         // Unreffing the connection and the socket will auto-close things when all the pending writes are done
         // TODO: Writes from an on_exit handler will fail, because the event loop will not get a chance to
@@ -97,15 +97,17 @@ bool Socket::is_connected()
 
 //.............................................................................
 
-void Socket::write( const guint8 * data, gsize count )
+void Socket::write( const guint8* data, gsize count )
 {
     if ( ! is_connected() )
     {
         tpwarn( "ATTEMPT TO WRITE ON A SOCKET THAT IS NOT OPEN" );
+
         if ( client )
         {
             tpwarn( "YOU MUST WAIT FOR Socket:on_connected() BEFORE YOU WRITE" );
         }
+
         return;
     }
 
@@ -116,18 +118,18 @@ void Socket::write( const guint8 * data, gsize count )
 
 //.............................................................................
 
-void Socket::set_delegate( Delegate * _delegate )
+void Socket::set_delegate( Delegate* _delegate )
 {
     delegate = _delegate;
 }
 
 //.............................................................................
 
-void Socket::connect_async( GObject * source_object, GAsyncResult * res, gpointer me )
+void Socket::connect_async( GObject* source_object, GAsyncResult* res, gpointer me )
 {
-    Socket * self = ( Socket * ) me;
+    Socket* self = ( Socket* ) me;
 
-    GError * error = NULL;
+    GError* error = NULL;
 
     self->connection = g_socket_client_connect_to_host_finish( G_SOCKET_CLIENT( source_object ), res, & error );
 
@@ -154,7 +156,7 @@ void Socket::connect_async( GObject * source_object, GAsyncResult * res, gpointe
         g_assert( self->output );
         g_assert( self->connection );
 
-        guint8 * input_buffer = g_new( guint8, INPUT_BUFFER_SIZE );
+        guint8* input_buffer = g_new( guint8, INPUT_BUFFER_SIZE );
 
         g_object_set_data_full( G_OBJECT( self->input ), INPUT_BUFFER_KEY, input_buffer, g_free );
 
@@ -176,7 +178,7 @@ void Socket::start_async_read()
         return;
     }
 
-    guint8 * input_buffer = ( guint8 * ) g_object_get_data( G_OBJECT( input ), INPUT_BUFFER_KEY );
+    guint8* input_buffer = ( guint8* ) g_object_get_data( G_OBJECT( input ), INPUT_BUFFER_KEY );
 
     g_assert( input_buffer );
 
@@ -185,11 +187,11 @@ void Socket::start_async_read()
 
 //.............................................................................
 
-void Socket::read_async( GObject * source_object, GAsyncResult * res, gpointer me )
+void Socket::read_async( GObject* source_object, GAsyncResult* res, gpointer me )
 {
-    Socket * self = ( Socket * ) me;
+    Socket* self = ( Socket* ) me;
 
-    GError * error = NULL;
+    GError* error = NULL;
 
     gssize bytes_read = g_input_stream_read_finish( self->input, res, & error );
 
@@ -213,7 +215,7 @@ void Socket::read_async( GObject * source_object, GAsyncResult * res, gpointer m
     {
         if ( self->delegate )
         {
-            guint8 * input_buffer = ( guint8 * ) g_object_get_data( G_OBJECT( self->input ), INPUT_BUFFER_KEY );
+            guint8* input_buffer = ( guint8* ) g_object_get_data( G_OBJECT( self->input ), INPUT_BUFFER_KEY );
 
             self->delegate->on_data_read( input_buffer, bytes_read );
         }
@@ -235,7 +237,7 @@ void Socket::start_async_write()
         // Create a new output buffer to hold anything else that wants to
         // be written in the meantime.
 
-        g_object_set_data_full( G_OBJECT( output ), OUTPUT_BUFFER_KEY, output_buffer, ( GDestroyNotify) g_byte_array_unref );
+        g_object_set_data_full( G_OBJECT( output ), OUTPUT_BUFFER_KEY, output_buffer, ( GDestroyNotify ) g_byte_array_unref );
 
         tplog( "SCHEDULING WRITE OF %d BYTES", output_buffer->len );
 
@@ -247,11 +249,11 @@ void Socket::start_async_write()
 
 //.............................................................................
 
-void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer me )
+void Socket::write_async( GObject* source_object, GAsyncResult* res, gpointer me )
 {
-    Socket * self = ( Socket * ) me;
+    Socket* self = ( Socket* ) me;
 
-    GError * error = NULL;
+    GError* error = NULL;
 
     self->writing = false;
 
@@ -279,7 +281,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
     }
     else
     {
-        GByteArray * write_buffer = ( GByteArray * ) g_object_get_data( G_OBJECT( self->output ), OUTPUT_BUFFER_KEY );
+        GByteArray* write_buffer = ( GByteArray* ) g_object_get_data( G_OBJECT( self->output ), OUTPUT_BUFFER_KEY );
 
         tplog( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
 

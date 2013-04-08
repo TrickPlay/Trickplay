@@ -1,8 +1,7 @@
 module clutter_image;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "network.h"
 #include "util.h"
@@ -293,7 +292,7 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Property: src
+    Property: src
 
     The src property is a string that references an image file. The string may refer to either a path in your application bundle or a URI.
 
@@ -574,7 +573,7 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	UndocumentedFunction: load_from_date
+    UndocumentedFunction: load_from_date
 
 
 */
@@ -587,7 +586,7 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	UndocumentedFunction: load_app_icon
+    UndocumentedFunction: load_app_icon
 
     This one lets you get an image from another app. We may want to leave it undocumented. I don't think it is dangerous because we are not returning the data to Lua, we are just sticking it into an image.
 
@@ -622,32 +621,32 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Function: add_onloaded_listener
+    Function: add_onloaded_listener
 
-	The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+    The add_onloaded_listener() function registers a handler function for <on_loaded> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( loadedImage, failed )
-		(end)
+        (code)
+        f( loadedImage, failed )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         loadedImage - the Image object that has finished loading
         failed - boolean value indicating failure or success of the load operation (true=failure)
 
     *Handler Return Value:* None
 
-	*Code Example:* Refer to the <async> property
+    *Code Example:* Refer to the <async> property
 
-	*See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+    *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
 */
 
     int add_onloaded_listener( function f )
@@ -661,17 +660,17 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Function: remove_onloaded_listener
+    Function: remove_onloaded_listener
 
-	The remove_onloaded_listener() function unregisters the specified event handler.
+    The remove_onloaded_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onloaded_listener> function
+    *See Also:* the <add_onloaded_listener> function
 */
 
     remove_onloaded_listener( int ref )
@@ -680,23 +679,23 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Function: add_onsizechanged_listener
+    Function: add_onsizechanged_listener
 
-	The add_onsizechanged_listener() function registers a handler function for <on_size_changed> events.
+    The add_onsizechanged_listener() function registers a handler function for <on_size_changed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onsizechanged_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onsizechanged_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( loadedImage, newWidth, newHeight )
-		(end)
+        (code)
+        f( loadedImage, newWidth, newHeight )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
         loadedImage - the Image object that has changed size
         newWidth - integer width in pixels of the loaded image
@@ -737,7 +736,7 @@ class Image [[ClutterActor*]] actor
         myImage:add_onsizechanged_listener( sizeChangeHandler )
         (end)
 
-	*See Also:* the <on_size_changed> event and the <remove_onsizechanged_listener> function
+    *See Also:* the <on_size_changed> event and the <remove_onsizechanged_listener> function
 */
 
     int add_onsizechanged_listener( function f )
@@ -751,17 +750,17 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Function: remove_onsizechanged_listener
+    Function: remove_onsizechanged_listener
 
-	The remove_onsizechanged_listener() function unregisters the specified event handler.
+    The remove_onsizechanged_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onsizechanged_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onsizechanged_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onsizechanged_listener> function
+    *See Also:* the <add_onsizechanged_listener> function
 */
 
     remove_onsizechanged_listener( int ref )
@@ -770,11 +769,11 @@ class Image [[ClutterActor*]] actor
         ]];
 
 /***************************************
-	Event: on_loaded
+    Event: on_loaded
 
     The on_loaded event occurs when an asynchronously-loaded image has finished loading.
 
-	*See Also:* the <add_onloaded_listener> function
+    *See Also:* the <add_onloaded_listener> function
 */
 
     function on_loaded
@@ -797,7 +796,7 @@ class Image [[ClutterActor*]] actor
 
     The event handler is *not* fired by changing the image's display size, for example, by scaling the image or altering its width or height properties in any way. The handler is also not fired if a subsequently-loaded image is the same size as the previously-loaded image.
 
-	*See Also:* the <add_onsizechanged_listener> function
+    *See Also:* the <add_onsizechanged_listener> function
 */
 
     function on_size_changed

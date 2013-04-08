@@ -6,220 +6,220 @@
 class Settings
 {
 public:
-    
+
     Settings(lua_State*l)
     :
         L(l),
         db(NULL),
         dirty(false)
     {
-		App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
+        App::get(L)->add_notification_handler(TP_NOTIFICATION_PROFILE_CHANGE,profile_change_handler,this);
     }
-    
+
     ~Settings()
     {
-		close();
+        close();
     }
-    
+
     void open()
     {
-		if (db)
-		{
-	    	return;
-	    }
+        if (db)
+        {
+            return;
+        }
 
-		bool create = true;
+        bool create = true;
 
-	    SQLite::DB mdb( ":memory:" );
+        SQLite::DB mdb( ":memory:" );
 
-		FreeLater free_later;
-			    
-		App * app=App::get(L);
-	
-		gchar * name=g_strdup_printf("settings-%d.db",app->get_profile_id());
-		free_later(name);
-        
+        FreeLater free_later;
+
+        App * app=App::get(L);
+
+        gchar * name=g_strdup_printf("settings-%d.db",app->get_profile_id());
+        free_later(name);
+
         gchar * fn=g_build_filename(app->get_data_path().c_str(),name,NULL);
         free_later(fn);
-        
+
         file_name = fn;
-        
+
         if ( g_file_test( fn , G_FILE_TEST_EXISTS ) )
         {
-		    SQLite::DB ddb( fn , SQLITE_OPEN_READONLY );
-		    
-		    if ( SQLite::Backup( mdb , ddb ).ok() )
-		    {
-		    	g_debug( "RESTORED SETTINGS DATABASE" );
-				create  = false;
-				dirty = false;
-		    }    
-		}	    
+            SQLite::DB ddb( fn , SQLITE_OPEN_READONLY );
 
-	    if ( create )
-	    {
-	    	g_debug( "CREATING SETTINGS DATABASE" );
-	    	
-	    	mdb.exec( "CREATE TABLE settings ( key TEXT PRIMARY KEY NOT NULL , value TEXT )" );
-	    	
-	    	dirty = false;
-	    }
+            if ( SQLite::Backup( mdb , ddb ).ok() )
+            {
+                g_debug( "RESTORED SETTINGS DATABASE" );
+                create  = false;
+                dirty = false;
+            }
+        }
 
-		db = new SQLite::DB( mdb ); 	    
+        if ( create )
+        {
+            g_debug( "CREATING SETTINGS DATABASE" );
+
+            mdb.exec( "CREATE TABLE settings ( key TEXT PRIMARY KEY NOT NULL , value TEXT )" );
+
+            dirty = false;
+        }
+
+        db = new SQLite::DB( mdb );
     }
-    
+
     void close()
     {
-		if (db)
-		{
-			if (dirty)
-			{
-				SQLite::DB destination( file_name.c_str() );
-				if ( SQLite::Backup( destination , *db ).ok() )
-				{
-					g_debug( "FLUSHED SETTINGS DATABASE" );
-				}
-				else
-				{
-					g_warning( "FAILED TO FLUSH SETTINGS DATABASE %s" , file_name.c_str() );
-				}
-				dirty = false;
-			}
-			
-			delete db;
-			db = NULL;
-			file_name.clear(); 
-		}	
+        if (db)
+        {
+            if (dirty)
+            {
+                SQLite::DB destination( file_name.c_str() );
+                if ( SQLite::Backup( destination , *db ).ok() )
+                {
+                    g_debug( "FLUSHED SETTINGS DATABASE" );
+                }
+                else
+                {
+                    g_warning( "FAILED TO FLUSH SETTINGS DATABASE %s" , file_name.c_str() );
+                }
+                dirty = false;
+            }
+
+            delete db;
+            db = NULL;
+            file_name.clear();
+        }
     }
-    
+
     void set()
     {
-		open();
-		
-		if ( !db )
-		{
-			return;
-		}
-	
+        open();
+
+        if ( !db )
+        {
+            return;
+        }
+
         size_t key_len;
-        
+
         const char * key=lua_tolstring(L,2,&key_len);
-        
+
         if (!key)
         {
             g_warning("TRYING TO ADD SETTINGS WITH NON-STRING KEY: %s", Util::where_am_i_lua(L).c_str());
             return;
         }
-        
+
         // If they set it to nil, we delete the record
-        
+
         if (lua_isnil(L,3))
         {
-        	SQLite::Statement d( *db , "delete from settings where key = ?1" );
-        	d.bind( 1 , String( key , key_len ) );
-        	d.step();
-        	dirty = true;        	
+            SQLite::Statement d( *db , "delete from settings where key = ?1" );
+            d.bind( 1 , String( key , key_len ) );
+            d.step();
+            dirty = true;
         }
         else
         {
-		    LSG;
-		    
-		    lua_getglobal(L,"serialize");
-		    lua_pushvalue(L,3);
-		    lua_call(L,1,1);
-		    
+            LSG;
+
+            lua_getglobal(L,"serialize");
+            lua_pushvalue(L,3);
+            lua_call(L,1,1);
+
             size_t value_len;
-    
+
             const char * value=lua_tolstring(L,-1,&value_len);
-            
+
             SQLite::Statement insert(*db,"INSERT OR REPLACE INTO settings (key,value) VALUES (?1,?2);");
-            
+
             insert.bind( 1 , String( key , key_len ) );
             insert.bind( 2 , String( value , value_len ) );
-            
+
             if ( !insert.step_done() )
             {
                 g_warning("FAILED TO STORE SETTING '%s' = '%s' : %s (%s)",key,value,insert.get_msg().c_str(), Util::where_am_i_lua(L).c_str());
             }
-            
-		    lua_pop(L,1);
-		    
-		    LSG_END(0);
-		    
-		    dirty = true;
+
+            lua_pop(L,1);
+
+            LSG_END(0);
+
+            dirty = true;
         }
     }
-    
+
     bool get()
     {
-		open();
-		
-		if (!db)
-		{
-			return false;
-		}
-	
+        open();
+
+        if (!db)
+        {
+            return false;
+        }
+
         size_t key_len;
-        
+
         const char * key=lua_tolstring(L,2,&key_len);
-        
+
         if (!key)
         {
             g_warning("TRYING TO GET SETTING WITH NON-STRING KEY: %s", Util::where_am_i_lua(L).c_str());
             return false;
         }
-        
+
         SQLite::Statement select( *db , "SELECT value FROM settings WHERE key = ?1" );
         select.bind( 1 , String( key , key_len ) );
-        
+
         if ( ! select.step_row() )
         {
-        	return false;
+            return false;
         }
-        
+
         String value( select.get_string( 0 ) );
-        
-		String statement="return "+value;
-		
-		if (luaL_dostring(L,statement.c_str())!=0)
-		{
-		    g_warning("FAILED TO EVALUATE SETTING VALUE: %s", Util::where_am_i_lua(L).c_str());
-		    // pop the error
-		    lua_pop( L, 1 );
-		    return false;
-		}
-		else
-		{
-	    	// The result of dostring should be at the top of the stack	    
-    	}
-        
+
+        String statement="return "+value;
+
+        if (luaL_dostring(L,statement.c_str())!=0)
+        {
+            g_warning("FAILED TO EVALUATE SETTING VALUE: %s", Util::where_am_i_lua(L).c_str());
+            // pop the error
+            lua_pop( L, 1 );
+            return false;
+        }
+        else
+        {
+            // The result of dostring should be at the top of the stack
+        }
+
         return true;
     }
-    
+
 private:
-    
+
     static void profile_change_handler(TPContext *,const char *,void * self)
     {
-		// We just close the current database - so that a new one will be
-		// opened when needed using the new profile id
-		
-		((Settings*)self)->close();
+        // We just close the current database - so that a new one will be
+        // opened when needed using the new profile id
+
+        ((Settings*)self)->close();
     }
-    
-    lua_State * 	L;
-    SQLite::DB * 	db;
-    String			file_name;
-    bool			dirty;
+
+    lua_State *     L;
+    SQLite::DB *    db;
+    String          file_name;
+    bool            dirty;
 };
 
 ]]
 
 /*
-	Global: settings
-	
-	The settings global variable contains the database entries for the currently active profile.
-	
-	For a complete explanation of the settings variable, refer to the description of the <profile> global variable.
+    Global: settings
+
+    The settings global variable contains the database entries for the currently active profile.
+
+    For a complete explanation of the settings variable, refer to the description of the <profile> global variable.
 */
 
 global settings [[Settings*]] table
@@ -228,21 +228,21 @@ global settings [[Settings*]] table
         [[
             self=lb_construct( Settings , new Settings(L) );
         ]];
-        
+
     ~settings()
         [[
             delete self;
         ]];
-        
+
     multi __index()
         [[
             if (!self->get())
                 lua_pushnil(L);
             return 1;
         ]];
-        
+
     __newindex()
         [[
             self->set();
-        ]];        
+        ]];
 }

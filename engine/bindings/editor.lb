@@ -34,13 +34,13 @@ restricted global editor [[ void * ]]
                 lua_newtable( L );
                 int t = lua_gettop( L );
                 int i = 1;
-                
+
                 for ( const gchar * name = g_dir_read_name( dir ); name; name = g_dir_read_name( dir ) )
                 {
                     lua_pushstring( L , name );
                     lua_rawseti( L , t , i++ );
                 }
-                
+
                 g_dir_close( dir );
             }
             else
@@ -52,7 +52,7 @@ restricted global editor [[ void * ]]
 
      bool writefile(string file_name, lstring contents, bool overwrite=true)
         [[
-            result = false;              
+            result = false;
 
             AppResource r( L , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
 
@@ -68,7 +68,7 @@ restricted global editor [[ void * ]]
                     }
                     fclose( fp );
                 }
-            }            
+            }
         ]];
 
      bool change_app_path( string path )
@@ -185,11 +185,11 @@ restricted global editor [[ void * ]]
 
 #endif
         ]];
-		
-	int execute( string command_str )
-		[[
-			result = system(command_str);
-		]];
+
+    int execute( string command_str )
+        [[
+            result = system(command_str);
+        ]];
 
 }
 

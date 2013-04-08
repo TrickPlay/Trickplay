@@ -8,40 +8,56 @@
 #include <time.h>
 #include <math.h>
 
-int main ( int argc, char ** argv )
+int main( int argc, char** argv )
 {
+    // initialization
+
     g_type_init();
     MagickCoreGenesis( * argv, MagickTrue );
 
-    Options * options = options_new_from_arguments( argc, argv );
+    // setup using command line arguments
 
-    State  * state  = state_new();
+    Options* options = options_new_from_arguments( argc, argv );
+
+    State*   state  = state_new();
     state_load_inputs( state, options );
-    
-    Progress * progress = progress_new( options );
-    ProgressChunk * layout_chunk,
-                  * comp_chunk,
-                  * spacer_chunk = NULL;
-    
+
+    Progress* progress = progress_new( options );
+    ProgressChunk* layout_chunk,
+                   * comp_chunk,
+                   * spacer_chunk = NULL;
+
+    // iterate until all inputs have been given homes
+
     unsigned n_items;
-    while (( n_items = g_sequence_get_length( state->items ) ))
+
+    while ( ( n_items = g_sequence_get_length( state->items ) ) )
     {
-        Layout * best = layout_new_from_state( state, 0, options );
-        
+        // a null layout used to gather information
+
+        Layout* best = layout_new_from_state( state, 0, options );
+
         unsigned min_w = best->max_item_w,
                  max_w = MAX( min_w, MIN( best->item_area * 2 / best->max_item_h, options->output_size_limit ) );
-        
-        layout_chunk = progress_new_chunk( progress, (float) n_items * (float) ( max_w - min_w ) / 6000.0f );
-        comp_chunk   = progress_new_chunk( progress, sqrt( log10( (float) best->item_area ) * (float) n_items ) );
-        if ( spacer_chunk ) spacer_chunk->estimate = 0.0;
+
+        // estimate how long it will take to generate this layout
+
+        layout_chunk = progress_new_chunk( progress, ( float ) n_items * ( float )( max_w - min_w ) / 6000.0f );
+        comp_chunk   = progress_new_chunk( progress, sqrt( log10( ( float ) best->item_area ) * ( float ) n_items ) );
+
+        if ( spacer_chunk ) { spacer_chunk->estimate = 0.0; }
+
         spacer_chunk = progress_new_chunk( progress, ( layout_chunk->estimate + comp_chunk->estimate ) / 6.0 );
-    
+
+        // test all plausible layout widths, choosing the most efficient
+
         for ( unsigned i = min_w; i <= max_w; i++ )
         {
-            Layout * layout = layout_new_from_state( state, i, options );
-            Layout * better = layout_choose( layout, best, options );
+            Layout* layout = layout_new_from_state( state, i, options );
 
-            if ( layout == better )
+            // optimize for efficiency, largeness, and squareness, in that order
+
+            if ( layout->value > best->value )
             {
                 layout_free( best );
                 best = layout;
@@ -50,24 +66,30 @@ int main ( int argc, char ** argv )
             {
                 layout_free( layout );
             }
-            
+
+            // update the progress estimate
+
             if ( i % 10 == 1 )
             {
-                layout_chunk->progress = (float) ( i - min_w + 1 ) / (float) ( max_w - min_w + 1 );
+                layout_chunk->progress = ( float )( i - min_w + 1 ) / ( float )( max_w - min_w + 1 );
                 progress_recalculate( progress );
             }
         }
-        
+
+        // if for some reason nothing could be placed on this iteration, iterating again won't help, so exit
+
         if ( !best->places->len )
         {
-            fprintf( stderr, "Failed to fit all of the images.\n" );
-            exit( 1 );
+            fprintf( stderr, "Failed to fit all of the images\n" );
+            exit( LAYOUT_FAILED );
         }
-        
+
+        // save the layout, generating one PNG and part of the JSON
+
         state_add_layout( state, best, comp_chunk, options );
-        
+
         layout_chunk->progress = 1.0;
-        comp_chunk->estimate = sqrt( log10( (float) best->area ) * (float) best->places->len );
+        comp_chunk->estimate = sqrt( log10( ( float ) best->area ) * ( float ) best->places->len );
         comp_chunk->progress = 1.0;
         progress_recalculate( progress );
     }
@@ -82,5 +104,5 @@ int main ( int argc, char ** argv )
 
     MagickCoreTerminus();
 
-    return 0;
+    return SUCCESS;
 }

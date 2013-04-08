@@ -4,6 +4,7 @@
 
 #include "clutter_util.h"
 #include "lb.h"
+#include "profiler.h"
 #include "trickplay/controller.h"
 
 #include "clutter_actor.lb.h"
@@ -13,14 +14,14 @@
 
 //.............................................................................
 
-ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
+ClutterActor* ClutterUtil::make_actor( ClutterActor * ( constructor )() )
 {
     return CLUTTER_ACTOR( g_object_ref( g_object_ref_sink( G_OBJECT( constructor() ) ) ) );
 }
 
 //.............................................................................
 
-void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
+void ClutterUtil::push_clutter_color( lua_State* L, ClutterColor* color )
 {
     LSG;
 
@@ -34,21 +35,21 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
     lua_pushnumber( L, color->alpha );
     lua_rawseti( L, -2, 4 );
 
-    (void)LSG_END( 1 );
+    ( void )LSG_END( 1 );
 }
 
 //.............................................................................
 
-ClutterColor ClutterUtil::string_to_color( const char * s )
+ClutterColor ClutterUtil::string_to_color( const char* s )
 {
     ClutterColor result = { 0 , 0 , 0 , 0 };
 
     if ( s )
     {
-    	if ( clutter_color_from_string( & result , s ) )
-    	{
-    		return result;
-    	}
+        if ( clutter_color_from_string( & result , s ) )
+        {
+            return result;
+        }
 
         int colors[4] = {0, 0, 0, 255};
         char buffer[3] = {0, 0, 0};
@@ -68,17 +69,17 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 
             if ( 1 != sscanf( buffer, "%x", &colors[i] ) )
             {
-            	break;
+                break;
             }
 
-			if ( colors[i] < 0 )
-			{
-				colors[i] = 0;
-			}
-			else if ( colors[i] > 255 )
-			{
-				colors[i] = 255;
-			}
+            if ( colors[i] < 0 )
+            {
+                colors[i] = 0;
+            }
+            else if ( colors[i] > 255 )
+            {
+                colors[i] = 255;
+            }
 
             len -= 2;
             ++i;
@@ -95,11 +96,11 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 
 //.............................................................................
 
-void ClutterUtil::to_clutter_geometry( lua_State * L, int index, ClutterGeometry * geometry )
+void ClutterUtil::to_clutter_geometry( lua_State* L, int index, ClutterGeometry* geometry )
 {
     LSG;
 
-	index = abs_index(L, index);
+    index = abs_index( L, index );
 
     if ( lua_istable( L, index ) )
     {
@@ -124,11 +125,11 @@ void ClutterUtil::to_clutter_geometry( lua_State * L, int index, ClutterGeometry
 
 //.............................................................................
 
-void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+void ClutterUtil::to_clutter_color( lua_State* L, int index, ClutterColor* color )
 {
     LSG;
 
-	index = abs_index(L, index);
+    index = abs_index( L, index );
 
     if ( lua_istable( L, index ) )
     {
@@ -156,7 +157,7 @@ void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * col
 
 //.............................................................................
 
-gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
+gulong ClutterUtil::to_clutter_animation_mode( const char* mode )
 {
     if ( !mode )
     {
@@ -165,9 +166,9 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
     gulong result = CLUTTER_LINEAR;
 
-    GEnumClass * ec = G_ENUM_CLASS( g_type_class_ref( CLUTTER_TYPE_ANIMATION_MODE ) );
-    gchar * cm = g_strdup_printf( "CLUTTER_%s", mode );
-    GEnumValue * v = g_enum_get_value_by_name( ec, cm );
+    GEnumClass* ec = G_ENUM_CLASS( g_type_class_ref( CLUTTER_TYPE_ANIMATION_MODE ) );
+    gchar* cm = g_strdup_printf( "CLUTTER_%s", mode );
+    GEnumValue* v = g_enum_get_value_by_name( ec, cm );
     g_free( cm );
 
     if ( v )
@@ -182,9 +183,9 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
 //.............................................................................
 
-ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
+ClutterActor* ClutterUtil::user_data_to_actor( lua_State* L, int n )
 {
-	ClutterActor * result = LB_GET_ACTOR( L , n );
+    ClutterActor* result = LB_GET_ACTOR( L , n );
 
     if ( ! result )
     {
@@ -199,9 +200,9 @@ ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 
 //.............................................................................
 
-ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
+ClutterTimeline* ClutterUtil::user_data_to_timeline( lua_State* L, int n )
 {
-	ClutterTimeline * result = LB_GET_TIMELINE( L , n );
+    ClutterTimeline* result = LB_GET_TIMELINE( L , n );
 
     if ( ! result )
     {
@@ -216,9 +217,9 @@ ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
 
 //.............................................................................
 
-ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
+ClutterAnimator* ClutterUtil::user_data_to_animator( lua_State* L, int n )
 {
-	ClutterAnimator * result = LB_GET_ANIMATOR( L , n );
+    ClutterAnimator* result = LB_GET_ANIMATOR( L , n );
 
     if ( ! result )
     {
@@ -233,9 +234,9 @@ ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
 
 //.............................................................................
 
-ClutterConstraint * ClutterUtil::user_data_to_constraint( lua_State * L , int n )
+ClutterConstraint* ClutterUtil::user_data_to_constraint( lua_State* L , int n )
 {
-	ClutterConstraint * result = LB_GET_CONSTRAINT( L , n );
+    ClutterConstraint* result = LB_GET_CONSTRAINT( L , n );
 
     if ( ! result )
     {
@@ -250,7 +251,7 @@ ClutterConstraint * ClutterUtil::user_data_to_constraint( lua_State * L , int n 
 
 //.............................................................................
 
-void ClutterUtil::set_props_from_table( lua_State * L, int table )
+void ClutterUtil::set_props_from_table( lua_State* L, int table )
 {
     LSG;
 
@@ -277,108 +278,114 @@ void ClutterUtil::set_props_from_table( lua_State * L, int table )
 // the object should automatically hide(); when opacity stops being 0, unless hide() has been called manually,
 // it should show() itself
 
-void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self )
+void ClutterUtil::actor_opacity_notify( GObject* , GParamSpec* , ClutterActor* self )
 {
-    unsigned opacity = clutter_actor_get_opacity(self);
+    unsigned opacity = clutter_actor_get_opacity( self );
 
-    if(opacity == 0)
+    if ( opacity == 0 )
     {
-        if(CLUTTER_ACTOR_IS_VISIBLE(self))
+        if ( CLUTTER_ACTOR_IS_VISIBLE( self ) )
         {
-//            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
-            clutter_actor_hide(self);
+            //            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_hide( self );
         }
-    } else {
-        if(!CLUTTER_ACTOR_IS_VISIBLE(self))
+    }
+    else
+    {
+        if ( !CLUTTER_ACTOR_IS_VISIBLE( self ) )
         {
-//            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
-            clutter_actor_show(self);
+            //            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_show( self );
         }
     }
 }
 
-void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
+void ClutterUtil::actor_on_show( ClutterActor* actor, void* )
 {
-	if( clutter_actor_get_opacity( actor ) == 0 )
-	{
-//        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
-	    clutter_actor_hide( actor );
-	}
+    if ( clutter_actor_get_opacity( actor ) == 0 )
+    {
+        //        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
+        clutter_actor_hide( actor );
+    }
 }
 
-void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
+void ClutterUtil::actor_on_hide( ClutterActor* actor, void* )
 {
 }
 
-const gchar * ClutterUtil::get_actor_type( ClutterActor * actor )
+const gchar* ClutterUtil::get_actor_type( ClutterActor* actor )
 {
     g_assert( actor );
 
-    const gchar *metatable = get_actor_metatable( actor );
+    const gchar* metatable = get_actor_metatable( actor );
     static gchar the_type[64];
-    if( metatable )
+
+    if ( metatable )
     {
-        const gchar *end = g_strstr_len( metatable, -1, "_METATABLE" );
+        const gchar* end = g_strstr_len( metatable, -1, "_METATABLE" );
         g_assert( end );
 
-        const gchar *cursor = metatable;
+        const gchar* cursor = metatable;
         gsize len = 0;
         // First letter caps, rest lower case
-        the_type[len++] = g_ascii_toupper(*(cursor++));
-        while(cursor < end && len < sizeof(the_type))
+        the_type[len++] = g_ascii_toupper( *( cursor++ ) );
+
+        while ( cursor < end && len < sizeof( the_type ) )
         {
-            the_type[len++] = g_ascii_tolower(*(cursor++));
+            the_type[len++] = g_ascii_tolower( *( cursor++ ) );
         }
+
         the_type[len] = '\0';
 
         return the_type;
     }
     else
     {
-        const gchar *type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
-	    if ( g_str_has_prefix( type, "Clutter" ) )
-	    {
-	        type += 7;
-	    }
+        const gchar* type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
 
-	    return type;
+        if ( g_str_has_prefix( type, "Clutter" ) )
+        {
+            type += 7;
+        }
+
+        return type;
     }
 }
 
-void ClutterUtil::initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable )
+void ClutterUtil::initialize_actor( lua_State* L, ClutterActor* actor, const char* metatable )
 {
     // Metatables are static, so we don't need to free it
     g_object_set_data( G_OBJECT( actor ), "tp-metatable", ( gpointer )metatable );
 
 #if 0
-    g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
-    g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
-    g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
+    g_signal_connect( G_OBJECT( actor ), "notify::opacity", ( GCallback )actor_opacity_notify, actor );
+    g_signal_connect( G_OBJECT( actor ), "show", ( GCallback )actor_on_show, actor );
+    g_signal_connect( G_OBJECT( actor ), "hide", ( GCallback )actor_on_hide, actor );
 #endif
 
 }
 
 //.............................................................................
 
-const char * ClutterUtil::get_actor_metatable( ClutterActor * actor )
+const char* ClutterUtil::get_actor_metatable( ClutterActor* actor )
 {
     if ( !actor )
     {
         return NULL;
     }
 
-    return ( const char * )g_object_get_data( G_OBJECT( actor ), "tp-metatable" );
+    return ( const char* )g_object_get_data( G_OBJECT( actor ), "tp-metatable" );
 }
 
 //.............................................................................
 
-void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
+void ClutterUtil::wrap_concrete_actor( lua_State* L, ClutterActor* actor )
 {
     if ( ! actor )
     {
         lua_pushnil( L );
     }
-    else if ( UserData * ud = UserData::get( G_OBJECT( actor ) ) )
+    else if ( UserData* ud = UserData::get( G_OBJECT( actor ) ) )
     {
         ud->push_proxy();
     }
@@ -390,13 +397,13 @@ void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
 
 //-----------------------------------------------------------------------------
 
-void ClutterUtil::wrap_constraint( lua_State * L , ClutterConstraint * constraint )
+void ClutterUtil::wrap_constraint( lua_State* L , ClutterConstraint* constraint )
 {
     if ( ! constraint )
     {
         lua_pushnil( L );
     }
-    else if ( UserData * ud = UserData::get( G_OBJECT( constraint ) ) )
+    else if ( UserData* ud = UserData::get( G_OBJECT( constraint ) ) )
     {
         ud->push_proxy();
     }
@@ -408,7 +415,7 @@ void ClutterUtil::wrap_constraint( lua_State * L , ClutterConstraint * constrain
 
 //-----------------------------------------------------------------------------
 
-void ClutterUtil::wrap_timeline( lua_State * L , ClutterTimeline * timeline )
+void ClutterUtil::wrap_timeline( lua_State* L , ClutterTimeline* timeline )
 {
     if ( ! timeline )
     {
@@ -416,28 +423,33 @@ void ClutterUtil::wrap_timeline( lua_State * L , ClutterTimeline * timeline )
         return;
     }
 
-    if ( UserData * ud = UserData::get( G_OBJECT( timeline ) ) )
+    if ( UserData* ud = UserData::get( G_OBJECT( timeline ) ) )
     {
         ud->push_proxy();
+
         if ( ! lua_isnil( L , -1 ) )
         {
             return;
         }
+
         lua_pop( L , 1 );
     }
 
-    UserData * ud = UserData::make( L , "Timeline" );
+    UserData* ud = UserData::make( L , "Timeline" );
     g_object_ref( G_OBJECT( timeline ) );
     ud->initialize_with_master( timeline );
     ud->check_initialized();
     luaL_getmetatable( L , "TIMELINE_METATABLE" );
+
     if ( lua_isnil( L , -1 ) )
     {
         lua_getglobal( L , "Timeline" );
         lua_pop( L , 2 );
         luaL_getmetatable( L , "TIMELINE_METATABLE" );
     }
+
     lua_setmetatable( L , -2 );
+    PROFILER_CREATED( "Timeline", timeline );
 }
 
 //-----------------------------------------------------------------------------
@@ -446,10 +458,10 @@ void ClutterUtil::wrap_timeline( lua_State * L , ClutterTimeline * timeline )
 
 static gboolean event_pump( gpointer )
 {
-    while ( ClutterEvent * event = clutter_event_get() )
+    while ( ClutterEvent* event = clutter_event_get() )
     {
-        clutter_do_event ( event );
-        clutter_event_free ( event );
+        clutter_do_event( event );
+        clutter_event_free( event );
     }
 
     return FALSE;
@@ -459,61 +471,71 @@ static gboolean event_pump( gpointer )
 
 static ClutterModifierType to_clutter_modifier( unsigned long int modifiers )
 {
-	unsigned long int result = 0;
+    unsigned long int result = 0;
 
-	if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
-	{
-		result |= CLUTTER_SHIFT_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
-	{
-		result |= CLUTTER_LOCK_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
-	{
-		result |= CLUTTER_CONTROL_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
-	{
-		result |= CLUTTER_SUPER_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
-	{
-		result |= CLUTTER_HYPER_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_META )
-	{
-		result |= CLUTTER_META_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
-	{
-		result |= CLUTTER_MOD1_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
-	{
-		result |= CLUTTER_MOD2_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
-	{
-		result |= CLUTTER_MOD3_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
-	{
-		result |= CLUTTER_MOD4_MASK;
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
-	{
-		result |= CLUTTER_MOD5_MASK;
-	}
+    if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
+    {
+        result |= CLUTTER_SHIFT_MASK;
+    }
 
-	return ClutterModifierType( result );
+    if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
+    {
+        result |= CLUTTER_LOCK_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
+    {
+        result |= CLUTTER_CONTROL_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
+    {
+        result |= CLUTTER_SUPER_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
+    {
+        result |= CLUTTER_HYPER_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_META )
+    {
+        result |= CLUTTER_META_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
+    {
+        result |= CLUTTER_MOD1_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
+    {
+        result |= CLUTTER_MOD2_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
+    {
+        result |= CLUTTER_MOD3_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
+    {
+        result |= CLUTTER_MOD4_MASK;
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
+    {
+        result |= CLUTTER_MOD5_MASK;
+    }
+
+    return ClutterModifierType( result );
 }
 
-void ClutterUtil::inject_key_down( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers )
+void ClutterUtil::inject_key_down( ClutterActor* stage, guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_KEY_PRESS );
+    ClutterEvent* event = clutter_event_new( CLUTTER_KEY_PRESS );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
@@ -537,11 +559,11 @@ void ClutterUtil::inject_key_down( ClutterActor *stage, guint key_code, gunichar
 #endif
 }
 
-void ClutterUtil::inject_key_up( ClutterActor *stage, guint key_code, gunichar unicode , unsigned long int modifiers )
+void ClutterUtil::inject_key_up( ClutterActor* stage, guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_KEY_RELEASE );
+    ClutterEvent* event = clutter_event_new( CLUTTER_KEY_RELEASE );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
@@ -565,11 +587,11 @@ void ClutterUtil::inject_key_up( ClutterActor *stage, guint key_code, gunichar u
 #endif
 }
 
-void ClutterUtil::inject_motion( ClutterActor *stage, gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_motion( ClutterActor* stage, gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_MOTION );
+    ClutterEvent* event = clutter_event_new( CLUTTER_MOTION );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
@@ -593,11 +615,11 @@ void ClutterUtil::inject_motion( ClutterActor *stage, gfloat x , gfloat y , unsi
 #endif
 }
 
-void ClutterUtil::inject_button_press( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_button_press( ClutterActor* stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_PRESS );
+    ClutterEvent* event = clutter_event_new( CLUTTER_BUTTON_PRESS );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
@@ -622,11 +644,11 @@ void ClutterUtil::inject_button_press( ClutterActor *stage, guint32 button , gfl
 #endif
 }
 
-void ClutterUtil::inject_button_release( ClutterActor *stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
+void ClutterUtil::inject_button_release( ClutterActor* stage, guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
+    ClutterEvent* event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
@@ -651,26 +673,30 @@ void ClutterUtil::inject_button_release( ClutterActor *stage, guint32 button , g
 #endif
 }
 
-void ClutterUtil::inject_scroll( ClutterActor *stage, int direction , unsigned long int modifiers )
+void ClutterUtil::inject_scroll( ClutterActor* stage, int direction , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
-    ClutterEvent * event = clutter_event_new( CLUTTER_SCROLL );
+    ClutterEvent* event = clutter_event_new( CLUTTER_SCROLL );
     event->any.stage = CLUTTER_STAGE( stage );
     event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->scroll.modifier_state = to_clutter_modifier( modifiers );
 
-    switch( direction )
+    switch ( direction )
     {
-    case TP_CONTROLLER_SCROLL_UP:		event->scroll.direction = CLUTTER_SCROLL_UP; break;
-    case TP_CONTROLLER_SCROLL_DOWN:		event->scroll.direction = CLUTTER_SCROLL_DOWN; break;
-    case TP_CONTROLLER_SCROLL_LEFT:		event->scroll.direction = CLUTTER_SCROLL_LEFT; break;
-    case TP_CONTROLLER_SCROLL_RIGHT:	event->scroll.direction = CLUTTER_SCROLL_RIGHT; break;
-    default:
-    	clutter_event_free( event );
-    	clutter_threads_leave();
-    	return;
+        case TP_CONTROLLER_SCROLL_UP:       event->scroll.direction = CLUTTER_SCROLL_UP; break;
+
+        case TP_CONTROLLER_SCROLL_DOWN:     event->scroll.direction = CLUTTER_SCROLL_DOWN; break;
+
+        case TP_CONTROLLER_SCROLL_LEFT:     event->scroll.direction = CLUTTER_SCROLL_LEFT; break;
+
+        case TP_CONTROLLER_SCROLL_RIGHT:    event->scroll.direction = CLUTTER_SCROLL_RIGHT; break;
+
+        default:
+            clutter_event_free( event );
+            clutter_threads_leave();
+            return;
     }
 
     clutter_event_put( event );
@@ -689,169 +715,187 @@ void ClutterUtil::inject_scroll( ClutterActor *stage, int direction , unsigned l
 #endif
 }
 
-void ClutterUtil::stage_coordinates_to_screen_coordinates( ClutterActor *stage, gdouble *x, gdouble *y )
+void ClutterUtil::stage_coordinates_to_screen_coordinates( ClutterActor* stage, gdouble* x, gdouble* y )
 {
 
-    if ( ClutterActor * screen = clutter_container_find_child_by_name( CLUTTER_CONTAINER( stage ), "screen") )
+    if ( ClutterActor* screen = clutter_container_find_child_by_name( CLUTTER_CONTAINER( stage ), "screen" ) )
     {
         gdouble scale_x, scale_y;
 
-        clutter_actor_get_scale(screen, &scale_x, &scale_y);
+        clutter_actor_get_scale( screen, &scale_x, &scale_y );
 
         *x /= scale_x;
         *y /= scale_y;
     }
 }
 
-unsigned long int ClutterUtil::get_tp_modifiers( ClutterEvent * event )
+unsigned long int ClutterUtil::get_tp_modifiers( ClutterEvent* event )
 {
-	unsigned long int result = TP_CONTROLLER_MODIFIER_NONE;
+    unsigned long int result = TP_CONTROLLER_MODIFIER_NONE;
 
-	ClutterModifierType cm = clutter_event_get_state( event );
+    ClutterModifierType cm = clutter_event_get_state( event );
 
-	if ( cm & CLUTTER_SHIFT_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_SHIFT;
-	}
-	if ( cm & CLUTTER_LOCK_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_LOCK;
-	}
-	if ( cm & CLUTTER_CONTROL_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_CONTROL;
-	}
-	if ( cm & CLUTTER_SUPER_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_SUPER;
-	}
-	if ( cm & CLUTTER_HYPER_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_HYPER;
-	}
-	if ( cm & CLUTTER_META_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_META;
-	}
+    if ( cm & CLUTTER_SHIFT_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_SHIFT;
+    }
 
-	if ( cm & CLUTTER_MOD1_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_1;
-	}
-	if ( cm & CLUTTER_MOD2_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_2;
-	}
-	if ( cm & CLUTTER_MOD3_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_3;
-	}
-	if ( cm & CLUTTER_MOD4_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_4;
-	}
-	if ( cm & CLUTTER_MOD5_MASK )
-	{
-		result |= TP_CONTROLLER_MODIFIER_5;
-	}
+    if ( cm & CLUTTER_LOCK_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_LOCK;
+    }
 
-	return result;
+    if ( cm & CLUTTER_CONTROL_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_CONTROL;
+    }
+
+    if ( cm & CLUTTER_SUPER_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_SUPER;
+    }
+
+    if ( cm & CLUTTER_HYPER_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_HYPER;
+    }
+
+    if ( cm & CLUTTER_META_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_META;
+    }
+
+    if ( cm & CLUTTER_MOD1_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_1;
+    }
+
+    if ( cm & CLUTTER_MOD2_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_2;
+    }
+
+    if ( cm & CLUTTER_MOD3_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_3;
+    }
+
+    if ( cm & CLUTTER_MOD4_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_4;
+    }
+
+    if ( cm & CLUTTER_MOD5_MASK )
+    {
+        result |= TP_CONTROLLER_MODIFIER_5;
+    }
+
+    return result;
 }
 
-void ClutterUtil::push_event_modifiers( lua_State * L , ClutterEvent * event )
+void ClutterUtil::push_event_modifiers( lua_State* L , ClutterEvent* event )
 {
-	push_event_modifiers( L , get_tp_modifiers( event ) );
+    push_event_modifiers( L , get_tp_modifiers( event ) );
 }
 
-void ClutterUtil::push_event_modifiers( lua_State * L , unsigned long int modifiers )
+void ClutterUtil::push_event_modifiers( lua_State* L , unsigned long int modifiers )
 {
-	if ( ! modifiers )
-	{
-		lua_pushnil( L );
-		return;
-	}
+    if ( ! modifiers )
+    {
+        lua_pushnil( L );
+        return;
+    }
 
-	lua_newtable( L );
+    lua_newtable( L );
 
-	int t = lua_gettop( L );
+    int t = lua_gettop( L );
 
-	if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
-	{
-		lua_pushliteral( L , "shift" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
-	{
-		lua_pushliteral( L , "lock" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
-	{
-		lua_pushliteral( L , "control" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
-	{
-		lua_pushliteral( L , "super" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
-	{
-		lua_pushliteral( L , "hyper" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_META )
-	{
-		lua_pushliteral( L , "meta" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
+    if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
+    {
+        lua_pushliteral( L , "shift" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
 
-	if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
-	{
-		lua_pushliteral( L , "mod1" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
-	{
-		lua_pushliteral( L , "mod2" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
-	{
-		lua_pushliteral( L , "mod3" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
-	{
-		lua_pushliteral( L , "mod4" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
-	if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
-	{
-		lua_pushliteral( L , "mod5" );
-		lua_pushboolean( L , true );
-		lua_rawset( L , t );
-	}
+    if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
+    {
+        lua_pushliteral( L , "lock" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
+    {
+        lua_pushliteral( L , "control" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
+    {
+        lua_pushliteral( L , "super" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
+    {
+        lua_pushliteral( L , "hyper" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_META )
+    {
+        lua_pushliteral( L , "meta" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
+    {
+        lua_pushliteral( L , "mod1" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
+    {
+        lua_pushliteral( L , "mod2" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
+    {
+        lua_pushliteral( L , "mod3" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
+    {
+        lua_pushliteral( L , "mod4" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
+
+    if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
+    {
+        lua_pushliteral( L , "mod5" );
+        lua_pushboolean( L , true );
+        lua_rawset( L , t );
+    }
 
 }
 
 //-----------------------------------------------------------------------------
 
-bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* actor )
+bool ClutterUtil::is_qualified_child( ClutterActor* container , ClutterActor* actor )
 {
-    if(actor)
-	{
-        if ( ClutterActor * parent = clutter_actor_get_parent( actor ) )
+    if ( actor )
+    {
+        if ( ClutterActor* parent = clutter_actor_get_parent( actor ) )
         {
             g_warning( "TRYING TO ADD ELEMENT %p TO CONTAINER %p BUT IT ALREADY HAS PARENT %p" , actor , container , parent );
             return false;
@@ -860,22 +904,26 @@ bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* a
         {
             /* check if source is not already a parent or ancestor of the self */
             ClutterActor* ancestor = clutter_actor_get_parent( container );
+
             if ( CLUTTER_IS_CONTAINER( actor ) && ancestor != NULL )
             {
                 while ( ancestor != NULL && ancestor != actor )
                 {
                     ancestor = clutter_actor_get_parent( ancestor );
                 }
+
                 if ( ancestor != NULL )
                 {
                     g_warning( "TRYING TO ADD ELEMENT %p TO CONTAINER %p BUT IT IS ALREADY A PARENT OR ANCESTOR OF %p. IGNORING %p" ,
-								actor , container , container , actor );
+                            actor , container , container , actor );
                     return false;
                 }
             }
+
             return true;
         }
-	}
+    }
+
     return false;
 }
 
@@ -885,14 +933,14 @@ void ClutterUtil::keep_alive( gpointer o , bool on )
 {
     g_assert( o );
 
-    GObject * object = G_OBJECT( o );
+    GObject* object = G_OBJECT( o );
 
     static GQuark key = 0;
     static char value = 0;
 
     if ( 0 == key )
     {
-    	key = g_quark_from_string( "__tp-keep-alive" );
+        key = g_quark_from_string( "__tp-keep-alive" );
     }
 
     bool has_one = g_object_get_qdata( object , key );

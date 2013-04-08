@@ -1,0 +1,202 @@
+
+/***************************************/
+Class: Button
+
+	The Button widget implements a pushbutton the user can interact with.
+
+	In addition to the properties and functions described on this page, the Button data type also supports all the properties and functions defined in the <UIElement> interface.
+
+	*Code Example:* Create a Button object, display it on the screen, and receive notification when the user presses it.
+
+		(code)
+		-- Load the Widget Library. This is necessary before creating any widget.
+		WL = dofile( "widgetlib/Widget_Library" )
+
+		-- Create a Button object; make it reactive so it receives pointer/mouse events
+		button = WL.Button( { position    = { 100, 100 },
+							  label       = "My First Button",
+							  reactive    = true,
+							  on_released = buttonReleasedHandler,
+		} )
+		if( button == nil )then
+			print( "ERROR: Could not create Button object" )
+			exit()
+		end
+
+		-- Add the button to the screen and show the screen
+		screen:add( button )
+		screen:show()
+
+		-- Activate pointer/mouse events to all reactive objects
+		controllers:start_pointer()
+
+		-- **************************************
+		function buttonReleaseHandler()
+
+			-- This function is invoked when the user presses and releases the button
+			-- or when a TrickPlay application simulates a button release by calling
+			-- the release() function.
+			print( "The button was released" )
+		end
+		(end)
+
+/***************************************/
+Constructor: Button
+
+	The Button() constructor creates a new Button object. Initial property values can be specified in the constructor's argument.
+
+	Unless set explicitly by the TrickPlay application, the generated Button object will be initialized with the default settings shown below. Properties not listed below are assigned the same default values as a newly-constructed <UIElement> object.
+
+		(code)
+		label    = "Button"
+		size     = { 200, 50 }
+		position = { 0, 0 }
+		(end)
+
+	*Prototype:*
+
+		(code)
+		Button( table props = 0 )
+		(end)
+
+	*Arguments:*
+
+		props - optional table of Button property settings.
+
+	*Return Value:* reference to the constructed Button object. If an error occurred, returns nil.
+
+	*Code Example:* Create a new Button object
+
+		(code)
+		myButton = WidgetLibrary.Button( { label    = "myButton",
+										   size     = { 300, 50 },
+										   position = { 100, 100 },
+		} )
+		if( myButton == nil ){
+			print( "Error: Could not create Button object" )
+		end
+		(end)
+
+	*See Also:* the <label> property
+
+/***************************************/
+Property: label
+
+	The label property is a string containing the text to display within the button.
+
+	*Default Value:* "Button"
+
+/***************************************/
+Function: press
+
+	The press() function simulates the user pressing the button, including firing the <on_pressed> event.
+
+	If press() is called two or more times without an intervening call to release(), the on_pressed event occurs only on the first call to press() and the subsequent calls do not fire the event.
+
+	*Prototype:*
+
+		(code)
+		press()
+		(end)
+
+	*Arguments:* None.
+
+	*Return Value:* None.
+
+	*See Also:* the <on_pressed> event and <release> and <click> functions
+
+/***************************************/
+Function: release
+
+	The release() function simulates the user releasing the button, including firing the <on_released> event.
+
+	If release() is called two or more times without an intervening call to press(), the on_released event occurs only on the first call to release() and the subsequent calls do not fire the event.
+
+	*Prototype:*
+
+		(code)
+		release()
+		(end)
+
+	*Arguments:* None.
+
+	*Return Value:* None.
+
+	*See Also:* the <on_released> event and <press> and <click> functions
+
+/***************************************/
+Function: click
+
+	The click() function simulates the user pressing and releasing the button, including firing the <on_pressed> and <on_released> event.
+
+	*Prototype:*
+
+		(code)
+		click()
+		(end)
+
+	*Arguments:* None.
+
+	*Return Value:* None.
+
+	*See Also:* the <on_pressed> and <on_released> events and <press> and <release> functions
+
+/***************************************/
+Event: on_pressed
+
+	The on_pressed event occurs whenever the Button object is pressed. The object can be pressed by the user (as with a television remote control or mouse) or by a TrickPlay application by calling the <press> or <click> function.
+
+	Note: To receive mouse and other pointer-type input, the object's <UIElement.reactive> property must be set to true (default=false) and pointer events must be activated by calling the global <controllers.start_pointer> function.
+
+	*Prototype:*
+
+		(code)
+		on_pressed( self )
+		(end)
+
+	*Arguments:*
+
+		self - reference to Button object that was pressed
+
+	*Code Example:* Receive and handle on_pressed events
+
+		(code)
+		/*********************************************/
+		-- Define event handler
+		function
+		handleButtonPress( self )
+
+			-- on_pressed event was fired. Perform handling here.
+			print( "on_pressed event occurred" )
+		end
+
+		/*********************************************/
+
+		-- Hook handleButtonPress() to on_pressed events
+		myButton.on_pressed = handleButtonPress
+		(end)
+
+	*See Also:* the <press> and <click> functions and <on_released> event
+
+/***************************************/
+Event: on_released
+
+	The on_released event occurs whenever the Button object is released after being pressed. The object can be released by the user (as with a television remote control or mouse) or by a TrickPlay application by calling the <release> or <click> function.
+
+	Note: To receive mouse and other pointer-type input, the object's <UIElement.reactive> property must be set to true (default=false) and pointer events must be activated by calling the global <controllers.start_pointer> function.
+
+	*Prototype:*
+
+		(code)
+		on_released( self )
+		(end)
+
+	*Arguments:*
+
+		self - reference to Button object that was released
+
+	*Code Example:* Refer to the Code Example in the <on_pressed> event.
+
+	*See Also:* the <release> and <click> functions and <on_pressed> event
+
+/***************************************/

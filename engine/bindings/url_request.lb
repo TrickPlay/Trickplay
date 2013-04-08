@@ -32,11 +32,11 @@ interface URLResponse [[Network::Response*]]
     readonly bool failed
         [[failed=self->failed;]];
 
-	# This property is documented in the url_response.lb file
+    # This property is documented in the url_response.lb file
     readonly lstring body
         [[
-	    body = (const char*) self->body->data;
-	    body_len = self->body->len;
+        body = (const char*) self->body->data;
+        body_len = self->body->len;
         ]];
 
     # This property is documented in the url_response.lb file
@@ -85,7 +85,7 @@ interface URLRequestCancel [[guint*]]
             delete self;
         ]];
 
-	# This function is documented in the url_request_cancel.lb file
+    # This function is documented in the url_request_cancel.lb file
     cancel()
         [[
             App::get( L )->get_network()->cancel_async_request( * self );
@@ -102,33 +102,33 @@ class URLRequest [[Network::Request*]]
 {
 
 /***************************************
-	Constructor: URLRequest
+    Constructor: URLRequest
 
-	The URLRequest() constructor creates a new URLRequest object. The request is not sent upon construction; use the object's <perform>, <send> or <stream> functions to send the request.
+    The URLRequest() constructor creates a new URLRequest object. The request is not sent upon construction; use the object's <perform>, <send> or <stream> functions to send the request.
 
-	*Arguments:*
+    *Arguments:*
 
-		url - optional table of URLRequest property settings
+        url - optional table of URLRequest property settings
 
-	*Return Value:* Reference to created URLRequest object
+    *Return Value:* Reference to created URLRequest object
 
-	*Code Examples:* Create several URLRequest objects using various initialization techniques
+    *Code Examples:* Create several URLRequest objects using various initialization techniques
 
-		(code)
-		-- Create URLRequest object, specifying URL in url property
-		request1     = URLRequest()
-		request1.url = "http://www.trickplay.com"
+        (code)
+        -- Create URLRequest object, specifying URL in url property
+        request1     = URLRequest()
+        request1.url = "http://www.trickplay.com"
 
-		-- Create URLRequest object, initializing the url property in the constructor
-		request2 = URLRequest( { url = "http://www.trickplay.com" } )
+        -- Create URLRequest object, initializing the url property in the constructor
+        request2 = URLRequest( { url = "http://www.trickplay.com" } )
 
-		-- Create URLRequest object, initializing multiple properties in the constructor
-		request3 = URLRequest( { url    = "http://www.trickplay.com",
-		                         method = "GET",
+        -- Create URLRequest object, initializing multiple properties in the constructor
+        request3 = URLRequest( { url    = "http://www.trickplay.com",
+                                 method = "GET",
         } )
-		(end)
+        (end)
 
-	*See Also:* the <perform> and <send> functions
+    *See Also:* the <perform> and <send> functions
 */
 
     URLRequest(string url=NULL)
@@ -141,10 +141,10 @@ class URLRequest [[Network::Request*]]
                 lb_set_props_from_table(L);
                 lua_pop(L,1);
             }
-		    else if (url)
-		    {
-			    self->url=url;
-		    }
+            else if (url)
+            {
+                self->url=url;
+            }
         ]];
 
     ~URLRequest()
@@ -153,19 +153,19 @@ class URLRequest [[Network::Request*]]
         ]];
 
     /*
-    	Property: url
+        Property: url
 
-    	The url property specifies the request's URL address.
+        The url property specifies the request's URL address.
 
-    	*Default Setting:* None
+        *Default Setting:* None
 
-    	*Code Example:* Set the object's URL address
+        *Code Example:* Set the object's URL address
 
-    	(code)
-    	request.url = "http://www.trickplay.com"
-    	(end)
+        (code)
+        request.url = "http://www.trickplay.com"
+        (end)
 
-    	*See Also:* the <perform> and <send> functions
+        *See Also:* the <perform> and <send> functions
     */
 
     string url
@@ -173,13 +173,13 @@ class URLRequest [[Network::Request*]]
         [[self->url=url;]];
 
     /*
-    	Property: method
+        Property: method
 
-    	The method property specifies the object's HTTP submission method, such as "GET" or "PUT".
+        The method property specifies the object's HTTP submission method, such as "GET" or "PUT".
 
-    	*Default Setting:* "GET"
+        *Default Setting:* "GET"
 
-    	*See Also:* the <perform> and <send> functions
+        *See Also:* the <perform> and <send> functions
     */
 
     string method
@@ -188,27 +188,27 @@ class URLRequest [[Network::Request*]]
 
 
     /*
-    	Property: timeout
+        Property: timeout
 
-    	The timeout property specifies the amount of time in seconds to wait for a response. If a response is not received within the specified time, the request will fail and generate an HTTP 408-Request timeout error.
+        The timeout property specifies the amount of time in seconds to wait for a response. If a response is not received within the specified time, the request will fail and generate an HTTP 408-Request timeout error.
 
-    	*Default Setting:* 30 seconds
+        *Default Setting:* 30 seconds
 
-    	*See Also:* the <URLResponse.code> property
-	*/
+        *See Also:* the <URLResponse.code> property
+    */
 
     double timeout
         [[timeout=self->timeout_s;]]
         [[self->timeout_s=timeout;]];
 
     /*
-    	Property: redirect
+        Property: redirect
 
-    	The redirect property is a boolean flag indicating whether or not the request should automatically follow redirections (true=follow redirections).
+        The redirect property is a boolean flag indicating whether or not the request should automatically follow redirections (true=follow redirections).
 
-    	*Default Setting:* true (follow redirections)
+        *Default Setting:* true (follow redirections)
 
-    	*See Also:* the <url> property
+        *See Also:* the <url> property
     */
 
     bool redirect
@@ -216,19 +216,19 @@ class URLRequest [[Network::Request*]]
         [[self->redirect=redirect;]];
 
     /*
-    	Property: headers
+        Property: headers
 
-    	The headers property is a table containing the request's HTTP header fields. Each table entry is a header/value pair. For example, the header "Content-Length: 432" would be specified in the headers table as shown below.
+        The headers property is a table containing the request's HTTP header fields. Each table entry is a header/value pair. For example, the header "Content-Length: 432" would be specified in the headers table as shown below.
 
-    	(code)
-    	request.headers = { ["Content-Length"] = 432 }
-    	(end)
+        (code)
+        request.headers = { ["Content-Length"] = 432 }
+        (end)
 
-    	The headers table cannot be modified in place. Instead, the table must be constructed in its entirety prior to assigning it to the headers property.
+        The headers table cannot be modified in place. Instead, the table must be constructed in its entirety prior to assigning it to the headers property.
 
-    	*Default Setting:* None
+        *Default Setting:* None
 
-    	*See Also:* the <body> property
+        *See Also:* the <body> property
     */
 
     table headers
@@ -253,28 +253,28 @@ class URLRequest [[Network::Request*]]
         ]];
 
     /*
-    	Property: body
+        Property: body
 
-    	The body property contains the string to be sent as the request's body data.
+        The body property contains the string to be sent as the request's body data.
 
-    	*Default Setting:* None
+        *Default Setting:* None
 
-    	*See Also:* the <headers> property
+        *See Also:* the <headers> property
     */
 
     string body
         [[body=self->body.c_str();]]
         [[self->body=body;]];
 
-	/*
-		Property: user_agent
+    /*
+        Property: user_agent
 
-		The user_agent property is a string that specifies the request's user agent.
+        The user_agent property is a string that specifies the request's user agent.
 
-		*Default Setting:* Constructed string that spoofs "Mozilla/5.0" and includes the TrickPlay SDK version number and other data
+        *Default Setting:* Constructed string that spoofs "Mozilla/5.0" and includes the TrickPlay SDK version number and other data
 
-		*See Also:* the <url> property
-	*/
+        *See Also:* the <url> property
+    */
 
     string user_agent
         [[user_agent=self->user_agent.c_str();]]
@@ -282,69 +282,69 @@ class URLRequest [[Network::Request*]]
 
 
     /*
-    	Property: certificate
+        Property: certificate
 
-    	The certificate property is a string containing an X.509 certificate in PEM (Privacy Enhanced Mail) format. The certificate may be necessary for authentication when using a secure connection, such as HTTPS.
+        The certificate property is a string containing an X.509 certificate in PEM (Privacy Enhanced Mail) format. The certificate may be necessary for authentication when using a secure connection, such as HTTPS.
 
-    	*Default Setting:* None
+        *Default Setting:* None
 
-    	*See Also:* the <private_key> property
+        *See Also:* the <private_key> property
     */
 
     string certificate
         [[certificate=self->client_certificate_pem.c_str();]]
         [[self->client_certificate_pem=certificate;]];
 
-	/*
-		Property: private_key
+    /*
+        Property: private_key
 
-		The private_key property is a string containing an X.509 private key in PEM (Privacy Enhanced Mail) format.	The private key may be necessary for authentication when using a secure connection, such as HTTPS.
+        The private_key property is a string containing an X.509 private key in PEM (Privacy Enhanced Mail) format. The private key may be necessary for authentication when using a secure connection, such as HTTPS.
 
-		*Default Setting:* None
+        *Default Setting:* None
 
-		*See Also:* the <certificate> property
-	*/
+        *See Also:* the <certificate> property
+    */
 
     string private_key
         [[private_key=self->client_private_key_pem.c_str();]]
         [[self->client_private_key_pem=private_key;]];
 
 
-	/*
-		Function: perform
+    /*
+        Function: perform
 
-		The perform() function sends the HTTP request and blocks further program execution until a response is received. To process the HTTP request asynchronously, use the <send> function.
+        The perform() function sends the HTTP request and blocks further program execution until a response is received. To process the HTTP request asynchronously, use the <send> function.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* a <URLResponse> object
+        *Return Value:* a <URLResponse> object
 
-		*Code Example:* Define an HTTP request object and send it immediately, waiting for a response
+        *Code Example:* Define an HTTP request object and send it immediately, waiting for a response
 
-		(code)
-		response = URLRequest( { url     = "http://www.trickplay.com",
-		                         timeout = 5,
-		                         headers = { ["Accept"] = "text/plain", ["Accept-Charset"] = "utf-8" },
-		} ):perform()
+        (code)
+        response = URLRequest( { url     = "http://www.trickplay.com",
+                                 timeout = 5,
+                                 headers = { ["Accept"] = "text/plain", ["Accept-Charset"] = "utf-8" },
+        } ):perform()
 
-		-- Check response
-		if( response.failed )then
-			print( "HTTP Request failed. Error code:", response.code )
-		else
-			print( "HTTP Request succeeded." )
-		end
-		(end)
+        -- Check response
+        if( response.failed )then
+            print( "HTTP Request failed. Error code:", response.code )
+        else
+            print( "HTTP Request succeeded." )
+        end
+        (end)
 
-		*See Also:* the <send> and <stream> functions
-	*/
+        *See Also:* the <send> and <stream> functions
+    */
 
     URLResponse perform()
         [[
-	    	App * app=App::get(L);
+            App * app=App::get(L);
 
             Network::Response response=app->get_network()->perform_request(
-				*self,
-				app->get_cookie_jar());
+                *self,
+                app->get_cookie_jar());
 
             lua_pushlightuserdata(L,new Network::Response(response));
             new_URLResponse(L);
@@ -352,44 +352,44 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-   	Function: send
+    Function: send
 
-   	The send() function sends the HTTP request and continues program execution without waiting for a response. When either a response is received or the request fails (for example, due to a timeout), the object is notified by the firing of an <on_complete> event.
+    The send() function sends the HTTP request and continues program execution without waiting for a response. When either a response is received or the request fails (for example, due to a timeout), the object is notified by the firing of an <on_complete> event.
 
-   	*Arguments:* None
+    *Arguments:* None
 
-   	*Return Value:* a <URLRequestCancel> object. This object can be used to cancel an in-progress request by calling the object's <URLRequestCancel.cancel> function.
+    *Return Value:* a <URLRequestCancel> object. This object can be used to cancel an in-progress request by calling the object's <URLRequestCancel.cancel> function.
 
-   	*Code Example:* Create and send a URLRequest object, process it asynchronously, and handle its response
+    *Code Example:* Create and send a URLRequest object, process it asynchronously, and handle its response
 
-    	(code)
-    	-- Create HTTP Request object
-    	urlRequest = URLRequest( { url = "http://www.trickplay.com" } )
+        (code)
+        -- Create HTTP Request object
+        urlRequest = URLRequest( { url = "http://www.trickplay.com" } )
 
-    	-- Define an on_complete event handler and hook it into on_complete events
-    	function handleResponse( httpRequest, httpResponse )
-    		print( "Response received, code =", httpResponse.code )
-    	end
-    	urlRequest:add_oncomplete_listener( handleResponse )
+        -- Define an on_complete event handler and hook it into on_complete events
+        function handleResponse( httpRequest, httpResponse )
+            print( "Response received, code =", httpResponse.code )
+        end
+        urlRequest:add_oncomplete_listener( handleResponse )
 
-    	-- Send request asynchronously
-    	urlRequest:send()
-    	print( "Sent HTTP Request" )
-    	(end)
+        -- Send request asynchronously
+        urlRequest:send()
+        print( "Sent HTTP Request" )
+        (end)
 
-   	*See Also:* the <perform> and <stream> functions and the <on_complete> event
+    *See Also:* the <perform> and <stream> functions and the <on_complete> event
 */
 
     URLRequestCancel send()
         [[
-	    	App * app=App::get(L);
+            App * app=App::get(L);
 
             guint id = app->get_network()->perform_request_async(
-				*self,
-				app->get_cookie_jar(),
-				URLRequest_response_callback,
-				UserData::Handle::make(L,1,self),
-				UserData::Handle::destroy);
+                *self,
+                app->get_cookie_jar(),
+                URLRequest_response_callback,
+                UserData::Handle::make(L,1,self),
+                UserData::Handle::destroy);
 
             lua_pushnumber( L , id );
             new_URLRequestCancel( L );
@@ -397,38 +397,38 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Function: stream
+    Function: stream
 
-	The stream() function sends the HTTP request and continues program execution without waiting for a response. Whenever a partial response is received, the object is notified by the firing of an <on_response_chunk> event. When either the response is complete or the request fails, an <on_complete> event occurs. The TrickPlay SDK libraries do not accumulate the received partial responses; if response accumulation is desired, it is the responsibility of the application program to implement it.
+    The stream() function sends the HTTP request and continues program execution without waiting for a response. Whenever a partial response is received, the object is notified by the firing of an <on_response_chunk> event. When either the response is complete or the request fails, an <on_complete> event occurs. The TrickPlay SDK libraries do not accumulate the received partial responses; if response accumulation is desired, it is the responsibility of the application program to implement it.
 
-	*Arguments:* None
+    *Arguments:* None
 
-   	*Return Value:* a <URLRequestCancel> object. This object can be used to cancel an in-progress request by calling the object's <URLRequestCancel.cancel> function.
+    *Return Value:* a <URLRequestCancel> object. This object can be used to cancel an in-progress request by calling the object's <URLRequestCancel.cancel> function.
 
-   	*Code Example:* Create and send a URLRequest object, process it asynchronously in chucks, and handle its response(s)
+    *Code Example:* Create and send a URLRequest object, process it asynchronously in chucks, and handle its response(s)
 
-    	(code)
-    	-- Create HTTP Request object
-    	urlRequest = URLRequest( { url = "http://www.trickplay.com" } )
+        (code)
+        -- Create HTTP Request object
+        urlRequest = URLRequest( { url = "http://www.trickplay.com" } )
 
-    	-- Define an on_complete handler and hook it to the event
-    	function handleResponse( httpRequest, httpResponse )
-    		print( "Response received, code =", httpResponse.code )
-    	end
-		urlRequest:add_oncomplete_listener( handleResponse )
+        -- Define an on_complete handler and hook it to the event
+        function handleResponse( httpRequest, httpResponse )
+            print( "Response received, code =", httpResponse.code )
+        end
+        urlRequest:add_oncomplete_listener( handleResponse )
 
-    	-- Define an on_response_chunk handler and hook it to the event
-    	function handleResponseChunk( httpRequest, httpResponse )
-    		print( "Response Chunk received, code =", httpResponse.code )
-    	end
-		urlRequest:add_onresponsechunk_listener( handleResponseChunk )
+        -- Define an on_response_chunk handler and hook it to the event
+        function handleResponseChunk( httpRequest, httpResponse )
+            print( "Response Chunk received, code =", httpResponse.code )
+        end
+        urlRequest:add_onresponsechunk_listener( handleResponseChunk )
 
-		-- Send the request and process it asynchronously
-		urlRequest:stream()
-    	print( "Sent HTTP Request" )
-    	(end)
+        -- Send the request and process it asynchronously
+        urlRequest:stream()
+        print( "Sent HTTP Request" )
+        (end)
 
-   	*See Also:* the <perform> and <send> functions and the <on_complete> and <on_response_chunk> events
+    *See Also:* the <perform> and <send> functions and the <on_complete> and <on_response_chunk> events
 */
 
     URLRequestCancel stream()
@@ -449,32 +449,32 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Function: add_oncomplete_listener
+    Function: add_oncomplete_listener
 
-	The add_oncomplete_listener() function registers a handler function for <on_complete> events.
+    The add_oncomplete_listener() function registers a handler function for <on_complete> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncomplete_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_oncomplete_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( request, response )
-		(end)
+        (code)
+        f( request, response )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		request - URLRequest object that initiated the request
-		response - <URLResponse> object containing the response information
+        request - URLRequest object that initiated the request
+        response - <URLResponse> object containing the response information
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code examples for the <send> and <stream> functions for demonstrations on hooking the on_complete event
+    *Code Example:* See the code examples for the <send> and <stream> functions for demonstrations on hooking the on_complete event
 
-	*See Also:* the <on_complete> event and the <remove_oncomplete_listener> function
+    *See Also:* the <on_complete> event and the <remove_oncomplete_listener> function
 */
 
     int add_oncomplete_listener( function f )
@@ -483,17 +483,17 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Function: remove_oncomplete_listener
+    Function: remove_oncomplete_listener
 
-	The remove_oncomplete_listener() function unregisters the specified event handler.
+    The remove_oncomplete_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_oncomplete_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_oncomplete_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_oncomplete_listener> function and the <on_complete> event
+    *See Also:* the <add_oncomplete_listener> function and the <on_complete> event
 */
 
     remove_oncomplete_listener( int ref )
@@ -502,32 +502,32 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Function: add_onresponsechunk_listener
+    Function: add_onresponsechunk_listener
 
-	The add_onresponsechunk_listener() function registers a handler function for <on_response_chunk> events.
+    The add_onresponsechunk_listener() function registers a handler function for <on_response_chunk> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onresponsechunk_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onresponsechunk_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( request, response )
-		(end)
+        (code)
+        f( request, response )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-		request - URLRequest object that initiated the request
-		response - <URLResponse> object containing the response chunk
+        request - URLRequest object that initiated the request
+        response - <URLResponse> object containing the response chunk
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*Code Example:* See the code example for the <stream> function for a demonstration of hooking the on_response_chunk event
+    *Code Example:* See the code example for the <stream> function for a demonstration of hooking the on_response_chunk event
 
-	*See Also:* the <on_response_chunk> event and the <remove_onresponsechunk_listener> function
+    *See Also:* the <on_response_chunk> event and the <remove_onresponsechunk_listener> function
 */
 
     int add_onresponsechunk_listener( function f )
@@ -536,17 +536,17 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Function: remove_onresponsechunk_listener
+    Function: remove_onresponsechunk_listener
 
-	The remove_onresponsechunk_listener() function unregisters the specified event handler.
+    The remove_onresponsechunk_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onresponsechunk_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onresponsechunk_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onresponsechunk_listener> function and the <on_response_chunk> event
+    *See Also:* the <add_onresponsechunk_listener> function and the <on_response_chunk> event
 */
 
     remove_onresponsechunk_listener( int ref )
@@ -555,11 +555,11 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Event: on_complete
+    Event: on_complete
 
-	The on_complete event occurs after an HTTP request sent via the <send> or <stream> functions has finished or failed.
+    The on_complete event occurs after an HTTP request sent via the <send> or <stream> functions has finished or failed.
 
-	*See Also:* the <add_oncomplete_listener> function
+    *See Also:* the <add_oncomplete_listener> function
 */
 
     function on_complete
@@ -571,11 +571,11 @@ class URLRequest [[Network::Request*]]
         ]];
 
 /***************************************
-	Event: on_response_chunk
+    Event: on_response_chunk
 
-	The on_response_chunk event occurs upon receipt of a portion of a response to an HTTP request sent via the <stream> function. Each firing of the on_response_chunk event contains a new portion; chunks do not accumulate with each invocation. When the final portion is received, an <on_complete> event occurs.
+    The on_response_chunk event occurs upon receipt of a portion of a response to an HTTP request sent via the <stream> function. Each firing of the on_response_chunk event contains a new portion; chunks do not accumulate with each invocation. When the final portion is received, an <on_complete> event occurs.
 
-	*See Also:* the <add_onresponsechunk_listener> function
+    *See Also:* the <add_onresponsechunk_listener> function
 */
 
     function on_response_chunk
@@ -592,15 +592,15 @@ class URLRequest [[Network::Request*]]
 [[
 void URLRequest_response_callback(const Network::Response&response,gpointer _handle)
 {
-	UserData::Handle * handle = UserData::Handle::get( _handle );
+    UserData::Handle * handle = UserData::Handle::get( _handle );
 
-	lua_State * L = handle->get_lua_state();
+    lua_State * L = handle->get_lua_state();
 
-	if ( L )
-	{
-    	lua_pushlightuserdata(L,new Network::Response(response));
-    	new_URLResponse(L);
-    	lua_remove(L,-2);
+    if ( L )
+    {
+        lua_pushlightuserdata(L,new Network::Response(response));
+        new_URLResponse(L);
+        lua_remove(L,-2);
 
         lb_invoke_callbacks(L,(Network::Request*)handle->get_user(),"URLREQUEST_METATABLE","on_complete",1,0);
     }

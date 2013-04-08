@@ -1,4 +1,4 @@
-import os, telnetlib, base64, sys, random, json, time
+import os, telnetlib, base64, sys, random, json, time, re
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *

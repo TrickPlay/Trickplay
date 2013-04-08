@@ -2,8 +2,7 @@
 module clutter_path;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 
 #include "util.h"
 #include "clutter_util.h"
@@ -107,14 +106,14 @@ class Path [[ClutterPath*]]
 
         *Return Value:* A new Path object
 
-		*Code Example:* Create two Path objects
+        *Code Example:* Create two Path objects
 
-		(code)
-		animationPath1 = Path()  -- no path defined yet for this object
-		animationPath2 = Path( "M0 0 L100 100" )  -- this object has a defined path consisting of a straight line from point (0, 0) to (100, 100)
-		(end)
+        (code)
+        animationPath1 = Path()  -- no path defined yet for this object
+        animationPath2 = Path( "M0 0 L100 100" )  -- this object has a defined path consisting of a straight line from point (0, 0) to (100, 100)
+        (end)
 
-		*See Also:* the <move_to>, <line_to> and <get_position> functions
+        *See Also:* the <move_to>, <line_to> and <get_position> functions
 
     */
 
@@ -244,11 +243,11 @@ class Path [[ClutterPath*]]
 
         The close() function adds a straight line from the last-defined node to the node created by the most-recent call to the move_to() function.
 
-		*Arguments:* None
+        *Arguments:* None
 
-		*Return Value:* None
+        *Return Value:* None
 
-		*See Also:* the <move_to> function and the z command in the <add_string_path> function
+        *See Also:* the <move_to> function and the z command in the <add_string_path> function
     */
 
     close()
@@ -280,34 +279,34 @@ class Path [[ClutterPath*]]
 
         (code)
         -- Define the rectangle to animate
-	    local rectangle = Rectangle{ color    = "FF0000",
-    	    						 size     = { 100 , 100 },
-    	    						 position = { 0 , 980 },
-    	}
-    	screen:add( rectangle )
+        local rectangle = Rectangle{ color    = "FF0000",
+                                     size     = { 100 , 100 },
+                                     position = { 0 , 980 },
+        }
+        screen:add( rectangle )
 
-		-- Define the Path to animate along
-    	local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
+        -- Define the Path to animate along
+        local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
 
-		-- Define the Timeline animation
-    	local timeline = Timeline{ duration = 3000,
-    	    					   loop     = true,
-    	}
+        -- Define the Timeline animation
+        local timeline = Timeline{ duration = 3000,
+                                   loop     = true,
+        }
 
-		-- Define a handler for the Timeline's on_new_frame events
-		function moveRectangle( timeline, duration, progress )
-			-- Determine and set the rectangle's current position along the defined Path
-			rectangle.position = path:get_position( progress )
-		end
+        -- Define a handler for the Timeline's on_new_frame events
+        function moveRectangle( timeline, duration, progress )
+            -- Determine and set the rectangle's current position along the defined Path
+            rectangle.position = path:get_position( progress )
+        end
 
-		-- Hook the handler into the on_new_frame event
-		timeline:add_onnewframe_listener( moveRectangle )
+        -- Hook the handler into the on_new_frame event
+        timeline:add_onnewframe_listener( moveRectangle )
 
-		-- Show everything on the screen
-		screen:show()
+        -- Show everything on the screen
+        screen:show()
 
-		-- Start the animation
-	    timeline:start()
+        -- Start the animation
+        timeline:start()
         (end)
     */
 
@@ -351,9 +350,9 @@ class Path [[ClutterPath*]]
         { X_coordinate_position, Y_coordinate_position }
         (end)
 
-		*Code Example:* Refer to the example at the top of this section for a complete demonstration of the Path and get_position() function.
+        *Code Example:* Refer to the example at the top of this section for a complete demonstration of the Path and get_position() function.
 
-		*See Also:* the <add_string_path> function
+        *See Also:* the <add_string_path> function
     */
 
     table get_position( double progress )

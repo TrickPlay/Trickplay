@@ -10,7 +10,7 @@ class ControllerDiscoveryUPnP : public ControllerServer::Discovery
 {
 public:
 
-    ControllerDiscoveryUPnP( TPContext * context, const String & name, int port );
+    ControllerDiscoveryUPnP( TPContext* context, const String& name, int port );
 
     ~ControllerDiscoveryUPnP();
 
@@ -18,7 +18,7 @@ public:
 
 private:
 
-    static int upnp_device_callback( Upnp_EventType type , void * event , void * user );
+    static int upnp_device_callback( Upnp_EventType type , void* event , void* user );
 
     String controller_name;
 

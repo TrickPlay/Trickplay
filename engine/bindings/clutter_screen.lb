@@ -1,12 +1,15 @@
 module clutter_screen;
 
 [[
-#define CLUTTER_VERSION_MIN_REQUIRED CLUTTER_VERSION_CUR_STABLE
-#include "clutter/clutter.h"
+#include "tp-clutter.h"
 #if defined(CLUTTER_WINDOWING_GLX)
 #include "clutter/x11/clutter-x11.h"
 #elif defined(CLUTTER_WINDOWING_OSX)
 #include "clutter/osx/clutter-osx.h"
+#ifdef check
+// AppKit seems to pollute the global namespace with a "check" macro.
+#undef check
+#endif
 #endif
 #include "context.h"
 #include "clutter_util.h"
@@ -172,11 +175,7 @@ global screen [[ClutterActor*]] actor , container
 
     show_all()
         [[
-#ifndef CLUTTER_VERSION_1_10
-            clutter_actor_show_all(self);
-#else
             clutter_actor_show(self);
-#endif
             // Show the stage as well
             clutter_actor_show(App::get(L)->get_context()->get_stage());
         ]];
@@ -246,21 +245,13 @@ global screen [[ClutterActor*]] actor , container
     table color
         [[
             ClutterColor color;
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_get_background_color( self, &color );
-#else
-            clutter_stage_get_color(CLUTTER_STAGE(self),&color);
-#endif
             push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             to_clutter_color(L,2,&color);
-#ifdef CLUTTER_VERSION_1_10
             clutter_actor_set_background_color( self, &color );
-#else
-            clutter_stage_set_color(CLUTTER_STAGE(self),&color);
-#endif
         ]];
 */
     table perspective
@@ -337,7 +328,6 @@ global screen [[ClutterActor*]] actor , container
             NSWindow *stage_window = clutter_osx_get_stage_window( CLUTTER_STAGE( App::get(L)->get_context()->get_stage() ) );
             NSRect frame = [stage_window frame];
             // OSX coordinates are measured from bottom-left so X is good, but y needs adjustment
-            NSRect screen_frame = [[stage_window screen] frame];
             frame.origin.x = x;
             [stage_window setFrameOrigin:frame.origin];
 #else
