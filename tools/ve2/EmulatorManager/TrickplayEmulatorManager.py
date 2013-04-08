@@ -178,7 +178,6 @@ class TrickplayEmulatorManager(QWidget):
 				            self.GLInspector_ui = Ui_horizGuideDialog()
 
 				        self.GLInspector_ui.setupUi(self.GLI_dialog) 
-				        #self.GLI_dialog.setGeometry(400,400, 286, 86)
 				        self.main.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
 				        self.GLI_dialog.setGeometry(int(self.main.x)+400,int(self.main.y)+200, 286, 86)
 				        self.GLI_dialog.focusWidget()
@@ -207,7 +206,6 @@ class TrickplayEmulatorManager(QWidget):
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
 				        gid = (s[9:])
-				        #gid = int(s[9:])
 				    elif luaCmd == "focusSet2":
 				        focusObj = str(s[9:])
 				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
@@ -253,11 +251,6 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "clear:Insp":
 					try:
-					    #try:
-					        #gid = int(gid)
-					    #except:
-					        #print("error :( gid is missing!") 
-
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
 					        print('Found*', result['gid'], result['name'])
