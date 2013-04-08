@@ -224,7 +224,7 @@ ui = {
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
 
-local function dump_properties( o )
+function dump_properties( o )
         local t = {}
         local l = 0
         for k , v in pairs( getmetatable( o ).__getters__ ) do

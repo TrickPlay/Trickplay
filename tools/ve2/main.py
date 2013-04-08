@@ -84,13 +84,11 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        #self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
 
         self.windows = {"inspector":False, "images":False}
         self.inspectorWindowClicked()
 
         # Create Inspector
-        #self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
 
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
@@ -106,7 +104,6 @@ class MainWindow(QMainWindow):
 
         self._ifilesystem = TrickplayImageFileSystem(self)
         self.ui.fileSystemLayout.addWidget(self._ifilesystem)
-        #self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
@@ -128,7 +125,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_Button, SIGNAL("triggered()"),  self.button)
         QObject.connect(self.ui.actionDialog_Box, SIGNAL("triggered()"),  self.dialogbox)
         QObject.connect(self.ui.actionToastAlert, SIGNAL("triggered()"),  self.toastalert)
-        #QObject.connect(self.ui.actionToggleButton, SIGNAL("triggered()"),  self.togglebutton)
         QObject.connect(self.ui.actionCheckBox, SIGNAL("triggered()"),  self.checkbox)
         QObject.connect(self.ui.actionRadioButton, SIGNAL("triggered()"),  self.radiobutton)
         QObject.connect(self.ui.actionProgressSpinner, SIGNAL("triggered()"),  self.progressspinner)
@@ -145,7 +141,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionMenuButton, SIGNAL("triggered()"),  self.menubutton)
 
         QObject.connect(self.ui.actionWidgetText, SIGNAL("triggered()"),  self.text)
-        #QObject.connect(self.ui.actionWidgetImage, SIGNAL("triggered()"),  self.image)
         QObject.connect(self.ui.actionWidgetRectangle, SIGNAL("triggered()"),  self.rectangle)
 
         QObject.connect(self.ui.actionGroup, SIGNAL("triggered()"),  self.group)
@@ -460,7 +455,6 @@ class MainWindow(QMainWindow):
             self.path = self.apath
         path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
 
-        #result = self.adjustPath(path)
         if path :
             self.uiD.directory.setText(path)
             self.uiD.id.setReadOnly(False)
@@ -486,7 +480,7 @@ class MainWindow(QMainWindow):
         """
         New app dialog
         """
-        self.dialog = QDialog() #QDialog
+        self.dialog = QDialog() 
         self.id = ""
         self.name = ""
         self.uiD = Ui_importSkinImages()
