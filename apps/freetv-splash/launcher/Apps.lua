@@ -1,27 +1,117 @@
-local lorem_ipsum = [[Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.]]
 
 local icon_w = 480
 local icon_h = 270
+local unsel_scale = .75
+local   sel_scale = 1.25
 local launcher_icons = {}
 generic_launcher_icon = Image{src="assets/generic-app-icon.jpg"}
 screen:add( generic_launcher_icon )
 generic_launcher_icon:hide()
 
 local function pre_x(i)
-    return (10+icon_w*.5)*(i-1)-icon_w*.25
+    return (10+icon_w*unsel_scale)*(i-1)-icon_w*(sel_scale-unsel_scale)/2
 end
 local function sel_x(i)
-    return (10+icon_w*.5)*(i-1)--icon_w*.25
+    return (10+icon_w*unsel_scale)*(i-1)--icon_w*.25
 end
 local function post_x(i)
-    return (10+icon_w*.5)*(i-1)+icon_w*.25
+    return (10+icon_w*unsel_scale)*(i-1)+icon_w*(sel_scale-unsel_scale)/2
 end
 
+local padding=10
+local function make_icon(v)
+
+    local i = Image()
+    if not(i:load_app_icon(v.id,"launcher-icon.png") or
+        i:load_app_icon(v.id,"launcher-icon.jpg")) then
+
+        i = Clone{source=generic_launcher_icon}
+    end
+    i.size = {icon_w,icon_h}
+    local g = Group()
+    local title_grp = Group()
+    local t = Text{
+        x=padding/2,
+        y=padding/2,
+        w=i.w-padding,
+        ellipsize = "END",
+        color = "white",
+        text=v.name,
+        font = FONT_NAME.." 24px"
+    }
+    local r = Rectangle{
+        w=i.w,
+        h=t.h+padding,
+        color="black",
+        --opacity = 200
+    }
+    local duration = 250
+    local mode     = "EASE_OUT_SINE"
+    g.slogan = v.long_name or v.name
+    g.description = v.description or lorem_ipsum
+    g.name = v.id
+    g:add(i,title_grp)
+    title_grp:add(r,t)
+
+
+    g.position     = {     0, g.h/2*3/4 }
+    g.anchor_point = { g.w/2, g.h   }
+    g.y_rotation = { 0, g.w/2, 0 }
+    local anim = AnimationState {
+        duration = duration,
+        mode = mode,
+        transitions = {
+            {
+                source = "*",
+                target = "focus",
+                keys = {
+                    { title_grp, "opacity", 255 },
+                    { g, "scale", { sel_scale, sel_scale } },
+                },
+            },
+            {
+                source = "*",
+                target = "unfocus",
+                keys = {
+                    { title_grp, "opacity", 0 },
+                    { g, "scale", { unsel_scale, unsel_scale } },
+                },
+            },
+        },
+    }
+
+    g.extra.focus = function(self,x)
+        --title_grp.clip_to_size = false
+        anim.state = "focus"
+        if x then
+            g:stop_animation()
+            g:animate{
+                duration=duration,
+                mode = mode,
+                x = x,
+            }
+        end
+    end
+
+    g.extra.unfocus = function(self,x)
+        --title_grp.clip_to_size = true
+        anim.state = "unfocus"
+        if x then
+            g:stop_animation()
+            g:animate{
+                duration=duration,
+                mode = mode,
+                x = x,
+            }
+        end
+    end
+    anim:warp("unfocus")
+    return g
+end
+
+local app_list = {}
 do
-    local app_list = apps:get_for_current_profile()
-    local i,g,r,t
-    local padding=10
-    for k,v in pairs(app_list) do
+    for k,v in pairs(apps:get_for_current_profile()) do
 
         if not v.attributes.nolauncher    and
             k ~= "com.trickplay.launcher" and
@@ -29,109 +119,22 @@ do
             k ~= "com.trickplay.app-shop" and
             k ~= "com.trickplay.editor"   then
 
-            local i = Image()
-            if not(i:load_app_icon(v.id,"launcher-icon.png") or
-                i:load_app_icon(v.id,"launcher-icon.jpg")) then
+            --local g=make_icon(v)
 
-                i = Clone{source=generic_launcher_icon}
-            end
-            i.size = {icon_w,icon_h}
-            local g = Group()
-            local title_grp = Group()
-            local t = Text{
-                x=padding/2,
-                y=padding/2,
-                w=i.w-padding,
-                ellipsize = "END",
-                color = "white",
-                text=v.name,
-                font = FONT_NAME.." 20px"
-            }
-            local r = Rectangle{
-                w=i.w,
-                h=t.h+padding,
-                color="black",
-                opacity = 200
-            }
-            local duration = 250
-            local mode     = "EASE_OUT_SINE"
-            g.slogan = v.long_name or v.name
-            g.description = v.description or lorem_ipsum
-            g.name = v.id
-            g:add(i,title_grp)
-            title_grp:add(r,t)
-
-
-            g.position     = {     0, g.h/2*3/4 }
-            g.anchor_point = { g.w/2, g.h   }
-            g.y_rotation = { 0, g.w/2, 0 }
-            g.extra.anim = AnimationState {
-                                                            duration = duration,
-                                                            mode = mode,
-                                                            transitions = {
-                                                                {
-                                                                    source = "*",
-                                                                    target = "focus",
-                                                                    keys = {
-                                                                        --{ g, "opacity", 255 },
-                                                                        --{ g, "y_rotation", 0 },
-                                                                        { title_grp, "opacity", 255 },
-                                                                        { g, "scale", { 1, 1 } },
-                                                                    },
-                                                                },
-                                                                {
-                                                                    source = "*",
-                                                                    target = "unfocus",
-                                                                    keys = {
-                                                                        --{ g, "opacity", 64 },
-                                                                        --{ g, "y_rotation", 5 },
-                                                                        { title_grp, "opacity", 0 },
-                                                                        { g, "scale", { .5, .5 } },
-                                                                    },
-                                                                },
-                                                            },
-            }
-
-            g.extra.focus = function(self,x)
-                --title_grp.clip_to_size = false
-                self.anim.state = "focus"
-                if x then
-                    g:stop_animation()
-                    g:animate{
-                        duration=duration,
-                        mode = mode,
-                        x = x,
-                    }
-                end
-            end
-
-            g.extra.unfocus = function(self,x)
-                --title_grp.clip_to_size = true
-                self.anim.state = "unfocus"
-                if x then
-                    g:stop_animation()
-                    g:animate{
-                        duration=duration,
-                        mode = mode,
-                        x = x,
-                    }
-                end
-            end
-            g.anim:warp("unfocus")
-
-
-
-
-            --launcher_icons[v.id] = i
-            table.insert(launcher_icons,g)
+            --table.insert(launcher_icons,g)
+            table.insert(app_list,v)
         end
 
     end
 end
 
 
-local menubar = Group {}
-local apps_list = {}
+local menubar = make_sliding_bar__expanded_focus{
+    items = app_list,
+    make_item = make_icon,
+    unsel_offset = icon_w*(sel_scale-unsel_scale)/2,
+    spacing = 10+icon_w*unsel_scale,
+}
 local app_offset = -icon_w*.25
 local active_app = 2
 local backing = Group()
@@ -179,7 +182,7 @@ do
     end
     function backing.extra.anim.timeline.on_completed()
         if backing.extra.anim.state == "full" then
-            set_incoming_text(apps_list[active_app],"right")
+            set_incoming_text(menubar:curr(),"right")
         end
     end
 end
@@ -188,13 +191,6 @@ do
     local text_w = 600
     local duration = 200
     local setup_text = function(g)
-        g.slogan = Text{
-            y = -350,
-            w=text_w,
-            ellipsize = "END",
-            color = "white",
-            font = FONT_NAME.." Bold 20px",
-        }
         g.description = Text{
             y=-300,
             wrap=true,
@@ -203,18 +199,18 @@ do
             color = "white",
             font = FONT_NAME.." 20px",
         }
-        g:add( g.slogan, g.description )
+        g:add( g.description )
         return g
     end
 
     local   incoming_text = setup_text( Group{ name=   "incoming_text" } )
-    local displaying_text = setup_text( Group{ name= "displaying_text",x = 200 } )
+    local displaying_text = setup_text( Group{ name= "displaying_text",x = 800 } )
     local next_text
     local animating = false
-    local set_incoming_text__internal = function(curr_app,direction)
+    local set_incoming_text__internal
+    set_incoming_text__internal = function(curr_app,direction)
 
         next_text = nil
-        incoming_text.slogan.text      = curr_app.slogan
         incoming_text.description.text = curr_app.description
 
         if direction == "left" then
@@ -242,7 +238,6 @@ do
             on_completed = function()
                 displaying_text:stop_animation()
                 displaying_text.x = incoming_text.x
-                displaying_text.slogan.text      = incoming_text.slogan.text
                 displaying_text.description.text = incoming_text.description.text
                 displaying_text.opacity = 255
                 if next_text then
@@ -263,13 +258,12 @@ do
     end
 
     set_current_text = function(curr_app)
-        displaying_text.slogan.text      = curr_app.slogan
         displaying_text.description.text = curr_app.description
     end
     backing:add(displaying_text,incoming_text)
 
 end
-
+--[=[]]
 local function focus_app(number, t)
     menubar:stop_animation()
     local the_app = apps_list[number]
@@ -345,7 +339,7 @@ local function build_bar()
     focus_app(active_app,10)
     --set_current_text(apps_list[active_app])
 end
-
+--]=]
 local function show_bar()
     menubar:show()
     backing.anim.state = "half"
@@ -360,7 +354,13 @@ end
 
 local function on_activate(label)
     label:animate({ duration = 250, opacity = 255 })
-    if(menubar.count == 0) then build_bar() end
+    --if(menubar.count == 0) then build_bar() end
+    if menubar.parent == nil then
+        screen:add(backing,menubar)
+        menubar:hide()
+        menubar.y = 812.5
+        backing.y = menubar.y
+    end
     hide_bar()
 end
 
@@ -385,7 +385,7 @@ end
 
 local prev_app
 local key_events = {
-    [keys.Left] = function()
+    [keys.Left] = function()--[=[]]
         --unfocus_app(active_app)
         prev_app = active_app
         local transition_time = 250
@@ -398,9 +398,14 @@ local key_events = {
         end
         --focus_app(active_app, transition_time)
         transfer_focus(prev_app,-1,transition_time)
+        --]=]
+        menubar:press_left()
+        if backing.anim.state == "full" then
+            set_incoming_text(menubar:curr(),"left")
+        end
         return true
     end,
-    [keys.Right] = function()
+    [keys.Right] = function()--[=[]]
         --unfocus_app(active_app)
         prev_app = active_app
         local transition_time = 250
@@ -413,6 +418,11 @@ local key_events = {
         end
         --focus_app(active_app, transition_time)
         transfer_focus(prev_app,1,transition_time)
+        --]=]
+        menubar:press_right()
+        if backing.anim.state == "full" then
+            set_incoming_text(menubar:curr(),"right")
+        end
         return true
     end,
     [keys.Up] = function()

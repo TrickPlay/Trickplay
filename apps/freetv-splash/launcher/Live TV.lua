@@ -141,14 +141,15 @@ local channel_data = {
             },
 }
 --]]
-local menubar = Group { }
+local menubar
 local channel_bar
 local channel_bar_focus
 local bar_height
 local show_offset = 0
 local active_show = 2
 
-local function make_show_tile(channel_num, data)
+local function make_show_tile(channel_num, data,channel_bar,channel_bar_focus)
+    local bar_height = channel_bar.h
     local show_group = Group { name = data.show }
     local logo = Image { src = "assets/channel_logos/logo-"..data.channel..".png" }
     logo.anchor_point = { 0, logo.h/2 }
@@ -160,13 +161,14 @@ local function make_show_tile(channel_num, data)
     channel_num.x = 15
     channel_num.y = -48
 
-    local bg_focus = Clone { source = channel_bar_focus, name = "bg-focus", x = 1, w = show_text.x + show_text.w + 30 }
-    local bg_unfocus = Clone { source = channel_bar, name = "bg-unfocus", x = 1, w = show_text.x + show_text.w + 30 }
+    local r_w = show_text.x + math.max(channel_num.w,show_text.w) + 30
+    local bg_focus = Clone { source = channel_bar_focus, name = "bg-focus", x = 1, w = r_w }
+    local bg_unfocus = Clone { source = channel_bar, name = "bg-unfocus", x = 1, w = r_w }
 
     show_group:add( Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height } },
                     bg_focus,
                     bg_unfocus,
-                    Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height }, x = 1 + show_text.x + show_text.w + 30 },
+                    Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height }, x = 1 + r_w },
                     channel_num, logo, show_text )
 
     show_group.extra.anim = AnimationState {
@@ -217,7 +219,7 @@ local function make_show_tile(channel_num, data)
     show_group.episode = 3
     return show_group
 end
-
+--[=[]]
 local function unfocus_show(number)
     menubar:find_child("tv_shows").children[number]:unfocus()
 end
@@ -230,17 +232,7 @@ local function focus_show(number, t)
     menubar:animate({ duration = t, mode = mode, x = 200 - the_show.x })
 end
 
-local function make_stub(w)
-    local stub = Group { name = "stub" }
-
-    stub:add( Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height } },
-                Clone { source = channel_bar, name = "bg-unfocus", x = 1, w = w - 2 },
-                Rectangle { name = "edge", color = "#2d414e", size = { 1, bar_height }, x = w - 1 }
-            )
-
-    return stub
-end
-
+--]=]
 local backing = Group()
 
 local set_incoming_show, set_current_show, hide_current_show
@@ -265,12 +257,13 @@ do
                                                             source = "*",
                                                             target = "full",
                                                             keys = {
-                                                                { r, "y", hidden_y - 500 },
-                                                                { r, "h",            500 },
+                                                                { r, "y", hidden_y - 550 },
+                                                                { r, "h",            550 },
                                                             },
                                                         },
                                                     },
     }
+    backing.clip = {0,hidden_y - 550,screen.w,550}
     function backing.extra.anim.timeline.on_started()
         if backing.extra.anim.state ~= "full" then
             --set_incoming_show({slogan="",description=""},"right")
@@ -290,16 +283,42 @@ do
 end
 
 do
+    local blue_color = {100,100,200}
     local text_w = 600
     local duration = 200
     local max_airings = 5
+    local function ampm(hr,min)
+        hr = tonumber(hr)
+        min = min and (":"..min) or ""
+        if hr < 12 then
+            if hr == 0 then
+                hr = 12
+            end
+            hr = hr..min.."AM"
+        else
+            if hr ~= 12 then
+                hr = hr -12
+            end
+            hr = hr..min.."PM"
+        end
+        return hr
+    end
+    local function get_sprite( uri )
+        if type(uri)~="string" then return false end
+        uri = uri:sub(uri:len()-uri:reverse():find("/")+2)
+        return(uri)
+    end
     local setup_info = function(g)
+        g.image = Sprite{
+            sheet = tv_show_sprites,
+        }
+        g.description_group = Group()
         g.slogan = Text{
-            y = -350,
+            y = -375,
             w=text_w,
             ellipsize = "END",
-            color = "white",
-            font = FONT_NAME.." Bold 20px",
+            color = blue_color,
+            font = FONT_NAME.." Bold 30px",
         }
         g.description = Text{
             y=-300,
@@ -307,63 +326,82 @@ do
             wrap_mode = "WORD",
             w=text_w,
             color = "white",
-            font = FONT_NAME.." 20px",
+            font = FONT_NAME.." 24px",
             text = "description",
         }
         g.start_time = Text{
-            y=-150,
+            y=-80,
             w=text_w,
-            color = "white",
-            font = FONT_NAME.." Bold 20px",
+            color = blue_color,
+            font = FONT_NAME.." Bold 24px",
             text = "start_time",
         }
-        g.aired_on = Text{
-            y=-120,
+        g.duration = Text{
+            y=-80,
+            x= 150,
             w=text_w,
             color = "white",
-            font = FONT_NAME.." Bold 20px",
+            font = FONT_NAME.." Bold 24px",
+            text = "duration",
+        }
+        g.aired_on = Text{
+            y=-50,
+            w=text_w,
+            color = "white",
+            font = FONT_NAME.." Bold 24px",
             text = "aired_on",
         }
         g.season_episode = Text{
-            y=-90,
+            y=-50,
             w=text_w,
             color = "white",
-            font = FONT_NAME.."  20px",
+            font = FONT_NAME.."  24px",
             text = "season_episode",
         }
+
+
+        g.next_airings = Group{
+            x= 900,
+            y= g.description.y,
+            children={
+                Text{
+                    color = "white",
+                    font = FONT_NAME.."  20px",
+                    text = "Next Airings:",
+                }
+            }
+        }
         g.related = Text{
-            x= 800,
-            y=-350,
+            x= 1050,
+            y= g.description.y,
             text = "Related",
             color = "white",
             font = FONT_NAME.."  20px",
-            text = "related",
+            text = "Related:",
         }
-        g.next_airings = Text{
-            x= g.related.x,
-            y=-150,
-            color = "white",
-            font = FONT_NAME.."  20px",
-            text = "next_airings",
-        }
-        g:add(
+        g.description_group:add(
             g.slogan,
             g.description,
             g.start_time,
             g.aired_on,
-            g.season_episode,
+            g.duration
+        )
+        g:add(
+            g.image,
+            g.description_group,
+            --g.season_episode,
             g.related,
             g.next_airings
         )
         local airings = {}
         for i=1,max_airings do
             airings[i] = Text{
-                x = g.next_airings.x+150*(i-1),
-                y = g.next_airings.y+60,
+                --g.next_airings.x+150*(i-1),
+                y = 30*(i-1)+50,
                 color = "white",
                 font =  FONT_NAME.."  20px",
             }
-            g:add(airings[i])
+            g.next_airings:add(airings[i])
         end
         local curr_show
         function g:get_show()
@@ -372,6 +410,19 @@ do
         function g:set_show(show)
             if show == nil then error("nil show",2) end
             curr_show = show
+            local id =
+                get_sprite(show.banner) or
+                get_sprite(show.cast)   or
+                get_sprite(show.logo)   or
+                ""
+            --print(show.show_name,id,show.banner,show.cast,show.logo)
+            g.image[id == "" and "hide" or "show"](g.image)
+            g.image.id = id
+            g.description_group.x = id ~= "" and (g.image.w+30) or 0
+            g.next_airings.x = g.description_group.x + text_w+300
+            g.related.x = g.next_airings.x+150
+            g.image.anchor_point = {0,g.image.h/2}
+            g.image.y = -200
             g.season_episode.text =
                 (show.season_number  ~= json_null) and
                 (show.episode_number ~= json_null) and
@@ -392,17 +443,20 @@ do
             g.aired_on.text =
                 show.original_air_date ~= json_null and
                 ("AIRED ON "..show.original_air_date) or ""
+            g.duration.text =
+                show.duration.." min"
             g.start_time.text =
-                show.start_time ~= json_null and
-                show.start_time_t.hour..":"..show.start_time_t.min or ""
+                (show.start_time ~= json_null) and
+                ampm(show.start_time_t.hour,show.start_time_t.min) or ""
             ---[[
-            if show.series_id and #series[show.series_id] > 1 then
+            if show.series_id and series[show.series_id] and #series[show.series_id] > 1 then
                 --print("num in series",#series[show.series_id])
+                ---[[
                 g.next_airings.text =
-                    show.show_name ~= json_null and
-                    "Next Airings of "..show.show_name..":" or
+                    --show.show_name ~= json_null and
+                    --"Next Airings of "..show.show_name..":" or
                     "Next Airings:"
-
+                --]]
                 local curr_show
                 for i=1,#airings do
                     --print(i, (#series[show.series_id]))
@@ -410,8 +464,8 @@ do
                         curr_show = series[show.series_id][i]
 
                         airings[i].text =
-                            curr_show.start_time_t.wkdy.." "..
-                            tonumber(curr_show.start_time_t.hour).."\n"
+                            curr_show.start_time_t.wkdy.."\t"..
+                            ampm(curr_show.start_time_t.hour)--[[.."\n"
                         airings[i].text = airings[i].text..(
                             (curr_show.season_number  ~= json_null) and
                             (curr_show.episode_number ~= json_null) and
@@ -420,9 +474,7 @@ do
                             (curr_show.season_number ~= json_null) and
                             "S "..curr_show.season_number
                             (curr_show.episode_number ~= json_null) and
-                            "Ep "..curr_show.episode_number or "")
-                    else
-                        airings[i].text = "b"
+                            "Ep "..curr_show.episode_number or "")--]]
                     end
                 end
             else
@@ -483,6 +535,8 @@ do
     end
 
     hide_current_show = function()
+        --displaying_show:stop_animation()
+        --incoming_show:complete_animation()
         displaying_show:animate{
             duration=200,
             opacity=0,
@@ -499,17 +553,10 @@ do
 
 end
 
+--[=[]]
 local function build_bar()
     screen:add(backing,menubar)
     menubar:hide()
-    local clone_src = Group { name = "Clone sources" }
-    menubar:add(clone_src)
-    clone_src:hide()
-
-    channel_bar = Image { src = "assets/channelbar/channel-bar.png" }
-    channel_bar_focus = Image { src = "assets/channelbar/channel-bar-focus.png" }
-    bar_height = channel_bar.h
-    clone_src:add(channel_bar, channel_bar_focus)
 
     local clip_group_outter = Group { name = "clip_outter" }
     menubar:add(clip_group_outter)
@@ -544,28 +591,58 @@ local function build_bar()
 
     focus_show(active_show,10)
 end
-
-local function show_bar()
+--]=]
+local function show_bar()--[=[]]
     menubar:find_child("clip_inner"):stop_animation()
     menubar:show()
-    menubar:find_child("clip_inner"):animate({ duration = 250, y = 0, mode = "EASE_OUT_SINE" })
+    menubar:find_child("clip_inner"):animate({
+        duration = 250, y = 0, mode = "EASE_OUT_SINE"
+        })
+    --]=]
+    menubar:anim_in()
 --    menubar:raise_to_top()
 end
 
-local function hide_bar()
+local function hide_bar()--[=[]]
     menubar:find_child("clip_inner"):stop_animation()
-    menubar:find_child("clip_inner"):animate({ duration = 250, y = bar_height, mode = "EASE_OUT_SINE", on_completed = function() menubar:hide() end })
+    menubar:find_child("clip_inner"):animate({
+        duration = 250, y = bar_height,
+        mode = "EASE_OUT_SINE",
+        on_completed = function() menubar:hide() end
+        })
+    --]=]
+    menubar:anim_out()
     backing.anim.state = "hidden"
 end
 
 local function on_activate(label)
     label:animate({ duration = 250, opacity = 255 })
-    if(menubar.count == 0) then build_bar() end
+    --if(menubar.count == 0) then build_bar() end
+    if menubar == nil then
+menubar = make_sliding_bar__highlighted_focus{
+    make_stub = make_stub,
+    make_item = make_show_tile,
+    items = channel_data,
+}
+        screen:add(backing,menubar)
+        menubar:hide()
+        menubar.y = 925 - 150
+        backing.y = menubar.y
+
+    end
     hide_bar()
 end
 
 local function on_deactivate(label, new_active)
-    label:animate({ duration = 250, opacity = 128, on_completed = function() if(new_active) then new_active:activate() end end } )
+    label:animate({
+        duration = 250,
+        opacity = 128,
+        on_completed = function()
+            if(new_active) then
+                new_active:activate()
+            end
+        end
+    } )
     hide_bar()
 end
 
@@ -577,7 +654,34 @@ local function on_sleep(label)
     hide_bar()
 end
 
+local key_events = {
+    [keys.Left] = function()
+        menubar:press_left()
+        if backing.anim.state == "full" then
+                set_incoming_show(
+                    menubar:curr().show_ref,
+                    "left"
+                )
+            end
+return true
+    end,
+    [keys.Right] = function()
+        menubar:press_right()
+        if backing.anim.state == "full" then
+                set_incoming_show(
+                    menubar:curr().show_ref,
+                    "right"
+                )
+            end
+        return true
+    end,
+    [keys.Up] = function()
+        backing.anim.state = "full"
+        return true
+    end,
+}
 local function on_key_down(label, key)
+    --[=[]]
     if( keys.Left == key or keys.Right == key ) then
         unfocus_show(active_show)
 
@@ -610,6 +714,8 @@ local function on_key_down(label, key)
         backing.anim.state = "full"
         return true
     end
+    --]=]
+    return key_events[key] and key_events[key]()
 end
 
 return {
