@@ -71,7 +71,7 @@ local function show_launcher(start_item)
     date_time.position = { screen.w * 19/20, screen.h * 1/10 }
 
     screen:add(highlight_scrim)
-    launcher_group:add(service_logo)
+    --launcher_group:add(service_logo)
     launcher_group:add(menubar)
     launcher_group:add(date_time)
     highlight_scrim:lower_to_bottom()
@@ -93,27 +93,27 @@ function start_launcher(the_service, start_item)
     service = the_service
     load_assets()
     show_launcher(start_item)
-    --[=[ 
-    -- This code creates the EPG, right now it just hangs out in the back 
+    --[=[
+    -- This code creates the EPG, right now it just hangs out in the back
     -- (there was no discussion on how to animate to it)
     -- it grabs key focus, but the key presses bleed through to the main UI as well
-    
-    
+
+
     epg_menu = dofile("EPG.lua")
     screen:add(epg_menu)
     epg_menu:lower_to_bottom()
-    
+
     --get_channel_list(function(channels)
-        
+
         local channels = json:parse( readfile("tv_guide_json/channels.json") )--readfile("local_data/get_channel_list"))
         if channels == nil then
             error("bad channels")
         end
         --[[
-        if  type(channels) ~= "table" or 
-            type(channels.Channels) ~= "table" or 
+        if  type(channels) ~= "table" or
+            type(channels.Channels) ~= "table" or
             type(channels.Channels.Channel) ~= "table" then
-            
+
             print("get_channel_list got bad data")
             return
         end
@@ -122,16 +122,16 @@ function start_launcher(the_service, start_item)
             --print("--------------------------------------------------------------------")
             --dumptable(channel)
             --[[
-            if type(channel) ~= "table" or 
-                type(channel.Name) ~= "string" or 
-                type(channel.Pictures) ~= "table" or 
-                type(channel.Pictures.Picture[1]) ~= "table" or 
-                type(channel.Pictures.Picture[1].Value) ~= "string" then 
-                
+            if type(channel) ~= "table" or
+                type(channel.Name) ~= "string" or
+                type(channel.Pictures) ~= "table" or
+                type(channel.Pictures.Picture[1]) ~= "table" or
+                type(channel.Pictures.Picture[1].Value) ~= "string" then
+
                 print("get_channel_list got bad entry")
-                return 
+                return
             end
-            
+
             local pic
             for i,p in ipairs(channel.Pictures.Picture) do
                 if p.type == "Logo" then
@@ -141,11 +141,11 @@ function start_launcher(the_service, start_item)
             end
             --]]
             make_proxy(
-                
+
                 channel.name,
-                
+
                 pic
-                
+
             )
         end
         --]]
@@ -156,10 +156,10 @@ function start_launcher(the_service, start_item)
     --get_scheduling(function(t,old)
         local old = 1351875000
         local t = json:parse(readfile("local_data/get_scheduling"))
-        if  type(t) ~= "table" or 
-            type(t.Channels) ~= "table" or 
+        if  type(t) ~= "table" or
+            type(t.Channels) ~= "table" or
             type(t.Channels.Channel) ~= "table" then
-            
+
             print("get_scheduling got bad data")
             return
         end
@@ -169,6 +169,6 @@ function start_launcher(the_service, start_item)
         epg_menu:load_scheduling()
     dolater(function()
         epg_menu:grab_key_focus()
-        
+
     end)--]=]
 end

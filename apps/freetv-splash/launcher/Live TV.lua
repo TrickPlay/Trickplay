@@ -330,14 +330,14 @@ do
             text = "description",
         }
         g.start_time = Text{
-            y=-80,
+            y=-100,
             w=text_w,
             color = blue_color,
             font = FONT_NAME.." Bold 24px",
             text = "start_time",
         }
         g.duration = Text{
-            y=-80,
+            y=-100,
             x= 150,
             w=text_w,
             color = "white",
@@ -362,7 +362,7 @@ do
 
         g.next_airings = Group{
             x= 900,
-            y= g.description.y,
+            y= g.description.y-20,
             children={
                 Text{
                     color = "white",
@@ -373,7 +373,7 @@ do
         }
         g.related = Text{
             x= 1050,
-            y= g.description.y,
+            y= g.next_airings.y,
             text = "Related",
             color = "white",
             font = FONT_NAME.."  20px",
@@ -415,11 +415,18 @@ do
                 get_sprite(show.cast)   or
                 get_sprite(show.logo)   or
                 ""
+            if show.show_description == json_null then
+                dumptable(show)
+            end
             --print(show.show_name,id,show.banner,show.cast,show.logo)
             g.image[id == "" and "hide" or "show"](g.image)
             g.image.id = id
             g.description_group.x = id ~= "" and (g.image.w+30) or 0
-            g.next_airings.x = g.description_group.x + text_w+300
+            --g.next_airings.x = g.description_group.x + text_w+300
+
+            g.next_airings.x =
+                show.show_description ~= json_null and
+                g.description_group.x + text_w+300 or g.description_group.x
             g.related.x = g.next_airings.x+150
             g.image.anchor_point = {0,g.image.h/2}
             g.image.y = -200
@@ -448,6 +455,18 @@ do
             g.start_time.text =
                 (show.start_time ~= json_null) and
                 ampm(show.start_time_t.hour,show.start_time_t.min) or ""
+                --[[
+            g.slogan.y =
+                show.show_description ~= json_null and
+                -375 or g.next_airings.y
+                --]]
+--[[
+            g.start_time.y =
+                show.show_description ~= json_null and
+                -100 or g.description.y
+            g.duration.y = g.start_time.y
+            g.aired_on.y = g.start_time.y + 50
+            --]]
             ---[[
             if show.series_id and series[show.series_id] and #series[show.series_id] > 1 then
                 --print("num in series",#series[show.series_id])
@@ -479,6 +498,7 @@ do
                 end
             else
                 g.next_airings.text = ""
+                g.related.x = g.next_airings.x
             end
             --]]
         end
