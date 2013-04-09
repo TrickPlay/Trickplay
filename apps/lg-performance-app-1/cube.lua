@@ -390,14 +390,30 @@ function cube:rotate(outgoing,incoming,direction)
         incoming:raise_to_top()
     end
     function tl.on_completed()
-        animating = false
+
 
         curr_r = incoming
         next_r = outgoing
         outgoing:unparent()
 
-        --repeat if RED was pressed
-        return again and cube:rotate(curr_r,next_r,direction)
+            --repeat if RED was pressed
+            if again then
+                if cube_delay and cube_delay > 0 then
+                    dolater(cube_delay,function()
+                        animating = false
+                        if again then
+                            cube:rotate(curr_r,next_r,direction)
+                        end
+                    end)
+                else
+                    animating = false
+                    cube:rotate(curr_r,next_r,direction)
+                end
+            else
+                animating = false
+            end
+            --return again and cube:rotate(curr_r,next_r,direction)
+
     end
     rotate_animation:start()
 end

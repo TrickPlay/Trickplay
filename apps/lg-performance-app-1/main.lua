@@ -1,3 +1,8 @@
+modal_menu_delay =  45
+cube_delay       = 120
+deletion_delay   =  37
+slide_delay      =  60
+
 
 screen:show()
 screen_w = screen.w
@@ -120,15 +125,15 @@ btm_row_tab:add(btm_row_backing,btm_row_backing_text)
 -- Create the my apps grid
 local my_apps_items = {
     {
-        {text="Input List",    src="icon-input-list.png"},
-        {text="Settings",      src="icon-settings.png"},
-        {text="Internet",      src="icon-internet.png"},
-        {text="Search",        src="icon-search.png"},
-        {text="Now & Hot",     src="icon-now-hot.png"},
-        {text="CNN",           src="icon-cnn.png"},
-        {text="Cinema Now",    src="icon-cinema-now.png"},
-        {text="AP",            src="icon-ap.png"},
-        {text="User Guide",    src="icon-user-guide.png"},
+        {text="Air Combat",    src="icon-aircombat-trickplay.png", app="com.trickplay.air-combat"},
+        {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
+        {text="Zombie",        src="icon-zombie-trickplay.png",    app="com.trickplay.zombie-blaster"},
+        {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
+        {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
+        {text="Dawn",          src="icon-liberty-global.png",      app="com.lgi.dawn-ui"},
+        {text="App Shop",      src="icon-apps-trickplay.png",      app="com.trickplay.app-shop"},
+        {text="On Demand",     src="icon-vod-trickplay.png"},
+        {text="Penguins",      src="icon-penguin.png",             app="com.trickplay.penguins"},
         {text="Ch. List",      src="icon-ch-list.png"},
     },
     {
@@ -301,13 +306,30 @@ cube.key_events[keys.Down] = function()
         }
     }
     function a.timeline.on_completed()
-        my_apps_to_cube_animating = false
 
+--[[
         --if repeating, then fire off the reciprocal animation
         if my_apps_to_cube_repeat then
             grid.key_events[keys.BACK]()
         --give the key focus to the 'My Apps' screen
         else
+            grid:grab_key_focus()
+        end
+--]]
+        if my_apps_to_cube_repeat then
+            if slide_delay and slide_delay > 0 then
+                dolater(slide_delay,function()
+                    my_apps_to_cube_animating = false
+                    if my_apps_to_cube_repeat then
+                        grid.key_events[keys.BACK]()
+                    end
+                end)
+            else
+                my_apps_to_cube_animating = false
+                grid.key_events[keys.BACK]()
+            end
+        else
+            my_apps_to_cube_animating = false
             grid:grab_key_focus()
         end
     end
@@ -397,6 +419,7 @@ grid.key_events[keys.BACK] = function()
         }
     }
     function a.timeline.on_completed()
+        --[[
         my_apps_to_cube_animating = false
 
         --if repeating, then fire off the reciprocal animation
@@ -404,6 +427,24 @@ grid.key_events[keys.BACK] = function()
             cube.key_events[keys.Down]()
         --give the key focus to the 'My Apps' screen
         else
+            my_apps_top:unparent()
+            cube:grab_key_focus()
+        end
+        --]]
+        if my_apps_to_cube_repeat then
+            if slide_delay and slide_delay > 0 then
+                dolater(slide_delay,function()
+                    my_apps_to_cube_animating = false
+                    if my_apps_to_cube_repeat then
+                        cube.key_events[keys.Down]()
+                    end
+                end)
+            else
+                my_apps_to_cube_animating = false
+                cube.key_events[keys.Down]()
+            end
+        else
+            my_apps_to_cube_animating = false
             my_apps_top:unparent()
             cube:grab_key_focus()
         end
