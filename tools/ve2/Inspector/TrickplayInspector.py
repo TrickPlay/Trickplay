@@ -744,15 +744,13 @@ class TrickplayInspector(QWidget):
         
         source_button = None
 
+        boolCheckBox = {}
+        boolNumber = {}
+        boolHandlers = {}
 
-        # 
-        # Tab Property Filling 
-        #
-        numSpinBox = {}
-        numNumber = {}
-        numHandlers = {}
 
         if data['type'] == "Tab" :
+            #for p in ['gid', 'name', 'type', 'index', 'label', 'neighbors']:
             for p in ['gid', 'name', 'type', 'index', 'label']:
                 if p != 'neighbors':
                     i = QTreeWidgetItem() 
@@ -767,46 +765,6 @@ class TrickplayInspector(QWidget):
             self.ui.property.addTopLevelItems(items)
             return 
             
-        def numPropertyFill(propName, propOrder, data, gid=None) :
-            def makeNumberHandler(gid, prop_name):
-                def handler(value):
-                    if not self.preventChanges:
-                        self.preventChanges = True
-                        self.sendData(gid, prop_name, value)
-                    self.preventChanges = False
-                return handler
-    
-            num_spinbox = QSpinBox()
-            num_spinbox.setMaximum(1000)
-            num_spinbox.setButtonSymbols(QAbstractSpinBox.PlusMinus)
-            if type(propName) == list:
-                numValue = str(data[propName[0]])
-            else:
-                try:
-                    numValue = str(data[propName]) 
-                    gid = str(data["gid"])
-                except:
-                    numValue = str(data) 
-
-            num_spinbox.setValue(int(numValue))
-    
-            if type(propName) == list:
-                strPropName = ' '.join(propName)
-                numSpinBox[strPropName] = num_spinbox
-                numNumber[strPropName] = propOrder
-                numHandlers[strPropName] = makeNumberHandler(gid, propName)
-                num_spinbox.stateChanged.connect(numHandlers[strPropName])
-            else :
-                numSpinBox[propName] = num_spinbox
-                numNumber[propName] = propOrder
-                numHandlers[propName] = makeNumberHandler(gid, propName)
-                num_spinbox.valueChanged.connect(numHandlers[propName])
-
-        boolCheckBox = {}
-        boolNumber = {}
-        boolHandlers = {}
-
-
         def boolPropertyFill(propName, propOrder, data, gid=None) :
             def makeBoolHandler(gid, prop_name):
                 def handler(state):
@@ -859,10 +817,11 @@ class TrickplayInspector(QWidget):
                 def handler():
                     if not self.preventChanges:
                         self.preventChanges = True
-                        #db = QFontDatabase()
-                        #db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
-                        #for family in db.families():
-                            #print family, "***"
+                        db = QFontDatabase()
+                        db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
+                        for family in db.families():
+                            print family, "***"
+                            
 
                         fontDialog = QFontDialog()
                         fontDialog.setCurrentFont(defaultFont)
@@ -1079,7 +1038,7 @@ class TrickplayInspector(QWidget):
             if str(data["type"]) in NO_STYLE_WIDGET and p == "style" :
                 pass
 
-            elif p is 'gid': # gid is created, but it will be hidden later 
+            elif p is 'gid': 
                 i = QTreeWidgetItem() 
                 i.setText (0, p)  # first col : property name
                 i.setText (1, str(data[p])) # second col : property value (text input field) 
@@ -1087,30 +1046,25 @@ class TrickplayInspector(QWidget):
                 n = n + 1
                 gidItem  = i
 
-            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") : 
-                
-                #
+            elif data.has_key(p) == True and not (p == "items" and data["type"] == "MenuButton") : # and p is not 'gid': 
                 # Text Inputs
-                #
-                
-                # First Col : property name
 
                 i = QTreeWidgetItem() 
+                #i.setText (0, p)  # first col : property name
+                i.setWhatsThis(0, p)  # first col : property name
                 if PROP_S_LIST.has_key(p):
                     i.setText(0, PROP_S_LIST[p])
                 else:
-                    i.setText (0, p)  
+                    i.setText (0, p)  # first col : property name
+                
+                #i.setText (0, p[:1].upper()+p[1:])
 
                 #if p in TEXT_PROP or p in READ_ONLY or p in COMBOBOX_PROP :
                 if p in TEXT_PROP or p in READ_ONLY :
                     if p == "scale":
                         i.setText (1, str(data[p][:2])) # second col : property value (text input field) 
                     else:
-                        if  str(data[p]).replace('-','',1).replace('.','',1).isdigit() :
-                            numPropertyFill(p, n, data) 
-                            #i.setText (1, str(data[p])) # second col : property value (text input field) 
-                        else :
-                            i.setText (1, str(data[p])) # second col : property value (text input field) 
+                        i.setText (1, str(data[p])) # second col : property value (text input field) 
                         
                     if not  p in READ_ONLY and self.editable is True and not p in NESTED_PROP_LIST:
                         i.setFlags(i.flags() ^Qt.ItemIsEditable)
@@ -1227,10 +1181,6 @@ class TrickplayInspector(QWidget):
                 elif p in COMBOBOX_PROP: 
                     comboPropertyFill(p, n, data) 
 
-                # 
-                # Nested Property Filling 
-                # 
-
                 if p in NESTED_PROP_LIST and not ( p == "text" and  data['type'] == "TextInput" ): 
                     z = data[p]
                     if p == "items" and data["type"] == "ButtonPicker":
@@ -1247,13 +1197,7 @@ class TrickplayInspector(QWidget):
                                 j.setText (0, sp)  # first col : property name
                             #kkk
                             #j.setText (0, sp[:1].upper()+sp[1:])
-                            if  str(z[idx]).replace('-','',1).replace('.','',1).isdigit() :
-                                print(sp, "numFill ?????????????????")
-                                numPropertyFill(sp, n, str(z[idx]), str(data['gid']))
-                                #boolPropertyFill(colNames, colNums, q, (data['gid'])) 
-                                #j.setText (1, str(z[idx]))
-                            else:
-                                j.setText (1, str(z[idx]))
+                            j.setText (1, str(z[idx]))
                             #if p ~= "base_size": #read_only r: 'color
                             if not p in READ_ONLY and self.editable is True :
                                 j.setFlags(j.flags() ^Qt.ItemIsEditable)
@@ -1320,12 +1264,7 @@ class TrickplayInspector(QWidget):
                                                 colNames = [sssp, ssp, sp, 'style']
                                                 colorPropertyFill(colNames, colNums, r, (data['gid'])) 
                                             else:
-                                                if  str(r[sssp]).replace('-','',1).replace('.','',1).isdigit() :
-                                                    print(sssp, "numFill !!!")
-                                                    numPropertyFill(sssp, n, data)
-                                                    #m.setText(1,str(r[sssp]))
-                                                else:
-                                                    m.setText(1,str(r[sssp]))
+                                                m.setText(1,str(r[sssp]))
                                                 if self.editable == True:
                                                     m.setFlags(k.flags() ^Qt.ItemIsEditable)
                                             c3 = c3 + 1
@@ -1348,12 +1287,7 @@ class TrickplayInspector(QWidget):
                                         elif ssp in ['justify', 'wrap']:
                                             boolPropertyFill(colNames, colNums, q, (data['gid'])) 
                                         else:
-                                            if  str(q[ssp]).replace('-','',1).replace('.','',1).isdigit() :
-                                                print(ssp, "numFill !!!")
-                                                numPropertyFill(ssp, n, data)
-                                                #l.setText(1,str(q[ssp]))
-                                            else:
-                                                l.setText(1,str(q[ssp]))
+                                            l.setText(1,str(q[ssp]))
                                             if self.editable == True:
                                                 l.setFlags(l.flags() ^Qt.ItemIsEditable)
                                     c2 = c2 + 1 
@@ -1361,13 +1295,14 @@ class TrickplayInspector(QWidget):
                             except:
                                 pass
  
+
                 items.append(i)
                 n = n + 1
 
         self.ui.property.addTopLevelItems(items)
         self.ui.property.setItemHidden(gidItem, True)
 
-        # Property Style Setting 
+        #if self.neighbors :
 
         if neighbors_n > 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(neighbors_n), 1, self.neighbors)
@@ -1417,18 +1352,6 @@ class TrickplayInspector(QWidget):
                         except : 
                             pass
                 
-        if numSpinBox :
-            for n, b in numSpinBox.iteritems() :
-                if type(numNumber[n]) is not list :
-                    self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(numNumber[n])), 1, b)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(numNumber[n])),1).setStyleSheet("QSpinBox{padding-top:-1px;padding-bottom:-1px;font-size:12px;}")
-                else:
-                    if len(numNumber[n]) < 4:
-                        try:
-                            self.ui.property.setItemWidget(self.ui.property.topLevelItem(numNumber[n][0]).child(numNumber[n][1]).child(numNumber[n][2]), 1, b)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(numNumber[n][0]).child(numNumber[n][1]).child(numNumber[n][2]),1).setStyleSheet("QSpinBox{padding-top: -1px;padding-bottom:-1px;font-size:12px;}")
-                        except:
-                            pass
         if boolCheckBox :
             for n, b in boolCheckBox.iteritems() :
                 if type(boolNumber[n]) is not list :
