@@ -10,6 +10,7 @@ group.level = levels.this.id
 fx = {}
 
 evFrame[fx] = function(self,d,ms)
+--[[
 	dt = d/2300/2
 	s = 1+dt*6
 	d2 = 4^(d/1000)
@@ -45,17 +46,21 @@ evFrame[fx] = function(self,d,ms)
     		end
         end
 	end
+]]--
 end
 
 local init = function(obj)
+--[[
 	obj = obj or penguin
 	isbank = levels.this.bank > 0 and 1 or 0
 	px, py = obj.x + obj.w/2, obj.y + obj.h/2
 	group:lower(penguin)
 	c = floor(group.count/4)
+]]--
 end
 
 fx.splash = function()
+--[[
 	init()
 	j = Sprite{src = "splash-3.png", x = px, y = ground[row]+120,
 			  anchor_point = {64,120}, scale = {0.5,0.2}, opacity = 255}
@@ -70,10 +75,11 @@ fx.splash = function()
 		j.scale = {d,d}
 		group:add(j)
 	end
+]]--
 end
 
 fx.smash = function(block)
-	if block.level ~= group.level then return end
+--[[	if block.level ~= group.level then return end
 	init(block)
 	for i=1+floor(c/3),rand(5,8) do
 		j = Sprite{src = chunks[rand(4)], opacity = 255, x = px+nrand(50),
@@ -83,9 +89,11 @@ fx.smash = function(block)
 		j.vx, j.vy, j.vz, j.vo = (j.x-px)/160, (j.y-py)/160-0.25, nrand(0.5), -0.2
 		group:add(j)
 	end
+]]
 end
 
 fx.flakes = function(num)
+--[[
 	init()
 	num = num and num-c or 1
 	if num == 1 and rand(6) < c then return end
@@ -99,9 +107,11 @@ fx.flakes = function(num)
 		--Class:dump(j)
 		group:add(j)
 	end
+]]--
 end
 
 fx.explode = function(num)
+--[[
 	fx.flakes(num or rand(12,15))
 	group:raise(penguin)
 	j = Sprite{src = "explode-128.png", x = px, y = py-20*isbank,
@@ -109,4 +119,5 @@ fx.explode = function(num)
 	j.vx, j.vy, j.vo = 0, -0.06*isbank, -0.32
 	--Class:dump(j)
 	group:add(j)
+]]--
 end
