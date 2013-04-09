@@ -453,57 +453,57 @@ local function make_poster(item)
 
     local title_grp = Group { w = img.w }
     local title  = Text {
-        font = FONT_NAME.." 36px",
+        font = FONT_NAME.." 38px",
         color = "white",
         text = item.name,
-        x = 3, y = 1,
+        x = 6, y = 1,
         scale = { 1/2.5, 1/2.5 },
         ellipsize = "END",
-        w =  img.w*2.5,
+        w =  img.w*2.5-6,
     }
     local title_scrim = Rectangle {
         color = grey,
         w = img.w + 4,
-        h = (title.h/2.5) + 2
+        h = (title.h/2.5) + 9
     }
     title_grp:add(title_scrim, title)
     title_grp.w = img.w
-    title_grp.y = -title_scrim.h
-    title_grp.clip_to_size = true
+    title_grp.y = -title_scrim.h+5
+    --title_grp.clip_to_size = true
 
     poster:add(title_grp)
 
     poster.anchor_point = { poster.w/2, poster.h }
     --poster.y_rotation = { 0, poster.w/2, 0 }
     poster.extra.anim = AnimationState {
-                                                    duration = duration,
-                                                    mode = mode,
-                                                    transitions = {
-                                                        {
-                                                            source = "*",
-                                                            target = "focus",
-                                                            keys = {
-                                                                { poster, "opacity", 255 },
-                                                                --{ poster, "y_rotation", 0 },
-                                                                { title_grp, "opacity", 255 },
-                                                                { poster, "scale", { 2.5, 2.5 } },
-                                                            },
-                                                        },
-                                                        {
-                                                            source = "*",
-                                                            target = "unfocus",
-                                                            keys = {
-                                                                { poster, "opacity", 64 },
-                                                                --{ poster, "y_rotation", -15 },
-                                                                { title_grp, "opacity", 0 },
-                                                                { poster, "scale", { 1, 1 } },
-                                                            },
-                                                        },
-                                                    },
+                                        duration = duration,
+                                        mode = mode,
+                                        transitions = {
+                                            {
+                                                source = "*",
+                                                target = "focus",
+                                                keys = {
+                                                    { poster, "opacity", 255 },
+                                                    --{ poster, "y_rotation", 0 },
+                                                    { title_grp, "opacity", 255 },
+                                                    { poster, "scale", { 2.5, 2.5 } },
+                                                },
+                                            },
+                                            {
+                                                source = "*",
+                                                target = "unfocus",
+                                                keys = {
+                                                    { poster, "opacity", 64 },
+                                                    --{ poster, "y_rotation", -15 },
+                                                    { title_grp, "opacity", 0 },
+                                                    { poster, "scale", { 1, 1 } },
+                                                },
+                                            },
+                                        },
     }
 
     poster.extra.focus = function(self,x)
-        title_grp.clip_to_size = false
+        --title_grp.clip_to_size = false
         self.anim.state = "focus"
         if x then
             poster:stop_animation()
@@ -516,7 +516,7 @@ local function make_poster(item)
     end
 
     poster.extra.unfocus = function(self,x)
-        title_grp.clip_to_size = true
+        --title_grp.clip_to_size = true
         self.anim.state = "unfocus"
         if x then
             poster:stop_animation()
@@ -631,7 +631,7 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
     --local channel_num = Text { color = "grey35", text = ""..channel_num, font = FONT_NAME.." 192px" }
     local label = Text { color = "white", text = data.label, font = FONT_NAME.." 40px" }
     label.anchor_point = { 0, label.h/2 }
-    label.position = { logo.x + logo.w + 15, bar_height/2 }
+    label.position = { logo.x + logo.w - 80, bar_height/2 }
     --channel_num.x = 15
     --channel_num.y = -48
 
@@ -785,7 +785,7 @@ do
     }
     local i = 1
     for i,v in ipairs(buttons) do
-        local w = 250
+        local w = 210
         local focused = Clone{w=w,source = channel_bar_focus}
         local unfocused = Clone{w=w,source = channel_bar}
         local label  = Text{
