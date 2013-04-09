@@ -227,14 +227,14 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             if #entries < 3 then
                 local new_rows = {
                     {
-                        {text="Google Earth",  src="icon-google-earth.png"},
-                        {text="Forky",         src="icon-forky.png"},
-                        {text="LG Smart",      src="icon-lg-smart.png"},
-                        {text="3D World",      src="icon-3d-on.png"},
-                        {text="Nat Geo",       src="icon-national-geo.png"},
-                        {text="Gystle",        src="icon-gystle.png"},
-                        {text="Netflix",       src="icon-netflix.png"},
-                        {text="NHL",           src="icon-nhl.png"},
+                        {text="Air Combat",    src="icon-aircombat-trickplay.png", app="com.trickplay.air-combat"},
+                        {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
+                        {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
+                        {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
+                        {text="Dawn",          src="icon-liberty-global.png",      app="com.lgi.dawn-ui"},
+                        {text="App Shop",      src="icon-apps-trickplay.png",      app="com.trickplay.app-shop"},
+                        {text="On Demand",     src="icon-vod-trickplay.png",       app="com.trickplay.jyp"},
+                        {text="Penguins",      src="icon-penguin.png",             app="com.trickplay.penguins"},
                         {text="O2",            src="icon-o2.png"},
                         {text="Simplelink",    src="icon-simple-link.png"},
                     },
@@ -334,23 +334,24 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             print(apps,entries[sel_r][sel_c].app)
             if apps and entries[sel_r][sel_c].app then
                 apps:launch(entries[sel_r][sel_c].app)
-            end
-            --if there more than one left
-            if entries[1][2] then
-                instance:delete(sel_r,sel_c)
-                --if you are deleting to icon at the very end,
-                --then move the highlight to the next one
-                if sel_r == #entries and sel_c == #entries[#entries] then
-                    --if the last icon is in the leftmost column
-                    if  sel_c == 1 then
-                        --then the highlight needs to wrap around to
-                        --the rightmost columns
-                        sel_r = sel_r-1
-                        sel_c = #entries[sel_r-1]
-                    else
-                        sel_c = sel_c - 1
+            else
+                --if there more than one left
+                if entries[1][2] then
+                    instance:delete(sel_r,sel_c)
+                    --if you are deleting to icon at the very end,
+                    --then move the highlight to the next one
+                    if sel_r == #entries and sel_c == #entries[#entries] then
+                        --if the last icon is in the leftmost column
+                        if  sel_c == 1 then
+                            --then the highlight needs to wrap around to
+                            --the rightmost columns
+                            sel_r = sel_r-1
+                            sel_c = #entries[sel_r-1]
+                        else
+                            sel_c = sel_c - 1
+                        end
+                        move_hl()
                     end
-                    move_hl()
                 end
             end
         end,

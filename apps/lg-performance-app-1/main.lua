@@ -127,14 +127,14 @@ local my_apps_items = {
     {
         {text="Air Combat",    src="icon-aircombat-trickplay.png", app="com.trickplay.air-combat"},
         {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
-        {text="Zombie",        src="icon-zombie-trickplay.png",    app="com.trickplay.zombie-blaster"},
         {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
         {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
         {text="Dawn",          src="icon-liberty-global.png",      app="com.lgi.dawn-ui"},
         {text="App Shop",      src="icon-apps-trickplay.png",      app="com.trickplay.app-shop"},
-        {text="On Demand",     src="icon-vod-trickplay.png"},
+        {text="On Demand",     src="icon-vod-trickplay.png",       app="com.trickplay.jyp"},
         {text="Penguins",      src="icon-penguin.png",             app="com.trickplay.penguins"},
         {text="Ch. List",      src="icon-ch-list.png"},
+        {text="Easy Map",      src="icon-lg-easy-map.png"},
     },
     {
         {text="Google Earth",  src="icon-google-earth.png"},
