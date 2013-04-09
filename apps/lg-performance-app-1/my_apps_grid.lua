@@ -4,6 +4,8 @@
 local function make_icon(item)
     local instance = Group()
 
+    instance.app = item.app
+
     local s = Sprite{sheet = assets,id=item.src}
 
     local t   = Text{
@@ -268,11 +270,20 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                 end
             end
             -----------------------------------------------------------
-            deleting = false
+            --deleting = false
 
             if again then
-                instance:delete(d_r,d_c)
-
+                if deletion_delay and deletion_delay > 0 then
+                    dolater(deletion_delay,function()
+                        deleting = false
+                        instance:delete(d_r,d_c)
+                    end)
+                else
+                    deleting = false
+                    instance:delete(d_r,d_c)
+                end
+            else
+                deleting = false
             end
         end
 
@@ -320,8 +331,10 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     local key_events = {
         --delete the selected icon
         [keys.OK] = function()
-
-            --if apps then apps:launch("com.lgi.dawn-ui") end
+            print(apps,entries[sel_r][sel_c].app)
+            if apps and entries[sel_r][sel_c].app then
+                apps:launch(entries[sel_r][sel_c].app)
+            end
             --if there more than one left
             if entries[1][2] then
                 instance:delete(sel_r,sel_c)
