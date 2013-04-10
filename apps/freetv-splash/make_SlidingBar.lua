@@ -14,17 +14,31 @@ make_sliding_bar__expanded_focus    = function(p)
     local entries = {}
     local curr_index = 2
 
+    local clip_group_outter = Group { name = "clip_outter" }
+    instance:add(clip_group_outter)
+    local clip_group = Group { name = "clip_inner" }
+    clip_group_outter:add(clip_group)
+
+    local entries_group = Group { name = "entries" }
+    clip_group:add(entries_group)
+
     local function focus(number, t)
         instance:stop_animation()
         local entry = entries[number]
         entry:raise_to_top()
         entry:focus(sel_x(number))
         local mode = "EASE_IN_OUT_SINE"
-        instance:animate({ duration = t, mode = mode, x = 400 - sel_x(number) })
+        clip_group_outter:animate{
+            duration = t,
+            mode = mode,
+            x = 400 - sel_x(number)
+        }
     end
 
     local function unfocus(number,direction)
-        entries[number]:unfocus(direction==1 and pre_x(number) or post_x(number))
+        entries[number]:unfocus(
+            direction==1 and pre_x(number) or post_x(number)
+        )
     end
 
     local function transfer_focus(direction,dur)
@@ -36,7 +50,7 @@ make_sliding_bar__expanded_focus    = function(p)
             for i,entry in ipairs(entries) do
                 entry.x = entry.x - 2*p.unsel_offset--(post_x(1) - pre_x(1))
             end
-            instance.x = instance.x + 2*p.unsel_offset--(post_x(1) - pre_x(1))
+            clip_group_outter.x = clip_group_outter.x + 2*p.unsel_offset--(post_x(1) - pre_x(1))
 
             unfocus(curr_index,1)
         elseif curr_index == n and direction == 1 then
@@ -44,7 +58,7 @@ make_sliding_bar__expanded_focus    = function(p)
             for i,entry in ipairs(entries) do
                 entry.x = entry.x + 2*p.unsel_offset--(post_x(1) - pre_x(1))
             end
-            instance.x = instance.x - 2*p.unsel_offset--(post_x(1) - pre_x(1))
+            clip_group_outter.x = clip_group_outter.x - 2*p.unsel_offset--(post_x(1) - pre_x(1))
 
             unfocus(curr_index,-1)
         else
@@ -65,7 +79,7 @@ make_sliding_bar__expanded_focus    = function(p)
         for k,v in pairs(p.items) do
             table.insert(entries,p.make_item(v))
         end
-        instance:add(unpack(entries))
+        entries_group:add(unpack(entries))
         for i,v in ipairs(entries) do
             v.x = (
                 i == curr_index and sel_x or
@@ -73,6 +87,13 @@ make_sliding_bar__expanded_focus    = function(p)
                 i >  curr_index and post_x)(i)
         end
 
+---[[
+    clip_group_outter.clip = {
+        -205, 0,
+        205+entries[#entries].x+entries[#entries].w,
+        entries_group.h
+    }
+--]]
 
         focus(curr_index,10)
     function instance:press_left()
@@ -102,6 +123,21 @@ make_sliding_bar__expanded_focus    = function(p)
             opacity  = 255,
             on_completed = f,
         }
+    end
+    function instance:anim_in()
+        clip_group:stop_animation()
+        instance:show()
+        clip_group:animate({
+            duration = 250, y = 0, mode = "EASE_OUT_SINE"
+            })
+    end
+    function instance:anim_out()
+        clip_group:stop_animation()
+        clip_group:animate({
+            duration = 250, y = clip_group.h,
+            mode = "EASE_OUT_SINE",
+            on_completed = function() instance:hide() end
+            })
     end
 
 
