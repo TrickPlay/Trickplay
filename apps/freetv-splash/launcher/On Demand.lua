@@ -13,7 +13,7 @@ end
 
 local default_vod_info = {
     title       = "Hugo Cabret",
-    description = lorem_ipsum,
+    description = lorem_ipsum_longer,
     year        = "(2011)",
     rating      = "PG",
     run_time    = "126 min",
@@ -60,7 +60,7 @@ do
     function backing.extra.anim.timeline.on_started()
         if backing.extra.anim.state ~= "full" then
             print("shit")
-            set_incoming_show(empty_vod_info,"right")
+            --set_incoming_show(empty_vod_info,"right")
             hide_current_show()
         end
     end
@@ -264,7 +264,7 @@ do
         displaying_show:animate{
             duration=200,
             opacity=0,
-            --y=displaying_show.y+500,
+            y=displaying_show.y+500,
             on_completed = function()
                 displaying_show.y = displaying_show.y -500
             end
@@ -441,65 +441,70 @@ local movies =
 	},
 }
 
-
+local   sel_scale = 2.5
+local unsel_scale = 1
 local function make_poster(item)
     local grey = "444444"
     local duration = 250
     local mode = "EASE_OUT_SINE"
-    local poster = Group {}
-    local img = Image { src = "assets/movie_posters/"..item.poster, x = 2, y = 2 }
+    local poster  = Group()
+    local inner_g = Group()
+    local img = Image { src = "assets/movie_posters/"..item.poster, x = 2 }
     local img_scrim = Rectangle { color = grey, w = img.w + 4, h = img.h + 4 }
-    poster:add(img_scrim, img)
 
     local title_grp = Group { w = img.w }
-    local title  = Text {
-        font = FONT_NAME.." 38px",
-        color = "white",
-        text = item.name,
-        x = 6, y = 1,
-        scale = { 1/2.5, 1/2.5 },
+    local title   = Text {
+        font      = FONT_NAME.." 38px",
+        color     = "white",
+        text      = item.name,
+        x         = 6,
+        y         = 1,
+        scale     = { 1/sel_scale, 1/sel_scale },
         ellipsize = "END",
-        w =  img.w*2.5-6,
+        w         =  img.w*sel_scale-6,
     }
     local title_scrim = Rectangle {
         color = grey,
         w = img.w + 4,
-        h = (title.h/2.5) + 9
+        h = (title.h/sel_scale)+4
     }
     title_grp:add(title_scrim, title)
     title_grp.w = img.w
-    title_grp.y = -title_scrim.h+5
+    img_scrim.y = title_scrim.h-1
+    img.y = img_scrim.y+2
     --title_grp.clip_to_size = true
+    inner_g:add(img_scrim, img,title_grp)
+    poster:add(inner_g)
+    inner_g.position     = { inner_g.w/2*sel_scale, inner_g.h*sel_scale}
+    inner_g.anchor_point = { inner_g.w/2, inner_g.h}
 
-    poster:add(title_grp)
-
-    poster.anchor_point = { poster.w/2, poster.h }
+    --poster.anchor_point = { poster.w/2, poster.h }
     --poster.y_rotation = { 0, poster.w/2, 0 }
     poster.extra.anim = AnimationState {
-                                        duration = duration,
-                                        mode = mode,
-                                        transitions = {
-                                            {
-                                                source = "*",
-                                                target = "focus",
-                                                keys = {
-                                                    { poster, "opacity", 255 },
-                                                    --{ poster, "y_rotation", 0 },
-                                                    { title_grp, "opacity", 255 },
-                                                    { poster, "scale", { 2.5, 2.5 } },
-                                                },
-                                            },
-                                            {
-                                                source = "*",
-                                                target = "unfocus",
-                                                keys = {
-                                                    { poster, "opacity", 64 },
-                                                    --{ poster, "y_rotation", -15 },
-                                                    { title_grp, "opacity", 0 },
-                                                    { poster, "scale", { 1, 1 } },
-                                                },
-                                            },
-                                        },
+                        duration = duration,
+                        mode = mode,
+                        transitions = {
+                            {
+                                source = "*",
+                                target = "focus",
+                                keys = {
+                                    { poster, "opacity", 255 },
+                                    --{ poster, "y_rotation", 0 },
+                                    { title_grp, "opacity", 255 },
+                                    { inner_g, "scale", { sel_scale, sel_scale } },
+                                },
+                            },
+                            {
+                                source = "*",
+                                target = "unfocus",
+                                keys = {
+                                    { poster, "opacity", 64 },
+                                    --{ poster, "y_rotation", -15 },
+                                    { title_grp, "opacity", 0 },
+                                    { inner_g, "scale", { unsel_scale, unsel_scale } },
+                                },
+                            },
+                        },
     }
 
     poster.extra.focus = function(self,x)
@@ -726,7 +731,7 @@ clone_src:add(
 local ppv_menu = Group()
 do
     local button_group = Group{name="Buttons",x=700,y=550}
-    local poster = Clone{w=184*2.5,h=(244)*2.5,y=160,x=170}
+    local poster = Clone{y=105,x=200}
     local right_side = Group()
     local buttons = {
         "Free\nPreview",
@@ -1025,6 +1030,7 @@ menubar       = make_sliding_bar__highlighted_focus{
                     self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
+                    self:curr().sub_menu:anim_out()
                     return true
                 end,
                 press_ok = function(self)
@@ -1049,8 +1055,10 @@ menubar       = make_sliding_bar__highlighted_focus{
     press_up = function(self)
         --print(self,curr_menu)
         screen:add(self:curr().sub_menu)
-        self:curr().sub_menu:show()
-        self:curr().sub_menu.y = 770
+        self:curr().sub_menu:hide()
+        self:curr().sub_menu.x = -200
+        self:curr().sub_menu.y = 105
+        self:curr().sub_menu:anim_in()
         curr_menu = self:curr().sub_menu
         backing.anim.state = "full"
         return true

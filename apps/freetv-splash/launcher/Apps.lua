@@ -29,34 +29,39 @@ local function make_icon(v)
     end
     i.size = {icon_w,icon_h}
     local g = Group()
+    local inner_g = Group()
     local title_grp = Group()
+    local r = Rectangle{
+        w=i.w,
+        h=62,--t.h+padding,
+        color="444444",
+        --opacity = 200
+    }
     local t = Text{
-        x=padding/2,
-        y=padding/2,
+        x= 12,
+        y=r.h/2-1,--padding/2,
         w=i.w-padding,
         ellipsize = "END",
         color = "white",
         text=v.name,
-        font = FONT_NAME.." 24px"
+        font = FONT_NAME.." 34px"
     }
-    local r = Rectangle{
-        w=i.w,
-        h=t.h+padding,
-        color="black",
-        --opacity = 200
-    }
+    t.anchor_point={0,t.h/2}
     local duration = 250
     local mode     = "EASE_OUT_SINE"
     g.slogan = v.long_name or v.name
     g.description = v.description or lorem_ipsum
     g.name = v.id
-    g:add(i,title_grp)
+    inner_g:add(i,title_grp)
+    g:add(inner_g)
     title_grp:add(r,t)
+    --title_grp.y = -r.h
+    i.y = r.h
 
 
-    g.position     = {     0, g.h/2*3/4 }
-    g.anchor_point = { g.w/2, g.h   }
-    g.y_rotation = { 0, g.w/2, 0 }
+    inner_g.position     = { inner_g.w/2*sel_scale, inner_g.h*sel_scale}
+    inner_g.anchor_point = { inner_g.w/2, inner_g.h}
+    --g.y_rotation = { 0, g.w/2, 0 }
     local anim = AnimationState {
         duration = duration,
         mode = mode,
@@ -66,7 +71,7 @@ local function make_icon(v)
                 target = "focus",
                 keys = {
                     { title_grp, "opacity", 255 },
-                    { g, "scale", { sel_scale, sel_scale } },
+                    { inner_g, "scale", { sel_scale, sel_scale } },
                 },
             },
             {
@@ -74,7 +79,7 @@ local function make_icon(v)
                 target = "unfocus",
                 keys = {
                     { title_grp, "opacity", 0 },
-                    { g, "scale", { unsel_scale, unsel_scale } },
+                    { inner_g, "scale", { unsel_scale, unsel_scale } },
                 },
             },
         },
@@ -133,7 +138,7 @@ local menubar = make_sliding_bar__expanded_focus{
     items = app_list,
     make_item = make_icon,
     unsel_offset = icon_w*(sel_scale-unsel_scale)/2,
-    spacing = 10+icon_w*unsel_scale,
+    spacing = 30+icon_w*unsel_scale,
 }
 local app_offset = -icon_w*.25
 local active_app = 2
@@ -159,18 +164,10 @@ do
                                                         },
                                                         {
                                                             source = "*",
-                                                            target = "half",
-                                                            keys = {
-                                                                { r, "y", hidden_y - (icon_h+20) },
-                                                                { r, "h",            (icon_h+20) },
-                                                            },
-                                                        },
-                                                        {
-                                                            source = "*",
                                                             target = "full",
                                                             keys = {
-                                                                { r, "y", hidden_y - 500 },
-                                                                { r, "h",            500 },
+                                                                { r, "y", hidden_y - 423 },
+                                                                { r, "h",            423 },
                                                             },
                                                         },
                                                     },
@@ -188,23 +185,23 @@ do
 end
 
 do
-    local text_w = 600
+    local text_w = 800
     local duration = 200
     local setup_text = function(g)
         g.description = Text{
-            y=-300,
+            y=-270,
             wrap=true,
             wrap_mode = "WORD",
             w=text_w,
             color = "white",
-            font = FONT_NAME.." 20px",
+            font = FONT_NAME.." 26px",
         }
         g:add( g.description )
         return g
     end
 
     local   incoming_text = setup_text( Group{ name=   "incoming_text" } )
-    local displaying_text = setup_text( Group{ name= "displaying_text",x = 800 } )
+    local displaying_text = setup_text( Group{ name= "displaying_text",x = 740 } )
     local next_text
     local animating = false
     local set_incoming_text__internal
@@ -341,25 +338,28 @@ local function build_bar()
 end
 --]=]
 local function show_bar()
-    menubar:show()
-    backing.anim.state = "half"
+    --menubar:show()
+    backing.anim.state = "full"
+    menubar:anim_in()
 end
 
 local function hide_bar()
-    menubar:hide()
+    --menubar:hide()
     backing.anim.state = "hidden"
+    menubar:anim_out()
 end
-
 
 
 local function on_activate(label)
     label:animate({ duration = 250, opacity = 255 })
     --if(menubar.count == 0) then build_bar() end
     if menubar.parent == nil then
+
         screen:add(backing,menubar)
         menubar:hide()
-        menubar.y = 812.5
-        backing.y = menubar.y
+        menubar.x = -300
+        menubar.y = 812.5-313
+        backing.y = 812.5
     end
     hide_bar()
 end
