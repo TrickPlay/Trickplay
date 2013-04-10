@@ -8,6 +8,8 @@ local function make_icon(item)
 
     local s = Sprite{sheet = assets,id=item.src}
 
+    instance.icon = s
+
     local t   = Text{
         text  = item.text,
         font  = ICON_FONT,
@@ -227,7 +229,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             if #entries < 3 then
                 local new_rows = {
                     {
-                        {text="Air Combat",    src="icon-aircombat-trickplay.png", app="com.trickplay.air-combat"},
+                        {text="Poker",         src="icons-poker-dawgz.png",        app="com.trickplay.poker-dawgz"},
                         {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
                         {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
                         {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
@@ -333,7 +335,24 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         [keys.OK] = function()
             print(apps,entries[sel_r][sel_c].app)
             if apps and entries[sel_r][sel_c].app then
-                apps:launch(entries[sel_r][sel_c].app)
+
+                local dur = 250
+
+                screen:animate{duration=dur,opacity=0}
+
+                local c = entries[sel_r][sel_c].icon
+                c = Clone{source =c,position= c.transformed_position}
+                screen:add(c)
+
+                c:animate{
+                    duration = dur,
+                    scale = {screen.w/c.w,screen.w/c.w},
+                    x=0,y=0,
+                    on_completed = function()
+                        apps:launch(entries[sel_r][sel_c].app)
+                    end
+                }
+                screen:grab_key_focus()
             else
                 --if there more than one left
                 if entries[1][2] then
