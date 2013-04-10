@@ -9,7 +9,6 @@ from main import MainWindow
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment
 
-signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 def main(argv):
 
@@ -54,7 +53,14 @@ def main(argv):
     except KeyboardInterrupt:
 		exit("Exited")
 
+def sigint_handler(*args):
+    print("Handler for the SIGINT signal.")
+    app.main.exit()
+    sys.exit(0)
+
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGINT, sigint_handler)
     main(sys.argv)
 
     
