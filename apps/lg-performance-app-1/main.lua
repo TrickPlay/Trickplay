@@ -125,7 +125,7 @@ btm_row_tab:add(btm_row_backing,btm_row_backing_text)
 -- Create the my apps grid
 local my_apps_items = {
     {
-        {text="Air Combat",    src="icon-aircombat-trickplay.png", app="com.trickplay.air-combat"},
+        {text="Poker",         src="icons-poker-dawgz.png",        app="com.trickplay.poker-dawgz"},
         {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
         {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
         {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
