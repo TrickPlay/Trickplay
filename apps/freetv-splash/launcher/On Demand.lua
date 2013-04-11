@@ -264,9 +264,9 @@ do
         displaying_show:animate{
             duration=200,
             opacity=0,
-            y=displaying_show.y+500,
+            y=displaying_show.y+800,
             on_completed = function()
-                displaying_show.y = displaying_show.y -500
+                displaying_show.y = displaying_show.y -800
             end
         }
     end
@@ -899,9 +899,10 @@ menubar       = make_sliding_bar__highlighted_focus{
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
                 press_down   = function(self)
-                    self:unparent()
+                    --self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
+                    self:anim_out(function() self:unparent() end)
                     return true
                 end,
                 press_ok = function(self)
@@ -931,9 +932,10 @@ menubar       = make_sliding_bar__highlighted_focus{
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
                 press_down   = function(self)
-                    self:unparent()
+                    --self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
+                    self:anim_out(function() self:unparent() end)
                     return true
                 end,
                 press_ok = function(self)
@@ -963,9 +965,10 @@ menubar       = make_sliding_bar__highlighted_focus{
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
                 press_down   = function(self)
-                    self:unparent()
+                    --self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
+                    self:anim_out(function() self:unparent() end)
                     return true
                 end,
                 press_ok = function(self)
@@ -995,9 +998,10 @@ menubar       = make_sliding_bar__highlighted_focus{
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
                 press_down   = function(self)
-                    self:unparent()
+                    --self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
+                    self:anim_out(function() self:unparent() end)
                     return true
                 end,
                 press_ok = function(self)
@@ -1027,10 +1031,10 @@ menubar       = make_sliding_bar__highlighted_focus{
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
                 press_down   = function(self)
-                    self:unparent()
+                    --self:unparent()
                     curr_menu = menubar
                     backing.anim.state = "hidden"
-                    self:curr().sub_menu:anim_out()
+                    self:anim_out(function() self:unparent() end)
                     return true
                 end,
                 press_ok = function(self)
@@ -1055,7 +1059,7 @@ menubar       = make_sliding_bar__highlighted_focus{
     press_up = function(self)
         --print(self,curr_menu)
         screen:add(self:curr().sub_menu)
-        self:curr().sub_menu:hide()
+        --self:curr().sub_menu:hide()
         self:curr().sub_menu.x = -200
         self:curr().sub_menu.y = 105
         self:curr().sub_menu:anim_in()

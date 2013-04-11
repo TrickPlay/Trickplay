@@ -272,10 +272,8 @@ do
     end
     function backing.extra.anim.timeline.on_completed()
         if backing.extra.anim.state == "full" then
-            print("happenin")
             set_incoming_show(
-                menubar:find_child("tv_shows").children[
-                    active_show].show_ref,
+                menubar:curr().show_ref,
                 "right"
             )
         end

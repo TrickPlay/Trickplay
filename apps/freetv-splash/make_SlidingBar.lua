@@ -124,22 +124,29 @@ make_sliding_bar__expanded_focus    = function(p)
             on_completed = f,
         }
     end
-    function instance:anim_in()
+    function instance:anim_in(f)
         clip_group:stop_animation()
         instance:show()
-        clip_group:animate({
-            duration = 250, y = 0, mode = "EASE_OUT_SINE"
-            })
+        clip_group:animate{
+            duration = 250,
+            y = 0,
+            mode = "EASE_OUT_SINE",
+            on_completed = f,
+        }
     end
-    function instance:anim_out()
+    function instance:anim_out(f)
         clip_group:stop_animation()
         clip_group:animate({
-            duration = 250, y = clip_group.h,
+            duration = 250,
+            y = clip_group.h,
             mode = "EASE_OUT_SINE",
-            on_completed = function() instance:hide() end
-            })
+            on_completed =function()
+                instance:hide()
+                return f and f()
+            end,
+        })
     end
-
+    clip_group.y = clip_group.h
 
     instance.press_ok   = p.press_ok
     instance.press_up   = p.press_up
