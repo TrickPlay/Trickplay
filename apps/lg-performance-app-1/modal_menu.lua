@@ -232,11 +232,12 @@ return function ( items )
 
         modal_menu.z = -400
         modal_menu:animate{
-            duration = 250*dur_mult,
+            duration = 300*dur_mult,
+            mode = "EASE_OUT_QUAD",
             opacity = 255,
         }
         modal_menu:animate{
-            duration = 300*dur_mult,
+            duration = 500*dur_mult,
             mode = "EASE_OUT_BACK",
             z = 0,
             on_completed = function()
@@ -256,14 +257,14 @@ return function ( items )
             end
         }
         modal_menu_skim:animate{
-            duration = 250*dur_mult,
+            duration = 200*dur_mult,
             opacity = 150,
         }
 
     end
     function modal_menu:unfocus()
         modal_menu:animate{
-            duration = 250*dur_mult,
+            duration = 350*dur_mult,
             opacity = 0,
             z = -400,
             on_completed = function()
@@ -272,6 +273,8 @@ return function ( items )
                         dolater(modal_menu_delay,function()
                             if loop and modal_menu.is_animating == false then
                                 modal_menu:focus(prev_menu)
+                            else
+                                prev_menu:grab_key_focus()
                             end
                         end)
                     else
@@ -284,7 +287,7 @@ return function ( items )
             end
         }
         modal_menu_skim:animate{
-            duration = 250*dur_mult,
+            duration = 350*dur_mult,
             opacity  = 0,
         }
     end

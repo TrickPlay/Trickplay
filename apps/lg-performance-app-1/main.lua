@@ -1,7 +1,7 @@
-modal_menu_delay =  45
+modal_menu_delay =  120
 cube_delay       = 120
-deletion_delay   =  37
-slide_delay      =  60
+deletion_delay   = 120
+slide_delay      = 120
 
 
 screen:show()
