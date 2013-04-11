@@ -1,5 +1,6 @@
 
 local movie_w = 180
+    local grey_color = "a0a9b0"
 local curr_menu
 local function pre_x(i)
     return (10+movie_w)*(i-1)-movie_w*2/2+30
@@ -95,7 +96,7 @@ do
             x = g.title.x + g.title.w + 10,
             --w=text_w,
             --ellipsize = "END",
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.." 16px",
             --text = "(2011)"
         }
@@ -105,7 +106,7 @@ do
             wrap=true,
             wrap_mode = "WORD",
             w=text_w,
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.." 20px",
             --text = lorem_ipsum,
         }
@@ -113,7 +114,7 @@ do
             y=g.title.y+g.title.h+10,
             x=g.title.x,
             --w=text_w,
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.." 16px",
             --text = "PG",
         }
@@ -121,7 +122,7 @@ do
             y=g.rating.y,
             x=g.rating.x+g.rating.w+10,
             --w=text_w,
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.." 16px",
             --text = "126 min",
         }
@@ -740,7 +741,7 @@ do
         "$4.95\nHulu",
     }
     local genre = Text{
-        color = "white",
+        color = grey_color,
         text = "Adventure | Drama | Family | Mystery",
         font = FONT_NAME.." 20px",
         y = 400,
@@ -754,7 +755,7 @@ do
         x = genre.x,
     }
     local director_name = Text{
-        color = "white",
+        color = grey_color,
         text = "Martin Scorsese",
         font = FONT_NAME.." 20px",
         y = director.y+director.h,
@@ -768,7 +769,7 @@ do
         x = director.x+300,
     }
     local writer_names = Text{
-        color = "white",
+        color = grey_color,
         text  = "John Logan (screen play)\nBrian Selznick (book)",
         font  = FONT_NAME.." 20px",
         y = director_name.y,
@@ -782,7 +783,7 @@ do
         x = writers.x+300,
     }
     local star_names = Text{
-        color = "white",
+        color = grey_color,
         text  = "Asa Butterfield\nChloe Grace Moretz\nChristopher Lee",
         font  = FONT_NAME.." 20px",
         y = director_name.y,

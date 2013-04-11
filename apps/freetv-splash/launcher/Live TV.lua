@@ -5,6 +5,23 @@ table.
 Example:
 ]]
 
+local clone_sources = Group()
+screen:add(clone_sources)
+clone_sources:hide()
+
+local vert_line = Image{
+    src = "assets/line-separator-vertical.png"
+}
+local et = Image{
+    src = "assets/live-tv-et.png"
+}
+local showbiz = Image{
+    src = "assets/live-tv-showbiz.png"
+}
+local tmz = Image{
+    src = "assets/live-tv-tmz.png"
+}
+clone_sources:add(vert_line,et,tmz,showbiz)
 local function __genOrderedIndex( t )
     local orderedIndex = {}
     for key in pairs(t) do
@@ -281,7 +298,8 @@ do
 end
 
 do
-    local blue_color = {100,100,200}
+    local blue_color = "6fa4d3"
+    local grey_color = "a0a9b0"
     local text_w = 600
     local duration = 200
     local max_airings = 5
@@ -323,8 +341,8 @@ do
             wrap=true,
             wrap_mode = "WORD",
             w=text_w,
-            color = "white",
-            font = FONT_NAME.." 24px",
+            color = grey_color,
+            font = FONT_NAME.." 26px",
             text = "description",
         }
         g.start_time = Text{
@@ -338,21 +356,21 @@ do
             y=-100,
             x= 150,
             w=text_w,
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.." Bold 24px",
             text = "duration",
         }
         g.aired_on = Text{
             y=-50,
             w=text_w,
-            color = "white",
-            font = FONT_NAME.." Bold 24px",
+            color = grey_color,
+            font = FONT_NAME.." Bold 22px",
             text = "aired_on",
         }
         g.season_episode = Text{
             y=-50,
             w=text_w,
-            color = "white",
+            color = grey_color,
             font = FONT_NAME.."  24px",
             text = "season_episode",
         }
@@ -363,19 +381,39 @@ do
             y= g.description.y-20,
             children={
                 Text{
-                    color = "white",
+                    color = grey_color,
                     font = FONT_NAME.."  20px",
                     text = "Next Airings:",
-                }
+                },
+                Clone{
+                    x      = 150,
+                    source = vert_line
+                },
             }
         }
-        g.related = Text{
+        g.related = Group{
             x= 1050,
             y= g.next_airings.y,
-            text = "Related",
-            color = "white",
-            font = FONT_NAME.."  20px",
-            text = "Related:",
+            children = {
+                Text{
+                    text  = "Related",
+                    color = grey_color,
+                    font  = FONT_NAME.."  20px",
+                    text  = "Related:",
+                },
+                Clone{
+                    y      = 50,
+                    source = et,
+                },
+                Clone{
+                    y      = 100,
+                    source = showbiz,
+                },
+                Clone{
+                    y      = 150,
+                    source = tmz,
+                },
+            }
         }
         g.description_group:add(
             g.slogan,
@@ -396,7 +434,7 @@ do
             airings[i] = Text{
                 --g.next_airings.x+150*(i-1),
                 y = 30*(i-1)+50,
-                color = "white",
+                color = grey_color,
                 font =  FONT_NAME.."  20px",
             }
             g.next_airings:add(airings[i])
@@ -425,7 +463,7 @@ do
             g.next_airings.x =
                 show.show_description ~= json_null and
                 g.description_group.x + text_w+300 or g.description_group.x
-            g.related.x = g.next_airings.x+150
+            g.related.x = g.next_airings.x+230
             g.image.anchor_point = {0,g.image.h/2}
             g.image.y = -200
             g.season_episode.text =
@@ -469,11 +507,7 @@ do
             if show.series_id and series[show.series_id] and #series[show.series_id] > 1 then
                 --print("num in series",#series[show.series_id])
                 ---[[
-                g.next_airings.text =
-                    --show.show_name ~= json_null and
-                    --"Next Airings of "..show.show_name..":" or
-                    "Next Airings:"
-                --]]
+                g.next_airings:show()
                 local curr_show
                 for i=1,#airings do
                     --print(i, (#series[show.series_id]))
@@ -495,7 +529,7 @@ do
                     end
                 end
             else
-                g.next_airings.text = ""
+                g.next_airings:hide()
                 g.related.x = g.next_airings.x
             end
             --]]
