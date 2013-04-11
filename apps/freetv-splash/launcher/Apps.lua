@@ -144,7 +144,7 @@ local app_offset = -icon_w*.25
 local active_app = 2
 local backing = Group()
 
-local set_incoming_text, set_current_text
+local set_incoming_text, set_current_text, hide_current_text
 
 do
     local r = Rectangle{color="black",w=screen.w,opacity=155}
@@ -174,7 +174,8 @@ do
     }
     function backing.extra.anim.timeline.on_started()
         if backing.extra.anim.state ~= "full" then
-            set_incoming_text({slogan="",description=""},"right")
+            --set_incoming_text({slogan="",description=""},"right")
+            hide_current_text()
         end
     end
     function backing.extra.anim.timeline.on_completed()
@@ -233,6 +234,7 @@ do
             x = displaying_text.x,
             opacity = 255,
             on_completed = function()
+                incoming_text.opacity = 0
                 displaying_text:stop_animation()
                 displaying_text.x = incoming_text.x
                 displaying_text.description.text = incoming_text.description.text
@@ -254,6 +256,16 @@ do
         end
     end
 
+    hide_current_text = function()
+        displaying_text:animate{
+            duration=200,
+            opacity=0,
+            y=displaying_text.y+400,
+            on_completed = function()
+                displaying_text.y = displaying_text.y -400
+            end
+        }
+    end
     set_current_text = function(curr_app)
         displaying_text.description.text = curr_app.description
     end
