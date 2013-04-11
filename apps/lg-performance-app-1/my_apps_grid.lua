@@ -106,7 +106,10 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     instance.anchor_point = {w/2,0}
 
     ----------------------------------------------------------
-    local deletion_duration = 250
+    local        fly_duration = 1250
+    local grid_slide_duration = 1000
+    local     mode = "EASE_OUT_EXPO"
+    local fly_mode = "EASE_IN_OUT_BACK"
     local deleting = false
     local again = false
     function instance:delete(d_r,d_c)
@@ -115,7 +118,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
         deleting = true
 
-        local dur = .5
+        local dur = (.5*grid_slide_duration)/fly_duration
+        local grid_end = grid_slide_duration/fly_duration
         local properties = {}
 
         for r,row in ipairs(entries) do
@@ -136,9 +140,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 source = item,
                                 name   = "opacity",
                                 keys   = {
-                                    {0.0,    "EASE_OUT_CIRC",255},
-                                    {t_start,"EASE_OUT_CIRC",255},
-                                    {1.0,    "EASE_OUT_CIRC",  0},
+                                    {0.0,    mode,255},
+                                    {t_start,mode,255},
+                                    {grid_end,    mode,  0},
                                 },
                             }
                         )
@@ -152,9 +156,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "x",
                             keys   = {
-                                {0.0,    "EASE_OUT_CIRC",item.x},
-                                {t_start,"EASE_OUT_CIRC",item.x},
-                                {1.0,    "EASE_OUT_CIRC",w-(cell_w)},
+                                {0.0,    fly_mode,item.x},
+                                {t_start,fly_mode,item.x},
+                                {1.0,    fly_mode,w-(cell_w)},
                             },
                         }
                     )
@@ -164,9 +168,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "y",
                             keys   = {
-                                {0.0,"EASE_OUT_CIRC",item.y},
-                                {t_start,"EASE_OUT_CIRC",item.y},
-                                {1.0,"EASE_OUT_CIRC",item.y-(cell_h+y_spacing)},
+                                {0.0,    fly_mode,item.y},
+                                {t_start,fly_mode,item.y},
+                                {1.0,    fly_mode,item.y-(cell_h+y_spacing)},
                             },
                         }
                     )
@@ -178,9 +182,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 source = item,
                                 name   = "opacity",
                                 keys   = {
-                                    {0.0,    "EASE_OUT_CIRC",item.opacity},
-                                    {t_start,"EASE_OUT_CIRC",item.opacity},
-                                    {1.0,    "EASE_OUT_CIRC",         255},
+                                    {0.0,    mode,item.opacity},
+                                    {t_start,mode,item.opacity},
+                                    {1.0,    mode,         255},
                                 },
                             }
                         )
@@ -193,9 +197,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "x",
                             keys   = {
-                                {0.0,"EASE_OUT_CIRC",item.x},
-                                {t_start,"EASE_OUT_CIRC",item.x},
-                                {1.0,"EASE_OUT_CIRC",item.x-(cell_w+x_spacing)},
+                                {0.0,      mode,item.x},
+                                {t_start,  mode,item.x},
+                                {grid_end, mode,item.x-(cell_w+x_spacing)},
                             },
                         }
                     )
@@ -204,7 +208,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         end
 
         local a = Animator{
-            duration   = deletion_duration*dur_mult,
+            duration   = grid_slide_duration*dur_mult,
             properties = properties
         }
         function a.timeline.on_completed()
@@ -323,8 +327,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         hl:animate{
             duration = 100*dur_mult,
             mode="EASE_OUT_QUAD",
-            x = entries[sel_r][sel_c].x+55,
-            y = entries[sel_r][sel_c].y+70,
+            x = (cell_w+x_spacing)*(sel_c-1)+55,
+            y = (cell_h+y_spacing)*(sel_r-1)+70,
         }
     end
     move_hl()
@@ -353,7 +357,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                     end
                 }
                 screen:grab_key_focus()
-            else
+            elseif not deleting then
                 --if there more than one left
                 if entries[1][2] then
                     instance:delete(sel_r,sel_c)
