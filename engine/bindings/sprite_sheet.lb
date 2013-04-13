@@ -309,17 +309,18 @@ class SpriteSheet [[SpriteSheet*]]
     *Return Value:* table of sprite string IDs
 */
 
-    table get_ids()
+    readonly table ids
         [[
             std::list< std::string > * ids = self->get_ids();
 
-            lua_createtable( L, 0, ids->size() );
+            lua_createtable( L, ids->size(), 0 );
             int table = lua_gettop( L );
+            int i=1;
 
-            for ( std::list< std::string >::iterator id = ids->begin(); id != ids->end(); ++id )
+            for ( std::list< std::string >::iterator id = ids->begin(); id != ids->end(); ++id, ++i )
             {
-                lua_pushboolean( L, true );
-                lua_setfield( L, table, id->c_str() );
+                lua_pushstring( L, id->c_str() );
+                lua_rawseti( L, table, i );
             }
 
             delete ids;
