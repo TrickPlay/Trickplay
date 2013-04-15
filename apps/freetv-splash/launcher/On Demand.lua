@@ -2,15 +2,6 @@
 local movie_w = 180
     local grey_color = "a0a9b0"
 local curr_menu
-local function pre_x(i)
-    return (10+movie_w)*(i-1)-movie_w*2/2+30
-end
-local function sel_x(i)
-    return (10+movie_w)*(i-1)--icon_w*.25
-end
-local function post_x(i)
-    return (10+movie_w)*(i-1)+movie_w*2/2-30
-end
 
 local default_vod_info = {
     title       = "Hugo Cabret",
@@ -27,64 +18,16 @@ local empty_vod_info = {
     rating      = "",
     run_time    = "",
 }
-local backing = Group()
-
-
-local set_incoming_show, set_current_show, hide_current_show
-
-do
-    local r = Rectangle{color="black",w=screen.w,opacity=155}
-    backing:add(r)
-    local hidden_y = 150
-    backing.extra.anim = AnimationState {
-                                                    duration = 250,
-                                                    mode = "EASE_OUT_SINE",
-                                                    transitions = {
-                                                        {
-                                                            source = "*",
-                                                            target = "hidden",
-                                                            keys = {
-                                                                { r, "y", hidden_y },
-                                                                { r, "h",        0 },
-                                                            },
-                                                        },
-                                                        {
-                                                            source = "*",
-                                                            target = "full",
-                                                            keys = {
-                                                                { r, "y", hidden_y - 820 },
-                                                                { r, "h",            820 },
-                                                            },
-                                                        },
-                                                    },
-    }---[[
-    function backing.extra.anim.timeline.on_started()
-        if backing.extra.anim.state ~= "full" then
-            print("shit")
-            --set_incoming_show(empty_vod_info,"right")
-            hide_current_show()
-        end
-    end
-    function backing.extra.anim.timeline.on_completed()
-        if backing.extra.anim.state == "full" then
-            print("happenin")
-            set_incoming_show(
-                default_vod_info,
-                "right"
-            )
-        end
-    end
-    --]]
-end
-
-
-do
-    local text_w = 800
-    local duration = 200
-    local max_airings = 5
-    local setup_info = function(g)
+local backing = make_MoreInfoBacking{
+    info_x     = 200,
+    expanded_h = 670,
+    create_more_info = function()
+        local text_w = 800
+        local duration = 200
+        local max_airings = 5
+        local g = Group()
         g.title = Text{
-            y = -620,x=500,
+            y = 30,x=500,
             --w=text_w,
             --ellipsize = "END",
             color = "white",
@@ -133,14 +76,9 @@ do
             g.rating,
             g.run_time
         )
-        local curr_show
-        function g:get_show()
-            return curr_show
-        end
-        function g:set_show(show)
-            if show == nil then error("nil show",2) end
-
-            curr_show = show
+        return g
+    end,
+    populate = function(g,show)
             g.title.text       = show.title
             g.description.text = show.description
             g.year.text        = show.year
@@ -148,135 +86,10 @@ do
             g.rating.text      = show.rating
             g.run_time.text    = show.run_time
             g.run_time.x       = g.rating.x + g.rating.w + 10
-            --[[
-            curr_show = show
-            g.season_episode.text =
-                (show.season_number  ~= json_null) and
-                (show.episode_number ~= json_null) and
-                ("Season "   ..show.season_number..
-                " : Episode "..show.episode_number) or
-                (show.season_number ~= json_null) and
-                "Season "..show.season_number
-                (show.episode_number ~= json_null) and
-                "Episode "..show.episode_number or ""
-            g.slogan.text =
-                show.series_description ~= json_null and
-                show.series_description or
-                show.show_name ~= json_null and
-                show.show_name or ""
-            g.description.text =
-                show.show_description ~= json_null and
-                show.show_description or ""
-            g.aired_on.text =
-                show.original_air_date ~= json_null and
-                ("AIRED ON "..show.original_air_date) or ""
-            g.start_time.text =
-                show.start_time ~= json_null and
-                show.start_time_t.hour..":"..show.start_time_t.min or ""
-            ---[[
-            if show.series_id and series[show.series_id] and #series[show.series_id] > 1 then
-                --print("num in series",#series[show.series_id])
-                g.next_airings.text =
-                    show.show_name ~= json_null and
-                    "Next Airings of "..show.show_name..":" or
-                    "Next Airings:"
-
-                local curr_show
-                for i=1,#airings do
-                    --print(i, (#series[show.series_id]))
-                    if i < (#series[show.series_id]) then
-                        curr_show = series[show.series_id][i]
-
-                        airings[i].text =
-                            curr_show.start_time_t.wkdy.." "..
-                            tonumber(curr_show.start_time_t.hour).."\n"
-                        airings[i].text = airings[i].text..(
-                            (curr_show.season_number  ~= json_null) and
-                            (curr_show.episode_number ~= json_null) and
-                            ("S "   ..curr_show.season_number..
-                            " : Ep "..curr_show.episode_number) or
-                            (curr_show.season_number ~= json_null) and
-                            "S "..curr_show.season_number
-                            (curr_show.episode_number ~= json_null) and
-                            "Ep "..curr_show.episode_number or "")
-                    else
-                        airings[i].text = "b"
-                    end
-                end
-            else
-                g.next_airings.text = ""
-            end
-            --]]
-        end
-        return g
-    end
-
-    local   incoming_show = setup_info( Group{ name=   "incoming_show", opacity = 0 } )
-    local displaying_show = setup_info( Group{ name= "displaying_show", opacity = 0,
-        x = 200 } )
-    local next_show
-    local animating = false
-
-    set_incoming_show = function(curr_show,direction)
-        if curr_show == nil then error("nil show",2) end
-
-        if animating then
-            next_show = {curr_show,direction}
-            return
-        end
-        animating = true
-        print("incoming")
-        incoming_show:set_show(curr_show)
-
-        if direction == "left" then
-            incoming_show.x = displaying_show.x - screen.w
-            displaying_show:animate{
-                duration = duration,
-                x = displaying_show.x + screen.w,
-                opacity = 0,
-            }
-        elseif direction == "right" then
-            incoming_show.x = displaying_show.x + screen.w
-            displaying_show:animate{
-                duration = duration,
-                x = displaying_show.x - screen.w,
-                opacity = 0,
-            }
-        else
-            error("Direction must equal 'left' or 'right' . Received "..
-                tostring(direction),2)
-        end
-        incoming_show:animate{
-            duration = duration,
-            x = displaying_show.x,
-            opacity = 255,
-            on_completed = function()
-                incoming_show.opacity = 0
-                displaying_show:stop_animation()
-                displaying_show.x = incoming_show.x
-                displaying_show:set_show(incoming_show:get_show() or empty_vod_info)
-                displaying_show.opacity = 255
-                animating = false
-            end
-        }
-    end
-
-    hide_current_show = function()
-        displaying_show:animate{
-            duration=200,
-            opacity=0,
-            y=displaying_show.y+800,
-            on_completed = function()
-                displaying_show.y = displaying_show.y -800
-            end
-        }
-    end
-    set_current_show = function(curr_show)
-        displaying_show:set_show(curr_show)
-    end
-    backing:add(displaying_show,incoming_show)
-
-end
+    end,
+    empty_info = empty_vod_info,
+    get_current = function() return default_vod_info end,
+}
 
 local catch_up = {
     {
@@ -537,96 +350,12 @@ local function make_poster(item)
 
     return poster
 end
---[[
-local menubar = Group {}
-local movies_list = {}
-local movie_offset = 0
-local active_movie = 2
-
-local function focus_movie(number, t)
-    menubar:stop_animation()
-    local the_movie = movies_list[number]
-    the_movie:raise_to_top()
-    the_movie:focus(sel_x(number))
-    local mode = "EASE_IN_OUT_SINE"
-    menubar:animate({ duration = t, mode = mode, x = 400 - sel_x(number) })
-end
-
-local function unfocus_movie(number,direction)
-    movies_list[number]:unfocus(direction==1 and pre_x(number) or post_x(number))
-end
-
-local function transfer_focus(curr_i,direction,dur)
-    local n = #movies_list
-
-    if curr_i == 1 and direction == -1 then
-        transition_time = n*50
-
-        for i,movie in ipairs(menubar:find_child("movies").children) do
-            movie.x = movie.x - (post_x(1) - pre_x(1))
-        end
-        menubar.x = menubar.x + (post_x(1) - pre_x(1))
-
-        unfocus_movie(curr_i,1)
-    elseif curr_i == n and direction == 1 then
-        transition_time = n*50
-        for i,movie in ipairs(menubar:find_child("movies").children) do
-            movie.x = movie.x + (post_x(1) - pre_x(1))
-        end
-        menubar.x = menubar.x - (post_x(1) - pre_x(1))
-
-        unfocus_movie(curr_i,-1)
-    else
-        unfocus_movie(curr_i,direction)
-    end
-    curr_i = wrap_i(
-        curr_i+direction,
-        n
-    )
-
-
-    focus_movie( curr_i, dur )
-end
-
-local function build_bar()
-    screen:add(menubar)
-    menubar:hide()
-
-    local clip_group_outter = Group { name = "clip_outter" }
-    menubar:add(clip_group_outter)
-    local clip_group = Group { name = "clip_inner" }
-    clip_group_outter:add(clip_group)
-
-    local movies_group = Group { name = "movies" }
-    clip_group:add(movies_group)
-
-    for k,v in pairs(movies) do
-        local new_movie = make_poster(v)
-        new_movie.x = movie_offset
-        movie_offset = movie_offset + new_movie.w
-        movies_group:add(new_movie)
-        movies_list[#movies_list+1] = new_movie
-    end
-    for i,v in ipairs(movies_list) do
-        v.x = (
-            i == active_movie and sel_x or
-            i <  active_movie and pre_x or
-            i >  active_movie and post_x)(i)
-    end
-
-    menubar.y = 1150 - movies_group.h
-
-    focus_movie(active_movie,10)
-end
---]]
----[[
 local sub_menu = make_sliding_bar__expanded_focus{
     items = movies,
     make_item = make_poster,
     unsel_offset = movie_w*2/2-30,
     spacing = 10+movie_w,
 }
---]]
 
 local function make_category(_, data,channel_bar,channel_bar_focus)
     local bar_height = channel_bar.h
@@ -911,13 +640,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                     return true
                 end,
                 press_left = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "right"
                     )
@@ -944,13 +673,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                     return true
                 end,
                 press_left = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "right"
                     )
@@ -977,13 +706,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                     return true
                 end,
                 press_left = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "right"
                     )
@@ -1010,13 +739,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                     return true
                 end,
                 press_left = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "right"
                     )
@@ -1043,13 +772,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                     return true
                 end,
                 press_left = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
-                    set_incoming_show(
+                    backing:set_incoming(
                         default_vod_info,--self:curr(),
                         "right"
                     )
@@ -1094,7 +823,7 @@ local function on_activate(label)
         menubar:hide()
         menubar.y = 925 - 150
         --sub_menu.y = 400
-        backing.y = menubar.y
+        backing.y = 105--menubar.y
     end
     hide_bar()
 end
@@ -1120,42 +849,11 @@ local function on_sleep(label)
     hide_bar()
 end
 
-local prev_movie
 local key_events = {
-    [keys.Left] = function()--[=[]]
-        --unfocus_app(active_movie)
-        prev_movie = active_movie
-        local transition_time = 250
-        active_movie = wrap_i(active_movie-1,menubar:find_child("movies").count)--((active_app - 2) % menubar:find_child("apps").count) + 1
-        if( active_movie == menubar:find_child("movies").count ) then
-            transition_time = menubar:find_child("movies").count*50
-        end
-        --[[
-        if backing.anim.state == "full" then
-            set_incoming_text(apps_list[active_movie],"left")
-        end
-        --]]
-        --focus_app(active_movie, transition_time)
-        transfer_focus(prev_movie,-1,transition_time)
-        --]=]
+    [keys.Left] = function()
         return curr_menu.press_left  and curr_menu:press_left()--true
     end,
-    [keys.Right] = function()--[=[]]
-        --unfocus_app(active_movie)
-        prev_movie = active_movie
-        local transition_time = 250
-        active_movie = wrap_i(active_movie+1,menubar:find_child("movies").count)--(active_app % menubar:find_child("apps").count) + 1
-        if( active_movie == 1 ) then
-            transition_time = menubar:find_child("movies").count*50
-        end
-        --[[
-        if backing.anim.state == "full" then
-            set_incoming_text(apps_list[active_movie],"right")
-        end
-        --]]
-        --focus_app(active_movie, transition_time)
-        transfer_focus(prev_movie,1,transition_time)
-        --]=]
+    [keys.Right] = function()
         return curr_menu.press_right and curr_menu:press_right()--true
     end,
     [keys.Up] = function()
@@ -1167,36 +865,11 @@ local key_events = {
     [keys.OK] = function()
         return curr_menu.press_ok    and curr_menu:press_ok()--true
     end,
-    --[[
-    [keys.Up] = function()
-        backing.anim.state = "full"
-        return true
-    end,
-    --]]
 }
 
 local function on_key_down(label, key)
     return key_events[key] and key_events[key]()
 end
---[[
-local function on_key_down(label, key)
-    if( keys.Left == key or keys.Right == key ) then
-        unfocus_movie(active_movie)
-
-        local transition_time = 250
-        if(keys.Left == key) then
-            active_movie = ((active_movie - 2) % menubar:find_child("movies").count) + 1
-            if( active_movie == menubar:find_child("movies").count ) then transition_time = menubar:find_child("movies").count*50 end
-        else
-            active_movie = (active_movie % menubar:find_child("movies").count) + 1
-            if( active_movie == 1 ) then transition_time = menubar:find_child("movies").count*50 end
-        end
-
-        focus_movie(active_movie, transition_time)
-        return true
-    end
-end
---]]
 return {
             label = "On Demand",
             activate = on_activate,

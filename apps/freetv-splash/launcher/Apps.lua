@@ -8,15 +8,6 @@ generic_launcher_icon = Image{src="assets/generic-app-icon.jpg"}
 screen:add( generic_launcher_icon )
 generic_launcher_icon:hide()
 
-local function pre_x(i)
-    return (10+icon_w*unsel_scale)*(i-1)-icon_w*(sel_scale-unsel_scale)/2
-end
-local function sel_x(i)
-    return (10+icon_w*unsel_scale)*(i-1)--icon_w*.25
-end
-local function post_x(i)
-    return (10+icon_w*unsel_scale)*(i-1)+icon_w*(sel_scale-unsel_scale)/2
-end
 
 local padding=10
 local function make_icon(v)
@@ -142,55 +133,16 @@ local menubar = make_sliding_bar__expanded_focus{
 }
 local app_offset = -icon_w*.25
 local active_app = 2
-local backing = Group()
 
-local set_incoming_text, set_current_text, hide_current_text
-
-do
-    local r = Rectangle{color="black",w=screen.w,opacity=155}
-    backing:add(r)
-    local hidden_y = icon_h/2-25
-    backing.extra.anim = AnimationState {
-                                                    duration = 250,
-                                                    mode = "EASE_OUT_SINE",
-                                                    transitions = {
-                                                        {
-                                                            source = "*",
-                                                            target = "hidden",
-                                                            keys = {
-                                                                { r, "y", hidden_y },
-                                                                { r, "h",        0 },
-                                                            },
-                                                        },
-                                                        {
-                                                            source = "*",
-                                                            target = "full",
-                                                            keys = {
-                                                                { r, "y", hidden_y - 423 },
-                                                                { r, "h",            423 },
-                                                            },
-                                                        },
-                                                    },
-    }
-    function backing.extra.anim.timeline.on_started()
-        if backing.extra.anim.state ~= "full" then
-            --set_incoming_text({slogan="",description=""},"right")
-            hide_current_text()
-        end
-    end
-    function backing.extra.anim.timeline.on_completed()
-        if backing.extra.anim.state == "full" then
-            set_incoming_text(menubar:curr(),"right")
-        end
-    end
-end
-
-do
-    local text_w = 800
-    local duration = 200
-    local setup_text = function(g)
+local backing = make_MoreInfoBacking{
+    info_x     = 740,
+    expanded_h = 423,
+    get_current = function() return menubar:curr() or {description=lorem_ipsum} end,
+    create_more_info = function()
+        local g = Group()
+        local text_w = 800
         g.description = Text{
-            y=-270,
+            y=313-270,
             wrap=true,
             wrap_mode = "WORD",
             w=text_w,
@@ -199,156 +151,12 @@ do
         }
         g:add( g.description )
         return g
-    end
-
-    local   incoming_text = setup_text( Group{ name=   "incoming_text" } )
-    local displaying_text = setup_text( Group{ name= "displaying_text",x = 740 } )
-    local next_text
-    local animating = false
-    local set_incoming_text__internal
-    set_incoming_text__internal = function(curr_app,direction)
-
-        next_text = nil
-        incoming_text.description.text = curr_app.description
-
-        if direction == "left" then
-            incoming_text.x = displaying_text.x - screen.w
-            displaying_text:animate{
-                duration = duration,
-                x = displaying_text.x + screen.w,
-                opacity = 0,
-            }
-        elseif direction == "right" then
-            incoming_text.x = displaying_text.x + screen.w
-            displaying_text:animate{
-                duration = duration,
-                x = displaying_text.x - screen.w,
-                opacity = 0,
-            }
-        else
-            error("Direction must equal 'left' or 'right' . Received "..
-                tostring(direction),2)
-        end
-        incoming_text:animate{
-            duration = duration,
-            x = displaying_text.x,
-            opacity = 255,
-            on_completed = function()
-                incoming_text.opacity = 0
-                displaying_text:stop_animation()
-                displaying_text.x = incoming_text.x
-                displaying_text.description.text = incoming_text.description.text
-                displaying_text.opacity = 255
-                if next_text then
-                    dolater(set_incoming_text__internal,next_text[1],next_text[2])
-                end
-                animating = false
-            end
-        }
-    end
-    set_incoming_text = function(curr_app,direction)
-        if animating then
-            next_text = {curr_app,direction}
-            return
-        else
-            animating = true
-            set_incoming_text__internal(curr_app,direction)
-        end
-    end
-
-    hide_current_text = function()
-        displaying_text:animate{
-            duration=200,
-            opacity=0,
-            y=displaying_text.y+400,
-            on_completed = function()
-                displaying_text.y = displaying_text.y -400
-            end
-        }
-    end
-    set_current_text = function(curr_app)
-        displaying_text.description.text = curr_app.description
-    end
-    backing:add(displaying_text,incoming_text)
-
-end
---[=[]]
-local function focus_app(number, t)
-    menubar:stop_animation()
-    local the_app = apps_list[number]
-    the_app:raise_to_top()
-    the_app:focus(sel_x(number))
-    local mode = "EASE_IN_OUT_SINE"
-    menubar:animate({ duration = t, mode = mode, x = 400 - sel_x(number) })
-end
-
-local function unfocus_app(number,direction)
-    apps_list[number]:unfocus(direction==1 and pre_x(number) or post_x(number))
-end
-
-local function transfer_focus(curr_i,direction,dur)
-
-
-    if curr_i == 1 and direction == -1 then
-        transition_time = menubar:find_child("apps").count*50
-
-        for i,app in ipairs(menubar:find_child("apps").children) do
-            app.x = app.x - (post_x(1) - pre_x(1))
-        end
-        menubar.x = menubar.x + (post_x(1) - pre_x(1))
-
-        unfocus_app(curr_i,1)
-    elseif curr_i == menubar:find_child("apps").count and direction == 1 then
-        transition_time = menubar:find_child("apps").count*50
-        for i,app in ipairs(menubar:find_child("apps").children) do
-            app.x = app.x + (post_x(1) - pre_x(1))
-        end
-        menubar.x = menubar.x - (post_x(1) - pre_x(1))
-
-        unfocus_app(curr_i,-1)
-    else
-        unfocus_app(curr_i,direction)
-    end
-    curr_i = wrap_i(
-        curr_i+direction,
-        menubar:find_child("apps").count
-    )
-
-
-    focus_app( curr_i, dur )
-end
-
-local function build_bar()
-    screen:add(backing,menubar)
-    menubar:hide()
-
-    local clip_group_outter = Group { name = "clip_outter" }
-    menubar:add(clip_group_outter)
-    local clip_group = Group { name = "clip_inner" }
-    clip_group_outter:add(clip_group)
-
-    local apps_group = Group { name = "apps" }
-    clip_group:add(apps_group)
-
-    for k,v in pairs(launcher_icons) do
-        local new_movie = v
-        v.x = pre_x(#apps_list+1)
-        apps_group:add(v)
-        apps_list[#apps_list+1] = v
-    end
-    for i,v in ipairs(apps_list) do
-        v.x = (
-            i == active_app and sel_x or
-            i <  active_app and pre_x or
-            i >  active_app and post_x)(i)
-    end
-
-    menubar.y = 812.5
-    backing.y = menubar.y
-    focus_app(active_app,10)
-    --set_current_text(apps_list[active_app])
-end
---]=]
+    end,
+    populate = function(g,show)
+        g.description.text = show.description
+    end,
+    empty_info = {description=""},
+}
 local function show_bar()
     --menubar:show()
     backing.anim.state = "full"
@@ -371,7 +179,7 @@ local function on_activate(label)
         menubar:hide()
         menubar.x = -300
         menubar.y = 812.5-313
-        backing.y = 812.5
+        backing.y = 812.5-313
     end
     hide_bar()
 end
@@ -397,43 +205,17 @@ end
 
 local prev_app
 local key_events = {
-    [keys.Left] = function()--[=[]]
-        --unfocus_app(active_app)
-        prev_app = active_app
-        local transition_time = 250
-        active_app = wrap_i(active_app-1,menubar:find_child("apps").count)--((active_app - 2) % menubar:find_child("apps").count) + 1
-        if( active_app == menubar:find_child("apps").count ) then
-            transition_time = menubar:find_child("apps").count*50
-        end
-        if backing.anim.state == "full" then
-            set_incoming_text(apps_list[active_app],"left")
-        end
-        --focus_app(active_app, transition_time)
-        transfer_focus(prev_app,-1,transition_time)
-        --]=]
+    [keys.Left] = function()
         menubar:press_left()
         if backing.anim.state == "full" then
-            set_incoming_text(menubar:curr(),"left")
+            backing:set_incoming(menubar:curr(),"left")
         end
         return true
     end,
-    [keys.Right] = function()--[=[]]
-        --unfocus_app(active_app)
-        prev_app = active_app
-        local transition_time = 250
-        active_app = wrap_i(active_app+1,menubar:find_child("apps").count)--(active_app % menubar:find_child("apps").count) + 1
-        if( active_app == 1 ) then
-            transition_time = menubar:find_child("apps").count*50
-        end
-        if backing.anim.state == "full" then
-            set_incoming_text(apps_list[active_app],"right")
-        end
-        --focus_app(active_app, transition_time)
-        transfer_focus(prev_app,1,transition_time)
-        --]=]
+    [keys.Right] = function()
         menubar:press_right()
         if backing.anim.state == "full" then
-            set_incoming_text(menubar:curr(),"right")
+            backing:set_incoming(menubar:curr(),"right")
         end
         return true
     end,
