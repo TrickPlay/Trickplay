@@ -27,6 +27,7 @@ local i = 1
 local channel_data = {}
 while i <= 100 do
     if type(channels[i]) == "number" then i = channels[i] end
+    if channels[i] == nil then break end
     print(i)
     channel_data[i] = {
         channel = channels[i].name,

@@ -75,7 +75,7 @@ local function load_up_data(dir)
     for num,channel in pairs(channels_str) do
 
         num = tonumber(num)
-
+        if num < 100 then
         channels[num]  = channel
 
         largest_chan = math.max(largest_chan,num)
@@ -110,6 +110,7 @@ local function load_up_data(dir)
 
             end
             --]]
+        end
         end
     end
 
