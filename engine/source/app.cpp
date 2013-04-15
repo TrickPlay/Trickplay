@@ -1157,11 +1157,11 @@ void App::run_part2( const StringSet& allowed_names , RunCallback run_callback )
     g_assert( screen );
 
     clutter_actor_set_position( screen, width/2, height/2 );
+    clutter_actor_set_anchor_point(screen, context->get_int( TP_VIRTUAL_WIDTH )/2, context->get_int( TP_VIRTUAL_HEIGHT )/2);
     clutter_actor_set_size( screen, context->get_int( TP_VIRTUAL_WIDTH ), context->get_int( TP_VIRTUAL_HEIGHT ) );
 
     if ( rotation > 0 && rotation < 4 )
     {
-        clutter_actor_set_anchor_point(screen, context->get_int( TP_VIRTUAL_WIDTH )/2, context->get_int( TP_VIRTUAL_HEIGHT )/2);
         clutter_actor_set_rotation(screen, CLUTTER_Z_AXIS, rotation * 90, 0, 0, 0);
         g_debug("ROTATED SCREEN TO ORIENTATION %d", rotation);
     }
