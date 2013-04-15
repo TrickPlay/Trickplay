@@ -262,7 +262,7 @@ class TrickplayEmulatorManager(QWidget):
 					        print("UI Element not found")
 
 					except:
-					    print("error :(")
+					    print("error :-(")
 
 
 				    if gid is not None and luaCmd == "openInspc":
@@ -283,7 +283,7 @@ class TrickplayEmulatorManager(QWidget):
 					        return
 
 					except:
-					    print("error :(")
+					    print("error :/(")
 
 				    if luaCmd == "repStInfo":
 				        if self.main.command == "openFile" :

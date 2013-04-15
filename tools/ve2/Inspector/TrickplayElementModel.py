@@ -395,8 +395,11 @@ class TrickplayElementModel(QStandardItemModel):
        
     def recSearch(self, property, value, item):
 
-        if item[property] == value:
-            return item
+        try : 
+            if item[property] == value:
+                return item
+        except:
+            return None
         
         # Check the item's children
         else:

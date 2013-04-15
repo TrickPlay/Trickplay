@@ -1,4 +1,4 @@
-import os, time
+import os, time, sys
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -10,6 +10,10 @@ from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 from UI.ImportSkinDialog import Ui_importSkinImages
 
+try:
+    _fromUtf8 = QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
 
 class MainWindow(QMainWindow):
     
@@ -86,24 +90,48 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.windows = {"inspector":False, "images":False}
-        self.inspectorWindowClicked()
 
         # Create Inspector
 
-        self.ui.InspectorDock.toggleViewAction().setText("Inspector")
-        self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
-        self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
+
+        #self.ui.InspectorDock.toggleViewAction().setText("Inspector")
+        #self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
+        #self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
 
         self._inspector = TrickplayInspector(self)
-        self.ui.InspectorLayout.addWidget(self._inspector)
+        self._inspector.setWindowFlags(Qt.Window)
+        self._inspector.setWindowTitle('Inspector')
+        #self._inspector.toggleViewAction().setText("Inspector")
+        #self.ui.menuView.addAction(self._inspector.toggleViewAction())
+        #self._inspector.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
+
+        self.inspectorWindowClicked()
+
+        #self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create Image File System
-        self.ui.fileSystemDock.toggleViewAction().setText("Images")
-        self.ui.menuView.addAction(self.ui.fileSystemDock.toggleViewAction())
-        self.ui.fileSystemDock.toggleViewAction().triggered.connect(self.imagesWindowClicked)
+        #self.ui.fileSystemDock.toggleViewAction().setText("Images")
+        #self.ui.menuView.addAction(self.ui.fileSystemDock.toggleViewAction())
+        #self.ui.fileSystemDock.toggleViewAction().triggered.connect(self.imagesWindowClicked)
 
         self._ifilesystem = TrickplayImageFileSystem(self)
-        self.ui.fileSystemLayout.addWidget(self._ifilesystem)
+        self._ifilesystem.setWindowFlags(Qt.Window)
+        self._ifilesystem.setWindowTitle('Images')
+        self.imagesWindowClicked()
+
+        #self.ui.fileSystemLayout.addWidget(self._ifilesystem)
+
+        #Create main menu 
+
+        self.ui.menubar.setNativeMenuBar(False)
+        self._menubar = QWidget()
+        self._menubar.setWindowFlags(Qt.Window)
+        #self._menubar.setWindowFlags(Qt.FramelessWindowHint)
+        #self._menubar.setWindowTitle('MainMenu')
+
+        self._menubar.setLayout(self.ui.mainMenuLayout)
+        self._menubar.show()
+
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
@@ -226,13 +254,19 @@ class MainWindow(QMainWindow):
         # Restore sizes/positions of docks
         settings = QSettings()
         if settings.value('mainMenuDock') and settings.value('inspectorDock') and settings.value('fileSystemDock') :
-            self.ui.mainMenuDock.setGeometry((settings.value('mainMenuDock').toRect()))
-            self.ui.InspectorDock.setGeometry((settings.value('inspectorDock').toRect()))
-            self.ui.fileSystemDock.setGeometry((settings.value('fileSystemDock').toRect()))
+            #self.ui.mainMenuDock.setGeometry((settings.value('mainMenuDock').toRect()))
+            self._menubar.setGeometry((settings.value('mainMenuDock').toRect()))
+            #self.ui.InspectorDock.setGeometry((settings.value('inspectorDock').toRect()))
+            self._inspector.setGeometry((settings.value('inspectorDock').toRect()))
+            #self.ui.fileSystemDock.setGeometry((settings.value('fileSystemDock').toRect()))
+            self._ifilesystem.setGeometry((settings.value('fileSystemDock').toRect()))
         else :
-            self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
-            self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
-            self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
+            #self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
+            self._menubar.setGeometry(self.luaEx,self.luaEy-85,670,100)
+            #self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+            self._inspector.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+            #self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
+            self._ifilesystem.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         self.path =  None 
         self.app = app
@@ -317,7 +351,7 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setWindowTitle("Error")
-        msg.setGeometry(self.ui.mainMenuDock.geometry().x() + 100, self.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+        msg.setGeometry(self._menubar.geometry().x() + 100, self._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
         ret = msg.exec_()
         if ret == QMessageBox.Ok:
             return
@@ -330,7 +364,7 @@ class MainWindow(QMainWindow):
         msg.addButton("Close without Saving" , QMessageBox.NoRole )
         msg.setDefaultButton(QMessageBox.Cancel)
         msg.setWindowTitle("Warning")
-        msg.setGeometry(self.ui.mainMenuDock.geometry().x() + 100, self.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+        msg.setGeometry(self._menubar.geometry().x() + 100, self._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
         ret = msg.exec_()
         if ret == QMessageBox.Save:
             self.saveProject()
@@ -426,7 +460,7 @@ class MainWindow(QMainWindow):
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
         self.bar.setWindowTitle("Import Assets...")
-        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+        self.bar.setGeometry(self._ifilesystem.geometry().x() + 200, self._ifilesystem.geometry().y() + 100, 300, 20)
 
         while path == -1 :
             if self.path is None:
@@ -492,7 +526,7 @@ class MainWindow(QMainWindow):
 
         cancelButton = self.uiD.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.uiD.buttonBox.button(QDialogButtonBox.Ok)
-        self.dialog.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self._ifilesystem.geometry().x() + 200, self._ifilesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
 
         QObject.connect(self.uiD.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
 
@@ -594,7 +628,7 @@ class MainWindow(QMainWindow):
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
         self.bar.setWindowTitle("Import Skin...")
-        self.bar.setGeometry(self.ui.fileSystemDock.geometry().x() + 200, self.ui.fileSystemDock.geometry().y() + 100, 300, 20)
+        self.bar.setGeometry(self._ifilesystem.geometry().x() + 200, self._ifilesystem.geometry().y() + 100, 300, 20)
 
         skinPath, id = self.importSkinDialog()
         if skinPath:
@@ -857,20 +891,24 @@ class MainWindow(QMainWindow):
     
     def debug_started(self):
         print "[VE] Code Editor Started"
-        self.ui.fileSystemDock.hide()
+        #self.ui.fileSystemDock.hide()
+        self._ifilesystem.hide()
         self.windows['images'] = False
-        self.ui.InspectorDock.hide()
+        #self.ui.InspectorDock.hide()
+        self._inspector.hide()
         self.windows['inspector'] = False
-        self.ui.mainMenuDock.hide()
+        #self.ui.mainMenuDock.hide()
         
     def debug_finished(self, errorCode):
         print "[VE] Code Editor Finished"
         if self.debugger.state() == QProcess.NotRunning :
-            self.ui.fileSystemDock.show()
+            #self.ui.fileSystemDock.show()
+            self._ifilesystem.show()
             self.windows['images'] = True
-            self.ui.InspectorDock.show()
+            #self.ui.InspectorDock.show()
+            self._inspector.show()
             self.windows['inspector'] = True
-            self.ui.mainMenuDock.show()
+            #self.ui.mainMenuDock.show()
             self.run()
             if errorCode == 2 : 
                 self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
@@ -895,9 +933,12 @@ class MainWindow(QMainWindow):
     def exit(self):
         self.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
         settings = QSettings()
-        settings.setValue("mainMenuDock", self.ui.mainMenuDock.geometry());
-        settings.setValue("inspectorDock", self.ui.InspectorDock.geometry());
-        settings.setValue("fileSystemDock", self.ui.fileSystemDock.geometry());
+        #settings.setValue("mainMenuDock", self.ui.mainMenuDock.geometry());
+        settings.setValue("mainMenuDock", self._menubar.geometry());
+        #settings.setValue("inspectorDock", self.ui.InspectorDock.geometry());
+        settings.setValue("inspectorDock", self._inspector.geometry());
+        #settings.setValue("fileSystemDock", self.ui.fileSystemDock.geometry());
+        settings.setValue("fileSystemDock", self._ifilesystem.geometry());
         time.sleep(0.1)
         settings.setValue("x", self.x)
         settings.setValue("y", self.y)
@@ -908,6 +949,7 @@ class MainWindow(QMainWindow):
                     return True
             self.stop(False, True)
             self.close()
+        sys.exit(0)
         return True
 
     def editorWindowClicked(self) :
@@ -918,18 +960,22 @@ class MainWindow(QMainWindow):
 
     def imagesWindowClicked(self) :
     	if self.windows['images'] == True:
-    		self.ui.fileSystemDock.hide()
+    		#self.ui.fileSystemDock.hide()
+    		self._ifilesystem.hide()
     		self.windows['images'] = False
     	else :
-    		self.ui.fileSystemDock.show()
+    		#self.ui.fileSystemDock.show()
+    		self._ifilesystem.show()
     		self.windows['images'] = True
 
     def inspectorWindowClicked(self) :
     	if self.windows['inspector'] == True:
-    		self.ui.InspectorDock.hide()
+    		#self.ui.InspectorDock.hide()
+    		self._inspector.hide()
     		self.windows['inspector'] = False
     	else :
-    		self.ui.InspectorDock.show()
+    		#self.ui.InspectorDock.show()
+    		self._inspector.show()
     		self.windows['inspector'] = True
 
     def setCurrentProject(self, path, openList = None):
@@ -938,9 +984,10 @@ class MainWindow(QMainWindow):
         """
         self.path = path
         if path is not -1:
-            self.ui.mainMenuDock.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
+            #self.ui.mainMenuDock.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
+            self._menubar.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
-            #self.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(path)) +"')")
+            self.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(path)) +"')")
 
 
     def backgroundImage(self):

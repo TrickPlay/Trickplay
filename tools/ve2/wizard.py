@@ -66,7 +66,8 @@ class Wizard():
             msg.addButton("New Project" , VE_NEW_PROJECT_ROLE)
             msg.addButton("Open Project" , VE_OPEN_PROJECT_ROLE)
             msg.setWindowTitle(title)
-            msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+            #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+            msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
 
             ret = msg.exec_()
             if ret == VE_NEW_PROJECT_ROLE:
@@ -322,7 +323,8 @@ class Wizard():
         QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
         QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
 
-        self.dialog.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        #self.dialog.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
 
 
         if id is not None:
@@ -350,14 +352,16 @@ class Wizard():
                         msg = QMessageBox()
                         msg.setText('Path "' + path + '" is aleady exist. Please select other id or name for the project.')
                         msg.setWindowTitle("Error")
-                        msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                        #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                        msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                         msg.exec_()
                         return None
                 except:
                     msg = QMessageBox()
                     msg.setText('Path "' + path + '" is not valid. Please select other id or name for the project.')
                     msg.setWindowTitle("Error")
-                    msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                    #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                    msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                     msg.exec_()
                     return None
 
