@@ -1,4 +1,3 @@
-SLIDER = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -20,14 +19,14 @@ Slider = setmetatable(
     {},
     {
         __index = function(self,k)
-            
+
             return getmetatable(self)[k]
-            
+
         end,
         __call = function(self,p)
-            
+
             return self:declare():set(p or {})
-            
+
         end,
         subscriptions = {
             ["style"] = function(instance,_ENV)
@@ -47,70 +46,70 @@ Slider = setmetatable(
                 end,
                 grip_w = function(instance,_ENV)
                     return function(oldf) return grip.w     end,
-                    function(oldf,self,v)        grip.w = v 
+                    function(oldf,self,v)        grip.w = v
                         resized = true
                     end
                 end,
                 grip_h = function(instance,_ENV)
                     return function(oldf) return grip.h     end,
-                    function(oldf,self,v)        grip.h = v 
+                    function(oldf,self,v)        grip.h = v
                         resized = true
                     end
                 end,
                 track_w = function(instance,_ENV)
                     return function(oldf) return track.w     end,
-                    function(oldf,self,v)        track.w = v 
+                    function(oldf,self,v)        track.w = v
                         resized = true
                     end
                 end,
                 track_h = function(instance,_ENV)
                     return function(oldf) return track.h     end,
-                    function(oldf,self,v)        track.h = v 
+                    function(oldf,self,v)        track.h = v
                         resized = true
                     end
                 end,
                 direction = function(instance,_ENV)
                     return function(oldf) return direction     end,
-                    function(oldf,self,v) 
-                        
+                    function(oldf,self,v)
+
                         if v == "horizontal" then
                             direction_pos = "x"
-                            direction_num =  1 
+                            direction_num =  1
                             direction_dim = "w"
                         elseif v == "vertical" then
                             direction_pos = "y"
-                            direction_num =  2 
+                            direction_num =  2
                             direction_dim = "h"
                         else
                             error("Expected 'horizontal' or 'vertical'. Received "..v,2)
                         end
-                        direction = v 
+                        direction = v
                         resized = true
                     end
                 end,
                 progress = function(instance,_ENV)
                     return function(oldf) return progress     end,
-                    function(oldf,self,v) 
+                    function(oldf,self,v)
                         print(v)
                         if type(v) ~= "number" then
                             error("Expected number. Received ".. type(v),2)
-                        elseif v > 1 or v < 0 then 
+                        elseif v > 1 or v < 0 then
                             error("Must be between [0,1]. Received ".. v,2)
                         end
-                        grip[direction_pos] = 
-                            v*(track[direction_dim]-grip[direction_dim]) + 
+                        grip[direction_pos] =
+                            v*(track[direction_dim]-grip[direction_dim]) +
                             grip[direction_dim]/2
-                        
+
                         print(direction_pos,grip.gid,grip[direction_pos])
-                        
-                        progress = v 
+
+                        progress = v
                     end
                 end,
                 widget_type = function(instance,_ENV)
                     return function(oldf) return "Slider" end
                 end,
                 attributes = function(instance,_ENV)
-                    return function(oldf,self) 
+                    return function(oldf,self)
                         local t = oldf(self)
                         t.direction = instance.direction
                         t.progress  = instance.progress
@@ -118,10 +117,10 @@ Slider = setmetatable(
                         t.grip_h    = instance.grip_h
                         t.track_w   = instance.track_w
                         t.track_h   = instance.track_h
-                        
+
                         t.type = "Slider"
-                        
-                        return t  
+
+                        return t
                     end
                 end,
             },
@@ -132,18 +131,18 @@ Slider = setmetatable(
             drag_horizontal= function(instance,_ENV)
                 return function(x,_)
                     p = p + ( x - prev_pos )*pixels_to_progress_ratio
-                    
+
                     prev_pos = x
-                    
+
                     instance.progress = p > 1 and 1 or p > 0 and p or 0
                 end
             end,
             drag_vertical =  function(instance,_ENV)
                 return function(_,y)
                     p = p + ( y - prev_pos )*pixels_to_progress_ratio
-                    
+
                     prev_pos = y
-                    
+
                     instance.progress = p > 1 and 1 or p > 0 and p or 0
                 end
             end,
@@ -200,15 +199,15 @@ Slider = setmetatable(
                         else
                             error("invalid direction",2)
                         end
-                        
+
                         instance.w = grip.w > track.w and grip.w or track.w
                         instance.h = grip.h > track.h and grip.h or track.h
                     end
                 end
             end,
         },
-        
-        
+
+
         declare = function(self,parameters)
             local instance, _ENV = Widget(parameters)
             restyle = true
@@ -218,14 +217,14 @@ Slider = setmetatable(
                 on_button_down = function(self,...)
                     print("here",direction_dim)
                     pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
-                    
+
                     --position_grabbed_from = ({...})[direction_num]
                     prev_pos = ({...})[direction_num]
-                    
+
                     --this function is called by screen_on_motion
                     g_dragging = _ENV["drag_"..direction]
                     grip:grab_pointer()
-                    
+
                     return true
                 end,
                 on_motion = function(self,...)
@@ -239,42 +238,42 @@ Slider = setmetatable(
             }
             --]]
             track = NineSlice{
-                name =  "track", 
+                name =  "track",
                 reactive = true,
                 on_button_down = function(self,...)
-                    
+
                     pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
-                    
+
                     prev_pos =
                         --the transformed position of the grip
                         grip.transformed_position[direction_num]*
                         --transformed position value has to be converted to the 1920x1080 scale
                         screen[direction_dim]/screen.transformed_size[direction_num]+
                         -- transformed position doesn't take anchor point into account
-                        grip[direction_dim]/2 
-                    
+                        grip[direction_dim]/2
+
                     _ENV["drag_"..direction](...)
                 end,
             }
             --]]
-            
+
             p = 0
             progress = 0
-            
+
             direction = "horizontal"
             direction_pos = "x"
             direction_num =  1
             direction_dim = "w"
             pixels_to_progress_ratio = 1
             prev_pos = 0
-            
+
             add( instance, track, grip )
-            
+
             setup_object(self,instance,_ENV)
-            
+
             return instance, _ENV
-            
-            
+
+
         end,
     }
 )
