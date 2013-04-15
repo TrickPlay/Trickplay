@@ -335,7 +335,8 @@ class TrickplayImageFileSystem(QWidget):
         self.dialog = QDialog()
         self.ndirUi = Ui_newFolderDialog()
         self.ndirUi.setupUi(self.dialog)
-        self.dialog.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 400, self.main.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        #self.dialog.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 400, self.main.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.main._filesystem.geometry().x() + 400, self.main._filesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
         if self.dialog.exec_():
 			dir_name = self.ndirUi.folder_name.text()
 			new_path = newFolderParent+dir_name+"/"

@@ -1459,16 +1459,17 @@ class TrickplayInspector(QWidget):
             # show the screen items 
             for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked 
-                theItem = self.search(theLayer, 'name')
-                if theItem is not None:
+                if len(theLayer) > 0 :
+                    theItem = self.search(str(theLayer), 'name')
+                    if theItem is not None:
 
-                    if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
-                        self.sendData(theItem['gid'], "is_visible", True)
-                        theItem.setCheckState(Qt.Checked)
-                    # the layer is not in this selected screen and if it is checked 
-                    elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
-                        self.sendData(theItem['gid'], "is_visible", False)
-                        theItem.setCheckState(Qt.Unchecked)
+                        if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
+                            self.sendData(theItem['gid'], "is_visible", True)
+                            theItem.setCheckState(Qt.Checked)
+                        # the layer is not in this selected screen and if it is checked 
+                        elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
+                            self.sendData(theItem['gid'], "is_visible", False)
+                            theItem.setCheckState(Qt.Unchecked)
 
             if theItem :
                 self.curLayerGid = theItem['gid'] 
