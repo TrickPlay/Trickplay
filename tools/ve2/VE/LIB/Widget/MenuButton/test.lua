@@ -3,11 +3,11 @@ local test_group = Group()
 
 screen:add(test_group)
 local tests = {
-    
+
 }
 
 for i,test in ipairs(tests) do
-    
+
     if not test() then print("test "..i.." failed") end
     test_group:clear()
 end
@@ -95,12 +95,16 @@ mb4.neighbors[keys.Up] = mb3
 mb3.neighbors[keys.Down] = mb4
 
 --]]
+
+mb5 = WL.MenuButton(mb4.attributes)
+mb5.x = 1400
+
 wg = WL.Widget_Group()
 screen:add(wg)
 wg:add(
     WL.Widget_Rectangle{x=300,size = {20,1000}},
     WL.Widget_Rectangle{x=600,size = {20,1000}},
-    mb0,mb1,mb2,mb3,mb4
+    mb0,mb1,mb2,mb3,mb4,mb5
 )
 
 --print(get_all_styles())

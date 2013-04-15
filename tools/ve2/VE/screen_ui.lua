@@ -13,23 +13,19 @@ end
 
 
 function screen_ui.n_selected_all() 
+    local currentLayer 
 	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "border") then 
-				screen:remove(j)
-				local a, b = string.find(j.name,"border")
-		    	local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	-- VE2 g-> screen
-		    	if(t_obj ~= nil) then 
-					t_obj.extra.selected = false
-					local am = screen:find_child(t_obj.name.."a_m")
-        			if am then 
-	   					screen:remove(am)
-        			end
-	        	end
+
+		        local a, b = string.find(j.name,"border")
+		        local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	-- VE2 g-> screen
+			    _VE_.deselectUIElement(t_obj.gid, false)
+
 			end 
 		end
 	end
-
+    _VE_.openInspector(screen.gid, false)
 	selected_objs = {}
 
 end
@@ -38,12 +34,12 @@ function screen_ui.draw_selected_container_border(x,y)
 
 	local prev_selected_container
 
+	selected_container = util.find_container(x,y) 
+
 	if selected_container then 
 		prev_selected_container = selected_container 
 	end 
 			
-	selected_container = util.find_container(x,y) 
-
 	if prev_selected_container then 
 		if prev_selected_container ~= selected_container then 
 			screen_ui.n_selected (prev_selected_container)
@@ -52,10 +48,10 @@ function screen_ui.draw_selected_container_border(x,y)
 
 	if selected_container and selected_content then 
 		if selected_content.extra.is_in_group ~= true then 
-			if selected_container.selected == false then
+			if selected_container.ve_selected == false then
 				screen_ui.container_selected(selected_container,x,y)	
 			elseif selected_container.widget_type == "LayoutManager" then 
-				if selected_container.selected == true then
+				if selected_container.ve_selected == true then
 					local layout_bdr = screen:find_child(selected_container.name.."border")
 					if layout_bdr then 
 				    	local r_c = layout_bdr.r_c
@@ -124,7 +120,7 @@ function screen_ui.container_selected(obj, x, y)
 
     if not screen:find_child(obj_border.name) then 
         screen:add(obj_border)
-        obj.extra.selected = true
+        obj.extra.ve_selected = true
         --table.insert(selected_objs, obj_border.name)
     end
 end  
@@ -297,7 +293,7 @@ function screen_ui.selected(obj)
     anchor_mark.name = obj.name.."a_m"
     screen:add(anchor_mark)
     screen:add(obj_border)
-    obj.extra.selected = true
+    obj.extra.ve_selected = true
     table.insert(selected_objs, obj_border.name)
 end  
 
@@ -321,20 +317,21 @@ function screen_ui.n_selected(obj)
 
 		util.table_removekey(selected_objs, obj.name.."border")
 
-        obj.extra.selected = false
+        obj.extra.ve_selected = false
      end 
 
 end  
 
 function screen_ui.n_select_all ()
 
+    local currentLayer 
+
 	for i, j in pairs (screen.children) do -- VE2 : g->screen
-		if(j.extra.selected == true) then 
+		if(j.extra.ve_selected == true) then 
 			screen_ui.n_selected(j) 
 		end 
 	end 
 	selected_objs = {}
-
 end 
 
 function screen_ui.n_select(obj, drag)
@@ -444,19 +441,20 @@ function screen_ui.multi_select_done(x,y)
 
     for k, l in pairs(screen.children) do -- VE2 : g -> screen
         if l.children then
+        --if l.name and string.find(l.name, "Layer") ~= nil then
         for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
-			if(v.extra.selected == false and v.parent.visible == true) then 
-		    	screen_ui.selected(v)
-                _VE_.openInspector(v.gid, true)
-
+			if(v.extra.ve_selected == false and v.parent.visible == true) then 
+			    if(v.extra.ve_selected == false and l.visible == true) then 
+		    	    --screen_ui.selected(v)
+                    _VE_.openInspector(v.gid, true)
+                end
 			end 
 		end 
 		end 
 		end 
     end
-
 	
 	screen:remove(multi_select_border)
 	m_init_x = 0 

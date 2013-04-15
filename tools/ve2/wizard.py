@@ -66,6 +66,9 @@ class Wizard():
             msg.addButton("New Project" , VE_NEW_PROJECT_ROLE)
             msg.addButton("Open Project" , VE_OPEN_PROJECT_ROLE)
             msg.setWindowTitle(title)
+            #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+            msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+
             ret = msg.exec_()
             if ret == VE_NEW_PROJECT_ROLE:
                 self.mainWindow.newProject()
@@ -144,7 +147,7 @@ class Wizard():
                         return 
 
             else:
-                print('[VDBG] Error - ' + path + ' is not existing directory.')
+                print('[VE] Error - ' + path + ' is not existing directory.')
             
     def lineSplit(self, line):
         """
@@ -320,6 +323,10 @@ class Wizard():
         QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
         QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
 
+        #self.dialog.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+
+
         if id is not None:
             self.ui.id.setText(id)
         if name is not None:
@@ -345,12 +352,16 @@ class Wizard():
                         msg = QMessageBox()
                         msg.setText('Path "' + path + '" is aleady exist. Please select other id or name for the project.')
                         msg.setWindowTitle("Error")
+                        #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                        msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                         msg.exec_()
                         return None
                 except:
                     msg = QMessageBox()
                     msg.setText('Path "' + path + '" is not valid. Please select other id or name for the project.')
                     msg.setWindowTitle("Error")
+                    #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+                    msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                     msg.exec_()
                     return None
 
@@ -359,13 +370,22 @@ class Wizard():
                 appFile.write('app = {' + APP.format(id, name) + '}')
                 appFile.close()
 
+                eventPath = os.path.join(path, 'event.lua')
+                eventFile = open(eventPath, 'w')
+                eventContents = "-- SCREEN ON_KEY_DOWN SECTION [DO NOT CHANGE THIS LINE]\n\tfunction screen:on_key_down(key)\n\n\tend\n-- END SCREEN ON_KEY_DOWN SECTION [DO NOT CHANGE THIS LINE]\n\n-- SCREEN ON_KEY_UP SECTION [DO NOT CHANGE THIS LINE]\n\tfunction screen:on_key_up(key)\n\n\tend\n-- END SCREEN ON_KEY_UP SECTION [DO NOT CHANGE THIS LINE]\n\n-- SCREEN ON_BUTTON_DOWN SECTION [DO NOT CHANGE THIS LINE]\n\tfunction screen:on_button_down(x , y , button, num_clicks, m)\n\n\tend\n-- END SCREEN ON_BUTTON_DOWN SECTION [DO NOT CHANGE THIS LINE]\n\n-- SCREEN ON_BUTTON_UP SECTION [DO NOT CHANGE THIS LINE]\n\tfunction screen:on_button_up(x , y , button, num_clicks, m)\n\n\tend\n-- END SCREEN ON_BUTTON_UP SECTION [DO NOT CHANGE THIS LINE]\n\n-- SCREEN ON_MOTION SECTION [DO NOT CHANGE THIS LINE]\n\tfunction screen:on_motion(x , y)\n\n\tend\n-- END SCREEN ON_MOTION SECTION [DO NOT CHANGE THIS LINE]\n\n"
+
+                eventFile.write(eventContents)
+                eventFile.close()
+
                 mainPath = os.path.join(path, 'main.lua')
                 mainFile = open(mainPath, 'w')
 
-                mainContents = """-- GLOBAL SECTION\nWL=dofile('LIB/Widget/Widget_Library.lua') --Load widget library\ndofile('LIB/ve2/ve_runtime') --Load VE runtime library \n-- END GLOBAL SECTION\n\nfunction main()\n\n\tlocal layers_file = 'screens/layers.json'\n\tlocal styles_file = 'screens/styles.json'\n\tlocal screens_file = 'screens/screens.json'\n\tlocal image_path = 'assets/images/'\n\n\tlocal style = readfile(styles_file)\n\tstyle = string.sub(style, 2, string.len(style)-1)\n\tload_styles(style)\n\n\tlocal layer = readfile(layers_file)\n\tlayer = string.sub(layer, 2, string.len(layer)-1)\n\n\tlocal screens = readfile(screens_file)\n\tscreens = string.sub(screens, 2, string.len(screens)-1)\n\n\tlocal layerGroup = load_layer(layer)\n\n\tfor i,j in ipairs(layerGroup.children) do\n\t\tif string.find(j.name, 'Layer') then\n\t\t\tloadfile(string.lower(j.name)..'.lua')\n\t\t\tj:unparent()\n\t\t\tscreen:add(j)\n\t\t\tj:hide()\n\t\tend\n\tend\n\n\ttransit_to(screens, nil)\n\n-- SCREEN ON_KEY_DOWN SECTION\n\tfunction screen:on_key_down(key)\n\tend\n-- END SCREEN ON_KEY_DOWN SECTION\n\nend\n\n-- GLOBAL SECTION FOOTER \ncontrollers:start_pointer()\nscreen:show()\ndolater(main)\n-- END GLOBAL SECTION FOOTER""" 
-                
+                mainContents = """-- GLOBAL SECTION [DO NOT CHANGE THIS LINE]\nWL=dofile('LIB/Widget/Widget_Library.lua') --Load widget library\nVL=dofile('LIB/ve2/ve_runtime') --Load VE runtime library \n-- END GLOBAL SECTION [DO NOT CHANGE THIS LINE]\n\nfunction main()\n\n\tlocal layers_file = 'screens/layers.json'\n\tlocal styles_file = 'screens/styles.json'\n\tlocal screens_file = 'screens/screens.json'\n\tlocal image_path = 'assets/images/'\n\n\tlocal style = readfile(styles_file)\n\tstyle = string.sub(style, 2, string.len(style)-1)\n\tVL.load_styles(style)\n\n\tlocal layer = readfile(layers_file)\n\tlayer = string.sub(layer, 2, string.len(layer)-1)\n\n\tlocal screens = readfile(screens_file)\n\tscreens = string.sub(screens, 2, string.len(screens)-1)\n\n\tlocal layerGroup = VL.load_layer(layer)\n\n\tfor i,j in ipairs(layerGroup.children) do\n\t\tif string.find(j.name, 'Layer') then\n\t\t\tloadfile(string.lower(j.name)..'.lua')\n\t\t\tj:unparent()\n\t\t\tscreen:add(j)\n\t\t\tj:hide()\n\t\tend\n\tend\n\n\tdofile('event.lua')\n\tVL.transit_to(screens, nil)\n\nend\n\n-- GLOBAL SECTION FOOTER [DO NOT CHANGE THIS LINE]\ncontrollers:start_pointer()\nscreen:show()\ndolater(main)\n-- END GLOBAL SECTION FOOTER [DO NOT CHANGE THIS LINE]""" 
+
                 mainFile.write(mainContents)
                 mainFile.close()
+
+
                 self.openList = [appPath, mainPath]
                 # create subdirectories (lib, assets, screens ...) and copy lib files into it. 
                 assets_path = str(os.path.join(str(path), 'assets'))
@@ -380,7 +400,7 @@ class Wizard():
                 lib_path = str(os.path.join(str(path), 'LIB'))
                 os.mkdir(lib_path)
                 shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/Widget')) ,str(os.path.join(lib_path, 'Widget')))
-                shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/assets')) ,str(os.path.join(lib_path, 'assets')))
+                #shutil.copytree(str(os.path.join(self.mainWindow.apath, 'VE/LIB/assets')) ,str(os.path.join(lib_path, 'assets')))
                 os.mkdir(str(os.path.join(lib_path, 've2')))
                 shutil.copyfile(str(os.path.join(self.mainWindow.apath, 'VE/LIB/VE/ve_runtime.lua')) ,str(os.path.join(lib_path, 've2/ve_runtime.lua')))
 

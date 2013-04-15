@@ -46,5 +46,10 @@ print(od2:to_json())
 print(od3:to_json())
 print(od4:to_json())
 --]]
-screen:add(od1,od2,od3,od4,od5)
+local r = Rectangle{
+    size = od1.size,
+    position = od1.position,
+    opacity = 100
+}
+screen:add(r,od1,od2,od3,od4,od5)
 
