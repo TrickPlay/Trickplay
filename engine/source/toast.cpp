@@ -322,8 +322,8 @@ Toast::Toast( TPContext* c )
 
     clutter_actor_get_size( stage , & stage_width , & stage_height );
 
-    gfloat xs = stage_width / 1920.0;
-    gfloat ys = stage_height / 1080.0;
+    gfloat xs = stage_width / context->get_int( TP_VIRTUAL_WIDTH );
+    gfloat ys = stage_height / context->get_int( TP_VIRTUAL_HEIGHT );
 
     // Set the scale on the group
 
