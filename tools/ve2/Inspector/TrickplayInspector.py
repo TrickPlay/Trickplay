@@ -687,6 +687,9 @@ class TrickplayInspector(QWidget):
         """
         Select a row of the inspector model (as the result of a search)
         """
+        #print "selectItem", item.partner().text()
+        print "selectItem"
+
         topLeft = item.index()
         bottomRight = item.partner().index()
         
@@ -700,6 +703,12 @@ class TrickplayInspector(QWidget):
             self.ui.inspector.selectionModel().select(
                 QItemSelection(topLeft, bottomRight),
                 QItemSelectionModel.SelectCurrent)
+
+        inputCmd = str("_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
+        inputCmd2 = str("_VE_.selectUIElement('"+str(item.TPJSON()['name'])+"',false)")
+        print inputCmd2
+        self.main._emulatorManager.trickplay.write(inputCmd+"\n")
+        self.main._emulatorManager.trickplay.waitForBytesWritten()
     
     def boolValChanged (self,state):
         print state
