@@ -111,7 +111,7 @@ class TrickplayEmulatorManager(QWidget):
 				break
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
-			print ".............."+s
+			#print ".............."+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):

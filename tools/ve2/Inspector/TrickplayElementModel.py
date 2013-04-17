@@ -177,7 +177,7 @@ class TrickplayElementModel(QStandardItemModel):
                 #result = self.inspector.search(self.inspector.newgid, 'gid')
                 if result: 
                     #print("[[[[[111111111111111111111]]]]", self.inspector.newgid)
-                    print("[[[[[111111111111111111111]]]]")
+                    #print("[[[[[111111111111111111111]]]]")
                     self.inspector.selectItem(result, "f")
                 else:
                     print("[TrickplayElementModel] UI Element not found.")
@@ -185,7 +185,7 @@ class TrickplayElementModel(QStandardItemModel):
             else:
                 result = self.inspector.search(gid, 'gid')
                 if result:
-                    print("[[[[[2222222222222222222]]]]")
+                    #print("[[[[[2222222222222222222]]]]")
                     self.inspector.selectItem(result, "f")
                 else :
                     print "????????????????????"
