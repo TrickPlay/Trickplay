@@ -1088,8 +1088,13 @@ _VE_.getScreenLoc = function()
     print("screenLoc"..screen.x..","..screen.y)
 end 
 _VE_.setScreenLoc = function(x, y)
-    screen.y = y--300
-    screen.x = x--1900
+    if x == 0 and y == 0  then 
+        screen.y = 300
+        screen.x = 300
+    else
+        screen.y = y--300
+        screen.x = x--1900
+    end 
 end 
 
 _VE_.newLayer = function()
@@ -1501,6 +1506,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         screen_ui.n_selected_all()
         uiInstance.extra.mouse_handler = false 
         util.create_mouse_event_handler(uiInstance, uiTypeStr)
+        print("newui_gid"..uiInstance.gid)
         util.addIntoLayer(uiInstance)
     end
 

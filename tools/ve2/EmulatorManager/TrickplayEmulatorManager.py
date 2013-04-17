@@ -210,6 +210,8 @@ class TrickplayEmulatorManager(QWidget):
 				        focusObj = str(s[9:])
 				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
 				        self.inspector.neighbors.toggled(False)
+				    elif luaCmd == "newui_gid":
+				        self.inspector.newgid = str(s[9:])
 				    elif luaCmd == "openInspc":
 				        gid = (s[10:])
 				        shift = s[9]
@@ -274,6 +276,7 @@ class TrickplayEmulatorManager(QWidget):
 					        if shift == "f" :
 					            self.inspector.ui.inspector.selectionModel().clear()
 
+					        print ("select item >>>>>>>>>>>>>>>>>>>  ")
 					        self.inspector.selectItem(result, shift)
                             # open Property Tab 
 					        # self.inspector.ui.tabWidget.setCurrentIndex(1)

@@ -13,7 +13,6 @@ class TrickplayElementModel(QStandardItemModel):
         self.inspector = inspector
         self.manager = QNetworkAccessManager()
         self.reply = None
-        self.theBigestGid = None
         self.styleData = None
         self.preventChanges = False
         self.newChildGid = None
@@ -149,7 +148,6 @@ class TrickplayElementModel(QStandardItemModel):
             for c in pdata["children"]:
                 if c["name"] == "screen":
                     child = c
-                    #self.theBigestGid = 2
                     break
                 
             """
@@ -165,26 +163,21 @@ class TrickplayElementModel(QStandardItemModel):
                 print( "Could not find screen element." )
             else:
                 self.tpData = pdata
-                self.theBigestGid = 2
                 self.insertElement(root, child, pdata, True)
 
             self.inspector.ui.inspector.expandAll()
             #self.inspector.ui.inspector.setRowHidden(0, root.index(), True)
 
-            gid = None
-
-            try:
-                index = self.inspector.selected(self.ui.inspector)
-                item = self.itemFromIndex(index)
-                gid = item['gid']
-            except:
-                gid = 2
+            gid = child['gid']
 
             # Find the last item after getting new data so that
             # both trees reflect the changes
             if self.inspector.main.command == "newLayer" or self.inspector.main.command == "insertUIElement" :
-                result = self.inspector.search(self.theBigestGid , 'gid')
+                result = child #self.inspector.search(gid, 'gid')
+                #result = self.inspector.search(self.inspector.newgid, 'gid')
                 if result: 
+                    #print("[[[[[111111111111111111111]]]]", self.inspector.newgid)
+                    print("[[[[[111111111111111111111]]]]")
                     self.inspector.selectItem(result, "f")
                 else:
                     print("[TrickplayElementModel] UI Element not found.")
@@ -192,7 +185,10 @@ class TrickplayElementModel(QStandardItemModel):
             else:
                 result = self.inspector.search(gid, 'gid')
                 if result:
+                    print("[[[[[2222222222222222222]]]]")
                     self.inspector.selectItem(result, "f")
+                else :
+                    print "????????????????????"
     
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
                 self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                
@@ -246,9 +242,6 @@ class TrickplayElementModel(QStandardItemModel):
             self.inspector.layerName[(gid)] = self.inspector.curLayerName
             self.inspector.layerGid[(gid)] = self.inspector.curLayerGid
 
-        if gid > self.theBigestGid:
-            self.theBigestGid = gid 
-
         if "Texture" == title:
             title = "Image"
         elif "Widget_" == title[:7]:
@@ -268,6 +261,8 @@ class TrickplayElementModel(QStandardItemModel):
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)
+        print node.TPJSON()['gid'], node.TPJSON()['name'], "######################"
+        #print node['gid'], node['name'], "######################"
 
         # Add a checkbox for everything but screen
         if not screen:
@@ -399,10 +394,10 @@ class TrickplayElementModel(QStandardItemModel):
             if item[property] == value:
                 return item
         except:
-            return None
+            pass
         
         # Check the item's children
-        else:
+        try:
             
             count = item.rowCount()
             if count > 0:
@@ -411,6 +406,6 @@ class TrickplayElementModel(QStandardItemModel):
                     if result:
                         return result
                         
-            else:
-                return None
+        except:
+            pass
 
