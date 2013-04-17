@@ -915,6 +915,8 @@ static gboolean lua_gc_every_frame( gpointer state )
 
 //-----------------------------------------------------------------------------
 
+unsigned App::rotation = 0;
+
 App::App( TPContext* c, const App::Metadata& md, const String& dp, const LaunchInfo& _launch )
     :
     context( c ),
@@ -936,6 +938,8 @@ App::App( TPContext* c, const App::Metadata& md, const String& dp, const LaunchI
 
 #endif
 {
+    rotation = c->get_int( TP_SCREEN_ROTATION );
+
     // Create the user agent
 
     user_agent = Network::format_user_agent(
@@ -1007,18 +1011,29 @@ void debug_hook( lua_State* L, lua_Debug* ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer screen )
+void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer the_screen )
 {
-    if ( screen )
+    if ( the_screen )
     {
         ClutterActor* stage = CLUTTER_ACTOR( the_stage );
+        ClutterActor* screen = CLUTTER_ACTOR( the_screen );
 
         gfloat width;
         gfloat height;
+        gfloat s_width;
+        gfloat s_height;
 
         clutter_actor_get_size( stage , & width , & height );
+        clutter_actor_get_size( screen , & s_width , & s_height );
 
-        clutter_actor_set_scale( CLUTTER_ACTOR( screen ), width / 1920, height / 1080 );
+        // Scale depends on rotation!
+        if(rotation % 2 != 0)
+        {
+            // Swap width for height
+            clutter_actor_set_scale( screen, width / s_height, height / s_width );
+        } else {
+            clutter_actor_set_scale( screen, width / s_width, height / s_height );
+        }
 
         g_debug( "DISPLAY SIZE CHANGED TO %1.0fx%1.0f" , width , height );
     }
@@ -1133,12 +1148,23 @@ void App::run_part2( const StringSet& allowed_names , RunCallback run_callback )
 
     g_assert( stage );
 
+    gfloat width;
+    gfloat height;
+    clutter_actor_get_size(stage, &width, &height);
+
     screen = clutter_actor_new();
 
     g_assert( screen );
 
-    clutter_actor_set_position( screen, 0, 0 );
-    clutter_actor_set_size( screen, 1920, 1080 );
+    clutter_actor_set_position( screen, width/2, height/2 );
+    clutter_actor_set_anchor_point(screen, context->get_int( TP_VIRTUAL_WIDTH )/2, context->get_int( TP_VIRTUAL_HEIGHT )/2);
+    clutter_actor_set_size( screen, context->get_int( TP_VIRTUAL_WIDTH ), context->get_int( TP_VIRTUAL_HEIGHT ) );
+
+    if ( rotation > 0 && rotation < 4 )
+    {
+        clutter_actor_set_rotation(screen, CLUTTER_Z_AXIS, rotation * 90, 0, 0, 0);
+        g_debug("ROTATED SCREEN TO ORIENTATION %d", rotation);
+    }
 
     clutter_actor_set_name( screen , "screen" );
 
@@ -1761,8 +1787,11 @@ void App::animate_in()
 
     gfloat width;
     gfloat height;
+    gfloat s_width;
+    gfloat s_height;
 
     clutter_actor_get_size( stage, &width , &height );
+    clutter_actor_get_size( screen, &s_width , &s_height );
 
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
@@ -1771,7 +1800,14 @@ void App::animate_in()
 
     clutter_actor_set_child_above_sibling( stage, screen, NULL );
 
-    clutter_actor_set_scale( screen, width / 1920, height / 1080 );
+    // Scale depends on rotation!
+    if(rotation % 2 != 0)
+    {
+        // Swap width for height
+        clutter_actor_set_scale( screen, width / s_height, height / s_width );
+    } else {
+        clutter_actor_set_scale( screen, width / s_width, height / s_height );
+    }
 
     clutter_actor_grab_key_focus( screen );
 }
@@ -1832,13 +1868,17 @@ gboolean App::animate_out_callback( gpointer s )
         gfloat width;
         gfloat height;
 
-        clutter_actor_get_size( parent, &width, &height );
+        gfloat s_width;
+        gfloat s_height;
 
-        clutter_actor_set_anchor_point( screen, 960, 540 );
+        clutter_actor_get_size( parent, &width, &height );
+        clutter_actor_get_size( parent, &s_width, &s_height );
+
+        clutter_actor_set_anchor_point( screen, s_width / 2, s_height / 2 );
 
         clutter_actor_set_position( screen, width / 2, height / 2 );
 
-        clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
+        clutter_actor_set_clip( screen, 0, 0, s_width, s_height );
 
         ClutterAnimator* animator = clutter_animator_new();
         clutter_animator_set_duration( animator, 750 );

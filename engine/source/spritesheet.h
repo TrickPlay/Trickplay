@@ -79,19 +79,23 @@ public:
     class Sprite : public PushTexture
     {
     public:
-        Sprite() : source( NULL ), x( 0 ), y( 0 ), w( 0 ), h( 0 ) {}
-        ~Sprite() {}
+        Sprite() : source( NULL ), x( 0 ), y( 0 ), w( 0 ), h( 0 ), id( NULL ) {}
+        ~Sprite()  {}
 
-        void set_sprite( Source* _source, int _x, int _y, int _w, int _h )
+        void set_sprite( Source* _source, const char * new_id, int _x, int _y, int _w, int _h )
         {
             g_assert( _source );
             source = _source;
+            id = new_id;
             x = MAX( _x, 0 ); y = MAX( _y, 0 ); w = _w; h = _h;
         }
 
         void update();
         void get_natural_dimensions( int* _w, int* _h ) { * _w = w; * _h = h; }
         void unsubscribe( PingMe* ping, bool release_now );
+
+        void set_id( char * new_id ) { id = new_id; }
+        const char * get_id() { return id; }
 
     private:
         void make_texture( bool immediately );
@@ -100,6 +104,7 @@ public:
         PushTexture::PingMe ping;
         Source* source;
         int x, y, w, h;
+        const char * id;
     };
 
     //inline static void unref( SpriteSheet * sheet ) { RefCounted::unref( sheet ); }

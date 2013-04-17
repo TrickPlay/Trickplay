@@ -1782,6 +1782,9 @@ void TPContext::load_external_configuration()
         TP_DATA_PATH,
         TP_SCREEN_WIDTH,
         TP_SCREEN_HEIGHT,
+        TP_VIRTUAL_WIDTH,
+        TP_VIRTUAL_HEIGHT,
+        TP_SCREEN_ROTATION,
         TP_CONFIG_FROM_ENV,
         TP_CONFIG_FROM_FILE,
         TP_CONSOLE_ENABLED,
@@ -1989,6 +1992,21 @@ void TPContext::validate_configuration()
     if ( !get( TP_SCREEN_HEIGHT ) )
     {
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
+    }
+
+    if ( !get( TP_VIRTUAL_WIDTH ) )
+    {
+        set( TP_VIRTUAL_WIDTH, TP_VIRTUAL_WIDTH_DEFAULT );
+    }
+
+    if ( !get( TP_VIRTUAL_HEIGHT ) )
+    {
+        set( TP_VIRTUAL_HEIGHT, TP_VIRTUAL_HEIGHT_DEFAULT );
+    }
+
+    if ( !get( TP_SCREEN_ROTATION ) )
+    {
+        set( TP_SCREEN_ROTATION, TP_SCREEN_ROTATION_DEFAULT );
     }
 
     // RESOURCES PATH

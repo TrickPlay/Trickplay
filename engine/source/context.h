@@ -39,6 +39,9 @@
 #define TP_CONTROLLERS_PORT_DEFAULT         0
 #define TP_SCREEN_WIDTH_DEFAULT             960
 #define TP_SCREEN_HEIGHT_DEFAULT            540
+#define TP_VIRTUAL_WIDTH_DEFAULT            1920
+#define TP_VIRTUAL_HEIGHT_DEFAULT           1080
+#define TP_SCREEN_ROTATION_DEFAULT          0
 #define TP_CONTROLLERS_NAME_DEFAULT         "TrickPlay"
 #define TP_LIRC_ENABLED_DEFAULT             true
 #define TP_LIRC_UDS_DEFAULT                 "/var/run/lirc/lircd"
