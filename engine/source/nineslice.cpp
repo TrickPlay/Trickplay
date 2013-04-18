@@ -44,7 +44,7 @@ struct Slice
             material = cogl_material_copy( COGL_MATERIAL( clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
         }
 
-        clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+        nineslice_redraw(effect);
 
         loaded = sprite && sprite->is_real();
         done = !sprite || sprite->is_real() || sprite->is_failed();
@@ -152,12 +152,17 @@ void nineslice_effect_get_tile( NineSliceEffect* effect, gboolean tile[6] )
     }
 }
 
-void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess )
+void nineslice_redraw( NineSliceEffect* effect )
+{
+    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+}
+
+void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess, bool constructing )
 {
     g_assert(i < 6);
     effect->priv->tile[i] = guess ? ( i ? effect->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
 
-    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+    if (!constructing) nineslice_redraw(effect);
 }
 
 void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] )
@@ -167,7 +172,7 @@ void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] )
         effect->priv->tile[i] = tile[i];
     }
 
-    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+    nineslice_redraw(effect);
 }
 
 std::vector< int >* nineslice_effect_get_borders( NineSliceEffect* effect )
