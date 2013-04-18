@@ -140,7 +140,7 @@ private:
     short_timer(short_time),
     long_timer(long_time)
     {
-        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        text = CLUTTER_TEXT( clutter_text_new_full( "Sans 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
         clutter_text_set_line_wrap( text, true );
         clutter_text_set_line_alignment( text, PANGO_ALIGN_RIGHT );
         clutter_actor_set_x( CLUTTER_ACTOR( text ), clutter_actor_get_width( CLUTTER_ACTOR (stage) )/2 );
@@ -268,7 +268,7 @@ private:
     {
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
 
-        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        text = CLUTTER_TEXT( clutter_text_new_full( "Sans 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
         clutter_actor_set_name( CLUTTER_ACTOR( text ), "FPS Counter" );
 
         g_object_ref_sink( text );
