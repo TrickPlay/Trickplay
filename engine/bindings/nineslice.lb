@@ -1,6 +1,7 @@
 module nineslice;
 
 [[
+
 #include "log.h"
 #include "clutter_util.h"
 #include "util.h"
@@ -12,6 +13,10 @@ static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" 
 struct NineSliceBinding
 {
     NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
+    ~NineSliceBinding()
+    {
+        
+    }
 
     NineSliceEffect * get_effect() { return effect; };
 
@@ -64,9 +69,7 @@ struct NineSliceBinding
 
         ids[i] = new_id;
 
-        if (constructing) return;
-
-        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+        if (!constructing) nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
 
     void set_sheet( SpriteSheet * _sheet )
@@ -180,7 +183,13 @@ class NineSlice [[ClutterActor*]] actor
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
 
-            ClutterUtil::set_props_from_table( L, props );
+            if ( props )
+            {
+                get_binding(self)->constructing = true;
+                ClutterUtil::set_props_from_table( L, props );
+                get_binding(self)->constructing = false;
+                get_binding(self)->set_all_sprites();
+            }
 
             g_object_unref( self );
         ]];
