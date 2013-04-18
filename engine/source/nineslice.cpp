@@ -1,4 +1,5 @@
 #include <math.h>
+#include "log.h"
 #include "nineslice.h"
 
 G_DEFINE_TYPE( NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT );
@@ -153,7 +154,7 @@ void nineslice_effect_get_tile( NineSliceEffect* effect, gboolean tile[6] )
 
 void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess )
 {
-    g_assert( i < 6 );
+    g_assert(i < 6);
     effect->priv->tile[i] = guess ? ( i ? effect->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
 
     clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
