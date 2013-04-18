@@ -1,26 +1,43 @@
 module nineslice;
 
 [[
+#include "log.h"
 #include "clutter_util.h"
 #include "util.h"
 #include "nineslice.h"
-
 #include "sprite_sheet.lb.h"
-]]
-
-
-[[
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
+    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
 
     NineSliceEffect * get_effect() { return effect; };
 
-    bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
-    void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
+    bool get_tile( unsigned i )
+    {
+        if ( i >= 6 )
+        {
+            tpwarn("Invalid NineSlice tile index %d. The value must be between 0 and 6", i);
+            return false;
+        }
+
+        return nineslice_effect_get_tile( effect, i );
+    }
+
+    void set_tile( unsigned i, bool t, bool guess )
+    {
+        if ( i >= 6 )
+        {
+            tpwarn("Invalid NineSlice tile index %d. The value must be between 0 and 6", i);
+            return;
+        }
+
+        if (constructing) return;
+
+        nineslice_effect_set_tile( effect, i, t, guess );
+    }
 
     bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
 
@@ -28,14 +45,29 @@ struct NineSliceBinding
 
     std::string & get_id( unsigned i )
     {
-        g_assert( i < 9 );
+        if ( i >= 9 )
+        {
+            tpwarn("Invalid NineSlice id index %d. The value must be between 0 and 9", i);
+
+            static std::string e = "";
+            return e;
+        }
+
         return ids[i];
     };
 
     void set_id( unsigned i, const std::string & new_id )
     {
-        g_assert( i < 9 );
+        if ( i >= 9 )
+        {
+            tpwarn("Invalid NineSlice id index %d. The value must be between 0 and 9", i);
+            return;
+        }
+
         ids[i] = new_id;
+
+        if (constructing) return;
+
         nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
 
@@ -43,9 +75,14 @@ struct NineSliceBinding
     {
         sheet = _sheet;
 
+        if (constructing) return;
+
         for ( unsigned i = 0; i < 9; ++i )
         {
-            nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+            if ( !(ids[i].empty()) )
+            {
+                nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+            }
         }
     }
 
@@ -58,7 +95,7 @@ struct NineSliceBinding
     }
 
     bool async;
-    bool can_fire;
+    bool constructing;
 
 private:
     NineSliceEffect * effect;
