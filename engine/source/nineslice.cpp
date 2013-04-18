@@ -63,20 +63,13 @@ struct Slice
     bool done;
 };
 
-struct _NineSliceEffectPrivate
-{
-    Slice* slices;
-    bool can_fire;
-    gboolean tile[6];
-};
-
 class SignalLoadedLater : public Action
 {
     NineSliceEffect* self;
 
-public: SignalLoadedLater( NineSliceEffect* s ) : self( s ) { g_assert( s ); };
+    public: SignalLoadedLater( NineSliceEffect* s ) : self( s ) { g_assert( s ); };
 
-protected: bool run()
+    protected: bool run()
     {
         if ( nineslice_effect_is_done( self ) )
         {

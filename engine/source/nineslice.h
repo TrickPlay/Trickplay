@@ -13,17 +13,22 @@ GType nineslice_effect_get_type( void );
 #define IS_NINESLICE_EFFECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT))
 #define NINESLICE_EFFECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
 
-typedef struct _NineSliceEffect NineSliceEffect;
-typedef struct _NineSliceEffectClass NineSliceEffectClass;
-typedef struct _NineSliceEffectPrivate NineSliceEffectPrivate;
+struct Slice;
 
-struct _NineSliceEffect
+struct NineSliceEffectPrivate
+{
+    Slice* slices;
+    bool can_fire;
+    gboolean tile[6];
+};
+
+struct NineSliceEffect
 {
     ClutterEffect parent_instance;
     NineSliceEffectPrivate* priv;
 };
 
-struct _NineSliceEffectClass
+struct NineSliceEffectClass
 {
     ClutterEffectClass parent_class;
 };
