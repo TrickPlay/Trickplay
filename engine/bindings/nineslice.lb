@@ -34,9 +34,7 @@ struct NineSliceBinding
             return;
         }
 
-        if (constructing) return;
-
-        nineslice_effect_set_tile( effect, i, t, guess );
+        nineslice_effect_set_tile( effect, i, t, guess, constructing );
     }
 
     bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
@@ -77,11 +75,18 @@ struct NineSliceBinding
 
         if (constructing) return;
 
+        set_all_sprites();
+    }
+
+    void set_all_sprites()
+    {
+        if (!sheet) return;
+
         for ( unsigned i = 0; i < 9; ++i )
         {
             if ( !(ids[i].empty()) )
             {
-                nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+                nineslice_effect_set_sprite( effect, i, sheet->get_sprite( ids[i].c_str() ), async );
             }
         }
     }
