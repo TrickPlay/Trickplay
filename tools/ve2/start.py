@@ -7,7 +7,7 @@ from wizard import Wizard
 from main import MainWindow
 
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment
+from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment, QTimer
 
 
 def main(argv):
@@ -23,6 +23,15 @@ def main(argv):
     try:
         app = QApplication(argv)
 
+        def sigint_handler(signal, frame):
+            print("Handler for the SIGINT signal.")
+            app.main.exit()
+            sys.exit(0)
+        print("WE ARE REGISTERING SIG HANDLER")
+        signal.signal(signal.SIGINT, sigint_handler)
+        timer = QTimer()
+        timer.start(500)
+        timer.timeout.connect(lambda: None)
         QCoreApplication.setOrganizationDomain('www.trickplay.com');
         QCoreApplication.setOrganizationName('Trickplay');
         QCoreApplication.setApplicationName('Trickplay VisalEditor 2');
@@ -53,14 +62,7 @@ def main(argv):
     except KeyboardInterrupt:
 		exit("Exited")
 
-def sigint_handler(*args):
-    print("Handler for the SIGINT signal.")
-    app.main.exit()
-    sys.exit(0)
 
-if __name__ == '__main__':
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    signal.signal(signal.SIGINT, sigint_handler)
-    main(sys.argv)
+main(sys.argv)
 
     
