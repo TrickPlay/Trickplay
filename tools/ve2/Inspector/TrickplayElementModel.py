@@ -181,7 +181,6 @@ class TrickplayElementModel(QStandardItemModel):
                     self.inspector.selectItem(result, "f")
                 else:
                     print("[TrickplayElementModel] UI Element not found.")
-                self.inspector.main.command == ""
             else:
                 result = self.inspector.search(gid, 'gid')
                 if result:
@@ -190,6 +189,7 @@ class TrickplayElementModel(QStandardItemModel):
                 else :
                     print "????????????????????"
     
+            self.inspector.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
                 self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                
             return
