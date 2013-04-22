@@ -26,23 +26,6 @@ class MyDialog(QDialog):
     def paintEvent(self, event):
         pass
 
-        """create a painting canvas
-        
-        painter = QPainter()
-        painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        # use the brush for a texture/wallpaper background
-        # supply a background image file you have (add needed path)
-        painter.setBrush(QBrush(QPixmap("BG_GoldSwirl.gif")))
-        painter.drawRect(event.rect())
-        # optionally write something in the wallpaper
-        # (check the fonts available on your computer)
-        painter.setFont(QFont('Freestyle Script', 48))
-        painter.drawText(50, 160, "Hello World!")
-        painter.end()
-
-        create a painting canvas"""
-
 # Could use QWizard, but this is simpler
 class Wizard():
     
@@ -66,7 +49,6 @@ class Wizard():
             msg.addButton("New Project" , VE_NEW_PROJECT_ROLE)
             msg.addButton("Open Project" , VE_OPEN_PROJECT_ROLE)
             msg.setWindowTitle(title)
-            #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
             msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
 
             ret = msg.exec_()
@@ -320,12 +302,10 @@ class Wizard():
         QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
         QObject.connect(self.ui.id, SIGNAL("textChanged(QString)"), self.idChanged)
         QObject.connect(self.ui.name, SIGNAL("textChanged(QString)"), self.nameChanged)
-        QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
-        QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
+        QObject.connect(cancelButton, SIGNAL('clicked()'), self.quiet_exit)
+        QObject.connect(okButton, SIGNAL('clicked()'), self.quiet_exit)
 
-        #self.dialog.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
         self.dialog.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
-
 
         if id is not None:
             self.ui.id.setText(id)
@@ -352,7 +332,6 @@ class Wizard():
                         msg = QMessageBox()
                         msg.setText('Path "' + path + '" is aleady exist. Please select other id or name for the project.')
                         msg.setWindowTitle("Error")
-                        #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                         msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                         msg.exec_()
                         return None
@@ -360,7 +339,6 @@ class Wizard():
                     msg = QMessageBox()
                     msg.setText('Path "' + path + '" is not valid. Please select other id or name for the project.')
                     msg.setWindowTitle("Error")
-                    #msg.setGeometry(self.mainWindow.ui.mainMenuDock.geometry().x() + 100, self.mainWindow.ui.mainMenuDock.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                     msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
                     msg.exec_()
                     return None
@@ -412,5 +390,5 @@ class Wizard():
         else:
             return -1
 
-    def exit_ii(self):
+    def quiet_exit(self):
 		pass
