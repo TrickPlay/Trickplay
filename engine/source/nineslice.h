@@ -39,7 +39,7 @@ void nineslice_effect_set_sprite( NineSliceEffect* effect, unsigned i, SpriteShe
 
 bool nineslice_effect_is_done( NineSliceEffect* effect );
 bool nineslice_effect_is_loaded( NineSliceEffect* effect );
-void nineslice_effect_signal_loaded_later( NineSliceEffect* effect );  // fires "load_finished" signal if true
+Action * nineslice_effect_signal_loaded_later( NineSliceEffect* effect );  // fires "load_finished" signal if true
 
 // There are 6 tile parameters (see nineslice.lb); set/get them individually or as an array
 
