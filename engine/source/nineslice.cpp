@@ -17,8 +17,16 @@ struct Slice
         self->update();
     }
 
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ) {};
-    ~Slice() { if ( material ) { cogl_handle_unref( material ); } }
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL ) {};
+    ~Slice()
+    {
+        if ( done && action ) {
+            Action::cancel( action );
+            action = NULL;
+        }
+
+        if ( material ) cogl_handle_unref( material );
+    }
 
     void set_sprite( Sprite* _sprite, bool async )
     {
@@ -51,16 +59,17 @@ struct Slice
 
         if ( done )
         {
-            nineslice_effect_signal_loaded_later( effect );
+            action = nineslice_effect_signal_loaded_later( effect );
         }
     }
 
-    NineSliceEffect* effect;
-    CoglMaterial* material;
-    Sprite* sprite;
-    PingMe ping;
-    bool loaded;
-    bool done;
+    NineSliceEffect   * effect;
+    CoglMaterial      * material;
+    Sprite            * sprite;
+    PingMe              ping;
+    bool                loaded;
+    bool                done;
+    Action * action;
 };
 
 class SignalLoadedLater : public Action
@@ -122,13 +131,18 @@ bool nineslice_effect_is_loaded( NineSliceEffect* effect )
     return true;
 }
 
-void nineslice_effect_signal_loaded_later( NineSliceEffect* effect )
+Action * nineslice_effect_signal_loaded_later( NineSliceEffect* effect )
 {
+    SignalLoadedLater * ret = NULL;
     if ( effect->priv->can_fire )
     {
         effect->priv->can_fire = false;
-        Action::post( new SignalLoadedLater( effect ) );
+
+        ret = new SignalLoadedLater( effect );
+        Action::post( ret );
     }
+
+    return ret;
 }
 
 bool nineslice_effect_get_tile( NineSliceEffect* effect, unsigned i )
