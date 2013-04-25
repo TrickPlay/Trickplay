@@ -100,7 +100,6 @@ class MainWindow(QMainWindow):
 
         # Create Inspector
         self._inspector = TrickplayInspector(self)
-        #self._inspector.setWindowFlags(Qt.Window)
         self._inspector.setWindowTitle('Inspector')
         self.ui.actionInspector.toggled.connect(self.inspectorWindowClicked)
 
@@ -108,7 +107,6 @@ class MainWindow(QMainWindow):
 
         # Create Image File System
         self._ifilesystem = TrickplayImageFileSystem(self)
-        #self._ifilesystem.setWindowFlags(Qt.Window)
         self._ifilesystem.setWindowTitle('Images')
         self.ui.actionImages.toggled.connect(self.imagesWindowClicked)
 
@@ -126,9 +124,6 @@ class MainWindow(QMainWindow):
                 QWidget.__init__(self, None, flags )
 
         self._menubar = menubarWidget()
-
-        #self._menubar.setWindowFlags(Qt.Window)
-        #self._menubar.setWindowFlags(Qt.FramelessWindowHint)
 
         self.mainMenuLayout = QGridLayout()
         self.mainMenuLayout.setSpacing(0)

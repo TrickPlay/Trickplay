@@ -352,10 +352,7 @@ class Neighbors(QWidget):
             #self.tbDic(self.findCheckedButton().whatsThis()) 
             self.findCheckedButton().setEnabled(False)
             #_VE_.focusSettingMode()
-            inputCmd = str("_VE_.focusSettingMode("+self.keyDic[str(self.findCheckedButton().whatsThis())]+")")
-            print inputCmd
-            self.trickplay.write(inputCmd+"\n")
-            self.trickplay.waitForBytesWritten()
+            self.main.sendLuaCommand("focusSettingMode", "_VE_.focusSettingMode("+self.keyDic[str(self.findCheckedButton().whatsThis())]+")")
         else :
             if self.findCheckedButton():
                 if self.findCheckedButton().text() != "empty":
@@ -717,12 +714,8 @@ class TrickplayInspector(QWidget):
         except:
             pass
 
-        inputCmd = str("_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
-        inputCmd2 = str("_VE_.selectUIElement('"+str(item.TPJSON()['name'])+"',false)")
-        print inputCmd2
-        self.main._emulatorManager.trickplay.write(inputCmd+"\n")
-        self.main._emulatorManager.trickplay.waitForBytesWritten()
-    
+        self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
+
     def boolValChanged (self,state):
         print state
 
@@ -735,10 +728,7 @@ class TrickplayInspector(QWidget):
                 currentPropVal = "LIB/Widget/skin.json"
             else :
                 currentPropVal = "assets/skins/"+currentPropVal+".json"
-            inputCmd = str("WL.Style('"+str(self.style_name)+"').spritesheet_map = '"+currentPropVal+"'")
-            print inputCmd
-            self.main._emulatorManager.trickplay.write(inputCmd+"\n")
-            self.main._emulatorManager.trickplay.waitForBytesWritten()
+            self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(self.style_name)+"').spritesheet_map = '"+currentPropVal+"'")
             self.preventChanges = False
 
     def propertyFill(self, data, styleIndex=None):
@@ -1120,9 +1110,7 @@ class TrickplayInspector(QWidget):
                 elif p == "source":
                     layers =  "','".join (self.screens[self.currentScreenName])
                     layers = "{'"+layers+"'}"
-                    inputCmd = str("_VE_.printInstanceName("+layers+")")
-                    self.main._emulatorManager.trickplay.write(inputCmd+"\n")
-                    self.main._emulatorManager.trickplay.waitForBytesWritten()
+                    self.main.sendLuaCommand("printInstanceName", "_VE_.printInstanceName("+layers+")")
                     comboPropertyFill(p, n, data)
 
                 elif p == "src":
@@ -1567,11 +1555,7 @@ class TrickplayInspector(QWidget):
         for selIdx in selectedList : 
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
-                inputCmd = str("_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
-                inputCmd2 = str("_VE_.selectUIElement('"+str(selItem.TPJSON()['name'])+"',"+multiSelect+")")
-                print inputCmd2
-                self.main._emulatorManager.trickplay.write(inputCmd+"\n")
-                self.main._emulatorManager.trickplay.waitForBytesWritten()
+                self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
             except:
                 pass
         deselectedList = deselected.indexes()
@@ -1579,11 +1563,7 @@ class TrickplayInspector(QWidget):
             deselItem = self.inspectorModel.itemFromIndex(deselIdx)
             try :
                 #print (str(deselItem.TPJSON()['name'])+" deselected!!!")
-                inputCmd = str("_VE_.deselectUIElement('"+str(deselItem.TPJSON()['gid'])+"',"+multiSelect+")")
-                inputCmd2 = str("_VE_.deselectUIElement('"+str(deselItem.TPJSON()['name'])+"',"+multiSelect+")")
-                print inputCmd2
-                self.main._emulatorManager.trickplay.write(inputCmd+"\n")
-                self.main._emulatorManager.trickplay.waitForBytesWritten()
+                self.main.sendLuaCommand("deselectUIElement", "_VE_.deselectUIElement('"+str(deselItem.TPJSON()['gid'])+"',"+multiSelect+")")
             except:
                 pass
             

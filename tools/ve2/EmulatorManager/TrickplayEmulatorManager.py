@@ -36,47 +36,29 @@ class TrickplayEmulatorManager(QWidget):
 
     def setStyleInfo(self, style_name, property1, property2, property3=None, value=None):
         if property1 == 'name':
-            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property1)+" = '"+str(property2)+"'")
+            self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property1)+" = '"+str(property2)+"'")
         elif property3 == "style":
-            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
+            self.main.sendLuaCommand("WL.Style","WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
-            inputCmd = str("WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
-        print inputCmd
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
-        
+            self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
+
     def setUIInfo(self, gid, property, value, n=None):
         if n:
-            inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
+            self.main.sendLuaCommand("setUIInfo","_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
-            inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
+            self.main.sendLuaCommand("setUIInfo", "_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
         
-        print "[VE] "+inputCmd
         self.inspector.setGid = gid
         self.inspector.setProp = property
 
-        #self.inspector.preventChanges = True
-        self.main.command = "setUIInfo"
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
-
     def repStInfo(self):
-        inputCmd = str("_VE_.repStInfo()")
-        print inputCmd
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
+        self.main.sendLuaCommand("repStInfo", "_VE_.repStInfo()")
 
     def getStInfo(self):
-        inputCmd = str("_VE_.getStInfo()")
-        print inputCmd
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
+        self.main.sendLuaCommand("getStInfo", "_VE_.getStInfo()")
 
     def getUIInfo(self):
-        inputCmd = str("_VE_.getUIInfo()")
-        print inputCmd
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
+        self.main.sendLuaCommand("getUIInfo", "_VE_.getUIInfo()")
 
     def setPath(self, p):
         self._path = p
@@ -89,10 +71,7 @@ class TrickplayEmulatorManager(QWidget):
 		self.main.ui.actionEditor.setEnabled(True)
 
     def deleteClicked(self) :
-        inputCmd = str("_VE_.deleteGuideLine()")
-        print inputCmd
-        self.trickplay.write(inputCmd+"\n")
-        self.trickplay.waitForBytesWritten()
+        self.main.sendLuaCommand("deleteGuideLine", "_VE_.deleteGuideLine()")
         self.GLI_dialog.done(1)
         
     def app_ready_read(self):
@@ -189,12 +168,9 @@ class TrickplayEmulatorManager(QWidget):
 				        else:
 				            new_positon = "nil"
 				        if luaCmd =="openV_GLI":
-				            inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
+				            self.main.sendLuaCommand("setVGuideX", "_VE_.setVGuideX("+str(new_positon)+")")
 				        else:
-				            inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
-				        print inputCmd
-				        self.trickplay.write(inputCmd+"\n")
-				        self.trickplay.waitForBytesWritten()
+				            self.main.sendLuaCommand("setHGuideX", "_VE_.setHGuideY("+str(new_positon)+")")
 
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()

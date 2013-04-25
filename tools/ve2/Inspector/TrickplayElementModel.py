@@ -11,6 +11,7 @@ class TrickplayElementModel(QStandardItemModel):
     def __init__(self, inspector, parent=None):
         QWidget.__init__(self, parent)
         self.inspector = inspector
+        self.main = inspector.main
         self.manager = QNetworkAccessManager()
         self.reply = None
         self.styleData = None
@@ -116,17 +117,14 @@ class TrickplayElementModel(QStandardItemModel):
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
                     if str(self.lmParentGid) != 'nil' : 
-                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
                     else:
-                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
                 else:
                     if str(self.lmParentGid) != 'nil' : 
-                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
                     else:
-                        inputCmd = str("_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
-                print inputCmd
-                self.inspector.main._emulatorManager.trickplay.write(inputCmd+"\n")
-                self.inspector.main._emulatorManager.trickplay.waitForBytesWritten()
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
             else:
                 pass
                 #print ("newChildGid or newParentGid is nil ...")
@@ -172,7 +170,7 @@ class TrickplayElementModel(QStandardItemModel):
 
             # Find the last item after getting new data so that
             # both trees reflect the changes
-            if self.inspector.main.command == "newLayer" or self.inspector.main.command == "insertUIElement" :
+            if self.main.command == "newLayer" or self.main.command == "insertUIElement" :
                 result = child #self.inspector.search(gid, 'gid')
                 #result = self.inspector.search(self.inspector.newgid, 'gid')
                 if result: 
@@ -182,10 +180,10 @@ class TrickplayElementModel(QStandardItemModel):
             else:
                 result = child #self.inspector.search(gid, 'gid')
                 if result:
-                    self.inspector.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
+                    self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
                     self.inspector.selectItem(result, "f")
     
-            self.inspector.main.command = ""
+            self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
                 self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                
             return
