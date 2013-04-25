@@ -1691,10 +1691,10 @@ class TrickplayInspector(QWidget):
                     self.preventChanges = False
                     return 
 
+                self.deselectItems()
+                itemGid = item['gid']
                 if self.sendData(item['gid'], 'is_visible', checkState):        
-                #if self.sendData(item['gid'], 'visible', checkState):        
                     item['is_visible'] = checkState
-                    #item['visible'] = checkState
                     #self.propertyModel.fill(item.TPJSON())
                     if item['name'][:5] == "Layer":
                         if checkState == True :
@@ -1707,6 +1707,9 @@ class TrickplayInspector(QWidget):
                                     del self.screens[self.currentScreenName][index]
                                     break
                                 index = index + 1 
+
+                    if checkState == True :
+                        self.selectItem(self.search(itemGid, 'gid'), False)
             
             self.preventChanges = False
     
