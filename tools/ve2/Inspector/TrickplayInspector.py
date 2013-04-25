@@ -1,4 +1,4 @@
-import re, os
+import re, os, sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #import connection
@@ -465,11 +465,19 @@ class PickerItemTable(QWidget):
 class TrickplayInspector(QWidget):
     
     def __init__(self, main = None, parent = None, f = 0):
+        flags = Qt.Tool | Qt.WindowStaysOnTopHint 
+        if sys.platform == "darwin":
+            flags |= Qt.WA_MacAlwaysShowToolWindow
+        else:
+            flags |= Qt.X11BypassWindowManagerHint
+
+        #QWidget.__init__(self, None, flags ) 
+
         """
         UI Element property inspector made up of two QTreeViews
         """
         
-        QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent, flags)
         
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
@@ -682,27 +690,32 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.scrollTo(topLeft, 3)
         self.ui.inspector.selectionModel().select( QItemSelection(topLeft, bottomRight), QItemSelectionModel.Clear)
 
+    def deselectItems(self):
+        self.ui.inspector.selectionModel().clear()
+
+
     def selectItem(self, item, shift):
-    #def selectItem(self, item):
         """
         Select a row of the inspector model (as the result of a search)
         """
-        #print "selectItem", item.partner().text()
         print "selectItem"
 
-        topLeft = item.index()
-        bottomRight = item.partner().index()
+        try:
+            topLeft = item.index()
+            bottomRight = item.partner().index()
         
-        self.ui.inspector.scrollTo(topLeft, 3)
+            self.ui.inspector.scrollTo(topLeft, 3)
         
-        if shift and shift == "t" :
-            self.ui.inspector.selectionModel().select(
-                QItemSelection(topLeft, bottomRight),
-                QItemSelectionModel.Select)
-        else:
-            self.ui.inspector.selectionModel().select(
-                QItemSelection(topLeft, bottomRight),
-                QItemSelectionModel.SelectCurrent)
+            if shift and shift == "t" :
+                self.ui.inspector.selectionModel().select(
+                    QItemSelection(topLeft, bottomRight),
+                    QItemSelectionModel.Select)
+            else:
+                self.ui.inspector.selectionModel().select(
+                    QItemSelection(topLeft, bottomRight),
+                    QItemSelectionModel.SelectCurrent)
+        except:
+            pass
 
         inputCmd = str("_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
         inputCmd2 = str("_VE_.selectUIElement('"+str(item.TPJSON()['name'])+"',false)")
@@ -1512,10 +1525,23 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
 
-        #print("selectionChaged !!!!!!!!!!!!!!!!!!!!!!")
+        print("selectionChaged !!!!!!!!!!!!!!!!!!!!!!")
+        print(selected.count(),deselected.count())
         
         if self.preventChanges:
-            return
+            print("selectionChanged : preventChanges ") #return
+
+        if len(self.ui.inspector.selectionModel().selectedIndexes()) > 1:
+            print "menuEnabled "
+            self.main.menuEnable()
+            for i in self.ui.inspector.selectionModel().selectedIndexes() :
+                item = self.inspectorModel.itemFromIndex(i)
+                if str(item.text()).find("Layer") == 0 :
+                    self.main.menuDisable()
+                    break
+        else:
+            print "menuDisable "
+            self.main.menuDisable()
             
         self.selectedItemCount = 0
         selectedList = selected.indexes()
@@ -1684,6 +1710,7 @@ class TrickplayInspector(QWidget):
             
             self.preventChanges = False
     
+
     # "dataChanged(const QModelIndex &, const QModelIndex &)"
 
     def propertyItemExpanded(self, item):

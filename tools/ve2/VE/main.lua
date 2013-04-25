@@ -78,22 +78,6 @@
 
 _VE_ = {}
 
--- Get Style 
-_VE_.getStInfo = function()
-
-    local t = {}
-    --table.insert(t, json:parse(fake_style_json))
-    table.insert(t, json:parse(WL.get_all_styles()))
-    print("getStInfo"..json:stringify(t))
-end 
-
--- Ret Style
-_VE_.repStInfo = function()
-    local t = {}
-    table.insert(t, json:parse(WL.get_all_styles()))
-    print("repStInfo"..json:stringify(t))
-end 
-
 -- Get UI
 _VE_.getUIInfo = function()
     local t = {}
@@ -105,6 +89,20 @@ _VE_.getUIInfo = function()
     end
     
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
+end 
+
+-- Get Style 
+_VE_.getStInfo = function()
+    local t = {}
+    table.insert(t, json:parse(WL.get_all_styles()))
+    print("getStInfo"..json:stringify(t))
+end 
+
+-- Ret Style
+_VE_.repStInfo = function()
+    local t = {}
+    table.insert(t, json:parse(WL.get_all_styles()))
+    print("repStInfo"..json:stringify(t))
 end 
 
 -- Execute Debugger 
@@ -652,6 +650,304 @@ end
 
 -- Delete
 _VE_.delete = function(gid)
+    del_obj = devtools:gid(gid)
+    screen_ui.n_selected(del_obj)
+    del_obj.parent:remove(del_obj)
+end
+
+_VE_.delete_org = function(gid)
+
+    if #(selected_objs) == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	local delete_f = function(del_obj)
+
+		screen_ui.n_selected(del_obj)
+
+        --[[
+        if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
+	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
+        end
+        --]]
+        --[=[  
+        -- manage user stub code 
+		if util.need_stub_code(del_obj) == true then 
+			if current_fn then 
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
+			    local main = readfile("main.lua")
+			    if main then 
+			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
+			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
+				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
+				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
+				  		local main_last = string.sub(main, r+1, -1)
+				  		main = ""
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
+				  		editor_lb:writefile("main.lua",main, true)
+	       		    end 
+			     end 
+	       	end 
+	   end 
+       ]=]
+    end 
+
+    util.getCurLayer(gid)
+
+    blockReport = true
+
+    for i, v in pairs(curLayer.children) do
+		if(v.extra.ve_selected == true) then
+			if v.extra.clone then 
+				if #v.extra.clone > 0 then
+                    print (v.name,"can't be deleted. It has clone object")
+        			screen:grab_key_focus()
+					input_mode = hdr.S_SELECT
+					return 
+				end 
+			end 
+
+			if v.type == "Clone" or v.widget_type == "Widget_Clone" then 
+				util.table_remove_val(v.source.extra.clone, v.name)
+			end 
+			
+			delete_f(v)
+		    curLayer:remove(v)
+		end 
+	end 
+	
+    blockReport = false
+
+    _VE_.refresh()
+    --[=[
+	for i, j in pairs(selected_objs) do 
+		j = string.sub(j, 1,-7)
+		local bumo
+		local s_obj = g:find_child(j)
+
+		if s_obj then 
+			bumo = s_obj.parent 
+		else 
+			return 
+		end 
+
+		if bumo.name == nil then 
+				if (bumo.parent.name == "window") then -- AP, SP 
+			    	bumo = bumo.parent.parent
+					for j, k in pairs (bumo.content.children) do 
+			 			--if(k.extra.selected == true) then
+						if k.name == s_obj.name then 
+							delete_f(k) 
+        	     	    	bumo.content:remove(k)
+			 			end 
+					end 
+				elseif (bumo.parent.extra.type == "DialogBox") then
+					bumo = bumo.parent 
+					delete_f(s_obj)
+					bumo.content:remove(s_obj)
+				elseif (bumo.parent.extra.type == "TabBar") then
+					bumo = bumo.parent
+					for e,f in pairs (bumo.tabs) do 
+						for t,y in pairs (f.children) do 
+							if y.name == s_obj.name then 
+								delete_f(s_obj)
+								f:remove(y)
+							end 
+						end 
+					end 
+				end 
+		elseif bumo.extra.type == "LayoutManager" then  
+				for e, r in pairs (bumo.cells) do 
+					if r then 
+						for x, c in pairs (r) do 
+							if c.name == s_obj.name then 
+							 	delete_f(s_obj) 
+							 	bumo:replace(e,x,nil)
+							end 
+						end
+					end 
+				end
+		else -- Regular Group 
+				for p, q in pairs (bumo.children) do 
+					if q.name == s_obj.name then 
+						delete_f(s_obj) 
+						bumo:remove(s_obj)
+					end 
+				end 
+		end 
+	end 
+    --]=]
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+
+end 
+
+-- SET
+_VE_.setUIInfo = function(gid, property, value, n)
+    
+    uiInstance = kk
+    screen_ui.n_selected(del_obj)
+end
+
+_VE_.delete_org = function(gid)
+
+    if #(selected_objs) == 0 then 
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+	local delete_f = function(del_obj)
+
+		screen_ui.n_selected(del_obj)
+
+        --[[
+        if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
+	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
+        end
+        --]]
+        --[=[  
+        -- manage user stub code 
+		if util.need_stub_code(del_obj) == true then 
+			if current_fn then 
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
+			    local main = readfile("main.lua")
+			    if main then 
+			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
+			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
+				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
+				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
+				  		local main_last = string.sub(main, r+1, -1)
+				  		main = ""
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
+				  		editor_lb:writefile("main.lua",main, true)
+	       		    end 
+			     end 
+	       	end 
+	   end 
+       ]=]
+    end 
+
+    util.getCurLayer(gid)
+
+    blockReport = true
+
+    for i, v in pairs(curLayer.children) do
+		if(v.extra.ve_selected == true) then
+			if v.extra.clone then 
+				if #v.extra.clone > 0 then
+                    print (v.name,"can't be deleted. It has clone object")
+        			screen:grab_key_focus()
+					input_mode = hdr.S_SELECT
+					return 
+				end 
+			end 
+
+			if v.type == "Clone" or v.widget_type == "Widget_Clone" then 
+				util.table_remove_val(v.source.extra.clone, v.name)
+			end 
+			
+			delete_f(v)
+		    curLayer:remove(v)
+		end 
+	end 
+	
+    blockReport = false
+
+    _VE_.refresh()
+    --[=[
+	for i, j in pairs(selected_objs) do 
+		j = string.sub(j, 1,-7)
+		local bumo
+		local s_obj = g:find_child(j)
+
+		if s_obj then 
+			bumo = s_obj.parent 
+		else 
+			return 
+		end 
+
+		if bumo.name == nil then 
+				if (bumo.parent.name == "window") then -- AP, SP 
+			    	bumo = bumo.parent.parent
+					for j, k in pairs (bumo.content.children) do 
+			 			--if(k.extra.selected == true) then
+						if k.name == s_obj.name then 
+							delete_f(k) 
+        	     	    	bumo.content:remove(k)
+			 			end 
+					end 
+				elseif (bumo.parent.extra.type == "DialogBox") then
+					bumo = bumo.parent 
+					delete_f(s_obj)
+					bumo.content:remove(s_obj)
+				elseif (bumo.parent.extra.type == "TabBar") then
+					bumo = bumo.parent
+					for e,f in pairs (bumo.tabs) do 
+						for t,y in pairs (f.children) do 
+							if y.name == s_obj.name then 
+								delete_f(s_obj)
+								f:remove(y)
+							end 
+						end 
+					end 
+				end 
+		elseif bumo.extra.type == "LayoutManager" then  
+				for e, r in pairs (bumo.cells) do 
+					if r then 
+						for x, c in pairs (r) do 
+							if c.name == s_obj.name then 
+							 	delete_f(s_obj) 
+							 	bumo:replace(e,x,nil)
+							end 
+						end
+					end 
+				end
+		else -- Regular Group 
+				for p, q in pairs (bumo.children) do 
+					if q.name == s_obj.name then 
+						delete_f(s_obj) 
+						bumo:remove(s_obj)
+					end 
+				end 
+		end 
+	end 
+    --]=]
+
+	input_mode = hdr.S_SELECT
+	screen:grab_key_focus()
+
+end 
+
+-- SET
+_VE_.setUIInfo = function(gid, property, value, n)
+    
+    uiInstance = 
+    screen_ui.n_selected(del_obj)
+end
+
+_VE_.delete_org = function(gid)
 
     if #(selected_objs) == 0 then 
         screen:grab_key_focus()
@@ -893,12 +1189,8 @@ _VE_.openFile = function(path)
 
     --the first time this function is called, styles will get set up
     --if not styles then load_styles() end
-    
-    --_VE_.buildVF()
-    --load the json
     local style = readfile(styles_file)
     style = string.sub(style, 2, string.len(style)-1)
-
     if style == nil then
         error("Style '"..styles_file.."' does not exist.",2)
     end
@@ -910,26 +1202,18 @@ _VE_.openFile = function(path)
     local layer = readfile(layers_file)
     --layer = string.sub(layer, 2, string.len(layer)-1)
     layer = json:stringify(json:parse(layer)[1])
-    
     if layer == nil then
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
-    --print(WL.get_all_styles())
-
     _VE_.buildVF()
-
-    --print(WL.get_all_styles())
 
     --print(layer)
     s = VL.load_layer(layer)
     objectsNames = s.objects
     --print (s, #s.children)
 
-    --_VE_.buildVF()
-
     for i,j in ipairs(s.children) do
-        --if string.find(j.name, "Layer") ~= nil then 
         if string.find(j.name, "Layer") ~= nil and 
          string.find(j.name, "a_m") == nil and 
          string.find(j.name, "border") == nil 
@@ -971,7 +1255,9 @@ _VE_.openFile = function(path)
                 end 
 
                 m.extra.mouse_handler = false
+
                 util.create_mouse_event_handler(m, uiTypeStr)
+
                 if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" or uiTypeStr == "DialogBox" then
                     for o, p in ipairs(m.children) do
                         p.extra.mouse_handler = false
@@ -1512,8 +1798,8 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     blockReport = false
 
-    _VE_.refreshDone()
-    _VE_.openInspector(uiInstance.gid, false)
+    --_VE_.refreshDone()
+    --_VE_.openInspector(uiInstance.gid, false)
     _VE_.repUIInfo(uiInstance)
 
 end
@@ -1549,10 +1835,12 @@ _VE_.selectUIElement = function(gid, multiSel)
     end 
     shift = org_shift
 
+    --[[
     if not (#selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil) and 
        #selected_objs > 0 and selected_obj_cnt == 0 then 
         print "menuEnabled"
     end
+    ]]
     selected_obj_cnt = #selected_objs
 end 
 
@@ -1570,10 +1858,12 @@ _VE_.deselectUIElement = function(gid, multiSel)
     end
     shift = org_shift
 
+    --[[
     if #selected_objs == 0 and selected_obj_cnt ~= 0 or 
        #selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
         print "menuDisabled"
     end
+    ]]
     selected_obj_cnt = #selected_objs
 end 
 
@@ -1612,6 +1902,7 @@ end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
+        print("Screen onbuttondown !!!")
 
         if shift == false then
             screen_ui.n_selected_all()

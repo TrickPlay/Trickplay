@@ -1,4 +1,4 @@
-import re, os, json
+import re, os, json, sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #import connection
@@ -139,11 +139,15 @@ class DnDTreeWidget(QTreeWidget):
 class TrickplayImageFileSystem(QWidget):
     
     def __init__(self, main = None, parent = None, f = 0):
+        flags = Qt.Tool | Qt.WindowStaysOnTopHint 
+        if sys.platform == "darwin":
+            flags |= Qt.WA_MacAlwaysShowToolWindow
+        else:
+            flags |= Qt.X11BypassWindowManagerHint
         """
         UI Element property inspector made up of two QTreeViews
         """
-        
-        QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent, flags)
         
         self.ui = Ui_VirtualFileSystem()
         self.ui.setupUi(self)

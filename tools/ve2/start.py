@@ -21,7 +21,6 @@ def main(argv):
         app = QApplication(argv)
 
         def sigint_handler(signal, frame):
-            print("Handler for the SIGINT signal.")
             app.main.exit()
             sys.exit(0)
 
@@ -54,6 +53,7 @@ def main(argv):
             settings = QSettings()
             settings.setValue('path', path) 
             main.setCurrentProject(path, wizard.filesToOpen())
+
             app.setActiveWindow(main._menubar)
             main._menubar.raise_()
             main._inspector.raise_()

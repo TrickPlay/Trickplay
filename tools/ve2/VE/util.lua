@@ -52,12 +52,12 @@ function util.addIntoLayer (uiInstance, group)
     --devtools:gid(curLayerGid):add(uiInstance)
     curLayer:add(uiInstance)
 
-    if group == nil then
-        _VE_.refresh()
-    end 
+    --if group == nil then
+        --_VE_.refresh()
+    --end 
 
+    -- regisiger subscribe_to function to new ui instance
     if uiInstance.subscribe_to then  
-
         uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
     end 
 
@@ -514,6 +514,11 @@ local function change_image_name (uiTypeStr)
         
     if i ~= nil then 
         imgFileName = string.sub(uiTypeStr, 1, i-1)
+    else 
+        i, j = string.find(uiTypeStr, ".gif")
+        if i ~= nil then 
+            imgFileName = string.sub(uiTypeStr, 1, i-1)
+        end
     end 
     imgFileName = string.gsub(imgFileName, "/", "_S_")
     imgFileName = string.gsub(imgFileName, "%.", "_P_")

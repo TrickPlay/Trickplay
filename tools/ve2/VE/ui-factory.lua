@@ -15,20 +15,6 @@ local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","focus_c
 
 local attr_t_idx 
 
---[[
-local icon_map = 
-{
-	["Left Edge      "] = function() icon = icon_l return icon end, 
-    ["Right Edge    "] = function() icon = icon_r return icon end, 
-    ["Top             "] = function() icon = icon_t return icon end, 
-    ["Bottom        "] = function() icon = icon_b return icon end, 
-    ["Horiz. Center   "] = function() icon = icon_hc return icon end, 
-    ["Vert. Center    "] = function() icon = icon_vc return icon end, 
-    ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
-    ["Vertically 	  "] = function() icon = icon_dvc return icon end 
-}
-]]
-
 local color_map =
 {
         [ "Text" ] = function()  size = {490, 680} color = {25,25,25,100}  return size, color end,
@@ -207,7 +193,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		--plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
@@ -240,7 +225,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		--plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
 
 		plus.position = {text.x + text.w + PADDING_X, 0}
@@ -411,19 +395,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		if item_type then 
         	item.item_type = item_type
 	    end 
-		--local minus = assets("lib/assets/li-btn-dim-minus.png")
-		--minus = assets("lib/assets/li-btn-dim-minus.png")
 		local minus = Image {src = "lib/assets/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
-		--local up = assets("lib/assets/li-btn-dim-up.png")
-		--up = assets("lib/assets/li-btn-dim-up.png")
 
 		local up = Image{src = "lib/assets/li-btn-dim-up.png"}
 	    up.name = "item_up"..tostring(i)
 		up.reactive = true
-		--local down = assets("lib/assets/li-btn-dim-down.png")
-		--down = assets("lib/assets/li-btn-dim-down.png")
 		local down = Image {src = "lib/assets/li-btn-dim-down.png"}
 
 	    down.name = "item_down"..tostring(i)

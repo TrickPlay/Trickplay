@@ -7,8 +7,6 @@ local multi_select_border
 local screen_pos_of_child = function(actor)
     return actor.transformed_position[1]/screen.scale[1], 
            actor.transformed_position[2]/screen.scale[2]
-    --return  child.x + child.parent.x + bumo.x + p.box_border_width,
-            --child.y + child.parent.y + bumo.y + p.box_border_width
 end
 
 
@@ -17,11 +15,11 @@ function screen_ui.n_selected_all()
 	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "border") then 
-
 		        local a, b = string.find(j.name,"border")
-		        local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	-- VE2 g-> screen
-			    _VE_.deselectUIElement(t_obj.gid, false)
-
+		        local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	
+                if t_obj then 
+			        _VE_.deselectUIElement(t_obj.gid, false)
+                end
 			end 
 		end
 	end
@@ -108,7 +106,6 @@ function screen_ui.container_selected(obj, x, y)
 			tile_y = tile.y - tile.anchor_point[2]
 			tile_w = tile.w
 			tile_h = tile.h
-            --print (">>>"..row..":"..col.." ("..tile_x..","..tile_y..","..tile_w..","..tile_h)
 			tile_x = obj.x + tile_x
 			tile_y = obj.y + tile_y
 		end
@@ -121,7 +118,6 @@ function screen_ui.container_selected(obj, x, y)
     if not screen:find_child(obj_border.name) then 
         screen:add(obj_border)
         obj.extra.ve_selected = true
-        --table.insert(selected_objs, obj_border.name)
     end
 end  
 
@@ -200,7 +196,7 @@ function screen_ui.selected(obj)
 	local tab_extra_h, tab_extra_w
 
    	if(obj.extra.is_in_group == true)then 
-		for i, c in pairs(screen.children) do  --VE2 : g -> screen
+		for i, c in pairs(screen.children) do  
 			if obj.name == c.name then 
 				break
 			else 
@@ -231,7 +227,6 @@ function screen_ui.selected(obj)
     	end
 		group_pos = util.get_group_position(obj)
 		if bumo then 
-			--obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
 			obj_border.x, obj_border.y = screen_pos_of_child(obj) 	
 		elseif group_pos then 
      		obj_border.x = (obj.x * obj.parent_group.scale[1] + group_pos[1])
@@ -326,7 +321,7 @@ function screen_ui.n_select_all ()
 
     local currentLayer 
 
-	for i, j in pairs (screen.children) do -- VE2 : g->screen
+	for i, j in pairs (screen.children) do 
 		if(j.extra.ve_selected == true) then 
 			screen_ui.n_selected(j) 
 		end 
@@ -424,7 +419,7 @@ function screen_ui.multi_select_done(x,y)
 
 	local m_slt_flag 
 
-	for k, l in pairs(screen.children) do  -- VE2 : g -> screen
+	for k, l in pairs(screen.children) do  
         if l.children then
 	    for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
@@ -439,15 +434,13 @@ function screen_ui.multi_select_done(x,y)
 		screen_ui.n_select_all()
 	end 
 
-    for k, l in pairs(screen.children) do -- VE2 : g -> screen
+    for k, l in pairs(screen.children) do 
         if l.children then
-        --if l.name and string.find(l.name, "Layer") ~= nil then
         for i, v in pairs(l.children) do 
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
 			if(v.extra.ve_selected == false and v.parent.visible == true) then 
 			    if(v.extra.ve_selected == false and l.visible == true) then 
-		    	    --screen_ui.selected(v)
                     _VE_.openInspector(v.gid, true)
                 end
 			end 
@@ -558,7 +551,7 @@ function screen_ui.dragging(x,y)
 	      border = screen:find_child(actor.name.."border")
 	      if(border ~= nil) then 
 		  	  if (actor.extra.is_in_group == true) then
-				 for k, l in pairs(screen.children) do -- VE2 : g -> screen
+				 for k, l in pairs(screen.children) do
                     if l.children then
 				    for i, c in pairs(l.children) do 
 					if actor.name == c.name then 
@@ -594,10 +587,7 @@ function screen_ui.dragging(x,y)
 
 
 				 if bumo then 
-					--local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 					local cur_x, cur_y = screen_pos_of_child(actor) 
-                    --cur_x = actor.transformed_position[1]/screen.scale[1]
-                    --cur_y = actor.transformed_position[2]/screen.scale[2]
 	             	border.position = {cur_x, cur_y}
 				 else 
 				 	local group_pos = util.get_group_position(actor)
@@ -630,7 +620,6 @@ function screen_ui.dragging(x,y)
 
 		    if (actor.extra.is_in_group == true) then
 				if bumo then 
-					--local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
 					local cur_x, cur_y = screen_pos_of_child(actor) 
 	                anchor_mark.position = {cur_x, cur_y}
 				else 
@@ -669,13 +658,13 @@ function screen_ui.timeline_show()
 	local timeline =  screen:find_child("timeline") 
 
 	if not timeline then 
-		if #screen.children > 0 then  -- VE2: g -> screen
+		if #screen.children > 0 then  
 			input_mode = hdr.S_SELECT 
 			local tl = ui_element.timeline() 
 			tl.extra.show = true 
 			screen:add(tl)
 		end
-	elseif #screen.children == 0 then -- VE2 : g->screen
+	elseif #screen.children == 0 then 
 		screen:remove(timeline)
 	elseif timeline.extra.show ~= true  then 
 		timeline:show()
@@ -693,16 +682,6 @@ function screen_ui.menu_hide()
 		menu.menuHide()
 	end 
 	screen:grab_key_focus()
-end 
-
-function screen_ui.add_bg()
---[[
-	screen:add(BG_IMAGE_20)
-    screen:add(BG_IMAGE_40)
-    screen:add(BG_IMAGE_80)
-    screen:add(BG_IMAGE_white)
-    screen:add(BG_IMAGE_import)
-    ]]
 end 
 
 function screen_ui.auto_save()

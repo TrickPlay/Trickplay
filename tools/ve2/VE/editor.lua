@@ -346,20 +346,14 @@ function editor.duplicate(gid)
 		    end 
 
 			uiTypeStr = util.getTypeStr(v) 
-            --print (uiTypeStr)
 
             if hdr.uiElementCreate_map[uiTypeStr] then
-                --dumptable(v.attributes)
                 uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
-                --print ("Here 222")
-                --print (uiDuplicate)
-                --print (uiTypeStr)
             end 
 
             uiDuplicate.position = {v.x + 20, v.y +20}
 
 			uiTypeStr = util.getTypeNameStr(v) 
-            --util.assign_right_name(uiDuplicate, uiTypeStr)
             uiDuplicate = contentsNameAssign(uiDuplicate)
 
             util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
@@ -427,8 +421,6 @@ function editor.arrange_prep (gid)
         
     local basis_obj_name = util.getObjName(selected_objs[1])
     local basis_obj = curLayer:find_child(basis_obj_name)
-    --copy_selected_objs = selected_objs
-    --dumptable(copy_selected_objs)
 
     return basis_obj_name, basis_obj, sel_objs
 
@@ -442,7 +434,6 @@ function editor.arrange_end (gid, obj, sel_objs)
     blockReport = false
     _VE_.refresh() 
     _VE_.refreshDone()
-    --selected_objs = sel_objs
     screen_ui.n_selected_all()
 
     --if #sel_objs > 1 then 

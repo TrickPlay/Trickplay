@@ -105,13 +105,15 @@ class TrickplayEmulatorManager(QWidget):
 			    break
 			# Read one line
 			s = self.trickplay.readLine()
+
 			# If the line is null, it means there is nothing more
 			# to read during this iteration
 			if s.isNull():
 				break
+
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
-			#print ".............."+s
+			print ".............."+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
@@ -156,12 +158,10 @@ class TrickplayEmulatorManager(QWidget):
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
+				        print("REP UI INfo")
 				        self.pdata = json.loads(s[9:])
-				    elif luaCmd == "menuEnabl":
-				        self.main.menuEnable()
-				    elif luaCmd == "menuDisab":
-				        self.main.menuDisable()
 				    elif luaCmd == "screenLoc":
+				        print("screen Loc")
 				        screenLoc = s[9:]
 				        sepPos = screenLoc.find(",")
 				        self.main.x = screenLoc[:sepPos]
@@ -199,12 +199,16 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
 				    elif luaCmd == "repUIInfo":
+				        print("repUIInfo")
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repStInfo" :
+				        print("repStInfo")
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "getStInfo" :
+				        print("getStInfo")
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
+				        print("clearInsp")
 				        gid = (s[9:])
 				    elif luaCmd == "focusSet2":
 				        focusObj = str(s[9:])
@@ -213,9 +217,11 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "newui_gid":
 				        self.inspector.newgid = str(s[9:])
 				    elif luaCmd == "openInspc":
+				        print("openInspc")
 				        gid = (s[10:])
 				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
+				        print("scrJSInfo")
 				        scrData = json.loads(s[9:])
 				        self.inspector.screens = {} 
 				        screenNames = []
@@ -240,6 +246,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.addItemToScreens = False
 
 				    elif luaCmd == "imageInfo":
+				        print("imageInfo")
 				        self.imgData = json.loads(s[9:])
 				        self.fscontentMoveBlock = True 
 				        self.filesystem.buildImageTree(self.imgData)
@@ -253,17 +260,21 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "clear:Insp":
 					try:
+					    print("YUGI")
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
+					        print("YUGI22")
 					        print('Found*', result['gid'], result['name'])
 					        self.inspector.clearItem(result)
 					        #self.inspector.selectItem(result, shift)
                             # open Property Tab 
 					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
+					        print("YUGI33")
 					        print("UI Element not found")
 
 					except:
+					    print("YUGI44")
 					    print("error :-(")
 
 
@@ -281,7 +292,7 @@ class TrickplayEmulatorManager(QWidget):
                             # open Property Tab 
 					        # self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
-					        print(gid, "---UI Element not found")
+					        print(result, gid, "---UI Element not found")
 					        self.inspector.ui.inspector.clearSelection()
 					        return
 
@@ -289,6 +300,7 @@ class TrickplayEmulatorManager(QWidget):
 					    print("error :/(")
 
 				    if luaCmd == "repStInfo":
+				        print("REP St INfo")
 				        if self.main.command == "openFile" :
 				            return 
 				        self.inspector.inspectorModel.styleData = sdata
@@ -302,20 +314,31 @@ class TrickplayEmulatorManager(QWidget):
 				        return
 
 				    elif luaCmd == "repUIInfo":
+				        self.pdata = self.pdata[0]
+
 				        if self.main.command == "openFile" :
 				            return 
-				        self.pdata = self.pdata[0]
-				        self.inspector.curData = self.pdata
-				        if self.inspector.curItemGid == self.inspector.curData['gid'] :
-				            if self.main.command is not "setUIInfo" :
-				                self.inspector.preventChanges = True
-				                self.inspector.propertyFill(self.inspector.curData)
-				                if self.ve_ready == False :
-				                    self.unsavedChanges = True
-				                self.ve_ready = False 
-				        self.inspector.preventChanges = False
+				        elif self.main.command == "insertUIElement" :
+				            self.main.command = "" 
+				            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
+				            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
+				            self.inspector.deselectItems()
+				            newItem = self.inspector.search(self.pdata['gid'], 'gid')
+				            self.inspector.selectItem(newItem, False)
+				            return 
+				        else:
+				            self.inspector.curData = self.pdata
+				            if self.inspector.curItemGid == self.inspector.curData['gid'] :
+				                if self.main.command is not "setUIInfo" :
+				                    self.inspector.preventChanges = True
+				                    self.inspector.propertyFill(self.inspector.curData)
+				                    if self.ve_ready == False :
+				                        self.unsavedChanges = True
+				                    self.ve_ready = False 
+				            self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
+				        print ("sdata is not None and self.pdata is not None")
 				        self.inspector.preventChanges = True
 				        self.contentMoveBlock = True 
 				        self.inspector.clearTree()
@@ -324,6 +347,7 @@ class TrickplayEmulatorManager(QWidget):
 				        self.contentMoveBlock = False 
 
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
+				        """
 				        try:
 				            result = self.inspector.search(self.inspector.setGid, 'gid')
 				            if result: 
@@ -335,6 +359,7 @@ class TrickplayEmulatorManager(QWidget):
 				            #g_item[0].setSelected(True)
 				        except : 
 				            pass
+				        """
                         
 				        self.inspector.preventChanges = False
 				        try : 

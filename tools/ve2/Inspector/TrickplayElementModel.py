@@ -176,18 +176,14 @@ class TrickplayElementModel(QStandardItemModel):
                 result = child #self.inspector.search(gid, 'gid')
                 #result = self.inspector.search(self.inspector.newgid, 'gid')
                 if result: 
-                    #print("[[[[[111111111111111111111]]]]", self.inspector.newgid)
-                    #print("[[[[[111111111111111111111]]]]")
                     self.inspector.selectItem(result, "f")
                 else:
                     print("[TrickplayElementModel] UI Element not found.")
             else:
-                result = self.inspector.search(gid, 'gid')
+                result = child #self.inspector.search(gid, 'gid')
                 if result:
-                    #print("[[[[[2222222222222222222]]]]")
+                    self.inspector.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
                     self.inspector.selectItem(result, "f")
-                else :
-                    print "????????????????????"
     
             self.inspector.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
@@ -391,7 +387,7 @@ class TrickplayElementModel(QStandardItemModel):
     def recSearch(self, property, value, item):
 
         try : 
-            if item[property] == value:
+            if item.TPJSON()[property] == value:
                 return item
         except:
             pass
