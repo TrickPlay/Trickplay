@@ -1,26 +1,51 @@
 module nineslice;
 
 [[
+
+#include "log.h"
 #include "clutter_util.h"
 #include "util.h"
 #include "nineslice.h"
-
 #include "sprite_sheet.lb.h"
-]]
-
-
-[[
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
+    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), effect( _effect ), sheet( NULL ), action( NULL ) { assert( effect ); };
+
+    ~NineSliceBinding()
+    {
+        if ( async && action )
+        {
+            Action::cancel( action );
+            action = NULL;
+        }
+    }
 
     NineSliceEffect * get_effect() { return effect; };
 
-    bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
-    void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
+    bool get_tile( unsigned i )
+    {
+        if ( i >= 6 )
+        {
+            tpwarn("Invalid NineSlice tile index %d. The value must be between 0 and 6", i);
+            return false;
+        }
+
+        return nineslice_effect_get_tile( effect, i );
+    }
+
+    void set_tile( unsigned i, bool t, bool guess )
+    {
+        if ( i >= 6 )
+        {
+            tpwarn("Invalid NineSlice tile index %d. The value must be between 0 and 6", i);
+            return;
+        }
+
+        nineslice_effect_set_tile( effect, i, t, guess, constructing );
+    }
 
     bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
 
@@ -28,24 +53,49 @@ struct NineSliceBinding
 
     std::string & get_id( unsigned i )
     {
-        g_assert( i < 9 );
+        if ( i >= 9 )
+        {
+            tpwarn("Invalid NineSlice id index %d. The value must be between 0 and 9", i);
+
+            static std::string e = "";
+            return e;
+        }
+
         return ids[i];
     };
 
     void set_id( unsigned i, const std::string & new_id )
     {
-        g_assert( i < 9 );
+        if ( i >= 9 )
+        {
+            tpwarn("Invalid NineSlice id index %d. The value must be between 0 and 9", i);
+            return;
+        }
+
         ids[i] = new_id;
-        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+
+        if (!constructing) nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
 
     void set_sheet( SpriteSheet * _sheet )
     {
         sheet = _sheet;
 
+        if (constructing) return;
+
+        set_all_sprites();
+    }
+
+    void set_all_sprites()
+    {
+        if (!sheet) return;
+
         for ( unsigned i = 0; i < 9; ++i )
         {
-            nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+            if ( !(ids[i].empty()) )
+            {
+                nineslice_effect_set_sprite( effect, i, sheet->get_sprite( ids[i].c_str() ), async );
+            }
         }
     }
 
@@ -53,17 +103,18 @@ struct NineSliceBinding
     {
         if ( async )
         {
-            nineslice_effect_signal_loaded_later( effect );
+            action = nineslice_effect_signal_loaded_later( effect );
         }
     }
 
     bool async;
-    bool can_fire;
+    bool constructing;
 
 private:
     NineSliceEffect * effect;
     SpriteSheet * sheet;
     std::string ids[9];
+    Action * action;
 };
 
 #define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
@@ -138,7 +189,13 @@ class NineSlice [[ClutterActor*]] actor
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
 
-            ClutterUtil::set_props_from_table( L, props );
+            if ( props )
+            {
+                get_binding(self)->constructing = true;
+                ClutterUtil::set_props_from_table( L, props );
+                get_binding(self)->constructing = false;
+                get_binding(self)->set_all_sprites();
+            }
 
             g_object_unref( self );
         ]];
