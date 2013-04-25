@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
 
         # Create Inspector
         self._inspector = TrickplayInspector(self)
-        self._inspector.setWindowFlags(Qt.Window)
+        #self._inspector.setWindowFlags(Qt.Window)
         self._inspector.setWindowTitle('Inspector')
         self.ui.actionInspector.toggled.connect(self.inspectorWindowClicked)
 
@@ -108,16 +108,27 @@ class MainWindow(QMainWindow):
 
         # Create Image File System
         self._ifilesystem = TrickplayImageFileSystem(self)
-        self._ifilesystem.setWindowFlags(Qt.Window)
+        #self._ifilesystem.setWindowFlags(Qt.Window)
         self._ifilesystem.setWindowTitle('Images')
         self.ui.actionImages.toggled.connect(self.imagesWindowClicked)
 
         self.imagesWindowClicked()
 
         #Create main menu 
-        self._menubar = QWidget()
-        self._menubar.setWindowFlags(Qt.Window)
-        self._menubar.setWindowFlags(Qt.FramelessWindowHint)
+        class menubarWidget(QWidget):
+            def __init__(self):
+                flags = Qt.Tool | Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+                if sys.platform == "darwin":
+                    flags |= Qt.WA_MacAlwaysShowToolWindow
+                else:
+                    flags |= Qt.X11BypassWindowManagerHint
+
+                QWidget.__init__(self, None, flags )
+
+        self._menubar = menubarWidget()
+
+        #self._menubar.setWindowFlags(Qt.Window)
+        #self._menubar.setWindowFlags(Qt.FramelessWindowHint)
 
         self.mainMenuLayout = QGridLayout()
         self.mainMenuLayout.setSpacing(0)
@@ -135,7 +146,8 @@ class MainWindow(QMainWindow):
         self._inspector.emulatorManager = self._emulatorManager
 
 		#File Menu
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        #QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        self.ui.action_Exit.triggered.connect(self.exit)
         QObject.connect(self.ui.actionLua_File_Engine_UI_Elements, SIGNAL("triggered()"),  self.openLua)
         QObject.connect(self.ui.actionJSON_New_UI_Elements, SIGNAL("triggered()"),  self.open)
         QObject.connect(self.ui.actionNew_Layer, SIGNAL("triggered()"),  self.newLayer)
@@ -262,7 +274,8 @@ class MainWindow(QMainWindow):
         self.command = None
         self.currentProject = None
 
-        QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
+        #QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
+        app.aboutToQuit.connect(self.exit)
 
     @property
     def emulatorManager(self):
@@ -780,6 +793,8 @@ class MainWindow(QMainWindow):
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Button')")
+        #curLayerItem = self._inspector.search(self._inspector.curLayerGid, 'gid')
+        #self._inspector.inspectorModel.insertElement(curLayerItem, newData, curLayerItem.TPJSON(), False)
         return True
 
     def text(self):
@@ -806,7 +821,12 @@ class MainWindow(QMainWindow):
         return True
 
     def delete(self):
-        self.sendLuaCommand("delete", "_VE_.delete('"+str(self._inspector.curLayerGid)+"')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        if index :
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            print item['gid'], item['name']
+            self.sendLuaCommand("delete", "_VE_.delete('"+str(item['gid'])+"')")
+            item.parent().removeRow(item.row())
         return True
 
     def duplicate(self):
@@ -910,12 +930,15 @@ class MainWindow(QMainWindow):
         self._emulatorManager.run()
 
     def exit(self):
+
         self.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
+
         settings = QSettings()
         settings.setValue("mainMenuDock", self._menubar.geometry());
         settings.setValue("inspectorDock", self._inspector.geometry());
         settings.setValue("fileSystemDock", self._ifilesystem.geometry());
         time.sleep(0.1)
+
         settings.setValue("x", self.x)
         settings.setValue("y", self.y)
 
@@ -926,6 +949,7 @@ class MainWindow(QMainWindow):
             self.stop(False, True)
             self.close()
         sys.exit(0)
+
         return True
 
     def editorWindowClicked(self) :

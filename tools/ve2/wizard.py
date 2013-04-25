@@ -59,6 +59,7 @@ class Wizard():
             return 
     
     def start(self, path, openApp=False, newApp=False):
+
         self.openList = None
         
         # Check settings for the last path used
