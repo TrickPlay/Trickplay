@@ -57,6 +57,7 @@ class Ui_MainWindow(object):
         self.menuView_2.setObjectName(_fromUtf8("menuView_2"))
         self.menuBackground = QtGui.QMenu(self.menuView_2)
         self.menuBackground.setObjectName(_fromUtf8("menuBackground"))
+        """
         self.InspectorDock = QtGui.QDockWidget(MainWindow)
         self.InspectorDock.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -64,7 +65,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.InspectorDock.sizePolicy().hasHeightForWidth())
         self.InspectorDock.setSizePolicy(sizePolicy)
-        self.InspectorDock.setMinimumSize(QtCore.QSize(79, 41))
+        self.InspectorDock.setMinimumSize(QtCore.QSize(330, 41))
         font = QtGui.QFont()
         font.setPointSize(9)
         self.InspectorDock.setFont(font)
@@ -83,7 +84,7 @@ class Ui_MainWindow(object):
         self.InspectorLayout.setObjectName(_fromUtf8("InspectorLayout"))
         self.gridLayout_7.addLayout(self.InspectorLayout, 0, 0, 1, 1)
         self.InspectorDock.setWidget(self.InspectorContainer)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.InspectorDock)
+        #MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.InspectorDock)
         self.fileSystemDock = QtGui.QDockWidget(MainWindow)
         self.fileSystemDock.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -110,7 +111,9 @@ class Ui_MainWindow(object):
         self.fileSystemLayout.setObjectName(_fromUtf8("fileSystemLayout"))
         self.gridLayout_8.addLayout(self.fileSystemLayout, 0, 0, 1, 1)
         self.fileSystemDock.setWidget(self.fileSystemContainer)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.fileSystemDock)
+        """
+        """
+        #MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.fileSystemDock)
         self.mainMenuDock = QtGui.QDockWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
@@ -124,6 +127,7 @@ class Ui_MainWindow(object):
         self.mainMenuDock.setWindowTitle(_fromUtf8(""))
         self.mainMenuDock.setObjectName(_fromUtf8("mainMenuDock"))
         self.mainMenuDock.setGeometry(400,215,670,100)
+        """
         self.mainMenuContainer = QtGui.QWidget()
         self.mainMenuContainer.setMaximumSize(QtCore.QSize(672, 25))
         font = QtGui.QFont()
@@ -138,8 +142,9 @@ class Ui_MainWindow(object):
         self.mainMenuLayout.setMargin(0)
         self.mainMenuLayout.setObjectName(_fromUtf8("mainMenuLayout"))
         self.mainMenuLayout.addWidget(self.menubar)
-        self.mainMenuDock.setWidget(self.mainMenuContainer)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(4), self.mainMenuDock)
+        #self.mainMenuDock.setWidget(self.mainMenuContainer)
+        #MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(4), self.mainMenuDock)
+
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
         self.action_Exit = QtGui.QAction(MainWindow)
@@ -495,10 +500,12 @@ class Ui_MainWindow(object):
         self.menu_arrange.setTitle(QtGui.QApplication.translate("MainWindow", "Arrange", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView_2.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBackground.setTitle(QtGui.QApplication.translate("MainWindow", "Background", None, QtGui.QApplication.UnicodeUTF8))
+        """
         self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.InspectorDock.setGeometry(1365,275,330,570)
         self.fileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Images", None, QtGui.QApplication.UnicodeUTF8))
         self.fileSystemDock.setGeometry(50,275,330,570)
+        """
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))

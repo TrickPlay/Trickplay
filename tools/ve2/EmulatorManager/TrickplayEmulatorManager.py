@@ -51,11 +51,12 @@ class TrickplayEmulatorManager(QWidget):
         else:
             inputCmd = str("_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
         
-        print inputCmd
+        print "[VE] "+inputCmd
         self.inspector.setGid = gid
         self.inspector.setProp = property
 
         #self.inspector.preventChanges = True
+        self.main.command = "setUIInfo"
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -110,6 +111,7 @@ class TrickplayEmulatorManager(QWidget):
 				break
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
+			#print ".............."+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
@@ -117,6 +119,7 @@ class TrickplayEmulatorManager(QWidget):
 					#self.main.open() # load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
                     
+					self.ve_ready = True
 					if self.main and self.main.currentProject is None: 
 					     return
 					elif self.main and self.main.currentProject : 
@@ -132,7 +135,16 @@ class TrickplayEmulatorManager(QWidget):
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
 					self.trickplay.close()
-				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc()")
+
+				settings = QSettings()
+				self.main.x = str(settings.value('x').toInt()[0])
+				self.main.y = str(settings.value('y').toInt()[0])
+
+				if self.main.x == None or self.main.y == None:
+				    self.main.x = str(1900)
+				    self.main.y = str(300)
+
+				self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc("+self.main.x+","+self.main.y+")")
 				self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
 
 			else:
@@ -145,6 +157,18 @@ class TrickplayEmulatorManager(QWidget):
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "menuEnabl":
+				        self.main.menuEnable()
+				    elif luaCmd == "menuDisab":
+				        self.main.menuDisable()
+				    elif luaCmd == "screenLoc":
+				        screenLoc = s[9:]
+				        sepPos = screenLoc.find(",")
+				        self.main.x = screenLoc[:sepPos]
+				        self.main.y = screenLoc[sepPos + 1:]
+				        settings = QSettings()
+				        settings.setValue("x", self.main.x)
+				        settings.setValue("y", self.main.y)
 				    elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
 				        org_position = int(s[9:])
 				        self.GLI_dialog = QDialog()
@@ -154,20 +178,24 @@ class TrickplayEmulatorManager(QWidget):
 				            self.GLInspector_ui = Ui_horizGuideDialog()
 
 				        self.GLInspector_ui.setupUi(self.GLI_dialog) 
-				        self.GLI_dialog.setGeometry(400,400, 286, 86)
+				        self.main.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
+				        self.GLI_dialog.setGeometry(int(self.main.x)+400,int(self.main.y)+200, 286, 86)
 				        self.GLI_dialog.focusWidget()
 				        self.GLInspector_ui.spinBox.setValue(org_position) 
 				        QObject.connect(self.GLInspector_ui.deleteButton, SIGNAL("clicked()"), self.deleteClicked)
 
 				        if self.GLI_dialog.exec_():
 				            new_positon = self.GLInspector_ui.spinBox.value()
-				            if luaCmd =="openV_GLI":
-				                inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
-				            else:
-				                inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
-				            print inputCmd
-				            self.trickplay.write(inputCmd+"\n")
-				            self.trickplay.waitForBytesWritten()
+				        else:
+				            new_positon = "nil"
+				        if luaCmd =="openV_GLI":
+				            inputCmd = str("_VE_.setVGuideX("+str(new_positon)+")")
+				        else:
+				            inputCmd = str("_VE_.setHGuideY("+str(new_positon)+")")
+				        print inputCmd
+				        self.trickplay.write(inputCmd+"\n")
+				        self.trickplay.waitForBytesWritten()
+
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
 				    elif luaCmd == "repUIInfo":
@@ -178,13 +206,13 @@ class TrickplayEmulatorManager(QWidget):
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
 				        gid = (s[9:])
-				        #gid = int(s[9:])
 				    elif luaCmd == "focusSet2":
 				        focusObj = str(s[9:])
 				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
 				        self.inspector.neighbors.toggled(False)
+				    elif luaCmd == "newui_gid":
+				        self.inspector.newgid = str(s[9:])
 				    elif luaCmd == "openInspc":
-				        #gid = int(s[10:])
 				        gid = (s[10:])
 				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
@@ -215,20 +243,19 @@ class TrickplayEmulatorManager(QWidget):
 				        self.imgData = json.loads(s[9:])
 				        self.fscontentMoveBlock = True 
 				        self.filesystem.buildImageTree(self.imgData)
+				        if self.filesystem.orgCnt >= self.filesystem.idCnt and self.filesystem.imageCommand in ["assets", "skins"]:
+				            self.main.errorMsg("No new image file was added !")
+
+				        self.filesystem.imageCommand = ""
 				        self.fscontentMoveBlock = False 
 				    else:
 				        pass
 
 				    if gid is not None and luaCmd == "clear:Insp":
 					try:
-					    #try:
-					        #gid = int(gid)
-					    #except:
-					        #print("error :( gid is missing!") 
-
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
-					        print('Found', result['gid'], result['name'])
+					        print('Found*', result['gid'], result['name'])
 					        self.inspector.clearItem(result)
 					        #self.inspector.selectItem(result, shift)
                             # open Property Tab 
@@ -237,16 +264,11 @@ class TrickplayEmulatorManager(QWidget):
 					        print("UI Element not found")
 
 					except:
-					    print("error :(")
+					    print("error :-(")
 
 
 				    if gid is not None and luaCmd == "openInspc":
 					try:
-					    #try:
-					        #gid = int(gid)
-					    #except:
-					        #print("error :( gid is missing!") 
-
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
 					        print('Found', result['gid'], result['name'])
@@ -254,17 +276,17 @@ class TrickplayEmulatorManager(QWidget):
 					        if shift == "f" :
 					            self.inspector.ui.inspector.selectionModel().clear()
 
+					        print ("select item >>>>>>>>>>>>>>>>>>>  ")
 					        self.inspector.selectItem(result, shift)
                             # open Property Tab 
-					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
+					        # self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
 					        print(gid, "---UI Element not found")
+					        self.inspector.ui.inspector.clearSelection()
 					        return
 
 					except:
-					    print("error :(")
-					    #self.getUIInfo()
-					    #self.getStInfo()
+					    print("error :/(")
 
 				    if luaCmd == "repStInfo":
 				        if self.main.command == "openFile" :
@@ -273,8 +295,9 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.preventChanges = True
 				        if self.inspector.cbStyle is not None:
 				            self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
-				            self.unsavedChanges = True
-				            #print("---------------------unsavedChanges", self.unsavedChanges)
+				            if self.ve_ready == False :
+				                self.unsavedChanges = True
+				            self.ve_ready = False 
 				        self.inspector.preventChanges = False
 				        return
 
@@ -284,10 +307,12 @@ class TrickplayEmulatorManager(QWidget):
 				        self.pdata = self.pdata[0]
 				        self.inspector.curData = self.pdata
 				        if self.inspector.curItemGid == self.inspector.curData['gid'] :
-				            self.inspector.preventChanges = True
-				            self.inspector.propertyFill(self.inspector.curData)
-				            self.unsavedChanges = True
-				            #print("---------------unsavedChanges", self.unsavedChanges)
+				            if self.main.command is not "setUIInfo" :
+				                self.inspector.preventChanges = True
+				                self.inspector.propertyFill(self.inspector.curData)
+				                if self.ve_ready == False :
+				                    self.unsavedChanges = True
+				                self.ve_ready = False 
 				        self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
@@ -297,20 +322,27 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
+
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 				        try:
 				            result = self.inspector.search(self.inspector.setGid, 'gid')
 				            if result: 
 				                self.inspector.ui.inspector.selectionModel().clear()
 				                self.inspector.selectItem(result, "f")
-				            g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
-				            g_index = self.inspector.ui.property.indexFromItem(g_item[0])
-				            self.inspector.ui.property.setExpanded(g_index, True)
+				            #g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
+				            #g_index = self.inspector.ui.property.indexFromItem(g_item[0])
+				            #self.inspector.ui.property.setExpanded(g_index, True)
+				            #g_item[0].setSelected(True)
 				        except : 
-				            #print ("couldn't find setGid")
 				            pass
                         
 				        self.inspector.preventChanges = False
+				        try : 
+				            if self.main.menuCommand == "newProject" :
+				                self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
+				                self.main.menuCommand = "" 
+				        except:
+				            pass
 
 				        if self.main.command == "openFile":
 				            self.main.command = ""
@@ -340,6 +372,7 @@ class TrickplayEmulatorManager(QWidget):
                 n = re.search("=", item).end()
                 env.remove(item[:n-1])
 
+        env.insert("TP_first_app_exits", "false")
         env.insert("TP_LOG", "raw")
         env.insert("TP_config_file","")
 
@@ -348,4 +381,14 @@ class TrickplayEmulatorManager(QWidget):
 
         self.trickplay.setProcessEnvironment(env)
         
-        ret = self.trickplay.start('trickplay', [self.path()])
+        self.trickplay.start('trickplay', [self.path()])
+        ret = self.trickplay.waitForStarted()
+        if ret == False :
+            if self.trickplay.error() == QProcess.FailedToStart :
+                self.main.errorMsg("TrickPlay engine failed to launch: check TrickPlay SDK installation") 
+            elif self.trickplay.error() == QProcess.Timedout :
+                self.main.errorMsg("TrickPlay engine launch timed out: check TrickPlay SDK installation") 
+
+
+
+

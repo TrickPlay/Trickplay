@@ -350,6 +350,8 @@ private:
     guint                   lua_gc_func;
     StringMap               globals;
 
+    static unsigned         rotation;
+
 #ifndef TP_PRODUCTION
 
     class Debugger                debugger;
