@@ -6,27 +6,27 @@
     -- Constants, Global Variables  
     -------------------------------
     hdr = dofile("header")
-    local currentProjectPath 
 
     --TEST Function 
     aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/ve2/TEST/tr.dd3")
+        _VE_.openFile("/home/hjkim/code/trickplay/tools/TEST/test.test11")
     end 
 
     bb = function ()
-        _VE_.insertUIElement(8, 'LayoutManager')
-        _VE_.insertUIElement(8, 'Button')
+        dumptable(screen:find_child("Layer0").children)
     end 
 
-    cc = function ()
-        
+    cc = function (gidN)
+        _VE_.selectUIElement(gidN, false)
     end 
     dd = function ()
     end 
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
- 
+    local currentProjectPath 
+    local select_screen = false
+    local openFile= false
     local key_map =
     {
         --[ keys.c	] = function() editor.clone() input_mode = hdr.S_SELECT end,
@@ -184,7 +184,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 		newChild.group_position = {0,0,0}
         newChild.is_in_group = false
         newChild.parent_group = nil
-        newChild.reactive = false
+        newChild.reactive = true
         util.create_mouse_event_handler(newChild, newChild.widget_type)
         newParent:add(newChild)
 
@@ -247,42 +247,42 @@ end
 
 _VE_.alignLeft = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
    
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		    if(v.x ~= basis_obj.x) then
 			  	v.x = basis_obj.x
 		    end
     	end
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
 
 _VE_.alignRight = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
 			v.x = basis_obj.x + basis_obj.w - v.w
 		   end
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
 
 _VE_.alignTop = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name ) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name ) then
 		  --   screen_ui.n_selected(v)
 		  if(v.y ~= basis_obj.y) then
 			v.y = basis_obj.y 
@@ -290,16 +290,16 @@ _VE_.alignTop = function(gid)
 		end 
    end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
     
 end 
 
 _VE_.alignBottom = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and  v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and  v.name ~= basis_obj_name) then
 		    --screen_ui.n_selected(v)
 		    if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
 			    v.y = basis_obj.y + basis_obj.h - v.h 
@@ -307,16 +307,16 @@ _VE_.alignBottom = function(gid)
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
  
 _VE_.alignHorizontalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
     
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		    -- screen_ui.n_selected(v)
 		    if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
 			    v.x = basis_obj.x + basis_obj.w/2 - v.w/2
@@ -324,16 +324,16 @@ _VE_.alignHorizontalCenter = function(gid)
 		end 
     end
 
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 
 end 
  
 _VE_.alignVerticalCenter = function(gid)
 
-    local basis_obj_name, basis_obj = editor.arrange_prep(gid)
+    local basis_obj_name, basis_obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true and v.name ~= basis_obj_name) then
+	    if(v.extra.ve_selected == true and v.name ~= basis_obj_name) then
 		-- screen_ui.n_selected(v)
 		    if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
 			    v.y = basis_obj.y + basis_obj.h/2 - v.h/2
@@ -341,12 +341,12 @@ _VE_.alignVerticalCenter = function(gid)
 		end 
     end
   
-    editor.arrange_end()
+    editor.arrange_end(gid, basis_obj, sel_objs)
 end 
 
 _VE_.distributeHorizontal = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
     
     local x_table = {}
     local temp_w = 0
@@ -357,7 +357,7 @@ _VE_.distributeHorizontal = function(gid)
     local distance = 0
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             table.insert(x_table, j.x)
             if j.x < min then 
                 min = j.x 
@@ -370,7 +370,7 @@ _VE_.distributeHorizontal = function(gid)
 
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             if j.x == min then 
                 min = j.x + j.w
             elseif j.x ~= max then 
@@ -387,7 +387,7 @@ _VE_.distributeHorizontal = function(gid)
 
     while #x_table ~= 0 do
         for i,j in ipairs (curLayer.children) do 
-            if j.extra.selected == true then 
+            if j.extra.ve_selected == true then 
                 if j.x == next_x then 
                     j.x = next_pos - j.w
                     screen:find_child(j.name.."border").x = next_pos - j.w
@@ -400,12 +400,12 @@ _VE_.distributeHorizontal = function(gid)
         end 
     end 
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 _VE_.distributeVertical = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
     
     local y_table = {}
     local temp_h = 0
@@ -416,7 +416,7 @@ _VE_.distributeVertical = function(gid)
     local distance = 0
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             table.insert(y_table, j.y)
             if j.y < min then 
                 min = j.y 
@@ -429,7 +429,7 @@ _VE_.distributeVertical = function(gid)
 
 
     for i,j in ipairs (curLayer.children) do
-        if j.extra.selected == true then 
+        if j.extra.ve_selected == true then 
             if j.y == min then 
                 min = j.y + j.h
             elseif j.y ~= max then 
@@ -446,7 +446,7 @@ _VE_.distributeVertical = function(gid)
 
     while #y_table ~= 0 do
         for i,j in ipairs (curLayer.children) do 
-            if j.extra.selected == true then 
+            if j.extra.ve_selected == true then 
                 if j.y == next_y then 
                     j.y = next_pos - j.h
                     screen:find_child(j.name.."border").y = next_pos - j.h
@@ -459,28 +459,28 @@ _VE_.distributeVertical = function(gid)
         end 
     end 
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 _VE_.bringToFront = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 			curLayer:remove(v)
 			curLayer:add(v)
 			--screen_ui.n_selected(v)
         end
     end
 
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 end 
 
 
 _VE_.bringForward = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -491,7 +491,7 @@ _VE_.bringForward = function(gid)
 		    table.insert(tmp_g, v)
 			table.insert(tmp_g, table.remove(slt_g))
 		end 
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    table.insert(slt_g, v) 
 			screen_ui.n_selected(v)
 		else 
@@ -510,20 +510,45 @@ _VE_.bringForward = function(gid)
 	    curLayer:add(v)
     end 
 
-    editor.arrange_end(gid)
+--[[
+    
+    for i, v in ipairs(curLayer.children) do
+	    curLayer:remove(v)  -- 1,2,(3)
+		if #slt_g ~= 0 then 
+			local b = table.remove(tmp_g)
+		    local f = table.remove(slt_g)
+			table.insert(tmp_g, f) 
+			table.insert(tmp_g, b)
+		end 
+	    if (v.extra.selected == true) then
+		    table.insert(slt_g, v) 
+			screen_ui.n_selected(v)
+		else 
+		    table.insert(tmp_g, v) 
+		end
+    end
+
+    tmp_g = util.get_reverse_t(tmp_g)
+    while #tmp_g ~= 0 do
+	    v = table.remove(tmp_g)
+	    curLayer:add(v) 
+    end 
+
+]]
+    editor.arrange_end(gid, obj, sel_objs)
 
 end
 
 _VE_.sendToBack = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
 
     for i, v in ipairs(curLayer.children) do
 	    curLayer:remove(v) 
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    table.insert(slt_g, v)
 			screen_ui.n_selected(v)
 		else 
@@ -531,6 +556,7 @@ _VE_.sendToBack = function(gid)
 		end
     end
     
+    slt_g = util.get_reverse_t(slt_g) 
     while #slt_g ~= 0 do
 	    v = table.remove(slt_g)
 	    curLayer:add(v)	
@@ -542,13 +568,14 @@ _VE_.sendToBack = function(gid)
 	    curLayer:add(v)	
     end 
 	
-    editor.arrange_end(gid)
+    editor.arrange_end(gid, obj, sel_objs)
 
 end
 
 _VE_.sendBackward = function(gid)
 
-    editor.arrange_prep(gid)
+    local obj_name, obj
+    obj_name, obj, sel_objs = editor.arrange_prep(gid)
 
     local tmp_g = {}
     local slt_g = {}
@@ -561,7 +588,7 @@ _VE_.sendBackward = function(gid)
 			table.insert(tmp_g, b)
 			table.insert(tmp_g, f) 
 		end 
-	    if (v.extra.selected == true) then
+	    if (v.extra.ve_selected == true) then
 		    table.insert(slt_g, v) 
 			screen_ui.n_selected(v)
 		else 
@@ -582,8 +609,8 @@ _VE_.sendBackward = function(gid)
 	    curLayer:add(v) 
     end 
 
-    editor.arrange_end(gid)
-
+    editor.arrange_end(gid, obj, sel_objs)
+   
 end
 
 _VE_.setCurrentProject = function(path)
@@ -592,6 +619,11 @@ end
 
 _VE_.refreshDone = function()
     buildInsp = false
+    if openFile== true then 
+        _VE_.openInspector(screen:find_child('Layer0').gid, false)
+        _VE_.repUIInfo(screen:find_child("Layer0"))
+        openFile= false
+    end 
 end 
 
 _VE_.refresh = function()
@@ -672,7 +704,7 @@ _VE_.delete = function(gid)
     blockReport = true
 
     for i, v in pairs(curLayer.children) do
-		if(v.extra.selected == true) then
+		if(v.extra.ve_selected == true) then
 			if v.extra.clone then 
 				if #v.extra.clone > 0 then
                     print (v.name,"can't be deleted. It has clone object")
@@ -779,7 +811,7 @@ _VE_.setUIInfo = function(gid, property, value, n)
         uiInstance:move_anchor_point(ax, ay)
     elseif n ~= nil then 
         uiInstance['tabs'][n].label = value 
-        print (n, value)
+        --print (n, value)
     else
         uiInstance[property] = value 
     end 
@@ -808,6 +840,11 @@ _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
 _VE_.openInspector = function(gid, multi)
+    if gid == screen.gid and select_screen == false then 
+        return
+    elseif  gid == screen.gid and select_screen == true then  
+        select_screen = false
+    end
     if buildInsp == true then
         return
     elseif shift == true or multi then 
@@ -830,7 +867,6 @@ _VE_.buildVF = function(path)
     local images = readfile(images_file)
     if images and #images > 0 then 
         images = string.gsub (images, "(\n+)", "")
-        --images = string.sub(images, 2, string.len(images)-1)
         print("imageInfo"..images)
         spriteSheet = WL.Widget_SpriteSheet { map = images_file } 
     end
@@ -839,6 +875,7 @@ end
 _VE_.openFile = function(path)
 
     blockReport = true
+    openFile = true
     screen:clear()
 
     current_dir = path
@@ -866,21 +903,26 @@ _VE_.openFile = function(path)
         error("Style '"..styles_file.."' does not exist.",2)
     end
 
-    load_styles(style) 
+    -- Library 
+    WL = dofile("LIB/Widget/Widget_Library.lua")
+    VL.load_styles(style) 
 
     local layer = readfile(layers_file)
-    layer = string.sub(layer, 2, string.len(layer)-1)
+    --layer = string.sub(layer, 2, string.len(layer)-1)
+    layer = json:stringify(json:parse(layer)[1])
     
     if layer == nil then
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
-    -- Library 
-    WL = dofile("LIB/Widget/Widget_Library.lua")
+    --print(WL.get_all_styles())
+
     _VE_.buildVF()
 
+    --print(WL.get_all_styles())
+
     --print(layer)
-    s = load_layer(layer)
+    s = VL.load_layer(layer)
     objectsNames = s.objects
     --print (s, #s.children)
 
@@ -892,7 +934,7 @@ _VE_.openFile = function(path)
          string.find(j.name, "a_m") == nil and 
          string.find(j.name, "border") == nil 
         then 
-            for l,m in ipairs(j.children) do 
+            for l,m in ipairs(j.children) do  
 
                 m.created = false
                 if m.subscribe_to then  
@@ -904,6 +946,30 @@ _VE_.openFile = function(path)
                 if uiTypeStr == "LayoutManager" then 
                     m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
                 end 
+
+                if uiTypeStr == "Widget_Text" then 
+                    function m:on_key_down(key)
+    	                if key == keys.Return then 
+			                m:set{cursor_visible = false}
+        	                screen.grab_key_focus(screen)
+			                m:set{editable= false}
+			                local text_len = string.len(m.text) 
+			                local font_len = string.len(m.font) 
+	                        local font_sz = tonumber(string.sub(m.font, font_len - 3, font_len -2))	
+			                local total = math.floor((font_sz * text_len / m.w) * font_sz *2/3) 
+			                if(total > m.h) then 
+				                m.h = total 
+			                end 
+                        end
+
+                        _VE_.repUIInfo(m)
+                
+    	                if key == keys.Return then 
+			                return true
+	                    end 
+                    end 
+                end 
+
                 m.extra.mouse_handler = false
                 util.create_mouse_event_handler(m, uiTypeStr)
                 if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" or uiTypeStr == "DialogBox" then
@@ -955,7 +1021,7 @@ _VE_.openFile = function(path)
                 end 
                 m.reactive = true 
                 m.lock = false
-                m.selected = false
+                m.ve_selected = false
                 m.is_in_group = false
             end
         end     
@@ -964,7 +1030,9 @@ _VE_.openFile = function(path)
     end
     
     _VE_.refresh()
+    
     blockReport = false
+
 
     --_VE_.buildVF()
     --[[
@@ -1016,13 +1084,20 @@ end
 _VE_.screenShow = function()
     screen:show()
 end 
-_VE_.setScreenLoc = function()
-    screen.y = 300
-    screen.x = 400
+_VE_.getScreenLoc = function()
+    print("screenLoc"..screen.x..","..screen.y)
+end 
+_VE_.setScreenLoc = function(x, y)
+    if x == 0 and y == 0  then 
+        screen.y = 300
+        screen.x = 300
+    else
+        screen.y = y--300
+        screen.x = x--1900
+    end 
 end 
 
 _VE_.newLayer = function()
-    
     for m,n in ipairs (screen.children) do
         if n.name == "Layer"..layerNum then 
             layerNum = layerNum + 1
@@ -1045,19 +1120,19 @@ local objCodeGen = function(contents, layer, lowLayer, obj)
     print (contents, layer, lowLayer, obj.name, obj.widget_type) 
 
     if obj.widget_type == "Button" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_pressed = function() end\n\t"
         contents = contents..lowLayer..".elements."..obj.name..".on_released = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     elseif obj.widget_type == "CheckBox" or obj.widget_type == "RadioButton" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_selection = function() end\n\t"
         contents = contents..lowLayer..".elements."..obj.name..".on_deselection = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     elseif obj.widget_type == "ToastAlert" then 
-        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION\n\t" 
+        contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
         contents = contents..lowLayer..".elements."..obj.name..".on_completed = function() end\n"
-        contents = contents.."-- END "..layer.."."..obj.name.." SECTION\n\n" 
+        contents = contents.."-- END "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\n" 
     end 
 
     return contents 
@@ -1067,17 +1142,15 @@ local codeGen = function()
 
     for a,b in ipairs (screen.children) do 
         if b.name and string.find(b.name, "Layer") then 
-
             local layerName = b.name
             local lowLayerName = string.lower(layerName)
-            
             local contents = readfile(lowLayerName..".lua")
-            print ( contents )
+            --print ( contents )
 
             local contents_header = "local "..lowLayerName.." = ...\n" 
             local contents_tail = "return "..lowLayerName 
 
-            if contents ~= nil then 
+            if contents ~= nil and b.elements ~= nil then 
                 local new_contents = ""
 
                 for i, j in pairs(b.elements) do 
@@ -1094,7 +1167,7 @@ local codeGen = function()
 				end
 
                 -----------------------------------
-                print (contents_last)
+                --print (contents_last)
 				local temp = contents_last 
                 local backup_obj = {}
 
@@ -1113,7 +1186,7 @@ local codeGen = function()
                     c, d = string.find(temp, "[-][-] BEGIN ")
                 end 
                         
-                dumptable(backup_obj)
+                --dumptable(backup_obj)
 
                 local temp_first, temp_last, temp_middle
                 for k, l in ipairs(backup_obj) do 
@@ -1139,9 +1212,11 @@ local codeGen = function()
                 
                 contents = contents_header
 
-                for i, j in pairs(b.elements) do 
-                    contents = objCodeGen(contents, layerName, lowLayerName, j) 
-                end 
+                if b.elements then 
+                    for i, j in pairs(b.elements) do 
+                        contents = objCodeGen(contents, layerName, lowLayerName, j) 
+                    end 
+                end
 
                 contents = contents..contents_tail
                 editor_lb:writefile(lowLayerName..".lua", contents, true)
@@ -1164,13 +1239,19 @@ _VE_.saveFile = function(scrJson)
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
 
+    --print ("***********************************")
+    --print (WL.get_all_styles())
+    --print ("***********************************")
+
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     --editor_lb:writefile("/screens/layers.json", '['..json:stringify(layer_t)..']', true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
     --screen:clear()
-    --_VE_.openFile(currentProjectPath)
+    _VE_.setAppPath(currentProjectPath)
+    _VE_.openFile(currentProjectPath)
+    _VE_.refreshDone()
 
     codeGen()
 
@@ -1211,13 +1292,21 @@ _VE_.white = function()
 end
 
 _VE_.setHGuideY = function(y)
-    selected_guideline.y = y - 10 
-    util.close_guideInspector()
+    if y ~= nil then 
+        selected_guideline.y = y - 10 
+        util.close_guideInspector()
+    else 
+        util.close_guideInspector()
+    end
 end 
 
 _VE_.setVGuideX = function(x)
-    selected_guideline.x = x - 10 
-    util.close_guideInspector()
+    if x ~= nil then 
+        selected_guideline.x = x - 10 
+        util.close_guideInspector()
+    else
+        util.close_guideInspector()
+    end
 end 
 
 _VE_.deleteGuideLine = function()
@@ -1336,6 +1425,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     util.getCurLayer(layerGid)
 
+
     blockReport = true
 
     if uiTypeStr == "Rectangle" or uiTypeStr == "Widget_Rectangle"  then 
@@ -1352,7 +1442,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         end 
 
     elseif uiTypeStr == "Clone" or uiTypeStr == "Widget_Clone" then 
-        
         editor.clone()
         return
 
@@ -1400,7 +1489,11 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
         --uiInstance.items = {WL.Button{name="pretty_button"}}
     end 
         
-    util.assign_right_name(uiInstance, uiTypeStr)
+    if uiTypeStr == "Image" then 
+        util.assign_right_name(uiInstance, path)
+    else 
+        util.assign_right_name(uiInstance, uiTypeStr)
+    end
 
     if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
         uiInstance.sheet = spriteSheet
@@ -1410,18 +1503,41 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     end
 
     if uiInstance ~= nil then 
+        screen_ui.n_selected_all()
         uiInstance.extra.mouse_handler = false 
         util.create_mouse_event_handler(uiInstance, uiTypeStr)
+        print("newui_gid"..uiInstance.gid)
         util.addIntoLayer(uiInstance)
     end
 
     blockReport = false
 
-    _VE_.selectUIElement(uiInstance.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiInstance.gid, false)
+    _VE_.repUIInfo(uiInstance)
 
 end
+
+_VE_.imageNameChange = function(org, new)
+
+
+    for m,n in ipairs (screen.children) do
+        if n.name then
+        if string.find(n.name, "Layer") ~= nil and 
+         string.find(n.name, "a_m") == nil and 
+         string.find(n.name, "border") == nil 
+        then 
+            for q,w in ipairs (n.children) do 
+                if w.widget_type == "Widget_Sprite" and w.id == org then 
+                    w.id = new 
+                end 
+            end
+        end
+        end
+    end 
+end 
+
+local selected_obj_cnt 
 
 _VE_.selectUIElement = function(gid, multiSel)
     local org_shift = shift
@@ -1432,6 +1548,12 @@ _VE_.selectUIElement = function(gid, multiSel)
         screen_ui.selected(devtools:gid(gid))
     end 
     shift = org_shift
+
+    if not (#selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil) and 
+       #selected_objs > 0 and selected_obj_cnt == 0 then 
+        print "menuEnabled"
+    end
+    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.deselectAll = function()
@@ -1447,6 +1569,12 @@ _VE_.deselectUIElement = function(gid, multiSel)
         screen_ui.n_selected(devtools:gid(gid))
     end
     shift = org_shift
+
+    if #selected_objs == 0 and selected_obj_cnt ~= 0 or 
+       #selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
+        print "menuDisabled"
+    end
+    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.focusSettingMode = function(key)
@@ -1484,6 +1612,12 @@ end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
+
+        if shift == false then
+            screen_ui.n_selected_all()
+            select_screen = true
+        end 
+        
         if input_mode == hdr.S_FOCUS then 
             --local selObjName, selObjGid = screen_ui.getSelectedName()
             local selObj = screen_ui.getSelectedObj()

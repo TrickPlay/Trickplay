@@ -2,7 +2,9 @@
 -- Utils 
 -----------
 local util = {}
-
+local containerOrder 
+local numberOfItems 
+local oupperObj, tupperObj
 
 local uiElementCreate_map = 
 {
@@ -44,7 +46,7 @@ function util.addIntoLayer (uiInstance, group)
 
     uiInstance.reactive = true
     uiInstance.lock = false
-    uiInstance.selected = false
+    uiInstance.ve_selected = false
     uiInstance.is_in_group = false
 
     --devtools:gid(curLayerGid):add(uiInstance)
@@ -78,7 +80,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         if dragging then
             local actor , dx , dy = unpack( dragging )
             actor.position = { x - dx , y - dy  }
-            if uiInstance.selected == true then 
+            if uiInstance.ve_selected == true then 
                 local border= screen:find_child(uiInstance.name.."border")
                 if border then 
                     border.position = { x - dx , y - dy  }
@@ -116,9 +118,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             return true
         elseif control == true and uiInstance.extra.is_in_group == true or 
  --]]
-        if uiInstance.extra.is_in_group == true or 
-           control == false and uiInstance.extra.is_in_group == false then 
 
+        if uiInstance.extra.is_in_group == true or control == false and uiInstance.extra.is_in_group == false then
             _VE_.openInspector(uiInstance.gid)
 
             --[[
@@ -168,9 +169,12 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                    string.find(j.name, "a_m") == nil and 
                    string.find(j.name, "border") == nil 
                    and j.visible == true  then 
+                    numberOfItems = #(j.children)
                     for k,l in ipairs (j.children) do 
 			            if util.is_this_container(l) == true then 
-				            l:lower_to_bottom()
+                            oupperObj = j.children[k+1]
+                            tupperObj = j.children[k+2]
+				            l:lower_to_bottom() 
 		                end 
                     end 
                 end 
@@ -253,33 +257,48 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         if dragging ~= nil then 
             actor , dx , dy = unpack( dragging )
         end 
+        ---[[ Content Setting 
+        local c, t 
 
-        ----[[ Content Setting 
 		if util.is_in_container_group(x,y) and selected_content then 
-		    local c, t = util.find_container(x,y) 
+		        --local c, t = util.find_container(x,y) 
+		        c, t = util.find_container(x,y) 
 			    if not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
 			        if c and t then 
-				        if (uiInstance.extra.selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
+				        if (uiInstance.extra.ve_selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
+                            print(uiInstance.parent.name)
+                            dumptable(uiInstance.parent.children)
 			        	    uiInstance:unparent()
 						    if t ~= "TabBar" then
 			        	        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y,0}
 						    end 
+
 			        	    uiInstance.extra.is_in_group = true
+                            
 							if screen:find_child(uiInstance.name.."border") then 
 			             	    screen:find_child(uiInstance.name.."border").position = uiInstance.position
 							end
 							if screen:find_child(uiInstance.name.."a_m") then 
 			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
 			        		end 
+
 			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" or t == "Widget_Group" then 
 
                                 if t == "DialogBox" then 
 								    uiInstance.y = uiInstance.y - c.separator_y
                                 elseif t == "ArrowPane" then 
-                                    uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
-                                    uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
+                                    --uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
+                                    if c.contents_offset[1] then 
+                                        print ("xxxxx")
+                                        uiInstance.x = uiInstance.x - c.contents_offset[1]
+                                    end 
+                                    --uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
+                                    if c.contents_offset[2] then 
+                                        print ("yyyyy")
+                                        uiInstance.y = uiInstance.y - c.contents_offset[2]
+                                    end 
                                 elseif t == "ScrollPane" then 
-                                    uiInstance.x = uiInstance.x + c.virtual_x
+                                    uiInstance.x = uiInstance.x + c.virtual_x 
                                     uiInstance.y = uiInstance.y + c.virtual_y
                                 end 
 
@@ -324,11 +343,10 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 end 
 
 			        		elseif t == "TabBar" then 
-                                ---[[
-							    --local x_off, y_off = c:get_offset() TODO : Tab direction 
 							    local t_index = c.selected_tab
 							    if t_index then 
-                                    uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
+                                    print("TabBar's new contents x should be set (the arrow size and offset)")
+                                    --uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
 								    uiInstance.y = uiInstance.y - c.y - c.tab_h
                                     uiInstance.reactive = true
                                     uiInstance.is_in_group = true
@@ -339,11 +357,27 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                                 if blockReport ~= true then
                                     _VE_.refresh()
                                 end 
-                                --]]
 
-							elseif t == "Group" then 
+							elseif t == "Group" or t == "WidgetGroup" then 
 							    c:add(uiInstance)
 			        		end 
+
+--[[
+                            print(c.parent.name)
+                            dumptable(c.parent.children)
+
+                            local row , col=  c:r_c_from_abs_x_y(x,y)
+                            if col and row then 
+                                uiInstance.reactive = false
+                                uiInstance.is_in_group = true
+                                uiInstance.parent_group = c
+		                        uiInstance.group_position = c.position
+                                c.cells[row][col] = uiInstance
+                            end
+
+                            print(c.parent.name)
+                            dumptable(c.parent.children)
+]]
 			     	      end 
 			       		end 
 					editor_lb:set_cursor(68)
@@ -354,11 +388,24 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 				screen:remove(screen:find_child(c.name.."a_m"))
 				screen:remove(screen:find_child(uiInstance.name.."border"))
 				screen:remove(screen:find_child(uiInstance.name.."a_m"))
+		        selected_container.ve_selected = false
+		        selected_content.ve_selected = false
 				selected_content = nil
 		        selected_container = nil
 	        end 
 	    end 
+        if c then 
+            c:raise_to_top()
+            if oupperObj and c.parent:find_child(oupperObj.name) then 
+                c:lower(oupperObj)
+            elseif tupperObj then 
+                c:lower(tupperObj)
+            end 
+        end 
+
 	    -- Content Setting --]] 
+
+
 
         for i, j in ipairs (screen.children) do 
 	        if j.name then 
@@ -438,8 +485,6 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			   	end
 			end
 		end 
-
-
 		selected_content = nil
 		selected_container = nil
         dragging = nil
@@ -449,26 +494,80 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         return true 
 	end,true) 
     uiInstance.extra.mouse_handler = true 
+
 end 
 
 function util.is_available (name) 
     for i, j in pairs (objectsNames) do
         if i == name then 
+            print(name.."  is not available")
             return false
         end
     end 
+    print(name.."  is available")
     return true
 end
 
-function util.assign_right_name (uiInstance, uiTypeStr)
+local function change_image_name (uiTypeStr)
+    local imgFileName, i, j
+    i, j = string.find(uiTypeStr, ".png")
+        
+    if i ~= nil then 
+        imgFileName = string.sub(uiTypeStr, 1, i-1)
+    end 
+    imgFileName = string.gsub(imgFileName, "/", "_S_")
+    imgFileName = string.gsub(imgFileName, "%.", "_P_")
+    imgFileName = string.gsub(imgFileName, "-", "_D_")
+    
+    local lowerChar, capitalChar, n
+    lowerChar, n = string.gsub(string.sub(imgFileName, 1,1), "%l", "Y") 
+    capitalChar, n = string.gsub(string.sub(imgFileName, 1,1), "%u", "Y") 
 
+    if lowerCase == "Y" or capitalChar == "Y"then 
+        imgFileName = string.lower(string.sub(imgFileName, 1,1))..string.sub(imgFileName, 2, -1)
+    else 
+        imgFileName = "_"..imgFileName
+    end
+
+    return imgFileName
+end 
+
+function util.assign_right_name (uiInstance, uiTypeStr)
+    uiTypeStr = (uiTypeStr:sub(1, 1):upper()..uiTypeStr:sub(2, -1))
+    if hdr.uiNum_map[uiTypeStr] == nil then
+        local imgFileName
+        
+        imgFileName = change_image_name(uiTypeStr)
+
+        if hdr.uiNum_map[imgFileName] == nil then
+            hdr.uiNum_map[imgFileName] = 0 
+        end 
+
+        while  util.is_available(imgFileName.."_"..hdr.uiNum_map[imgFileName]) == false do 
+            hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
+        end 
+
+        uiInstance.name = imgFileName.."_"..hdr.uiNum_map[imgFileName]
+        hdr.uiNum_map[imgFileName] = hdr.uiNum_map[imgFileName] + 1
+
+    else 
+
+        while util.is_available(uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]) == false do
+            hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
+        end 
+    
+        uiInstance.name = uiTypeStr:lower()..hdr.uiNum_map[uiTypeStr]
+        hdr.uiNum_map[uiTypeStr] = hdr.uiNum_map[uiTypeStr] + 1
+    
+--[[
     while util.is_available(uiTypeStr:lower()..uiNum) == false do
         uiNum = uiNum + 1
     end 
 
     uiInstance.name = uiTypeStr:lower()..uiNum
     uiNum = uiNum + 1
-
+]]
+    end 
 end 
 	
 
@@ -561,7 +660,7 @@ function util.get_min_max ()
 
      for i, v in pairs(curLayer.children) do
           if curLayer:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.ve_selected == true) then
 			if(v.x < min_x) then min_x = v.x end 
 			if(v.x > max_x) then max_x = v.x end
 			if(v.y < min_y) then min_y = v.y end 
@@ -580,7 +679,7 @@ end
 
 function util.org_cord() 
     for i, v in pairs(curLayer.children) do
-		if(v.extra.selected == true) then
+		if(v.extra.ve_selected == true) then
 		     v.x = v.x - v.anchor_point[1] 
 		     v.y = v.y - v.anchor_point[2] 
 		end 
@@ -589,7 +688,7 @@ end
 
 function util.ang_cord() 
     for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    screen_ui.n_selected(v)
 		    v.x = v.x + v.anchor_point[1] 
 		    v.y = v.y + v.anchor_point[2] 
@@ -636,7 +735,7 @@ function util.get_x_sort_t()
      local x_sort_t = {}
      
      for i, v in pairs(curLayer.children) do
-	    if(v.extra.selected == true) then
+	    if(v.extra.ve_selected == true) then
 		    local n = #x_sort_t
 			if(n ==0) then
 				table.insert(x_sort_t, v) 

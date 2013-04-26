@@ -1,4 +1,5 @@
 #include <math.h>
+#include "log.h"
 #include "nineslice.h"
 
 G_DEFINE_TYPE( NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT );
@@ -16,8 +17,16 @@ struct Slice
         self->update();
     }
 
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ) {};
-    ~Slice() { if ( material ) { cogl_handle_unref( material ); } }
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL ) {};
+    ~Slice()
+    {
+        if ( done && action ) {
+            Action::cancel( action );
+            action = NULL;
+        }
+
+        if ( material ) cogl_handle_unref( material );
+    }
 
     void set_sprite( Sprite* _sprite, bool async )
     {
@@ -43,39 +52,33 @@ struct Slice
             material = cogl_material_copy( COGL_MATERIAL( clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
         }
 
-        clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+        nineslice_redraw(effect);
 
         loaded = sprite && sprite->is_real();
         done = !sprite || sprite->is_real() || sprite->is_failed();
 
         if ( done )
         {
-            nineslice_effect_signal_loaded_later( effect );
+            action = nineslice_effect_signal_loaded_later( effect );
         }
     }
 
-    NineSliceEffect* effect;
-    CoglMaterial* material;
-    Sprite* sprite;
-    PingMe ping;
-    bool loaded;
-    bool done;
-};
-
-struct _NineSliceEffectPrivate
-{
-    Slice* slices;
-    bool can_fire;
-    gboolean tile[6];
+    NineSliceEffect   * effect;
+    CoglMaterial      * material;
+    Sprite            * sprite;
+    PingMe              ping;
+    bool                loaded;
+    bool                done;
+    Action * action;
 };
 
 class SignalLoadedLater : public Action
 {
     NineSliceEffect* self;
 
-public: SignalLoadedLater( NineSliceEffect* s ) : self( s ) { g_assert( s ); };
+    public: SignalLoadedLater( NineSliceEffect* s ) : self( s ) { g_assert( s ); };
 
-protected: bool run()
+    protected: bool run()
     {
         if ( nineslice_effect_is_done( self ) )
         {
@@ -128,13 +131,18 @@ bool nineslice_effect_is_loaded( NineSliceEffect* effect )
     return true;
 }
 
-void nineslice_effect_signal_loaded_later( NineSliceEffect* effect )
+Action * nineslice_effect_signal_loaded_later( NineSliceEffect* effect )
 {
+    SignalLoadedLater * ret = NULL;
     if ( effect->priv->can_fire )
     {
         effect->priv->can_fire = false;
-        Action::post( new SignalLoadedLater( effect ) );
+
+        ret = new SignalLoadedLater( effect );
+        Action::post( ret );
     }
+
+    return ret;
 }
 
 bool nineslice_effect_get_tile( NineSliceEffect* effect, unsigned i )
@@ -151,12 +159,17 @@ void nineslice_effect_get_tile( NineSliceEffect* effect, gboolean tile[6] )
     }
 }
 
-void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess )
+void nineslice_redraw( NineSliceEffect* effect )
 {
-    g_assert( i < 6 );
+    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+}
+
+void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess, bool constructing )
+{
+    g_assert(i < 6);
     effect->priv->tile[i] = guess ? ( i ? effect->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
 
-    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+    if (!constructing) nineslice_redraw(effect);
 }
 
 void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] )
@@ -166,7 +179,7 @@ void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] )
         effect->priv->tile[i] = tile[i];
     }
 
-    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+    nineslice_redraw(effect);
 }
 
 std::vector< int >* nineslice_effect_get_borders( NineSliceEffect* effect )

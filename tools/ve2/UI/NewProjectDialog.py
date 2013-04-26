@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'NewProjectDialog.ui'
+# Form implementation generated from reading ui file 'UI/NewProjectDialog.ui'
 #
-# Created: Mon Jun 11 10:05:22 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Mon Feb 11 12:53:07 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -37,6 +37,7 @@ class Ui_newProjectDialog(object):
         self.horizontalLayout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.directory = QtGui.QLineEdit(newProjectDialog)
+        self.directory.setText(_fromUtf8(""))
         self.directory.setReadOnly(True)
         self.directory.setObjectName(_fromUtf8("directory"))
         self.horizontalLayout.addWidget(self.directory)
@@ -81,26 +82,10 @@ class Ui_newProjectDialog(object):
     def retranslateUi(self, newProjectDialog):
         newProjectDialog.setWindowTitle(QtGui.QApplication.translate("newProjectDialog", "New Project", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDirectory.setText(QtGui.QApplication.translate("newProjectDialog", "Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.directory.setText(QtGui.QApplication.translate("newProjectDialog", "Project Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.directory.setPlaceholderText(QtGui.QApplication.translate("newProjectDialog", "Project Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.browse.setText(QtGui.QApplication.translate("newProjectDialog", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.labelId.setText(QtGui.QApplication.translate("newProjectDialog", "Company Identifier", None, QtGui.QApplication.UnicodeUTF8))
         self.id.setPlaceholderText(QtGui.QApplication.translate("newProjectDialog", "com.organization", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName.setText(QtGui.QApplication.translate("newProjectDialog", "App Name", None, QtGui.QApplication.UnicodeUTF8))
         self.name.setPlaceholderText(QtGui.QApplication.translate("newProjectDialog", "newapplication", None, QtGui.QApplication.UnicodeUTF8))
-
-    def paintEvent(self, event):
-        """create a painting canvas"""
-        painter = QPainter()
-        painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        # use the brush for a texture/wallpaper background
-        # supply a background image file you have (add needed path)
-        painter.setBrush(QBrush(QPixmap("BG_GoldSwirl.gif")))
-        painter.drawRect(event.rect())
-        # optionally write something in the wallpaper
-        # (check the fonts available on your computer)
-        painter.setFont(QFont('Freestyle Script', 48))
-        painter.drawText(50, 160, "Hello World!")
-        painter.end()
-
 

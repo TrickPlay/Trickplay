@@ -1,4 +1,3 @@
-OVERRIDEMETATABLE = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -8,9 +7,9 @@ function override_property( object , name , getter , setter )
     assert( type( name )   == "string"   )
     assert( getter == nil or type( getter ) == "function" )
     assert( setter == nil or type( setter ) == "function" )
-    
+
     local mt = getmetatable( object )
-    
+
     if getter then
         local old_getter = mt.__getters__[name]
         mt.__getters__[ name ] =
@@ -18,7 +17,7 @@ function override_property( object , name , getter , setter )
                 return getter( old_getter , object )
             end
     end
-        
+
     if setter then
         local old_setter = mt.__setters__[name]
         mt.__setters__[name] =
@@ -32,13 +31,13 @@ function override_function( object , name , newf )
     assert( type( object ) == "userdata" )
     assert( type( name )   == "string"   )
     assert( type( newf )   == "function" )
-    
+
     local mt = getmetatable( object )
-    
+
     local oldf = mt[ name ]
-    
+
     mt[ name ] =  function( ... )   return newf( oldf , ... )   end
-    
+
 end
 
 --TODO add override_private_function

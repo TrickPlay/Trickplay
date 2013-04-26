@@ -545,23 +545,23 @@ protected:
         switch ( dir )
         {
             case TP_KEY_UP:
-                fr2.set( 0 , 0 , 1920 , fr.y1 );
+                fr2.set( 0 , 0 , kb->context->get_int( TP_VIRTUAL_WIDTH ) , fr.y1 );
                 fr.y1 = 0;
                 break;
 
             case TP_KEY_DOWN:
-                fr2.set( 0 , fr.y2 , 1920 , 1080 );
-                fr.y2 = 1080;
+                fr2.set( 0 , fr.y2 , kb->context->get_int( TP_VIRTUAL_WIDTH ) , kb->context->get_int( TP_VIRTUAL_HEIGHT ) );
+                fr.y2 = kb->context->get_int( TP_VIRTUAL_HEIGHT );
                 break;
 
             case TP_KEY_LEFT:
-                fr2.set( 0 , 0 , fr.x1 , 1080 );
+                fr2.set( 0 , 0 , fr.x1 , kb->context->get_int( TP_VIRTUAL_HEIGHT ) );
                 fr.x1 = 0;
                 break;
 
             case TP_KEY_RIGHT:
-                fr2.set( fr.x2 , 0 , 1920 , 1080 );
-                fr.x2 = 1920;
+                fr2.set( fr.x2 , 0 , kb->context->get_int( TP_VIRTUAL_WIDTH ) , kb->context->get_int( TP_VIRTUAL_HEIGHT ) );
+                fr.x2 = kb->context->get_int( TP_VIRTUAL_WIDTH );
                 break;
 
             default : g_assert( false );
@@ -1694,8 +1694,8 @@ Keyboard::Keyboard( TPContext* c )
 
     clutter_actor_get_size( stage , & stage_width , & stage_height );
 
-    gfloat xs = stage_width / 1920.0;
-    gfloat ys = stage_height / 1080.0;
+    gfloat xs = stage_width / context->get_int( TP_VIRTUAL_WIDTH );
+    gfloat ys = stage_height / context->get_int( TP_VIRTUAL_HEIGHT );
 
     // Set the scale on the keyboard
 

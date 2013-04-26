@@ -28,12 +28,12 @@ struct SpriteBinding
     };
 
     SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
-                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ),
-                                             action( NULL ) {}
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), texture( NULL ), 
+                                             action( NULL ), id_to_free( false ), id( NULL ) {}
 
     ~SpriteBinding()
     {
-        if ( id ) {
+        if ( id && id_to_free) {
             g_free( id );
             id = NULL;
         }
@@ -53,21 +53,42 @@ struct SpriteBinding
         }
     }
 
-    const char * get_id() { return id; }
+    const char * get_id() { return id_to_free ? id : sprite->get_id(); }
 
     void set_id( const char * new_id )
     {
         g_assert( new_id );
 
         /* TODO: replace strcmp with something safe */
-        if ( !id || strcmp( id, new_id ) )
-        {
-            if ( id ) g_free( id );
-            id = new_id ? g_strdup( new_id ) : NULL;
+        SpriteSheet::Sprite * s = sheet ? sheet->get_sprite( new_id ) : NULL;
+        if ( s ) {
+            if ( id && id_to_free ) g_free(id);
+            id = (char *) (s->get_id());
+            id_to_free = false;
+            sprite = s;
+            update_sprite();
+        } else {
+            if ( !id || strcmp(id, new_id) )
+            {
+                if ( id && id_to_free ) g_free( id );
+                id = g_strdup( new_id );
+            }
+            id_to_free = true;
         }
+    }
 
-        update_sprite();
+    void update_sprite()
+    {
+        if ( constructing ) return;
 
+        if ( sprite )
+        {
+            ping.assign( sprite, SpriteBinding::on_ping, this, !async );
+        }
+        else
+        {
+            g_warning( "Spritesheet does not contain the id '%s'", id );
+        }
     }
 
     void set_sheet( SpriteSheet * _sheet )
@@ -80,11 +101,29 @@ struct SpriteBinding
 
         sheet = _sheet;
 
-        if ( _sheet ) {
-            RefCounted::ref( _sheet );
-        }
+        if ( !_sheet ) return;
 
-        update_sprite();
+        RefCounted::ref( _sheet );
+
+        if ( !id ) return;
+
+        SpriteSheet::Sprite *s = sheet->get_sprite( id );
+        if ( s )
+        {
+            sprite = s;
+            if ( id && id_to_free ) g_free(id);
+            id = (char *) (s->get_id());
+            id_to_free = false;
+            update_sprite();
+        }
+        else
+        {
+            if ( id_to_free ) return;
+            /* Previously id maps to a valid sprite, now invalid */
+            id_to_free = true;
+            id = g_strdup( sprite->get_id() );
+            sprite = NULL;
+        }
     };
 
     void update()
@@ -134,25 +173,6 @@ struct SpriteBinding
         }
     }
 
-    void update_sprite()
-    {
-        if ( sheet && id )
-        {
-            sprite = sheet->get_sprite( id );
-
-            if ( constructing ) return;
-
-            if ( sprite )
-            {
-                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
-            }
-            else
-            {
-                g_warning( "Spritesheet does not contain the id '%s'", id );
-            }
-        }
-    }
-
     bool async;
     bool loaded;
     bool can_fire;
@@ -170,9 +190,11 @@ private:
 
     SpriteSheet::Sprite * sprite;
     SpriteSheet         * sheet;
-    char * id;
     CoglHandle texture;
     SignalLoadedLater   * action;
+
+    bool id_to_free;
+    char * id;
 };
 
 void set_sheet_first( lua_State * L , int table )
@@ -347,8 +369,9 @@ class Sprite [[ClutterActor*]] actor
             SpriteBinding * binding = get_binding( self );
             const char * new_id = lua_tostring( L , -1 );
 
-            g_object_set_data_full( G_OBJECT( self ), "tp-src",
-                g_strdup_printf( "[Sprite] \"%s\"", new_id ? new_id : "" ), g_free );
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( "[Sprite]" ) , g_free );
+            //g_object_set_data_full( G_OBJECT( self ), "tp-src",
+                //g_strdup_printf( "[Sprite] \"%s\"", new_id ? new_id : "" ), g_free );
 
             binding->set_id( new_id );
         ]];
