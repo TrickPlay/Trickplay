@@ -145,7 +145,7 @@ print("ssssssssssssssssssssssssssssssssss")
 b0 = WL.ToggleButton()
 b0.x = 400
 
-b1 = WL.ToggleButton{x=400,y=100,selected = false, label = "text",reactive=true}
+b1 = WL.ToggleButton{x=400,y=100,w=200,h=50,selected = false, label = "text",reactive=true}
 
 b2 = WL.ToggleButton{x=400,y=200,selected = true,enabled = false,reactive=true}
 
@@ -155,10 +155,14 @@ b3 = WL.ToggleButton{
     x = 600,y = 0,
     empty_icon  = Image{src="Button/strike-off.png"},
     filled_icon = Image{src="Button/strike-on.png",x=-8,y=-8},
-    images = {
-        default = Image{src="Button/button3.png"},
-        focus   = Image{src="Button/button-focus.png"},
-    },
+    reactive=true
+}
+b4 = WL.ToggleButton{
+    name = "B2",
+    x = 600,y = 100,
+    w=200,h=50,
+    empty_icon  = Image{src="Button/strike-off.png"},
+    filled_icon = Image{src="Button/strike-on.png",x=-8,y=-8},
     reactive=true
 }
 
@@ -167,12 +171,8 @@ print("tttttttttttttttttttttttttttttttttt")
 
 
 
-screen:add(b0,b1,b2,b3)
+screen:add(b0,b1,b2,b3,b4)
 
-b0.reactive = true
-b1.reactive = true
-b2.reactive = true
-b3.reactive = true
 
 controllers:start_pointer()
 

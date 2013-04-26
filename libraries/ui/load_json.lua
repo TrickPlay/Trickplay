@@ -147,7 +147,7 @@ function load_styles(str)
 end
 
 
-local names
+local names, gids
 local neigbor_info, clone_info
 local curr_neighbors
 local obj
@@ -231,6 +231,7 @@ construct = function(t)
 
         error("Received invalid type: "..t.type)
     
+    gids[t.gid] = obj
     names[obj.name] = obj
     neigbor_info[obj] = curr_neighbors
     obj_to_elements_map[obj] = elements
@@ -244,9 +245,10 @@ end
 
 function load_layer(str)
 
-    names = {}
+    gids         = {}
+    names        = {}
     neigbor_info = {}
-    clone_info = {}
+    clone_info   = {}
     
     
       --load_styles should be called before load_layer
@@ -287,7 +289,9 @@ function load_layer(str)
     end
     
     for clone,src in pairs(clone_info) do
+        
         clone.source = names[src]
+        
     end
     
     for obj,neighbors in pairs(neigbor_info) do

@@ -6,71 +6,52 @@ G_DEFINE_TYPE( NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT );
 
 #define NINESLICE_EFFECT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), TYPE_NINESLICE_EFFECT, NineSliceEffectPrivate))
 
-typedef SpriteSheet::Sprite Sprite;
-typedef PushTexture::PingMe PingMe;
-
-struct Slice
+void Slice::on_ping( PushTexture* source, void* target )
 {
-    static void on_ping( PushTexture* source, void* target )
+    Slice* self = ( Slice* ) target;
+    self->update();
+}
+
+void Slice::set_sprite( Sprite* _sprite, bool async )
+{
+    sprite = _sprite;
+    loaded = false;
+    done = !sprite;
+    ping.assign( sprite, Slice::on_ping, this, !async );
+}
+
+void Slice::unset_sprite()
+{
+    ping.assign( NULL, NULL, NULL, false );
+    sprite = NULL;
+}
+
+void Slice::update()
+{
+    static ClutterActor* texture = clutter_texture_new();
+
+    if ( material )
     {
-        Slice* self = ( Slice* ) target;
-        self->update();
+        cogl_handle_unref( material );
+        material = NULL;
     }
 
-    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL ) {};
-    ~Slice()
+    if ( sprite )
     {
-        if ( done && action ) {
-            Action::cancel( action );
-            action = NULL;
-        }
-
-        if ( material ) cogl_handle_unref( material );
+        clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), sprite->get_texture() );
+        material = cogl_material_copy( COGL_MATERIAL( clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
     }
 
-    void set_sprite( Sprite* _sprite, bool async )
+    nineslice_redraw(effect);
+
+    loaded = sprite && sprite->is_real();
+    done = !sprite || sprite->is_real() || sprite->is_failed();
+
+    if ( done )
     {
-        sprite = _sprite;
-        loaded = false;
-        done = !sprite;
-        ping.assign( sprite, Slice::on_ping, this, !async );
+        action = nineslice_effect_signal_loaded_later( effect );
     }
-
-    void update()
-    {
-        static ClutterActor* texture = clutter_texture_new();
-
-        if ( material )
-        {
-            cogl_handle_unref( material );
-            material = NULL;
-        }
-
-        if ( sprite )
-        {
-            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), sprite->get_texture() );
-            material = cogl_material_copy( COGL_MATERIAL( clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
-        }
-
-        nineslice_redraw(effect);
-
-        loaded = sprite && sprite->is_real();
-        done = !sprite || sprite->is_real() || sprite->is_failed();
-
-        if ( done )
-        {
-            action = nineslice_effect_signal_loaded_later( effect );
-        }
-    }
-
-    NineSliceEffect   * effect;
-    CoglMaterial      * material;
-    Sprite            * sprite;
-    PingMe              ping;
-    bool                loaded;
-    bool                done;
-    Action * action;
-};
+}
 
 class SignalLoadedLater : public Action
 {
@@ -286,7 +267,12 @@ static gboolean nineslice_effect_pre_paint( ClutterEffect* self )
 
 static void nineslice_effect_dispose( GObject* gobject )
 {
-    delete[] NINESLICE_EFFECT( gobject )->priv->slices;
+    if (NINESLICE_EFFECT( gobject )->priv->slices)
+    {
+        delete[] NINESLICE_EFFECT( gobject )->priv->slices;
+        NINESLICE_EFFECT( gobject )->priv->slices = NULL;
+    }
+
     G_OBJECT_CLASS( nineslice_effect_parent_class )->dispose( gobject );
 }
 
