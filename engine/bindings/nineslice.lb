@@ -10,9 +10,19 @@ module nineslice;
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
+/* TODO: NineSlice should be able to reuse other SpriteSheet and Sprite objects created/loaded in the same lua program at run-time
+ * TODO: Need to make it clear how objects are destructed, instead of no code/comments
+ * TODO: Can create a simple syntax to hold nineslice definitions. Or use a straightforward workflow
+ * TODO: Leverage ClutterTableLayout to simplify the implementation
+ * TODO: Need to verify calculations of coordinates of x and y in the json file. Right now if it starts from 1 instead of 0, some sprites are being missed
+ * TODO: Cloning - Two instances of the same NineSlice should share SpriteSheet, Sprites
+ *
+ * Class heirarchy: NineSliceBinding -> NineSliceEffect -> NineSliceEffectPrivate -> Slice
+ */
+
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), effect( _effect ), sheet( NULL ), action( NULL ) { assert( effect ); };
+    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), sheet( NULL ), effect( _effect ), action( NULL ) { assert( effect ); }
 
     ~NineSliceBinding()
     {
@@ -21,9 +31,10 @@ struct NineSliceBinding
             Action::cancel( action );
             action = NULL;
         }
+        unsubscrube_sprites();
     }
 
-    NineSliceEffect * get_effect() { return effect; };
+    NineSliceEffect * get_effect() { return effect; }
 
     bool get_tile( unsigned i )
     {
@@ -62,7 +73,7 @@ struct NineSliceBinding
         }
 
         return ids[i];
-    };
+    }
 
     void set_id( unsigned i, const std::string & new_id )
     {
@@ -83,7 +94,7 @@ struct NineSliceBinding
 
         if (constructing) return;
 
-        set_all_sprites();
+        if (sheet) set_all_sprites();
     }
 
     void set_all_sprites()
@@ -107,14 +118,29 @@ struct NineSliceBinding
         }
     }
 
+    void unsubscrube_sprites()
+    {
+        Slice * slices = effect->priv->slices;
+
+        if (slices)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                slices[i].unset_sprite();
+            }
+            //delete[] slices;
+            //effect->priv->slices = NULL;
+        }
+    }
+
     bool async;
     bool constructing;
 
 private:
-    NineSliceEffect * effect;
-    SpriteSheet * sheet;
-    std::string ids[9];
-    Action * action;
+    SpriteSheet      * sheet;
+    NineSliceEffect  * effect;
+    std::string        ids[9];
+    Action           * action;
 };
 
 #define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
