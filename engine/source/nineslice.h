@@ -4,6 +4,9 @@
 #include <clutter/clutter.h>
 #include "spritesheet.h"
 
+typedef SpriteSheet::Sprite Sprite;
+typedef PushTexture::PingMe PingMe;
+
 GType nineslice_effect_get_type( void );
 
 #define TYPE_NINESLICE_EFFECT             (nineslice_effect_get_type())
@@ -13,7 +16,37 @@ GType nineslice_effect_get_type( void );
 #define IS_NINESLICE_EFFECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_CAST((klass),   TYPE_NINESLICE_EFFECT))
 #define NINESLICE_EFFECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj),   TYPE_NINESLICE_EFFECT, NineSliceEffectClass))
 
-struct Slice;
+struct NineSliceEffect;
+
+class Slice
+{
+public:
+    Slice() : effect( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL ) {}
+
+    ~Slice()
+    {
+        if ( done && action ) {
+            Action::cancel( action );
+            action = NULL;
+        }
+
+        if ( material ) cogl_handle_unref( material );
+    }
+
+    static void on_ping( PushTexture* source, void* target );
+    void set_sprite( Sprite* _sprite, bool async );
+    void unset_sprite();
+    void update();
+
+public:
+    NineSliceEffect   * effect;
+    CoglMaterial      * material;
+    Sprite            * sprite;
+    PingMe              ping;
+    bool                loaded;
+    bool                done;
+    Action            * action;
+};
 
 struct NineSliceEffectPrivate
 {
