@@ -10,8 +10,7 @@ module nineslice;
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
-/* TODO: NineSlice should be able to reuse other SpriteSheet and Sprite objects created/loaded in the same lua program at run-time
- * TODO: Need to make it clear how objects are destructed, instead of no code/comments
+/* TODO: Need to make it clear how objects are destructed, instead of no code/comments
  * TODO: Can create a simple syntax to hold nineslice definitions. Or use a straightforward workflow
  * TODO: Leverage ClutterTableLayout to simplify the implementation
  * TODO: Need to verify calculations of coordinates of x and y in the json file. Right now if it starts from 1 instead of 0, some sprites are being missed
