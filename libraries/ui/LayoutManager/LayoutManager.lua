@@ -158,7 +158,7 @@ ListManager = setmetatable(
                     function(oldf,self,v)
                         new_cells = v
                         --print("herp")
-                        dumptable(v)
+                        --dumptable(v)
                     end
                 end,
                 focus_to_index = function(instance,_ENV)
@@ -346,7 +346,7 @@ ListManager = setmetatable(
                         placeholder = v
                     end
                     if  new_cells then
-                        print(#new_cells)
+                        --print(#new_cells)
                         --cells.length = #new_cells
                         cells:new_data(new_cells)
 
@@ -754,7 +754,7 @@ LayoutManager = setmetatable(
                     function(oldf,self,v)
                         new_cells = v
                         mesg("LayoutManager",0,"LayoutManager.cells = ",v)
-                        dumptable(v)
+                        --dumptable(v)
                         --print("dim",cells.number_of_rows,cells.number_of_cols)
                     end
                 end,
