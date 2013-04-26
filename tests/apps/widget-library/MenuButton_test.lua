@@ -91,14 +91,14 @@ mb4.items:insert(2,WL.Button())
 --]]
 ---[[
 
-mb4.neighbors[keys.Up] = mb3
-mb3.neighbors[keys.Down] = mb4
+mb4.neighbors.Up = mb3
+mb3.neighbors.Down = mb4
 
 --]]
-
+---[[
 mb5 = WL.MenuButton(mb4.attributes)
 mb5.x = 1400
-
+--]]
 wg = WL.Widget_Group()
 screen:add(wg)
 wg:add(

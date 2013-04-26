@@ -27,6 +27,7 @@ lm1:set{
     x = 1000,
     number_of_rows = 4,
     number_of_cols = 2,
+    vertical_alignment = "top",
     --placeholder = Widget_Rectangle{w=300,h=300},
     cells = {
         {WL.Widget_Rectangle{w=100,h=100},WL.Widget_Rectangle{w=100,h=100}},
@@ -64,6 +65,8 @@ print("===============================================================")
 lmj:from_json(tj)
 screen:add(lmj)
 lmj.placeholder = WL.Widget_Rectangle{w=300,h=300}
+
+
 --]]
 ---[[
 lm2 = WL.LayoutManager{
@@ -76,6 +79,7 @@ lm2 = WL.LayoutManager{
         {WL.Button(),WL.Button()},
     }
 }
+lm2.cell_w = 400
 dolater(function()
     lm2:grab_key_focus()
 end)
