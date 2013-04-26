@@ -44,6 +44,14 @@ end
 tests_group:add(unpack(tests))
 
 ---------------------------------------------------------------------
+editor:change_app_path(absolute_path_to_widget_library)
+WL = dofile("Widget_Library.lua")
+
+dofile("load_json.lua")
+
+
+---------------------------------------------------------------------
+
 local load_test_menu
 load_test_menu = function()
     screen:add(Rectangle{color="880000",y = 80,h=100,w=500},tests_group)
@@ -90,7 +98,3 @@ controllers:start_pointer()
 screen:show()
 load_test_menu()
 ---------------------------------------------------------------------
-editor:change_app_path(absolute_path_to_widget_library)
-WL = dofile("Widget_Library.lua")
-
-dofile("load_json.lua")
