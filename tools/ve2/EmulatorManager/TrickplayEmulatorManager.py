@@ -290,17 +290,27 @@ class TrickplayEmulatorManager(QWidget):
 				        return
 
 				    elif luaCmd == "repUIInfo":
+				        print("HJJJJJJJJJJJJJJJJJJJJJJ", self.main.command)
 				        self.pdata = self.pdata[0]
 
 				        if self.main.command == "openFile" :
 				            return 
 				        elif self.main.command == "insertUIElement" :
+				            print("iuiuiui")
 				            self.main.command = "" 
 				            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
 				            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
 				            self.inspector.deselectItems()
 				            newItem = self.inspector.search(self.pdata['gid'], 'gid')
 				            self.inspector.selectItem(newItem, False)
+                            
+				            # Group : remove group's contents from the layer
+				            if self.pdata['type'] == 'Widget_Group' :
+				                print("aaa")
+				                for c in self.pdata['children'] :
+				                    i = self.inspector.search(c['gid'], 'gid')
+				                    i.parent().removeRow(i.row())
+
 				            return 
 				        else:
 				            self.inspector.curData = self.pdata
@@ -323,7 +333,6 @@ class TrickplayEmulatorManager(QWidget):
 				        self.contentMoveBlock = False 
 
 				        self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
-				        """
 				        try:
 				            result = self.inspector.search(self.inspector.setGid, 'gid')
 				            if result: 
@@ -335,7 +344,6 @@ class TrickplayEmulatorManager(QWidget):
 				            #g_item[0].setSelected(True)
 				        except : 
 				            pass
-				        """
                         
 				        self.inspector.preventChanges = False
 				        try : 

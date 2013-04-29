@@ -695,8 +695,6 @@ class TrickplayInspector(QWidget):
         """
         Select a row of the inspector model (as the result of a search)
         """
-        print "selectItem"
-
         try:
             topLeft = item.index()
             bottomRight = item.partner().index()
@@ -712,9 +710,10 @@ class TrickplayInspector(QWidget):
                     QItemSelection(topLeft, bottomRight),
                     QItemSelectionModel.SelectCurrent)
         except:
+            print "[VE] inspector.selectItem failed"
             pass
 
-        self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
+        #self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(item.TPJSON()['gid'])+"',false)")
 
     def boolValChanged (self,state):
         print state

@@ -164,25 +164,13 @@ class TrickplayElementModel(QStandardItemModel):
                 self.insertElement(root, child, pdata, True)
 
             self.inspector.ui.inspector.expandAll()
-            #self.inspector.ui.inspector.setRowHidden(0, root.index(), True)
 
-            gid = child['gid']
+            if not self.main.command == "newLayer" and not self.main.command == "insertUIElement" :
+                self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 
-            # Find the last item after getting new data so that
-            # both trees reflect the changes
-            if self.main.command == "newLayer" or self.main.command == "insertUIElement" :
-                result = child #self.inspector.search(gid, 'gid')
-                #result = self.inspector.search(self.inspector.newgid, 'gid')
-                if result: 
-                    self.inspector.selectItem(result, "f")
-                else:
-                    print("[TrickplayElementModel] UI Element not found.")
-            else:
-                result = child #self.inspector.search(gid, 'gid')
-                if result:
-                    self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
-                    self.inspector.selectItem(result, "f")
-    
+            #to keep the tree information :( 
+            print child.TPJSON()
+
             self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
                 self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                

@@ -15,6 +15,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+CONTAINER_UI = ['Widget_Group', 'Widget_ArrowPane'] 
 class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
@@ -663,6 +664,7 @@ class MainWindow(QMainWindow):
             self.run()
             self.command = "newProject"
             self.menuCommand = "newProject"
+
             self._ifilesystem.ui.fileSystemTree.clear()
             self._ifilesystem.orgCnt = 0
             self._ifilesystem.idCnt = 0
@@ -813,6 +815,19 @@ class MainWindow(QMainWindow):
 
     def ungroup(self):
         self.sendLuaCommand("ungroup", "_VE_.ungroup('"+str(self._inspector.curLayerGid)+"')")
+        curLayerItem = self._inspector.search(self._inspector.curLayerGid, 'gid')
+        selection = self._inspector.ui.inspector.selectionModel().selection()
+        for i in selection.indexes() :
+            item = self._inspector.inspectorModel.itemFromIndex(i)
+            try:
+                if item['type'] == "Widget_Group" :
+                    #print item['name'], "ungroup !!"
+                    for c in item['children']:
+                        #print c['name']," will be added into the layer"
+                        self._inspector.inspectorModel.insertElement(curLayerItem, c, curLayerItem.TPJSON(), False)
+                    item.parent().removeRow(item.row())
+            except:
+                pass
         return True
 
     def delete(self):

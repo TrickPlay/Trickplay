@@ -89,11 +89,11 @@ class Wizard():
             userPath = self.createAppDialog()
 
             if userPath and userPath is not -1:
-                print('[VE] App path chosen : ' + str(userPath))
+                print('[VE] New App Path : ' + str(userPath))
             elif userPath == -1:    
                 return -1
             else:
-                print('[VE] App path error')
+                print('[VE] App Path Error')
                 return
                 
             if os.path.exists(userPath):
@@ -110,7 +110,7 @@ class Wizard():
                         #return self.start(path, True, False)
                         return userPath
                     else:
-                        self.warningMsg("Error", 'Directory "' + os.path.basename(str(userPath)) + '" does not contain an "app" file and a "main.lua" file.')
+                        self.warningMsg("Error", 'Directory "' + os.path.basename(str(userPath)) + '" does not contain an "app" file or a "main.lua" file.')
                         return self.start(None)
         
         # Path was given on command line

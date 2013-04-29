@@ -196,12 +196,12 @@ function editor.group()
 		end 
     end
 
-    _VE_.refresh()
+    --_VE_.refresh()
     blockReport = false
-    _VE_.refreshDone()
-    _VE_.repUIInfo(uiGroup)
+    --_VE_.refreshDone()
+    --_VE_.repUIInfo(uiGroup)
 
-    screen:grab_key_focus()
+    --screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
 
     return uiGroup
@@ -242,13 +242,13 @@ function editor.ungroup(gid)
                         util.addIntoLayer(c, true)
 			     	end
 			     	curLayer:remove(v)
-                    _VE_.refresh()
+                    --_VE_.refresh()
 		        end 
 		   end 
 		end
 	end
 
-    screen.grab_key_focus(screen)
+    --screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
     blockReport = false
 
