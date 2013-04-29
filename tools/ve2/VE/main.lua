@@ -1103,7 +1103,7 @@ _VE_.newLayer = function()
     end 
     screen:add(WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
-    _VE_.refresh()
+    --_VE_.refresh()
 end 
 
 local codeExist = function(contents, layer, obj) 
@@ -1237,19 +1237,15 @@ _VE_.saveFile = function(scrJson)
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
 
-    --print ("***********************************")
-    --print (WL.get_all_styles())
-    --print ("***********************************")
 
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
-    --editor_lb:writefile("/screens/layers.json", '['..json:stringify(layer_t)..']', true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
     --screen:clear()
     _VE_.setAppPath(currentProjectPath)
     _VE_.openFile(currentProjectPath)
-    _VE_.refreshDone()
+    --_VE_.refreshDone()
 
     codeGen()
 
@@ -1501,7 +1497,7 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
     end
 
     if uiInstance ~= nil then 
-        screen_ui.n_selected_all()
+        --screen_ui.n_selected_all()
         uiInstance.extra.mouse_handler = false 
         util.create_mouse_event_handler(uiInstance, uiTypeStr)
         print("newui_gid"..uiInstance.gid)
