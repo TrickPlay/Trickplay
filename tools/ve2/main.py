@@ -833,7 +833,6 @@ class MainWindow(QMainWindow):
         index = self._inspector.selected (self.inspector.ui.inspector)
         while index is not None:
             item = self._inspector.inspectorModel.itemFromIndex(index)
-            print item['gid'], item['name']
             self.sendLuaCommand("delete", "_VE_.delete('"+str(item['gid'])+"')")
             item.parent().removeRow(item.row())
             index = self._inspector.selected (self.inspector.ui.inspector)

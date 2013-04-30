@@ -242,13 +242,11 @@ function editor.ungroup(gid)
                         util.addIntoLayer(c, true)
 			     	end
 			     	curLayer:remove(v)
-                    --_VE_.refresh()
 		        end 
 		   end 
 		end
 	end
 
-    --screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
     blockReport = false
 

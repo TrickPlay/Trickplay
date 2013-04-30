@@ -146,6 +146,7 @@ class TrickplayElementModel(QStandardItemModel):
             for c in pdata["children"]:
                 if c["name"] == "screen":
                     child = c
+                    self.inspector.screenGid = c["gid"]
                     break
                 
             """
