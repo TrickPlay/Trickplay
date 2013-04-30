@@ -58,7 +58,8 @@ function util.addIntoLayer (uiInstance, group)
 
     -- regisiger subscribe_to function to new ui instance
     if uiInstance.subscribe_to then  
-        uiInstance:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiInstance) end end) 
+        uiInstance:subscribe_to({"x", "y", "position"}, function() if dragging == nil then  _VE_.posUIInfo(uiInstance) end end) 
+        uiInstance:subscribe_to({"focused"}, function() if dragging == nil then _VE_.focusInfo(uiInstance) end  end )
     end 
 
     return
@@ -490,7 +491,8 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         dragging = nil
         --kkk
         --uiInstance:ungrab_pointer()
-        uiInstance:set{}
+        uiInstance:set{} 
+        uiInstance.x = uiInstance.x
         return true 
 	end,true) 
     uiInstance.extra.mouse_handler = true 

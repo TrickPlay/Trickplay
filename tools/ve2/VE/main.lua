@@ -834,6 +834,24 @@ _VE_.setUIInfo = function(gid, property, value, n)
 end 
 
 -- REPORT 
+_VE_.focusInfo = function(uiInstance)
+    if blockReport == true then 
+        return
+    end 
+    if uiInstance.focused then
+        print("focusInfo"..uiInstance.gid..":True")
+    else
+        print("focusInfo"..uiInstance.gid..":False")
+    end 
+end 
+
+_VE_.posUIInfo = function(uiInstance)
+    if blockReport == true then 
+        return
+    end 
+    print("posUIInfo"..uiInstance.gid..":"..uiInstance.x..":"..uiInstance.y)
+end 
+
 _VE_.repUIInfo = function(uiInstance)
 
     if blockReport == true then 
