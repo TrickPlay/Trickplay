@@ -1101,8 +1101,10 @@ _VE_.newLayer = function()
             layerNum = layerNum + 1
         end
     end 
-    screen:add(WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    local newLayer = WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}}
+    screen:add(newLayer)
     layerNum = layerNum + 1
+    _VE_.repUIInfo(newLayer)
     --_VE_.refresh()
 end 
 

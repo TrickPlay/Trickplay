@@ -290,13 +290,19 @@ class TrickplayEmulatorManager(QWidget):
 				        return
 
 				    elif luaCmd == "repUIInfo":
-				        print("HJJJJJJJJJJJJJJJJJJJJJJ", self.main.command)
 				        self.pdata = self.pdata[0]
 
 				        if self.main.command == "openFile" :
 				            return 
+				        elif self.main.command == "newLayer" :
+				            self.main.command = "" 
+				            screenItem = self.inspector.search(self.inspector.screenGid, 'gid')
+				            self.inspector.inspectorModel.insertElement(screenItem, self.pdata, screenItem.TPJSON(), False)
+				            self.inspector.deselectItems()
+				            newItem = self.inspector.search(self.pdata['gid'], 'gid')
+				            self.inspector.selectItem(newItem, False)
+				            return 
 				        elif self.main.command == "insertUIElement" :
-				            print("iuiuiui")
 				            self.main.command = "" 
 				            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
 				            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
