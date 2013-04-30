@@ -816,27 +816,27 @@ class MainWindow(QMainWindow):
     def ungroup(self):
         self.sendLuaCommand("ungroup", "_VE_.ungroup('"+str(self._inspector.curLayerGid)+"')")
         curLayerItem = self._inspector.search(self._inspector.curLayerGid, 'gid')
-        selection = self._inspector.ui.inspector.selectionModel().selection()
-        for i in selection.indexes() :
-            item = self._inspector.inspectorModel.itemFromIndex(i)
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
             try:
                 if item['type'] == "Widget_Group" :
-                    #print item['name'], "ungroup !!"
                     for c in item['children']:
-                        #print c['name']," will be added into the layer"
                         self._inspector.inspectorModel.insertElement(curLayerItem, c, curLayerItem.TPJSON(), False)
                     item.parent().removeRow(item.row())
             except:
                 pass
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def delete(self):
         index = self._inspector.selected (self.inspector.ui.inspector)
-        if index :
+        while index is not None:
             item = self._inspector.inspectorModel.itemFromIndex(index)
             print item['gid'], item['name']
             self.sendLuaCommand("delete", "_VE_.delete('"+str(item['gid'])+"')")
             item.parent().removeRow(item.row())
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def duplicate(self):
