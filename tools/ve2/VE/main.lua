@@ -641,11 +641,14 @@ _VE_.ungroup = function(gid)
  
 end 
 
+-- Clone
+_VE_.clone = function(gid)
+    editor.clone(gid)
+end 
+
 -- Duplicate
 _VE_.duplicate = function(gid)
-
     editor.duplicate(gid)
-
 end 
 
 -- Delete
@@ -1105,7 +1108,6 @@ _VE_.newLayer = function()
     screen:add(newLayer)
     layerNum = layerNum + 1
     _VE_.repUIInfo(newLayer)
-    --_VE_.refresh()
 end 
 
 local codeExist = function(contents, layer, obj) 
