@@ -291,8 +291,13 @@ class TrickplayEmulatorManager(QWidget):
 
 				    elif luaCmd == "repUIInfo":
 				        self.pdata = self.pdata[0]
-
 				        if self.main.command == "openFile" :
+				            return 
+				        elif self.main.command == "duplicate" or self.main.command == "clone":
+				            #self.main.command = "" 
+				            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
+				            if not self.inspector.search(self.pdata['gid'], 'gid') :
+				                self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
 				            return 
 				        elif self.main.command == "newLayer" :
 				            self.main.command = "" 

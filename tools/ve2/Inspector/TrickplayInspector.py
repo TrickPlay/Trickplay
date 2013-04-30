@@ -691,6 +691,20 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.selectionModel().clear()
 
 
+    def deselectItem(self, item):
+        """
+        Select a row of the inspector model (as the result of a search)
+        """
+        try:
+            topLeft = item.index()
+            bottomRight = item.partner().index()
+        
+            self.ui.inspector.scrollTo(topLeft, 3)
+            self.ui.inspector.selectionModel().select( QItemSelection(topLeft, bottomRight), QItemSelectionModel.Deselect)
+        except:
+            print "[VE] inspector.deselectItem failed"
+            pass
+
     def selectItem(self, item, shift):
         """
         Select a row of the inspector model (as the result of a search)

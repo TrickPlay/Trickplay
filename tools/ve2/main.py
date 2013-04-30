@@ -806,7 +806,15 @@ class MainWindow(QMainWindow):
         return True
 
     def clone(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Clone')")
+        #self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Clone')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            #self._inspector.curLayerGid = item.parent()['gid']
+            self.sendLuaCommand("clone", "_VE_.clone('"+str(item['gid'])+"')")
+            self._inspector.deselectItem(item)
+            self.command = "clone"
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def group(self):
@@ -839,7 +847,15 @@ class MainWindow(QMainWindow):
         return True
 
     def duplicate(self):
-        self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(self._inspector.curLayerGid)+"')")
+        #self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(self._inspector.curLayerGid)+"')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            #self._inspector.curLayerGid = item.parent()['gid']
+            self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(item['gid'])+"')")
+            self._inspector.deselectItem(item)
+            self.command = "duplicate"
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def rectangle(self):
