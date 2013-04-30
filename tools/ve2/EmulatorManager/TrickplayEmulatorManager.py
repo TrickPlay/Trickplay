@@ -6,6 +6,12 @@ from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest
 from UI.HorizontalGuideline import Ui_horizGuideDialog
 from UI.VerticalGuideline import Ui_vertGuideDialog
 
+def getNextInfo(s) :
+    idx = s.find(":")
+    info = s[:idx]
+    s = s[idx+1:]
+    return info, s 
+
 class TrickplayEmulatorManager(QWidget):
     
     def __init__(self, main=None, parent = None):
@@ -174,6 +180,25 @@ class TrickplayEmulatorManager(QWidget):
 
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
+				    elif luaCmd == "focusInfo":
+				        print("focusInfo")
+				        info = s[9:]
+				        fgid, info = getNextInfo(info)
+				        focus, info = getNextInfo(info)
+				        item = self.inspector.search(str(fgid), 'gid')
+				        if focus[:1] == "T":
+				            item['focused'] = True
+				        else:
+				            item['focused'] = False
+				    elif luaCmd == "posUIInfo":
+				        print("posUIInfo")
+				        posInfo = s[9:]
+				        posGid, posInfo = getNextInfo(posInfo)
+				        posX, posInfo = getNextInfo(posInfo)
+				        posY, posInfo = getNextInfo(posInfo)
+				        item = self.inspector.search(str(posGid), 'gid')
+				        item['position'] = [int(posX), int(posY), 0]
+
 				    elif luaCmd == "repUIInfo":
 				        print("repUIInfo")
 				        self.pdata = json.loads(s[9:])
@@ -288,7 +313,6 @@ class TrickplayEmulatorManager(QWidget):
 				            self.ve_ready = False 
 				        self.inspector.preventChanges = False
 				        return
-
 				    elif luaCmd == "repUIInfo":
 				        self.pdata = self.pdata[0]
 				        if self.main.command == "openFile" :
