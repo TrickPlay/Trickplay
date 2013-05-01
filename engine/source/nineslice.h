@@ -53,6 +53,7 @@ struct NineSliceLayoutPrivate
     Slice* slices;
     bool can_fire;
     gboolean tile[6];
+    gboolean parent_valid;
 };
 
 struct NineSliceLayout

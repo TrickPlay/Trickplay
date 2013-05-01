@@ -293,6 +293,7 @@ static void nineslice_layout_init( NineSliceLayout* self )
 
     self->priv->can_fire = true;
     self->priv->slices = new Slice[9];
+    self->priv->parent_valid = true;
 
     for ( unsigned i = 0; i < 9; ++i )
     {
