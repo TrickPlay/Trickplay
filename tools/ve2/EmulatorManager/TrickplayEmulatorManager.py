@@ -98,7 +98,7 @@ class TrickplayEmulatorManager(QWidget):
 
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
-			print ".............."+s
+			print "[TP] "+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
@@ -181,7 +181,6 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "prtObjNme":
 				        self.clonelist = s[9:].split()
 				    elif luaCmd == "focusInfo":
-				        print("focusInfo")
 				        info = s[9:]
 				        fgid, info = getNextInfo(info)
 				        focus, info = getNextInfo(info)
@@ -190,8 +189,14 @@ class TrickplayEmulatorManager(QWidget):
 				            item['focused'] = True
 				        else:
 				            item['focused'] = False
+				        item = self.inspector.search(str(fgid), 'gid')
+				        index = self.inspector.selected (self.inspector.ui.inspector)
+				        item = self.inspector.inspectorModel.itemFromIndex(index)
+				        if item['gid'] == fgid :
+				            self.inspector.deselectItem(item)
+				            self.inspector.selectItem(item, "f")
+
 				    elif luaCmd == "posUIInfo":
-				        print("posUIInfo")
 				        posInfo = s[9:]
 				        posGid, posInfo = getNextInfo(posInfo)
 				        posX, posInfo = getNextInfo(posInfo)
@@ -199,6 +204,8 @@ class TrickplayEmulatorManager(QWidget):
 				        item = self.inspector.search(str(posGid), 'gid')
 				        item['position'] = [int(posX), int(posY), 0]
 
+				        self.inspector.deselectItem(item)
+				        self.inspector.selectItem(item, "f")
 				    elif luaCmd == "repUIInfo":
 				        print("repUIInfo")
 				        self.pdata = json.loads(s[9:])
@@ -288,7 +295,6 @@ class TrickplayEmulatorManager(QWidget):
 					        if shift == "f" :
 					            self.inspector.ui.inspector.selectionModel().clear()
 
-					        print ("select item >>>>>>>>>>>>>>>>>>>  ")
 					        self.inspector.selectItem(result, shift)
                             # open Property Tab 
 					        # self.inspector.ui.tabWidget.setCurrentIndex(1)
@@ -301,7 +307,6 @@ class TrickplayEmulatorManager(QWidget):
 					    print("error :/(")
 
 				    if luaCmd == "repStInfo":
-				        print("REP St INfo")
 				        if self.main.command == "openFile" :
 				            return 
 				        self.inspector.inspectorModel.styleData = sdata
@@ -341,7 +346,6 @@ class TrickplayEmulatorManager(QWidget):
                             
 				            # Group : remove group's contents from the layer
 				            if self.pdata['type'] == 'Widget_Group' :
-				                print("aaa")
 				                for c in self.pdata['children'] :
 				                    i = self.inspector.search(c['gid'], 'gid')
 				                    i.parent().removeRow(i.row())
@@ -359,7 +363,6 @@ class TrickplayEmulatorManager(QWidget):
 				            self.inspector.preventChanges = False
 
 				    if sdata is not None and self.pdata is not None:
-				        print ("sdata is not None and self.pdata is not None")
 				        self.inspector.preventChanges = True
 				        self.contentMoveBlock = True 
 				        self.inspector.clearTree()

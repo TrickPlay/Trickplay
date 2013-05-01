@@ -907,9 +907,8 @@ _VE_.openFile = function(path)
     openFile = true
     screen:clear()
 
-    print ("before register screen.subscribe_to")
     if screen.subscribe_to then
-        print ("register screen.subscribe_to")
+        print ("screen.subscribe_to")
         screen:subscribe_to({"x", "y", "position"}, function() print("SCREEN", screen.x, screen.y) end)
     end
     current_dir = path
