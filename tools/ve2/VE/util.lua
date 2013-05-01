@@ -49,12 +49,9 @@ function util.addIntoLayer (uiInstance, group)
     uiInstance.ve_selected = false
     uiInstance.is_in_group = false
 
-    --devtools:gid(curLayerGid):add(uiInstance)
-    curLayer:add(uiInstance)
-
-    --if group == nil then
-        --_VE_.refresh()
-    --end 
+    if curLayer then 
+        curLayer:add(uiInstance)
+    end
 
     -- regisiger subscribe_to function to new ui instance
     if uiInstance.subscribe_to then  
