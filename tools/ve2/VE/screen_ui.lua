@@ -391,7 +391,7 @@ function screen_ui.multi_select(x,y)
         border_color= {255,25,25,255},
         border_width=0,
         color= {0,0,0,0},
-        size = {1,1},
+        size = {0,0},
         position = {x,y},
 		opacity = 255
     }
@@ -462,7 +462,9 @@ function screen_ui.multi_select_move(x,y)
 
 	if(multi_select_border == nil) then return end 
 	multi_select_border:set{border_width = 2}
-    multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
+    if  math.abs(x-m_init_x) > 0 and math.abs(y-m_init_y) > 0 then 
+        multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
+    end
     if(x- m_init_x < 0) then
     	multi_select_border.x = x
     end
