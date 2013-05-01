@@ -29,7 +29,10 @@ struct NineSliceBinding
             Action::cancel( action );
             action = NULL;
         }
+
         unsubscrube_sprites();
+
+        layout->priv->parent_valid = false; // NineSliceBinding is gone
     }
 
     NineSliceLayout * get_layout() { return layout; }
@@ -545,6 +548,9 @@ class NineSlice [[ClutterActor*]] actor
 
 void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * L )
 {
+    // NineSliceBinding is gone before all slices are loaded
+    if ( !layout->priv->parent_valid ) return;
+
     ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( layout ) );
 
     if ( get_binding( self )->async )
