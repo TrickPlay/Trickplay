@@ -907,6 +907,11 @@ _VE_.openFile = function(path)
     openFile = true
     screen:clear()
 
+    print ("before register screen.subscribe_to")
+    if screen.subscribe_to then
+        print ("register screen.subscribe_to")
+        screen:subscribe_to({"x", "y", "position"}, function() print("SCREEN", screen.x, screen.y) end)
+    end
     current_dir = path
     -- Set current app path 
 
@@ -954,9 +959,10 @@ _VE_.openFile = function(path)
             for l,m in ipairs(j.children) do  
 
                 m.created = false
-                if m.subscribe_to then  
-                    m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
-                end 
+                if m.subscribe_to then
+                   m:subscribe_to({"x", "y", "position"}, function() if dragging == nil then _VE_.posUIInfo(m) end end)
+                   m:subscribe_to({"focused"}, function() if dragging == nil then _VE_.focusInfo(m) end  end )
+                end
 
                 local uiTypeStr = util.getTypeStr(m) 
 
@@ -1052,50 +1058,7 @@ _VE_.openFile = function(path)
     
     blockReport = false
 
-
-    --_VE_.buildVF()
-    --[[
-    for i,j in ipairs(s.children) do
-        if string.find(j.name, "Layer") ~= nil then 
-            for l,m in ipairs(j.children) do 
-               if m.subscribe_to then  
-                m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
-               end 
-            end
-        end
-    end
-    -]]
 end 
-
-
---[[
-_VE_.openLuaFile = function()
-    --s = load_layer("layer1.json")
-    screen:clear()
-    g.reactive = false
-    
-    screen:add(g)
-
-    for i,j in ipairs(screen.children) do
-        --dump_properties(j)
-        --print (j.name)
-        j.extra.to_json = function() return fake_json end
-        function j.on_button_down( j , x , y , button )
-            dragging = { j , x - j.x , y - j.y }
-            if button == 3 then
-                _VE_.openInspector(4)
-            enimport
-        end
-    
-        function j.on_button_up( j , x , y , button )
-            dragging = nil
-        end
-    
-        j.reactive = true 
-        _VE_.repUIInfoWfakeJson(j)
-    end
-end 
-]]
 
 _VE_.screenHide = function()
     screen:hide()
@@ -1640,12 +1603,10 @@ end
         end 
         
         if input_mode == hdr.S_FOCUS then 
-            --local selObjName, selObjGid = screen_ui.getSelectedName()
             local selObj = screen_ui.getSelectedObj()
 
             if selObj then 
                 blockReport = true
-                --hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), nil) 
                 hdr.neighberKey_map[focusKey](selObj, nil) 
                 blockReport = false
             end 

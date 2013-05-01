@@ -132,17 +132,8 @@ function editor.clone(gid)
 
     util.create_mouse_event_handler(uiClone, "Clone")
 
-    uiClone.reactive = true
-    uiClone.lock = false
-    uiClone.ve_selected = false
-    uiClone.is_in_group = false
-
-    --util.addIntoLayer(uiClone, true)
-
-    if uiClone.subscribe_to then
-        uiClone:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiClone) end end)
-    end
     curLayer = devtools:gid(gid).parent
+    util.addIntoLayer(uiClone, true)
 
     if v.extra.clone then 
 	    table.insert(v.extra.clone, uiClone.name)
@@ -272,7 +263,8 @@ local function duplicate_child(new, org)
         n.is_in_group = true
 
         if n.subscribe_to then  
-            n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
+            n:subscribe_to({"x", "y", "position"}, function() if dragging == nil then _VE_.posUIInfo(n) end end)
+            n:subscribe_to({"focused"}, function() if dragging == nil then _VE_.focusInfo(n) end  end )
         end 
 
         if uiTypeStr == "Widget_Group" then  
@@ -345,16 +337,8 @@ function editor.duplicate(gid)
 
 	screen_ui.n_selected(v)
 
-    uiDuplicate.reactive = true
-    uiDuplicate.lock = false
-    uiDuplicate.ve_selected = false
-    uiDuplicate.is_in_group = false
-
-    if uiDuplicate.subscribe_to then
-        uiDuplicate:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(uiDuplicate) end end)
-    end
     curLayer = devtools:gid(gid).parent
-    curLayer:add(uiDuplicate)
+    util.addIntoLayer(uiDuplicate, true)
 
     blockReport = false
     _VE_.repUIInfo(uiDuplicate)
