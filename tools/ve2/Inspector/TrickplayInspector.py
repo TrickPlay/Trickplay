@@ -1526,14 +1526,13 @@ class TrickplayInspector(QWidget):
         is selected in the inspector view.
         """
 
-        print("selectionChaged !!!!!!!!!!!!!!!!!!!!!!")
-        print(selected.count(),deselected.count())
+        #print(selected.count(),deselected.count())
         
-        if self.preventChanges:
-            print("selectionChanged : preventChanges ") #return
+        #if self.preventChanges:
+            #print("selectionChanged : preventChanges ") #return
 
         if len(self.ui.inspector.selectionModel().selectedIndexes()) > 1:
-            print "menuEnabled "
+            #print "menuEnabled "
             self.main.menuEnable()
             for i in self.ui.inspector.selectionModel().selectedIndexes() :
                 item = self.inspectorModel.itemFromIndex(i)
@@ -1541,7 +1540,7 @@ class TrickplayInspector(QWidget):
                     self.main.menuDisable()
                     break
         else:
-            print "menuDisable "
+            #print "menuDisable "
             self.main.menuDisable()
             
         self.selectedItemCount = 0
