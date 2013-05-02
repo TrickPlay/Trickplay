@@ -30,7 +30,7 @@ class TrickplayElementModel(QStandardItemModel):
         QObject.connect(self, SIGNAL("rowsAboutToBeInserted (const QModelIndex&, int, int)"), self.rai)
 
     def rai(self, idx, i , j):
-        #print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
+        print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
             if the_item : 
@@ -67,7 +67,7 @@ class TrickplayElementModel(QStandardItemModel):
 
     def ri(self, idx, i , j):
         #idx is parent's idx 
-        #print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
+        print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
         pass
         """
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
