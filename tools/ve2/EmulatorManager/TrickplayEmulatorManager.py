@@ -204,11 +204,14 @@ class TrickplayEmulatorManager(QWidget):
 				        posGid, posInfo = getNextInfo(posInfo)
 				        posX, posInfo = getNextInfo(posInfo)
 				        posY, posInfo = getNextInfo(posInfo)
-				        item = self.inspector.search(str(posGid), 'gid')
-				        item['position'] = [int(posX), int(posY), 0]
+				        try:
+				            item = self.inspector.search(str(posGid), 'gid')
+				            item['position'] = [int(posX), int(posY), 0]
 
-				        self.inspector.deselectItem(item)
-				        self.inspector.selectItem(item, "f")
+				            self.inspector.deselectItem(item)
+				            self.inspector.selectItem(item, "f")
+				        except:
+				            pass
 				    elif luaCmd == "repUIInfo":
 				        print("repUIInfo")
 				        self.pdata = json.loads(s[9:])
@@ -367,7 +370,7 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if sdata is not None and self.pdata is not None:
 				        self.inspector.preventChanges = True
-				        self.contentMoveBlock = True 
+				        #self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))

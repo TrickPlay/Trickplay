@@ -240,7 +240,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     end
     blockReport = false 
 
-    _VE_.refresh()
+    --_VE_.refresh()
 end 
 
 _VE_.alignLeft = function(gid)
@@ -849,7 +849,7 @@ _VE_.posUIInfo = function(uiInstance)
     if blockReport == true then 
         return
     end 
-    print("posUIInfo"..uiInstance.gid..":"..uiInstance.x..":"..uiInstance.y)
+    print("posUIInfo"..uiInstance.gid..":"..uiInstance.x..":"..uiInstance.y..":")
 end 
 
 _VE_.repUIInfo = function(uiInstance)

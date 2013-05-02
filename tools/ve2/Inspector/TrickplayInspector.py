@@ -53,10 +53,10 @@ class DnDTreeView(QTreeView):
         if event.type() == QEvent.Drop:
             dropIndex = self.indexAt(event.pos())
             the_item= self.insp.inspectorModel.itemFromIndex(dropIndex)
-            if the_item.text() in ['Widget_Rectangle', "Group", "Button","ButtonPicker","ProgressBar",
-            "ProgressSpinner","OrbittingDots","Slider","TextInput", "ToastAlert", "ToggleButton","Widget_Text",
-            "Widget_Image"]:
-                print the_item.text() , "is not a container UI"
+            if the_item.text() in ['Rectangle', "Button","ButtonPicker","ProgressBar",
+            "ProgressSpinner","OrbittingDots","Slider","TextInput", "ToastAlert", "ToggleButton","Text",
+            "Image"]:
+                print "[VE] "+the_item.text()+" is not a container UI"
                 event.ignore()
                 self.insp.inspectorModel.preventChanges = False
                 return True
