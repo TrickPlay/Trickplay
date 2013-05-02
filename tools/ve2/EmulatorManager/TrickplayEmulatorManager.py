@@ -191,10 +191,13 @@ class TrickplayEmulatorManager(QWidget):
 				            item['focused'] = False
 				        item = self.inspector.search(str(fgid), 'gid')
 				        index = self.inspector.selected (self.inspector.ui.inspector)
-				        item = self.inspector.inspectorModel.itemFromIndex(index)
-				        if item['gid'] == fgid :
-				            self.inspector.deselectItem(item)
-				            self.inspector.selectItem(item, "f")
+				        try :
+				            item = self.inspector.inspectorModel.itemFromIndex(index)
+				            if item['gid'] == fgid :
+				                self.inspector.deselectItem(item)
+				                self.inspector.selectItem(item, "f")
+				        except:
+				            pass
 
 				    elif luaCmd == "posUIInfo":
 				        posInfo = s[9:]

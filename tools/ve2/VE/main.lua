@@ -1594,7 +1594,13 @@ end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
-        print("Screen onbuttondown !!!")
+        print("screen onbuttondown !!!")
+
+        local multi_bdr = screen:find_child("multi_select_border") 
+
+        if multi_bdr then 
+            screen:remove(multi_bdr)
+        end
 
         if shift == false then
             screen_ui.n_selected_all()
@@ -1633,6 +1639,7 @@ end
 
 	function screen:on_button_up(x,y,button,clicks_count, m)
 
+        print ("screen onbuttonup !!!")
 		screen_ui.dragging_up(x,y)
 
 	  	dragging = nil
