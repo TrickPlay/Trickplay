@@ -21,7 +21,10 @@ struct NineSliceLayout;
 class Slice
 {
 public:
-    Slice() : layout( NULL ), material( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL ) {}
+    Slice() : layout( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL )
+    {
+        texture = clutter_texture_new();
+    }
 
     ~Slice()
     {
@@ -30,7 +33,7 @@ public:
             action = NULL;
         }
 
-        if ( material ) cogl_handle_unref( material );
+        clutter_actor_destroy( texture );
     }
 
     static void on_ping( PushTexture* source, void* target );
@@ -40,7 +43,7 @@ public:
 
 public:
     NineSliceLayout   * layout;
-    CoglMaterial      * material;
+    ClutterActor      * texture;
     Sprite            * sprite;
     PingMe              ping;
     bool                loaded;
@@ -50,24 +53,26 @@ public:
 
 struct NineSliceLayoutPrivate
 {
-    Slice* slices;
-    bool can_fire;
-    gboolean tile[6];
-    gboolean parent_valid;
+    Slice               * slices;
+    bool                  can_fire;
+    gboolean              tile[6];
+    gboolean              parent_valid;
+    ClutterActor        * actor;
+    ClutterTableLayout  * table;
 };
 
 struct NineSliceLayout
 {
-    ClutterEffect parent_instance;
+    GObject parent_instance;
     NineSliceLayoutPrivate* priv;
 };
 
 struct NineSliceLayoutClass
 {
-    ClutterEffectClass parent_class;
+    GObjectClass parent_class;
 };
 
-ClutterEffect* nineslice_layout_new();
+GObject* nineslice_layout_new();
 
 void nineslice_layout_set_sprite( NineSliceLayout* layout, unsigned i, SpriteSheet::Sprite* sprite, bool async );
 
@@ -84,5 +89,7 @@ void nineslice_layout_set_tile( NineSliceLayout* layout, gboolean tile[6] );
 void nineslice_redraw( NineSliceLayout* layout );
 
 std::vector< int >* nineslice_layout_get_borders( NineSliceLayout* layout );
+
+void nineslice_layout_init_tablelayout( NineSliceLayout* self, ClutterActor * _actor );
 
 #endif
