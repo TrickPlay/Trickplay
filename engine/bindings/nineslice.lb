@@ -20,7 +20,13 @@ static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" 
 
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceLayout * _layout ) : async( false ), constructing( false ), sheet( NULL ), layout( _layout ), action( NULL ) { assert( layout ); }
+    NineSliceBinding( NineSliceLayout * _layout, ClutterActor * _actor ) : async( false ), constructing( false ), sheet( NULL ), layout( _layout ), action( NULL )
+    {
+        g_assert( layout );
+        g_assert( _actor );
+
+        nineslice_layout_init_tablelayout( layout, _actor );
+    }
 
     ~NineSliceBinding()
     {
@@ -129,8 +135,6 @@ struct NineSliceBinding
             {
                 slices[i].unset_sprite();
             }
-            //delete[] slices;
-            //layout->priv->slices = NULL;
         }
     }
 
@@ -204,15 +208,14 @@ class NineSlice [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
 
-            ClutterEffect * layout = nineslice_layout_new();
-            clutter_actor_add_effect_with_name( self,  "tp-nineslice-layout", layout );
+            GObject * layout = nineslice_layout_new();
             clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
 
             g_signal_connect_data( G_OBJECT( layout ), "load-finished",
                 (GCallback) NineSlice_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
 
-            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_LAYOUT( layout ) ) );
+            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_LAYOUT( layout ), self ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
 
@@ -551,7 +554,8 @@ void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * 
     // NineSliceBinding is gone before all slices are loaded
     if ( !layout->priv->parent_valid ) return;
 
-    ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( layout ) );
+    ClutterActor * self = layout->priv->actor;
+    g_assert( self );
 
     if ( get_binding( self )->async )
     {
