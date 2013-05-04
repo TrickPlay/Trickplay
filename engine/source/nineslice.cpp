@@ -33,8 +33,7 @@ void Slice::update()
 
     if ( done )
     {
-       nineslice_redraw(layout);
-       action = nineslice_layout_signal_loaded_later( layout );
+        nineslice_redraw(layout);
     }
 }
 
@@ -48,10 +47,11 @@ class SignalLoadedLater : public Action
     {
         if ( nineslice_layout_is_done( self ) )
         {
-            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", !nineslice_layout_is_loaded( self ) );
+            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", false );
         }
 
         self->priv->can_fire = true;
+        self->priv->action = NULL;
         return false;
     }
 };
@@ -109,7 +109,6 @@ Action * nineslice_layout_signal_loaded_later( NineSliceLayout* layout )
     if ( layout->priv->can_fire )
     {
         layout->priv->can_fire = false;
-
         ret = new SignalLoadedLater( layout );
         Action::post( ret );
     }
@@ -170,14 +169,14 @@ void nineslice_redraw( NineSliceLayout* layout )
 
     g_assert( layout->priv->actor );
     clutter_actor_queue_redraw( layout->priv->actor );
+
+    layout->priv->action = nineslice_layout_signal_loaded_later( layout );
 }
 
 void nineslice_layout_set_tile( NineSliceLayout* layout, unsigned i, bool t, bool guess, bool constructing )
 {
     g_assert(i < 6);
     layout->priv->tile[i] = guess ? ( i ? layout->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
-
-    //if (!constructing) nineslice_redraw(layout);
 }
 
 void nineslice_layout_set_tile( NineSliceLayout* layout, gboolean tile[6] )
@@ -186,8 +185,6 @@ void nineslice_layout_set_tile( NineSliceLayout* layout, gboolean tile[6] )
     {
         layout->priv->tile[i] = tile[i];
     }
-
-    //nineslice_redraw(layout);
 }
 
 std::vector< int >* nineslice_layout_get_borders( NineSliceLayout* layout )
@@ -236,6 +233,12 @@ static void nineslice_layout_dispose( GObject* gobject )
         layout->priv->table = NULL;
     }
 
+    if ( layout->priv->action )
+    {
+        Action::cancel( layout->priv->action );
+        layout->priv->action = NULL;
+    }
+
     G_OBJECT_CLASS( nineslice_layout_parent_class )->dispose( gobject );
 }
 
@@ -254,6 +257,7 @@ static void nineslice_layout_init( NineSliceLayout* self )
     self->priv->can_fire = true;
     self->priv->slices = new Slice[9];
     self->priv->parent_valid = true;
+    self->priv->action = NULL;
 }
 
 void nineslice_layout_init_tablelayout( NineSliceLayout* self, ClutterActor * _actor )

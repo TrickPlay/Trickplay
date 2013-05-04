@@ -21,18 +21,13 @@ struct NineSliceLayout;
 class Slice
 {
 public:
-    Slice() : layout( NULL ), sprite( NULL ), loaded( false ), done( true ), action( NULL )
+    Slice() : layout( NULL ), sprite( NULL ), loaded( false ), done( false )
     {
         texture = clutter_texture_new();
     }
 
     ~Slice()
     {
-        if ( done && action ) {
-            Action::cancel( action );
-            action = NULL;
-        }
-
         clutter_actor_destroy( texture );
     }
 
@@ -48,7 +43,6 @@ public:
     PingMe              ping;
     bool                loaded;
     bool                done;
-    Action            * action;
 };
 
 struct NineSliceLayoutPrivate
@@ -59,6 +53,7 @@ struct NineSliceLayoutPrivate
     gboolean              parent_valid;
     ClutterActor        * actor;
     ClutterTableLayout  * table;
+    Action              * action;
 };
 
 struct NineSliceLayout
