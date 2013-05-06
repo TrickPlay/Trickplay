@@ -153,6 +153,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 
 void Source::unsubscribe( PingMe* ping, bool release_now )
 {
+    g_assert( pings.count(ping) );
     pings.erase( ping );
 
     if ( can_signal && pings.empty() )
