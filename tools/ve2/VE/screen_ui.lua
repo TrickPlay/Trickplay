@@ -389,9 +389,9 @@ function screen_ui.multi_select(x,y)
     multi_select_border = Rectangle{
         name="multi_select_border", 
         border_color= {255,25,25,255},
-        border_width=0,
+        border_width=2,
         color= {0,0,0,0},
-        size = {0,0},
+        size = {2,2},
         position = {x,y},
 		opacity = 255
     }
@@ -403,7 +403,9 @@ end
 function screen_ui.multi_select_done(x,y) 
 
 	if(multi_select_border == nil) then return end 
-    multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
+    local min_width = multi_select_border.border_width
+    multi_select_border.w = math.max(math.abs(x-m_init_x), min_width)
+    multi_select_border.h = math.max(math.abs(y-m_init_y), min_width)
 
     if(x-m_init_x < 0) then
 		multi_select_border.x = x 
@@ -461,10 +463,9 @@ end
 function screen_ui.multi_select_move(x,y)
 
 	if(multi_select_border == nil) then return end 
-	multi_select_border:set{border_width = 2}
-    if  math.abs(x-m_init_x) > 0 and math.abs(y-m_init_y) > 0 then 
-        multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
-    end
+    local min_width = multi_select_border.border_width
+    multi_select_border.w = math.max(math.abs(x-m_init_x), min_width)
+    multi_select_border.h = math.max(math.abs(y-m_init_y), min_width)
     if(x- m_init_x < 0) then
     	multi_select_border.x = x
     end
