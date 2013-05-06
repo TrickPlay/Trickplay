@@ -103,17 +103,14 @@ bool nineslice_layout_is_loaded( NineSliceLayout* layout )
     return (counter != 9);
 }
 
-Action * nineslice_layout_signal_loaded_later( NineSliceLayout* layout )
+void nineslice_layout_signal_loaded_later( NineSliceLayout* layout )
 {
-    SignalLoadedLater * ret = NULL;
     if ( layout->priv->can_fire )
     {
         layout->priv->can_fire = false;
-        ret = new SignalLoadedLater( layout );
-        Action::post( ret );
+        layout->priv->action = new SignalLoadedLater( layout );
+        Action::post( layout->priv->action );
     }
-
-    return ret;
 }
 
 bool nineslice_layout_get_tile( NineSliceLayout* layout, unsigned i )
@@ -170,7 +167,7 @@ void nineslice_redraw( NineSliceLayout* layout )
     g_assert( layout->priv->actor );
     clutter_actor_queue_redraw( layout->priv->actor );
 
-    layout->priv->action = nineslice_layout_signal_loaded_later( layout );
+    nineslice_layout_signal_loaded_later( layout );
 }
 
 void nineslice_layout_set_tile( NineSliceLayout* layout, unsigned i, bool t, bool guess, bool constructing )
@@ -271,6 +268,7 @@ void nineslice_layout_init_tablelayout( NineSliceLayout* self, ClutterActor * _a
 
     for ( unsigned i = 0; i < 9; ++i )
     {
+        priv->slices[i].index = i;
         priv->slices[i].layout = self;
         clutter_table_layout_pack( priv->table, priv->slices[i].texture, i % 3, (gint) i / 3 );
 
