@@ -240,7 +240,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
     end
     blockReport = false 
 
-    --_VE_.refresh()
+    _VE_.refresh()
 end 
 
 _VE_.alignLeft = function(gid)
