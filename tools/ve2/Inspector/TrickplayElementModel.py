@@ -30,15 +30,15 @@ class TrickplayElementModel(QStandardItemModel):
         QObject.connect(self, SIGNAL("rowsAboutToBeInserted (const QModelIndex&, int, int)"), self.rai)
 
     def rai(self, idx, i , j):
-        print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
+            print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
             the_item= self.itemFromIndex(idx)
             if the_item : 
                 try:
                     self.newParentGid = the_item['gid']
                     print ("newParentGid", self.newParentGid)
                     if self.newParentGid == None and the_item.parent() and the_item.parent().parent()['type'] == "LayoutManager" :
-                        print ("LayoutManager")
+                        #print ("LayoutManager")
                         if the_item.text()[:3] == "Row" : #Drop into Row 
                             self.lmRow = int(the_item.text()[3:])
                             for x in range(0, the_item.rowCount()):
@@ -67,7 +67,7 @@ class TrickplayElementModel(QStandardItemModel):
 
     def ri(self, idx, i , j):
         #idx is parent's idx 
-        print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
+        #print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
         pass
         """
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
@@ -170,7 +170,7 @@ class TrickplayElementModel(QStandardItemModel):
                 self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 
             #to keep the tree information :( 
-            print child.TPJSON()
+            #child.TPJSON()
 
             self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
@@ -240,12 +240,11 @@ class TrickplayElementModel(QStandardItemModel):
             value = ""
         
         node = TrickplayElement(title)
-        self.node = node
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)
-        print node.TPJSON()['gid'], node.TPJSON()['name'], "######################"
-        #print node['gid'], node['name'], "######################"
+        print node['gid'], node['name'], "######################"
+        #self.node = node
 
         # Add a checkbox for everything but screen
         if not screen:
@@ -268,8 +267,10 @@ class TrickplayElementModel(QStandardItemModel):
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
         partner.setData(value, Qt.DisplayRole)
-        
+
+        self.inspector.main._emulatorManager.contentMoveBlock = True
         parent.appendRow([node, partner])
+        self.inspector.main._emulatorManager.contentMoveBlock = False
         
         # Recurse through tabs
         try:
@@ -347,6 +348,8 @@ class TrickplayElementModel(QStandardItemModel):
             children = data['children']
             for i in range(len(children)-1, -1, -1):
                 self.insertElement(node, children[i], data, False)
+                # keep the tree information :)
+                self.node = node
         
         # Element has no children
         except KeyError:

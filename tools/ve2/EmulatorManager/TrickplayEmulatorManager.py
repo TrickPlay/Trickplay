@@ -143,10 +143,8 @@ class TrickplayEmulatorManager(QWidget):
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
 				    if luaCmd == "getUIInfo":
-				        print("REP UI INfo")
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "screenLoc":
-				        print("screen Loc")
 				        screenLoc = s[9:]
 				        sepPos = screenLoc.find(",")
 				        self.main.x = screenLoc[:sepPos]
@@ -213,16 +211,12 @@ class TrickplayEmulatorManager(QWidget):
 				        except:
 				            pass
 				    elif luaCmd == "repUIInfo":
-				        print("repUIInfo")
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repStInfo" :
-				        print("repStInfo")
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "getStInfo" :
-				        print("getStInfo")
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "clearInsp":
-				        print("clearInsp")
 				        gid = (s[9:])
 				    elif luaCmd == "focusSet2":
 				        focusObj = str(s[9:])
@@ -231,11 +225,9 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "newui_gid":
 				        self.inspector.newgid = str(s[9:])
 				    elif luaCmd == "openInspc":
-				        print("openInspc")
 				        gid = (s[10:])
 				        shift = s[9]
 				    elif luaCmd == "scrJSInfo":
-				        print("scrJSInfo")
 				        scrData = json.loads(s[9:])
 				        self.inspector.screens = {} 
 				        screenNames = []
@@ -260,7 +252,6 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.addItemToScreens = False
 
 				    elif luaCmd == "imageInfo":
-				        print("imageInfo")
 				        self.imgData = json.loads(s[9:])
 				        self.fscontentMoveBlock = True 
 				        self.filesystem.buildImageTree(self.imgData)
@@ -373,6 +364,7 @@ class TrickplayEmulatorManager(QWidget):
 				        #self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
+
 				        self.inspector.screenChanged(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				        self.contentMoveBlock = False 
 
