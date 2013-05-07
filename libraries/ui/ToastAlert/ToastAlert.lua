@@ -5,7 +5,7 @@ local _ENV     = ({...})[2] or _ENV
 
 default_parameters = {
     title = "ToastAlert",
-    message_font="Sans 40px",
+    message_font="FreeSans 40px",
     message_color = "ffffff",
     vertical_message_padding   =   10,
     horizontal_message_padding =    5,
