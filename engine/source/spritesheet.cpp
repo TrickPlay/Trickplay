@@ -92,10 +92,13 @@ void Source::make_texture( bool immediately )
     }
     else
     {
-        async_loading = true;
-        failed = false;
-        sheet->app->load_image_async( source_uri, false, ( Image::DecodeAsyncCallback ) Source::async_img_callback, this, NULL );
-        set_texture( NULL, false, false ); // Do not fire on_loaded event
+        if ( !async_loading )
+        {
+            async_loading = true;
+            failed = false;
+            sheet->app->load_image_async( source_uri, false, ( Image::DecodeAsyncCallback ) Source::async_img_callback, this, NULL );
+            set_texture( NULL, false, false ); // Do not fire on_loaded event
+        }
     }
 }
 
@@ -150,6 +153,7 @@ CoglHandle Source::get_subtexture( int x, int y, int w, int h )
 
 void Source::unsubscribe( PingMe* ping, bool release_now )
 {
+    g_assert( pings.count(ping) );
     pings.erase( ping );
 
     if ( can_signal && pings.empty() )

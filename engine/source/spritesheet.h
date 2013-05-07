@@ -53,7 +53,6 @@ public:
         CoglHandle get_subtexture( int x, int y, int w, int h );
         void unsubscribe( PingMe* ping, bool release_now );
         void cancel_release_later();
-        bool is_async_loading() { return async_loading; }
 
         SpriteSheet* sheet;
         char* source_uri;
@@ -67,10 +66,9 @@ public:
         void make_texture( bool immediately );
         void lost_texture() {}
 
-        std::string cache_key;
-
-        ReleaseLater* action;
-        bool async_loading;
+        std::string     cache_key;
+        ReleaseLater  * action;
+        bool            async_loading;
     };
 
     // A sprite within the spritesheet, which other objects can take pointers to
