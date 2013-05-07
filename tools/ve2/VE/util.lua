@@ -104,7 +104,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		if m and m.control then control = true else control = false end 
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
-        --uiInstance:grab_pointer()
+        uiInstance:grab_pointer()
         
         --print ("control:", control)
         --print ("name", uiInstance.name)
@@ -487,7 +487,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		selected_container = nil
         dragging = nil
         --kkk
-        --uiInstance:ungrab_pointer()
+        uiInstance:ungrab_pointer()
         uiInstance:set{} 
         uiInstance.x = uiInstance.x
         return true 
