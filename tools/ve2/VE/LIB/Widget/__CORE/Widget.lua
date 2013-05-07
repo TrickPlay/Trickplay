@@ -530,9 +530,10 @@ Widget = function(parameters)
 
     return instance, _ENV
 end
-local function turn_group_into_widget_group(instance,parameters)
 
-    Widgetize(  instance  )
+function Widget_Group(parameters)
+
+    local instance = Widgetize(  Group()  )
 
 	override_property(instance,"widget_type",
         function(oldf,self) return "Widget_Group" end
@@ -600,10 +601,6 @@ local function turn_group_into_widget_group(instance,parameters)
     return parameters and instance:set(parameters) or instance
 
 end
-
-Widget_Group = function(p) return turn_group_into_widget_group(Group(),p) end
-
-turn_group_into_widget_group(screen)
 --------------------------------------------------------------------------------
 local rectangle_properties = {
     "color","border_width","border_color",

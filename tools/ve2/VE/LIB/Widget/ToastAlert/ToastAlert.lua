@@ -284,7 +284,7 @@ ToastAlert = setmetatable(
             animate_in_duration = 500
             animate_out_duration = 500
             message_color = "ffffff"
-            message_font="Sans 40px"
+            message_font="FreeSans 40px"
             animating = false
 
             setup_object(self,instance,_ENV)
