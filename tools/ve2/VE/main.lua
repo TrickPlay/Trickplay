@@ -1602,10 +1602,8 @@ end
             screen:remove(multi_bdr)
         end
 
-        if shift == false then
-            screen_ui.n_selected_all()
-            select_screen = true
-        end 
+        screen_ui.n_selected_all()
+        select_screen = true
         
         if input_mode == hdr.S_FOCUS then 
             local selObj = screen_ui.getSelectedObj()
