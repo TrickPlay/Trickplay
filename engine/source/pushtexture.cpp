@@ -18,6 +18,7 @@ PushTexture::~PushTexture()
 
 void PushTexture::subscribe( PingMe* ping, bool preload )
 {
+    g_assert( pings.count(ping) == 0 );
     pings.insert( ping );
 
     if ( real )

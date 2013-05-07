@@ -121,7 +121,7 @@ struct NineSliceBinding
     {
         if ( async )
         {
-            action = nineslice_layout_signal_loaded_later( layout );
+            nineslice_layout_signal_loaded_later( layout );
         }
     }
 
@@ -561,6 +561,8 @@ void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * 
     {
         lua_pushboolean( L, error ? 1 : 0 );
         UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+        layout->priv->can_fire = true;
+        layout->priv->action = NULL;
     }
 }
 
