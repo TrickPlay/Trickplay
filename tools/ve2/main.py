@@ -270,7 +270,6 @@ class MainWindow(QMainWindow):
         self.command = None
         self.currentProject = None
 
-        #QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
         app.aboutToQuit.connect(self.exit)
 
     @property
@@ -711,7 +710,6 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
-        #self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         self._emulatorManager.unsavedChanges = False
         return True
@@ -770,12 +768,6 @@ class MainWindow(QMainWindow):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ToastAlert')")
         return True
 
-    """
-    def togglebutton(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToggleButton')")
-        return True
-    """
-
     def checkbox(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'CheckBox')")
         return True
@@ -790,8 +782,6 @@ class MainWindow(QMainWindow):
 
     def button(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Button')")
-        #curLayerItem = self._inspector.search(self._inspector.curLayerGid, 'gid')
-        #self._inspector.inspectorModel.insertElement(curLayerItem, newData, curLayerItem.TPJSON(), False)
         return True
 
     def text(self):
@@ -806,11 +796,9 @@ class MainWindow(QMainWindow):
         return True
 
     def clone(self):
-        #self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Clone')")
         index = self._inspector.selected (self.inspector.ui.inspector)
         while index is not None:
             item = self._inspector.inspectorModel.itemFromIndex(index)
-            #self._inspector.curLayerGid = item.parent()['gid']
             self.sendLuaCommand("clone", "_VE_.clone('"+str(item['gid'])+"')")
             self._inspector.deselectItem(item)
             self.command = "clone"
@@ -847,11 +835,9 @@ class MainWindow(QMainWindow):
         return True
 
     def duplicate(self):
-        #self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(self._inspector.curLayerGid)+"')")
         index = self._inspector.selected (self.inspector.ui.inspector)
         while index is not None:
             item = self._inspector.inspectorModel.itemFromIndex(index)
-            #self._inspector.curLayerGid = item.parent()['gid']
             self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(item['gid'])+"')")
             self._inspector.deselectItem(item)
             self.command = "duplicate"
