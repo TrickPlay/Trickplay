@@ -314,6 +314,7 @@ static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointe
 {
     BufferInfo* info = ( BufferInfo* ) u_data;
 
+/*
     info->buffer.samples = GST_BUFFER_DATA( buffer );
     info->buffer.size = GST_BUFFER_SIZE( buffer );
 
@@ -322,6 +323,7 @@ static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointe
     info->buffer.user_data = gst_buffer_ref( buffer );
 
     tp_audio_sampler_submit_buffer( info->sampler , & info->buffer );
+*/
 
     return TRUE;
 }

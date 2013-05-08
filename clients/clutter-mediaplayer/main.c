@@ -185,14 +185,15 @@ static void get_stream_information( TPMediaPlayer* mp )
             {
                 // Get its video width and height
 
-                gint width;
-                gint height;
+                gint width = 0;
+                gint height = 0;
 
-                if ( gst_video_get_size( pad, &width, &height ) )
-                {
+
+//                if ( gst_video_get_size( pad, &width, &height ) )
+//                {
                     ud->video_width = width;
                     ud->video_height = height;
-                }
+//                }
 
                 gst_object_unref( GST_OBJECT( pad ) );
             }
