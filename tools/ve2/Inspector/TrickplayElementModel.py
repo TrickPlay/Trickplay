@@ -130,8 +130,6 @@ class TrickplayElementModel(QStandardItemModel):
                 #print ("newChildGid or newParentGid is nil ...")
 
             self.lmChild = "false"
-            self.lmRow = "nil"
-            self.lmCol = "nil"
             self.tabIndex = "nil"
             self.lmParentGid = "nil"
             
