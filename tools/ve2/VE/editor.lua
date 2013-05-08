@@ -157,7 +157,7 @@ function editor.group()
     blockReport = true
 
 	if #(selected_objs) == 0 then 
-		print ("there is no selected object !!")
+		print ("there is no selected object")
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return nil
@@ -175,7 +175,8 @@ function editor.group()
 			screen_ui.n_selected(v)
 			v:unparent()
 			v.is_in_group = true
-			v.reactive = false
+			--v.reactive = true
+            v.parent_group = uiGroup
 			v.group_position = uiGroup.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -183,10 +184,7 @@ function editor.group()
 		end 
     end
 
-    --_VE_.refresh()
     blockReport = false
-    --_VE_.refreshDone()
-    --_VE_.repUIInfo(uiGroup)
 
     --screen:grab_key_focus()
 	input_mode = hdr.S_SELECT

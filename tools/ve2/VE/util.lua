@@ -70,65 +70,56 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
         
-        --if control == true and mouse_state == hdr.BUTTON_DOWN then 
+        -- draw container border for contents setting 
         if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
 
         if dragging then
             local actor , dx , dy = unpack( dragging )
+
+            -- actor's position setting 
             actor.position = { x - dx , y - dy  }
+
+            -- actor's border and anchor_mark position setting 
             if uiInstance.ve_selected == true then 
+
                 local border= screen:find_child(uiInstance.name.."border")
-                if border then 
-                    border.position = { x - dx , y - dy  }
-                end 
                 local anchor_mark= screen:find_child(uiInstance.name.."a_m")
-                if anchor_mark then
-                    anchor_mark.position = { x - dx , y - dy  }
-                end
+			    local new_pos 
+
+                if uiInstance.is_in_group == true then 
+
+			        local group_pos = util.get_group_position(uiInstance)
+			        if group_pos then 
+                        new_pos = {x - dx + group_pos[1], y - dy + group_pos[2]} 
+                    end
+
+                else 
+                    new_pos = {x - dx , y - dy }
+                end 
+
+                if border then border.position = new_pos end 
+                if anchor_mark then anchor_mark.position = new_pos end
+
             end 
         end
+
     end,true)
 
     uiInstance:add_mouse_handler("on_button_down",function(self,  x , y , button, num_clicks, m, ...)
 
-        if input_mode == hdr.S_FOCUS then 
-            local selObjName, selGid = screen_ui.getSelectedName()
-            if selObjName ~= uiInstance.name then 
-		        screen_ui.selected(uiInstance) 
-            end 
-            return true 
-        end
-
 		if m and m.control then control = true else control = false end 
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
+
         uiInstance:grab_pointer()
         
-        --print ("control:", control)
-        --print ("name", uiInstance.name)
-        --print ("is_in_group", uiInstance.extra.is_in_group)
+        if control == false or uiInstance.is_in_group == true then
 
---[[
-        if control == false and uiInstance.extra.is_in_group == true then 
-            --print(" do nothing ")
-            return true
-        elseif control == true and uiInstance.extra.is_in_group == true or 
- --]]
-
-        if uiInstance.extra.is_in_group == true or control == false and uiInstance.extra.is_in_group == false then
             _VE_.openInspector(uiInstance.gid)
 
-            --[[
-            if input_mode == hdr.S_SELECT then
-	            if uiInstance.selected == nil or uiInstance.selected == false then 
-		            screen_ui.selected(uiInstance) 
-		        elseif(uiInstance.selected == true) then 
-			        screen_ui.n_select(uiInstance) 
-	            end
-            end
-            --]]
+            --TODO : Need to check this if ~ end 
 
             if uiTypeStr == "Text" or uiTypeStr == "Widget_Text"then 
                 uiInstance.cursor_visible = true
@@ -153,78 +144,36 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
                     return true
                 end
             end 
+
             return true
-        elseif control == true and uiInstance.extra.is_in_group == false then 
+
+        elseif control == true and uiInstance.is_in_group == false then 
 
             _VE_.openInspector(uiInstance.gid)
 
-            ----[[	SHOW POSSIBLE CONTAINERS
 
-            for i, j in ipairs (screen.children) do 
-	            if j.name then 
-                --if string.find(j.name, "Layer") and j.visible == true then 
-                if string.find(j.name, "Layer") ~= nil and 
-                   string.find(j.name, "a_m") == nil and 
-                   string.find(j.name, "border") == nil 
-                   and j.visible == true  then 
-                    numberOfItems = #(j.children)
-                    for k,l in ipairs (j.children) do 
-			            if util.is_this_container(l) == true then 
-                            oupperObj = j.children[k+1]
-                            tupperObj = j.children[k+2]
-				            l:lower_to_bottom() 
-		                end 
-                    end 
-                end 
-                end 
-	        end 
             editor_lb:set_cursor(52)
 			cursor_type = 52
 		    selected_content = uiInstance 
-            
-            local odr 
+
+            --[[ Show possible containers ]]-- 
+
             for i, j in ipairs (screen.children) do 
-	            if j.name then 
-                --if string.find(j.name, "Layer") and j.visible == true then 
-                if string.find(j.name, "Layer") ~= nil and 
-                   string.find(j.name, "a_m") == nil and 
-                   string.find(j.name, "border") == nil 
-                   and j.visible == true  then 
-
-
-                    for k,l in ipairs (j.children) do 
-			            if l.name == uiInstance.name then 
-				            odr = k
-			            end 
-			        end 
-                end
-                end
-            end
-
-			if odr then 
-                for i, j in ipairs (screen.children) do 
-	                if j.name then 
-                    --if string.find(j.name, "Layer") and j.visible == true then 
-                    if string.find(j.name, "Layer") ~= nil and 
+                if j.name and string.find(j.name, "Layer") ~= nil and 
                     string.find(j.name, "a_m") == nil and 
-                    string.find(j.name, "border") == nil 
-                    and j.visible == true  then 
-                        for k,l in ipairs (j.children) do 
-			                if util.is_this_container(l) == true then 
-					            if k > odr then 
-					                l.extra.org_opacity = l.opacity
-                       		        l:set{opacity = 50}
-					            end 	
-					        elseif k ~= odr then  
-					            l.extra.org_opacity = l.opacity
-                       	        l:set{opacity = 50}
-				            end 
+                    string.find(j.name, "border") == nil and
+                    j.visible == true  then 
+                    for k,l in ipairs (j.children) do 
+                        if l.name == uiInstance.name or util.is_this_container(l) == true then 
+					        l.org_opacity = l.opacity
+					    else
+					        l.org_opacity = l.opacity
+                       	    l:set{opacity = 50}
 				        end 
-			        end
-			        end
+				    end 
 			    end
 			end
-            --]] 
+
         end 
         return true
     end,true)
@@ -427,8 +376,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		    local group_pos
 	       	if(border ~= nil and dragging ~= nil) then 
 		        if (uiInstance.is_in_group == true) then
-			        --group_pos = util.get_group_position(uiInstance)
-			        group_pos = nil
+			        local group_pos = util.get_group_position(uiInstance)
 			        if group_pos then 
 			            if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
 	                    if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end

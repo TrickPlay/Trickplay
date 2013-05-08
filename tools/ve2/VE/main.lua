@@ -1000,7 +1000,7 @@ _VE_.openFile = function(path)
                     for o, p in ipairs(m.children) do
                         p.extra.mouse_handler = false
                         util.create_mouse_event_handler(p, p.widget_type)
-                        p.reactive = false 
+                        p.reactive = true 
                         p.is_in_group = true
                         p.parent_group = m 
                     end 
@@ -1011,7 +1011,7 @@ _VE_.openFile = function(path)
                         for o, p in ipairs(m.tabs[idx].contents.children) do 
                             p.extra.mouse_handler = false
                             util.create_mouse_event_handler(p, p.widget_type)
-                            p.reactive = false 
+                            p.reactive = true 
                             p.is_in_group = true
                             p.parent_group = m 
                         end 
@@ -1602,8 +1602,10 @@ end
             screen:remove(multi_bdr)
         end
 
-        screen_ui.n_selected_all()
-        select_screen = true
+        if #selected_objs ~= 0  then 
+            screen_ui.n_selected_all()
+            select_screen = true
+        end
         
         if input_mode == hdr.S_FOCUS then 
             local selObj = screen_ui.getSelectedObj()
@@ -1628,6 +1630,7 @@ end
 		end 
 
       	if(input_mode == hdr.S_RECTANGLE) then 
+	 	   screen_ui.cursor_setting()
 	       uiRectanle = editor.rectangle( x, y) 
 		   return
 	  	end
