@@ -188,12 +188,16 @@ static void get_stream_information( TPMediaPlayer* mp )
                 gint width = 0;
                 gint height = 0;
 
+                GstCaps *caps = gst_pad_get_current_caps(pad);
+                GstStructure *st = gst_caps_get_structure(caps, 0);
 
-//                if ( gst_video_get_size( pad, &width, &height ) )
-//                {
-                    ud->video_width = width;
-                    ud->video_height = height;
-//                }
+                gst_structure_get_int(st, "width", &width);
+                gst_structure_get_int(st, "height", &width);
+
+                gst_caps_unref(caps);
+
+                ud->video_width = width;
+                ud->video_height = height;
 
                 gst_object_unref( GST_OBJECT( pad ) );
             }
