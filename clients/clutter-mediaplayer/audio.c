@@ -22,7 +22,7 @@ BufferInfo;
 
 //=============================================================================
 
-static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointer u_data );
+static GstPadProbeReturn audio_buffer_received( GstPad* pad , GstPadProbeInfo* buffer , gpointer u_data );
 
 static void disconnect_probe( gpointer pad );
 
@@ -47,7 +47,8 @@ static GstElement* find_element_by_name( GstElement* bin , const char* name )
         return 0;
     }
 
-    gpointer el = 0;
+    GValue el;
+    g_value_unset(&el);
 
     int done = FALSE;
 
@@ -57,7 +58,8 @@ static GstElement* find_element_by_name( GstElement* bin , const char* name )
         {
             case GST_ITERATOR_OK:
             {
-                gchar* this_name = gst_element_get_name( GST_ELEMENT( el ) );
+                gpointer *elem = g_value_get_pointer ( &el );
+                gchar* this_name = gst_element_get_name( GST_ELEMENT( elem ) );
 
                 if ( this_name )
                 {
@@ -65,7 +67,7 @@ static GstElement* find_element_by_name( GstElement* bin , const char* name )
                     {
                         // Take an extra ref to it
 
-                        result = GST_ELEMENT( gst_object_ref( GST_OBJECT( el ) ) );
+                        result = GST_ELEMENT( gst_object_ref( GST_OBJECT( elem ) ) );
 
                         done = TRUE;
                     }
@@ -73,7 +75,7 @@ static GstElement* find_element_by_name( GstElement* bin , const char* name )
                     g_free( this_name );
                 }
 
-                gst_object_unref( GST_OBJECT( el ) );
+                gst_object_unref( GST_OBJECT( elem ) );
             }
             break;
 
@@ -87,6 +89,8 @@ static GstElement* find_element_by_name( GstElement* bin , const char* name )
                 break;
         }
     }
+
+    g_value_unset(&el);
 
     gst_iterator_free( it );
 
@@ -108,7 +112,8 @@ static GstPad* find_source_pad( GstElement* element )
 
     GstPad* result = 0;
 
-    gpointer pad = NULL;
+    GValue pad;
+    g_value_unset(&pad);
 
     int done = FALSE;
 
@@ -118,7 +123,7 @@ static GstPad* find_source_pad( GstElement* element )
         {
             case GST_ITERATOR_OK:
             {
-                result = GST_PAD( pad );
+                result = GST_PAD( g_value_get_pointer (&pad) );
 
                 done = TRUE;
             }
@@ -133,6 +138,8 @@ static GstPad* find_source_pad( GstElement* element )
                 break;
         }
     }
+
+    g_value_unset(&pad);
 
     gst_iterator_free( it );
 
@@ -187,7 +194,7 @@ void connect_audio_sampler_old( TPContext* context , GstElement* pipeline )
     //-------------------------------------------------------------------------
     // Get the caps for the source pad
 
-    GstCaps* caps = gst_pad_get_negotiated_caps( GST_PAD( source_pad ) );
+    GstCaps* caps = gst_pad_get_current_caps( GST_PAD( source_pad ) );
 
     if ( ! caps )
     {
@@ -248,7 +255,7 @@ void connect_audio_sampler_old( TPContext* context , GstElement* pipeline )
             info->buffer.channels = channels;
             info->buffer.format = TP_AUDIO_FORMAT_PCM_16 | TP_AUDIO_ENDIAN_LITTLE;
 
-            info->probe_handler = gst_pad_add_buffer_probe( GST_PAD( source_pad ) , G_CALLBACK( audio_buffer_received ) , info );
+            info->probe_handler = gst_pad_add_probe( GST_PAD( source_pad ) , GST_PAD_PROBE_TYPE_BUFFER, audio_buffer_received, info, NULL );
 
             // We attach the buffer info to the pad - so that it will be destroyed when
             // the pad goes away.
@@ -293,7 +300,7 @@ static void disconnect_probe( gpointer _pad )
 
     if ( info && info->probe_handler )
     {
-        gst_pad_remove_buffer_probe( pad , info->probe_handler );
+        gst_pad_remove_probe( pad , info->probe_handler );
 
         info->probe_handler = 0;
     }
@@ -303,29 +310,27 @@ static void disconnect_probe( gpointer _pad )
 
 //=============================================================================
 
-static void free_samples( void* samples , void* gst_buffer )
+static void free_samples( void* samples , void* dummy )
 {
-    gst_buffer_unref( GST_BUFFER( gst_buffer ) );
+    g_free(samples);
 }
 
 //=============================================================================
 
-static gboolean audio_buffer_received( GstPad* pad , GstBuffer* buffer , gpointer u_data )
+static GstPadProbeReturn audio_buffer_received( GstPad* pad , GstPadProbeInfo* probe_info , gpointer u_data )
 {
     BufferInfo* info = ( BufferInfo* ) u_data;
 
-/*
-    info->buffer.samples = GST_BUFFER_DATA( buffer );
-    info->buffer.size = GST_BUFFER_SIZE( buffer );
+    GstBuffer *buffer = gst_pad_probe_info_get_buffer( probe_info );
+
+    info->buffer.size = gst_buffer_extract(buffer, 0, info->buffer.samples, -1);
 
     info->buffer.copy_samples = 0;
     info->buffer.free_samples = free_samples;
-    info->buffer.user_data = gst_buffer_ref( buffer );
 
     tp_audio_sampler_submit_buffer( info->sampler , & info->buffer );
-*/
 
-    return TRUE;
+    return GST_PAD_PROBE_OK;
 }
 
 
@@ -362,17 +367,28 @@ void* connect_audio_sampler( TPContext* context )
     // Auto audio source and fakesink
 
     GstElement* audio_source = gst_element_factory_make( "autoaudiosrc" , "src" );
+    g_assert(audio_source);
 
     GstElement* sink = gst_element_factory_make( "fakesink" , "sink" );
-
+    g_assert(sink);
 
     gst_bin_add_many( GST_BIN( pipeline ) , audio_source , sink , NULL );
 
-    gst_element_link_many( audio_source , sink , NULL );
+    GstCaps *audioCaps = gst_caps_new_simple("audio/x-raw",
+        "endianness", G_TYPE_INT, 1234,
+        "signed", G_TYPE_BOOLEAN, TRUE,
+        "width", G_TYPE_INT, 16,
+        "depth", G_TYPE_INT, 16,
+        NULL);
 
-    gst_element_set_state( pipeline , GST_STATE_PLAYING );
+    gst_element_link_filtered( audio_source , sink , audioCaps );
 
-    if ( gst_element_get_state( pipeline , NULL , NULL , -1 ) == GST_STATE_CHANGE_FAILURE )
+    gst_caps_unref(audioCaps);
+
+    GstStateChangeReturn ret = gst_element_set_state( pipeline , GST_STATE_PLAYING );
+
+    if(GST_STATE_CHANGE_FAILURE == ret ||
+        (GST_STATE_CHANGE_ASYNC == ret && gst_element_get_state( pipeline , NULL , NULL , GST_SECOND ) == GST_STATE_CHANGE_FAILURE))
     {
         g_debug( "FAILED TO GO INTO PLAY" );
         gst_element_set_state( pipeline , GST_STATE_NULL );
@@ -383,7 +399,7 @@ void* connect_audio_sampler( TPContext* context )
     //.........................................................................
     // Get the source pad for the audio source
 
-    GstPad* pad = gst_element_get_pad( audio_source , "src" );
+    GstPad* pad = gst_element_get_static_pad( audio_source , "src" );
 
     if ( ! pad )
     {
@@ -396,7 +412,7 @@ void* connect_audio_sampler( TPContext* context )
     //.........................................................................
     // Get its caps
 
-    GstCaps* caps = gst_pad_get_negotiated_caps( GST_PAD( pad ) );
+    GstCaps* caps = gst_pad_get_current_caps( GST_PAD( pad ) );
 
     if ( ! caps )
     {
@@ -437,7 +453,7 @@ void* connect_audio_sampler( TPContext* context )
 
     gboolean ok = TRUE;
 
-    ok &= ! strcmp( "audio/x-raw-int" , gst_structure_get_name( st ) );
+    ok &= ! strcmp( "audio/x-raw" , gst_structure_get_name( st ) );
     ok &= gst_structure_get_int( st , "endianness" , & endianness );
     ok &= gst_structure_get_boolean( st , "signed" , & is_signed );
     ok &= gst_structure_get_int( st , "width" , & width );
@@ -484,7 +500,7 @@ void* connect_audio_sampler( TPContext* context )
         info->buffer.format |= TP_AUDIO_ENDIAN_BIG;
     }
 
-    info->probe_handler = gst_pad_add_buffer_probe( GST_PAD( pad ) , G_CALLBACK( audio_buffer_received ) , info );
+    info->probe_handler = gst_pad_add_probe( GST_PAD( pad ) , GST_PAD_PROBE_TYPE_BUFFER, audio_buffer_received, info, NULL );
 
     // We attach the buffer info to the pad - so that it will be destroyed when
     // the pad goes away.
