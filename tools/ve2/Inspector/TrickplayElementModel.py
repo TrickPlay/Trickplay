@@ -31,7 +31,7 @@ class TrickplayElementModel(QStandardItemModel):
 
     def rai(self, idx, i , j):
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
-            print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
+            #print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
             the_item= self.itemFromIndex(idx)
             if the_item : 
                 try:
@@ -43,18 +43,18 @@ class TrickplayElementModel(QStandardItemModel):
                             self.lmRow = int(the_item.text()[3:])
                             for x in range(0, the_item.rowCount()):
                                 temp_item = the_item.takeChild(x)
-                                print temp_item.text()
+                                #print temp_item.text()
                                 if temp_item.text() == "Empty" :
                                     self.lmCol = int( x ) 
                                     break
                             if self.lmCol == "nil" :
                                 self.lmCol = int( the_item.rowCount() )
-                            print "[", self.lmRow, self.lmCol ,"]"
+                            #print "[", self.lmRow, self.lmCol ,"]"
                             self.newParentGid = the_item.parent()['gid'] 
                         else : #Drop into Empty Cell 
                             self.lmCol = int(the_item.row()) # layout manager col number 
                             self.lmRow = int(the_item.parent().text()[3:])
-                            print "[", self.lmRow, self.lmCol ,"]"
+                            #print "[", self.lmRow, self.lmCol ,"]"
                             self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
                     elif the_item.parent()['type'] == "TabBar" :
                         #print("TabBar")
@@ -103,7 +103,7 @@ class TrickplayElementModel(QStandardItemModel):
                 if the_child_item : 
                     try:
                         self.newChildGid = the_child_item['gid']
-                        print("newChildGid", self.newChildGid)
+                        #print("newChildGid", self.newChildGid)
                     except:
                         self.newChildGid = None
                         print ("merong : newChildGid nil")
