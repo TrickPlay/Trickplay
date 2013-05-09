@@ -3,13 +3,16 @@ local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
 local create_arrow = function(dir)
-    return function(self,state) 
+    return function(self,state,_ENV)
+
         local s = Sprite{
             async = false,
             sheet=self.style.spritesheet,
             id = self.style["ArrowPane/arrow-"..dir.."/"..state..".png"],
         } --]]
-        print("new sprite",s.w,s.h, s.id)
+        print("new sprite",s.w,s.h, s.id,w,h)
+        w = s.w
+        h = s.h
         return s
     end
 end
