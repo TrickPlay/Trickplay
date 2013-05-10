@@ -10,8 +10,6 @@ PushTexture::~PushTexture()
         texture = NULL;
     }
 
-    failed = false;
-
     if ( !pings.empty() ) { pings.clear(); }
 }
 
@@ -22,7 +20,6 @@ void PushTexture::subscribe( PingMe* ping, bool immediately )
 
     if ( texture )
     {
-        g_assert( !failed );
         ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
     }
     else
@@ -37,7 +34,6 @@ void PushTexture::release_texture()
     {
         cogl_handle_unref( texture );
 
-        failed = false;
         texture = NULL;
 
         lost_texture();
@@ -57,8 +53,6 @@ CoglHandle PushTexture::get_texture()
 
 void PushTexture::set_texture( CoglHandle _texture, bool trigger )
 {
-    // failed is updated in Sprite and Source instances
-
     if ( texture ) { cogl_handle_unref( texture ); }
 
     texture = _texture;
@@ -82,7 +76,9 @@ void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* 
     if ( instance == _instance )
     {
         callback = _callback;
-        target = _target;
+        target   = _target;
+
+        // TODO: handle the case when we just want to change flag immediately
         return;
     }
 
@@ -90,9 +86,9 @@ void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* 
     // Source instances will have it released later when the app is running
     if ( instance ) { instance->unsubscribe( this, false ); }
 
-    callback = _callback;
-    target = _target;
     instance = _instance;
+    callback = _callback;
+    target   = _target;
 
     if ( instance ) { instance->subscribe( this, immediately ); }
 }
@@ -103,7 +99,7 @@ PingMe::~PingMe()
 
     instance = NULL;
     callback = NULL;
-    target = NULL;
+    target   = NULL;
 }
 
 

@@ -33,7 +33,7 @@ void Source::handle_async_img( Image* image )
     if ( image )
     {
         failed = false;
-        cache = false; // When used next time, need to check cache to see whether in cache or not
+        cache  = false; // When used next time, need to check cache to see whether in cache or not
 
         CoglHandle t = ref_texture_from_image( image, true );
         set_texture( t, true ); // Will update texture
@@ -43,7 +43,7 @@ void Source::handle_async_img( Image* image )
     else
     {
         failed = true;
-        cache = false;
+        cache  = false;
 
         g_warning( "Could not download image %s", source_uri );
         set_texture( NULL, true );
@@ -63,10 +63,9 @@ void Source::make_texture( bool immediately )
     if ( cache_texture != COGL_INVALID_HANDLE ) // In cache
     {
         failed = false;
-        cache = true;
+        cache  = true;
 
         set_texture( cogl_handle_ref( cache_texture ), true );
-
         return;
     }
 
@@ -78,6 +77,7 @@ void Source::make_texture( bool immediately )
         {
             failed = false;
             CoglHandle t = ref_texture_from_image( image, true );
+
             set_texture( t, true ); // Will update texture
 
             // Set variable cache next time when used, because we do not know whether
@@ -161,6 +161,7 @@ void Source::unsubscribe( PingMe* ping, bool release_now )
         if ( release_now )
         {
             cache = false;
+            failed = false;
             release_texture(); // Will update failed
             can_signal = true;
         }
@@ -194,6 +195,7 @@ void Sprite::unsubscribe( PingMe* ping, bool release_now )
 
     if ( pings.empty() ) // Sprite texture should always be release immediately
     {
+        source->set_failed( false );
         release_texture();
     }
 }
@@ -202,7 +204,8 @@ void Sprite::update()
 {
     g_assert( source );
 
-    failed = source->is_failed();
+    // Note that the Sprite class does not have the failed flag
+    bool failed = source->is_failed();
     bool is_real = source->get_texture();
 
     g_assert( !failed || !is_real );
@@ -239,9 +242,11 @@ class AsyncCallback : public Action
     SpriteSheet* self;
     bool failed;
 
-public: AsyncCallback( SpriteSheet* s, bool f ) : self( s ), failed( f ) {}
+  public:
+    AsyncCallback( SpriteSheet* s, bool f ) : self( s ), failed( f ) {}
 
-protected: bool run()
+  protected:
+    bool run()
     {
         g_signal_emit_by_name( self->extra, "load-finished", GINT_TO_POINTER( failed ) );
         self->can_fire = true;
