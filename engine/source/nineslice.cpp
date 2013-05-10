@@ -28,8 +28,8 @@ void Slice::unset_sprite()
 
 void Slice::update()
 {
-    loaded = sprite && sprite->is_real();
-    done = !sprite || sprite->is_real() || sprite->is_failed();
+    loaded = sprite && sprite->get_texture();
+    done = !sprite || sprite->get_texture() || sprite->is_failed();
 
     if ( done )
     {

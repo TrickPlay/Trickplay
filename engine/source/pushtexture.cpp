@@ -11,7 +11,6 @@ PushTexture::~PushTexture()
     }
 
     failed = false;
-    real = false;
 
     if ( !pings.empty() ) { pings.clear(); }
 }
@@ -21,7 +20,7 @@ void PushTexture::subscribe( PingMe* ping, bool immediately )
     g_assert( pings.count(ping) == 0 );
     pings.insert( ping );
 
-    if ( real )
+    if ( texture )
     {
         g_assert( !failed );
         ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
@@ -39,7 +38,6 @@ void PushTexture::release_texture()
         cogl_handle_unref( texture );
 
         failed = false;
-        real = false;
         texture = NULL;
 
         lost_texture();
@@ -57,16 +55,14 @@ CoglHandle PushTexture::get_texture()
     return texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture, bool _real, bool trigger )
+void PushTexture::set_texture( CoglHandle _texture, bool trigger )
 {
-    // failed and real are updated in Sprite and Source instances
+    // failed is updated in Sprite and Source instances
 
     if ( texture ) { cogl_handle_unref( texture ); }
 
     texture = _texture;
     // Skip cogl_handle_ref as it is done before calling set_texture
-
-    real = texture && _real;
 
     if ( trigger ) { ping_all(); }
 }

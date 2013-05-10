@@ -38,14 +38,13 @@ public:
         void* target;
     };
 
-    PushTexture() : failed( false ), texture( NULL ), real( false ) {}
+    PushTexture() : failed( false ), texture( NULL ) {}
     virtual ~PushTexture();
 
     CoglHandle get_texture();
-    void set_texture( CoglHandle texture, bool real, bool trigger );
+    void set_texture( CoglHandle texture, bool trigger );
     void get_dimensions( int* w, int* h );
     void ping_all();
-    bool is_real() { return real; }
     bool is_failed() { return failed; }
     void release_texture();
 
@@ -61,7 +60,6 @@ private:
     virtual void unsubscribe( PingMe* ping, bool release_now ) = 0;
 
     CoglHandle texture;
-    bool real;
 };
 
 #endif
