@@ -26,7 +26,7 @@ public:
 
         // Note: if assign() suceeds, it will immediately ping() this PingMe object using the given callback
 
-        void assign( PushTexture* instance, Callback* callback, void* target, bool preload );
+        void assign( PushTexture* instance, Callback* callback, void* target, bool immediately );
 
         friend class PushTexture;
 
@@ -57,7 +57,7 @@ protected:
     std::set< PingMe* > pings;
 
 private:
-    void subscribe( PingMe* ping, bool preload );
+    void subscribe( PingMe* ping, bool immediately );
     virtual void unsubscribe( PingMe* ping, bool release_now ) = 0;
 
     CoglHandle texture;
