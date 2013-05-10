@@ -152,7 +152,7 @@ struct SpriteBinding
         {
             GError * error = NULL;
 
-            if ( !sprite || sprite->is_failed() || !sprite->get_texture() )
+            if ( !sprite || sprite->is_failed() || !(sprite->get_texture()) )
             {
                 g_set_error( &error, CLUTTER_TEXTURE_ERROR, CLUTTER_TEXTURE_ERROR_BAD_FORMAT, "?" );
             }
