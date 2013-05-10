@@ -38,21 +38,19 @@ public:
         void* target;
     };
 
-    PushTexture() : failed( false ), texture( NULL ) {}
+    PushTexture() : texture( NULL ) {}
     virtual ~PushTexture();
 
     CoglHandle get_texture();
     void set_texture( CoglHandle texture, bool trigger );
     void get_dimensions( int* w, int* h );
     void ping_all();
-    bool is_failed() { return failed; }
     void release_texture();
 
 protected:
     virtual void make_texture( bool immediately ) = 0; // Descendent implements for when texture must be created
     virtual void lost_texture() = 0;                   // Descendent implements for when texture is released, ie., there are no more subscribers
 
-    bool failed;
     std::set< PingMe* > pings;
 
 private:
