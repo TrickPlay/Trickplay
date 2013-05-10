@@ -16,7 +16,7 @@ PushTexture::~PushTexture()
     if ( !pings.empty() ) { pings.clear(); }
 }
 
-void PushTexture::subscribe( PingMe* ping, bool preload )
+void PushTexture::subscribe( PingMe* ping, bool immediately )
 {
     g_assert( pings.count(ping) == 0 );
     pings.insert( ping );
@@ -28,7 +28,7 @@ void PushTexture::subscribe( PingMe* ping, bool preload )
     }
     else
     {
-        make_texture( preload ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
+        make_texture( immediately ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
     }
 }
 
@@ -81,7 +81,7 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* _target, bool preload )
+void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* _target, bool immediately )
 {
     if ( instance == _instance )
     {
@@ -98,7 +98,7 @@ void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* 
     target = _target;
     instance = _instance;
 
-    if ( instance ) { instance->subscribe( this, preload ); }
+    if ( instance ) { instance->subscribe( this, immediately ); }
 }
 
 PingMe::~PingMe()
