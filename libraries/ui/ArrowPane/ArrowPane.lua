@@ -210,6 +210,7 @@ ArrowPane = setmetatable(
                         t.cells                = nil
 
                        -- t.contents = self.contents
+                        t.style = instance.style.name
 
                         t.contents_offset = instance.contents_offset
                         t.pane_w    = instance.pane_w
