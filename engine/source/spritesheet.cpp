@@ -454,7 +454,8 @@ void SpriteSheet::load_json( const char* json )
         parse_json( JSON::Parser::parse( map, length ) );
     }
 
-    if ( map ) { g_free( map ); }
+    // No need to free map. map can either come from a lua string which will be freed by lua,
+    // or come from Network::Response which will be freed by ~Response()
 }
 
 Source* SpriteSheet::add_source()
