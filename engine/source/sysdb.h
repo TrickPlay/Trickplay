@@ -80,6 +80,7 @@ public:
         String      id;
         String      path;
         String      name;
+        String      description;
         int         release;
         String      version;
         StringSet   fingerprints;

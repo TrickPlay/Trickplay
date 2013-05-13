@@ -25,6 +25,7 @@ static const char* schema_create =
         "create table apps( id TEXT PRIMARY KEY NOT NULL,"
         "                   path TEXT NOT NULL, "
         "                   name TEXT,"
+        "                   description TEXT,"
         "                   release INTEGER NOT NULL,"
         "                   version TEXT NOT NULL,"
         "                   fingerprints TEXT,"
@@ -544,14 +545,15 @@ bool SystemDatabase::insert_app( const App::Metadata& metadata, const StringSet&
         attribute_list += *it;
     }
 
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7);" );
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,description,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7,?8);" );
     insert.bind( 1, metadata.id );
     insert.bind( 2, metadata.get_root_uri() );
     insert.bind( 3, metadata.name );
-    insert.bind( 4, metadata.release );
-    insert.bind( 5, metadata.version );
-    insert.bind( 6, fingerprint_list );
-    insert.bind( 7, attribute_list );
+    insert.bind( 4, metadata.description );
+    insert.bind( 5, metadata.release );
+    insert.bind( 6, metadata.version );
+    insert.bind( 7, fingerprint_list );
+    insert.bind( 8, attribute_list );
     insert.step();
 
     if ( ! insert.ok() )
@@ -617,8 +619,9 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement* s
         app.id = select->get_string( 0 );
         app.path = select->get_string( 1 );
         app.name = select->get_string( 2 );
-        app.release = select->get_int( 3 );
-        app.version = select->get_string( 4 );
+        app.description = select->get_string( 3 );
+        app.release = select->get_int( 4 );
+        app.version = select->get_string( 5 );
 
         StringVector fingerprints = split_string( select->get_string( 5 ) , "," );
 
@@ -638,7 +641,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement* s
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,attributes from apps;" );
+    SQLite::Statement select( db, "select id,path,name,description,release,version,fingerprints,attributes from apps;" );
 
     return get_app_list( &select );
 }
@@ -768,7 +771,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppS
         return AppInfo::List();
     }
 
-    String s( "select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.attributes"
+    String s( "select a.id,a.path,a.name,a.description,a.release,a.version,a.fingerprints,a.attributes"
             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
 
     switch ( sort )
