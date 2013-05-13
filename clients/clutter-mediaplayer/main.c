@@ -16,6 +16,11 @@ extern void* connect_audio_sampler( TPContext* context );
 
 extern void disconnect_audio_sampler( void* sampler );
 
+
+//-----------------------------------------------------------------------------
+
+static ClutterActor *background_texture = NULL;
+
 //-----------------------------------------------------------------------------
 
 typedef struct
@@ -34,6 +39,16 @@ UserData;
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
 
 static TPContext* context = 0;
+
+//-----------------------------------------------------------------------------
+
+static inline void g_info( const gchar* format, ... )
+{
+    va_list args;
+    va_start( args, format );
+    g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_INFO, format, args );
+    va_end( args );
+}
 
 //-----------------------------------------------------------------------------
 // Signal handlers
@@ -653,14 +668,6 @@ static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer v
 
 static int mp_constructor( TPMediaPlayer* mp )
 {
-    static int init = 0;
-
-    if ( !init )
-    {
-        init = 1;
-        clutter_gst_init( NULL, NULL );
-    }
-
     ClutterActor* video_texture = clutter_gst_video_texture_new();
 
     if ( !video_texture )
@@ -687,9 +694,12 @@ static int mp_constructor( TPMediaPlayer* mp )
     clutter_actor_set_size( video_texture, width, height );
     clutter_actor_set_position( video_texture, 0, 0 );
 
-    clutter_container_add_actor( CLUTTER_CONTAINER( stage ), video_texture );
-
-    clutter_actor_lower_bottom( video_texture );
+    if(background_texture)
+    {
+        clutter_actor_insert_child_above( stage, video_texture, background_texture );
+    } else {
+        clutter_actor_insert_child_below( stage, video_texture, NULL );
+    }
 
     g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
 
@@ -732,6 +742,58 @@ static int mp_constructor( TPMediaPlayer* mp )
 
     return 0;
 }
+
+static void background_loop_media( ClutterMedia *cm, gpointer *dummy )
+{
+    clutter_media_set_progress(cm, 0.0);
+    clutter_media_set_playing(cm, TRUE);
+}
+
+static void background_error( ClutterMedia *cm, GError *error, gpointer *dummy )
+{
+    g_warning("BACKGROUND MEDIA ERROR: %s", error->message);
+}
+
+static void run_background_video(const gchar *uri)
+{
+    background_texture = clutter_gst_video_texture_new();
+
+    if ( !background_texture )
+    {
+        g_warning( "FAILED TO CREATE CLUTTER GST VIDEO TEXTURE" );
+        return;
+    }
+
+    // Get the stage, size the video texture and add it to the stage
+
+    // This is a total hack, but there's no clean way to leak the ClutterStage out of the context
+    // and clutter_stage_get_default() might give us the wrong stage in a multi-stage enviroment (like Ubuntu or OSX)
+    ClutterActor* stage = ( ClutterActor* )tp_context_get( context, "sekrit-stage" );
+
+    gfloat width, height;
+
+    clutter_actor_get_size( stage, &width, &height );
+    clutter_actor_set_size( background_texture, width, height );
+    clutter_actor_set_position( background_texture, 0, 0 );
+    clutter_actor_set_name( background_texture, "BACKGROUND VIDEO");
+
+    clutter_actor_insert_child_below( stage, background_texture, NULL );
+
+    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , background_texture );
+
+    // Now we have an actor, in position.  Load and play the media in a loop
+
+    g_signal_connect( background_texture, "eos", G_CALLBACK( background_loop_media ), NULL );
+    g_signal_connect( background_texture, "error", G_CALLBACK( background_error ), NULL );
+
+    g_info("BACKGROUND VIDEO INITIALIZED: LOADING URI %s", uri);
+
+    clutter_media_set_uri( CLUTTER_MEDIA( background_texture ), uri );
+
+    clutter_media_set_playing( CLUTTER_MEDIA( background_texture ), TRUE );
+}
+
+
 //-----------------------------------------------------------------------------
 // We get notified when Trickplay is running - we start our audio sampler
 
@@ -740,6 +802,13 @@ static void trickplay_running( TPContext* context , const char* subject , void* 
     void * * sampler = ( void ** ) data;
 
     * sampler = connect_audio_sampler( context );
+
+
+    const gchar *background_video = tp_context_get( context, "background_video");
+    if(background_video)
+    {
+        run_background_video(background_video);
+    }
 }
 
 static void trickplay_exiting( TPContext* context , const char* subject , void* data )
@@ -761,6 +830,8 @@ static void quit( int sig )
 
 int main( int argc, char* argv[] )
 {
+    clutter_gst_init( NULL, NULL );
+
     signal( SIGINT , quit );
 
     tp_init( &argc, &argv );
