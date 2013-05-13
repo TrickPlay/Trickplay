@@ -3,5 +3,6 @@ app = {
 	release = "2",
 	version = "1.5",
 	name = "Penguin Zip-Zip",
+	description = "This is a game about penguing jumping",
 	copyright = "Trickplay Inc."
 }
