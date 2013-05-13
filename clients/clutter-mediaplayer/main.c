@@ -653,14 +653,6 @@ static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer v
 
 static int mp_constructor( TPMediaPlayer* mp )
 {
-    static int init = 0;
-
-    if ( !init )
-    {
-        init = 1;
-        clutter_gst_init( NULL, NULL );
-    }
-
     ClutterActor* video_texture = clutter_gst_video_texture_new();
 
     if ( !video_texture )
@@ -761,6 +753,8 @@ static void quit( int sig )
 
 int main( int argc, char* argv[] )
 {
+    clutter_gst_init( NULL, NULL );
+
     signal( SIGINT , quit );
 
     tp_init( &argc, &argv );
