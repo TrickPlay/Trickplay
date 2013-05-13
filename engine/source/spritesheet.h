@@ -28,6 +28,7 @@ public:
     protected: bool run()
         {
             self->cache = false;
+            self->set_failed( false );
             self->release_texture();
             self->can_signal = true;
             return false;
@@ -40,9 +41,13 @@ public:
     {
     public:
         Source( SpriteSheet* s ) : sheet( s ), source_uri( NULL ), cache( false ), can_signal( true ),
-            action( NULL ), async_loading( false ) { g_assert( s ); }
+            action( NULL ), async_loading( false ), failed( false )  { g_assert( s ); }
 
-        ~Source() { if ( source_uri ) { g_free( source_uri ); } }
+        ~Source()
+        {
+            if ( source_uri ) g_free( source_uri );
+            failed = false;
+        }
 
         void set_source( const char* uri );
         void set_source( Image* image );
@@ -59,6 +64,9 @@ public:
         bool cache;
         bool can_signal;
 
+        bool is_failed()                { return failed; }
+        void set_failed( bool _failed ) { failed = _failed; }
+
     private:
         static void async_img_callback( Image* image, Source* source ) { source->handle_async_img( image ); }
         void handle_async_img( Image* image );
@@ -69,6 +77,7 @@ public:
         std::string     cache_key;
         ReleaseLater  * action;
         bool            async_loading;
+        bool            failed;
     };
 
     // A sprite within the spritesheet, which other objects can take pointers to
@@ -94,6 +103,7 @@ public:
 
         void set_id( char * new_id ) { id = new_id; }
         const char * get_id() { return id; }
+        bool is_failed() { return source->is_failed(); }
 
     private:
         void make_texture( bool immediately );
