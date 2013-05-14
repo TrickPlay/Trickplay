@@ -53,7 +53,7 @@ class Media [[ClutterActor*]] actor
 
     Setting the src property also begins the process of loading the media. By default, media loading is performed synchronously. To determine the success or failure of a synchronous load, you can check the <loaded> property immediately after setting the src property.
 
-    Asynchronous media loading is supported by setting the async property prior to setting the src property. For instructions on handling asynchonous media loading, refer to the <async> property.
+    Asynchronous media loading is supported by setting the pre_load property prior to setting the src property. For instructions on handling asynchonous media loading, refer to the <pre_load> property.
 
     *Default Setting:* nil
 
@@ -76,7 +76,7 @@ class Media [[ClutterActor*]] actor
         end
         (end)
 
-    *See Also:* the <loaded>, and <async> properties
+    *See Also:* the <loaded>, and <pre_load> properties
 */
 
     string src
@@ -110,15 +110,15 @@ class Media [[ClutterActor*]] actor
         ]];
 
 /***************************************
-    Property: async
+    Property: pre_load
 
-    The async property is a boolean value that determines whether the media is loaded synchronously (async == nil or async == false) or asynchronously (async == true).
+    The pre_load property is a boolean value that determines whether the media is loaded synchronously (pre_load == nil or pre_load == false) or asynchronously (pre_load == true).
 
     Asynchronously-loaded media enable your application to continue to run while the media is loading. After the media is completely loaded, your application is notified by the firing of an <on_loaded> event. Registered event handlers can then perform the desired operations, such as resize or display the media.
 
     After starting one asynchronous load, it is possible for your application to begin a second media-load (synchronous or asynchronous) before the first load completes. There is no guarantee, however, that load operations will complete in the same order in which they were started; it is possible that the second load will finish before the first load. Therefore, your code should not contain any assumptions about the order in which medias finish loading.
 
-    To load the media asynchronously, the async property must be initialized prior to beginning the load operation. The load operation is then started by setting the src property. The example code below demonstrates the required operations.
+    To load the media asynchronously, the pre_load property must be initialized prior to beginning the load operation. The load operation is then started by setting the src property. The example code below demonstrates the required operations.
 
     *Default Setting:* false, i.e., medias are loaded synchronously
 
@@ -127,7 +127,7 @@ class Media [[ClutterActor*]] actor
         (code)
         -- Create a media object
         local myMedia = Media()
-        myMedia.async = true        -- will load media asynchronously
+        myMedia.pre_load = true        -- will load media asynchronously
 
         -- Define event handler
         handleLoadedEvent = nil
@@ -153,12 +153,12 @@ class Media [[ClutterActor*]] actor
     *See Also:* the <on_loaded> event and the <src> property
 */
 
-    bool async
+    bool pre_load
         [[
-            async=MediaExtra::get( self )->async;
+            pre_load=MediaExtra::get( self )->pre_load;
         ]]
         [[
-            MediaExtra::get( self )->async = async;
+            MediaExtra::get( self )->pre_load = pre_load;
         ]];
 
 /***************************************
@@ -185,7 +185,7 @@ class Media [[ClutterActor*]] actor
 
     *Handler Return Value:* None
 
-    *Code Example:* Refer to the <async> property
+    *Code Example:* Refer to the <pre_load> property
 
     *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
 */
@@ -248,7 +248,7 @@ class Media [[ClutterActor*]] actor
 [[
 void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L )
 {
-    if ( MediaExtra::get( self )->async )
+    if ( MediaExtra::get( self )->pre_load )
     {
         lua_pushboolean(L,error?1:0);
         UserData::invoke_callbacks(G_OBJECT(self),"on_loaded",1,0,L);

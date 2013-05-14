@@ -207,13 +207,13 @@ class MediaExtra
 
     bool           constructing;
     bool           loaded;
-    bool           async;
+    bool           pre_load;
     bool           read_tags;
     JSON::Object   tags;
 
   private:
 
-    MediaExtra() : constructing( false ), loaded( false ), async( false ), read_tags( false ) {}
+    MediaExtra() : constructing( false ), loaded( false ), pre_load( false ), read_tags( false ) {}
 
     ~MediaExtra() {}
 
