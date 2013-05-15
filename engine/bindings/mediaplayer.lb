@@ -19,13 +19,9 @@ class MP : private MediaPlayer::Delegate
 {
     public:
 
-        MP(lua_State * l,bool use_default=true)
-        :
-            L(l),
-            player(NULL),
-            is_default(use_default)
+        MP( lua_State * l, bool use_default = false ) : L( l ), player( NULL ), is_default( use_default )
         {
-            if (is_default)
+            if ( is_default )
             {
                 player=App::get(L)->get_context()->get_default_media_player();
             }
@@ -49,6 +45,8 @@ class MP : private MediaPlayer::Delegate
                 if (!is_default)
                     delete player;
             }
+
+            App::get(L)->get_context()->remove_media_player( player );
         }
 
         MediaPlayer * get_player()
