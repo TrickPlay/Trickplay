@@ -7,7 +7,7 @@ module media_module;
 #include "mediaplayers.h"
 //#include "app.h"
 #include "context.h"
-//#include "app_resource.h"
+#include "app_resource.h"
 
 void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L );
 static bool load_media( lua_State * L, ClutterTexture * texture );
@@ -470,6 +470,206 @@ class Media [[ClutterActor*]] actor
                 MediaExtra::get( self, L )->get_player()->reset();
         ]];
 
+/***************************************
+*/
+    int load(string uri,string extra="")
+        [[
+            if ( MediaPlayer * mp = MediaExtra::get( self, L )->get_player() )
+            {
+                if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
+                {
+                    result = mp->load( resource.get_uri().c_str() , extra );
+                }
+                else
+                {
+                    result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
+                }
+            }
+            else
+            {
+                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            }
+            g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+/***************************************
+*/
+    int play()
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->play()
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+/***************************************
+*/
+    int pause()
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->pause()
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+/***************************************
+*/
+    int seek(double seconds)
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->seek(seconds)
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+/***************************************
+*/
+    int set_playback_rate(int rate)
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->set_playback_rate(rate)
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+    /*
+        Function: get_viewport_geometry
+
+        The get_viewport_geometry() function retrieves the positon and size of the video viewport. By default, the video viewport fills the entire display.
+
+        *Arguments:* None
+
+        *Return Value:* table containing video viewport information in the format shown below. In case of error, returns nil.
+
+            (code)
+            { X-coordinate location, Y-coordinate location, width, height }
+            (end)
+
+        *See Also:* the <set_viewport_geometry> function
+    */
+
+    table get_viewport_geometry()
+        [[
+            int left;
+            int top;
+            int width;
+            int height;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_viewport_geometry( &left, &top, &width, &height )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
+
+            if ( result )
+            {
+                lua_pushnil(L);
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,left);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,top);
+                lua_rawseti(L,-2,2);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,3);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,4);
+            }
+        ]];
+
+    /*
+        Function: set_viewport_geometry
+
+        The set_viewport_geometry() function sets the position and size of the video viewport.
+
+        *Arguments:*
+
+            left - viewport's X-coordinate position
+            top - viewport's Y-coordinate position
+            width - viewport's width in pixels
+            height - viewport's height in pixels
+
+        *Return Value:* Returns 0 if successful, else returns non-zero error value
+
+        *See Also:* the <get_viewport_geometry> function
+    */
+
+    int set_viewport_geometry( int left, int top, int width, int height )
+        [[
+            if ( width  < 0 ) width  = 0;
+            if ( height < 0 ) height = 0;
+
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->set_viewport_geometry( left, top, width, height)
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+    /*
+        Function: reset_viewport_geometry
+
+        The reset_viewport_geometry() function resets the video viewport to its default, full-screen size.
+
+        *Arguments:* None
+
+        *Return Value:* Returns 0 if successful, else returns non-zero error value
+
+        *See Also:* the <set_viewport_geometry> function
+    */
+
+    int reset_viewport_geometry()
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                     ? MediaExtra::get( self, L )->get_player()->reset_viewport_geometry()
+                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
+
+    /*
+        Function: play_sound
+
+        The play_sound() function plays the audio sound contained in a specified URI.
+
+        The audio played by play_sound() does not abide by the mediaplayer variable's <volume> or <mute> properties. Also, it is not possible to <pause> playback of the audio, nor does play_sound() invoke any event handlers when the audio has completed or an error occurs. If an application requires any of these characteristics, it should use the <load> and <play> functions, instead.
+
+        Note: A "file:"-type URI is not supported for security reasons. An audio file stored in the application's app bundle can be loaded by specifying the file's path within the bundle's directory structure.
+
+        *Arguments:*
+
+            uri - string URI specifying the audio source to play
+
+        *Return Value:* Returns 0 if successful, else returns non-zero error value
+
+        *See Also:* the <load> and <play> functions
+    */
+
+    int play_sound(string uri)
+        [[
+            if ( MediaPlayer * mp = MediaExtra::get( self, L )->get_player() )
+            {
+                if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
+                {
+                    result = mp->play_sound( resource.get_uri().c_str() );
+                }
+                else
+                {
+                    result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
+                }
+            }
+            else
+            {
+                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            }
+
+            if( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+        ]];
 /***************************************
     Function: add_onloaded_listener
 
