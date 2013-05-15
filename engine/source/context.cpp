@@ -2373,6 +2373,8 @@ bool TPContext::remove_media_player( MediaPlayer *instance  )
 
     media_player.remove( instance );
 
+    delete instance;
+
     return true;
 }
 
