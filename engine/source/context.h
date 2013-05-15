@@ -393,7 +393,7 @@ private:
     String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
-    MediaPlayer*                media_player;
+    std::list< MediaPlayer* >   media_player;
 
     HttpTrickplayApiSupport*   http_trickplay_api_support;
 
