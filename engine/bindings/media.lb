@@ -32,11 +32,11 @@ class MediaExtra : private MediaPlayer::Delegate
 
     static MediaExtra* get( gpointer texture, lua_State *l )
     {
-        g_assert( l );
-
         MediaExtra* result = ( MediaExtra* ) g_object_get_data( G_OBJECT( texture ), "media-extra" );
 
         if ( result ) return result;
+
+        g_assert( l );
 
         result = new MediaExtra();
         result->L = l;
@@ -72,6 +72,33 @@ class MediaExtra : private MediaPlayer::Delegate
 };
 
 ]]
+
+/*
+    This is an actor wrapper around the video texture.
+*/
+
+interface video_texture1 [[ClutterActor *]] actor
+{
+    video_texture1()
+        [[
+            self = lb_construct_gobject( ClutterActor , G_OBJECT( lua_touserdata( L , -1 ) ) );
+        ]];
+
+    ~video_texture1()
+        [[
+        ]];
+
+    readonly udata parent
+        [[
+            lua_pushnil(L);
+        ]];
+
+    unparent()
+        [[
+            // Cannot let the app developer remove his screen from the stage,
+            // because he would not have a way to put it back
+        ]];
+}
 
 /***************************************
     Class: Media
@@ -214,10 +241,233 @@ class Media [[ClutterActor*]] actor
 
     bool pre_load
         [[
-            pre_load=MediaExtra::get( self, L )->pre_load;
+            pre_load = MediaExtra::get( self, L )->pre_load;
         ]]
         [[
             MediaExtra::get( self, L )->pre_load = pre_load;
+        ]];
+
+/***************************************
+*/
+    readonly int state
+        [[
+            state = MediaExtra::get( self, L )->get_player()
+                    ? MediaExtra::get( self, L )->get_player()->get_state()
+                    : TP_MEDIAPLAYER_IDLE;
+        ]];
+
+/***************************************
+*/
+    readonly double position
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_position(&position)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                position = 0;
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+        ]];
+
+/***************************************
+*/
+    readonly table buffered_duration
+        [[
+            double start;
+            double end;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_buffered_duration(&start,&end)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                lua_pushnil(L);
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,start);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,end);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+
+/***************************************
+*/
+    readonly table video_size
+        [[
+            int width;
+            int height;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_video_size(&width,&height)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                lua_pushnil(L);
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+
+/***************************************
+*/
+    readonly bool has_video
+        [[
+            int type;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_media_type(&type)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                has_video = false;
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                has_video = type & TP_MEDIA_TYPE_VIDEO;
+            }
+        ]];
+
+/***************************************
+*/
+    readonly bool has_audio
+        [[
+            int type;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                has_audio = false;
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                has_audio = type & TP_MEDIA_TYPE_AUDIO;
+            }
+        ]];
+
+/***************************************
+*/
+    readonly table tags
+        [[
+            lua_newtable(L);
+
+            if ( MediaExtra::get( self, L )->get_player() )
+            {
+                StringPairList tags = MediaExtra::get( self, L )->get_player()->get_tags();
+
+                int i=1;
+
+                for ( StringPairList::const_iterator it=tags.begin(); it != tags.end(); ++it, ++i )
+                {
+                    lua_pushstring(L,it->first.c_str());
+                    lua_pushstring(L,it->second.c_str());
+                    lua_rawset(L,-3);
+                }
+            }
+        ]];
+
+/***************************************
+*/
+    readonly UIElement texture
+        [[
+            if ( !MediaExtra::get( self, L )->get_player() )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                void * t = MediaExtra::get( self, L )->get_player()->get_viewport_texture();
+
+                if ( !t || !CLUTTER_IS_ACTOR(t) )
+                {
+                    lua_pushnil( L );
+                }
+                else
+                {
+                    UserData * ud = UserData::get( G_OBJECT( t ) );
+
+                    if ( ud )
+                    {
+                        ud->push_proxy();
+                    }
+                    else
+                    {
+                        lua_pushlightuserdata( L , t );
+                        new_video_texture1( L );
+                        lua_remove( L , -2 );
+                    }
+                }
+            }
+        ]];
+
+/***************************************
+*/
+    double volume
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_volume( &volume )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                volume = 0;
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_volume(volume);
+        ]];
+
+/***************************************
+*/
+    bool mute
+        [[
+            int m;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_mute( &m )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                mute = false;
+                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            }
+            else
+            {
+                mute = m;
+            }
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_mute( mute );
+        ]];
+
+/***************************************
+*/
+    reset()
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->reset();
         ]];
 
 /***************************************
