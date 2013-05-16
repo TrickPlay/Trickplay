@@ -19,7 +19,8 @@ class MediaExtra : private MediaPlayer::Delegate
 {
   public:
 
-    MediaExtra() : constructing( false ), loaded_flag( false ), pre_load( false ), read_tags( false ), L( NULL ), player( NULL ) {}
+    MediaExtra() : constructing( false ), loaded_flag( false ), pre_load( false ), read_tags( false ), L( NULL ), player( NULL )
+    {}
 
     ~MediaExtra()
     {
@@ -69,6 +70,7 @@ class MediaExtra : private MediaPlayer::Delegate
     virtual void loaded(MediaPlayer * player);
     virtual void error(MediaPlayer * player,int code,const char * message);
     virtual void end_of_stream(MediaPlayer * player);
+
 };
 
 ]]
@@ -77,14 +79,14 @@ class MediaExtra : private MediaPlayer::Delegate
     This is an actor wrapper around the video texture.
 */
 
-interface video_texture1 [[ClutterActor *]] actor
+interface media_texture [[ClutterActor *]] actor
 {
-    video_texture1()
+    media_texture()
         [[
             self = lb_construct_gobject( ClutterActor , G_OBJECT( lua_touserdata( L , -1 ) ) );
         ]];
 
-    ~video_texture1()
+    ~media_texture()
         [[
         ]];
 
@@ -411,7 +413,7 @@ class Media [[ClutterActor*]] actor
                     else
                     {
                         lua_pushlightuserdata( L , t );
-                        new_video_texture1( L );
+                        new_media_texture( L );
                         lua_remove( L , -2 );
                     }
                 }
