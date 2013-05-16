@@ -81,9 +81,9 @@ ArrowPane = setmetatable(
 
                         return {
                             ((self.horizontal_arrows_are_visible) and
-                            (x+left.w) or x),
+                            (x+left.w+self.horizontal_spacing) or x),
                             ((self.vertical_arrows_are_visible) and
-                            (y+up.h) or y)
+                            (y+up.h+self.vertical_spacing) or y)
                         }
                     end
                 end,
