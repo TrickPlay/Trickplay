@@ -114,6 +114,8 @@ public:
 
     MediaPlayer* create_new_media_player( MediaPlayer::Delegate* delegate );
 
+    bool remove_media_player( MediaPlayer *instance  );
+
     //.........................................................................
     // Sends a request to the outside world
 
@@ -393,7 +395,7 @@ private:
     String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
-    MediaPlayer*                media_player;
+    std::list< MediaPlayer* >   media_player;
 
     HttpTrickplayApiSupport*   http_trickplay_api_support;
 
