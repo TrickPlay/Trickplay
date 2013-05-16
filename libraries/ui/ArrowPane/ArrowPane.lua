@@ -240,6 +240,11 @@ ArrowPane = setmetatable(
             functions = {
                 add    = function(instance,_ENV) return function(oldf,self,...) pane:add(   ...) end end,
                 remove = function(instance,_ENV) return function(oldf,self,...) pane:remove(...) end end,
+                arrow_size = function(instance,_ENV)
+                    return function(oldf,self,index)
+                        return _ENV[index].size
+                    end
+                end,
             },
         },
         private = {
