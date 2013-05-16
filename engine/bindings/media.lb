@@ -9,7 +9,7 @@ module media_module;
 #include "context.h"
 #include "app_resource.h"
 
-void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L );
+//void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L );
 static bool load_media( lua_State * L, ClutterTexture * texture );
 
 //-----------------------------------------------------------------------------
@@ -19,7 +19,7 @@ class MediaExtra : private MediaPlayer::Delegate
 {
   public:
 
-    MediaExtra() : constructing( false ), loaded_flag( false ), pre_load( false ), read_tags( false ), L( NULL ), player( NULL )
+    MediaExtra() : constructing( false ), loaded_flag( false ), pre_load( false ), read_tags( false ), L( NULL ), player( NULL ), actor( NULL )
     {}
 
     ~MediaExtra()
@@ -31,9 +31,11 @@ class MediaExtra : private MediaPlayer::Delegate
         App::get(L)->get_context()->remove_media_player( player );
     }
 
-    static MediaExtra* get( gpointer texture, lua_State *l )
+    static MediaExtra* get( ClutterActor * _actor, lua_State *l )
     {
-        MediaExtra* result = ( MediaExtra* ) g_object_get_data( G_OBJECT( texture ), "media-extra" );
+        g_assert( _actor );
+
+        MediaExtra* result = ( MediaExtra* ) g_object_get_data( G_OBJECT( _actor ), "media-extra" );
 
         if ( result ) return result;
 
@@ -42,7 +44,9 @@ class MediaExtra : private MediaPlayer::Delegate
         result = new MediaExtra();
         result->L = l;
 
-        g_object_set_data_full( G_OBJECT( texture ), "media-extra", result, ( GDestroyNotify ) MediaExtra::destroy );
+        if ( _actor ) result->actor = _actor;
+
+        g_object_set_data_full( G_OBJECT( _actor ), "media-extra", result, ( GDestroyNotify ) MediaExtra::destroy );
 
         result->player = App::get(l)->get_context()->create_new_media_player(result);
 
@@ -52,6 +56,8 @@ class MediaExtra : private MediaPlayer::Delegate
     }
 
     MediaPlayer * get_player() { return player; }
+
+    ClutterActor * get_actor() { return actor; }
 
     bool           constructing;
     bool           loaded_flag;
@@ -63,6 +69,7 @@ class MediaExtra : private MediaPlayer::Delegate
 
     lua_State    * L;
     MediaPlayer  * player;
+    ClutterActor * actor;
 
     static void destroy( MediaExtra* me ) { delete me; }
 
@@ -474,13 +481,13 @@ class Media [[ClutterActor*]] actor
 
 /***************************************
 */
-    int load(string uri,string extra="")
+    int load( string uri, string extra = "")
         [[
             if ( MediaPlayer * mp = MediaExtra::get( self, L )->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
-                    result = mp->load( resource.get_uri().c_str() , extra );
+                    result = mp->load( resource.get_uri().c_str(), extra );
                 }
                 else
                 {
@@ -491,7 +498,7 @@ class Media [[ClutterActor*]] actor
             {
                 result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
-            g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+            g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
 /***************************************
@@ -705,11 +712,11 @@ class Media [[ClutterActor*]] actor
         [[
             result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
 
-            UserData::get( L )->connect_signal(
+            /*UserData::get( L )->connect_signal(
                 "on_loaded",
                 "load-finished",
                 G_CALLBACK(Media_on_loaded),
-                L);
+                L);*/
         ]];
 
 /***************************************
@@ -774,11 +781,11 @@ class Media [[ClutterActor*]] actor
         [[
             UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
 
-            UserData::get( L )->connect_signal(
+            /*UserData::get( L )->connect_signal(
                 "on_loaded",
                 "load-finished",
                 G_CALLBACK(Media_on_loaded),
-                L);
+                L);*/
         ]];
 
 /***************************************
@@ -807,6 +814,7 @@ class Media [[ClutterActor*]] actor
 }
 
 [[
+/*
 void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L )
 {
     if ( MediaExtra::get( self, L )->pre_load )
@@ -814,28 +822,28 @@ void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L )
         lua_pushboolean(L,error?1:0);
         UserData::invoke_callbacks(G_OBJECT(self),"on_loaded",1,0,L);
     }
-}
+}*/
 
 static bool load_media( lua_State * L, ClutterTexture * texture )
 {
     return true;
 }
 
-void MediaExtra::loaded(MediaPlayer * player)
+void MediaExtra::loaded( MediaPlayer * player )
 {
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_loaded",0,0);
+    lb_invoke_callbacks( L, G_OBJECT( this->get_actor() ), "MEDIA_METATABLE", "on_loaded", 0, 0 );
 }
 
-void MediaExtra::error(MediaPlayer * player,int code,const char * message)
+void MediaExtra::error( MediaPlayer * player, int code, const char * message )
 {
-    lua_pushinteger(L,code);
-    lua_pushstring(L,message);
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_error",2,0);
+    lua_pushinteger( L, code );
+    lua_pushstring( L, message );
+    lb_invoke_callbacks( L, G_OBJECT( this->get_actor() ), "MEDIA_METATABLE", "on_error", 2, 0 );
 }
 
-void MediaExtra::end_of_stream(MediaPlayer * player)
+void MediaExtra::end_of_stream( MediaPlayer * player )
 {
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
+    lb_invoke_callbacks( L, G_OBJECT( this->get_actor() ), "MEDIA_METATABLE", "on_end_of_stream", 0, 0 );
 }
 
 ]]
