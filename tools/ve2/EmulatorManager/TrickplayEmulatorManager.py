@@ -216,6 +216,7 @@ class TrickplayEmulatorManager(QWidget):
 				            if self.inspector.main.command is not "setUIInfo" :
 				                self.inspector.deselectItem(item)
 				                self.inspector.selectItem(item, "f")
+				            self.unsavedChanges = True
 				        except:
 				            pass
 				    elif luaCmd == "repUIInfo":
@@ -249,9 +250,11 @@ class TrickplayEmulatorManager(QWidget):
 				                focusItem['neighbors'][OtherButton[buttonType]] = theItem['name']
 				            else:
 				                theItem['neighbors']["Return"] = focusObjName
+				        self.unsavedChanges = True
 
 				    elif luaCmd == "newui_gid":
 				        self.inspector.newgid = str(s[9:])
+				        self.unsavedChanges = True
 				    elif luaCmd == "openInspc":
 				        gid = (s[10:])
 				        shift = s[9]
@@ -402,7 +405,6 @@ class TrickplayEmulatorManager(QWidget):
 				            result = self.inspector.search(self.inspector.setGid, 'gid')
 				            if result: 
 				                self.inspector.ui.inspector.selectionModel().clear()
-				                self.inspector.selectItem(result, "f")
 				        except : 
 				            pass
                         

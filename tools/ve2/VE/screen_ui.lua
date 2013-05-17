@@ -38,7 +38,6 @@ function screen_ui.draw_selected_container_border(x,y)
 			end 
 	    end 
 	end 
-    bb()
 end 
 
 function screen_ui.container_deselected()
