@@ -42,6 +42,36 @@ local uiElementName_map =
     ['Widget_Sprite'] = function()  return "image" end,
 }
 
+function util.getSelectedObjs()
+    local seleced_objs = {}
+    for m,n in ipairs (screen.children) do
+        if n.name and string.find(n.name, "border") ~= nil then 
+            table.insert(selected_objs, n.name)
+        end 
+    end 
+    return selected_objs
+end
+function util.getSelectedObjCnt()
+    local cnt = 0
+    for m,n in ipairs (screen.children) do
+        if n.name and string.find(n.name, "border") ~= nil then 
+            cnt = cnt + 1 
+        end 
+    end 
+    return cnt 
+end
+function util.isLayerObj(obj)
+    if obj.name and
+        string.find(obj.name, "Layer") ~= nil and
+        string.find(obj.name, "a_m") == nil and
+        string.find(obj.name, "border") == nil
+    then
+        return true
+    else
+        return false
+    end
+end
+
 function util.addIntoLayer (uiInstance, group)
 
     uiInstance.reactive = true
@@ -69,8 +99,17 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
     end 
 
     uiInstance:add_mouse_handler("on_motion",function(self, x,y)
+		--if m and m.control then control = true else control = false end 
+		if m and m.shift then shift = true else shift = false end 
         
-        -- draw container border for contents setting 
+        if uiInstance.is_in_group and uiInstance.parent_group then 
+            if uiInstance.parent_group.widget_type == "LayoutManager" or
+               uiInstance.parent_group.widget_type == "MenuButton" then
+               return 
+            end 
+        end 
+
+        --draw container border for contents setting 
         if control == true then 
 			screen_ui.draw_selected_container_border(x,y) 
 		end 
@@ -89,12 +128,10 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			    local new_pos 
 
                 if uiInstance.is_in_group == true then 
-
 			        local group_pos = util.get_group_position(uiInstance)
 			        if group_pos then 
                         new_pos = {x - dx + group_pos[1], y - dy + group_pos[2]} 
                     end
-
                 else 
                     new_pos = {x - dx , y - dy }
                 end 
@@ -109,7 +146,16 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
     uiInstance:add_mouse_handler("on_button_down",function(self,  x , y , button, num_clicks, m, ...)
 
+        if input_mode == hdr.S_FOCUS then
+            local selObjName, selGid = screen_ui.getSelectedName()
+            if selObjName ~= uiInstance.name then
+                screen_ui.selected(uiInstance)
+            end
+            return true
+        end
+
 		if m and m.control then control = true else control = false end 
+		if m and m.shift then shift = true else shift = false end 
 
         dragging = { uiInstance , x - uiInstance.x , y - uiInstance.y }
 
@@ -119,7 +165,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 
             _VE_.openInspector(uiInstance.gid)
 
-            --TODO : Need to check this if ~ end 
+            --TODO : check this if ~ end is right for text .. 
 
             if uiTypeStr == "Text" or uiTypeStr == "Widget_Text"then 
                 uiInstance.cursor_visible = true
@@ -159,10 +205,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
             --[[ Show possible containers ]]-- 
 
             for i, j in ipairs (screen.children) do 
-                if j.name and string.find(j.name, "Layer") ~= nil and 
-                    string.find(j.name, "a_m") == nil and 
-                    string.find(j.name, "border") == nil and
-                    j.visible == true  then 
+                if util.isLayerObj(j) == true and  j.visible == true  then 
                     for k,l in ipairs (j.children) do 
                         if l.name == uiInstance.name or util.is_this_container(l) == true then 
 					        l.org_opacity = l.opacity
@@ -178,189 +221,115 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         return true
     end,true)
 
-    uiInstance:add_mouse_handler("on_button_up",function(self,  x,y,button)
+    uiInstance:add_mouse_handler("on_button_up",function(self, x,y,button,num_clicks, m, ...)
         
+        -- TODO : check m, control setting 
+		if m  and m.control then control = true else control = false end 
+		if m and m.shift then shift = true else shift = false end 
+
+		if screen:find_child("multi_select_border") then
+			return 
+		end 
+
+        -- [[ Focus Destination 
+
         if input_mode == hdr.S_FOCUS then 
             local selObjName, selObjGid = screen_ui.getSelectedName()
-            if selObjName ~= uiInstance.name then 
 		        screen_ui.n_selected(uiInstance) 
                 if devtools:gid(selObjGid) then 
                     blockReport = true 
                     hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), uiInstance) 
                     blockReport = false 
                 end 
-                print("focusSet2"..uiInstance.name)
+                print("focusSet2"..uiInstance.gid)
                 input_mode = hdr.S_SELECT
-            end 
             return true 
         end
-		if m  and m.control then control = true else control = false end 
 
-		if screen:find_child("multi_select_border") then
-			return 
-		end 
+        --]] 
 
+        if uiInstance.is_in_group and uiInstance.parent_group then 
+            if uiInstance.parent_group.widget_type == "LayoutManager" or
+               uiInstance.parent_group.widget_type == "MenuButton" then
+               dragging = nil  
+            end 
+        end 
+        -- Unpack dragging 
         local actor , dx , dy 
         if dragging ~= nil then 
             actor , dx , dy = unpack( dragging )
         end 
+
         ---[[ Content Setting 
-        local c, t 
-
 		if util.is_in_container_group(x,y) and selected_content then 
-		        --local c, t = util.find_container(x,y) 
-		        c, t = util.find_container(x,y) 
-			    if not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
-			        if c and t then 
-				        if (uiInstance.extra.ve_selected == true and c.x < uiInstance.x and c.y < uiInstance.y) then 
-                            print(uiInstance.parent.name)
-                            dumptable(uiInstance.parent.children)
-			        	    uiInstance:unparent()
-						    if t ~= "TabBar" then
-			        	        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y,0}
-						    end 
+		    local c, t = util.find_container(x,y) 
+			if c and t and not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
+			    uiInstance:unparent()
+			    uiInstance.is_in_group = true
+                uiInstance.reactive = true
+                uiInstance.parent_group = c
+		        uiInstance.group_position = c.position
 
-			        	    uiInstance.extra.is_in_group = true
-                            
-							if screen:find_child(uiInstance.name.."border") then 
-			             	    screen:find_child(uiInstance.name.."border").position = uiInstance.position
-							end
-							if screen:find_child(uiInstance.name.."a_m") then 
-			             	    screen:find_child(uiInstance.name.."a_m").position = uiInstance.position 
-			        		end 
+				if t == "DialogBox" then 
+			        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y - c.separator_y, uiInstance.z - c.z}
+                    c:add(uiInstance)
+                elseif t == "ArrowPane" or t == "ScrollPane" then 
+                    print ("contents_offsets :", c.contents_offset[1], c.contents_offset[2])
+                    print ("virtual_x, y:", c.virtual_x, c.virtual_y)
+                    uiInstance.x = uiInstance.x - c.x - c.contents_offset[1] + c.virtual_x 
+                    uiInstance.y = uiInstance.y - c.y - c.contents_offset[2] + c.virtual_y
+                    c:add(uiInstance)
+			    elseif t == "MenuButton" then 
+                    c.items:insert(c.items.length+1, uiInstance)
+			    elseif t == "LayoutManager" then 
+				    local row , col=  c:r_c_from_abs_x_y(x,y)
+                    c.cells[row][col] = uiInstance
+			    elseif t == "TabBar" then 
+				    local t_index = c.selected_tab
+				    if t_index then 
+                        print ("contents_offset[1],[2],tab_h", c.contents_offset[1], c.contents_offset[2], c.tab_h)
+			            uiInstance.x = uiInstance.x - c.x - c.contents_offset[1] 
+						uiInstance.y = uiInstance.y - c.y - c.contents_offset[2] 
+			            c.tabs[t_index].contents:add(uiInstance) 
+				    end
+				elseif t == "Group" or t == "Widget_Group" then 
+			        uiInstance.position = {uiInstance.x - c.x, uiInstance.y - c.y, uiInstance.z - c.z}
+				    c:add(uiInstance)
+			    end 
 
-			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" or t == "Widget_Group" then 
-
-                                if t == "DialogBox" then 
-								    uiInstance.y = uiInstance.y - c.separator_y
-                                elseif t == "ArrowPane" then 
-                                    --uiInstance.x = uiInstance.x - c.style.arrow.size - 2*c.style.arrow.offset
-                                    if c.contents_offset[1] then 
-                                        print ("xxxxx")
-                                        uiInstance.x = uiInstance.x - c.contents_offset[1]
-                                    end 
-                                    --uiInstance.y = uiInstance.y - c.style.arrow.size - 2*c.style.arrow.offset
-                                    if c.contents_offset[2] then 
-                                        print ("yyyyy")
-                                        uiInstance.y = uiInstance.y - c.contents_offset[2]
-                                    end 
-                                elseif t == "ScrollPane" then 
-                                    uiInstance.x = uiInstance.x + c.virtual_x 
-                                    uiInstance.y = uiInstance.y + c.virtual_y
-                                end 
-
-                                uiInstance.reactive = true
-                                uiInstance.is_in_group = true
-                                uiInstance.parent_group = c
-		                        --uiInstance.group_position = {}
-		                        --uiInstance.group_position[1] = c.x + c.style.arrow.size + 2*c.style.arrow.offset
-		                        --uiInstance.group_position[2] = c.y + c.style.arrow.size + 2*c.style.arrow.offset
-
-                                c:add(uiInstance)
-
-                                if blockReport ~= true then
-                                    _VE_.refresh()
-                                end 
-
-			        	    elseif t == "MenuButton" then 
-
-                                uiInstance.reactive = true
-                                uiInstance.is_in_group = true
-		                        --uiInstance.group_position = c.position 
-                                uiInstance.parent_group = c
-                                c.items:insert(c.items.length+1, uiInstance)
-                                if blockReport ~= true then
-                                    _VE_.refresh()
-                                end 
-                                
-			        	    elseif t == "LayoutManager" then 
-
-				     		    local row , col=  c:r_c_from_abs_x_y(x,y)
-                                if col and row then 
-                                    uiInstance.reactive = false
-                                    uiInstance.is_in_group = true
-                                    uiInstance.parent_group = c
-		                            uiInstance.group_position = c.position
-                                    c.cells[row][col] = uiInstance
-                                else 
-                                    print " no col, row information error:("
-                                end
-                                if blockReport ~= true then
-                                    _VE_.refresh()
-                                end 
-
-			        		elseif t == "TabBar" then 
-							    local t_index = c.selected_tab
-							    if t_index then 
-                                    print("TabBar's new contents x should be set (the arrow size and offset)")
-                                    --uiInstance.x = uiInstance.x - c.x - c.style.arrow.size - c.style.arrow.offset
-								    uiInstance.y = uiInstance.y - c.y - c.tab_h
-                                    uiInstance.reactive = true
-                                    uiInstance.is_in_group = true
-                                    uiInstance.parent_group = c
-		                            uiInstance.group_position = c.position
-			            			c.tabs[t_index].contents:add(uiInstance) 
-								end
-                                if blockReport ~= true then
-                                    _VE_.refresh()
-                                end 
-
-							elseif t == "Group" or t == "WidgetGroup" then 
-							    c:add(uiInstance)
-			        		end 
-
---[[
-                            print(c.parent.name)
-                            dumptable(c.parent.children)
-
-                            local row , col=  c:r_c_from_abs_x_y(x,y)
-                            if col and row then 
-                                uiInstance.reactive = false
-                                uiInstance.is_in_group = true
-                                uiInstance.parent_group = c
-		                        uiInstance.group_position = c.position
-                                c.cells[row][col] = uiInstance
-                            end
-
-                            print(c.parent.name)
-                            dumptable(c.parent.children)
-]]
-			     	      end 
-			       		end 
-					editor_lb:set_cursor(68)
+				editor_lb:set_cursor(68)
 			    cursor_type = 68
+
+			    if screen:find_child(c.name.."cBorder") and selected_container then 
+				    screen:remove(screen:find_child(c.name.."cBorder"))
+		            selected_container.container_selected = false
+				    screen:remove(screen:find_child(uiInstance.name.."border"))
+				    screen:remove(screen:find_child(uiInstance.name.."a_m"))
+				    selected_content = nil
+		            selected_container = nil
+	            end 
+
+                if blockReport ~= true then
+                    _VE_.refresh()
+                end 
+
+                if c then 
+                    c:raise_to_top()
+                    if oupperObj and c.parent:find_child(oupperObj.name) then 
+                        c:lower(oupperObj)
+                    elseif tupperObj then 
+                        c:lower(tupperObj)
+                    end 
+                end 
 			end 
-			if screen:find_child(c.name.."border") and selected_container then 
-				screen:remove(screen:find_child(c.name.."border"))
-				screen:remove(screen:find_child(c.name.."a_m"))
-				screen:remove(screen:find_child(uiInstance.name.."border"))
-				screen:remove(screen:find_child(uiInstance.name.."a_m"))
-		        selected_container.ve_selected = false
-		        selected_content.ve_selected = false
-				selected_content = nil
-		        selected_container = nil
-	        end 
 	    end 
-        if c then 
-            c:raise_to_top()
-            if oupperObj and c.parent:find_child(oupperObj.name) then 
-                c:lower(oupperObj)
-            elseif tupperObj then 
-                c:lower(tupperObj)
-            end 
-        end 
 
 	    -- Content Setting --]] 
 
 
-
         for i, j in ipairs (screen.children) do 
 	        if j.name then 
-                --if string.find(j.name, "Layer") and j.visible == true then 
-                if string.find(j.name, "Layer") ~= nil and 
-                   string.find(j.name, "a_m") == nil and 
-                   string.find(j.name, "border") == nil 
-                   and j.visible == true  then 
+                if util.isLayerObj(j) and j.visible == true then 
                     for k,l in ipairs (j.children) do 
 			            if l.extra.org_opacity then 
 				            l.opacity = l.extra.org_opacity
@@ -379,7 +348,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 			        local group_pos = util.get_group_position(uiInstance)
 			        if group_pos then 
 			            if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
-	                    if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
+	                    if am then am.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
 			        end
 		        else 
 	                border.position = {x -dx, y -dy}
@@ -434,10 +403,11 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
 		selected_content = nil
 		selected_container = nil
         dragging = nil
-        --kkk
+
         uiInstance:ungrab_pointer()
         uiInstance:set{} 
         uiInstance.x = uiInstance.x
+
         return true 
 	end,true) 
     uiInstance.extra.mouse_handler = true 
@@ -732,7 +702,7 @@ function util.get_x_space(x_sort_t)
           b = f
      end 
      
-     local n = #selected_objs
+     local n = util.getSelectedObjCnt()
      if (n > 2) then 
      	space = space / (n - 1)
      end 
@@ -757,37 +727,22 @@ end
  
 function util.is_this_container(v)
 
-    if v.extra then 
-        --if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") then
-        if v.widget_type == "Widget_Group" and string.find(v.name, "Layer") ~= nil and 
-                   string.find(v.name, "a_m") == nil and 
-                   string.find(v.name, "border") == nil then 
-
-	        return false
-        end 
-        if util.is_in_list(v.widget_type, hdr.uiContainers) == true then 
-	    	return true
-        else 
-	    	return false
-        end 
+    if util.is_in_list(v.widget_type, hdr.uiContainers) == true and
+       util.isLayerObj(v) == false then 
+	    return true
     else 
-        return false
+	    return false
     end 
 
 end 
 
 function util.find_container(x_pos, y_pos)
-
 	local c_tbl = {}
 
 	for i, j in ipairs (screen.children) do 
-	    if j.name then 
-        --if string.find(j.name, "Layer") and j.visible == true then 
-        if string.find(j.name, "Layer") ~= nil and 
-                   string.find(j.name, "a_m") == nil and 
-                   string.find(j.name, "border") == nil 
-                   and j.visible == true  then 
-
+        -- for each visible layer
+        if util.isLayerObj(j) and j.visible == true then 
+            -- for each children of the layer
             for k,l in ipairs (j.children) do 
 		        if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
 				    if util.is_this_container(l) then
@@ -796,28 +751,24 @@ function util.find_container(x_pos, y_pos)
 		        end 
             end 
         end 
-        end 
 	end 
 
 	if #c_tbl > 0 then 
 		local j = table.remove(c_tbl)
+        while #c_tbl > 0 do 
+		    table.remove(c_tbl)
+        end 
 		return j, j.widget_type 
 	else 
 		return nil
 	end 
-
 end 
 
 function util.is_in_container_group(x_pos, y_pos) 
 
 	for i, j in ipairs (screen.children) do 
 	    if j.name then 
-        --if string.find(j.name, "Layer") and j.visible == true then 
-        if string.find(j.name, "Layer") ~= nil and 
-                   string.find(j.name, "a_m") == nil and 
-                   string.find(j.name, "border") == nil 
-                   and j.visible == true  then 
-
+        if util.isLayerObj(j) and j.visible == true then 
             for k,l in ipairs (j.children) do 
 	            if l.x < x_pos and x_pos < l.x + l.w and l.y < y_pos and y_pos < l.y + l.h then 
 		            if util.is_this_container(l) then
@@ -869,19 +820,6 @@ function util.copy_obj (v)
 
       return new_object
 end	
-
-function util.is_this_selected(v)
-	local b_name = v.name.."border"
-
-	for i, j in pairs (selected_objs) do
-		if j == b_name then 
-			return true
-		end 
-	end 
-
-	return false
-end 
-
 
 function util.is_this_group(v)
 
@@ -1062,35 +1000,26 @@ function util.get_group_position(child_obj)
         print("get_group_position() fail, parent_obj is nil")
         return 
      else 
-        if parent_obj.widget_type == "ArrowPane" or parent_obj.widget_type == "TabBar" then
-            return {parent_obj.x + parent_obj.style.arrow.size - parent_obj.virtual_x + 2*parent_obj.style.arrow.offset, parent_obj.y +
-            parent_obj.style.arrow.size + 2*parent_obj.style.arrow.offset - parent_obj.virtual_y }
+        if parent_obj.widget_type == "ArrowPane" or  parent_obj.widget_type == "ScrollPane"then
+           return {parent_obj.x + parent_obj.contents_offset[1] - parent_obj.virtual_x, 
+                   parent_obj.y + parent_obj.contents_offset[2] - parent_obj.virtual_y }
+        elseif parent_obj.widget_type == "TabBar" then
+            return {parent_obj.x + parent_obj.contents_offset[1], 
+                    parent_obj.y + parent_obj.contents_offset[2]}
         elseif parent_obj.widget_type == "MenuButton" then 
-            return {parent_obj.x + parent_obj.item_spacing  + parent_obj.popup_offset, parent_obj.y +
-            parent_obj.item_spacing + parent_obj.popup_offset}
+            --return {parent_obj.x + 2*parent_obj.item_spacing + parent_obj.popup_offset, 
+                    --parent_obj.y + 2*parent_obj.item_spacing + parent_obj.popup_offset}
+            --print(child_obj.name, "----------------------")
+            --dumptable(child_obj.transformed_position)
+            --dumptable(child_obj.position)
+            --return child_obj.transformed_position
+            return {parent_obj.x, parent_obj.y + 2*parent_obj.item_spacing + 2*parent_obj.popup_offset}
         elseif parent_obj.widget_type == "DialogBox" then 
             return {parent_obj.x, parent_obj.y + parent_obj.separator_y}
-        elseif parent_obj.widget_type == "LayoutManager" then 
-            return parent_obj.position
-        elseif parent_obj.widget_type == "Widget_Group" then 
-            return parent_obj.position
         else
             return parent_obj.position
-
         end 
      end 
-
-     --[[
-     if parent_obj.widget_type ~= nil then
-        for i, v in pairs(parent_obj.children) do
-	        if (v.type == "Group") then 
-		        if v.find_child and (v:find_child(child_obj.name)) then
-			        return v.position 
-		        end 
-	        end 
-        end
-    end 
-    ]]
 end 
 	
 return util

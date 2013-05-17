@@ -12,6 +12,9 @@ def getNextInfo(s) :
     s = s[idx+1:]
     return info, s 
 
+VE_JSON_COMMAND = ["getStInfo", "getUIInfo", "repUIInfo", "repStInfo", "repUIInfo", "scrJSInfo", "imageInfo" ]
+OtherButton = { "Up":"Down", "Down":"Up", "Left":"Right", "Right":"Left"}
+
 class TrickplayEmulatorManager(QWidget):
     
     def __init__(self, main=None, parent = None):
@@ -98,7 +101,10 @@ class TrickplayEmulatorManager(QWidget):
 
 			# Convert it to a string and strip the trailing white space
 			s = str( s ).rstrip()
-			print "[TP] "+s
+			if s[:9] in VE_JSON_COMMAND :
+			    print "[TP] "+s[:9]
+			else :
+			    print "[TP] "+s
 
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
@@ -192,8 +198,9 @@ class TrickplayEmulatorManager(QWidget):
 				        try :
 				            item = self.inspector.inspectorModel.itemFromIndex(index)
 				            if item['gid'] == fgid :
-				                self.inspector.deselectItem(item)
-				                self.inspector.selectItem(item, "f")
+				                if self.inspector.main.command is not "setUIInfo" :
+				                    self.inspector.deselectItem(item)
+				                    self.inspector.selectItem(item, "f")
 				        except:
 				            pass
 
@@ -205,9 +212,10 @@ class TrickplayEmulatorManager(QWidget):
 				        try:
 				            item = self.inspector.search(str(posGid), 'gid')
 				            item['position'] = [int(posX), int(posY), 0]
-
-				            self.inspector.deselectItem(item)
-				            self.inspector.selectItem(item, "f")
+                            
+				            if self.inspector.main.command is not "setUIInfo" :
+				                self.inspector.deselectItem(item)
+				                self.inspector.selectItem(item, "f")
 				        except:
 				            pass
 				    elif luaCmd == "repUIInfo":
@@ -219,9 +227,29 @@ class TrickplayEmulatorManager(QWidget):
 				    elif luaCmd == "clearInsp":
 				        gid = (s[9:])
 				    elif luaCmd == "focusSet2":
-				        focusObj = str(s[9:])
-				        self.inspector.neighbors.findCheckedButton().setText(focusObj)
-				        self.inspector.neighbors.toggled(False)
+				        focusObjGid = str(s[9:])
+				        checkedButton = self.inspector.neighbors.findCheckedButton()
+				        focusItem = self.inspector.search(focusObjGid, 'gid')
+				        theItem = self.inspector.search(self.inspector.neighbors.gid, 'gid')
+				        buttonType =  str(checkedButton.whatsThis()).title()
+
+				        if focusItem is None:
+				            checkedButton.setText("empty")
+				            self.inspector.neighbors.toggled(False)
+				            if OtherButton.has_key(buttonType) :
+				                del theItem['neighbors'][buttonType] 
+				            else:
+				                del theItem['neighbors']["Return"] 
+				        else:
+				            focusObjName = focusItem['name']
+				            checkedButton.setText(focusObjName)
+				            self.inspector.neighbors.toggled(False)
+				            if OtherButton.has_key(buttonType) :
+				                theItem['neighbors'][buttonType] = focusObjName
+				                focusItem['neighbors'][OtherButton[buttonType]] = theItem['name']
+				            else:
+				                theItem['neighbors']["Return"] = focusObjName
+
 				    elif luaCmd == "newui_gid":
 				        self.inspector.newgid = str(s[9:])
 				    elif luaCmd == "openInspc":
@@ -287,7 +315,7 @@ class TrickplayEmulatorManager(QWidget):
 					try:
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
-					        print('Found', result['gid'], result['name'])
+					        #print('Found', result['gid'], result['name'])
 
 					        if shift == "f" :
 					            self.inspector.ui.inspector.selectionModel().clear()
@@ -320,10 +348,12 @@ class TrickplayEmulatorManager(QWidget):
 				        if self.main.command == "openFile" :
 				            return 
 				        elif self.main.command == "duplicate" or self.main.command == "clone":
-				            #self.main.command = "" 
 				            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
 				            if not self.inspector.search(self.pdata['gid'], 'gid') :
 				                self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
+				                self.inspector.deselectItems()
+				                newItem = self.inspector.search(self.pdata['gid'], 'gid')
+				                self.inspector.selectItem(newItem, False)
 				            return 
 				        elif self.main.command == "newLayer" :
 				            self.main.command = "" 
@@ -361,7 +391,6 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if sdata is not None and self.pdata is not None:
 				        self.inspector.preventChanges = True
-				        #self.contentMoveBlock = True 
 				        self.inspector.clearTree()
 				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 
@@ -374,10 +403,6 @@ class TrickplayEmulatorManager(QWidget):
 				            if result: 
 				                self.inspector.ui.inspector.selectionModel().clear()
 				                self.inspector.selectItem(result, "f")
-				            #g_item = self.inspector.ui.property.findItems(self.inspector.setProp,  Qt.MatchExactly, 0)
-				            #g_index = self.inspector.ui.property.indexFromItem(g_item[0])
-				            #self.inspector.ui.property.setExpanded(g_index, True)
-				            #g_item[0].setSelected(True)
 				        except : 
 				            pass
                         

@@ -36,7 +36,7 @@ class TrickplayElementModel(QStandardItemModel):
             if the_item : 
                 try:
                     self.newParentGid = the_item['gid']
-                    print ("newParentGid", self.newParentGid)
+                    #print ("newParentGid", self.newParentGid)
                     if self.newParentGid == None and the_item.parent() and the_item.parent().parent()['type'] == "LayoutManager" :
                         #print ("LayoutManager")
                         if the_item.text()[:3] == "Row" : #Drop into Row 
@@ -146,15 +146,6 @@ class TrickplayElementModel(QStandardItemModel):
                     child = c
                     self.inspector.screenGid = c["gid"]
                     break
-                
-            """
-            for c in child["children"]:
-                if c["name"][:5] == "Layer":
-                    layer = c 
-                    self.tpData = pdata
-                    self.insertElement(root, layer, pdata, True)
-
-            """
 
             if child is None:
                 print( "Could not find screen element." )
@@ -166,9 +157,6 @@ class TrickplayElementModel(QStandardItemModel):
 
             if not self.main.command == "newLayer" and not self.main.command == "insertUIElement" :
                 self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
-
-            #to keep the tree information :( 
-            #child.TPJSON()
 
             self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
@@ -241,8 +229,7 @@ class TrickplayElementModel(QStandardItemModel):
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)
-        print node['gid'], node['name'], "######################"
-        #self.node = node
+        #print "[VE] Inspector :", node['gid'], node['name']
 
         # Add a checkbox for everything but screen
         if not screen:

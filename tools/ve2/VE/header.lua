@@ -154,7 +154,7 @@ shift 		      = false
 control 	      = false
 
 -- table for ui elements selcection 
-selected_objs	  = {}
+--selected_objs	  = {}
 
 -- guide line  
 guideline_inspector_on = false
