@@ -13,23 +13,9 @@ from UI.Neighbors import Ui_Neighbors
 
 multiSelect = 'false'
 
-class MyDelegate(QItemDelegate):
-    def __init__(self):
-        QItemDelegate.__init__(self)
-    def sizeHint(self, option, index):
-        return QSize(32,15)
-
-class MyStyle (QWidget):
-    def __init__ (self, parent):
-        QWidget.__init__ (self, parent)
-        self.setGeometry(QtCore.QRect(0, 0, 100, 15))
-        lo = QHBoxLayout()
-        self._cbFoo = QComboBox()
-        for x in ["ABC", "DEF", "GHI", "JKL"]:
-            self._cbFoo.addItem(x)
-        lo.addWidget (self._cbFoo, 3)
-        self.setLayout (lo)
-
+CONTAINER_UI = []
+CONTENTS_MOVABLE_CONTAINER_UI = []
+NON_CONTAINER_UI = []
 
 class DnDTreeView(QTreeView):
     def __init__(self, parent=None, insp= None):
@@ -72,50 +58,6 @@ class DnDTreeView(QTreeView):
         #if event.type() == QEvent.ChildRemoved:
             #print "Tree item Removed"
         #if event.type() == QEvent.dataChanged or event.type() == QEvent.selectionChanged or event.type() == QEvent.ChildRemoved:
-
-    """
-    def dropEvent(self, event):
-        event.accept()
-    def eventFilter(self, sender, event):
-        print "Event Filter"
-    def dropEvent(self, event):
-        dropIndex = self.indexAt(event.pos())
-        if dropIndex.parent().isValid() : 
-            event.accept()
-
-    def dragMoveEvent(self, event):
-        event.setDropAction(Qt.MoveAction)
-        event.accept()
-        #print event.answerRect().x()
-        #print event.answerRect().y()
-
-    def dropEvent(self, event):
-        dropIndex = self.indexAt(event.pos())
-        if dropIndex.parent().isValid() : 
-            event.accept()
-    def dragEnterEvent(self, event):
-        event.accept()
-
-    def dragMoveEvent(self, event):
-        #event.setDropAction(Qt.MoveAction)
-        event.accept()
-        print event.answerRect().x()
-        print event.answerRect().y()
-
-    def dropEvent(self, event):
-        tree = event.source()
-        print tree.currentIndex().row(), "*"
-        print tree.currentIndex().column(), "*"
-        print tree.currentIndex().child(0,0).row(), "*"
-        print tree.currentIndex().child(0,0).column(), "*"
-        #event.setDropAction(Qt.CopyAction)
-        #event.setDropAction(Qt.MoveAction)
-        #event.acceptProposedAction()
-
-        #print "dropEvent : y ", event.pos().y()
-        #event.proposedAction()
-        #event.dropAction()
-    """
 
 class DnDTableWidget(QTableWidget):
     def __init__(self, parent=None, pickerTable = None):
@@ -309,27 +251,23 @@ class Neighbors(QWidget):
         
         if parent :
             self.insp = parent
+            self.main = parent.main
             self.trickplay = parent.main._emulatorManager.trickplay
 
         self.gid = gid
+        self.inspector = parent
         self.ui = Ui_Neighbors()
         self.ui.setupUi(self)
 
         self.resize(200,100)
         self.setMinimumSize(200,100)
 
-        #QObject.connect(self.ui.upButton, SIGNAL("toggled(bool)"),  self.toggled)
         self.ui.upButton.toggled.connect(self.toggled)
-        #QObject.connect(self.ui.downButton, SIGNAL("toggled(bool)"),  self.toggled)
         self.ui.downButton.toggled.connect(self.toggled)
-        #QObject.connect(self.ui.enterButton, SIGNAL("toggled(bool)"),  self.toggled)
         self.ui.enterButton.toggled.connect(self.toggled)
-        #QObject.connect(self.ui.rightButton, SIGNAL("toggled(bool)"),  self.toggled)
         self.ui.rightButton.toggled.connect(self.toggled)
-        QObject.connect(self.ui.leftButton, SIGNAL("toggled(bool)"),  self.toggled)
-        #self.ui.leftButton.toggled(self.toggled)
+        self.ui.leftButton.toggled.connect(self.toggled)
 
-        #self.tbDic = {'up': self.ui.upButton, 'down': self.ui.downButton, 'enter': self.ui.enterButton, 'left': self.ui.leftButton, 'right': self.ui.rightButton,  }
         self.keyDic = {'up': 'keys.Up', 'down': 'keys.Down', 'enter': 'keys.Return', 'left': 'keys.Left', 'right': 'keys.Right'}
         self.selIconDic = {'up': self.insp.icon_up_selected, 'down': self.insp.icon_down_selected, 'enter': self.insp.icon_enter_selected, 'left': self.insp.icon_left_selected, 'right': self.insp.icon_right_selected }
         self.iconDic = {'up': self.insp.icon_up, 'down': self.insp.icon_down, 'enter': self.insp.icon_enter, 'left': self.insp.icon_left, 'right': self.insp.icon_right}
@@ -347,11 +285,8 @@ class Neighbors(QWidget):
             return self.ui.enterButton
 
     def toggled(self, checked):
-        #print ("toggled", checked)
         if checked == True:
-            #self.tbDic(self.findCheckedButton().whatsThis()) 
             self.findCheckedButton().setEnabled(False)
-            #_VE_.focusSettingMode()
             self.main.sendLuaCommand("focusSettingMode", "_VE_.focusSettingMode("+self.keyDic[str(self.findCheckedButton().whatsThis())]+")")
         else :
             if self.findCheckedButton():
@@ -362,7 +297,6 @@ class Neighbors(QWidget):
                     self.findCheckedButton().setIcon(self.iconDic[str(self.findCheckedButton().whatsThis())])
                 self.findCheckedButton().setEnabled(True)
                 self.findCheckedButton().setChecked(False)
-            #self.findCheckedButton().setIcon(red)
 
 class PickerItemTable(QWidget):
     def __init__(self, parent, gid) :
@@ -793,19 +727,30 @@ class TrickplayInspector(QWidget):
         def boolPropertyFill(propName, propOrder, data, gid=None) :
             def makeBoolHandler(gid, prop_name):
                 def handler(state):
+
                     if not self.preventChanges:
+
                         self.preventChanges = True
 
                         if state == 2 :
                             boolVal = 'true'
+                            pyVal = True
                         else:
                             boolVal = 'false'
+                            pyVal = False
 
                         if type(prop_name) == list:
                             self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], boolVal)
                         else :
                             self.sendData(gid, prop_name, boolVal)
+                            data[prop_name] = pyVal
+                            if not 'Layer' in  data['name'] and prop_name == 'is_visible':
+                                # update inspector tree 
+                                theItem = self.search(gid, 'gid')
+                                self.updateInspectorItem(theItem, theItem.TPJSON())
+
                     self.preventChanges = False
+
                 return handler
     
             bool_checkbox = QCheckBox()
@@ -859,6 +804,7 @@ class TrickplayInspector(QWidget):
                                 self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2],"'"+fontString+"'")
                             else:
                                 self.sendData(gid, prop_name, fontString)
+                                data[prop_name] = fontString
                     self.preventChanges = False
                 return handler
 
@@ -950,6 +896,7 @@ class TrickplayInspector(QWidget):
                                 self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], colorStr)
                             else:
                                 self.sendData(gid, prop_name, colorStr)
+                                data[prop_name] = colorStr
                             #color_pushbutton.setIcon(QIcon(QPixmap(10,10).fill(color)))
                             pix = QPixmap(10,10)
                             pix.fill(color)
@@ -989,6 +936,7 @@ class TrickplayInspector(QWidget):
                             self.main._emulatorManager.setStyleInfo(self.style_name, prop_name[0], prop_name[1], prop_name[2], '"'+currentPropVal+'"')
                         else:
                             self.sendData(gid, prop_name, currentPropVal)
+                            data[prop_name] = currentPropVal
                     self.preventChanges = False
                     comboProp.setEditable(False)
                 return handler
@@ -1135,6 +1083,7 @@ class TrickplayInspector(QWidget):
                             if len(path) > 0 :
                                 path = os.path.basename(str(path))
                                 self.sendData((data['gid']), 'src', path)
+                                data['src'] = path
                             self.preventChanges = False
 
                     source_button = QPushButton()
@@ -1494,9 +1443,11 @@ class TrickplayInspector(QWidget):
                             self.sendData(theItem['gid'], "is_visible", False)
                             theItem.setCheckState(Qt.Unchecked)
 
+            """
             if theItem :
                 self.curLayerGid = theItem['gid'] 
                 self.ui.inspector.setCurrentIndex(theItem.index())
+            """
 
 
 
@@ -1574,7 +1525,6 @@ class TrickplayInspector(QWidget):
         for deselIdx in deselectedList : 
             deselItem = self.inspectorModel.itemFromIndex(deselIdx)
             try :
-                #print (str(deselItem.TPJSON()['name'])+" deselected!!!")
                 self.main.sendLuaCommand("deselectUIElement", "_VE_.deselectUIElement('"+str(deselItem.TPJSON()['gid'])+"',"+multiSelect+")")
             except:
                 pass
@@ -1652,17 +1602,11 @@ class TrickplayInspector(QWidget):
             #print("selectionChaged end")
             self.preventChanges = False
     
-    # "dataChanged(const QModelIndex &, const QModelIndex &)"
     def inspectorDataChanged(self, topLeft, bottomRight):
         """
         Change UI Element visibility using checkboxes
         """     
           
-        ###print "inspectorDataChanged"
-        #print "inspectorDataChanged"
-        #print "inspectorDataChanged"
-        #print "inspectorDataChanged"
-
         if not self.preventChanges:
             self.preventChanges = True
 
@@ -1704,9 +1648,6 @@ class TrickplayInspector(QWidget):
                         self.selectItem(self.search(itemGid, 'gid'), False)
             
             self.preventChanges = False
-    
-
-    # "dataChanged(const QModelIndex &, const QModelIndex &)"
 
     def propertyItemExpanded(self, item):
         print("propertyItemExpanded")
@@ -1768,7 +1709,7 @@ class TrickplayInspector(QWidget):
             return False
 
     def handle_style(self, item):
-        if self.is_this_subItem(item) is True: #if it is Style 
+        if self.is_this_subItem(item) is True: #if Style 
             pitem = item.parent()
             style_property = []
             while pitem is not None:
@@ -1778,22 +1719,29 @@ class TrickplayInspector(QWidget):
             if style_property[len(style_property)-1] == "style":
                 if not item.text(0) in NESTED_PROP_LIST:
                     try:    
-                        property, value = modelToData(item.text(0), item.text(1))
+                        prop_name = str(item.text(0)).replace(' ', '_')
+                        property, value = modelToData(prop_name, item.text(1))
                     except BadDataException, (e):
-                        print("Error >> Invalid data entered", e.value)
+                        print("[VE] Error >> Invalid data entered", e.value)
                         return True
 
-                self.main._emulatorManager.setStyleInfo(self.style_name, item.text(0), style_property[0], style_property[1], value)
+                self.main._emulatorManager.setStyleInfo(self.style_name, prop_name, style_property[0], style_property[1], value)
                 return True
         return False
-                
-
+        
+    def updateInspectorItem(self, item, data):
+        pItem = item.parent()
+        theData = item.TPJSON()
+        self.main._emulatorManager.contentMoveBlock = True
+        pItem.removeRow(item.row()) # cause to send _VE_.deselectUIElement() 
+        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False) 
+        self.main._emulatorManager.contentMoveBlock = False
+        self.ui.inspector.expandAll()
         
     def propertyItemChanged(self, item, col):
         if self.handle_style(item) is True:
             return
 
-        #if str(item.text(0)) in NESTED_PROP_LIST and str(item.text(0)) != "text" :
         if str(item.whatsThis(0)) in NESTED_PROP_LIST and str(item.whatsThis(0)) != "text" :
             return
 
@@ -1802,42 +1750,24 @@ class TrickplayInspector(QWidget):
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
             
             self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
-            #self.sendData(self.getGid(), str(pItem.text(0)), tValue)
+            item[str(pItem.whatsThis(0))] = tValue
         else :
-            if str(item.whatsThis(0)) == "label" and self.getType() == "Tab":
+            theItem = self.search(self.getGid(), 'gid')
+            if self.getType() == "Tab":
                 self.main._emulatorManager.setUIInfo(self.getGid(), "label",  str(item.text(1)), self.getIndex()) 
+                theItem["tabs"][int(self.getIndex())-1]["label"] = str(item.text(1))
+
+                # update inspector tree for tab label
+                self.updateInspectorItem(theItem, theItem.TPJSON())
+
             else:
                 self.sendData(self.getGid(), str(item.whatsThis(0)), str(item.text(1)))
-                #self.sendData(self.getGid(), str(item.text(0)), str(item.text(1)))
+                theItem[str(item.whatsThis(0))] = str(item.text(1))
 
-    def oopropertyDataChanged(self, topLeft, bottomRight):
-        """
-        Change UI Element properties
-        """
-        
-        if not self.preventChanges:
-            
-            self.preventChanges = True
-            
-            model = topLeft.model() 
-            item = model.itemFromIndex(topLeft)
-            
-            gid = item['gid']
-            
-            # For example, if changing { 'size' : { 'w' : 100 , 'h' : 200 } },
-            # then subtitle would be 'size' and title would be 'w' or 'h'
-            title = model.title(item)
-            subtitle = model.subtitle(item)
-            
-            value = model.prepareData(item)
-            if self.sendData(gid, subtitle + title, value): 
-                model.updateData(item)
-            else:
-                model.revertData(item)
-                print('Error >> Unable to send data to Trickplay')
-                
-            self.preventChanges = False
-        
+                if str(item.whatsThis(0)) == 'name':
+                    # update inspector tree for name
+                    self.updateInspectorItem(theItem, theItem.TPJSON())
+
     def sendData(self, gid, property, value):
         """
         Send changed properties to Trickplay device
@@ -1846,17 +1776,11 @@ class TrickplayInspector(QWidget):
             try:    
                 property, value = modelToData(property, value)
             except BadDataException, (e):
-                print("Error >> Invalid data entered", e.value)
+                print("[VE] Error >> Invalid data entered", e.value)
                 return False
 
-        #TODO : modelToData should be changed this way .. ? 
-        #if property in ["label", "name"] : #STRING_PROP_LIST:
-            #value = "'"+str(value)+"'"
-        #print('Sending:', gid, property, value)
         self.main._emulatorManager.setUIInfo(gid, property, value) 
         return True
-        
-        #connection.send({'gid': gid, 'properties' : {property : value}})
         
     def clearTree(self):
         """
@@ -1868,7 +1792,6 @@ class TrickplayInspector(QWidget):
             self.preventChanges = True
         
         self.inspectorModel.empty()
-        #self.propertyModel.empty()
         
         if not old:
             self.preventChanges = False

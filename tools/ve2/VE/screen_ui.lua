@@ -11,65 +11,53 @@ end
 
 
 function screen_ui.n_selected_all() 
-    local currentLayer 
-	for i, j in pairs (screen.children) do 
-		if j.name then 
-			if string.find(j.name, "border") then 
-		        local a, b = string.find(j.name,"border")
-		        local t_obj = screen:find_child(string.sub(j.name, 1, a-1))	
-                if t_obj then 
-			        _VE_.deselectUIElement(t_obj.gid, false)
-                end
-			end 
-		end
-	end
     _VE_.openInspector(screen.gid, false)
-	selected_objs = {}
-
 end
 
 function screen_ui.draw_selected_container_border(x,y) 
 
-	local prev_selected_container
+	if not selected_content or selected_content.is_in_group == true then 
+        return 
+    end 
 
 	selected_container = util.find_container(x,y) 
+    screen_ui.container_deselected()
 
 	if selected_container then 
-		prev_selected_container = selected_container 
-	end 
-			
-	if prev_selected_container then 
-		if prev_selected_container ~= selected_container then 
-			screen_ui.n_selected (prev_selected_container)
-		end 
-	end
-
-	if selected_container and selected_content then 
-		if selected_content.extra.is_in_group ~= true then 
-			if selected_container.ve_selected == false then
-				screen_ui.container_selected(selected_container,x,y)	
-			elseif selected_container.widget_type == "LayoutManager" then 
-				if selected_container.ve_selected == true then
-					local layout_bdr = screen:find_child(selected_container.name.."border")
-					if layout_bdr then 
-				    	local r_c = layout_bdr.r_c
-				     	local row, col = selected_container:r_c_from_abs_x_y(x,y)
-						if r_c then 
-				     		if r_c[1] ~= row or r_c[2] ~= col then  
-		    					screen_ui.n_selected(selected_container)
-				     		end 
-				     	end 
-					end 
-				end
+		screen_ui.container_selected(selected_container,x,y)	
+		if selected_container.widget_type == "LayoutManager" then 
+		    local layout_bdr = screen:find_child(selected_container.name.."border")
+		    if layout_bdr then 
+			    local r_c = layout_bdr.r_c
+				local row, col = selected_container:r_c_from_abs_x_y(x,y)
+				if r_c then 
+				    if r_c[1] ~= row or r_c[2] ~= col then  
+		    		    screen_ui.n_selected(selected_container)
+				    end 
+				end 
 			end 
-		end 
+	    end 
 	end 
+    bb()
 end 
 
+function screen_ui.container_deselected()
+    if selected_container == nil then 
+        selected_container_name = ""
+    else 
+        selected_container_name = selected_container.name
+    end
+
+    for m,n in ipairs (screen.children) do
+        if n.name and string.find(n.name, "cBorder") ~= nil and n.name ~= selected_container_name then
+            screen:remove(n)
+        end
+    end
+end
 function screen_ui.container_selected(obj, x, y)
 
 	local obj_border = Rectangle {
-			name = obj.name.."border", 
+			name = obj.name.."cBorder", 
         	color = {0,0,0,0},
         	border_color = {255,25,25,255},
         	border_width = 4,
@@ -84,16 +72,6 @@ function screen_ui.container_selected(obj, x, y)
         
 		obj_border.position = obj.position
         obj_border.size = obj.size
-
-        anchor_mark= ui.factory.draw_anchor_pointer()
-        if(obj.extra.is_in_group == true)then 
-        	anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
-        else 
-        	anchor_mark.position = {obj.x, obj.y, obj.z}
-        end
-        anchor_mark.name = obj.name.."a_m"
-
-        screen:add(anchor_mark)
 
    	else -- Layout Manager Tile border
 
@@ -117,7 +95,7 @@ function screen_ui.container_selected(obj, x, y)
 
     if not screen:find_child(obj_border.name) then 
         screen:add(obj_border)
-        obj.extra.ve_selected = true
+        obj.extra.container_selected = true
     end
 end  
 
@@ -179,10 +157,6 @@ function screen_ui.selected(obj)
     end
 
 	if obj.name == nil then return end 
-
-	if screen:find_child("multi_select_border") == nil and shift == false then 
-		screen_ui.n_selected_all()
-	end 
 
 	local obj_border = Rectangle{
    			name = obj.name.."border",
@@ -289,10 +263,12 @@ function screen_ui.selected(obj)
     screen:add(anchor_mark)
     screen:add(obj_border)
     obj.extra.ve_selected = true
-    table.insert(selected_objs, obj_border.name)
 end  
 
 function screen_ui.n_selected(obj)
+     if obj == nil then
+        return 
+     end
      if input_mode == hdr.S_FOCUS then
         screen:remove(screen:find_child(obj.name.."border"))
         return    
@@ -302,18 +278,11 @@ function screen_ui.n_selected(obj)
 		return 
 	 end 
 
-     if(obj.type ~= "Video") then 
-		-- remove red border
-        screen:remove(screen:find_child(obj.name.."border"))
-		-- remove red cross mark showing anchor point
-        if (screen:find_child(obj.name.."a_m") ~= nil) then 
-	     	screen:remove(screen:find_child(obj.name.."a_m"))
-        end
-
-		util.table_removekey(selected_objs, obj.name.."border")
-
-        obj.extra.ve_selected = false
-     end 
+	-- remove red border
+    screen:remove(screen:find_child(obj.name.."border"))
+	-- remove red cross mark showing anchor point
+	screen:remove(screen:find_child(obj.name.."a_m"))
+    obj.extra.ve_selected = false
 
 end  
 
@@ -326,7 +295,6 @@ function screen_ui.n_select_all ()
 			screen_ui.n_selected(j) 
 		end 
 	end 
-	selected_objs = {}
 end 
 
 function screen_ui.n_select(obj, drag)
@@ -354,7 +322,9 @@ function screen_ui.move_selected_obj(direction)
 			["Down"] = function() return 1 end,  
 		}
 
-	if #selected_objs ~= 0 then
+	if util.getSelectedObjCnt() ~= 0 then
+		local selected_objs =  util.getSelectedObjs()
+        if selected_objs then 
 		for q, w in pairs (selected_objs) do
 			local t_border = screen:find_child(w)
 			if(t_border ~= nil) then 
@@ -377,6 +347,7 @@ function screen_ui.move_selected_obj(direction)
 		     		anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
                	end
 	         end
+		end
 		end
 	end 
 end

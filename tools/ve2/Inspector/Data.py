@@ -120,6 +120,8 @@ modelToDataTable = {
     'y_rotationangle': lambda v: ('rotation-angle-y',  toFloat(v['angle'])),
     'z_rotationangle': lambda v: ('rotation-angle-z',  toFloat(v['angle'])),
     'label': lambda v: ('label',  toString(v)),
+    'x_offset': lambda v: ('x_offset',  toFloat(v)), 
+    'y_offset': lambda v: ('y_offset',  toFloat(v)), 
 }
 
 dataToModelTable = {
