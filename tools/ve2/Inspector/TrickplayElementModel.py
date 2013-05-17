@@ -127,7 +127,6 @@ class TrickplayElementModel(QStandardItemModel):
                         self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
             else:
                 pass
-                #print ("newChildGid or newParentGid is nil ...")
 
             self.lmChild = "false"
             self.tabIndex = "nil"
@@ -154,9 +153,6 @@ class TrickplayElementModel(QStandardItemModel):
                 self.insertElement(root, child, pdata, True)
 
             self.inspector.ui.inspector.expandAll()
-
-            if not self.main.command == "newLayer" and not self.main.command == "insertUIElement" :
-                self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
 
             self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
