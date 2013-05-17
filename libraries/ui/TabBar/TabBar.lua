@@ -169,9 +169,9 @@ TabBar = setmetatable(
                         --]]
                         return {
                             ((tab_location == "left") and
-                            (tab_w) or 0),
+                            (tab_w) or tab_pane:arrow_size("left")[1]+tab_pane.horizontal_spacing),
                             ((tab_location == "top") and
-                            (tab_h) or 0)
+                            (tab_h) or tab_pane:arrow_size("up")[2]+tab_pane.vertical_spacing)
                         }
                     end
                 end,
