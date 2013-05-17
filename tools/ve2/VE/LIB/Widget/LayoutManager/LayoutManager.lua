@@ -180,7 +180,7 @@ ListManager = setmetatable(
 
                         local t = oldf(self)
 
-                        t.style = nil
+                        --t.style = nil
 
                         t.length               = instance.length
                         t.vertical_alignment   = instance.vertical_alignment
