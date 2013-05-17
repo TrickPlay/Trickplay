@@ -10,7 +10,7 @@ module media_module;
 #include "app_resource.h"
 
 //void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L );
-static bool load_media( lua_State * L, ClutterTexture * texture );
+static bool load_media( lua_State * L, ClutterActor * actor );
 
 //-----------------------------------------------------------------------------
 // A structure attached to ClutterTexture to keep track of extra stuff
@@ -132,7 +132,7 @@ class Media [[ClutterActor*]] actor
 
             extra->constructing = FALSE;
 
-            load_media( L, CLUTTER_TEXTURE( self ) );
+            load_media( L, self );
 
             g_object_unref( self );
         ]];
@@ -181,8 +181,7 @@ class Media [[ClutterActor*]] actor
         [[
             g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free);
 
-            load_media( L, CLUTTER_TEXTURE( self ) );
-
+            load_media( L, self );
         ]];
 
 /***************************************
@@ -824,8 +823,42 @@ void Media_on_loaded( ClutterTexture *self, gpointer error, lua_State *L )
     }
 }*/
 
-static bool load_media( lua_State * L, ClutterTexture * texture )
+static bool load_media( lua_State * L, ClutterActor * actor )
 {
+    g_assert( L );
+    g_assert( actor );
+
+    int result;
+
+    MediaExtra * extra = MediaExtra::get( actor, L );
+
+    // Don't load when constructing. Not all properties may have been set yet
+    if ( extra->constructing ) return false;
+
+    extra->tags = JSON::Object();
+
+    extra->loaded_flag = false;
+
+    //.........................................................................
+    // Get the media source
+    char * uri = ( char * ) g_object_get_data( G_OBJECT( actor ), "tp-src" );
+    if ( !uri ) return false;
+
+    MediaPlayer * mp = extra->get_player();
+    if ( mp )
+    {
+        AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() );
+
+        result = resource ? mp->load( resource.get_uri().c_str(), "" )
+                          : TP_MEDIAPLAYER_ERROR_INVALID_URI;
+    }
+    else
+    {
+        result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+    }
+
+    g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+
     return true;
 }
 
