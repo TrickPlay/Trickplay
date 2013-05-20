@@ -623,11 +623,11 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement* s
         app.release = select->get_int( 4 );
         app.version = select->get_string( 5 );
 
-        StringVector fingerprints = split_string( select->get_string( 5 ) , "," );
+        StringVector fingerprints = split_string( select->get_string( 6 ) , "," );
 
         app.fingerprints.insert( fingerprints.begin() , fingerprints.end() );
 
-        StringVector attributes = split_string( select->get_string( 6 ) , "," );
+        StringVector attributes = split_string( select->get_string( 7 ) , "," );
 
         app.attributes.insert( attributes.begin() , attributes.end() );
 
