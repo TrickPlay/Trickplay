@@ -81,9 +81,9 @@ ArrowPane = setmetatable(
 
                         return {
                             ((self.horizontal_arrows_are_visible) and
-                            (x+left.w) or x),
+                            (x+left.w+self.horizontal_spacing) or x),
                             ((self.vertical_arrows_are_visible) and
-                            (y+up.h) or y)
+                            (y+up.h+self.vertical_spacing) or y)
                         }
                     end
                 end,
@@ -240,6 +240,11 @@ ArrowPane = setmetatable(
             functions = {
                 add    = function(instance,_ENV) return function(oldf,self,...) pane:add(   ...) end end,
                 remove = function(instance,_ENV) return function(oldf,self,...) pane:remove(...) end end,
+                arrow_size = function(instance,_ENV)
+                    return function(oldf,self,index)
+                        return _ENV[index].size
+                    end
+                end,
             },
         },
         private = {
