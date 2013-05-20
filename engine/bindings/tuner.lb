@@ -53,6 +53,23 @@ interface Tuner [[TunerDelegate*]]
             result=self->get_tuner()->tune_channel(new_channel);
         ]];
 
+/***************************************
+    Function: set_viewport
+
+    The set_viewport() function instructs the tuner to change its viewport to the specified position and size
+
+    *Arguments:*
+
+        left, top - Position in pixels from the top left of the screen
+
+        width, height - Size in pixels
+
+    *Return Value:* true if channel change was successful, otherwise false
+*/
+    bool set_viewport(int left, int top, int width, int height)
+    [[
+        result = self->get_tuner()->set_viewport(left, top, width, height);
+    ]];
 
 /***************************************
     Function: add_on_channel_changed_listener
