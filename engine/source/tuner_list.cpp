@@ -39,19 +39,25 @@ struct TPTuner
 
 //.............................................................................
 
-Tuner::Tuner( TunerList* _list, TPContext* _context , const char* _name, TPChannelChangeCallback _cb, void* _data )
+Tuner::Tuner( TunerList* _list, TPContext* _context , const char* _name, TPChannelChangeCallback _tune_channel_cb, TPTunerSetViewportGeometry _set_viewport_cb, void* _data )
     :
     tp_tuner( new TPTuner( this, _list ) ),
     name( _name ),
-    cb( _cb ),
+    tune_channel_cb( _tune_channel_cb ),
+    set_viewport_cb(_set_viewport_cb),
     data( _data )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
 
-    if ( ! cb )
+    if ( ! tune_channel_cb )
     {
-        cb = default_tune_channel;
+        tune_channel_cb = default_tune_channel_cb;
+    }
+
+    if( !set_viewport_cb )
+    {
+        set_viewport_cb = default_set_viewport_cb;
     }
 }
 
@@ -64,7 +70,14 @@ Tuner::~Tuner()
 
 //.............................................................................
 
-int Tuner::default_tune_channel( TPTuner* tuner, const char*, void* )
+int Tuner::default_tune_channel_cb( TPTuner* tuner, const char*, void* )
+{
+    // Failure
+    return 1;
+}
+//.............................................................................
+
+int Tuner::default_set_viewport_cb( TPTuner* tuner, int, int, int, int, void* )
 {
     // Failure
     return 1;
@@ -88,7 +101,14 @@ String Tuner::get_name() const
 
 int Tuner::tune_channel( const char* new_channel_uri )
 {
-    return cb( tp_tuner, new_channel_uri, data );
+    return tune_channel_cb( tp_tuner, new_channel_uri, data );
+}
+
+//.............................................................................
+
+int Tuner::set_viewport( int left, int top, int width, int height )
+{
+    return set_viewport_cb( tp_tuner, left, top, width, height, data );
 }
 
 //.............................................................................
@@ -115,12 +135,13 @@ void tp_tuner_channel_changed( TPTuner* tuner, const char* new_channel )
 }
 
 
-TPTuner* TunerList::add_tuner( TPContext* context , const char* name, TPChannelChangeCallback cb, void* data )
+TPTuner* TunerList::add_tuner( TPContext* context , const char* name, TPChannelChangeCallback tune_channel_cb, TPTunerSetViewportGeometry set_viewport_cb, void* data )
 {
     g_assert( name );
-    g_assert( cb );
+    g_assert( tune_channel_cb );
+    g_assert( set_viewport_cb );
 
-    Tuner* tuner = new Tuner( this , context , name , cb , data );
+    Tuner* tuner = new Tuner( this , context , name , tune_channel_cb, set_viewport_cb, data );
 
     TPTuner* result = tuner->get_tp_tuner();
 

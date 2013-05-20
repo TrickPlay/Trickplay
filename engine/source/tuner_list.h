@@ -15,7 +15,7 @@ class Tuner : public RefCounted
 {
 public:
 
-    Tuner( TunerList* list, TPContext* context , const char* name, TPChannelChangeCallback cb, void* data );
+    Tuner( TunerList* list, TPContext* context , const char* name, TPChannelChangeCallback tune_channel, TPTunerSetViewportGeometry set_viewport, void* data );
 
     TPTuner* get_tp_tuner();
 
@@ -23,7 +23,11 @@ public:
 
     int tune_channel( const char* new_channel_uri );
 
-    static int default_tune_channel( TPTuner* controller, const char*, void* );
+    int set_viewport( int left, int top, int width, int height );
+
+    static int default_tune_channel_cb( TPTuner* controller, const char*, void* );
+
+    static int default_set_viewport_cb( TPTuner* controller, int, int, int, int, void* );
 
     class Delegate
     {
@@ -45,7 +49,10 @@ private:
 
     String              name;
 
-    TPChannelChangeCallback  cb;
+    TPChannelChangeCallback  tune_channel_cb;
+
+    TPTunerSetViewportGeometry set_viewport_cb;
+
     void*               data;
 
     //.........................................................................
@@ -64,7 +71,7 @@ public:
 
     virtual ~TunerList();
 
-    TPTuner* add_tuner( TPContext* context , const char* name, TPChannelChangeCallback cb, void* data );
+    TPTuner* add_tuner( TPContext* context , const char* name, TPChannelChangeCallback tune_channel, TPTunerSetViewportGeometry set_viewport, void* data );
 
     void remove_tuner( TPTuner* tuner );
 
