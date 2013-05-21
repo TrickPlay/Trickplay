@@ -110,7 +110,7 @@ TPContext::TPContext()
     gameservice_support( NULL ),
 #endif
     media_player_constructor( NULL ),
-    //media_player( NULL ),
+    media_player( NULL ),
     http_trickplay_api_support( NULL ),
     external_log_handler( NULL ),
     external_log_handler_data( NULL ),
@@ -799,7 +799,7 @@ int TPContext::run()
     {
         g_info( "CREATING MEDIA PLAYER..." );
 
-        media_player.push_back( MediaPlayer::make( this , media_player_constructor ) );
+        media_player = MediaPlayer::make( this , media_player_constructor );
     }
     else
     {
@@ -948,10 +948,9 @@ int TPContext::run()
     //.....................................................................
     // Reset the media player, just in case
 
-    if ( media_player.size() )
+    if ( media_player )
     {
-        std::list<MediaPlayer*>::iterator itr = media_player.begin();
-        (*itr)->reset();
+        media_player->reset();
     }
 
     //.....................................................................
@@ -988,11 +987,10 @@ int TPContext::run()
     //.....................................................................
     // Kill the media player
 
-    if ( media_player.size() )
+    if ( media_player )
     {
-        for (std::list<MediaPlayer*>::iterator itr = media_player.begin(); itr != media_player.end(); itr++)
-            delete (MediaPlayer *) (*itr);
-        media_player.clear();
+        delete media_player;
+        media_player = NULL;
     }
 
     //........................................................................
@@ -2344,9 +2342,7 @@ bool TPContext::profile_switch( int id )
 
 MediaPlayer* TPContext::get_default_media_player()
 {
-    g_assert(media_player.size());
-    std::list< MediaPlayer* >::iterator itr = media_player.begin();
-    return (*itr);
+    return media_player;
 }
 
 //-----------------------------------------------------------------------------
@@ -2355,11 +2351,7 @@ MediaPlayer* TPContext::create_new_media_player( MediaPlayer::Delegate* delegate
 {
     if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
     {
-        MediaPlayer *instance = MediaPlayer::make( this , media_player_constructor, delegate );
-
-        media_player.push_back(instance);
-
-        return instance;
+        return MediaPlayer::make( this , media_player_constructor, delegate );
     }
     else
     {
