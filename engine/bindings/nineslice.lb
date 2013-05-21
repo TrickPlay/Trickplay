@@ -10,19 +10,23 @@ module nineslice;
 
 static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
-/* TODO: NineSlice should be able to reuse other SpriteSheet and Sprite objects created/loaded in the same lua program at run-time
- * TODO: Need to make it clear how objects are destructed, instead of no code/comments
- * TODO: Can create a simple syntax to hold nineslice definitions. Or use a straightforward workflow
+/* TODO: Need to make it clear how objects are destructed, instead of no code/comments
  * TODO: Leverage ClutterTableLayout to simplify the implementation
  * TODO: Need to verify calculations of coordinates of x and y in the json file. Right now if it starts from 1 instead of 0, some sprites are being missed
  * TODO: Cloning - Two instances of the same NineSlice should share SpriteSheet, Sprites
  *
- * Class heirarchy: NineSliceBinding -> NineSliceEffect -> NineSliceEffectPrivate -> Slice
+ * Class heirarchy: NineSliceBinding -> NineSliceLayout -> NineSliceLayoutPrivate -> Slice
  */
 
 struct NineSliceBinding
 {
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), constructing( false ), sheet( NULL ), effect( _effect ), action( NULL ) { assert( effect ); }
+    NineSliceBinding( NineSliceLayout * _layout, ClutterActor * _actor ) : async( false ), constructing( false ), sheet( NULL ), layout( _layout ), action( NULL )
+    {
+        g_assert( layout );
+        g_assert( _actor );
+
+        nineslice_layout_init_tablelayout( layout, _actor );
+    }
 
     ~NineSliceBinding()
     {
@@ -31,10 +35,13 @@ struct NineSliceBinding
             Action::cancel( action );
             action = NULL;
         }
+
         unsubscrube_sprites();
+
+        layout->priv->parent_valid = false; // NineSliceBinding is gone
     }
 
-    NineSliceEffect * get_effect() { return effect; }
+    NineSliceLayout * get_layout() { return layout; }
 
     bool get_tile( unsigned i )
     {
@@ -44,7 +51,7 @@ struct NineSliceBinding
             return false;
         }
 
-        return nineslice_effect_get_tile( effect, i );
+        return nineslice_layout_get_tile( layout, i );
     }
 
     void set_tile( unsigned i, bool t, bool guess )
@@ -55,12 +62,12 @@ struct NineSliceBinding
             return;
         }
 
-        nineslice_effect_set_tile( effect, i, t, guess, constructing );
+        nineslice_layout_set_tile( layout, i, t, guess, constructing );
     }
 
-    bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
+    bool is_loaded() { return sheet && nineslice_layout_is_loaded( layout ); };
 
-    std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
+    std::vector< int > * get_borders() { return nineslice_layout_get_borders( layout ); }
 
     std::string & get_id( unsigned i )
     {
@@ -85,7 +92,7 @@ struct NineSliceBinding
 
         ids[i] = new_id;
 
-        if (!constructing) nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
+        if (!constructing) nineslice_layout_set_sprite( layout, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
     }
 
     void set_sheet( SpriteSheet * _sheet )
@@ -105,7 +112,7 @@ struct NineSliceBinding
         {
             if ( !(ids[i].empty()) )
             {
-                nineslice_effect_set_sprite( effect, i, sheet->get_sprite( ids[i].c_str() ), async );
+                nineslice_layout_set_sprite( layout, i, sheet->get_sprite( ids[i].c_str() ), async );
             }
         }
     }
@@ -114,13 +121,13 @@ struct NineSliceBinding
     {
         if ( async )
         {
-            action = nineslice_effect_signal_loaded_later( effect );
+            nineslice_layout_signal_loaded_later( layout );
         }
     }
 
     void unsubscrube_sprites()
     {
-        Slice * slices = effect->priv->slices;
+        Slice * slices = layout->priv->slices;
 
         if (slices)
         {
@@ -128,8 +135,6 @@ struct NineSliceBinding
             {
                 slices[i].unset_sprite();
             }
-            //delete[] slices;
-            //effect->priv->slices = NULL;
         }
     }
 
@@ -138,7 +143,7 @@ struct NineSliceBinding
 
 private:
     SpriteSheet      * sheet;
-    NineSliceEffect  * effect;
+    NineSliceLayout  * layout;
     std::string        ids[9];
     Action           * action;
 };
@@ -146,7 +151,7 @@ private:
 #define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
 #define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
 
-void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L );
+void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * L );
 
 ]]
 
@@ -203,15 +208,14 @@ class NineSlice [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
 
-            ClutterEffect * effect = nineslice_effect_new();
-            clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
+            GObject * layout = nineslice_layout_new();
             clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
 
-            g_signal_connect_data( G_OBJECT( effect ), "load-finished",
+            g_signal_connect_data( G_OBJECT( layout ), "load-finished",
                 (GCallback) NineSlice_on_loaded,
                 L, 0, GConnectFlags( 0 ) );
 
-            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_EFFECT( effect ) ) );
+            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_LAYOUT( layout ), self ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
 
@@ -545,14 +549,20 @@ class NineSlice [[ClutterActor*]] actor
 
 [[
 
-void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L )
+void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * L )
 {
-    ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) );
+    // NineSliceBinding is gone before all slices are loaded
+    if ( !layout->priv->parent_valid ) return;
+
+    ClutterActor * self = layout->priv->actor;
+    g_assert( self );
 
     if ( get_binding( self )->async )
     {
         lua_pushboolean( L, error ? 1 : 0 );
         UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+        layout->priv->can_fire = true;
+        layout->priv->action = NULL;
     }
 }
 

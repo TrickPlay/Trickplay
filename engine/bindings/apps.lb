@@ -101,6 +101,9 @@ public:
         lua_pushstring(L,  info.name.c_str());
         lua_setfield(L, -2, "name");
 
+        lua_pushstring(L,  info.description.c_str());
+        lua_setfield(L, -2, "description");
+
         lua_pushstring(L,info.version.c_str());
         lua_setfield(L,-2,"version");
 

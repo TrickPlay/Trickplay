@@ -10,24 +10,21 @@ PushTexture::~PushTexture()
         texture = NULL;
     }
 
-    failed = false;
-    real = false;
-
     if ( !pings.empty() ) { pings.clear(); }
 }
 
-void PushTexture::subscribe( PingMe* ping, bool preload )
+void PushTexture::subscribe( PingMe* ping, bool immediately )
 {
+    g_assert( pings.count(ping) == 0 );
     pings.insert( ping );
 
-    if ( real )
+    if ( texture )
     {
-        g_assert( !failed );
         ping->ping(); // No need to trigger ping_all cause other subscribers have been pinged before
     }
     else
     {
-        make_texture( preload ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
+        make_texture( immediately ); // Will trigger ping_all. Through ping_all, trigger ping->ping()
     }
 }
 
@@ -37,8 +34,6 @@ void PushTexture::release_texture()
     {
         cogl_handle_unref( texture );
 
-        failed = false;
-        real = false;
         texture = NULL;
 
         lost_texture();
@@ -56,16 +51,12 @@ CoglHandle PushTexture::get_texture()
     return texture;
 }
 
-void PushTexture::set_texture( CoglHandle _texture, bool _real, bool trigger )
+void PushTexture::set_texture( CoglHandle _texture, bool trigger )
 {
-    // failed and real are updated in Sprite and Source instances
-
     if ( texture ) { cogl_handle_unref( texture ); }
 
     texture = _texture;
     // Skip cogl_handle_ref as it is done before calling set_texture
-
-    real = texture && _real;
 
     if ( trigger ) { ping_all(); }
 }
@@ -80,12 +71,14 @@ void PushTexture::ping_all()
 
 /* PingMe */
 
-void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* _target, bool preload )
+void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* _target, bool immediately )
 {
     if ( instance == _instance )
     {
         callback = _callback;
-        target = _target;
+        target   = _target;
+
+        // TODO: handle the case when we just want to change flag immediately
         return;
     }
 
@@ -93,11 +86,11 @@ void PingMe::assign( PushTexture* _instance, PingMe::Callback* _callback, void* 
     // Source instances will have it released later when the app is running
     if ( instance ) { instance->unsubscribe( this, false ); }
 
-    callback = _callback;
-    target = _target;
     instance = _instance;
+    callback = _callback;
+    target   = _target;
 
-    if ( instance ) { instance->subscribe( this, preload ); }
+    if ( instance ) { instance->subscribe( this, immediately ); }
 }
 
 PingMe::~PingMe()
@@ -106,7 +99,7 @@ PingMe::~PingMe()
 
     instance = NULL;
     callback = NULL;
-    target = NULL;
+    target   = NULL;
 }
 
 

@@ -308,7 +308,7 @@ Button = setmetatable(
                     images = {}
                     clear(instance)
                     for _,state in pairs(states) do
-                        images[state] = create_canvas(instance,state)
+                        images[state] = create_canvas(instance,state,_ENV)
                         add(instance,images[state])
                         if state ~= "default" then
                             image_states[state] = define_image_animation(images[state],state)
@@ -466,7 +466,7 @@ Button = setmetatable(
         --create_canvas = create_canvas
         states = {"default","focus","activation"}
         --default create_canvas function
-        create_canvas = function(self,state)
+        create_canvas = function(self,state,_ENV)
             --print(state)
             --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
 

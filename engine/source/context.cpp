@@ -2908,11 +2908,11 @@ void tp_context_set_media_player_constructor( TPContext* context, TPMediaPlayerC
 // Tuners
 //-----------------------------------------------------------------------------
 
-TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback cb, void* data )
+TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback tune_channel_cb, TPTunerSetViewportGeometry set_viewport_cb, void* data )
 {
     g_assert( context );
 
-    return context->tuner_list.add_tuner( context, name, cb, data );
+    return context->tuner_list.add_tuner( context, name, tune_channel_cb, set_viewport_cb, data );
 }
 
 void tp_context_remove_tuner( TPContext* context, TPTuner* tuner )
