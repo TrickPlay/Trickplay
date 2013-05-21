@@ -2,9 +2,9 @@
 #include "log.h"
 #include "nineslice.h"
 
-G_DEFINE_TYPE( NineSliceEffect, nineslice_effect, CLUTTER_TYPE_EFFECT );
+G_DEFINE_TYPE( NineSliceLayout, nineslice_layout, G_TYPE_OBJECT );
 
-#define NINESLICE_EFFECT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), TYPE_NINESLICE_EFFECT, NineSliceEffectPrivate))
+#define NINESLICE_LAYOUT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), TYPE_NINESLICE_LAYOUT, NineSliceLayoutPrivate))
 
 void Slice::on_ping( PushTexture* source, void* target )
 {
@@ -28,63 +28,48 @@ void Slice::unset_sprite()
 
 void Slice::update()
 {
-    static ClutterActor* texture = clutter_texture_new();
-
-    if ( material )
-    {
-        cogl_handle_unref( material );
-        material = NULL;
-    }
-
-    if ( sprite )
-    {
-        clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), sprite->get_texture() );
-        material = cogl_material_copy( COGL_MATERIAL( clutter_texture_get_cogl_material( CLUTTER_TEXTURE( texture ) ) ) );
-    }
-
-    nineslice_redraw(effect);
-
-    loaded = sprite && sprite->is_real();
-    done = !sprite || sprite->is_real() || sprite->is_failed();
+    loaded = sprite && sprite->get_texture();
+    done = !sprite || sprite->get_texture() || sprite->is_failed();
 
     if ( done )
     {
-        action = nineslice_effect_signal_loaded_later( effect );
+        nineslice_redraw(layout);
     }
 }
 
 class SignalLoadedLater : public Action
 {
-    NineSliceEffect* self;
+    NineSliceLayout* self;
 
-    public: SignalLoadedLater( NineSliceEffect* s ) : self( s ) { g_assert( s ); };
+    public: SignalLoadedLater( NineSliceLayout* s ) : self( s ) { g_assert( s ); };
 
     protected: bool run()
     {
-        if ( nineslice_effect_is_done( self ) )
+        if ( nineslice_layout_is_done( self ) )
         {
-            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", !nineslice_effect_is_loaded( self ) );
+            g_signal_emit_by_name( G_OBJECT( self ), "load-finished", false );
         }
 
         self->priv->can_fire = true;
+        self->priv->action = NULL;
         return false;
     }
 };
 
-ClutterEffect* nineslice_effect_new()
+GObject* nineslice_layout_new()
 {
-    return ( ClutterEffect* ) g_object_new( TYPE_NINESLICE_EFFECT, NULL );
+    return ( GObject* ) g_object_new( TYPE_NINESLICE_LAYOUT, NULL );
 }
 
-void nineslice_effect_set_sprite( NineSliceEffect* effect, unsigned i, Sprite* sprite, bool async )
+void nineslice_layout_set_sprite( NineSliceLayout* layout, unsigned i, Sprite* sprite, bool async )
 {
     g_assert( i < 9 );
-    effect->priv->slices[i].set_sprite( sprite, async );
+    layout->priv->slices[i].set_sprite( sprite, async );
 }
 
-bool nineslice_effect_is_done( NineSliceEffect* effect )
+bool nineslice_layout_is_done( NineSliceLayout* layout )
 {
-    Slice* slices = effect->priv->slices;
+    Slice* slices = layout->priv->slices;
 
     for ( unsigned i = 0; i < 9; ++i )
     {
@@ -97,75 +82,111 @@ bool nineslice_effect_is_done( NineSliceEffect* effect )
     return true;
 }
 
-bool nineslice_effect_is_loaded( NineSliceEffect* effect )
+bool nineslice_layout_is_loaded( NineSliceLayout* layout )
 {
-    Slice* slices = effect->priv->slices;
+    Slice* slices = layout->priv->slices;
+    unsigned counter = 0;
 
     for ( unsigned i = 0; i < 9; ++i )
     {
-        if ( slices[i].sprite && !slices[i].loaded )
+        if ( slices[i].sprite )
         {
-            return false;
+            if ( !slices[i].loaded ) return false;
+        }
+        else
+        {
+            counter++;
         }
     }
 
-    return true;
+    // When all sprites are NULL, the nineslice is not loaded
+    return (counter != 9);
 }
 
-Action * nineslice_effect_signal_loaded_later( NineSliceEffect* effect )
+void nineslice_layout_signal_loaded_later( NineSliceLayout* layout )
 {
-    SignalLoadedLater * ret = NULL;
-    if ( effect->priv->can_fire )
+    if ( layout->priv->can_fire )
     {
-        effect->priv->can_fire = false;
-
-        ret = new SignalLoadedLater( effect );
-        Action::post( ret );
+        layout->priv->can_fire = false;
+        layout->priv->action = new SignalLoadedLater( layout );
+        Action::post( layout->priv->action );
     }
-
-    return ret;
 }
 
-bool nineslice_effect_get_tile( NineSliceEffect* effect, unsigned i )
+bool nineslice_layout_get_tile( NineSliceLayout* layout, unsigned i )
 {
     g_assert( i < 6 );
-    return effect->priv->tile[i];
+    return layout->priv->tile[i];
 }
 
-void nineslice_effect_get_tile( NineSliceEffect* effect, gboolean tile[6] )
+void nineslice_layout_get_tile( NineSliceLayout* layout, gboolean tile[6] )
 {
     for ( unsigned i = 0; i < 6; i++ )
     {
-        tile[i] = effect->priv->tile[i];
+        tile[i] = layout->priv->tile[i];
     }
 }
 
-void nineslice_redraw( NineSliceEffect* effect )
+void get_slice_tile( NineSliceLayout* layout, unsigned index, gboolean *h, gboolean *v)
 {
-    clutter_actor_queue_redraw( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) ) );
+    g_assert( (index >= 0) && (index < 9) );
+
+    *h = *v = false;
+
+    switch (index)
+    {
+        case 1: *h = layout->priv->tile[2]; break;
+        case 3: *v = layout->priv->tile[4]; break;
+        case 4: *h = layout->priv->tile[0];
+                *v = layout->priv->tile[1]; break;
+        case 5: *v = layout->priv->tile[5]; break;
+        case 7: *h = layout->priv->tile[3]; break;
+        default: ;
+    }
 }
 
-void nineslice_effect_set_tile( NineSliceEffect* effect, unsigned i, bool t, bool guess, bool constructing )
+void nineslice_redraw( NineSliceLayout* layout )
+{
+    if ( !nineslice_layout_is_loaded( layout ) ) return;
+
+    Slice* slices = layout->priv->slices;
+
+    for ( unsigned i = 0; i < 9; i++ )
+    {
+        if ( slices[i].sprite )
+        {
+            ClutterActor * texture = slices[i].texture;
+            clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( texture ), slices[i].sprite->get_texture() );
+
+            gboolean h, v;
+            get_slice_tile(layout, i, &h, &v);
+            clutter_texture_set_repeat( CLUTTER_TEXTURE( texture ), h, v );
+        }
+    }
+
+    g_assert( layout->priv->actor );
+    clutter_actor_queue_redraw( layout->priv->actor );
+
+    nineslice_layout_signal_loaded_later( layout );
+}
+
+void nineslice_layout_set_tile( NineSliceLayout* layout, unsigned i, bool t, bool guess, bool constructing )
 {
     g_assert(i < 6);
-    effect->priv->tile[i] = guess ? ( i ? effect->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
-
-    if (!constructing) nineslice_redraw(effect);
+    layout->priv->tile[i] = guess ? ( i ? layout->priv->tile[ MAX( i / 2 - 1, 0 ) ] : false ) : t;
 }
 
-void nineslice_effect_set_tile( NineSliceEffect* effect, gboolean tile[6] )
+void nineslice_layout_set_tile( NineSliceLayout* layout, gboolean tile[6] )
 {
     for ( unsigned i = 0; i < 6; i++ )
     {
-        effect->priv->tile[i] = tile[i];
+        layout->priv->tile[i] = tile[i];
     }
-
-    nineslice_redraw(effect);
 }
 
-std::vector< int >* nineslice_effect_get_borders( NineSliceEffect* effect )
+std::vector< int >* nineslice_layout_get_borders( NineSliceLayout* layout )
 {
-    Slice* slices = effect->priv->slices;
+    Slice* slices = layout->priv->slices;
 
     int width[9], height[9];
 
@@ -194,108 +215,78 @@ std::vector< int >* nineslice_effect_get_borders( NineSliceEffect* effect )
     return borders;
 }
 
-/* GObject housekeeping */
-
-static gboolean nineslice_effect_pre_paint( ClutterEffect* self )
+static void nineslice_layout_dispose( GObject* gobject )
 {
-    float w, h;
-    ClutterActor* actor = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( self ) );
-    clutter_actor_get_size( actor, &w, &h );
-    NineSliceEffectPrivate* priv = NINESLICE_EFFECT( self )->priv;
-    Slice* slices = priv->slices;
-
-    if ( w <= 0 || h <= 0 )
+    NineSliceLayout * layout = NINESLICE_LAYOUT( gobject );
+    if ( layout->priv->slices )
     {
-        return FALSE;
+        delete[] NINESLICE_LAYOUT( gobject )->priv->slices;
+        NINESLICE_LAYOUT( gobject )->priv->slices = NULL;
     }
 
-    int width[9], height[9];
-
-    for ( unsigned i = 0; i < 9; i++ )
+    if ( layout->priv->table )
     {
-        Sprite* sprite = slices[i].sprite;
-
-        if ( sprite )
-        {
-            sprite->get_dimensions( & width[i], & height[i] );
-        }
-        else
-        {
-            width[i] = 0;
-            height[i] = 0;
-        }
+        g_object_unref( layout->priv->table );
+        layout->priv->table = NULL;
     }
 
-    float l = ( float ) MAX( MAX( width[0],  width[3] ), width[6] ),
-          r = ( float ) MAX( MAX( width[2],  width[5] ), width[8] ),
-          t = ( float ) MAX( MAX( height[0], height[1] ), height[2] ),
-          b = ( float ) MAX( MAX( height[6], height[7] ), height[8] );
-
-    if ( l + r > w )
+    if ( layout->priv->action )
     {
-        l = w * l / ( l + r );
-        r = w - l;
+        Action::cancel( layout->priv->action );
+        layout->priv->action = NULL;
     }
 
-    if ( t + b > h )
-    {
-        t = h * t / ( t + b );
-        b = h - t;
-    }
-
-    float xs[] = { 0.0, l, w - r, w },
-            ys[] = { 0.0, t, h - b, h };
-
-    for ( unsigned i = 0; i < 3; i++ )
-    {
-        for ( unsigned j = 0; j < 3; j++ )
-        {
-            if ( slices[i * 3 + j].material )
-            {
-                cogl_set_source( slices[i * 3 + j].material );
-                gboolean tx = j == 1 && priv->tile[( i == 0 ) ? 2 : ( i == 1 ) ? 0 : 3 ],
-                         ty = i == 1 && priv->tile[( j == 0 ) ? 4 : ( j == 1 ) ? 1 : 5 ];
-                cogl_rectangle_with_texture_coords( xs[j], ys[i], xs[j + 1], ys[i + 1], 0.0, 0.0,
-                        tx ? ( xs[j + 1] - xs[j] ) / ( float ) width[i * 3 + j] : 1.0,
-                        ty ? ( ys[i + 1] - ys[i] ) / ( float ) height[i * 3 + j] : 1.0 );
-            }
-        }
-    }
-
-    return FALSE;
+    G_OBJECT_CLASS( nineslice_layout_parent_class )->dispose( gobject );
 }
 
-static void nineslice_effect_dispose( GObject* gobject )
+static void nineslice_layout_class_init( NineSliceLayoutClass* klass )
 {
-    if (NINESLICE_EFFECT( gobject )->priv->slices)
-    {
-        delete[] NINESLICE_EFFECT( gobject )->priv->slices;
-        NINESLICE_EFFECT( gobject )->priv->slices = NULL;
-    }
-
-    G_OBJECT_CLASS( nineslice_effect_parent_class )->dispose( gobject );
-}
-
-static void nineslice_effect_class_init( NineSliceEffectClass* klass )
-{
-    g_type_class_add_private( klass, sizeof( NineSliceEffectPrivate ) );
-
-    ClutterEffectClass* cklass = CLUTTER_EFFECT_CLASS( klass );
-    cklass->pre_paint = nineslice_effect_pre_paint;
+    g_type_class_add_private( klass, sizeof( NineSliceLayoutPrivate ) );
 
     GObjectClass* gklass = G_OBJECT_CLASS( klass );
-    gklass->dispose = nineslice_effect_dispose;
+    gklass->dispose = nineslice_layout_dispose;    
 }
 
-static void nineslice_effect_init( NineSliceEffect* self )
+static void nineslice_layout_init( NineSliceLayout* self )
 {
-    self->priv = NINESLICE_EFFECT_GET_PRIVATE( self );
+    self->priv = NINESLICE_LAYOUT_GET_PRIVATE( self );
 
     self->priv->can_fire = true;
     self->priv->slices = new Slice[9];
+    self->priv->parent_valid = true;
+    self->priv->action = NULL;
+}
+
+void nineslice_layout_init_tablelayout( NineSliceLayout* self, ClutterActor * _actor )
+{
+    NineSliceLayoutPrivate* priv = self->priv;
+
+    priv->actor = _actor;
+    priv->table = (ClutterTableLayout *) clutter_table_layout_new();
+
+    clutter_actor_set_layout_manager( _actor, (ClutterLayoutManager *) (priv->table) );
 
     for ( unsigned i = 0; i < 9; ++i )
     {
-        self->priv->slices[i].effect = self;
+        priv->slices[i].index = i;
+        priv->slices[i].layout = self;
+        clutter_table_layout_pack( priv->table, priv->slices[i].texture, i % 3, (gint) i / 3 );
+
+        gboolean h, v;              // stretch
+        ClutterTableAlignment x, y; // alignment
+        switch (i) {
+            case 0: h = false; v = false; x = CLUTTER_TABLE_ALIGNMENT_END;    y = CLUTTER_TABLE_ALIGNMENT_END;    break;
+            case 1: h = true;  v = false; x = CLUTTER_TABLE_ALIGNMENT_CENTER; y = CLUTTER_TABLE_ALIGNMENT_END;    break;
+            case 2: h = false; v = false; x = CLUTTER_TABLE_ALIGNMENT_START;  y = CLUTTER_TABLE_ALIGNMENT_END;    break;
+            case 3: h = false; v = true;  x = CLUTTER_TABLE_ALIGNMENT_END;    y = CLUTTER_TABLE_ALIGNMENT_CENTER; break;
+            case 4: h = true;  v = true;  x = CLUTTER_TABLE_ALIGNMENT_CENTER; y = CLUTTER_TABLE_ALIGNMENT_CENTER; break;
+            case 5: h = false; v = true;  x = CLUTTER_TABLE_ALIGNMENT_START;  y = CLUTTER_TABLE_ALIGNMENT_CENTER; break;
+            case 6: h = false; v = false; x = CLUTTER_TABLE_ALIGNMENT_END;    y = CLUTTER_TABLE_ALIGNMENT_START;  break;
+            case 7: h = true;  v = false; x = CLUTTER_TABLE_ALIGNMENT_CENTER; y = CLUTTER_TABLE_ALIGNMENT_START;  break;
+            case 8: h = false; v = false; x = CLUTTER_TABLE_ALIGNMENT_START;  y = CLUTTER_TABLE_ALIGNMENT_START;  break;
+        }
+
+        clutter_table_layout_set_expand   ( priv->table, priv->slices[i].texture, h, v );
+        clutter_table_layout_set_alignment( priv->table, priv->slices[i].texture, x, y );
     }
 }

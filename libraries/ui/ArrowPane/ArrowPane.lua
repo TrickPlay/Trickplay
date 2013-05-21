@@ -3,13 +3,16 @@ local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
 
 local create_arrow = function(dir)
-    return function(self,state) 
+    return function(self,state,_ENV)
+
         local s = Sprite{
             async = false,
             sheet=self.style.spritesheet,
             id = self.style["ArrowPane/arrow-"..dir.."/"..state..".png"],
         } --]]
-        print("new sprite",s.w,s.h, s.id)
+        print("new sprite",s.w,s.h, s.id,w,h)
+        w = s.w
+        h = s.h
         return s
     end
 end
@@ -78,9 +81,9 @@ ArrowPane = setmetatable(
 
                         return {
                             ((self.horizontal_arrows_are_visible) and
-                            (x+left.w) or x),
+                            (x+left.w+self.horizontal_spacing) or x),
                             ((self.vertical_arrows_are_visible) and
-                            (y+up.h) or y)
+                            (y+up.h+self.vertical_spacing) or y)
                         }
                     end
                 end,
@@ -207,6 +210,7 @@ ArrowPane = setmetatable(
                         t.cells                = nil
 
                        -- t.contents = self.contents
+                        t.style = instance.style.name
 
                         t.contents_offset = instance.contents_offset
                         t.pane_w    = instance.pane_w
@@ -236,6 +240,11 @@ ArrowPane = setmetatable(
             functions = {
                 add    = function(instance,_ENV) return function(oldf,self,...) pane:add(   ...) end end,
                 remove = function(instance,_ENV) return function(oldf,self,...) pane:remove(...) end end,
+                arrow_size = function(instance,_ENV)
+                    return function(oldf,self,index)
+                        return _ENV[index].size
+                    end
+                end,
             },
         },
         private = {
