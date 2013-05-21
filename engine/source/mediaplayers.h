@@ -15,7 +15,7 @@ public:
     class Delegate
     {
     public:
-        virtual ~Delegate() {};
+
         virtual void loaded( MediaPlayer* player ) = 0;
         virtual void error( MediaPlayer* player, int code, const char* message ) = 0;
         virtual void end_of_stream( MediaPlayer* player ) = 0;
@@ -183,6 +183,43 @@ private:
     DelegateSet     delegates;
     StringPairList  tags;
     StringSet       schemes;
+};
+
+//-----------------------------------------------------------------------------
+// A structure attached to ClutterTexture to keep track of extra stuff
+
+class MediaExtra
+{
+  public:
+
+    static MediaExtra* get( gpointer texture )
+    {
+        MediaExtra* result = ( MediaExtra* ) g_object_get_data( G_OBJECT( texture ), "mediaplayer-extra" );
+
+        if ( !result )
+        {
+            result = new MediaExtra();
+
+            g_object_set_data_full( G_OBJECT( texture ), "mediaplayer-extra", result, ( GDestroyNotify ) MediaExtra::destroy );
+        }
+        return result;
+    }
+
+    bool           constructing;
+    bool           loaded;
+    bool           pre_load;
+    bool           read_tags;
+    JSON::Object   tags;
+
+  private:
+
+    MediaExtra() : constructing( false ), loaded( false ), pre_load( false ), read_tags( false ) {}
+
+    ~MediaExtra() {}
+
+    MediaExtra( const MediaExtra& ) {}
+
+    static void destroy( MediaExtra* me ) { delete me; }
 };
 
 #endif // _TRICKPLAY_MEDIAPLAYERS_H

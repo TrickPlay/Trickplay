@@ -114,8 +114,6 @@ public:
 
     MediaPlayer* create_new_media_player( MediaPlayer::Delegate* delegate );
 
-    bool remove_media_player( MediaPlayer *instance  );
-
     //.........................................................................
     // Sends a request to the outside world
 
