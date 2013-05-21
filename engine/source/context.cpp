@@ -2367,16 +2367,6 @@ MediaPlayer* TPContext::create_new_media_player( MediaPlayer::Delegate* delegate
     }
 }
 
-bool TPContext::remove_media_player( MediaPlayer *instance  )
-{
-    if ( !instance ) return false;
-
-    media_player.remove( instance );
-
-    delete instance;
-
-    return true;
-}
 
 //-----------------------------------------------------------------------------
 
