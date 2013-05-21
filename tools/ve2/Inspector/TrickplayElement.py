@@ -147,13 +147,3 @@ class TrickplayElement(QStandardItem):
         """
         
         return self.TPJSON().__iter__()
-
-
-#b = {'gid' : 1, 'name' : 'screen', 'children' : {'gid' : 2}}
-#c = b['children']
-#
-#a = TrickplayElement()
-#a._TP().setJSON(c)
-#a._TP().setParent(b)
-
-#print(a['gid'])

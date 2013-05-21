@@ -21,6 +21,7 @@ function screen_ui.draw_selected_container_border(x,y)
     end 
 
 	selected_container = util.find_container(x,y) 
+
     screen_ui.container_deselected()
 
 	if selected_container then 

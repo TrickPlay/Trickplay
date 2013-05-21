@@ -261,7 +261,7 @@ function util.create_mouse_event_handler(uiInstance, uiTypeStr)
         end 
 
         ---[[ Content Setting 
-		if util.is_in_container_group(x,y) and selected_content then 
+		if control and util.is_in_container_group(x,y) and selected_content then 
 		    local c, t = util.find_container(x,y) 
 			if c and t and not util.is_this_container(uiInstance) or c.name ~= uiInstance.name then
 			    uiInstance:unparent()
@@ -736,6 +736,14 @@ function util.is_this_container(v)
 
 end 
 
+function util.contentSetup(p, c)
+    c.extra.mouse_handler = false
+    util.create_mouse_event_handler(c, c.widget_type)
+    c.reactive = true 
+    c.is_in_group = true
+    c.parent_group = p 
+end
+
 function util.find_container(x_pos, y_pos)
 	local c_tbl = {}
 
@@ -755,13 +763,22 @@ function util.find_container(x_pos, y_pos)
 
 	if #c_tbl > 0 then 
 		local j = table.remove(c_tbl)
+        if #c_tbl > 0 and j.name == selected_content.name then 
+		    j = table.remove(c_tbl)
+        end 
+
         while #c_tbl > 0 do 
+            if j.name == selected_content.name then 
+		        j = table.remove(c_tbl)
+            end 
 		    table.remove(c_tbl)
         end 
-		return j, j.widget_type 
-	else 
-		return nil
+        if j then 
+		    return j, j.widget_type 
+        end  
 	end 
+
+	return nil
 end 
 
 function util.is_in_container_group(x_pos, y_pos) 

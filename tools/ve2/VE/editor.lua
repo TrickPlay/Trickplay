@@ -66,7 +66,6 @@ function editor.rectangle_done(x,y)
 
     _VE_.refresh()
     blockReport = false
-    --_VE_.selectUIElement(uiRectangle.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiRectangle.gid, false)
     _VE_.repUIInfo(uiRectangle)
@@ -324,14 +323,16 @@ function editor.duplicate(gid)
         uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
     end 
 
+    if uiTypeStr == "LayoutManager" then 
+        uiDuplicate.placeholder = WL.Widget_Rectangle{size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+    end
+
     uiDuplicate.position = {v.x + 20, v.y +20}
 
 	uiTypeStr = util.getTypeNameStr(v) 
     uiDuplicate = contentsNameAssign(uiDuplicate)
 
     util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
-
-	--screen_ui.n_selected(v)
 
     curLayer = devtools:gid(gid).parent
     util.addIntoLayer(uiDuplicate, true)

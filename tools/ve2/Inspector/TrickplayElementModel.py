@@ -4,7 +4,6 @@ from PyQt4.QtGui import *
 
 from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 from TrickplayElement import TrickplayElement
-#from connection import *
 
 class TrickplayElementModel(QStandardItemModel):
     
@@ -31,43 +30,34 @@ class TrickplayElementModel(QStandardItemModel):
 
     def rai(self, idx, i , j):
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
-            #print "rowsAboutInserted", i, j  #  at this level -- > it is going to be future parent's i==j th content 
             the_item= self.itemFromIndex(idx)
             if the_item : 
                 try:
                     self.newParentGid = the_item['gid']
-                    #print ("newParentGid", self.newParentGid)
                     if self.newParentGid == None and the_item.parent() and the_item.parent().parent()['type'] == "LayoutManager" :
-                        #print ("LayoutManager")
                         if the_item.text()[:3] == "Row" : #Drop into Row 
                             self.lmRow = int(the_item.text()[3:])
                             for x in range(0, the_item.rowCount()):
                                 temp_item = the_item.takeChild(x)
-                                #print temp_item.text()
                                 if temp_item.text() == "Empty" :
                                     self.lmCol = int( x ) 
                                     break
                             if self.lmCol == "nil" :
                                 self.lmCol = int( the_item.rowCount() )
-                            #print "[", self.lmRow, self.lmCol ,"]"
                             self.newParentGid = the_item.parent()['gid'] 
                         else : #Drop into Empty Cell 
                             self.lmCol = int(the_item.row()) # layout manager col number 
                             self.lmRow = int(the_item.parent().text()[3:])
-                            #print "[", self.lmRow, self.lmCol ,"]"
                             self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
                     elif the_item.parent()['type'] == "TabBar" :
-                        #print("TabBar")
                         self.tabIndex = the_item.row() + 1
                         self.newParentGid = the_item.parent()['gid']
                 except:
                     self.newParentGid = None
                     print ("merong : newParentGid nil")
-        #pass
 
     def ri(self, idx, i , j):
         #idx is parent's idx 
-        #print "rowsInserted", i, j #  at this level -- > it is going to be future parent's i==j th content 
         pass
         """
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
@@ -78,11 +68,8 @@ class TrickplayElementModel(QStandardItemModel):
                 except:
                     
         """
-        #print the_item['gid'], "inserted"
-        #print the_item['gid'], "newParent"
 
     def rar(self, idx, i , j):
-        #print "rowsAboutRemoved", i,j 
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
             if the_item :
@@ -103,15 +90,12 @@ class TrickplayElementModel(QStandardItemModel):
                 if the_child_item : 
                     try:
                         self.newChildGid = the_child_item['gid']
-                        #print("newChildGid", self.newChildGid)
                     except:
                         self.newChildGid = None
                         print ("merong : newChildGid nil")
 
 
     def rr(self, idx, i , j):
-        #print "rowsRemoved"
-        #self.preventChanges = False
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
@@ -216,9 +200,7 @@ class TrickplayElementModel(QStandardItemModel):
         if '' != value:   
             gs = str(gid)
             l = len(gs)
-            #value =  gs + ' ' * 2 * (6 - l) + value 
         else:    
-            #value = str(gid)
             value = ""
         
         node = TrickplayElement(title)
@@ -257,17 +239,14 @@ class TrickplayElementModel(QStandardItemModel):
         try:
             tabs = data['tabs']
             for r in range (0, len(tabs)) :
-                #tempnode = TrickplayElement("Tab"+str(r))
                 tempnode = TrickplayElement(tabs[r]['label'])
                 tempnode.tabdata = data
                 tempnode.tabIndex = r + 1
-                #self.node = tempnode
                 tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
                 partner = tempnode.partner()
                 partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
                 partner.setData("", Qt.DisplayRole)
                 node.appendRow([tempnode, partner])
-                #print r, (tabs[r]['contents'][1])
                 for c in range (0, len(tabs[r]['contents']['children'])) :
                     self.insertElement(tempnode, tabs[r]['contents']['children'][c], data, False)
 
@@ -278,11 +257,8 @@ class TrickplayElementModel(QStandardItemModel):
         # Recurse through cells
         try:
             cells = data['cells']
-            #print ("Rows:", len(cells))
-            #print ("Cols:", len(cells[0]))
             for r in range (0, len(cells)) :
                 tempnode = TrickplayElement("Row"+str(r))
-                #self.node = tempnode
                 tempnode.setFlags(tempnode.flags() ^ Qt.ItemIsEditable)
                 partner = tempnode.partner()
                 partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)

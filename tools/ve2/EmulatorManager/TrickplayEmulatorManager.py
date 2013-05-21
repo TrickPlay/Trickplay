@@ -109,7 +109,7 @@ class TrickplayEmulatorManager(QWidget):
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
 				try:
-					#self.main.open() # load setting path !! 
+					#load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
                     
 					self.ve_ready = True
@@ -122,8 +122,6 @@ class TrickplayEmulatorManager(QWidget):
 					        self.main.save() 
 					     else:
 					        self.main.open() 
-
-					#self.inspector.refresh() 
 				except:
 					print( "[VE] Failed to obtain ui info" )
 					# Close the process
@@ -296,21 +294,14 @@ class TrickplayEmulatorManager(QWidget):
 
 				    if gid is not None and luaCmd == "clear:Insp":
 					try:
-					    print("YUGI")
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
-					        print("YUGI22")
 					        print('Found*', result['gid'], result['name'])
 					        self.inspector.clearItem(result)
-					        #self.inspector.selectItem(result, shift)
-                            # open Property Tab 
-					        #self.inspector.ui.tabWidget.setCurrentIndex(1)
 					    else:
-					        print("YUGI33")
 					        print("UI Element not found")
 
 					except:
-					    print("YUGI44")
 					    print("error :-(")
 
 
@@ -318,8 +309,6 @@ class TrickplayEmulatorManager(QWidget):
 					try:
 					    result = self.inspector.search(gid, 'gid')
 					    if result: 
-					        #print('Found', result['gid'], result['name'])
-
 					        if shift == "f" :
 					            self.inspector.ui.inspector.selectionModel().clear()
 

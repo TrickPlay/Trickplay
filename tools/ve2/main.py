@@ -5,17 +5,18 @@ from PyQt4.QtCore import *
 
 from wizard import Wizard
 from UI.MainWindow import Ui_MainWindow
+from UI.ImportSkinDialog import Ui_importSkinImages
 from Inspector.TrickplayInspector import TrickplayInspector
 from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
-from UI.ImportSkinDialog import Ui_importSkinImages
+from Inspector.TrickplayElement import TrickplayElement
 
 try:
     _fromUtf8 = QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-CONTAINER_UI = ['Widget_Group', 'Widget_ArrowPane'] 
+
 class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
@@ -32,7 +33,9 @@ class MainWindow(QMainWindow):
             301 : 'Failed to fit all of the images'
         }
             
+        self.containerUI = ['Widget_Group', 'ArrowPane', 'MenuButton', 'ScrollPane', 'DialogBox', 'TabBar', 'LayoutManager'] 
         self.skinUI = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "ClippingRegion"]
+        self.uiElements = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "LayoutManager", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "Sprite", "Text", "Rectangle"]
 
         self.skinPath = {"ArrowPane": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
          "ButtonPicker": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
@@ -116,7 +119,7 @@ class MainWindow(QMainWindow):
         #Create main menu 
         class menubarWidget(QWidget):
             def __init__(self):
-                flags = Qt.Tool | Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+                flags = Qt.Tool | Qt.WindowStaysOnTopHint #| Qt.FramelessWindowHint
                 if sys.platform == "darwin":
                     flags |= Qt.WA_MacAlwaysShowToolWindow
                 else:
@@ -135,6 +138,7 @@ class MainWindow(QMainWindow):
         self._menubar.setLayout(self.mainMenuLayout)
 
         self._menubar.show()
+        self.menuDisable()
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
@@ -305,6 +309,25 @@ class MainWindow(QMainWindow):
         self.ui.actionUngroup.setEnabled(True)
         self.ui.actionClone.setEnabled(True)
         self.ui.actionDuplicate.setEnabled(True)
+        self.ui.actionDelete.setEnabled(True)
+
+    def menuDisableContents (self):
+        self.ui.action_left.setDisabled(True)
+        self.ui.action_right.setDisabled(True)
+        self.ui.action_top.setDisabled(True)
+        self.ui.action_bottom.setDisabled(True)
+        self.ui.action_horizontalCenter.setDisabled(True)
+        self.ui.action_verticalCenter.setDisabled(True)
+        self.ui.action_distributeHorizontally.setDisabled(True)
+        self.ui.action_distributeVertically.setDisabled(True)
+        self.ui.action_bring_to_front.setDisabled(True)
+        self.ui.action_bring_to_forward.setDisabled(True)
+        self.ui.action_send_to_back.setDisabled(True)
+        self.ui.action_send_backward.setDisabled(True)
+        self.ui.actionGroup.setDisabled(True)
+        self.ui.actionUngroup.setDisabled(True)
+        self.ui.actionClone.setDisabled(True)
+        self.ui.actionDuplicate.setDisabled(True)
         self.ui.actionDelete.setEnabled(True)
 
     def menuDisable (self):
@@ -830,8 +853,18 @@ class MainWindow(QMainWindow):
         while index is not None:
             item = self._inspector.inspectorModel.itemFromIndex(index)
             self.sendLuaCommand("delete", "_VE_.delete('"+str(item['gid'])+"')")
-            item.parent().removeRow(item.row())
-            index = self._inspector.selected (self.inspector.ui.inspector)
+            if "Row" in item.parent().text() :
+                emptynode = TrickplayElement("Empty")
+                emptynode.setFlags(emptynode.flags() ^ Qt.ItemIsEditable)
+                partner = emptynode.partner()
+                partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+                partner.setData("", Qt.DisplayRole) 
+                item.parent().appendRow([emptynode, partner])
+                item.parent().removeRow(item.row())
+                index = None
+            else:
+                item.parent().removeRow(item.row())
+                index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def duplicate(self):
