@@ -38,6 +38,8 @@ hdr.uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGro
                   "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
 
 hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", "ArrowPane", "TabBar", "MenuButton"} 
+hdr.uiContainersFixedContents = {"LayoutManager", "MenuButton"} 
+hdr.uiContainersChildrenContents = {"DialogBox", "ScrollPane", "Widget_Group", "ArrowPane"} 
 
 -------------------------------
 -- UI Element Creation Function Map 
@@ -153,9 +155,6 @@ v_guideline       = 0
 shift 		      = false
 control 	      = false
 
--- table for ui elements selcection 
---selected_objs	  = {}
-
 -- guide line  
 guideline_inspector_on = false
 selected_guideline = nil
@@ -172,6 +171,9 @@ ui = {
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
 
+function aa ()
+    _VE_.openFile("/Users/hjkim/TEST/trickplay.myTestApp12")
+end
 function dump_properties( o )
         local t = {}
         local l = 0
