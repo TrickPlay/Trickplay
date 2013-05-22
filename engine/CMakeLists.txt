@@ -559,6 +559,7 @@ list( APPEND
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
     ${ENGINE_SRC}/source/keys.cpp
+    ${ENGINE_SRC}/source/gst.cpp
     ${ENGINE_SRC}/source/media.cpp
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
