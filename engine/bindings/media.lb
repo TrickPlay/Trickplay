@@ -20,52 +20,45 @@ class MPlayer : private Media::Delegate
 
         MPlayer( lua_State * l ) : L( l ), player( NULL )
         {
-            player = Media::make( App::get(L)->get_context() , gst_constructor, this );
+            player = Media::make( App::get(L)->get_context(), gst_constructor, this );
 
-            if (player)
-            {
-                player->add_delegate(this);
-            }
+            if ( player ) player->add_delegate( this );
         }
 
         virtual ~MPlayer()
         {
-            if (player)
+            if ( player )
             {
-                player->remove_delegate(this);
+                player->remove_delegate( this );
                 delete player;
             }
         }
 
-        Media * get_player()
-        {
-            return player;
-        }
+        Media * get_player() { return player; }
 
     private:
 
         //......................................................................
         // Delegate methods
 
-        virtual void loaded(Media * player)
+        virtual void loaded( Media * player )
         {
-            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_loaded",0,0);
+            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
         }
 
-        virtual void error(Media * player,int code,const char * message)
+        virtual void error( Media * player, int code, const char * message )
         {
-            lua_pushinteger(L,code);
-            lua_pushstring(L,message);
-            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_error",2,0);
+            lua_pushinteger( L, code );
+            lua_pushstring( L, message );
+            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
         }
 
-        virtual void end_of_stream(Media * player)
+        virtual void end_of_stream( Media * player )
         {
-            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
+            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
         }
 
     private:
-
         lua_State  * L;
         Media      * player;
 };
@@ -107,14 +100,14 @@ interface media_texture [[ClutterActor *]] actor
 
 */
 
-global media [[MPlayer*]]
+global Media [[MPlayer*]]
 {
-    media()
+    Media()
         [[
             self=lb_construct( MPlayer , new MPlayer(L) );
         ]];
 
-    ~media()
+    ~Media()
         [[
             delete self;
         ]];
@@ -130,14 +123,14 @@ global media [[MPlayer*]]
     /*
         Property: state
 
-        The state property is an integer value indicating the media's current state.
+        The state property is an integer value indicating the Media's current state.
 
-        Possible media states are listed below. Note: When referencing a state, it must be referenced through the media variable. See the Code Example for a demonstration.
+        Possible Media states are listed below. Note: When referencing a state, it must be referenced through the Media variable. See the Code Example for a demonstration.
 
         IDLE - the mediaplayer is performing no operation
-        LOADING - the mediaplayer is preparing to play a media resource
-        PAUSED - the mediaplayer has paused playing a media resource
-        PLAYING - the mediaplayer is playing a media resource
+        LOADING - the mediaplayer is preparing to play a Media resource
+        PAUSED - the mediaplayer has paused playing a Media resource
+        PLAYING - the mediaplayer is playing a Media resource
 
         *Default Setting:* mediaplayer.IDLE
 
@@ -145,9 +138,9 @@ global media [[MPlayer*]]
 
             (code)
             -- Is mediaplayer paused?
-            if( mediaplayer.state == mediaplayer.PAUSED )then
+            if( Media.state == Media.PAUSED )then
                 -- Resume playing
-                mediaplayer:play()
+                Media:play()
             end
             (end)
 
@@ -156,7 +149,7 @@ global media [[MPlayer*]]
 
     readonly int state
         [[
-            state=self->get_player()?self->get_player()->get_state():TP_MEDIAPLAYER_IDLE;
+            state = self->get_player() ? self->get_player()->get_state() : TP_MEDIAPLAYER_IDLE;
         ]];
 
     /*
@@ -171,7 +164,7 @@ global media [[MPlayer*]]
 
     readonly double position
         [[
-            int result=self->get_player()?self->get_player()->get_position(&position):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = self->get_player() ? self->get_player()->get_position(&position) : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if(result)
             {
