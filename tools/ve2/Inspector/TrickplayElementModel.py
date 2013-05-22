@@ -6,7 +6,7 @@ from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest
 from TrickplayElement import TrickplayElement
 
 class TrickplayElementModel(QStandardItemModel):
-    
+
     def __init__(self, inspector, parent=None):
         QWidget.__init__(self, parent)
         self.inspector = inspector
@@ -31,22 +31,22 @@ class TrickplayElementModel(QStandardItemModel):
     def rai(self, idx, i , j):
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
-            if the_item : 
+            if the_item :
                 try:
                     self.newParentGid = the_item['gid']
                     if self.newParentGid == None and the_item.parent() and the_item.parent().parent()['type'] == "LayoutManager" :
-                        if the_item.text()[:3] == "Row" : #Drop into Row 
+                        if the_item.text()[:3] == "Row" : #Drop into Row
                             self.lmRow = int(the_item.text()[3:])
                             for x in range(0, the_item.rowCount()):
                                 temp_item = the_item.takeChild(x)
                                 if temp_item.text() == "Empty" :
-                                    self.lmCol = int( x ) 
+                                    self.lmCol = int( x )
                                     break
                             if self.lmCol == "nil" :
                                 self.lmCol = int( the_item.rowCount() )
-                            self.newParentGid = the_item.parent()['gid'] 
-                        else : #Drop into Empty Cell 
-                            self.lmCol = int(the_item.row()) # layout manager col number 
+                            self.newParentGid = the_item.parent()['gid']
+                        else : #Drop into Empty Cell
+                            self.lmCol = int(the_item.row()) # layout manager col number
                             self.lmRow = int(the_item.parent().text()[3:])
                             self.newParentGid = the_item.parent().parent()['gid'] #LayoutManager
                     elif the_item.parent()['type'] == "TabBar" :
@@ -57,16 +57,16 @@ class TrickplayElementModel(QStandardItemModel):
                     print ("merong : newParentGid nil")
 
     def ri(self, idx, i , j):
-        #idx is parent's idx 
+        #idx is parent's idx
         pass
         """
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
             the_item= self.itemFromIndex(idx)
-            if the_item : 
+            if the_item :
                 try:
                     self.newParentGid = the_item['gid']
                 except:
-                    
+
         """
 
     def rar(self, idx, i , j):
@@ -75,7 +75,7 @@ class TrickplayElementModel(QStandardItemModel):
             if the_item :
                 the_child_item = the_item.takeChild(i)
 
-                # child's parent 
+                # child's parent
                 if the_item['type'] == "MenuButton" :
                     self.lmChild = "true"
                     self.lmParentGid = the_item['gid']
@@ -87,7 +87,7 @@ class TrickplayElementModel(QStandardItemModel):
                         self.lmChild = "true"
                         self.lmParentGid = pGid
 
-                if the_child_item : 
+                if the_child_item :
                     try:
                         self.newChildGid = the_child_item['gid']
                     except:
@@ -100,23 +100,23 @@ class TrickplayElementModel(QStandardItemModel):
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
-                    if str(self.lmParentGid) != 'nil' : 
-                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    if str(self.lmParentGid) != 'nil' :
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')")
                     else:
-                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.tabIndex)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")")
                 else:
-                    if str(self.lmParentGid) != 'nil' : 
-                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')") 
+                    if str(self.lmParentGid) != 'nil' :
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+",'"+str(self.lmParentGid)+"')")
                     else:
-                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")") 
+                        self.main.sendLuaCommand("contentMove", "_VE_.contentMove('"+str(self.newChildGid)+"','"+str(self.newParentGid)+"',"+str(self.lmRow)+","+str(self.lmCol)+","+self.lmChild+","+str(self.lmParentGid)+")")
             else:
                 pass
 
             self.lmChild = "false"
             self.tabIndex = "nil"
             self.lmParentGid = "nil"
-            
-    
+
+
     def inspector_reply_finished(self, pdata=None, sdata=None):
         if pdata is not None :
             root = self.invisibleRootItem()
@@ -140,7 +140,7 @@ class TrickplayElementModel(QStandardItemModel):
 
             self.main.command = ""
             if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
-                self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                
+                self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
             return
 
 
@@ -151,7 +151,7 @@ class TrickplayElementModel(QStandardItemModel):
         """
         self.tpData = None
         self.getInspectorData()
-            
+
     def insertElement(self, parent, data, parentData, screen):
         """
         Recursively add UI Elements to the tree
@@ -159,11 +159,11 @@ class TrickplayElementModel(QStandardItemModel):
 
         """
         Parent is the parent node
-        
+
         Data is the property data for this node
         ParentData is a reference to the dictionary containing data
         """
-        
+
         if data is None:
             return
 
@@ -197,12 +197,12 @@ class TrickplayElementModel(QStandardItemModel):
             title = title[7:]
 
         # Set the name node to gid + name
-        if '' != value:   
+        if '' != value:
             gs = str(gid)
             l = len(gs)
-        else:    
+        else:
             value = ""
-        
+
         node = TrickplayElement(title)
         node.setTPJSON(data)
         node.setTPParent(parentData)
@@ -211,22 +211,22 @@ class TrickplayElementModel(QStandardItemModel):
 
         # Add a checkbox for everything but screen
         if not screen:
-            
+
             node.setCheckable(True)
-            
+
             checkState = Qt.Unchecked
             if data['is_visible']:
                 checkState = Qt.Checked
 
             node.setCheckState(checkState)
-        
+
         # Screen has no is_visible property because changing it
         # causes problems with key presses in the app
-        else:    
+        else:
             del(data['is_visible'])
             node.setSelectable(False)
             node.partner().setSelectable(False)
-        
+
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
         partner.setData(value, Qt.DisplayRole)
@@ -234,7 +234,7 @@ class TrickplayElementModel(QStandardItemModel):
         self.inspector.main._emulatorManager.contentMoveBlock = True
         parent.appendRow([node, partner])
         self.inspector.main._emulatorManager.contentMoveBlock = False
-        
+
         # Recurse through tabs
         try:
             tabs = data['tabs']
@@ -278,28 +278,28 @@ class TrickplayElementModel(QStandardItemModel):
         # Element has no cells
         except KeyError:
             pass
-        
+
         # Recurse through items
         try:
             if str(data['type']) == "MenuButton":
                 items = data['items']
                 for i in range(len(items)-1, -1, -1):
                     self.insertElement(node, items[i], data, False)
-        
+
         # Element has no items
         except KeyError:
             pass
-        
+
         # Recurse through contents
         try:
             contents = data['content']
             for i in range(len(contents)-1, -1, -1):
                 self.insertElement(node, contents[i], data, False)
-        
+
         # Element has no contents
         except KeyError:
             pass
-        
+
         # Recurse through children
         try:
             children = data['children']
@@ -307,48 +307,48 @@ class TrickplayElementModel(QStandardItemModel):
                 self.insertElement(node, children[i], data, False)
                 # keep the tree information :)
                 self.node = node
-        
+
         # Element has no children
         except KeyError:
             pass
-        
+
     def empty(self):
         """
         Remove all nodes from the tree
         """
-        
+
         self.invisibleRootItem().removeRow(0)
-        
+
     def search(self, property, value, start = None):
         """
         Find an element where property == value
         """
-        
+
         start = start or self.invisibleRootItem().child(0, 0)
-        
+
         if start:
             return self.recSearch(property, value, start)
         else:
             return None
-       
+
     def recSearch(self, property, value, item):
 
-        try : 
+        try :
             if item.TPJSON()[property] == value:
                 return item
         except:
             pass
-        
+
         # Check the item's children
         try:
-            
+
             count = item.rowCount()
             if count > 0:
                 for i in range(count):
                     result = self.recSearch(property, value, item.child(i))
                     if result:
                         return result
-                        
+
         except:
             pass
 

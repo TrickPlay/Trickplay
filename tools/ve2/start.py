@@ -34,13 +34,13 @@ def main(argv):
         QCoreApplication.setOrganizationName('Trickplay');
         QCoreApplication.setApplicationName('Trickplay VisalEditor 2');
         QCoreApplication.setApplicationVersion('0.0.1');
-            
+
         s = QProcessEnvironment.systemEnvironment().toStringList()
         for item in s:
             k , v = str( item ).split( "=" , 1 )
             if k == 'PWD':
                 apath = v
-        
+
         apath = os.path.join(apath, os.path.dirname(str(argv[0])))
         main = MainWindow(app, apath)
         main.show()
@@ -51,7 +51,7 @@ def main(argv):
         path = wizard.start(path)
         if path:
             settings = QSettings()
-            settings.setValue('path', path) 
+            settings.setValue('path', path)
             main.setCurrentProject(path, wizard.filesToOpen())
 
             app.setActiveWindow(main._menubar)
@@ -62,9 +62,9 @@ def main(argv):
         sys.exit(app.exec_())
 
     except KeyboardInterrupt:
-		exit("Exited")
+        exit("Exited")
 
 
 main(sys.argv)
 
-    
+
