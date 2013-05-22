@@ -107,7 +107,8 @@ class TrickplayEmulatorManager(QWidget):
 			    print "[TP] "+s
 
 			# Look for the VE_READY line
-			if s.startswith( "<<VE_READY>>:" ):
+			#if s.startswith( "<<VE_READY>>:" ):
+			if s.find("<<VE_READY>>:") > -1 :
 				try:
 					#load setting path !! 
 					print "[VE] Current Project : %s"%self.main.currentProject
