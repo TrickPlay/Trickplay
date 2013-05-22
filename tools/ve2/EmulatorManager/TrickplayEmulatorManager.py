@@ -84,7 +84,6 @@ class TrickplayEmulatorManager(QWidget):
         self.GLI_dialog.done(1)
 
     def app_ready_read(self):
-
         # Read all available output from the process
 
         while True:
@@ -411,7 +410,6 @@ class TrickplayEmulatorManager(QWidget):
 
                 elif s is not None:
                     pass
-
 
     def app_finished(self, errorCode):
         if self.trickplay.state() == QProcess.NotRunning :
