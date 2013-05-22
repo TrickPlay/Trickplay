@@ -134,9 +134,9 @@ private:
         // DO NOT ADD ANYTHING ABOVE mp. We rely on the address of mp being the
         // same as the address of the whole wrapper.
 
-        GST_Player   mp;
-        void*           marker;
-        Media*    player;
+        GST_Player  mp;
+        void*       marker;
+        Media*      player;
     };
 
     //.........................................................................

@@ -4,19 +4,23 @@
 
 #include "gst.h"
 
+typedef struct
+{
+    ClutterActor*   vt;
+    gulong          load_signal;
+    gint            video_width;
+    gint            video_height;
+    int             media_type;
+    int             mute;
+    double          volume;
+}
+UserData;
+
 //-----------------------------------------------------------------------------
 
 extern void* connect_audio_sampler( TPContext* context );
 
 extern void disconnect_audio_sampler( void* sampler );
-
-
-//-----------------------------------------------------------------------------
-
-static ClutterActor *background_texture = NULL;
-
-//-----------------------------------------------------------------------------
-
 
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
@@ -38,13 +42,13 @@ static inline void g_info( const gchar* format, ... )
 
 static void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
-    tp_media_player_end_of_stream( mp );
+    tp_mediaplayer_end_of_stream( mp );
     clutter_media_set_playing( cm, FALSE );
 }
 
 static void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
 {
-    tp_media_player_error( mp, error->code, error->message );
+    tp_mediaplayer_error( mp, error->code, error->message );
     clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
@@ -67,7 +71,7 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 
             if ( value )
             {
-                tp_media_player_tag_found( ( GST_Player* )user_data, tag, value );
+                tp_mediaplayer_tag_found( ( GST_Player* )user_data, tag, value );
             }
         }
 
@@ -295,7 +299,7 @@ static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 
             // Now, notify that the stream is loaded
 
-            tp_media_player_loaded( mp );
+            tp_mediaplayer_loaded( mp );
 
             // Disconnect this signal handler
 
@@ -361,7 +365,7 @@ static int gst_load( GST_Player* mp, const char* uri, const char* extra )
         case GST_STATE_CHANGE_NO_PREROLL:
         {
             get_stream_information( mp );
-            tp_media_player_loaded( mp );
+            tp_mediaplayer_loaded( mp );
             break;
         }
 
@@ -649,7 +653,7 @@ static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer v
 
 //-----------------------------------------------------------------------------
 
-static int gst_constructor( GST_Player* mp )
+int gst_constructor( GST_Player* mp, TPContext * context )
 {
     ClutterActor* video_texture = clutter_gst_video_texture_new();
 
@@ -677,12 +681,7 @@ static int gst_constructor( GST_Player* mp )
     clutter_actor_set_size( video_texture, width, height );
     clutter_actor_set_position( video_texture, 0, 0 );
 
-    if(background_texture)
-    {
-        clutter_actor_insert_child_above( stage, video_texture, background_texture );
-    } else {
-        clutter_actor_insert_child_below( stage, video_texture, NULL );
-    }
+    clutter_actor_insert_child_below( stage, video_texture, NULL );
 
     g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
 

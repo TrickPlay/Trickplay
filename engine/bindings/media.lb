@@ -3,31 +3,33 @@ module media_module;
 [[
 
 #include "tp-clutter.h"
-
-#include "mediaplayers.h"
+#include "gst.h"
+#include "media.h"
 #include "app.h"
 #include "context.h"
 #include "app_resource.h"
 
 //-----------------------------------------------------------------------------
-// Just a thin shell to hold a real MediaPlayer and act as its delegate. It can
+// Just a thin shell to hold a real Media and act as its delegate. It can
 // either use (and borrow) the default media player created by the context or
 // own (and dispose of) a new one.
 
-class MPlayer : private MediaPlayer::Delegate
+class MPlayer : private Media::Delegate
 {
     public:
 
         MPlayer( lua_State * l, bool use_default = false ) : L( l ), player( NULL ), is_default( use_default )
         {
-            if ( is_default )
+            player = Media::make( App::get(L)->get_context() , gst_constructor, this );
+
+            /*if ( is_default )
             {
                 player=App::get(L)->get_context()->get_default_media_player();
             }
             else
             {
                 player=App::get(L)->get_context()->create_new_media_player(this);
-            }
+            }*/
 
             if (player)
             {
@@ -40,12 +42,11 @@ class MPlayer : private MediaPlayer::Delegate
             if (player)
             {
                 player->remove_delegate(this);
-
-                App::get(L)->get_context()->remove_media_player( player );
+                delete player;
             }
         }
 
-        MediaPlayer * get_player()
+        Media * get_player()
         {
             return player;
         }
@@ -55,14 +56,14 @@ class MPlayer : private MediaPlayer::Delegate
         //......................................................................
         // Delegate methods
 
-        virtual void loaded(MediaPlayer * player);
-        virtual void error(MediaPlayer * player,int code,const char * message);
-        virtual void end_of_stream(MediaPlayer * player);
+        virtual void loaded(Media * player);
+        virtual void error(Media * player,int code,const char * message);
+        virtual void end_of_stream(Media * player);
 
     private:
 
         lua_State *     L;
-        MediaPlayer *   player;
+        Media *   player;
         bool            is_default;
 };
 
@@ -480,7 +481,7 @@ global media [[MPlayer*]]
 
     int load(string uri,string extra="")
         [[
-            if ( MediaPlayer * mp = self->get_player() )
+            if ( Media * mp = self->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
@@ -708,7 +709,7 @@ global media [[MPlayer*]]
 
     int play_sound(string uri)
         [[
-            if ( MediaPlayer * mp = self->get_player() )
+            if ( Media * mp = self->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
@@ -732,15 +733,15 @@ global media [[MPlayer*]]
     /*
         Function: new
 
-        The new() function creates a new MediaPlayer object on platforms that support multiple media players.
+        The new() function creates a new Media object on platforms that support multiple media players.
 
         *Arguments:* None
 
-        *Return Value:* new MediaPlayer object. If the platform does not support multiple media players, returns nil.
+        *Return Value:* new Media object. If the platform does not support multiple media players, returns nil.
 
     */
 
-    MediaPlayer new()
+    Media new()
         [[
                 lua_pushnil(L);
         ]];
@@ -955,19 +956,19 @@ global media [[MPlayer*]]
 
 [[
 
-void MPlayer::loaded(MediaPlayer * player)
+void MPlayer::loaded(Media * player)
 {
     lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_loaded",0,0);
 }
 
-void MPlayer::error(MediaPlayer * player,int code,const char * message)
+void MPlayer::error(Media * player,int code,const char * message)
 {
     lua_pushinteger(L,code);
     lua_pushstring(L,message);
     lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_error",2,0);
 }
 
-void MPlayer::end_of_stream(MediaPlayer * player)
+void MPlayer::end_of_stream(Media * player)
 {
     lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
 }

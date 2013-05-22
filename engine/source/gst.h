@@ -1,20 +1,11 @@
+#ifndef _TRICKPLAY_GST_H
+#define _TRICKPLAY_GST_H
+
 #include "clutter-gst/clutter-gst.h"
 #include "gst/video/video.h"
 
 #include "trickplay/mediaplayer.h"
 #include "trickplay/controller.h"
-
-typedef struct
-{
-    ClutterActor*   vt;
-    gulong          load_signal;
-    gint            video_width;
-    gint            video_height;
-    int             media_type;
-    int             mute;
-    double          volume;
-}
-UserData;
 
 #define TP_MEDIAPLAYER_IDLE         0x01
 #define TP_MEDIAPLAYER_LOADING      0x02
@@ -35,14 +26,14 @@ UserData;
 #define TP_MEDIAPLAYER_ERROR_NA                 -6
 
 typedef struct GST_Player GST_Player;
-typedef int (*GST_PlayerConstructor)( GST_Player * mp );
+typedef int (*GST_PlayerConstructor)( GST_Player * mp, TPContext * context );
 
 void tp_context_set_media_player_constructor( TPContext * context, GST_PlayerConstructor constructor);
-int tp_media_player_get_state( GST_Player * mp );
-void tp_media_player_loaded( GST_Player * mp );
-void tp_media_player_error( GST_Player * mp, int code, const char * message );
-void tp_media_player_end_of_stream( GST_Player * mp );
-void tp_media_player_tag_found( GST_Player * mp, const char * name, const char * value);
+int tp_mediaplayer_get_state( GST_Player * mp );
+void tp_mediaplayer_loaded( GST_Player * mp );
+void tp_mediaplayer_error( GST_Player * mp, int code, const char * message );
+void tp_mediaplayer_end_of_stream( GST_Player * mp );
+void tp_mediaplayer_tag_found( GST_Player * mp, const char * name, const char * value);
 
 struct GST_Player
 {
@@ -70,3 +61,6 @@ struct GST_Player
     void * (*get_viewport_texture)( GST_Player * mp);
 };
 
+extern int gst_constructor( GST_Player* mp, TPContext * context );
+
+#endif // _TRICKPLAY_GST_H
