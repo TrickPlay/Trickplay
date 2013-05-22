@@ -653,8 +653,10 @@ static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer v
 
 //-----------------------------------------------------------------------------
 
-int gst_constructor( GST_Player* mp, TPContext * context )
+int gst_constructor( GST_Player* mp, TPContext * _context )
 {
+    context = _context;
+
     ClutterActor* video_texture = clutter_gst_video_texture_new();
 
     if ( !video_texture )
