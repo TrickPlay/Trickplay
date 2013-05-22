@@ -42,7 +42,7 @@ void Media::Event::destroy( Event* event )
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
 
-Media* Media::make( TPContext* context , TPMediaPlayerConstructor constructor, Delegate* delegate )
+Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate )
 {
     if ( !constructor )
     {
@@ -52,7 +52,7 @@ Media* Media::make( TPContext* context , TPMediaPlayerConstructor constructor, D
 
     Wrapper* wrapper = ( Wrapper* )g_malloc0( sizeof( Wrapper ) );
 
-    TPMediaPlayer* mp = &wrapper->mp;
+    GST_Player* mp = &wrapper->mp;
 
     wrapper->marker = mp;
 
@@ -135,14 +135,14 @@ Media::~Media()
 }
 
 //-----------------------------------------------------------------------------
-// Given a TPMediaPlayer pointer, this casts it to a Wrapper pointer and
-// ensures that everything is in order. This relies on the TPMediaPlayer pointer
+// Given a GST_Player pointer, this casts it to a Wrapper pointer and
+// ensures that everything is in order. This relies on the GST_Player pointer
 // having the same address as its wrapper.
 //
 // Very pedantic, but better safe than sorry when these come from the outside
 // world.
 
-Media* Media::get( TPMediaPlayer* mp )
+Media* Media::get( GST_Player* mp )
 {
     g_assert( mp );
     Wrapper* wrapper = ( Wrapper* )mp;
@@ -156,7 +156,7 @@ Media* Media::get( TPMediaPlayer* mp )
 
 //-----------------------------------------------------------------------------
 
-TPMediaPlayer* Media::get_mp()
+GST_Player* Media::get_mp()
 {
     return &wrapper->mp;
 }
@@ -225,7 +225,7 @@ int Media::load( const char* uri, const char* extra )
 
     reset();
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !mp->load )
     {
@@ -263,7 +263,7 @@ int Media::play()
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !( state & ( TP_MEDIAPLAYER_PAUSED ) ) )
     {
@@ -296,7 +296,7 @@ int Media::seek( double seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !( state & ( TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED ) ) )
     {
@@ -327,7 +327,7 @@ int Media::pause()
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !( state & ( TP_MEDIAPLAYER_PLAYING ) ) )
     {
@@ -360,7 +360,7 @@ int Media::set_playback_rate( int rate )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( rate == 0 )
     {
@@ -397,7 +397,7 @@ int Media::get_position( double* seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( seconds );
 
@@ -432,7 +432,7 @@ int Media::get_duration( double* seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( seconds );
 
@@ -467,7 +467,7 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( start_seconds );
     g_assert( end_seconds );
@@ -503,7 +503,7 @@ int Media::get_video_size( int* width, int* height )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( width );
     g_assert( height );
@@ -539,7 +539,7 @@ int Media::get_viewport_geometry( int* left, int* top, int* width, int* height )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( left );
     g_assert( top );
@@ -571,7 +571,7 @@ int Media::set_viewport_geometry( int left, int top, int width, int height )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( width < 0 )
     {
@@ -620,7 +620,7 @@ int Media::get_media_type( int* type )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( type );
 
@@ -655,7 +655,7 @@ int Media::get_audio_volume( double* volume )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( volume );
 
@@ -693,7 +693,7 @@ int Media::set_audio_volume( double volume )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !mp->set_audio_volume )
     {
@@ -727,7 +727,7 @@ int Media::get_audio_mute( int* mute )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     g_assert( mute );
 
@@ -756,7 +756,7 @@ int Media::set_audio_mute( int mute )
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !mp->set_audio_mute )
     {
@@ -784,7 +784,7 @@ int Media::set_audio_mute( int mute )
 
 int Media::play_sound( const char* uri )
 {
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !mp->play_sound )
     {
@@ -806,7 +806,7 @@ void* Media::get_viewport_texture()
 {
     MPLOCK;
 
-    TPMediaPlayer* mp = get_mp();
+    GST_Player* mp = get_mp();
 
     if ( !mp->get_viewport_texture )
     {
@@ -994,7 +994,7 @@ void Media::remove_delegate( Delegate* delegate )
 
 // TODO: Find out where thet are being used within TrickPlay source code
 
-int tp_mediaplayer_get_state( TPMediaPlayer* mp )
+int tp_mediaplayer_get_state( GST_Player* mp )
 {
     tplog( "[%p] -> tp_media_player_get_state", mp );
     return Media::get( mp )->get_state();
@@ -1002,7 +1002,7 @@ int tp_mediaplayer_get_state( TPMediaPlayer* mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_mediaplayer_loaded( TPMediaPlayer* mp )
+void tp_mediaplayer_loaded( GST_Player* mp )
 {
     tplog( "[%p] -> tp_media_player_loaded", mp );
     Media::get( mp )->loaded();
@@ -1010,7 +1010,7 @@ void tp_mediaplayer_loaded( TPMediaPlayer* mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_mediaplayer_error( TPMediaPlayer* mp, int code, const char* message )
+void tp_mediaplayer_error( GST_Player* mp, int code, const char* message )
 {
     tplog( "[%p] -> tp_media_player_error(%d,'%s')", mp, code, message );
     Media::get( mp )->error( code, message );
@@ -1019,7 +1019,7 @@ void tp_mediaplayer_error( TPMediaPlayer* mp, int code, const char* message )
 
 //-----------------------------------------------------------------------------
 
-void tp_mediaplayer_end_of_stream( TPMediaPlayer* mp )
+void tp_mediaplayer_end_of_stream( GST_Player* mp )
 {
     tplog( "[%p] -> tp_media_player_end_of_stream", mp );
     Media::get( mp )->end_of_stream();
@@ -1027,7 +1027,7 @@ void tp_mediaplayer_end_of_stream( TPMediaPlayer* mp )
 
 //-----------------------------------------------------------------------------
 
-void tp_mediaplayer_tag_found( TPMediaPlayer* mp, const char* name, const char* value )
+void tp_mediaplayer_tag_found( GST_Player* mp, const char* name, const char* value )
 {
     tplog( "[%p] -> tp_media_player_tag_found('%s','%s')", mp, name, value );
 

@@ -1,6 +1,7 @@
 #ifndef _TRICKPLAY_MEDIA_H
 #define _TRICKPLAY_MEDIA_H
 
+#include "gst.h"
 #include "common.h"
 #include "trickplay/mediaplayer.h"
 #include "json.h"
@@ -24,11 +25,11 @@ public:
     //.........................................................................
     // Constructing a media player
 
-    static Media* make( TPContext* context , TPMediaPlayerConstructor constructor, Delegate* delegate = NULL );
+    static Media* make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate = NULL );
 
-    // Getting one from a TPMediaPlayer
+    // Getting one from a GST_Player
 
-    static Media* get( TPMediaPlayer* mp );
+    static Media* get( GST_Player* mp );
 
     ~Media();
 
@@ -84,11 +85,11 @@ private:
 
     // The external functions are friends
 
-    friend int tp_mediaplayer_get_state( TPMediaPlayer* mp );
-    friend void tp_mediaplayer_loaded( TPMediaPlayer* mp );
-    friend void tp_mediaplayer_error( TPMediaPlayer* mp, int code, const char* message );
-    friend void tp_mediaplayer_end_of_stream( TPMediaPlayer* mp );
-    friend void tp_mediaplayer_tag_found( TPMediaPlayer* mp, const char* name, const char* value );
+    friend int tp_mediaplayer_get_state( GST_Player* mp );
+    friend void tp_mediaplayer_loaded( GST_Player* mp );
+    friend void tp_mediaplayer_error( GST_Player* mp, int code, const char* message );
+    friend void tp_mediaplayer_end_of_stream( GST_Player* mp );
+    friend void tp_mediaplayer_tag_found( GST_Player* mp, const char* name, const char* value );
 
     //.........................................................................
     // Structure to hold an event
@@ -125,7 +126,7 @@ private:
 private:
 
     //.........................................................................
-    // We use this to hold the TPMediaPlayer instance. We bolt on a marker, that
+    // We use this to hold the GST_Player instance. We bolt on a marker, that
     // lets us verify its sanity and a pointer to us.
 
     struct Wrapper
@@ -133,7 +134,7 @@ private:
         // DO NOT ADD ANYTHING ABOVE mp. We rely on the address of mp being the
         // same as the address of the whole wrapper.
 
-        TPMediaPlayer   mp;
+        GST_Player   mp;
         void*           marker;
         Media*    player;
     };
@@ -163,9 +164,9 @@ private:
     void check( int valid_states );
 
     //.........................................................................
-    // Returns the pointer to the TPMediaPlayer inside our wrapper
+    // Returns the pointer to the GST_Player inside our wrapper
 
-    TPMediaPlayer* get_mp();
+    GST_Player* get_mp();
 
     //.........................................................................
 
