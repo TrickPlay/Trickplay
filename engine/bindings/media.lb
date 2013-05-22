@@ -23,6 +23,7 @@ class MediaExtra : private Media::Delegate
         : constructing( false ), loaded_flag( false ), async( false ), read_tags( false ), actor( _actor ), L( l ), player( NULL )
     {
         player = Media::make( App::get( L )->get_context(), gst_constructor, this );
+
         if ( player ) player->add_delegate( this );
     }
 
@@ -54,7 +55,7 @@ class MediaExtra : private Media::Delegate
         return instance;
     }
 
-    bool load_media()
+    /*bool load_media()
     {
         g_assert( L );
         g_assert( actor );
@@ -88,7 +89,7 @@ class MediaExtra : private Media::Delegate
         g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
 
         return true;
-    }
+    }*/
 
     bool           constructing;
     bool           loaded_flag;
@@ -102,19 +103,19 @@ class MediaExtra : private Media::Delegate
 
     virtual void loaded( Media * player )
     {
-        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
     }
 
     virtual void error( Media * player, int code, const char * message )
     {
         lua_pushinteger( L, code );
         lua_pushstring( L, message );
-        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
     }
 
     virtual void end_of_stream( Media * player )
     {
-        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
     }
 
     ClutterActor * actor;
@@ -176,14 +177,14 @@ class Media [[ClutterActor*]] actor
 
             media->constructing = FALSE;
 
-            media->load_media();
+            //media->load_media();
 
             g_object_unref( self );
         ]];
 
     ~Media()
         [[
-            delete self;
+            //delete self;
         ]];
 
 /***************************************
@@ -226,7 +227,7 @@ class Media [[ClutterActor*]] actor
         [[
             g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free);
 
-            MediaExtra::get( self, L )->load_media();
+            //MediaExtra::get( self, L )->load_media();
         ]];
 
     /*
