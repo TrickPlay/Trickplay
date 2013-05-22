@@ -18,18 +18,9 @@ class MPlayer : private Media::Delegate
 {
     public:
 
-        MPlayer( lua_State * l, bool use_default = false ) : L( l ), player( NULL ), is_default( use_default )
+        MPlayer( lua_State * l ) : L( l ), player( NULL )
         {
             player = Media::make( App::get(L)->get_context() , gst_constructor, this );
-
-            /*if ( is_default )
-            {
-                player=App::get(L)->get_context()->get_default_media_player();
-            }
-            else
-            {
-                player=App::get(L)->get_context()->create_new_media_player(this);
-            }*/
 
             if (player)
             {
@@ -56,15 +47,27 @@ class MPlayer : private Media::Delegate
         //......................................................................
         // Delegate methods
 
-        virtual void loaded(Media * player);
-        virtual void error(Media * player,int code,const char * message);
-        virtual void end_of_stream(Media * player);
+        virtual void loaded(Media * player)
+        {
+            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_loaded",0,0);
+        }
+
+        virtual void error(Media * player,int code,const char * message)
+        {
+            lua_pushinteger(L,code);
+            lua_pushstring(L,message);
+            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_error",2,0);
+        }
+
+        virtual void end_of_stream(Media * player)
+        {
+            lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
+        }
 
     private:
 
-        lua_State *     L;
-        Media *   player;
-        bool            is_default;
+        lua_State  * L;
+        Media      * player;
 };
 
 ]]
@@ -953,24 +956,3 @@ global media [[MPlayer*]]
 */
 
 }
-
-[[
-
-void MPlayer::loaded(Media * player)
-{
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_loaded",0,0);
-}
-
-void MPlayer::error(Media * player,int code,const char * message)
-{
-    lua_pushinteger(L,code);
-    lua_pushstring(L,message);
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_error",2,0);
-}
-
-void MPlayer::end_of_stream(Media * player)
-{
-    lb_invoke_callbacks(L,this,"MEDIAPLAYER_METATABLE","on_end_of_stream",0,0);
-}
-
-]]
