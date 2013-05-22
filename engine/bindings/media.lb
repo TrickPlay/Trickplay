@@ -2,6 +2,7 @@ module media_module;
 
 [[
 
+#include "clutter_util.h"
 #include "tp-clutter.h"
 #include "gst.h"
 #include "media.h"
@@ -14,53 +15,111 @@ module media_module;
 // either use (and borrow) the default media player created by the context or
 // own (and dispose of) a new one.
 
-class MPlayer : private Media::Delegate
+class MediaExtra : private Media::Delegate
 {
-    public:
+  public:
 
-        MPlayer( lua_State * l ) : L( l ), player( NULL )
+    MediaExtra( ClutterActor * _actor, lua_State * l )
+        : constructing( false ), loaded_flag( false ), async( false ), read_tags( false ), actor( _actor ), L( l ), player( NULL )
+    {
+        player = Media::make( App::get( L )->get_context(), gst_constructor, this );
+        if ( player ) player->add_delegate( this );
+    }
+
+    virtual ~MediaExtra()
+    {
+        if ( player )
         {
-            player = Media::make( App::get(L)->get_context(), gst_constructor, this );
+            player->remove_delegate( this );
+            delete player;
+        }
+    }
 
-            if ( player ) player->add_delegate( this );
+    Media * get_player() { return player; }
+
+    static void destroy( MediaExtra * me ) { delete me; }
+
+    static MediaExtra* get( ClutterActor * actor, lua_State * l )
+    {
+        g_assert( actor );
+        MediaExtra* instance = ( MediaExtra* ) g_object_get_data( G_OBJECT( actor ), "tp-media-extra" );
+
+        if ( ! instance )
+        {
+            g_assert( l );
+            instance = new MediaExtra( actor, l );
+            g_object_set_data_full( G_OBJECT( actor ), "tp-media-extra", instance, ( GDestroyNotify ) MediaExtra::destroy );
         }
 
-        virtual ~MPlayer()
+        return instance;
+    }
+
+    bool load_media()
+    {
+        g_assert( L );
+        g_assert( actor );
+
+        int result;
+
+        // Don't load when constructing. Not all properties may have been set yet 
+        if ( constructing ) return false;
+
+        tags = JSON::Object();
+
+        loaded_flag = false;
+
+        //.........................................................................
+        // Get the media source
+        char * uri = ( char * ) g_object_get_data( G_OBJECT( actor ), "tp-src" );
+        if ( !uri ) return false;
+
+        if ( player )
         {
-            if ( player )
-            {
-                player->remove_delegate( this );
-                delete player;
-            }
-        }
+            AppResource resource = AppResource( L , uri , 0 , player->get_valid_schemes() );
 
-        Media * get_player() { return player; }
+            result = resource ? player->load( resource.get_uri().c_str(), "" )
+                              : TP_MEDIAPLAYER_ERROR_INVALID_URI;
+        }   
+        else
+        {   
+            result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        }   
 
-    private:
+        g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
 
-        //......................................................................
-        // Delegate methods
+        return true;
+    }
 
-        virtual void loaded( Media * player )
-        {
-            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
-        }
+    bool           constructing;
+    bool           loaded_flag;
+    bool           async;
+    bool           read_tags;
+    JSON::Object   tags;
 
-        virtual void error( Media * player, int code, const char * message )
-        {
-            lua_pushinteger( L, code );
-            lua_pushstring( L, message );
-            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
-        }
+  private:
+    //......................................................................
+    // Delegate methods
 
-        virtual void end_of_stream( Media * player )
-        {
-            lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
-        }
+    virtual void loaded( Media * player )
+    {
+        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
+    }
 
-    private:
-        lua_State  * L;
-        Media      * player;
+    virtual void error( Media * player, int code, const char * message )
+    {
+        lua_pushinteger( L, code );
+        lua_pushstring( L, message );
+        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
+    }
+
+    virtual void end_of_stream( Media * player )
+    {
+        lb_invoke_callbacks( L, this, "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
+    }
+
+    ClutterActor * actor;
+    lua_State    * L;
+    Media        * player;
 };
 
 ]]
@@ -100,16 +159,74 @@ interface media_texture [[ClutterActor *]] actor
 
 */
 
-global Media [[MPlayer*]]
+class Media [[ClutterActor*]] actor
 {
-    Media()
+    Media(table props = 0 )
         [[
-            self=lb_construct( MPlayer , new MPlayer(L) );
+            //self=lb_construct( MediaExtra , new MediaExtra(L) );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_gst_video_texture_new ) );
+
+            ClutterUtil::initialize_actor( L, self, MEDIA_METATABLE );
+
+            MediaExtra * media = MediaExtra::get( self, L );
+
+            media->constructing = TRUE;
+
+            ClutterUtil::set_props_from_table( L, props );
+
+            media->constructing = FALSE;
+
+            media->load_media();
+
+            g_object_unref( self );
         ]];
 
     ~Media()
         [[
             delete self;
+        ]];
+
+/***************************************
+    Property: src
+
+    The src property is a string that references a media file. The string may refer to either a path in your application bundle or a URI.
+
+    Setting the src property also begins the process of loading the media. By default, media loading is performed synchronously. To determine the success or failure of a synchronous load, you can check the <loaded> property immediately after setting the src property.
+
+    Asynchronous media loading is supported by setting the pre_load property prior to setting the src property. For instructions on handling asynchonous media loading, refer to the <pre_load> property.
+
+    *Default Setting:* nil
+
+    *Code Examples:* Create an Meida object and load its associated media synchronously
+
+        (code)
+        local myMedia = Media()
+        myMedia.src = "assets/foo.avi"        -- load media synchronously
+        if myMedia.loaded == false then
+          -- Media not loaded; insert error-handling code here
+        end
+        (end)
+
+        (code)
+        -- Same as above, but combining object creation and
+        -- the setting of the src property in a single statement
+        local myMedia = Media( { src = "assets/foo.avi" } )
+        if myMedia.loaded == false then
+          -- Insert error-handling code here
+        end
+        (end)
+
+    *See Also:* the <loaded>, and <pre_load> properties
+*/
+
+    string src
+        [[
+            src=( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+        ]]
+        [[
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free);
+
+            MediaExtra::get( self, L )->load_media();
         ]];
 
     /*
@@ -119,6 +236,25 @@ global Media [[MPlayer*]]
     const int LOADING=TP_MEDIAPLAYER_LOADING;
     const int PAUSED=TP_MEDIAPLAYER_PAUSED;
     const int PLAYING=TP_MEDIAPLAYER_PLAYING;
+
+/***************************************
+    Property: loaded
+
+    The boolean loaded property indicates the success/true or failure/false of the media's synchronous-load operation.
+
+    The loaded property will also be set to false while a media is loading asynchronously. This may make it tempting to intermittently poll the loaded property to determine if the media has finished loading, but you should not do this because the loaded property can also be set to false due to the load operation failing; in such a scenario, your polling application will wait forever for the property to become true. Instead, you should register an <on_loaded> event handler to notify your application when an asynchronous-load operation has completed.
+
+    *Default Setting:* false
+
+    *Code Example:* To see the loaded property in use, check the code example given in the <src> property.
+
+    *See Also:* the <src> property
+*/
+
+    readonly bool loaded
+        [[
+            loaded = MediaExtra::get( self, L )->loaded_flag;
+        ]];
 
     /*
         Property: state
@@ -149,7 +285,7 @@ global Media [[MPlayer*]]
 
     readonly int state
         [[
-            state = self->get_player() ? self->get_player()->get_state() : TP_MEDIAPLAYER_IDLE;
+            state = MediaExtra::get( self, L )->get_player() ? MediaExtra::get( self, L )->get_player()->get_state() : TP_MEDIAPLAYER_IDLE;
         ]];
 
     /*
@@ -164,7 +300,9 @@ global Media [[MPlayer*]]
 
     readonly double position
         [[
-            int result = self->get_player() ? self->get_player()->get_position(&position) : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_position( &position )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if(result)
             {
@@ -185,7 +323,9 @@ global Media [[MPlayer*]]
 
     readonly double duration
         [[
-            int result=self->get_player()?self->get_player()->get_duration(&duration):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_duration(&duration)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -215,7 +355,9 @@ global Media [[MPlayer*]]
             double start;
             double end;
 
-            int result=self->get_player()?self->get_player()->get_buffered_duration(&start,&end):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_buffered_duration( &start, &end )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -247,9 +389,11 @@ global Media [[MPlayer*]]
             int width;
             int height;
 
-            int result=self->get_player()?self->get_player()->get_video_size(&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_video_size( &width, &height )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if (result)
+            if ( result )
             {
                 lua_pushnil(L);
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -277,7 +421,9 @@ global Media [[MPlayer*]]
     readonly bool has_video
         [[
             int type;
-            int result=self->get_player()?self->get_player()->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -303,7 +449,9 @@ global Media [[MPlayer*]]
     readonly bool has_audio
         [[
             int type;
-            int result=self->get_player()?self->get_player()->get_media_type(&type):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -327,9 +475,9 @@ global Media [[MPlayer*]]
     readonly table tags
         [[
             lua_newtable(L);
-            if (self->get_player())
+            if (MediaExtra::get( self, L )->get_player())
             {
-                StringPairList tags=self->get_player()->get_tags();
+                StringPairList tags = MediaExtra::get( self, L )->get_player()->get_tags();
 
                 int i=1;
 
@@ -352,13 +500,13 @@ global Media [[MPlayer*]]
 
     readonly UIElement texture
         [[
-            if (!self->get_player())
+            if (!MediaExtra::get( self, L )->get_player())
             {
                 lua_pushnil(L);
             }
             else
             {
-                void * t=self->get_player()->get_viewport_texture();
+                void * t=MediaExtra::get( self, L )->get_player()->get_viewport_texture();
 
                 if (!t || !CLUTTER_IS_ACTOR(t))
                 {
@@ -394,7 +542,9 @@ global Media [[MPlayer*]]
 
     double volume
         [[
-            int result=self->get_player()?self->get_player()->get_audio_volume(&volume):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_volume(&volume)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -403,8 +553,8 @@ global Media [[MPlayer*]]
             }
         ]]
         [[
-            if (self->get_player())
-                self->get_player()->set_audio_volume(volume);
+            if (MediaExtra::get( self, L )->get_player())
+                MediaExtra::get( self, L )->get_player()->set_audio_volume(volume);
         ]];
 
     /*
@@ -421,7 +571,7 @@ global Media [[MPlayer*]]
         [[
             int m;
 
-            int result=self->get_player()?self->get_player()->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -434,8 +584,8 @@ global Media [[MPlayer*]]
             }
         ]]
         [[
-            if (self->get_player())
-                self->get_player()->set_audio_mute(mute);
+            if (MediaExtra::get( self, L )->get_player())
+                MediaExtra::get( self, L )->get_player()->set_audio_mute(mute);
         ]];
 
     /*
@@ -452,8 +602,8 @@ global Media [[MPlayer*]]
 
     reset()
         [[
-            if (self->get_player())
-                self->get_player()->reset();
+            if (MediaExtra::get( self, L )->get_player())
+                MediaExtra::get( self, L )->get_player()->reset();
         ]];
 
     /*
@@ -477,7 +627,7 @@ global Media [[MPlayer*]]
 
     int load(string uri,string extra="")
         [[
-            if ( Media * mp = self->get_player() )
+            if ( Media * mp = MediaExtra::get( self, L )->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
@@ -511,7 +661,7 @@ global Media [[MPlayer*]]
 
     int play()
         [[
-            result=self->get_player()?self->get_player()->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -532,7 +682,7 @@ global Media [[MPlayer*]]
 
     int pause()
         [[
-            result=self->get_player()?self->get_player()->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -555,7 +705,7 @@ global Media [[MPlayer*]]
 
     int seek(double seconds)
         [[
-            result=self->get_player()?self->get_player()->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -582,7 +732,7 @@ global Media [[MPlayer*]]
 
     int set_playback_rate(int rate)
         [[
-            result=self->get_player()?self->get_player()->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -612,7 +762,7 @@ global Media [[MPlayer*]]
             int width;
             int height;
 
-            int result=self->get_player()?self->get_player()->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
+            int result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
 
             if (result)
             {
@@ -650,14 +800,12 @@ global Media [[MPlayer*]]
         *See Also:* the <get_viewport_geometry> function
     */
 
-    int set_viewport_geometry(int left,int top,int width,int height)
+    int set_viewport_geometry( int left, int top, int width, int height )
         [[
-            if (width<0)
-                width=0;
-            if (height<0)
-                height=0;
+            if ( width  < 0 ) width  = 0;
+            if ( height < 0 ) height = 0;
 
-            result=self->get_player()?self->get_player()->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result = MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -678,10 +826,12 @@ global Media [[MPlayer*]]
 
     int reset_viewport_geometry()
         [[
-          result=self->get_player()?self->get_player()->reset_viewport_geometry():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if(result)
+          result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->reset_viewport_geometry()
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            if ( result )
             {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
         ]];
 
@@ -703,9 +853,9 @@ global Media [[MPlayer*]]
         *See Also:* the <load> and <play> functions
     */
 
-    int play_sound(string uri)
+    int play_sound( string uri )
         [[
-            if ( Media * mp = self->get_player() )
+            if ( Media * mp = MediaExtra::get( self, L )->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
@@ -720,9 +870,9 @@ global Media [[MPlayer*]]
             {
                 result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
-            if(result)
+            if ( result )
             {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
         ]];
 
