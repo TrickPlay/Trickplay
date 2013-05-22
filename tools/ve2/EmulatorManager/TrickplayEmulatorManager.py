@@ -411,8 +411,6 @@ class TrickplayEmulatorManager(QWidget):
                 elif s is not None:
                     pass
 
-
->>>>>>> origin/develop
     def app_finished(self, errorCode):
         if self.trickplay.state() == QProcess.NotRunning :
             print "[VE] Trickplay APP is finished"
