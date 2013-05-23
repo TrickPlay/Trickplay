@@ -418,6 +418,11 @@ private:
 
 ]]
 
+/***********************************************
+    Class: UPnPClient
+
+    A client for UPnP
+*/
 class UPnPClient [[ Client * ]]
 {
     UPnPClient()
@@ -430,16 +435,37 @@ class UPnPClient [[ Client * ]]
             delete self;
         ]];
 
+/***********************************************
+    Function: search
+
+    *Arguments:*
+        target      -   What to search for
+        timeout_seconds -   Optional timeout; 0 means "no timeout" [default: 0]
+*/
     int search( string target , int timeout_seconds = 0 )
         [[
             result = self->search( L , target , timeout_seconds );
         ]];
 
+/***********************************************
+    Function: send_action
+
+    *Arguments:*
+        control_url     -   The control URL endpoint
+        service_type    -   The service type
+        action          -   The action to send
+        arguments       -   A table of arguments to pass to the action
+*/
     int send_action( string control_url , string service_type , string action , table arguments )
         [[
             result = self->send_action( L , control_url , service_type , action , arguments );
         ]];
 
+/***********************************************
+    Event: on_search_result
+
+    Gets generated when a search result is found
+*/
     function on_search_result
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_search_result" , L );
@@ -448,16 +474,27 @@ class UPnPClient [[ Client * ]]
             UserData::get( L )->set_last_callback( (char*) "on_search_result" , L );
         ]];
 
+/***********************************************
+    Function: add_onsearchresult_listener
+*/
     int add_onsearchresult_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_search_result" , L );
         ]];
 
+/***********************************************
+    Function: remove_onsearchresult_listener
+*/
     remove_onsearchresult_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_search_result" , L );
         ]];
 
+/***********************************************
+    Event: on_search_completed
+
+    Gets generated when a search is completed
+*/
     function on_search_completed
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_search_completed" , L );
@@ -466,16 +503,27 @@ class UPnPClient [[ Client * ]]
             UserData::get( L )->set_last_callback( (char*) "on_search_completed" , L );
         ]];
 
+/***********************************************
+    Function: add_onsearchcompleted_listener
+*/
     int add_onsearchcompleted_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_search_completed" , L );
         ]];
 
+/***********************************************
+    Function: remove_onsearchcompleted_listener
+*/
     remove_onsearchcompleted_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_search_completed" , L );
         ]];
 
+/***********************************************
+    Event: on_action_completed
+
+    Gets generated when an action is completed
+*/
     function on_action_completed
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_action_completed" , L );
@@ -484,11 +532,17 @@ class UPnPClient [[ Client * ]]
             UserData::get( L )->set_last_callback( (char*) "on_action_completed" , L );
         ]];
 
+/***********************************************
+    Function: add_onactioncompleted_listener
+*/
     int add_onactioncompleted_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_action_completed" , L );
         ]];
 
+/***********************************************
+    Function: remove_onactioncompleted_listener
+*/
     remove_onactioncompleted_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_action_completed" , L );
