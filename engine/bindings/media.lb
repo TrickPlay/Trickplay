@@ -222,10 +222,10 @@ class Media [[ClutterActor*]] actor
 
     string src
         [[
-            src=( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+            src = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
         ]]
         [[
-            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free);
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free );
 
             //MediaExtra::get( self, L )->load_media();
         ]];
@@ -233,10 +233,10 @@ class Media [[ClutterActor*]] actor
     /*
         Note: These state constants are documented in the state property.
     */
-    const int IDLE=TP_MEDIAPLAYER_IDLE;
-    const int LOADING=TP_MEDIAPLAYER_LOADING;
-    const int PAUSED=TP_MEDIAPLAYER_PAUSED;
-    const int PLAYING=TP_MEDIAPLAYER_PLAYING;
+    const int IDLE    = TP_MEDIAPLAYER_IDLE;
+    const int LOADING = TP_MEDIAPLAYER_LOADING;
+    const int PAUSED  = TP_MEDIAPLAYER_PAUSED;
+    const int PLAYING = TP_MEDIAPLAYER_PLAYING;
 
 /***************************************
     Property: loaded
@@ -550,7 +550,7 @@ class Media [[ClutterActor*]] actor
             if ( result )
             {
                 volume = 0;
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
         ]]
         [[
@@ -573,8 +573,8 @@ class Media [[ClutterActor*]] actor
             int m;
 
             int result = MediaExtra::get( self, L )->get_player()
-                         ? MediaExtra::get( self, L )->get_player()->get_audio_mute( &m )
-                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                       ? MediaExtra::get( self, L )->get_player()->get_audio_mute( &m )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if ( result )
             {
@@ -628,13 +628,15 @@ class Media [[ClutterActor*]] actor
         *See Also:* the <on_loaded> and <on_error> events
     */
 
-    int load(string uri,string extra="")
+    int load()
         [[
+            char * uri = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+
             if ( Media * mp = MediaExtra::get( self, L )->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
-                    result = mp->load( resource.get_uri().c_str() , extra );
+                    result = mp->load( resource.get_uri().c_str() , "" );
                 }
                 else
                 {
@@ -645,7 +647,8 @@ class Media [[ClutterActor*]] actor
             {
                 result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
-            g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+
+            g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
     /*
@@ -666,11 +669,9 @@ class Media [[ClutterActor*]] actor
         [[
             result = MediaExtra::get( self, L )->get_player()
                    ? MediaExtra::get( self, L )->get_player()->play()
-                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if ( result )
-            {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
-            }
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
     /*
@@ -690,10 +691,8 @@ class Media [[ClutterActor*]] actor
             result = MediaExtra::get( self, L )->get_player()
                    ? MediaExtra::get( self, L )->get_player()->pause()
                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if(result)
-            {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
-            }
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
     /*
@@ -715,10 +714,8 @@ class Media [[ClutterActor*]] actor
             result = MediaExtra::get( self, L )->get_player()
                    ? MediaExtra::get( self, L )->get_player()->seek(seconds)
                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if(result)
-            {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
-            }
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
     /*
@@ -744,10 +741,8 @@ class Media [[ClutterActor*]] actor
             result = MediaExtra::get( self, L )->get_player()
                    ? MediaExtra::get( self, L )->get_player()->set_playback_rate(rate)
                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if(result)
-            {
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
-            }
+
+            if( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
         ]];
 
     /*
@@ -768,8 +763,10 @@ class Media [[ClutterActor*]] actor
         *See Also:* the <load> and <play> functions
     */
 
-    int play_sound( string uri )
+    int play_sound()
         [[
+            char * uri = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+
             if ( Media * mp = MediaExtra::get( self, L )->get_player() )
             {
                 if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
@@ -786,10 +783,7 @@ class Media [[ClutterActor*]] actor
                 result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
 
-            if ( result )
-            {
-                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
-            }
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];
 
 /***************************************

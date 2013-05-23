@@ -643,25 +643,7 @@ int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor 
     // We own it
 
     g_object_ref_sink( G_OBJECT( video_texture ) );
-/*
-    // Get the stage, size the video texture and add it to the stage
 
-    clutter_actor_hide( video_texture );
-
-    // This is a total hack, but there's no clean way to leak the ClutterStage out of the context
-    // and clutter_stage_get_default() might give us the wrong stage in a multi-stage enviroment (like Ubuntu or OSX)
-    ClutterActor* stage = ( ClutterActor* )tp_context_get( context, "sekrit-stage" );
-
-    gfloat width, height;
-
-    clutter_actor_get_size( stage, &width, &height );
-    clutter_actor_set_size( video_texture, width, height );
-    clutter_actor_set_position( video_texture, 0, 0 );
-
-    clutter_actor_insert_child_below( stage, video_texture, NULL );
-
-    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
-*/
     // Connect signals
 
     g_signal_connect( video_texture, "eos", G_CALLBACK( gst_end_of_stream ), mp );
