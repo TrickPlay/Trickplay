@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trickplay/mediaplayer.h"
-#include "json.h"
 
 class MediaPlayer
 {
@@ -15,7 +14,7 @@ public:
     class Delegate
     {
     public:
-        virtual ~Delegate() {};
+
         virtual void loaded( MediaPlayer* player ) = 0;
         virtual void error( MediaPlayer* player, int code, const char* message ) = 0;
         virtual void end_of_stream( MediaPlayer* player ) = 0;

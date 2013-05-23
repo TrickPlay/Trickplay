@@ -5,20 +5,22 @@ from PyQt4.QtCore import *
 
 from wizard import Wizard
 from UI.MainWindow import Ui_MainWindow
+from UI.ImportSkinDialog import Ui_importSkinImages
 from Inspector.TrickplayInspector import TrickplayInspector
 from ImageFileSystem.TrickplayImageFileSystem import TrickplayImageFileSystem
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
-from UI.ImportSkinDialog import Ui_importSkinImages
+from Inspector.TrickplayElement import TrickplayElement
 
 try:
     _fromUtf8 = QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class MainWindow(QMainWindow):
-    
+
     def __init__(self, app, apath=None, parent = None):
-        
+
         self.stitcherErrorCode = {
             1 : 'Could not parse arguments',
             2 : 'No inputs given',
@@ -30,25 +32,27 @@ class MainWindow(QMainWindow):
             203 : 'Could not load spritesheet source image <path>',
             301 : 'Failed to fit all of the images'
         }
-            
-        self.skinUI = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "ClippingRegion"]
 
-        self.skinPath = {"ArrowPane": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
-         "ButtonPicker": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],  
-         "Button": ['default', 'activation', 'focus'],  
-         "DialogBox": ['default', 'seperator-h.png'],  
-         "MenuButton": ['default', 'activation', 'focus'],  
-         "RadioButton": ['default', 'activation', 'focus', 'selection', 'box-focus.png', 'box-default.png','box-selected.png', 'box-focus-selected.png'],  
-         "CheckBox": ['default', 'activation', 'focus', 'selection', 'radio-focus.png', 'radio-default.png','radio-selected.png', 'radio-focus-selected.png'],  
-         "TabBar": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default', 'activation', 'focus', 'selection'],  
-         "ToastAlert": ['default', 'seperator-h.png', 'error.png'],  
-         "TextInput": ['default', 'focus'],  
-         "ScrollPane": ['default', 'track', 'grip/default', 'grip/focus'],  
-         "Slider": ['track', 'grip/default', 'grip/focus'],  
-         "ProgressBar": ['empty', 'filled'], 
-         "OrbitingDots": ['icon.png'], 
-         "ProgressSpinner": ['icon.png'], 
-         "ClippingRegion": ['default'],  
+        self.containerUI = ['Widget_Group', 'ArrowPane', 'MenuButton', 'ScrollPane', 'DialogBox', 'TabBar', 'LayoutManager']
+        self.skinUI = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "ClippingRegion"]
+        self.uiElements = ["ArrowPane", "ButtonPicker", "Button", "DialogBox", "MenuButton", "RadioButton", "CheckBox", "TabBar", "LayoutManager", "ToastAlert", "TextInput", "ScrollPane", "Slider", "ProgressBar", "OrbitingDots", "ProgressSpinner", "Sprite", "Text", "Rectangle"]
+
+        self.skinPath = {"ArrowPane": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],
+         "ButtonPicker": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default'],
+         "Button": ['default', 'activation', 'focus'],
+         "DialogBox": ['default', 'seperator-h.png'],
+         "MenuButton": ['default', 'activation', 'focus'],
+         "RadioButton": ['default', 'activation', 'focus', 'selection', 'box-focus.png', 'box-default.png','box-selected.png', 'box-focus-selected.png'],
+         "CheckBox": ['default', 'activation', 'focus', 'selection', 'radio-focus.png', 'radio-default.png','radio-selected.png', 'radio-focus-selected.png'],
+         "TabBar": ['arrow-up', 'arrow-down', 'arrow-right', 'arrow-left', 'default', 'activation', 'focus', 'selection'],
+         "ToastAlert": ['default', 'seperator-h.png', 'error.png'],
+         "TextInput": ['default', 'focus'],
+         "ScrollPane": ['default', 'track', 'grip/default', 'grip/focus'],
+         "Slider": ['track', 'grip/default', 'grip/focus'],
+         "ProgressBar": ['empty', 'filled'],
+         "OrbitingDots": ['icon.png'],
+         "ProgressSpinner": ['icon.png'],
+         "ClippingRegion": ['default'],
         }
         self.skinPathList = self.skinPath.items()
 
@@ -56,90 +60,94 @@ class MainWindow(QMainWindow):
             'arrow-down':['default.png', 'focus.png', 'activation.png'],
             'arrow-right':['default.png', 'focus.png', 'activation.png'],
             'arrow-left':['default.png', 'focus.png', 'activation.png'],
-            'default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'grip/default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'activation':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png'], 
-            'focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'grip/focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'selection':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'empty':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'filled':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'], 
-            'track':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'] 
+            'default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'grip/default':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'activation':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png'],
+            'focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'grip/focus':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'selection':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'empty':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'filled':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png'],
+            'track':['se.png','sw.png','ne.png','nw.png','n.png','e.png','w.png','s.png','c.png']
         }
 
+        #Progress Bar for image/skin importing
         self.bar = None
 
+        #Trickplay Lua Emulator, default position
         self.luaEy = 300
-        self.luaEx = 1900
+        self.luaEx = 500
+
         QWidget.__init__(self, parent)
-        
+
+        #VE path
         self.apath = apath
 
+        #Visual Debugger
         self.debugger = QProcess()
-
         QObject.connect(self.debugger, SIGNAL('started()'), self.debug_started)
         QObject.connect(self.debugger, SIGNAL('finished(int)'), self.debug_finished)
 
+        #Stitcher
         self.stitcher = QProcess()
         QObject.connect(self.stitcher, SIGNAL('started()'), self.stitcher_started)
         QObject.connect(self.stitcher, SIGNAL('finished(int)'), self.stitcher_finished)
         QObject.connect(self.stitcher, SIGNAL('readyReadStandardError()'), self.stitcher_stdError)
         QObject.connect(self.stitcher, SIGNAL('readyRead()'), self.import_readyRead)
 
+        #MainWindow UI
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.resize(0,0)
 
         self.windows = {"inspector":False, "images":False}
 
         # Create Inspector
-
-
-        #self.ui.InspectorDock.toggleViewAction().setText("Inspector")
-        #self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
-        #self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
-
         self._inspector = TrickplayInspector(self)
-        self._inspector.setWindowFlags(Qt.Window)
         self._inspector.setWindowTitle('Inspector')
-        #self._inspector.toggleViewAction().setText("Inspector")
-        #self.ui.menuView.addAction(self._inspector.toggleViewAction())
-        #self._inspector.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
+        self.ui.actionInspector.toggled.connect(self.inspectorWindowClicked)
 
         self.inspectorWindowClicked()
 
-        #self.ui.InspectorLayout.addWidget(self._inspector)
-        
         # Create Image File System
-        #self.ui.fileSystemDock.toggleViewAction().setText("Images")
-        #self.ui.menuView.addAction(self.ui.fileSystemDock.toggleViewAction())
-        #self.ui.fileSystemDock.toggleViewAction().triggered.connect(self.imagesWindowClicked)
-
         self._ifilesystem = TrickplayImageFileSystem(self)
-        self._ifilesystem.setWindowFlags(Qt.Window)
         self._ifilesystem.setWindowTitle('Images')
+        self.ui.actionImages.toggled.connect(self.imagesWindowClicked)
+
         self.imagesWindowClicked()
 
-        #self.ui.fileSystemLayout.addWidget(self._ifilesystem)
+        #Create main menu
+        class menubarWidget(QWidget):
+            def __init__(self):
+                flags = Qt.Tool | Qt.WindowStaysOnTopHint #| Qt.FramelessWindowHint
+                if sys.platform == "darwin":
+                    flags |= Qt.WA_MacAlwaysShowToolWindow
+                else:
+                    flags |= Qt.X11BypassWindowManagerHint
 
-        #Create main menu 
+                QWidget.__init__(self, None, flags )
 
+        self._menubar = menubarWidget()
+
+        self.mainMenuLayout = QGridLayout()
+        self.mainMenuLayout.setSpacing(0)
+        self.mainMenuLayout.setMargin(0)
+        self.mainMenuLayout.setObjectName(_fromUtf8("mainMenuLayout"))
+        self.mainMenuLayout.addWidget(self.ui.menubar)
         self.ui.menubar.setNativeMenuBar(False)
-        self._menubar = QWidget()
-        self._menubar.setWindowFlags(Qt.Window)
-        #self._menubar.setWindowFlags(Qt.FramelessWindowHint)
-        #self._menubar.setWindowTitle('MainMenu')
+        self._menubar.setLayout(self.mainMenuLayout)
 
-        self._menubar.setLayout(self.ui.mainMenuLayout)
         self._menubar.show()
-
+        self.menuDisable()
 
         # Create EmulatorManager
         self.ui.actionEditor.toggled.connect(self.editorWindowClicked)
-        self._emulatorManager = TrickplayEmulatorManager(self) 
+        self._emulatorManager = TrickplayEmulatorManager(self)
         self._inspector.emulatorManager = self._emulatorManager
 
-		#File Menu
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        #File Menu
+        #QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        self.ui.action_Exit.triggered.connect(self.exit)
         QObject.connect(self.ui.actionLua_File_Engine_UI_Elements, SIGNAL("triggered()"),  self.openLua)
         QObject.connect(self.ui.actionJSON_New_UI_Elements, SIGNAL("triggered()"),  self.open)
         QObject.connect(self.ui.actionNew_Layer, SIGNAL("triggered()"),  self.newLayer)
@@ -148,8 +156,8 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionSave_Project, SIGNAL("triggered()"),  self.saveProject)
         QObject.connect(self.ui.actionImport_Assets, SIGNAL("triggered()"),  self.importAssets)
         QObject.connect(self.ui.actionImport_Skins, SIGNAL("triggered()"),  self.importSkins)
-        
-		#Edit Menu
+
+        #Edit Menu
         QObject.connect(self.ui.action_Button, SIGNAL("triggered()"),  self.button)
         QObject.connect(self.ui.actionDialog_Box, SIGNAL("triggered()"),  self.dialogbox)
         QObject.connect(self.ui.actionToastAlert, SIGNAL("triggered()"),  self.toastalert)
@@ -177,7 +185,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionDuplicate, SIGNAL("triggered()"),  self.duplicate)
         QObject.connect(self.ui.actionDelete, SIGNAL("triggered()"),  self.delete)
 
-		#Arrange Menu
+        #Arrange Menu
         QObject.connect(self.ui.action_left, SIGNAL("triggered()"),  self.left)
         self.ui.action_left.setIconVisibleInMenu(True)
         left_icon = QIcon()
@@ -226,13 +234,12 @@ class MainWindow(QMainWindow):
         distV_icon.addPixmap(QPixmap(self.apath+"/Assets/icons/icon-align-distributev.png"), QIcon.Disabled, QIcon.Off)
         self.ui.action_distributeVertically.setIcon(distV_icon)
 
-
         QObject.connect(self.ui.action_bring_to_front, SIGNAL("triggered()"),  self.bringToFront)
         QObject.connect(self.ui.action_bring_to_forward, SIGNAL("triggered()"),  self.bringForward)
         QObject.connect(self.ui.action_send_to_back, SIGNAL("triggered()"),  self.sendToBack)
         QObject.connect(self.ui.action_send_backward, SIGNAL("triggered()"),  self.sendBackward)
 
-		#View Menu
+        #View Menu
         QObject.connect(self.ui.actionImage, SIGNAL("triggered()"),  self.backgroundImage)
         QObject.connect(self.ui.actionSmall_Grid, SIGNAL("triggered()"),  self.smallGrid)
         QObject.connect(self.ui.actionMedium_Grid, SIGNAL("triggered()"),  self.mediumGrid)
@@ -246,42 +253,44 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionShow_Guides, SIGNAL("triggered()"),  self.showGuides)
         QObject.connect(self.ui.actionSnap_to_Guides, SIGNAL("triggered()"),  self.snapToGuides)
 
-		#Run Menu
+        #Run Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
         QObject.connect(self.ui.action_CodeEditor, SIGNAL("triggered()"),  self.debug)
         QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
-		
+
         # Restore sizes/positions of docks
         settings = QSettings()
         if settings.value('mainMenuDock') and settings.value('inspectorDock') and settings.value('fileSystemDock') :
-            #self.ui.mainMenuDock.setGeometry((settings.value('mainMenuDock').toRect()))
             self._menubar.setGeometry((settings.value('mainMenuDock').toRect()))
-            #self.ui.InspectorDock.setGeometry((settings.value('inspectorDock').toRect()))
             self._inspector.setGeometry((settings.value('inspectorDock').toRect()))
-            #self.ui.fileSystemDock.setGeometry((settings.value('fileSystemDock').toRect()))
             self._ifilesystem.setGeometry((settings.value('fileSystemDock').toRect()))
         else :
-            #self.ui.mainMenuDock.setGeometry(self.luaEx,self.luaEy-85,670,100)
             self._menubar.setGeometry(self.luaEx,self.luaEy-85,670,100)
-            #self.ui.InspectorDock.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
             self._inspector.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
-            #self.ui.fileSystemDock.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
             self._ifilesystem.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
-        self.path =  None 
+        self.path =  None
         self.app = app
         self.command = None
         self.currentProject = None
 
-        QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
+        app.aboutToQuit.connect(self.exit)
 
     @property
     def emulatorManager(self):
         return self._emulatorManager
-    
+
     @property
     def inspector(self):
         return self._inspector
+
+    @property
+    def menubar(self):
+        return self._menubar
+
+    @property
+    def ifilesystem(self):
+        return self._ifilesystem
 
     def menuEnable (self):
         self.ui.action_left.setEnabled(True)
@@ -300,6 +309,25 @@ class MainWindow(QMainWindow):
         self.ui.actionUngroup.setEnabled(True)
         self.ui.actionClone.setEnabled(True)
         self.ui.actionDuplicate.setEnabled(True)
+        self.ui.actionDelete.setEnabled(True)
+
+    def menuDisableContents (self):
+        self.ui.action_left.setDisabled(True)
+        self.ui.action_right.setDisabled(True)
+        self.ui.action_top.setDisabled(True)
+        self.ui.action_bottom.setDisabled(True)
+        self.ui.action_horizontalCenter.setDisabled(True)
+        self.ui.action_verticalCenter.setDisabled(True)
+        self.ui.action_distributeHorizontally.setDisabled(True)
+        self.ui.action_distributeVertically.setDisabled(True)
+        self.ui.action_bring_to_front.setDisabled(True)
+        self.ui.action_bring_to_forward.setDisabled(True)
+        self.ui.action_send_to_back.setDisabled(True)
+        self.ui.action_send_backward.setDisabled(True)
+        self.ui.actionGroup.setDisabled(True)
+        self.ui.actionUngroup.setDisabled(True)
+        self.ui.actionClone.setDisabled(True)
+        self.ui.actionDuplicate.setDisabled(True)
         self.ui.actionDelete.setEnabled(True)
 
     def menuDisable (self):
@@ -335,7 +363,7 @@ class MainWindow(QMainWindow):
         self.sendLuaCommand("openFile", '_VE_.openFile("'+str(self.path)+'")')
         self.imageJsonFile = str(os.path.join(self.path, "assets/images/images.json"))
         return True
-    
+
     def setAppPath(self):
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(self.path)+'")')
         return True
@@ -372,11 +400,11 @@ class MainWindow(QMainWindow):
         elif ret == QMessageBox.Cancel:
             return False
         return True
-        
+
     def stitcher_started(self):
         if self.bar is not None :
             self.bar.show()
-        return 
+        return
 
     def import_readyRead(self):
         while True:
@@ -392,10 +420,10 @@ class MainWindow(QMainWindow):
     def stitcher_stdError(self):
         s = self.stitcher.readAllStandardError()
         if s.contains('\r') or s.contains('\n') :
-            l = s.split('\n') 
+            l = s.split('\n')
             newVal = 0
-            try : 
-                if s[len(s)-1:] in ['\r', '\n'] : 
+            try :
+                if s[len(s)-1:] in ['\r', '\n'] :
                     newVal = int(l[len(l) - 2])
                     self.lastNumber = None
                 else :
@@ -403,21 +431,21 @@ class MainWindow(QMainWindow):
                         newVal = int(l[len(l) - 2])
                     elif self.lastNum is not None:
                         newVal = int(self.lastNum+l[0])
-                    else : 
+                    else :
                         newVal = int(l[0])
                     self.lastNumber = l[len(l) - 1]
-                        
+
                 if self.bar is not None:
                     self.bar.setValue(newVal)
                 print "[VE] progressBar.setValue : %s  "%str(newVal)
-            except : 
+            except :
                 pass
 
         else:
             print str(s.data())
 
     def stitcher_finished(self, errorCode):
-        if errorCode == 0 : 
+        if errorCode == 0 :
             if self.bar is not None and self.importCmd is not "remove":
                 print "[VE] progressBar.setValue : %s  "%'100'
                 self.bar.setValue(100)
@@ -425,7 +453,7 @@ class MainWindow(QMainWindow):
             if self.importCmd is "assets" :
                 self.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
-        else : 
+        else :
             if self.bar is not None:
                 self.bar.hide()
             errorMsg = str(self.stitcher.readAllStandardError().data())
@@ -433,29 +461,30 @@ class MainWindow(QMainWindow):
                 self.errorMsg(self.stitcherErrorCode[int(errorCode)])
             else :
                 self.errorMsg("Import Failed.")
-        return 
+        return
 
     def processErrorHandler(self, process_name):
         if process_name == "stitcher" :
             if self.stitcher.error() == QProcess.FailedToStart :
-                self.errorMsg("Import helper failed to launch: check TrickPlay SDK installation") 
+                self.errorMsg("Import helper failed to launch: check TrickPlay SDK installation")
             elif self.stitcher.error() == QProcess.Timedout :
-                self.errorMsg("Import helper launch timed out: check TrickPlay SDK installation") 
+                self.errorMsg("Import helper launch timed out: check TrickPlay SDK installation")
         elif process_name == "trickplay" :
             if self._emulatorManager.trickplay.error() == QProcess.FailedToStart :
-                self.errorMsg("TrickPlay engine failed to launch: check TrickPlay SDK installation") 
+                self.errorMsg("TrickPlay engine failed to launch: check TrickPlay SDK installation")
             elif self._emulatorManager.trickplay.error() == QProcess.Timedout :
-                self.errorMsg("TrickPlay engine launch timed out: check TrickPlay SDK installation") 
+                self.errorMsg("TrickPlay engine launch timed out: check TrickPlay SDK installation")
         elif process_name == "debugger" :
             if self.debugger.error() == QProcess.FailedToStart :
-                self.errorMsg("Visual Debugger helper failed to launch: check TrickPlay SDK installation") 
+                self.errorMsg("Visual Debugger helper failed to launch: check TrickPlay SDK installation")
             elif self.debugger.error() == QProcess.Timedout :
-                self.errorMsg("Visual Debugger helper launch timed out: check TrickPlay SDK installation") 
+                self.errorMsg("Visual Debugger helper launch timed out: check TrickPlay SDK installation")
 
     def importAssets(self):
         self.importCmd = "assets"
         self._ifilesystem.imageCommand = "assets"
-        path = -1 
+        path = -1
+
         self.bar = QProgressBar()
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
@@ -464,7 +493,7 @@ class MainWindow(QMainWindow):
 
         while path == -1 :
             if self.path is None:
-		        self.path = self.apath
+                self.path = self.apath
             path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
 
         if path:
@@ -494,27 +523,15 @@ class MainWindow(QMainWindow):
             self.uiD.id.setReadOnly(False)
 
         return path
-        """
-        path = -1
-        while path == -1 :
-            if self.path is None:
-                self.path = self.apath
-            path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
-            self.sourcePath = path 
-        return path
-        """
 
     def idChanged(self, change):
         self.id = change
-
-    def exit_ii(self):
-        pass
 
     def importSkinDialog(self, path=None, id=None, name=None):
         """
         New app dialog
         """
-        self.dialog = QDialog() 
+        self.dialog = QDialog()
         self.id = ""
         self.name = ""
         self.uiD = Ui_importSkinImages()
@@ -522,7 +539,7 @@ class MainWindow(QMainWindow):
 
         if path is not None :
             self.uiD.directory.setText(path)
-        
+
 
         cancelButton = self.uiD.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.uiD.buttonBox.button(QDialogButtonBox.Ok)
@@ -533,24 +550,23 @@ class MainWindow(QMainWindow):
         if id is not None:
             self.uiD.id.setText(id)
 
-        if self.dialog.exec_():            
+        if self.dialog.exec_():
             id = str(self.uiD.id.text())
             path = str(self.uiD.directory.text())
 
             if '' == id or '' == name or path == "source image directory" :
                 return self.importSkinDialog(path, id, name)
-        return path, id 
-
+        return path, id
 
     def importSkinErrorMsg(self, sUIs, fUIs):
         msg = QMessageBox()
-        errorMsg = "" 
+        errorMsg = ""
 
         if len (sUIs) is not 0:
             errorMsg = "Skin assets are available for the following UI Elements: \n\n"
-            i = 1 
+            i = 1
             for j in sUIs:
-                if j == "TabBar" and errorMsg[-1:] != "\n": 
+                if j == "TabBar" and errorMsg[-1:] != "\n":
                     errorMsg = errorMsg[:len(errorMsg)-1]
                     errorMsg = errorMsg + j + "\t\t"
                 elif len(j) > 10 :
@@ -559,14 +575,14 @@ class MainWindow(QMainWindow):
                     errorMsg = errorMsg + j + "\t\t"
                 if i % 3 == 0 :
                     errorMsg = errorMsg + "\n"
-                i = i + 1 
+                i = i + 1
 
             errorMsg = errorMsg + "\n\n"
 
         errorMsg = errorMsg + "Could not find skin assets for the following UI Elements: \n\n"
-        j = 1 
+        j = 1
         for i in fUIs:
-            if i == "TabBar" and errorMsg[-1:] != "\n": 
+            if i == "TabBar" and errorMsg[-1:] != "\n":
                 errorMsg = errorMsg[:len(errorMsg)-1]
                 errorMsg = errorMsg + i + "\t\t"
             elif len(i) > 10 :
@@ -575,7 +591,7 @@ class MainWindow(QMainWindow):
                 errorMsg = errorMsg + i + "\t\t"
             if j % 3 == 0 :
                 errorMsg = errorMsg + "\n"
-            j = j + 1 
+            j = j + 1
 
         errorMsg = errorMsg + "\n\nDo you want to proceed ?\n"
         msg.setText(errorMsg)
@@ -584,13 +600,13 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle("Import Skin Error")
         ret = msg.exec_()
         if ret == QMessageBox.Yes:
-            return True 
+            return True
         else:
-            return False 
-            
+            return False
+
 
     def checkSkinAssetsExist(self, path):
-        
+
         id1 = ""
         id2 = ""
         uiName = ""
@@ -598,7 +614,7 @@ class MainWindow(QMainWindow):
         succeedUI = self.skinUI
 
         for i, v in self.skinPathList:
-            uiName = i 
+            uiName = i
             for j in v:
                 id1 = j
                 if self.skinSubPath.has_key(j) == True :
@@ -634,7 +650,7 @@ class MainWindow(QMainWindow):
         if skinPath:
             print ("[VE] Import Skin Images ...[%s]"%skinPath)
             if self.checkSkinAssetsExist(skinPath) != True :
-                return 
+                return
 
         if os.path.exists(os.path.join(self.path, "assets/skins/"+id+".json")) == True:
             print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/'"+id+" "+skinPath)
@@ -652,7 +668,7 @@ class MainWindow(QMainWindow):
     def newProject(self):
         orgPath = self.path
         wizard = Wizard(self)
-        path = None 
+        path = None
 
         if self._emulatorManager.unsavedChanges == True :
             self.warningMsg()
@@ -670,6 +686,7 @@ class MainWindow(QMainWindow):
             self.run()
             self.command = "newProject"
             self.menuCommand = "newProject"
+
             self._ifilesystem.ui.fileSystemTree.clear()
             self._ifilesystem.orgCnt = 0
             self._ifilesystem.idCnt = 0
@@ -692,10 +709,10 @@ class MainWindow(QMainWindow):
         path = -1
         while path == -1 :
             if self.path is None:
-		        self.path = self.apath
+                self.path = self.apath
             path = QFileDialog.getExistingDirectory(None, 'Open Project', self.path, QFileDialog.ShowDirsOnly)
             if path == None or path == "":
-                return 
+                return
             path = wizard.start(path, True)
         print ("[VE] Open Project [%s]"%path)
         if path:
@@ -716,7 +733,6 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
-        #self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         self._emulatorManager.unsavedChanges = False
         return True
@@ -775,12 +791,6 @@ class MainWindow(QMainWindow):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'ToastAlert')")
         return True
 
-    """
-    def togglebutton(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToggleButton')")
-        return True
-    """
-
     def checkbox(self):
         self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'CheckBox')")
         return True
@@ -809,7 +819,13 @@ class MainWindow(QMainWindow):
         return True
 
     def clone(self):
-        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement('"+str(self._inspector.curLayerGid)+"', 'Clone')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            self.sendLuaCommand("clone", "_VE_.clone('"+str(item['gid'])+"')")
+            self._inspector.deselectItem(item)
+            self.command = "clone"
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def group(self):
@@ -818,14 +834,47 @@ class MainWindow(QMainWindow):
 
     def ungroup(self):
         self.sendLuaCommand("ungroup", "_VE_.ungroup('"+str(self._inspector.curLayerGid)+"')")
+        curLayerItem = self._inspector.search(self._inspector.curLayerGid, 'gid')
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            try:
+                if item['type'] == "Widget_Group" :
+                    for c in item['children']:
+                        self._inspector.inspectorModel.insertElement(curLayerItem, c, curLayerItem.TPJSON(), False)
+                    item.parent().removeRow(item.row())
+            except:
+                pass
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def delete(self):
-        self.sendLuaCommand("delete", "_VE_.delete('"+str(self._inspector.curLayerGid)+"')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            self.sendLuaCommand("delete", "_VE_.delete('"+str(item['gid'])+"')")
+            if "Row" in item.parent().text() :
+                emptynode = TrickplayElement("Empty")
+                emptynode.setFlags(emptynode.flags() ^ Qt.ItemIsEditable)
+                partner = emptynode.partner()
+                partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+                partner.setData("", Qt.DisplayRole)
+                item.parent().appendRow([emptynode, partner])
+                item.parent().removeRow(item.row())
+                index = None
+            else:
+                item.parent().removeRow(item.row())
+                index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def duplicate(self):
-        self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(self._inspector.curLayerGid)+"')")
+        index = self._inspector.selected (self.inspector.ui.inspector)
+        while index is not None:
+            item = self._inspector.inspectorModel.itemFromIndex(index)
+            self.sendLuaCommand("duplicate", "_VE_.duplicate('"+str(item['gid'])+"')")
+            self._inspector.deselectItem(item)
+            self.command = "duplicate"
+            index = self._inspector.selected (self.inspector.ui.inspector)
         return True
 
     def rectangle(self):
@@ -835,47 +884,47 @@ class MainWindow(QMainWindow):
     def left(self):
         self.sendLuaCommand("alignLeft", "_VE_.alignLeft('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def right(self):
         self.sendLuaCommand("alignRight", "_VE_.alignRight('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def top(self):
         self.sendLuaCommand("alignTop", "_VE_.alignTop('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def bottom(self):
         self.sendLuaCommand("alignBottom", "_VE_.alignBottom('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def horizontalCenter(self):
         self.sendLuaCommand("horizontalCenter", "_VE_.alignHorizontalCenter('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def verticalCenter(self):
         self.sendLuaCommand("verticalCenter", "_VE_.alignVerticalCenter('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def distributeHorizontal(self):
         self.sendLuaCommand("distributeHorizontal", "_VE_.distributeHorizontal('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def distributeVertical(self):
         self.sendLuaCommand("distributeVertical", "_VE_.distributeVertical('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def bringToFront(self):
         self.sendLuaCommand("bringToFront", "_VE_.bringToFront('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def bringForward(self):
         self.sendLuaCommand("bringForward", "_VE_.bringForward('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def sendToBack(self):
         self.sendLuaCommand("sendToBack", "_VE_.sendToBack('"+str(self._inspector.curLayerGid)+"')")
         return True
-        
+
     def sendBackward(self):
         self.sendLuaCommand("sendBackward", "_VE_.sendBackward('"+str(self._inspector.curLayerGid)+"')")
         return True
@@ -885,36 +934,30 @@ class MainWindow(QMainWindow):
         self.onExit = exit
 
         if self._emulatorManager.trickplay.state() == QProcess.Running:
-            # Local Debugging / Run 
+            # Local Debugging / Run
             self._emulatorManager.trickplay.close()
 
-    
+
     def debug_started(self):
         print "[VE] Code Editor Started"
-        #self.ui.fileSystemDock.hide()
         self._ifilesystem.hide()
         self.windows['images'] = False
-        #self.ui.InspectorDock.hide()
         self._inspector.hide()
         self.windows['inspector'] = False
-        #self.ui.mainMenuDock.hide()
-        
+
     def debug_finished(self, errorCode):
         print "[VE] Code Editor Finished"
         if self.debugger.state() == QProcess.NotRunning :
-            #self.ui.fileSystemDock.show()
             self._ifilesystem.show()
             self.windows['images'] = True
-            #self.ui.InspectorDock.show()
             self._inspector.show()
             self.windows['inspector'] = True
-            #self.ui.mainMenuDock.show()
             self.run()
-            if errorCode == 2 : 
-                self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
+            if errorCode == 2 :
+                self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation")
             else :
                 if self.debugger.exitStatus() is not QProcess.NormalExit and self.debugger.exitStatus() != 0:
-                    self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation") 
+                    self.errorMsg("Visual Debugger launch failed : check TrickPlay SDK installation")
 
     def debug(self):
         if self._emulatorManager.trickplay.state() == QProcess.Running:
@@ -931,15 +974,15 @@ class MainWindow(QMainWindow):
         self._emulatorManager.run()
 
     def exit(self):
+
         self.sendLuaCommand("getScreenLoc", "_VE_.getScreenLoc()")
+
         settings = QSettings()
-        #settings.setValue("mainMenuDock", self.ui.mainMenuDock.geometry());
         settings.setValue("mainMenuDock", self._menubar.geometry());
-        #settings.setValue("inspectorDock", self.ui.InspectorDock.geometry());
         settings.setValue("inspectorDock", self._inspector.geometry());
-        #settings.setValue("fileSystemDock", self.ui.fileSystemDock.geometry());
         settings.setValue("fileSystemDock", self._ifilesystem.geometry());
         time.sleep(0.1)
+
         settings.setValue("x", self.x)
         settings.setValue("y", self.y)
 
@@ -950,6 +993,7 @@ class MainWindow(QMainWindow):
             self.stop(False, True)
             self.close()
         sys.exit(0)
+
         return True
 
     def editorWindowClicked(self) :
@@ -959,24 +1003,20 @@ class MainWindow(QMainWindow):
             self.sendLuaCommand("screenHide", "_VE_.screenHide()")
 
     def imagesWindowClicked(self) :
-    	if self.windows['images'] == True:
-    		#self.ui.fileSystemDock.hide()
-    		self._ifilesystem.hide()
-    		self.windows['images'] = False
-    	else :
-    		#self.ui.fileSystemDock.show()
-    		self._ifilesystem.show()
-    		self.windows['images'] = True
+        if self.windows['images'] == True:
+            self._ifilesystem.hide()
+            self.windows['images'] = False
+        else :
+            self._ifilesystem.show()
+            self.windows['images'] = True
 
     def inspectorWindowClicked(self) :
-    	if self.windows['inspector'] == True:
-    		#self.ui.InspectorDock.hide()
-    		self._inspector.hide()
-    		self.windows['inspector'] = False
-    	else :
-    		#self.ui.InspectorDock.show()
-    		self._inspector.show()
-    		self.windows['inspector'] = True
+        if self.windows['inspector'] == True:
+            self._inspector.hide()
+            self.windows['inspector'] = False
+        else :
+            self._inspector.show()
+            self.windows['inspector'] = True
 
     def setCurrentProject(self, path, openList = None):
         """
@@ -984,7 +1024,6 @@ class MainWindow(QMainWindow):
         """
         self.path = path
         if path is not -1:
-            #self.ui.mainMenuDock.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self._menubar.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
             self.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(path)) +"')")

@@ -1,4 +1,4 @@
-import re, os, json
+import re, os, json, sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #import connection
@@ -29,22 +29,22 @@ class StitcherThread(QThread):
             print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.imageTree.idsToRemove + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
             self.imageTree.main.stitcher.start("stitcher \""+self.emptyPath+"\" -m \""+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+"\" -g "+ self.imageTree.idsToRemove +" -o \""+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images\"")
         else :
-            
-            fileCnt = 0 
+
+            fileCnt = 0
             for imageData in self.imageTree.data:
                 for imageFile in imageData['sprites']:
                     id = imageFile['id']
-                    if id.find(self.imageTree.getDir(self.itemWT)) == 0 : 
+                    if id.find(self.imageTree.getDir(self.itemWT)) == 0 :
                         fileCnt = fileCnt + 1
 
             print("stitcher "+self.emptyPath+" -m "+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+" -g "+ self.itemWT + " -o "+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images")
 
-            self.imageTree.main.stitcher.start("stitcher \""+self.emptyPath+"\" -m \""+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+"\" -g "+ self.itemWT+" -o \""+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images\"") 
+            self.imageTree.main.stitcher.start("stitcher \""+self.emptyPath+"\" -m \""+str(os.path.join(self.imageTree.main.path, "assets/images/images.json"))+"\" -g "+ self.itemWT+" -o \""+str(os.path.join(self.imageTree.main.path, "assets/images"))+"/images\"")
 
             if fileCnt == 1 :
                 orgId = "}\n\t],"
                 newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+self.imageTree.getDir(self.itemWT)+"\" }\n\t],"
-                self.imageTree.imageJsonItemSub(orgId, newFolderInfo) 
+                self.imageTree.imageJsonItemSub(orgId, newFolderInfo)
 
     def stop(self):
         self.runState = 0
@@ -75,7 +75,7 @@ class DnDTreeWidget(QTreeWidget):
          return False
 
      def moveSelection(self, parent, position):
-	    # save the selected items
+        # save the selected items
          dropTo = None
          dragFrom = None
 
@@ -125,7 +125,7 @@ class DnDTreeWidget(QTreeWidget):
                      self.insertTopLevelItem(
                          self.topLevelItemCount(), taken.pop(0))
              else:
-		# insert the items at the specified position
+        # insert the items at the specified position
                  if parent_index.isValid():
                      parent.insertChild(min(target,
                          parent.childCount()), taken.pop(0))
@@ -137,19 +137,23 @@ class DnDTreeWidget(QTreeWidget):
 
 
 class TrickplayImageFileSystem(QWidget):
-    
+
     def __init__(self, main = None, parent = None, f = 0):
+        flags = Qt.Tool | Qt.WindowStaysOnTopHint
+        if sys.platform == "darwin":
+            flags |= Qt.WA_MacAlwaysShowToolWindow
+        else:
+            flags |= Qt.X11BypassWindowManagerHint
         """
         UI Element property inspector made up of two QTreeViews
         """
-        
-        QWidget.__init__(self, parent)
-        
+        QWidget.__init__(self, parent, flags)
+
         self.ui = Ui_VirtualFileSystem()
         self.ui.setupUi(self)
-              
+
         self.main = main
-        
+
         self.ui.fileSystemTree = DnDTreeWidget(self)
         self.ui.fileSystemTree.setObjectName(_fromUtf8("fileSystemTree"))
         #self.ui.fileSystemTree.headerItem().setText(0, _fromUtf8("1"))
@@ -159,22 +163,22 @@ class TrickplayImageFileSystem(QWidget):
         #self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
         self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
-        # id changed 
+        # id changed
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.fileItemChanged)
 
-        # tool button handlers 
+        # tool button handlers
         QObject.connect(self.ui.importButton, SIGNAL('clicked()'), self.importAsset)
         QObject.connect(self.ui.deleteButton, SIGNAL('clicked()'), self.removeAsset)
         QObject.connect(self.ui.newFolderButton, SIGNAL('clicked()'), self.createNewFolder)
-        
+
         self.ui.fileSystemTree.setSortingEnabled(True)
         self.ui.fileSystemTree.sortItems(0, Qt.AscendingOrder)
         self.ui.fileSystemTree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.createContextMenu()
         QObject.connect(self.ui.fileSystemTree, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
 
-        self.idCnt = 0 
-        self.orgCnt = 0 
+        self.idCnt = 0
+        self.orgCnt = 0
         self.imageCommand = ""
 
     def isDir(self, orgId) :
@@ -182,7 +186,7 @@ class TrickplayImageFileSystem(QWidget):
             return True
         else:
             return False
-        
+
     def getLastDir(self, id) :
         folder = ""
         while re.search("\/", id):
@@ -203,16 +207,16 @@ class TrickplayImageFileSystem(QWidget):
             id = id[n:]
 
         return dirVal
-        
+
     def isOnTop(self, id):
         if self.isDir(id) == True and id.count("/") == 1 :
             return True
         if self.isDir(id) == False and id.count("/") == 0 :
             return True
         return False
-            
+
     def isSameDir(self, id, id2):
-        if self.getDir(id) == self.getDir(id2) : 
+        if self.getDir(id) == self.getDir(id2) :
             return True
         return False
 
@@ -225,7 +229,7 @@ class TrickplayImageFileSystem(QWidget):
                     if dropTo == "" and id[:len(dragId)] == dragId :
                         print dropTo+dragId, "is existing"
                         return False
-                        
+
                     if id.find(dropTo+dragId) == 0 :
                         print dropTo+dragId, "is existing"
                         return False
@@ -253,7 +257,7 @@ class TrickplayImageFileSystem(QWidget):
 
         #print "Drag From : %s"%dragFrom
         #print "Drop To : %s"%dropTo
-        
+
         #Dir -> Dir
         if self.isOnTop(dragFrom) == True :
             org = dragFrom
@@ -269,14 +273,14 @@ class TrickplayImageFileSystem(QWidget):
         #print "New Id : %s "%new
 
         if org != new :
-            self.imageJsonItemSub(org, new) 
+            self.imageJsonItemSub(org, new)
         return True
 
     def createContextMenu(self):
-        # Toolbar font 
+        # Toolbar font
         font = QFont()
         font.setPointSize(9)
-    
+
         # Popup Menu
         self.popMenu = QMenu( self)
         self.popMenu.setFont(font)
@@ -287,7 +291,7 @@ class TrickplayImageFileSystem(QWidget):
         self.popMenu.addAction( '&Delete', self.removeAsset )
         self.popMenu.addSeparator()
         self.popMenu.addAction( '&Import New Assets', self.importAsset )
-        
+
     def contextMenu(self, point):
         self.popMenu.exec_( self.ui.fileSystemTree.mapToGlobal(point) )
 
@@ -308,7 +312,7 @@ class TrickplayImageFileSystem(QWidget):
         self.sTread.run()
 
     def insertImage(self) :
-        
+
         item = self.ui.fileSystemTree.currentItem()
         source = item.whatsThis(0)
         if self.isDir(source) == False :
@@ -320,7 +324,7 @@ class TrickplayImageFileSystem(QWidget):
             spriteSheet = SpriteSheet { map = "assets/image/images.json" }
             image = WidgetImage{ sheet = spriteSheet, id = "ee/ff.png" }
         """
-        
+
     def createNewFolder(self) :
         #if self.main._emulatorManager.fscontentMoveBlock == True :
             #return
@@ -336,31 +340,31 @@ class TrickplayImageFileSystem(QWidget):
         self.ndirUi = Ui_newFolderDialog()
         self.ndirUi.setupUi(self.dialog)
         #self.dialog.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 400, self.main.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
-        self.dialog.setGeometry(self.main._filesystem.geometry().x() + 400, self.main._filesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.main._ifilesystem.geometry().x() + 400, self.main._ifilesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
         if self.dialog.exec_():
-			dir_name = self.ndirUi.folder_name.text()
-			new_path = newFolderParent+dir_name+"/"
-			#orgId = str(item.whatsThis(0))
-			if self.isDir(orgId) == True: 
-			    orgId = "}\n\t],"
-			    newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
-			else:
-			    newFolderInfo = orgId+"\" },\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path
+            dir_name = self.ndirUi.folder_name.text()
+            new_path = newFolderParent+dir_name+"/"
+            #orgId = str(item.whatsThis(0))
+            if self.isDir(orgId) == True:
+                orgId = "}\n\t],"
+                newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
+            else:
+                newFolderInfo = orgId+"\" },\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path
 
-			self.imageJsonItemSub(orgId, newFolderInfo) 
-            
+            self.imageJsonItemSub(orgId, newFolderInfo)
+
     def fileItemChanged(self, item, col):
         orgId = str(item.whatsThis(0))
         newId = self.getDir(orgId)+str(item.text(0))
 
-        self.imageJsonItemSub(orgId, newId) 
+        self.imageJsonItemSub(orgId, newId)
 
     def buildImageTree(self,  data, styleIndex=None):
         # Clear Image File System Tree
-        self.orgCnt = self.idCnt 
+        self.orgCnt = self.idCnt
 
         self.ui.fileSystemTree.clear()
-        self.idCnt = 0 
+        self.idCnt = 0
 
         #self.ui.fileSystemTree.setColumnCount(2)
         items = []
@@ -369,33 +373,33 @@ class TrickplayImageFileSystem(QWidget):
 
         for imageData in data:
             cnt = 0
-            
+
             for imageFile in imageData['sprites']:
                 id = imageFile['id']
                 i = {}
                 idx = 1
                 folderIdx = ""
-                    
+
                 while re.search("\/", id):
                     n = re.search("\/", id).end()
                     folder = id[:n-1]
                     folderIdx = folderIdx+folder+":"
                     if idx > 1:
-                        folderColIdx = 0 
+                        folderColIdx = 0
                         folderParent = i[idx-1]
                     else:
-                        folderColIdx = 1 
+                        folderColIdx = 1
                         folderParent = None
 
                     if folders.has_key(folderIdx) == True :
-                        i[idx] = folders[folderIdx][folderColIdx] 
-                    else : 
+                        i[idx] = folders[folderIdx][folderColIdx]
+                    else :
                         i[idx] = QTreeWidgetItem(folderParent)
-                        i[idx].setText (0, folder)  
+                        i[idx].setText (0, folder)
                         temp = i[idx].font(0)
                         temp.setBold(True)
-                        #i[idx].setFont (0, i[idx].font(0))  
-                        i[idx].setFont (0, temp)  
+                        #i[idx].setFont (0, i[idx].font(0))
+                        i[idx].setFont (0, temp)
                         i[idx].setWhatsThis(0, folderIdx.replace(":", "/"))
 
                     idx = idx + 1
@@ -403,28 +407,28 @@ class TrickplayImageFileSystem(QWidget):
 
                     if folders.has_key(folderIdx) == False :
                         folders[folderIdx] = {}
-                        folders[folderIdx][0] = i[idx - 1]                    
-                        folders[folderIdx][1] = i[1]                    
+                        folders[folderIdx][0] = i[idx - 1]
+                        folders[folderIdx][1] = i[1]
 
-                fileName = id    
+                fileName = id
                 if idx > 1 :
                     if len(id) > 0:
-                        j = QTreeWidgetItem(folders[folderIdx][0]) 
-                        j.setText (0, fileName)  
+                        j = QTreeWidgetItem(folders[folderIdx][0])
+                        j.setText (0, fileName)
                         j.setFlags(j.flags() ^Qt.ItemIsEditable)
                         j.setWhatsThis(0, imageFile['id'])
                     else :
                         folders[folderIdx][0].setText(0, folders[folderIdx][0].text(0)+" [%s items]"%str(folders[folderIdx][0].childCount()))
                         #print folders[folderIdx][0].text(0)+"[%s items folder]"%str(folders[folderIdx][0].childCount())
                         if folders[folderIdx][0].childCount() == 0 :
-                            j = QTreeWidgetItem(folders[folderIdx][0]) 
-                            j.setText (0, "(Emplty)")  
+                            j = QTreeWidgetItem(folders[folderIdx][0])
+                            j.setText (0, "(Emplty)")
                             j.setWhatsThis(0, imageFile['id'])
                     self.ui.fileSystemTree.addTopLevelItem(folders[folderIdx][1]) # top level item
 
                 else :
                     j = QTreeWidgetItem()
-                    j.setText (0, fileName) 
+                    j.setText (0, fileName)
                     j.setFlags(j.flags() ^Qt.ItemIsEditable)
                     j.setWhatsThis(0, imageFile['id'])
                     self.topWhatsThis = imageFile['id']
@@ -432,6 +436,6 @@ class TrickplayImageFileSystem(QWidget):
                 cnt = cnt + 1
                 self.idCnt = self.idCnt + cnt
 
-        return 
-        
-                    
+        return
+
+
