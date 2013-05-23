@@ -66,6 +66,7 @@ public:
 
         bool is_failed()                { return failed; }
         void set_failed( bool _failed ) { failed = _failed; }
+        bool is_async_loading()         { return async_loading; }
 
     private:
         static void async_img_callback( Image* image, Source* source ) { source->handle_async_img( image ); }
@@ -104,6 +105,7 @@ public:
         void set_id( char * new_id ) { id = new_id; }
         const char * get_id() { return id; }
         bool is_failed() { return source->is_failed(); }
+        bool is_loaded();
 
     private:
         void make_texture( bool immediately );

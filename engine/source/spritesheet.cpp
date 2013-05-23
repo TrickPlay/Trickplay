@@ -235,6 +235,11 @@ void Sprite::lost_texture()
     ping.assign( NULL, NULL, NULL, false ); // Unregister Sprite call back function
 }
 
+bool Sprite::is_loaded()
+{
+    return !( source->is_async_loading() ) && get_texture() && !is_failed();
+}
+
 /* SpriteSheet */
 
 class AsyncCallback : public Action
