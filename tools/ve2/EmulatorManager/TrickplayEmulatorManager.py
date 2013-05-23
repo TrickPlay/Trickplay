@@ -382,6 +382,7 @@ class TrickplayEmulatorManager(QWidget):
 
                     if sdata is not None and self.pdata is not None:
                         self.inspector.preventChanges = True
+                        self.contentMoveBlock = True
                         self.inspector.clearTree()
                         self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 
