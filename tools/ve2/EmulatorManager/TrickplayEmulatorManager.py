@@ -377,6 +377,12 @@ class TrickplayEmulatorManager(QWidget):
                             """
 
                             return
+                        elif self.main.command == "setUIInfo" :
+                            self.inspector.preventChanges = True
+                            item = self.inspector.search(self.pdata['gid'], 'gid')
+                            item.setTPJSON(self.pdata)
+                            self.unsavedChanges = True
+                            self.inspector.preventChanges = False
                         else:
                             self.inspector.curData = self.pdata
                             if self.inspector.curItemGid == self.inspector.curData['gid'] :

@@ -1673,7 +1673,7 @@ class TrickplayInspector(QWidget):
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
 
             self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
-            item[str(pItem.whatsThis(0))] = tValue
+            #item[str(pItem.whatsThis(0))] = tValue
         else :
             theItem = self.search(self.getGid(), 'gid')
             if self.getType() == "Tab":
