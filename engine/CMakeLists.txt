@@ -443,7 +443,6 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/tuner.lb
     ${BINDINGS_SRC}/tuners.lb
-    ${BINDINGS_SRC}/media.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb

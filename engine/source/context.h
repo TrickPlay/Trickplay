@@ -114,8 +114,6 @@ public:
 
     MediaPlayer* create_new_media_player( MediaPlayer::Delegate* delegate );
 
-    bool remove_media_player( MediaPlayer *instance  );
-
     //.........................................................................
     // Sends a request to the outside world
 
@@ -343,7 +341,7 @@ private:
     friend TPController* tp_context_add_controller( TPContext* context, const char* name, const TPControllerSpec* spec, void* data );
     friend void tp_context_remove_controller( TPContext* context, TPController* controller );
 
-    friend TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback cb, void* data );
+    friend TPTuner* tp_context_add_tuner( TPContext* context, const char* name, TPChannelChangeCallback tune_channel_cb, TPTunerSetViewportGeometry set_viewport_cb, void* data );
     friend void tp_context_remove_tuner( TPContext* context, TPTuner* tuner );
 
     friend TPAudioSampler* tp_context_get_audio_sampler( TPContext* context );
@@ -395,7 +393,7 @@ private:
     String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
-    std::list< MediaPlayer* >   media_player;
+    MediaPlayer*                media_player;
 
     HttpTrickplayApiSupport*   http_trickplay_api_support;
 

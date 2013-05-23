@@ -80,6 +80,37 @@ typedef struct TPTuner TPTuner;
         const char *new_channel_uri,
         void * data);
 
+
+/*
+    Callback: tuner_set_viewport_callback
+
+    The TrickPlay engine will use this function to call your tuner and ask it to change the viewport into which it's rendering.
+
+    Arguments:
+
+        tuner   -   The tuner that should change its viewport, as returned by <tp_context_add_tuner>.
+
+        left,top     -       The position of the top-left of the new viewport, in pixels relative to the screen
+
+        width,height    -   The width and height in pixels of the viewport
+
+        data                -       User data that was passed to <tp_context_add_tuner>
+
+    Returns:
+
+        resultcode          -       0 if viewport resize was successful, non-zero if failed.
+*/
+
+    typedef int
+    (*TPTunerSetViewportGeometry)(
+
+        TPTuner* tuner,
+        int left,
+        int top,
+        int width,
+        int height,
+        void *data);
+
 /*-----------------------------------------------------------------------------*/
 /*
     Section: Tuner Events
@@ -150,7 +181,8 @@ typedef struct TPTuner TPTuner;
 
         TPContext * context,
         const char * name,
-        TPChannelChangeCallback tune_channel,
+        TPChannelChangeCallback tune_channel_cb,
+        TPTunerSetViewportGeometry set_viewport_cb,
         void * data);
 
 

@@ -7,25 +7,10 @@
     -------------------------------
     hdr = dofile("header")
 
-    --TEST Function 
-    aa = function ()
-        _VE_.openFile("/home/hjkim/code/trickplay/tools/TEST/test.test11")
-    end 
-
-    bb = function ()
-        dumptable(screen:find_child("Layer0").children)
-    end 
-
-    cc = function (gidN)
-        _VE_.selectUIElement(gidN, false)
-    end 
-    dd = function ()
-    end 
     ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
     local currentProjectPath 
-    local select_screen = false
     local openFile= false
     local key_map =
     {
@@ -72,17 +57,33 @@
 ---                 Local Editor Functions                              ---
 ---------------------------------------------------------------------------
 
+    local function styleUpdate()
+        if blockReport ~= true then
+            _VE_.refresh()
+        end 
+    end 
+
 ---------------------------------------------------------------------------
 ---            Global  Visual Editor Functions                          ---
 ---------------------------------------------------------------------------
 
 _VE_ = {}
 
+-- Get UI
+_VE_.getUIInfo = function()
+    local t = {}
+    for m,n in ipairs (screen.children) do
+        if n.to_json then 
+            table.insert(t, json:parse(n:to_json()))
+        end
+    end
+    
+    print("getUIInfo"..json_head..json:stringify(t)..json_tail)
+end 
+
 -- Get Style 
 _VE_.getStInfo = function()
-
     local t = {}
-    --table.insert(t, json:parse(fake_style_json))
     table.insert(t, json:parse(WL.get_all_styles()))
     print("getStInfo"..json:stringify(t))
 end 
@@ -92,19 +93,6 @@ _VE_.repStInfo = function()
     local t = {}
     table.insert(t, json:parse(WL.get_all_styles()))
     print("repStInfo"..json:stringify(t))
-end 
-
--- Get UI
-_VE_.getUIInfo = function()
-    local t = {}
-    for m,n in ipairs (screen.children) do
-        if n.to_json then -- s1.b1
-            dumptable(n.transformed_position)
-            table.insert(t, json:parse(n:to_json()))
-        end
-    end
-    
-    print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 
 -- Execute Debugger 
@@ -118,12 +106,7 @@ _VE_.printInstanceName = function(layernames)
     theNames =""
 
     for m,n in ipairs (screen.children) do
-        if n.name then
-        --if string.find(n.name, "Layer") then  
-        if string.find(n.name, "Layer") ~= nil and 
-         string.find(n.name, "a_m") == nil and 
-         string.find(n.name, "border") == nil 
-        then 
+        if util.isLayerObj(n) == true then 
             print(n.name)
             for q,w in ipairs (layernames) do 
                 if n.name == w then
@@ -137,11 +120,11 @@ _VE_.printInstanceName = function(layernames)
                 end
             end
         end
-        end
     end 
     print("prtObjNme"..theNames)
 end 
 
+-- Move Content 
 _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmParentGid)
     local newChild = devtools:gid(newChildGid)
     local newParent = devtools:gid(newParentGid)
@@ -192,11 +175,6 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
 
     else
 
-        if newParent.widget_type ~= "MenuButton" and newParent.widget_type ~= "LayoutManager" then 
-            newChild.reactive = true
-        end 
-
-        newChild.reactive = false
         newChild.position = {0,0,0}
         newChild.is_in_group = true
         newChild.parent_group = newParent
@@ -237,7 +215,6 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
             newParent.items:insert(newIndex, newChild)
         else
             newParent:add(newChild)
-            --util.n_selected(newChild)
         end
     end
     blockReport = false 
@@ -510,31 +487,6 @@ _VE_.bringForward = function(gid)
 	    curLayer:add(v)
     end 
 
---[[
-    
-    for i, v in ipairs(curLayer.children) do
-	    curLayer:remove(v)  -- 1,2,(3)
-		if #slt_g ~= 0 then 
-			local b = table.remove(tmp_g)
-		    local f = table.remove(slt_g)
-			table.insert(tmp_g, f) 
-			table.insert(tmp_g, b)
-		end 
-	    if (v.extra.selected == true) then
-		    table.insert(slt_g, v) 
-			screen_ui.n_selected(v)
-		else 
-		    table.insert(tmp_g, v) 
-		end
-    end
-
-    tmp_g = util.get_reverse_t(tmp_g)
-    while #tmp_g ~= 0 do
-	    v = table.remove(tmp_g)
-	    curLayer:add(v) 
-    end 
-
-]]
     editor.arrange_end(gid, obj, sel_objs)
 
 end
@@ -581,7 +533,7 @@ _VE_.sendBackward = function(gid)
     local slt_g = {}
 
     for i, v in ipairs(curLayer.children) do
-	    curLayer:remove(v)  -- 1,2,(3)
+	    curLayer:remove(v)  
 		if #slt_g ~= 0 then 
 		    local b = table.remove(slt_g)
 			local f = table.remove(tmp_g)
@@ -618,12 +570,10 @@ _VE_.setCurrentProject = function(path)
 end 
 
 _VE_.refreshDone = function()
+
     buildInsp = false
-    if openFile== true then 
-        _VE_.openInspector(screen:find_child('Layer0').gid, false)
-        _VE_.repUIInfo(screen:find_child("Layer0"))
-        openFile= false
-    end 
+    openFile= false
+
 end 
 
 _VE_.refresh = function()
@@ -643,186 +593,103 @@ _VE_.ungroup = function(gid)
  
 end 
 
+-- Clone
+_VE_.clone = function(gid)
+    editor.clone(gid)
+end 
+
 -- Duplicate
 _VE_.duplicate = function(gid)
-
     editor.duplicate(gid)
-
 end 
 
 -- Delete
 _VE_.delete = function(gid)
+    del_obj = devtools:gid(gid)
+    screen_ui.n_selected(del_obj)
 
-    if #(selected_objs) == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-	local delete_f = function(del_obj)
-
-		screen_ui.n_selected(del_obj)
-
-        --[[
-        if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
-	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
+    pGroup = del_obj.parent_group 
+    local idx, didx
+    if pGroup then 
+        if pGroup.widget_type == "MenuButton" then 
+            idx = 0 
+            while pGroup.items.length > idx do
+                idx = idx +1 
+                if pGroup.items[idx].gid == gid then
+                    pGroup.items:remove(idx)
+                end
+            end 
+        elseif pGroup.widget_type == "LayoutManager" then 
+            for r = 1, pGroup.number_of_rows, 1 do
+                for c = 1, pGroup.number_of_cols, 1 do
+                    if pGroup.cells[r][c].gid == gid then
+                        pGroup.cells[r][c] = nil 
+                    end
+                end
+            end
         end
-        --]]
-        --[=[  
-        -- manage user stub code 
-		if util.need_stub_code(del_obj) == true then 
-			if current_fn then 
-				local a, b = string.find(current_fn,"screens") 
-				local current_fn_without_screen 
-	   			if a then 
-					current_fn_without_screen = string.sub(current_fn, 9, -1)
-	   			end 
-
-	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
-
-			    local main = readfile("main.lua")
-			    if main then 
-			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
-			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
-				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
-				  		local main_first = string.sub(main, 1, q-1)
-						local main_delete = string.sub(main, q, r-1) 
-				  		local main_last = string.sub(main, r+1, -1)
-				  		main = ""
-				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
-				  		editor_lb:writefile("main.lua",main, true)
-	       		    end 
-			     end 
-	       	end 
-	   end 
-       ]=]
-    end 
-
-    util.getCurLayer(gid)
-
-    blockReport = true
-
-    for i, v in pairs(curLayer.children) do
-		if(v.extra.ve_selected == true) then
-			if v.extra.clone then 
-				if #v.extra.clone > 0 then
-                    print (v.name,"can't be deleted. It has clone object")
-        			screen:grab_key_focus()
-					input_mode = hdr.S_SELECT
-					return 
-				end 
-			end 
-
-			if v.type == "Clone" or v.widget_type == "Widget_Clone" then 
-				util.table_remove_val(v.source.extra.clone, v.name)
-			end 
-			
-			delete_f(v)
-		    curLayer:remove(v)
-		end 
-	end 
-	
-    blockReport = false
-
-    _VE_.refresh()
-    --[=[
-	for i, j in pairs(selected_objs) do 
-		j = string.sub(j, 1,-7)
-		local bumo
-		local s_obj = g:find_child(j)
-
-		if s_obj then 
-			bumo = s_obj.parent 
-		else 
-			return 
-		end 
-
-		if bumo.name == nil then 
-				if (bumo.parent.name == "window") then -- AP, SP 
-			    	bumo = bumo.parent.parent
-					for j, k in pairs (bumo.content.children) do 
-			 			--if(k.extra.selected == true) then
-						if k.name == s_obj.name then 
-							delete_f(k) 
-        	     	    	bumo.content:remove(k)
-			 			end 
-					end 
-				elseif (bumo.parent.extra.type == "DialogBox") then
-					bumo = bumo.parent 
-					delete_f(s_obj)
-					bumo.content:remove(s_obj)
-				elseif (bumo.parent.extra.type == "TabBar") then
-					bumo = bumo.parent
-					for e,f in pairs (bumo.tabs) do 
-						for t,y in pairs (f.children) do 
-							if y.name == s_obj.name then 
-								delete_f(s_obj)
-								f:remove(y)
-							end 
-						end 
-					end 
-				end 
-		elseif bumo.extra.type == "LayoutManager" then  
-				for e, r in pairs (bumo.cells) do 
-					if r then 
-						for x, c in pairs (r) do 
-							if c.name == s_obj.name then 
-							 	delete_f(s_obj) 
-							 	bumo:replace(e,x,nil)
-							end 
-						end
-					end 
-				end
-		else -- Regular Group 
-				for p, q in pairs (bumo.children) do 
-					if q.name == s_obj.name then 
-						delete_f(s_obj) 
-						bumo:remove(s_obj)
-					end 
-				end 
-		end 
-	end 
-    --]=]
-
-	input_mode = hdr.S_SELECT
-	screen:grab_key_focus()
-
-end 
+    end
+        
+    del_obj.parent:remove(del_obj)
+end
 
 -- SET
 _VE_.setUIInfo = function(gid, property, value, n)
     
     uiInstance = devtools:gid(gid)
 	screen_ui.n_selected(uiInstance) 
+
     if property == 'source' then 
         the_obj = screen:find_child(value) 
         if the_obj ~= nil then 
             uiInstance[property] = the_obj 
             uiInstance.extra.source = value
-		    --screen_ui.n_selected(uiInstance)
         end 
+	    screen_ui.selected(uiInstance) 
     elseif property == 'visible' then 
-        screen_ui.n_selected_all()
         uiInstance[property] = value 
+        if value == false then 
+            _VE_.deselectUIElement(uiInstance.gid, false)
+        else
+            _VE_.selectUIElement(uiInstance.gid, false)
+        end
     elseif property == "anchor_point" then 
         ax = table.remove(value, 1)
         ay = table.remove(value, 1) 
+        print (ax, ay, "&&&")
         uiInstance:move_anchor_point(ax, ay)
+	    screen_ui.selected(uiInstance) 
     elseif n ~= nil then 
         uiInstance['tabs'][n].label = value 
-        --print (n, value)
+	    screen_ui.selected(uiInstance) 
     else
         uiInstance[property] = value 
+	    screen_ui.selected(uiInstance) 
     end 
-    --if property == "label" then 
-    _VE_.refresh()
-    _VE_.openInspector(uiInstance.gid, false)
-    --end 
-	screen_ui.selected(uiInstance) 
 end 
 
 -- REPORT 
+_VE_.focusInfo = function(uiInstance)
+    if blockReport == true then 
+        return
+    end 
+    if input_mode == hdr.S_FOCUS then 
+        return 
+    end 
+    if uiInstance.focused then
+        print("focusInfo"..uiInstance.gid..":True")
+    else
+        print("focusInfo"..uiInstance.gid..":False")
+    end 
+end 
+
+_VE_.posUIInfo = function(uiInstance)
+    if blockReport == true then 
+        return
+    end 
+    print("posUIInfo"..uiInstance.gid..":"..math.floor(uiInstance.x)..":"..math.floor(uiInstance.y)..":")
+end 
+
 _VE_.repUIInfo = function(uiInstance)
 
     if blockReport == true then 
@@ -839,12 +706,9 @@ end
 _VE_.clearInspector = function(gid)
     print("clearInsp"..gid)
 end
+
 _VE_.openInspector = function(gid, multi)
-    if gid == screen.gid and select_screen == false then 
-        return
-    elseif  gid == screen.gid and select_screen == true then  
-        select_screen = false
-    end
+
     if buildInsp == true then
         return
     elseif shift == true or multi then 
@@ -852,7 +716,6 @@ _VE_.openInspector = function(gid, multi)
     else
         print("openInspc".."f"..gid)
     end
-    --print("openInspc"..gid)
 end 
 
 _VE_.setAppPath = function(path)
@@ -878,10 +741,11 @@ _VE_.openFile = function(path)
     openFile = true
     screen:clear()
 
-    current_dir = path
     -- Set current app path 
-
     editor_lb:change_app_path(path)
+    current_dir = path
+
+    -- Set VE Background Image
     util.setBGImages(path)
 
     local layers_file = "screens/layers.json"
@@ -893,61 +757,51 @@ _VE_.openFile = function(path)
 
     --the first time this function is called, styles will get set up
     --if not styles then load_styles() end
-    
-    --_VE_.buildVF()
-    --load the json
+
+    -- Read Style JSON
     local style = readfile(styles_file)
     style = string.sub(style, 2, string.len(style)-1)
-
     if style == nil then
         error("Style '"..styles_file.."' does not exist.",2)
     end
 
-    -- Library 
+    -- Load Widget Library 
     WL = dofile("LIB/Widget/Widget_Library.lua")
+
+    -- Load Styles 
     VL.load_styles(style) 
 
+    -- Read Layer JSON
     local layer = readfile(layers_file)
     --layer = string.sub(layer, 2, string.len(layer)-1)
     layer = json:stringify(json:parse(layer)[1])
-    
     if layer == nil then
         error("Layer '"..layers_file.."' does not exist.",2)
     end
 
-    --print(WL.get_all_styles())
-
+    -- Image File System 
     _VE_.buildVF()
 
-    --print(WL.get_all_styles())
-
-    --print(layer)
+    -- Load Layer
     s = VL.load_layer(layer)
     objectsNames = s.objects
-    --print (s, #s.children)
-
-    --_VE_.buildVF()
 
     for i,j in ipairs(s.children) do
-        --if string.find(j.name, "Layer") ~= nil then 
-        if string.find(j.name, "Layer") ~= nil and 
-         string.find(j.name, "a_m") == nil and 
-         string.find(j.name, "border") == nil 
-        then 
+        if util.isLayerObj(j) == true then 
             for l,m in ipairs(j.children) do  
 
+                -- Register subscribe_to function
                 m.created = false
-                if m.subscribe_to then  
-                    m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
-                end 
+                if m.subscribe_to then
+                   m:subscribe_to({"x", "y", "position"}, function() if dragging == nil then _VE_.posUIInfo(m) end end)
+                   m:subscribe_to({"focused"}, function() if dragging == nil then _VE_.focusInfo(m) end  end )
+                end
 
                 local uiTypeStr = util.getTypeStr(m) 
 
                 if uiTypeStr == "LayoutManager" then 
-                    m.placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
-                end 
-
-                if uiTypeStr == "Widget_Text" then 
+                    m.placeholder = WL.Widget_Rectangle{size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+                elseif uiTypeStr == "Widget_Text" then 
                     function m:on_key_down(key)
     	                if key == keys.Return then 
 			                m:set{cursor_visible = false}
@@ -971,54 +825,42 @@ _VE_.openFile = function(path)
                 end 
 
                 m.extra.mouse_handler = false
+
                 util.create_mouse_event_handler(m, uiTypeStr)
-                if uiTypeStr == "ArrowPane" or uiTypeStr == "ScrollPane" or uiTypeStr == "Widget_Group" or uiTypeStr == "DialogBox" then
+                    
+                -- Contents Setup 
+                if util.is_in_list(uiTypeStr, hdr.uiContainersChildrenContents) == true then
                     for o, p in ipairs(m.children) do
-                        p.extra.mouse_handler = false
-                        util.create_mouse_event_handler(p, p.widget_type)
-                        p.reactive = false 
-                        p.is_in_group = true
-                        p.parent_group = m 
+                        util.contentSetup(m, p)
                     end 
                 elseif uiTypeStr == "TabBar" then
                     local idx = 0
                     while m.tabs.length > idx do 
                         idx = idx + 1 
                         for o, p in ipairs(m.tabs[idx].contents.children) do 
-                            p.extra.mouse_handler = false
-                            util.create_mouse_event_handler(p, p.widget_type)
-                            p.reactive = false 
-                            p.is_in_group = true
-                            p.parent_group = m 
+                            util.contentSetup(m, p)
                         end 
                     end 
                 elseif uiTypeStr == "LayoutManager" then
                     for r = 1, m.number_of_rows, 1 do 
                         for c = 1, m.number_of_cols, 1 do 
-                            m.cells[r][c].extra.mouse_handler = false
-                            util.create_mouse_event_handler( m.cells[r][c], m.cells[r][c].widget_type)
-                            m.cells[r][c].reactive = false 
-                            m.cells[r][c].is_in_group = true
-                            m.cells[r][c].parent_group = m 
+                            if m.cells[r][c].name ~= nil then 
+                                util.contentSetup(m, m.cells[r][c])
+                            end 
                         end 
                     end 
                 elseif uiTypeStr == "MenuButton" then
                     local idx = 0
                     while m.items.length > idx  do
                         idx = idx + 1
-                        m.items[idx].extra.mouse_handler = false
-                        util.create_mouse_event_handler(m.items[idx], m.items[idx].widget_type)
-                        m.items[idx].reactive = false 
-                        m.items[idx].is_in_group = true
-                        m.items[idx].parent_group = m 
+                        util.contentSetup(m, m.items[idx])
                     end 
                 end 
 
-                if uiTypeStr == "Widget_Sprite" then 
-                    --m.sheet = spriteSheet
-                elseif uiTypeStr == "Image" then 
+                if uiTypeStr == "Image" then 
                     m.src = image_path..m.src
                 end 
+
                 m.reactive = true 
                 m.lock = false
                 m.ve_selected = false
@@ -1033,50 +875,7 @@ _VE_.openFile = function(path)
     
     blockReport = false
 
-
-    --_VE_.buildVF()
-    --[[
-    for i,j in ipairs(s.children) do
-        if string.find(j.name, "Layer") ~= nil then 
-            for l,m in ipairs(j.children) do 
-               if m.subscribe_to then  
-                m:subscribe_to(nil, function() if dragging == nil then _VE_.repUIInfo(m) end end)
-               end 
-            end
-        end
-    end
-    -]]
 end 
-
-
---[[
-_VE_.openLuaFile = function()
-    --s = load_layer("layer1.json")
-    screen:clear()
-    g.reactive = false
-    
-    screen:add(g)
-
-    for i,j in ipairs(screen.children) do
-        --dump_properties(j)
-        --print (j.name)
-        j.extra.to_json = function() return fake_json end
-        function j.on_button_down( j , x , y , button )
-            dragging = { j , x - j.x , y - j.y }
-            if button == 3 then
-                _VE_.openInspector(4)
-            enimport
-        end
-    
-        function j.on_button_up( j , x , y , button )
-            dragging = nil
-        end
-    
-        j.reactive = true 
-        _VE_.repUIInfoWfakeJson(j)
-    end
-end 
-]]
 
 _VE_.screenHide = function()
     screen:hide()
@@ -1090,10 +889,10 @@ end
 _VE_.setScreenLoc = function(x, y)
     if x == 0 and y == 0  then 
         screen.y = 300
-        screen.x = 300
+        screen.x = 500
     else
-        screen.y = y--300
-        screen.x = x--1900
+        screen.y = y
+        screen.x = x
     end 
 end 
 
@@ -1103,9 +902,10 @@ _VE_.newLayer = function()
             layerNum = layerNum + 1
         end
     end 
-    screen:add(WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    local newLayer = WL.Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}}
+    screen:add(newLayer)
     layerNum = layerNum + 1
-    _VE_.refresh()
+    _VE_.repUIInfo(newLayer)
 end 
 
 local codeExist = function(contents, layer, obj) 
@@ -1145,7 +945,6 @@ local codeGen = function()
             local layerName = b.name
             local lowLayerName = string.lower(layerName)
             local contents = readfile(lowLayerName..".lua")
-            --print ( contents )
 
             local contents_header = "local "..lowLayerName.." = ...\n" 
             local contents_tail = "return "..lowLayerName 
@@ -1167,7 +966,6 @@ local codeGen = function()
 				end
 
                 -----------------------------------
-                --print (contents_last)
 				local temp = contents_last 
                 local backup_obj = {}
 
@@ -1186,7 +984,6 @@ local codeGen = function()
                     c, d = string.find(temp, "[-][-] BEGIN ")
                 end 
                         
-                --dumptable(backup_obj)
 
                 local temp_first, temp_last, temp_middle
                 for k, l in ipairs(backup_obj) do 
@@ -1201,9 +998,6 @@ local codeGen = function()
                 end 
 
                 -----------------------------------
-
-                --print(new_contents)
-                --print(contents_last)
 
 				contents = contents_header..new_contents..contents_last
                 editor_lb:writefile(lowLayerName..".lua", contents, true)
@@ -1239,19 +1033,13 @@ _VE_.saveFile = function(scrJson)
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
 
-    --print ("***********************************")
-    --print (WL.get_all_styles())
-    --print ("***********************************")
 
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
-    --editor_lb:writefile("/screens/layers.json", '['..json:stringify(layer_t)..']', true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
-    --screen:clear()
     _VE_.setAppPath(currentProjectPath)
     _VE_.openFile(currentProjectPath)
-    _VE_.refreshDone()
 
     codeGen()
 
@@ -1337,11 +1125,6 @@ _VE_.addHorizonGuide = function()
      screen:add(h_gl)
      screen:grab_key_focus()
 
---[[
-	 if menuButtonView.items[11]["icon"].opacity < 255 then 
-		h_gl:hide()
-	 end 
-]]
 end
 
 _VE_.addVerticalGuide = function()
@@ -1373,7 +1156,6 @@ end
 
 _VE_.showGuides = function(guidelineShow)
     if guidelineShow == false then 
-		--menuButtonView.items[11]["icon"].opacity = 255
 		for i= 1, h_guideline, 1 do 
 			local h_guide = screen:find_child("h_guideline"..tostring(i))
 			if h_guide then 
@@ -1388,7 +1170,6 @@ _VE_.showGuides = function(guidelineShow)
 		end 
 	else 
 		if util.is_there_guideline() then 
-			--menuButtonView.items[11]["icon"].opacity = 0
 			for i= 1, h_guideline, 1 do 
 				local h_guide = screen:find_child("h_guideline"..tostring(i)) 
 				if h_guide then 
@@ -1410,10 +1191,8 @@ _VE_.showGuides = function(guidelineShow)
 end
 _VE_.snapToGuides = function(snapGuide)
 	if snapGuide == true then 
-		 	--menuButtonView.items[12]["icon"].opacity = 0 
             snapToGuide = false
 	else 
-		 	--menuButtonView.items[12]["icon"].opacity = 255 
             snapToGuide = true
 	end
 	screen:grab_key_focus()
@@ -1425,23 +1204,24 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
 
     util.getCurLayer(layerGid)
 
-
     blockReport = true
 
-    if uiTypeStr == "Rectangle" or uiTypeStr == "Widget_Rectangle"  then 
+    -- Create uiInstance 
+    if string.find(uiTypeStr, "Rectangle") then 
 
         input_mode = hdr.S_RECTANGLE 
+	 	screen_ui.cursor_setting()
         screen:grab_key_focus()
         return
 
-    elseif uiTypeStr == "Group" or uiTypeStr == "Widget_Group" then 
+    elseif string.find(uiTypeStr, "Group") then 
         
         uiInstance = editor.group()
         if uiInstance == nil then 
             return
         end 
 
-    elseif uiTypeStr == "Clone" or uiTypeStr == "Widget_Clone" then 
+    elseif string.find(uiTypeStr, "Clone") then 
         editor.clone()
         return
 
@@ -1458,8 +1238,6 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
             number_of_cols = 3,
             placeholder = WL.Widget_Rectangle{ size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}},
             cells = {
-                --{WL.Widget_Rectangle{name = "star", w=30,h=30},WL.Widget_Rectangle{name = "moon", w=100,h=100}},
-                --{WL.Widget_Rectangle{name = "rainbow", w=100,h=100},nil,WL.Widget_Rectangle{name="sun",w=100,h=100}},
             }
         }
     elseif uiTypeStr == "Slider" then 
@@ -1483,37 +1261,31 @@ _VE_.insertUIElement = function(layerGid, uiTypeStr, path)
                 {label="Three", contents = WL.Widget_Group()},
             }
         }
-    --elseif uiTypeStr == "DialogBox" then 
-        --local b = WL.Button{name="pretty_button"} uiInstance:add(b)
-    --elseif uiTypeStr == "MenuButton" then 
-        --uiInstance.items = {WL.Button{name="pretty_button"}}
-    end 
+    elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
+        editor.text(uiInstance)
+    end
         
+    -- Assign uiInstance name 
     if uiTypeStr == "Image" then 
         util.assign_right_name(uiInstance, path)
+        uiInstance.sheet = spriteSheet
+        uiInstance.id = path
     else 
         util.assign_right_name(uiInstance, uiTypeStr)
     end
 
-    if uiTypeStr == "Image" or uiTypeStr == "Widget_Sprite" then 
-        uiInstance.sheet = spriteSheet
-        uiInstance.id = path
-    elseif uiTypeStr == "Text" or uiTypeStr == "Widget_Text" then 
-        editor.text(uiInstance)
-    end
 
     if uiInstance ~= nil then 
-        screen_ui.n_selected_all()
-        uiInstance.extra.mouse_handler = false 
+        uiInstance.mouse_handler = false 
         util.create_mouse_event_handler(uiInstance, uiTypeStr)
+        if util.is_this_container(uiInstance) then
+            uiInstance.container_selected = false
+        end
         print("newui_gid"..uiInstance.gid)
         util.addIntoLayer(uiInstance)
     end
 
     blockReport = false
-
-    _VE_.refreshDone()
-    _VE_.openInspector(uiInstance.gid, false)
     _VE_.repUIInfo(uiInstance)
 
 end
@@ -1522,38 +1294,39 @@ _VE_.imageNameChange = function(org, new)
 
 
     for m,n in ipairs (screen.children) do
-        if n.name then
-        if string.find(n.name, "Layer") ~= nil and 
-         string.find(n.name, "a_m") == nil and 
-         string.find(n.name, "border") == nil 
-        then 
+        if util.isLayerObj(n) == true then 
             for q,w in ipairs (n.children) do 
                 if w.widget_type == "Widget_Sprite" and w.id == org then 
                     w.id = new 
                 end 
             end
         end
-        end
     end 
 end 
 
-local selected_obj_cnt 
 
 _VE_.selectUIElement = function(gid, multiSel)
     local org_shift = shift
     if multiSel == true then
         shift = multiSel
     end
+    local obj = devtools:gid(gid)
+
+    if obj.widget_type == "MenuButton" then
+        local idx = 0 
+        while obj.items.length > idx  do
+            idx = idx + 1
+            screen:remove(screen:find_child(obj.items[idx].name.."border"))
+            -- remove red cross mark showing anchor point
+            screen:remove(screen:find_child(obj.items[idx].name.."a_m"))
+            obj.items[idx].extra.ve_selected = false
+        end
+    end 
+
     if gid ~= screen.gid then
-        screen_ui.selected(devtools:gid(gid))
+        screen_ui.selected(obj)
     end 
     shift = org_shift
-
-    if not (#selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil) and 
-       #selected_objs > 0 and selected_obj_cnt == 0 then 
-        print "menuEnabled"
-    end
-    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.deselectAll = function()
@@ -1562,19 +1335,16 @@ end
 
 _VE_.deselectUIElement = function(gid, multiSel)
     local org_shift = shift
+    blockReport = true
     if multiSel == true then
         shift = multiSel
     end 
+
     if gid ~= screen.gid then
         screen_ui.n_selected(devtools:gid(gid))
     end
+    blockReport = false
     shift = org_shift
-
-    if #selected_objs == 0 and selected_obj_cnt ~= 0 or 
-       #selected_objs == 1 and string.find(selected_objs[1], "Layer") ~= nil then
-        print "menuDisabled"
-    end
-    selected_obj_cnt = #selected_objs
 end 
 
 _VE_.focusSettingMode = function(key)
@@ -1582,11 +1352,6 @@ _VE_.focusSettingMode = function(key)
     focusKey = key
 end 
 
-local function styleUpdate()
-    if blockReport ~= true then
-        _VE_.refresh()
-    end 
-end 
 
 
 ---------------------------------------------------------------------------
@@ -1600,31 +1365,30 @@ end
               key_map[key](self)
      	  end
      	end
-
     end
 
     function screen:on_key_up( key )
 
     	if key == keys.Shift_L or key == keys.Shift_R then shift = false end 
-    	if key == keys.Control_L or key == keys.Control_R then control = false end 
+    	if key == keys.Control_L or key == keys.Control_R then control = false  screen_ui.container_deselected() end 
 
     end
 
 	function screen:on_button_down(x,y,button,num_clicks,m)
 
+        print("screen onbuttondown !!!")
 
-        if shift == false then
-            screen_ui.n_selected_all()
-            select_screen = true
-        end 
-        
+        local multi_bdr = screen:find_child("multi_select_border") 
+
+        if multi_bdr then 
+            screen:remove(multi_bdr)
+        end
+
         if input_mode == hdr.S_FOCUS then 
-            --local selObjName, selObjGid = screen_ui.getSelectedName()
             local selObj = screen_ui.getSelectedObj()
 
             if selObj then 
                 blockReport = true
-                --hdr.neighberKey_map[focusKey](devtools:gid(selObjGid), nil) 
                 hdr.neighberKey_map[focusKey](selObj, nil) 
                 blockReport = false
             end 
@@ -1632,6 +1396,8 @@ end
             print("focusSet2".."empty")
             input_mode = hdr.S_SELECT
             return true 
+        else 
+            print("openInspc".."f"..screen.gid)
         end
 
       	mouse_state = hdr.BUTTON_DOWN 		
@@ -1652,6 +1418,7 @@ end
 
 	function screen:on_button_up(x,y,button,clicks_count, m)
 
+        print ("screen onbuttonup !!!")
 		screen_ui.dragging_up(x,y)
 
 	  	dragging = nil
@@ -1671,10 +1438,6 @@ end
 
     function screen:on_motion(x,y)
 
-	  	if control == true and mouse_state == hdr.BUTTON_DOWN and input_mode ~= hdr.S_RECTANGLE then 
-			screen_ui.draw_selected_container_border(x,y) 
-		end 
-	 
 	 	screen_ui.cursor_setting()
 	 	screen_ui.dragging(x,y)
 
