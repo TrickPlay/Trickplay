@@ -82,7 +82,6 @@ private:
 
     // The external functions are friends
 
-    friend int tp_mediaplayer_get_state( GST_Player* mp );
     friend void tp_mediaplayer_loaded( GST_Player* mp );
     friend void tp_mediaplayer_error( GST_Player* mp, int code, const char* message );
     friend void tp_mediaplayer_end_of_stream( GST_Player* mp );

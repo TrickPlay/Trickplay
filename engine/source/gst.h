@@ -28,8 +28,6 @@
 typedef struct GST_Player GST_Player;
 typedef int (*GST_PlayerConstructor)( GST_Player * mp, TPContext * context, ClutterActor * actor );
 
-void tp_context_set_media_player_constructor( TPContext * context, GST_PlayerConstructor constructor);
-int tp_mediaplayer_get_state( GST_Player * mp );
 void tp_mediaplayer_loaded( GST_Player * mp );
 void tp_mediaplayer_error( GST_Player * mp, int code, const char * message );
 void tp_mediaplayer_end_of_stream( GST_Player * mp );

@@ -813,14 +813,6 @@ void Media::remove_delegate( Delegate* delegate )
 // External callbacks
 //=============================================================================
 
-// TODO: Find out where thet are being used within TrickPlay source code
-
-int tp_mediaplayer_get_state( GST_Player* mp )
-{
-    tplog( "[%p] -> tp_media_player_get_state", mp );
-    return Media::get( mp )->get_state();
-}
-
 //-----------------------------------------------------------------------------
 
 void tp_mediaplayer_loaded( GST_Player* mp )
