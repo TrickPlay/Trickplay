@@ -667,6 +667,7 @@ _VE_.setUIInfo = function(gid, property, value, n)
         uiInstance[property] = value 
 	    screen_ui.selected(uiInstance) 
     end 
+    _VE_.repUIInfo(uiInstance)
 end 
 
 -- REPORT 

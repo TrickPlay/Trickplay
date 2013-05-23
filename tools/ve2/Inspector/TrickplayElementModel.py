@@ -29,9 +29,7 @@ class TrickplayElementModel(QStandardItemModel):
         QObject.connect(self, SIGNAL("rowsAboutToBeInserted (const QModelIndex&, int, int)"), self.rai)
 
     def rai(self, idx, i , j):
-        print "rai"
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
-            print "rai : contentBlock False"
             the_item= self.itemFromIndex(idx)
             if the_item :
                 try:
@@ -72,9 +70,7 @@ class TrickplayElementModel(QStandardItemModel):
         """
 
     def rar(self, idx, i , j):
-        print "rar"
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
-            print "rar : contentBlock false"
             the_item= self.itemFromIndex(idx)
             if the_item :
                 the_child_item = the_item.takeChild(i)
@@ -100,9 +96,7 @@ class TrickplayElementModel(QStandardItemModel):
 
 
     def rr(self, idx, i , j):
-        print "rr"
         if self.inspector.main._emulatorManager.contentMoveBlock == False :
-            print "rr : contentblock false"
             the_item= self.itemFromIndex(idx)
             if self.newChildGid and self.newParentGid :
                 if self.tabIndex is not "nil" :
