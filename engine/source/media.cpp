@@ -1,18 +1,15 @@
 
 #include "glib-object.h"
-
 #include "media.h"
 #include "util.h"
 #include "context.h"
 
-//=============================================================================
-
 #define TP_LOG_DOMAIN   "MP"
 #define TP_LOG_ON       false
 #define TP_LOG2_ON      false
+#define MPLOCK Util::GSRMutexLock lock(&mutex)
 
 #include "log.h"
-//=============================================================================
 
 Media::Event* Media::Event::make( Type type, int code, const gchar* message, const gchar* value )
 {
@@ -32,17 +29,12 @@ void Media::Event::destroy( Event* event )
     g_slice_free( Event, event );
 }
 
-//=============================================================================
-
-#define MPLOCK Util::GSRMutexLock lock(&mutex)
-
 //-----------------------------------------------------------------------------
 // Allocates a new wrapper and invokes the outside world's media player
 // constructor function to initialize the media player. If that fails,
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
-
-Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate )
+Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate, ClutterActor * actor )
 {
     if ( !constructor )
     {
@@ -58,7 +50,7 @@ Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Dele
 
     tplog( "[%p] <- constructor", mp );
 
-    if ( int result G_GNUC_UNUSED = constructor( mp, context ) )
+    if ( int result G_GNUC_UNUSED = constructor( mp, context, actor ) )
     {
         // Construction failed
 

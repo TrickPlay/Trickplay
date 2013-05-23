@@ -49,7 +49,7 @@ static void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 static void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
 {
     tp_mediaplayer_error( mp, error->code, error->message );
-    clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+    //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -408,7 +408,7 @@ static void gst_reset( GST_Player* mp )
     clutter_media_set_playing( cm, FALSE );
     clutter_media_set_progress( cm, 0 );
 
-    clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+    //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
 static int gst_play( GST_Player* mp )
@@ -632,7 +632,7 @@ static void* gst_get_viewport_texture( GST_Player* mp )
 }
 
 //-----------------------------------------------------------------------------
-
+/*
 static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer vt )
 {
     ClutterActor* video_texture = CLUTTER_ACTOR( vt );
@@ -650,14 +650,14 @@ static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer v
         clutter_actor_set_size( video_texture , width , height );
     }
 }
-
+*/
 //-----------------------------------------------------------------------------
 
-int gst_constructor( GST_Player* mp, TPContext * _context )
+int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor )
 {
     context = _context;
 
-    ClutterActor* video_texture = clutter_gst_video_texture_new();
+    ClutterActor* video_texture = actor ? actor : clutter_gst_video_texture_new();
 
     if ( !video_texture )
     {
@@ -668,7 +668,7 @@ int gst_constructor( GST_Player* mp, TPContext * _context )
     // We own it
 
     g_object_ref_sink( G_OBJECT( video_texture ) );
-
+/*
     // Get the stage, size the video texture and add it to the stage
 
     clutter_actor_hide( video_texture );
@@ -686,7 +686,7 @@ int gst_constructor( GST_Player* mp, TPContext * _context )
     clutter_actor_insert_child_below( stage, video_texture, NULL );
 
     g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
-
+*/
     // Connect signals
 
     g_signal_connect( video_texture, "eos", G_CALLBACK( gst_end_of_stream ), mp );

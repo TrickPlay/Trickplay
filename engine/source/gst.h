@@ -26,7 +26,7 @@
 #define TP_MEDIAPLAYER_ERROR_NA                 -6
 
 typedef struct GST_Player GST_Player;
-typedef int (*GST_PlayerConstructor)( GST_Player * mp, TPContext * context );
+typedef int (*GST_PlayerConstructor)( GST_Player * mp, TPContext * context, ClutterActor * actor );
 
 void tp_context_set_media_player_constructor( TPContext * context, GST_PlayerConstructor constructor);
 int tp_mediaplayer_get_state( GST_Player * mp );
@@ -61,6 +61,6 @@ struct GST_Player
     void * (*get_viewport_texture)( GST_Player * mp);
 };
 
-extern int gst_constructor( GST_Player* mp, TPContext * context );
+extern int gst_constructor( GST_Player* mp, TPContext * context, ClutterActor * actor );
 
 #endif // _TRICKPLAY_GST_H

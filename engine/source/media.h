@@ -25,7 +25,7 @@ public:
     //.........................................................................
     // Constructing a media player
 
-    static Media* make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate = NULL );
+    static Media* make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate, ClutterActor * actor );
 
     // Getting one from a GST_Player
 

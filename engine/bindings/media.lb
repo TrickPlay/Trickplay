@@ -22,7 +22,7 @@ class MediaExtra : private Media::Delegate
     MediaExtra( ClutterActor * _actor, lua_State * l )
         : constructing( false ), loaded_flag( false ), async( false ), read_tags( false ), actor( _actor ), L( l ), player( NULL )
     {
-        player = Media::make( App::get( L )->get_context(), gst_constructor, this );
+        player = Media::make( App::get( L )->get_context(), gst_constructor, this, actor );
 
         if ( player ) player->add_delegate( this );
     }
@@ -572,7 +572,9 @@ class Media [[ClutterActor*]] actor
         [[
             int m;
 
-            int result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->get_audio_mute(&m):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_mute(&m)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if (result)
             {
@@ -662,8 +664,10 @@ class Media [[ClutterActor*]] actor
 
     int play()
         [[
-            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->play():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            if(result)
+            result = MediaExtra::get( self, L )->get_player()
+                    ?MediaExtra::get( self, L )->get_player()->play()
+                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            if ( result )
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
             }
@@ -683,7 +687,9 @@ class Media [[ClutterActor*]] actor
 
     int pause()
         [[
-            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->pause():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->pause()
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -706,7 +712,9 @@ class Media [[ClutterActor*]] actor
 
     int seek(double seconds)
         [[
-            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->seek(seconds):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->seek(seconds)
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -733,7 +741,9 @@ class Media [[ClutterActor*]] actor
 
     int set_playback_rate(int rate)
         [[
-            result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->set_playback_rate(rate):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->set_playback_rate(rate)
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
@@ -763,7 +773,9 @@ class Media [[ClutterActor*]] actor
             int width;
             int height;
 
-            int result=MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->get_viewport_geometry(&left,&top,&width,&height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->get_viewport_geometry(&left,&top,&width,&height)
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;;
 
             if (result)
             {
@@ -806,7 +818,9 @@ class Media [[ClutterActor*]] actor
             if ( width  < 0 ) width  = 0;
             if ( height < 0 ) height = 0;
 
-            result = MediaExtra::get( self, L )->get_player()?MediaExtra::get( self, L )->get_player()->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->set_viewport_geometry(left,top,width,height)
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if(result)
             {
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
