@@ -165,6 +165,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
             end 
         end 
 		newChild.group_position = {0,0,0}
+		newChild.position = {0,0,0}
         newChild.is_in_group = false
         newChild.parent_group = nil
         newChild.reactive = true
