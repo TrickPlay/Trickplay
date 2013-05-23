@@ -356,17 +356,25 @@ class TrickplayEmulatorManager(QWidget):
                             return
                         elif self.main.command == "insertUIElement" :
                             self.main.command = ""
-                            curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
-                            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
-                            self.inspector.deselectItems()
-                            newItem = self.inspector.search(self.pdata['gid'], 'gid')
-                            self.inspector.selectItem(newItem, False)
+                            self.newGid = self.pdata['gid']
+                            # Group : remove group's contents from the layer
+                            if self.pdata['type'] == 'Widget_Group' :
+                                self.main.sendLuaCommand("refresh", "_VE_.refresh()")
+                                #self.main.sendLuaCommand("openInspector", "_VE_.openInspector('"+str(self.pdata['gid'])+"')")
+                            else:
+                                curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
+                                self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
+                                self.inspector.deselectItems()
+                                newItem = self.inspector.search(self.pdata['gid'], 'gid')
+                                self.inspector.selectItem(newItem, False)
 
+                            """
                             # Group : remove group's contents from the layer
                             if self.pdata['type'] == 'Widget_Group' :
                                 for c in self.pdata['children'] :
                                     i = self.inspector.search(c['gid'], 'gid')
                                     i.parent().removeRow(i.row())
+                            """
 
                             return
                         else:
@@ -390,6 +398,12 @@ class TrickplayEmulatorManager(QWidget):
                         self.contentMoveBlock = False
 
                         self.main.sendLuaCommand("refreshDone", "_VE_.refreshDone()")
+                        try:
+                            newItem = self.inspector.search(self.newGid, 'gid')
+                            self.inspector.selectItem(newItem, False)
+                            self.newGid = None
+                        except :
+                            pass
                         try:
                             result = self.inspector.search(self.inspector.setGid, 'gid')
                             if result:
