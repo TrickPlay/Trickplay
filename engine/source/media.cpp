@@ -219,12 +219,6 @@ int Media::load( const char* uri, const char* extra )
 
     GST_Player* mp = get_mp();
 
-    if ( !mp->load )
-    {
-        g_warning( "MP[%p]    load NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     gchar* unescaped_uri = g_uri_unescape_string( uri , 0 );
 
     if ( ! unescaped_uri )
@@ -263,12 +257,6 @@ int Media::play()
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    if ( !mp->play )
-    {
-        g_warning( "MP[%p]    play NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- play", mp );
 
     if ( int result = mp->play( mp ) )
@@ -296,12 +284,6 @@ int Media::seek( double seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    if ( !mp->seek )
-    {
-        g_warning( "MP[%p]    seek NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- seek(%f)", mp, seconds );
 
     if ( int result = mp->seek( mp, seconds ) )
@@ -325,12 +307,6 @@ int Media::pause()
     {
         g_warning( "MP[%p]    pause CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
-    }
-
-    if ( !mp->pause )
-    {
-        g_warning( "MP[%p]    pause NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
     tplog( "[%p] <- pause", mp );
@@ -366,12 +342,6 @@ int Media::set_playback_rate( int rate )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    if ( !mp->set_playback_rate )
-    {
-        g_warning( "MP[%p]    set_playback_rate NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- set_playback_rate(%d)", mp, rate );
 
     if ( int result = mp->set_playback_rate( mp, rate ) )
@@ -397,12 +367,6 @@ int Media::get_position( double* seconds )
     {
         g_warning( "MP[%p]    get_position CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
-    }
-
-    if ( !mp->get_position )
-    {
-        g_warning( "MP[%p]    get_position NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
     tplog( "[%p] <- get_position", mp );
@@ -432,12 +396,6 @@ int Media::get_duration( double* seconds )
     {
         g_warning( "MP[%p]    get_duration CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
-    }
-
-    if ( !mp->get_duration )
-    {
-        g_warning( "MP[%p]    get_duration NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
     tplog( "[%p] <- get_duration", mp );
@@ -470,12 +428,6 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    if ( !mp->get_buffered_duration )
-    {
-        g_warning( "MP[%p]    get_buffered_duration NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- get_buffered_duration", mp );
 
     if ( int result = mp->get_buffered_duration( mp, start_seconds, end_seconds ) )
@@ -504,12 +456,6 @@ int Media::get_video_size( int* width, int* height )
     {
         g_warning( "MP[%p]    get_video_size CALLED IN INVALID STATE", mp );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
-    }
-
-    if ( !mp->get_video_size )
-    {
-        g_warning( "MP[%p]    get_video_size NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
     tplog( "[%p] <- get_video_size", mp );
@@ -541,12 +487,6 @@ int Media::get_media_type( int* type )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    if ( !mp->get_media_type )
-    {
-        g_warning( "MP[%p]    get_media_type NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- get_media_type", mp );
 
     if ( int result = mp->get_media_type( mp, type ) )
@@ -569,12 +509,6 @@ int Media::get_audio_volume( double* volume )
     GST_Player* mp = get_mp();
 
     g_assert( volume );
-
-    if ( !mp->get_audio_volume )
-    {
-        g_warning( "MP[%p]    get_audio_volume NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
 
     tplog( "[%p] <- get_audio_volume", mp );
 
@@ -606,12 +540,6 @@ int Media::set_audio_volume( double volume )
 
     GST_Player* mp = get_mp();
 
-    if ( !mp->set_audio_volume )
-    {
-        g_warning( "MP[%p]    set_audio_volume NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     if ( volume < 0 )
     {
         volume = 0;
@@ -642,12 +570,6 @@ int Media::get_audio_mute( int* mute )
 
     g_assert( mute );
 
-    if ( !mp->get_audio_mute )
-    {
-        g_warning( "MP[%p]    get_audio_mute NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
-
     tplog( "[%p] <- get_audio_mute", mp );
 
     if ( int result = mp->get_audio_mute( mp, mute ) )
@@ -668,12 +590,6 @@ int Media::set_audio_mute( int mute )
     MPLOCK;
 
     GST_Player* mp = get_mp();
-
-    if ( !mp->set_audio_mute )
-    {
-        g_warning( "MP[%p]    set_audio_mute NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
 
     if ( mute != 0 )
     {
@@ -696,12 +612,6 @@ int Media::set_audio_mute( int mute )
 int Media::play_sound( const char* uri )
 {
     GST_Player* mp = get_mp();
-
-    if ( !mp->play_sound )
-    {
-        g_warning( "MP[%p]    play_sound NOT IMPLEMENTED", mp );
-        return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
-    }
 
     if ( int result = mp->play_sound( mp, uri ) )
     {

@@ -290,9 +290,9 @@ class Media [[ClutterActor*]] actor
         ]];
 
     /*
-        Property: position
+        Property: playback_position
 
-        The position property specifies the current playback position in seconds. If the mediaplayer is not currently playing a resource, the position property contains 0.
+        The playback_position property specifies the current playback position in seconds. If the mediaplayer is not currently playing a resource, the playback_position property contains 0.
 
         *Default Setting:* 0
 
