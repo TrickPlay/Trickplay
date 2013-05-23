@@ -299,15 +299,15 @@ class Media [[ClutterActor*]] actor
         *See Also:* the <duration> property and the <play> function
     */
 
-    readonly double position
+    readonly double playback_position
         [[
             int result = MediaExtra::get( self, L )->get_player()
-                         ? MediaExtra::get( self, L )->get_player()->get_position( &position )
-                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                       ? MediaExtra::get( self, L )->get_player()->get_position( & playback_position )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if(result)
             {
-                position=0;
+                playback_position = 0;
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
             }
         ]];
@@ -423,17 +423,17 @@ class Media [[ClutterActor*]] actor
         [[
             int type;
             int result = MediaExtra::get( self, L )->get_player()
-                         ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
-                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                       ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if (result)
+            if ( result )
             {
-                has_video=false;
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                has_video = false;
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
-                has_video=type&TP_MEDIA_TYPE_VIDEO;
+                has_video = type & TP_MEDIA_TYPE_VIDEO;
             }
         ]];
 
@@ -451,17 +451,17 @@ class Media [[ClutterActor*]] actor
         [[
             int type;
             int result = MediaExtra::get( self, L )->get_player()
-                         ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
-                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                       ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if (result)
+            if ( result )
             {
-                has_audio=false;
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                has_audio = false;
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
-                has_audio=type&TP_MEDIA_TYPE_AUDIO;
+                has_audio = type & TP_MEDIA_TYPE_AUDIO;
             }
         ]];
 
@@ -476,17 +476,17 @@ class Media [[ClutterActor*]] actor
     readonly table tags
         [[
             lua_newtable(L);
-            if (MediaExtra::get( self, L )->get_player())
+            if ( MediaExtra::get( self, L )->get_player() )
             {
                 StringPairList tags = MediaExtra::get( self, L )->get_player()->get_tags();
 
                 int i=1;
 
-                for (StringPairList::const_iterator it=tags.begin();it!=tags.end();++it,++i)
+                for ( StringPairList::const_iterator it = tags.begin(); it != tags.end(); ++it, ++i )
                 {
-                    lua_pushstring(L,it->first.c_str());
-                    lua_pushstring(L,it->second.c_str());
-                    lua_rawset(L,-3);
+                    lua_pushstring( L, it->first.c_str() );
+                    lua_pushstring( L, it->second.c_str() );
+                    lua_rawset( L,-3 );
                 }
             }
         ]];
@@ -547,15 +547,15 @@ class Media [[ClutterActor*]] actor
                          ? MediaExtra::get( self, L )->get_player()->get_audio_volume(&volume)
                          : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if (result)
+            if ( result )
             {
-                volume=0;
+                volume = 0;
                 g_warning("AT %s", Util::where_am_i_lua(L).c_str());
             }
         ]]
         [[
-            if (MediaExtra::get( self, L )->get_player())
-                MediaExtra::get( self, L )->get_player()->set_audio_volume(volume);
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_volume( volume );
         ]];
 
     /*
@@ -573,22 +573,22 @@ class Media [[ClutterActor*]] actor
             int m;
 
             int result = MediaExtra::get( self, L )->get_player()
-                         ? MediaExtra::get( self, L )->get_player()->get_audio_mute(&m)
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_mute( &m )
                          : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if (result)
+            if ( result )
             {
-                mute=false;
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                mute = false;
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
-                mute=m;
+                mute = m;
             }
         ]]
         [[
-            if (MediaExtra::get( self, L )->get_player())
-                MediaExtra::get( self, L )->get_player()->set_audio_mute(mute);
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_mute( mute );
         ]];
 
     /*
@@ -665,7 +665,7 @@ class Media [[ClutterActor*]] actor
     int play()
         [[
             result = MediaExtra::get( self, L )->get_player()
-                    ?MediaExtra::get( self, L )->get_player()->play()
+                   ? MediaExtra::get( self, L )->get_player()->play()
                     : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             if ( result )
             {
@@ -785,26 +785,11 @@ class Media [[ClutterActor*]] actor
             {
                 result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
+
             if ( result )
             {
                 g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
-        ]];
-
-    /*
-        Function: new
-
-        The new() function creates a new Media object on platforms that support multiple media players.
-
-        *Arguments:* None
-
-        *Return Value:* new Media object. If the platform does not support multiple media players, returns nil.
-
-    */
-
-    Media new()
-        [[
-                lua_pushnil(L);
         ]];
 
 /***************************************
