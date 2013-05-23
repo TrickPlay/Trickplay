@@ -50,8 +50,6 @@ struct GST_Player
     int (*get_duration)( GST_Player * mp, double * seconds);
     int (*get_buffered_duration)( GST_Player * mp, double * start_seconds, double * end_seconds);
     int (*get_video_size)( GST_Player * mp, int * width, int * height); 
-    int (*get_viewport_geometry)( GST_Player * mp, int * left, int * top, int * width, int * height);
-    int (*set_viewport_geometry)( GST_Player * mp, int left, int top, int width, int height);
     int (*get_media_type)( GST_Player * mp, int * type);
     int (*get_audio_volume)( GST_Player * mp, double * volume); 
     int (*set_audio_volume)( GST_Player * mp, double volume);

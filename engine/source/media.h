@@ -47,9 +47,6 @@ public:
     int get_duration( double* seconds );
     int get_buffered_duration( double* start_seconds, double* end_seconds );
     int get_video_size( int* width, int* height );
-    int get_viewport_geometry( int* left, int* top, int* width, int* height );
-    int set_viewport_geometry( int left, int top, int width, int height );
-    int reset_viewport_geometry( );
     int get_media_type( int* type );
     int get_audio_volume( double* volume );
     int set_audio_volume( double volume );

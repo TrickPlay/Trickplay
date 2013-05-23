@@ -497,31 +497,6 @@ static int gst_get_video_size( GST_Player* mp, int* width, int* height )
     return 0;
 }
 
-static int gst_get_viewport_geometry( GST_Player* mp, int* left, int* top, int* width, int* height )
-{
-    USERDATA( mp );
-    CM( ud );
-
-    gfloat x, y, w, h;
-    clutter_actor_get_position( CLUTTER_ACTOR( cm ), &x, &y );
-    clutter_actor_get_size( CLUTTER_ACTOR( cm ), &w, &h );
-    *left = x;
-    *top = y;
-    *width = w;
-    *height = h;
-    return 0;
-}
-
-static int gst_set_viewport_geometry( GST_Player* mp, int left, int top, int width, int height )
-{
-    USERDATA( mp );
-    CM( ud );
-
-    clutter_actor_set_position( CLUTTER_ACTOR( cm ), left, top );
-    clutter_actor_set_size( CLUTTER_ACTOR( cm ), width, height );
-    return 0;
-}
-
 static int gst_get_media_type( GST_Player* mp, int* type )
 {
     USERDATA( mp );
@@ -711,8 +686,6 @@ int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor 
     mp->get_duration = gst_get_duration;
     mp->get_buffered_duration = gst_get_buffered_duration;
     mp->get_video_size = gst_get_video_size;
-    mp->get_viewport_geometry = gst_get_viewport_geometry;
-    mp->set_viewport_geometry = gst_set_viewport_geometry;
     mp->get_media_type = gst_get_media_type;
     mp->get_audio_volume = gst_get_audio_volume;
     mp->set_audio_volume = gst_set_audio_volume;
