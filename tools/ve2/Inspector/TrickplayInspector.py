@@ -1657,7 +1657,7 @@ class TrickplayInspector(QWidget):
         theData = item.TPJSON()
         self.main._emulatorManager.contentMoveBlock = True
         pItem.removeRow(item.row()) # cause to send _VE_.deselectUIElement()
-        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False)
+        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False, True)
         self.main._emulatorManager.contentMoveBlock = False
         self.ui.inspector.expandAll()
 
@@ -1673,7 +1673,7 @@ class TrickplayInspector(QWidget):
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
 
             self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
-            item[str(pItem.whatsThis(0))] = tValue
+            #item[str(pItem.whatsThis(0))] = tValue
         else :
             theItem = self.search(self.getGid(), 'gid')
             if self.getType() == "Tab":
