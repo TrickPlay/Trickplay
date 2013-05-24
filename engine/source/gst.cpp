@@ -36,14 +36,13 @@ inline void g_info( const gchar* format, ... )
 
 //-----------------------------------------------------------------------------
 // Signal handlers
-
 void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
     USERDATA( mp );
 
     if ( ud->loop )
     {
-        gst_seek( mp, 0.0 );
+        gst_seek( mp, 0.0 ); // Do not trigger end_of_stream callback if loop is true
     }
     else
     {
@@ -56,11 +55,11 @@ void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
 {
     tp_mediaplayer_error( mp, error->code, error->message );
-    //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+    clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
 //-----------------------------------------------------------------------------
-// This is used to collect tags from a gstreamer tag list
+// Collect tags from a gstreamer tag list
 
 void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data )
 {
@@ -86,7 +85,7 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 }
 
 //-----------------------------------------------------------------------------
-// Looks for the stream types and video size
+// Get stream type and video size
 
 void get_stream_information( GST_Player* mp )
 {
@@ -205,7 +204,7 @@ void get_stream_information( GST_Player* mp )
 }
 
 //-----------------------------------------------------------------------------
-// Used to disconnect the loading_messages signal handler during a reset
+// Disconnect the loading_messages signal handler during a reset
 
 void disconnect_loading_messages( GST_Player* mp )
 {
@@ -233,7 +232,7 @@ void disconnect_loading_messages( GST_Player* mp )
 }
 
 //-----------------------------------------------------------------------------
-// gstreamer messages we receive while we are loading
+// Gstreamer messages received while loading
 
 void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 {
@@ -597,6 +596,7 @@ int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
     mp->get_viewport_texture = gst_get_viewport_texture;
 
     gst_set_audio_volume( mp, 0.5 ); // Initialize volume
+    g_warning("---%d---",CLUTTER_GST_MAJOR_VERSION);
 
     return 0;
 }
