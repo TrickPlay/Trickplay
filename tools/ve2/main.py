@@ -841,7 +841,7 @@ class MainWindow(QMainWindow):
             try:
                 if item['type'] == "Widget_Group" :
                     for c in item['children']:
-                        self._inspector.inspectorModel.insertElement(curLayerItem, c, curLayerItem.TPJSON(), False)
+                        self._inspector.inspectorModel.insertElement(curLayerItem, c, curLayerItem.TPJSON(), False, True)
                     item.parent().removeRow(item.row())
             except:
                 pass

@@ -1657,7 +1657,7 @@ class TrickplayInspector(QWidget):
         theData = item.TPJSON()
         self.main._emulatorManager.contentMoveBlock = True
         pItem.removeRow(item.row()) # cause to send _VE_.deselectUIElement()
-        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False)
+        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False, True)
         self.main._emulatorManager.contentMoveBlock = False
         self.ui.inspector.expandAll()
 
