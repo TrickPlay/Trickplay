@@ -50,7 +50,7 @@ module clutter_group;
     display of the children; by default, a Group's children will display even
     if they exist outside the Group's size region. To clip children that lie
     outside a particular region, define a clipping area by setting the
-    <UIElement.clip> property or set the <UIElement.clip_to_size> property to
+    <UIElement.clip> property or set the <clip_to_size> property to
     true. A code snippet demonstrating how to clip a region using a clipping
     rectangle is included in an Example section below.
 
@@ -145,7 +145,7 @@ module clutter_group;
     -- -----------------------------------------------------
     (end)
 
-    *See Also:* the <UIElement> and <Container> interfaces and the <UIElement.clip> and <UIElement.clip_to_size> properties
+    *See Also:* the <UIElement> and <Container> interfaces and the <UIElement.clip> and <UIElement.has_clip> properties
 */
 
 class Group [[ClutterActor*]] actor , container
@@ -161,4 +161,26 @@ class Group [[ClutterActor*]] actor , container
     ~Group()
         [[
         ]];
+
+/***************************************
+    Property: clip_to_size
+
+    The clip_to_size property is a boolean value that enables and disables clipping on a Group object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
+
+    Clipping on a Group object can also be enabled by defining a clipping rectangle via the <UIElement.clip> property.
+
+    *Default Setting:* false (clipping in the Group is disabled)
+
+    *See Also:* the <UIElement.clip> and <UIElement.has_clip> properties
+*/
+
+    bool clip_to_size
+        [[
+            clip_to_size = clutter_actor_get_clip_to_allocation( self );
+        ]]
+        [[
+            clutter_actor_set_clip_to_allocation( self , clip_to_size );
+        ]];
+
+
 }
