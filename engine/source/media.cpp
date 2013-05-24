@@ -50,7 +50,7 @@ Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Dele
 
     tplog( "[%p] <- constructor", mp );
 
-    if ( int result G_GNUC_UNUSED = constructor( mp, context, actor ) )
+    if ( int result G_GNUC_UNUSED = constructor( mp, actor ) )
     {
         // Construction failed
 

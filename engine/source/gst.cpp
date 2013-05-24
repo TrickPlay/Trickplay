@@ -19,16 +19,10 @@ UserData;
 
 //-----------------------------------------------------------------------------
 
-extern void* connect_audio_sampler( TPContext* context );
-
-extern void disconnect_audio_sampler( void* sampler );
-
 static int gst_seek( GST_Player* mp, double seconds );
 
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
-
-static TPContext* context = 0;
 
 //-----------------------------------------------------------------------------
 
@@ -77,10 +71,7 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
         {
             const gchar* value = g_value_get_string( &string_value );
 
-            if ( value )
-            {
-                tp_mediaplayer_tag_found( ( GST_Player* )user_data, tag, value );
-            }
+            if ( value ) tp_mediaplayer_tag_found( ( GST_Player* )user_data, tag, value );
         }
 
         g_value_unset( &string_value );
@@ -103,10 +94,7 @@ static void get_stream_information( GST_Player* mp )
     GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
 #endif
 
-    if ( !pipeline )
-    {
-        return;
-    }
+    if ( !pipeline ) return;
 
     //.........................................................................
     // Use stream info to get the type of each stream
@@ -119,10 +107,7 @@ static void get_stream_information( GST_Player* mp )
     if ( info_array )
     {
         // Each entry in the array is information for a single stream
-
-        guint i;
-
-        for ( i = 0; i < info_array->n_values; ++i )
+        for (guint i = 0; i < info_array->n_values; ++i )
         {
             GValue* info_value = g_value_array_get_nth( info_array, i );
 
@@ -146,19 +131,6 @@ static void get_stream_information( GST_Player* mp )
                             ud->media_type |= TP_MEDIA_TYPE_VIDEO;
                             break;
                     }
-
-#if 0
-                    // This lets you get the enum value associated with the stream type
-
-                    GParamSpec* pspec;
-                    GEnumValue* value;
-
-                    pspec = g_object_class_find_property( G_OBJECT_GET_CLASS( stream_info ), "type" );
-
-                    value = g_enum_get_value( G_PARAM_SPEC_ENUM( pspec )->enum_class, type );
-
-                    g_debug( "  STREAM TYPE IS %d %s", type, value->value_nick );
-#endif
                 }
             }
         }
@@ -191,10 +163,8 @@ static void get_stream_information( GST_Player* mp )
         {
             GstPad* pad = gst_element_get_static_pad( video_sink, "sink" );
 
-            if ( pad )
+            if ( pad ) // Get its video width and height
             {
-                // Get its video width and height
-
                 gint width = 0;
                 gint height = 0;
 
@@ -202,7 +172,7 @@ static void get_stream_information( GST_Player* mp )
                 GstStructure *st = gst_caps_get_structure(caps, 0);
 
                 gst_structure_get_int(st, "width", &width);
-                gst_structure_get_int(st, "height", &width);
+                gst_structure_get_int(st, "height", &height);
 
                 gst_caps_unref(caps);
 
@@ -216,11 +186,11 @@ static void get_stream_information( GST_Player* mp )
         }
     }
 
-#if 1
-
-    if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
+    /*if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
     {
-        GstElement* audio_sink = gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
+        GstElement* audio_sink = NULL;
+        g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
+        //GstElement* audio_sink = gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
 
         if ( !audio_sink )
         {
@@ -228,11 +198,10 @@ static void get_stream_information( GST_Player* mp )
         }
         else
         {
-            g_object_set( G_OBJECT( pipeline ), "audio-sink", audio_sink, NULL );
+            gst_object_unref( GST_OBJECT( audio_sink ) );
+            //g_object_set( G_OBJECT( pipeline ), "audio-sink", audio_sink, NULL );
         }
-    }
-
-#endif
+    }*/
 }
 
 //-----------------------------------------------------------------------------
@@ -243,10 +212,7 @@ static void disconnect_loading_messages( GST_Player* mp )
     USERDATA( mp );
     CM( ud );
 
-    if ( !ud->load_signal )
-    {
-        return;
-    }
+    if ( !ud->load_signal ) return;
 
 #if (CLUTTER_GST_MAJOR_VERSION<1)
     GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
@@ -254,17 +220,11 @@ static void disconnect_loading_messages( GST_Player* mp )
     GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
 #endif
 
-    if ( !pipeline )
-    {
-        return;
-    }
+    if ( !pipeline ) return;
 
     GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( pipeline ) );
 
-    if ( !bus )
-    {
-        return;
-    }
+    if ( !bus ) return;
 
     g_signal_handler_disconnect( bus, ud->load_signal );
     ud->load_signal = 0;
@@ -281,10 +241,7 @@ static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 
     switch ( message->type )
     {
-            //.....................................................................
-            // When a tag is found
-
-        case GST_MESSAGE_TAG:
+        case GST_MESSAGE_TAG: // When a tag is found
         {
             GstTagList* tags = NULL;
             gst_message_parse_tag( message, &tags );
@@ -298,19 +255,14 @@ static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
             break;
         }
 
-        //.....................................................................
-        // When the load is done - the stream is paused and ready to go
-
-        case GST_MESSAGE_ASYNC_DONE:
+        case GST_MESSAGE_ASYNC_DONE: // When the load is done - the stream is paused and ready to go
         {
             get_stream_information( mp );
 
             // Now, notify that the stream is loaded
-
             tp_mediaplayer_loaded( mp );
 
             // Disconnect this signal handler
-
             g_signal_handler_disconnect( bus, ud->load_signal );
             ud->load_signal = 0;
 
@@ -318,10 +270,7 @@ static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
         }
 
         default:
-        {
-            // Default handler to make clang shut up
-            break;
-        }
+            break; // Default handler to make clang shut up
     }
 }
 
@@ -353,10 +302,7 @@ static int gst_load( GST_Player* mp, const char* uri, const char* extra )
     GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
 #endif
 
-    if ( !pipeline )
-    {
-        return 1;
-    }
+    if ( !pipeline ) return 1;
 
     GstStateChangeReturn r = gst_element_set_state( pipeline, GST_STATE_PAUSED );
 
@@ -384,10 +330,7 @@ static int gst_load( GST_Player* mp, const char* uri, const char* extra )
 
             GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( pipeline ) );
 
-            if ( !bus )
-            {
-                return 3;
-            }
+            if ( !bus ) return 3;
 
             ud->load_signal = g_signal_connect( bus, "message", G_CALLBACK( loading_messages ), mp );
 
@@ -407,9 +350,9 @@ static void gst_reset( GST_Player* mp )
 
     disconnect_loading_messages( mp );
 
-    ud->video_width = 0;
+    ud->video_width  = 0;
     ud->video_height = 0;
-    ud->media_type = 0;
+    ud->media_type   = 0;
 
     // Reset should do more - it should truly forget all about the resource
 
@@ -426,10 +369,7 @@ static int gst_play( GST_Player* mp )
 
     clutter_media_set_playing( cm, TRUE );
 
-    if ( ud->media_type & TP_MEDIA_TYPE_VIDEO )
-    {
-        clutter_actor_show( CLUTTER_ACTOR( cm ) );
-    }
+    if ( ud->media_type & TP_MEDIA_TYPE_VIDEO ) clutter_actor_show( CLUTTER_ACTOR( cm ) );
 
     return 0;
 }
@@ -439,10 +379,7 @@ static int gst_seek( GST_Player* mp, double seconds )
     USERDATA( mp );
     CM( ud );
 
-    if ( !clutter_media_get_can_seek( cm ) )
-    {
-        return 1;
-    }
+    if ( !clutter_media_get_can_seek( cm ) ) return 1;
 
     clutter_media_set_progress( cm, seconds / clutter_media_get_duration( cm ) );
     return 0;
@@ -494,10 +431,7 @@ static int gst_get_video_size( GST_Player* mp, int* width, int* height )
 {
     USERDATA( mp );
 
-    if ( !( ud->media_type & TP_MEDIA_TYPE_VIDEO ) )
-    {
-        return TP_MEDIAPLAYER_ERROR_NA;
-    }
+    if ( !( ud->media_type & TP_MEDIA_TYPE_VIDEO ) ) return TP_MEDIAPLAYER_ERROR_NA;
 
     *width = ud->video_width;
     *height = ud->video_height;
@@ -517,14 +451,7 @@ static int gst_get_audio_volume( GST_Player* mp, double* volume )
     USERDATA( mp );
     CM( ud );
 
-    if ( ud->mute )
-    {
-        * volume = ud->volume;
-    }
-    else
-    {
-        *volume = clutter_media_get_audio_volume( cm );
-    }
+    * volume = ud->mute ? ud->volume : clutter_media_get_audio_volume( cm );
 
     return 0;
 }
@@ -536,10 +463,7 @@ static int gst_set_audio_volume( GST_Player* mp, double volume )
 
     ud->volume = volume;
 
-    if ( !ud->mute )
-    {
-        clutter_media_set_audio_volume( cm, volume );
-    }
+    if ( !ud->mute ) clutter_media_set_audio_volume( cm, volume );
 
     return 0;
 }
@@ -617,10 +541,7 @@ static int gst_play_sound( GST_Player* mp, const char* uri )
 
     gst_object_unref( GST_OBJECT( bus ) );
 
-    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( playbin, GST_STATE_PLAYING ) )
-    {
-        return 2;
-    }
+    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( playbin, GST_STATE_PLAYING ) ) return 2;
 
     return 0;
 }
@@ -633,31 +554,9 @@ static void* gst_get_viewport_texture( GST_Player* mp )
 }
 
 //-----------------------------------------------------------------------------
-/*
-static void stage_allocation_notify( GObject* actor , GParamSpec* p , gpointer vt )
+
+int gst_constructor( GST_Player* mp, ClutterActor * actor )
 {
-    ClutterActor* video_texture = CLUTTER_ACTOR( vt );
-
-    if ( vt )
-    {
-        // HACK ALERT
-        ClutterActor* stage = ( ClutterActor* )tp_context_get( context, "sekrit-stage" );
-
-        gfloat width;
-        gfloat height;
-
-        clutter_actor_get_size( stage , & width , & height );
-
-        clutter_actor_set_size( video_texture , width , height );
-    }
-}
-*/
-//-----------------------------------------------------------------------------
-
-int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor )
-{
-    context = _context;
-
     ClutterActor* video_texture = actor ? actor : clutter_gst_video_texture_new();
 
     if ( !video_texture )
@@ -666,17 +565,13 @@ int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor 
         return TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
     }
 
-    // We own it
-
-    g_object_ref_sink( G_OBJECT( video_texture ) );
+    g_object_ref_sink( G_OBJECT( video_texture ) ); // We own it
 
     // Connect signals
-
     g_signal_connect( video_texture, "eos", G_CALLBACK( gst_end_of_stream ), mp );
     g_signal_connect( video_texture, "error", G_CALLBACK( gst_error ), mp );
 
     // We use gmalloc0 to zero out the whole structure
-
     UserData* user_data = ( UserData* ) g_malloc0( sizeof( UserData ) );
 
     user_data->vt = video_texture;
