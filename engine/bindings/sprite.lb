@@ -27,7 +27,7 @@ struct SpriteBinding
         }
     };
 
-    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
+    SpriteBinding( ClutterActor * _actor ) : async( false ), can_fire( true ), constructing( false ),
                                              actor( _actor ), sprite( NULL ), sheet( NULL ), texture( NULL ), 
                                              action( NULL ), id_to_free( false ), id( NULL ) {}
 
@@ -171,8 +171,12 @@ struct SpriteBinding
         }
     }
 
+    bool is_loaded()
+    {
+        return sprite && sprite->is_loaded();
+    }
+
     bool async;
-    bool loaded;
     bool can_fire;
     bool constructing;
 
@@ -412,7 +416,7 @@ class Sprite [[ClutterActor*]] actor
 
     readonly bool loaded
         [[
-            loaded = get_binding( self )->loaded;
+            loaded = get_binding( self )->is_loaded();
         ]];
 
 /***************************************
