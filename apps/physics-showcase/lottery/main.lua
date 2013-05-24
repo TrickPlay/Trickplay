@@ -185,7 +185,7 @@ proxy_screen:add( fan )
 -- and pushes a ball upward
 
 local SUCKER_POSITION = { 514 * 2 , 240 }
-local SUCKER_SIZE     = { 42 * 2 , 180 }
+local SUCKER_SIZE     = { 42 * 2 , 130 }
 
 local SUCKER_FORCE    = 5
 

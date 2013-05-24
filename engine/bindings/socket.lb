@@ -35,8 +35,15 @@ private:
 
 ]]
 
+/************************************************
+    Class: Socket
+
+    The Socket data type handles asynchronous TCP client connections
+
+*/
 class Socket [[ SocketDelegate * ]]
 {
+
     Socket()
         [[
             self = lb_construct( SocketDelegate , new SocketDelegate( L ) );
@@ -47,26 +54,75 @@ class Socket [[ SocketDelegate * ]]
             delete self;
         ]];
 
+/******************************************
+    Property: is_connected
+
+    The is_connected property returns whether the socket is currently connected.  True is connected; false if not connected
+*/
     readonly bool is_connected
         [[
             is_connected = self->socket.is_connected();
         ]];
 
+/*******************************************
+    Function: connect
+
+    The connect function will asynchronously open a connection to the specified host and port
+
+    In the case that an IP address is given, a single connection attempt is made. In the case that a name is given, multiple connection attempts may be made, in turn and according to the number of address records in DNS, until a connection succeeds.
+
+    *Arguments:*
+
+        host_and_port - may be in any of a number of recognised formats: an IPv6 address, an IPv4 address, or a domain name (in which case a DNS lookup is performed). Quoting with [] is supported for all address types. A port may be specified in the usual way with a colon. Ports may be given as decimal numbers or symbolic names (in which case an /etc/services lookup is performed).
+        default_port - If no port override is given in host_and_port then default_port will be used as the port number to connect to. [default: 80]
+
+    *Code Example:* Connect to Google's web service
+
+    (code)
+        local socket = Socket()
+        socket:connect('google.com')
+    (end)
+
+    *See Also:* the <on_connected>, <on_connect_failed> and <on_disconnected> events
+*/
     connect( string host_and_port, int default_port = 80 )
         [[
             self->socket.connect( host_and_port, default_port );
         ]];
 
+/*******************************************
+    Function: disconnect
+
+    Unplug the socket.
+*/
     disconnect()
         [[
             self->socket.disconnect();
         ]];
 
+/*******************************************
+    Function: write
+
+    Send data to the socket, asynchronously.
+
+    *Arguments:*
+
+        data    -   The binary data to send.
+
+    *See Also:* the <on_data_read> and <on_write_failed> events
+*/
     write( lstring data )
         [[
             self->socket.write( ( const guint8 * ) data, data_len );
         ]];
 
+/*******************************************
+    Event: on_connected
+
+    The on_connected event occurs when the socket is connected
+
+    *See Also:* the <connect> function and the <on_connect_failed> event
+*/
     function on_connected
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_connected" , L );
@@ -75,16 +131,33 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_connected" , L );
         ]];
 
+/*******************************************
+    Function: add_onconnected_listener
+
+    *See Also:* the <on_connected> event
+*/
     int add_onconnected_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_connected" , L );
         ]];
 
+/*******************************************
+    Function: remove_onconnected_listener
+
+    *See Also:* the <on_connected> event
+*/
     remove_onconnected_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_connected" , L );
         ]];
 
+/*******************************************
+    Event: on_connect_failed
+
+    The on_connect_failed event occurs when the socket connection attempt fails
+
+    *See Also:* the <connect> function and the <on_connected> event
+*/
     function on_connect_failed
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_connect_failed" , L );
@@ -93,16 +166,33 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_connect_failed" , L );
         ]];
 
+/*******************************************
+    Function: add_onconnectfailed_listener
+
+    *See Also:* the <on_connect_failed> event
+*/
     int add_onconnectfailed_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_connect_failed" , L );
         ]];
 
+/*******************************************
+    Function: remove_onconnectfailed_listener
+
+    *See Also:* the <on_connect_failed> event
+*/
     remove_onconnectfailed_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_connect_failed" , L );
         ]];
 
+/*******************************************
+    Event: on_disconnected
+
+    The on_disconnected event occurs when the socket connection drops
+
+    *See Also:* the <disconnect> function
+*/
     function on_disconnected
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_disconnected" , L );
@@ -111,16 +201,34 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_disconnected" , L );
         ]];
 
+/*******************************************
+    Function: add_ondisconnected_listener
+
+    *See Also:* the <on_disconnected> event
+*/
     int add_ondisconnected_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_disconnected" , L );
         ]];
 
+/*******************************************
+    Function: remove_ondisconnected_listener
+
+    *See Also:* the <on_disconnected> event
+*/
     remove_ondisconnected_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_disconnected" , L );
         ]];
 
+
+/*******************************************
+    Event: on_write_failed
+
+    The on_write_failed event occurs when writing to the socket fails
+
+    *See Also:* the <write> function
+*/
     function on_write_failed
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_write_failed" , L );
@@ -129,16 +237,33 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_write_failed" , L );
         ]];
 
+/*******************************************
+    Function: add_writefailed_listener
+
+    *See Also:* the <on_write_failed> event
+*/
     int add_onwritefailed_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_write_failed" , L );
         ]];
 
+/*******************************************
+    Function: remove_writefailed_listener
+
+    *See Also:* the <on_write_failed> event
+*/
     remove_onwritefailed_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_write_failed" , L );
         ]];
 
+/*******************************************
+    Event: on_data_read
+
+    The on_data_read event occurs when data is received on the socket.  The callback function will get passed the data.
+
+    *See Also:* the <write> function
+*/
     function on_data_read
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_data_read" , L );
@@ -147,16 +272,33 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_data_read" , L );
         ]];
 
+/*******************************************
+    Function: add_dataread_listener
+
+    *See Also:* the <on_date_read> event
+*/
     int add_ondataread_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_data_read" , L );
         ]];
 
+/*******************************************
+    Function: remove_dataread_listener
+
+    *See Also:* the <on_date_read> event
+*/
     remove_ondataread_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_data_read" , L );
         ]];
 
+/*******************************************
+    Event: on_read_failure
+
+    The on_read_failure event occurs when a data read operation on the socket fails
+
+    *See Also:* the <on_data_read> function
+*/
     function on_read_failed
         [[
             return UserData::get( L )->get_last_callback( (char*) "on_read_failed" , L );
@@ -165,11 +307,21 @@ class Socket [[ SocketDelegate * ]]
             UserData::get( L )->set_last_callback( (char*) "on_read_failed" , L );
         ]];
 
+/*******************************************
+    Function: add_onreadfailed_listener
+
+    *See Also:* the <on_read_failure> event
+*/
     int add_onreadfailed_listener( function f )
         [[
             result = UserData::get( L )->add_callback( (char*) "on_read_failed" , L );
         ]];
 
+/*******************************************
+    Function: remove_onreadfailed_listener
+
+    *See Also:* the <on_read_failure> event
+*/
     remove_onreadfailed_listener( int ref )
         [[
             UserData::get( L )->remove_callback( (char*) "on_read_failed" , L );
