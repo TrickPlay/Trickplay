@@ -492,46 +492,6 @@ class Media [[ClutterActor*]] actor
         ]];
 
     /*
-        UndocumentedProperty: texture
-
-        The texture property is a super-secret property, used for demo purposes only. It must not get into the wrong hands, and so it will be undocumented.
-
-        If the media player exposes the video texture as a UIElement that you can manipulate, this property will return it. Otherwise, this property will be nil.
-    */
-
-    readonly UIElement texture
-        [[
-            if (!MediaExtra::get( self, L )->get_player())
-            {
-                lua_pushnil(L);
-            }
-            else
-            {
-                void * t=MediaExtra::get( self, L )->get_player()->get_viewport_texture();
-
-                if (!t || !CLUTTER_IS_ACTOR(t))
-                {
-                    lua_pushnil(L);
-                }
-                else
-                {
-                    UserData * ud = UserData::get( G_OBJECT( t ) );
-
-                    if ( ud )
-                    {
-                        ud->push_proxy();
-                    }
-                    else
-                    {
-                        lua_pushlightuserdata( L , t );
-                        new_media_texture( L );
-                        lua_remove( L , -2 );
-                    }
-                }
-            }
-        ]];
-
-    /*
         Property: volume
 
         The volume property is a value between 0-1, inclusive, that specifies the audio volume. The lowest volume is 0.

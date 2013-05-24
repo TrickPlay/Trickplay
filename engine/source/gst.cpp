@@ -393,7 +393,7 @@ int GST_Player::gst_pause( GST_Player* mp )
     return 0;
 }
 
-int gst_get_position( GST_Player* mp, double* seconds )
+int GST_Player::gst_get_position( GST_Player* mp, double* seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -402,7 +402,7 @@ int gst_get_position( GST_Player* mp, double* seconds )
     return 0;
 }
 
-int gst_get_duration( GST_Player* mp, double* seconds )
+int GST_Player::gst_get_duration( GST_Player* mp, double* seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -411,7 +411,7 @@ int gst_get_duration( GST_Player* mp, double* seconds )
     return 0;
 }
 
-int gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* end_seconds )
+int GST_Player::gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* end_seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -421,7 +421,7 @@ int gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* en
     return 0;
 }
 
-int gst_get_video_size( GST_Player* mp, int* width, int* height )
+int GST_Player::gst_get_video_size( GST_Player* mp, int* width, int* height )
 {
     USERDATA( mp );
 
@@ -433,14 +433,14 @@ int gst_get_video_size( GST_Player* mp, int* width, int* height )
     return 0;
 }
 
-int gst_get_media_type( GST_Player* mp, int* type )
+int GST_Player::gst_get_media_type( GST_Player* mp, int* type )
 {
     USERDATA( mp );
     *type = ud->media_type;
     return 0;
 }
 
-int gst_get_audio_volume( GST_Player* mp, double* volume )
+int GST_Player::gst_get_audio_volume( GST_Player* mp, double* volume )
 {
     USERDATA( mp );
     CM( ud );
@@ -450,7 +450,7 @@ int gst_get_audio_volume( GST_Player* mp, double* volume )
     return 0;
 }
 
-int gst_set_audio_volume( GST_Player* mp, double volume )
+int GST_Player::gst_set_audio_volume( GST_Player* mp, double volume )
 {
     USERDATA( mp );
     CM( ud );
@@ -462,7 +462,7 @@ int gst_set_audio_volume( GST_Player* mp, double volume )
     return 0;
 }
 
-int gst_get_audio_mute( GST_Player* mp, int* mute )
+int GST_Player::gst_get_audio_mute( GST_Player* mp, int* mute )
 {
     USERDATA( mp );
 
@@ -471,7 +471,7 @@ int gst_get_audio_mute( GST_Player* mp, int* mute )
     return 0;
 }
 
-int gst_set_audio_mute( GST_Player* mp, int mute )
+int GST_Player::gst_set_audio_mute( GST_Player* mp, int mute )
 {
     USERDATA( mp );
     CM( ud );
@@ -495,7 +495,7 @@ int gst_set_audio_mute( GST_Player* mp, int mute )
     return 0;
 }
 
-int gst_get_loop_flag( GST_Player* mp, bool* loop )
+int GST_Player::gst_get_loop_flag( GST_Player* mp, bool* loop )
 {
     USERDATA( mp );
 
@@ -504,7 +504,7 @@ int gst_get_loop_flag( GST_Player* mp, bool* loop )
     return 0;
 }
 
-int gst_set_loop_flag( GST_Player* mp, bool flag )
+int GST_Player::gst_set_loop_flag( GST_Player* mp, bool flag )
 {
     USERDATA( mp );
 
@@ -520,7 +520,7 @@ void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
     gst_object_unref( GST_OBJECT( playbin ) );
 }
 
-int gst_play_sound( GST_Player* mp, const char* uri )
+int GST_Player::gst_play_sound( GST_Player* mp, const char* uri )
 {
     GstElement* playbin = gst_element_factory_make( "playbin" , "play" );
 
@@ -538,13 +538,6 @@ int gst_play_sound( GST_Player* mp, const char* uri )
     if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( playbin, GST_STATE_PLAYING ) ) return 2;
 
     return 0;
-}
-
-void* gst_get_viewport_texture( GST_Player* mp )
-{
-    USERDATA( mp );
-
-    return ud->vt;
 }
 
 //-----------------------------------------------------------------------------
@@ -569,21 +562,7 @@ int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
 
     mp->user_data = user_data;
 
-    mp->get_position = gst_get_position;
-    mp->get_duration = gst_get_duration;
-    mp->get_buffered_duration = gst_get_buffered_duration;
-    mp->get_video_size = gst_get_video_size;
-    mp->get_media_type = gst_get_media_type;
-    mp->get_audio_volume = gst_get_audio_volume;
-    mp->set_audio_volume = gst_set_audio_volume;
-    mp->get_audio_mute = gst_get_audio_mute;
-    mp->set_audio_mute = gst_set_audio_mute;
-    mp->get_loop_flag = gst_get_loop_flag;
-    mp->set_loop_flag = gst_set_loop_flag;
-    mp->play_sound = gst_play_sound;
-    mp->get_viewport_texture = gst_get_viewport_texture;
-
-    gst_set_audio_volume( mp, 0.5 ); // Initialize volume
+    mp->gst_set_audio_volume( mp, 0.5 ); // Initialize volume
 
     return 0;
 }

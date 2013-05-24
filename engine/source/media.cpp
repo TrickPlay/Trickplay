@@ -294,7 +294,7 @@ int Media::get_position( double* seconds )
 
     tplog( "[%p] <- get_position", mp );
 
-    if ( int result = mp->get_position( mp, seconds ) )
+    if ( int result = mp->gst_get_position( mp, seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -321,7 +321,7 @@ int Media::get_duration( double* seconds )
 
     tplog( "[%p] <- get_duration", mp );
 
-    if ( int result = mp->get_duration( mp, seconds ) )
+    if ( int result = mp->gst_get_duration( mp, seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -349,7 +349,7 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
 
     tplog( "[%p] <- get_buffered_duration", mp );
 
-    if ( int result = mp->get_buffered_duration( mp, start_seconds, end_seconds ) )
+    if ( int result = mp->gst_get_buffered_duration( mp, start_seconds, end_seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -377,7 +377,7 @@ int Media::get_video_size( int* width, int* height )
 
     tplog( "[%p] <- get_video_size", mp );
 
-    if ( int result = mp->get_video_size( mp, width, height ) )
+    if ( int result = mp->gst_get_video_size( mp, width, height ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -404,7 +404,7 @@ int Media::get_media_type( int* type )
 
     tplog( "[%p] <- get_media_type", mp );
 
-    if ( int result = mp->get_media_type( mp, type ) )
+    if ( int result = mp->gst_get_media_type( mp, type ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -425,7 +425,7 @@ int Media::get_audio_volume( double* volume )
 
     tplog( "[%p] <- get_audio_volume", mp );
 
-    if ( int result = mp->get_audio_volume( mp, volume ) )
+    if ( int result = mp->gst_get_audio_volume( mp, volume ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -462,7 +462,7 @@ int Media::set_audio_volume( double volume )
 
     tplog( "[%p] <- set_audio_volume(%f)", mp, volume );
 
-    if ( int result = mp->set_audio_volume( mp, volume ) )
+    if ( int result = mp->gst_set_audio_volume( mp, volume ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -481,7 +481,7 @@ int Media::get_audio_mute( int* mute )
 
     tplog( "[%p] <- get_audio_mute", mp );
 
-    if ( int result = mp->get_audio_mute( mp, mute ) )
+    if ( int result = mp->gst_get_audio_mute( mp, mute ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -502,7 +502,7 @@ int Media::set_audio_mute( int mute )
 
     tplog( "[%p] <- set_audio_mute(%d)", mp, mute );
 
-    if ( int result = mp->set_audio_mute( mp, mute ) )
+    if ( int result = mp->gst_set_audio_mute( mp, mute ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -521,7 +521,7 @@ int Media::get_loop_flag( bool* loop )
 
     tplog( "[%p] <- get_loop_flag", mp );
 
-    if ( int result = mp->get_loop_flag( mp, loop ) )
+    if ( int result = mp->gst_get_loop_flag( mp, loop ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -540,7 +540,7 @@ int Media::set_loop_flag( bool loop )
 
     tplog( "[%p] <- set_loop_flag(%d)", mp, loop );
 
-    if ( int result = mp->set_loop_flag( mp, loop ) )
+    if ( int result = mp->gst_set_loop_flag( mp, loop ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -553,24 +553,13 @@ int Media::play_sound( const char* uri )
 {
     GST_Player* mp = get_mp();
 
-    if ( int result = mp->play_sound( mp, uri ) )
+    if ( int result = mp->gst_play_sound( mp, uri ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
     }
 
     return 0;
-}
-
-void* Media::get_viewport_texture()
-{
-    MPLOCK;
-
-    GST_Player* mp = get_mp();
-
-    if ( !mp->get_viewport_texture ) return NULL;
-
-    return mp->get_viewport_texture( mp );
 }
 
 StringPairList Media::get_tags()
