@@ -22,7 +22,7 @@ class MediaExtra : private Media::Delegate
     MediaExtra( ClutterActor * _actor, lua_State * l )
         : constructing( false ), loaded_flag( false ), async( false ), read_tags( false ), actor( _actor ), L( l ), player( NULL )
     {
-        player = Media::make( App::get( L )->get_context(), gst_constructor, this, actor );
+        player = Media::make( App::get( L )->get_context(), this, actor );
 
         if ( player ) player->add_delegate( this );
     }

@@ -34,14 +34,8 @@ void Media::Event::destroy( Event* event )
 // constructor function to initialize the media player. If that fails,
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
-Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Delegate* delegate, ClutterActor * actor )
+Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor )
 {
-    if ( !constructor )
-    {
-        g_warning( "MP[]   NO MEDIA PLAYER CONSTRUCTOR" );
-        return NULL;
-    }
-
     Wrapper* wrapper = ( Wrapper* )g_malloc0( sizeof( Wrapper ) );
 
     GST_Player* mp = &wrapper->mp;
@@ -50,7 +44,7 @@ Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Dele
 
     tplog( "[%p] <- constructor", mp );
 
-    if ( int result G_GNUC_UNUSED = constructor( mp, actor ) )
+    if ( int result G_GNUC_UNUSED = gst_constructor( mp, actor ) )
     {
         // Construction failed
 
