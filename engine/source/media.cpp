@@ -1,4 +1,3 @@
-
 #include "glib-object.h"
 #include "media.h"
 #include "util.h"
@@ -33,7 +32,6 @@ void Media::Event::destroy( Event* event )
 // Allocates a new wrapper and invokes the outside world's media player
 // constructor function to initialize the media player. If that fails,
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
-
 Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor )
 {
     Wrapper* wrapper = ( Wrapper* )g_malloc0( sizeof( Wrapper ) );
@@ -57,8 +55,6 @@ Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor
     return new Media( context , wrapper , delegate );
 }
 
-//-----------------------------------------------------------------------------
-
 Media::Media( TPContext* c, Wrapper* w, Delegate* d )
     :
     context( c ),
@@ -81,8 +77,6 @@ Media::Media( TPContext* c, Wrapper* w, Delegate* d )
 
     schemes.insert( s.begin(), s.end() );
 }
-
-//-----------------------------------------------------------------------------
 
 Media::~Media()
 {
@@ -140,14 +134,10 @@ Media* Media::get( GST_Player* mp )
     return wrapper->player;
 }
 
-//-----------------------------------------------------------------------------
-
 GST_Player* Media::get_mp()
 {
     return &wrapper->mp;
 }
-
-//-----------------------------------------------------------------------------
 
 void Media::check( int valid_states )
 {
@@ -161,8 +151,6 @@ void Media::check( int valid_states )
     }
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_state()
 {
     MPLOCK;
@@ -170,16 +158,11 @@ int Media::get_state()
     return state;
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::reset()
 {
     MPLOCK;
 
-    if ( state == TP_MEDIAPLAYER_IDLE )
-    {
-        return;
-    }
+    if ( state == TP_MEDIAPLAYER_IDLE ) return;
 
     if ( wrapper->mp.reset )
     {
@@ -190,26 +173,18 @@ void Media::reset()
         wrapper->mp.reset( get_mp() );
     }
 
-    // Flush all pending events
+    clear_events(); // Flush all pending events
 
-    clear_events();
-
-    // Clear tags
-
-    tags.clear();
+    tags.clear(); // Clear tags
 
     state = TP_MEDIAPLAYER_IDLE;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::load( const char* uri, const char* extra )
 {
     MPLOCK;
 
-    // Get us back to IDLE
-
-    reset();
+    reset(); // back to IDLE
 
     GST_Player* mp = get_mp();
 
@@ -237,8 +212,6 @@ int Media::load( const char* uri, const char* extra )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::play()
 {
     MPLOCK;
@@ -264,8 +237,6 @@ int Media::play()
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::seek( double seconds )
 {
     MPLOCK;
@@ -288,8 +259,6 @@ int Media::seek( double seconds )
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::pause()
 {
@@ -315,8 +284,6 @@ int Media::pause()
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::set_playback_rate( int rate )
 {
@@ -347,8 +314,6 @@ int Media::set_playback_rate( int rate )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_position( double* seconds )
 {
     MPLOCK;
@@ -376,8 +341,6 @@ int Media::get_position( double* seconds )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_duration( double* seconds )
 {
     MPLOCK;
@@ -404,8 +367,6 @@ int Media::get_duration( double* seconds )
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
 {
@@ -435,8 +396,6 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_video_size( int* width, int* height )
 {
     MPLOCK;
@@ -465,8 +424,6 @@ int Media::get_video_size( int* width, int* height )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_media_type( int* type )
 {
     MPLOCK;
@@ -493,8 +450,6 @@ int Media::get_media_type( int* type )
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::get_audio_volume( double* volume )
 {
@@ -526,8 +481,6 @@ int Media::get_audio_volume( double* volume )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::set_audio_volume( double volume )
 {
     MPLOCK;
@@ -554,8 +507,6 @@ int Media::set_audio_volume( double volume )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::get_audio_mute( int* mute )
 {
     MPLOCK;
@@ -577,18 +528,13 @@ int Media::get_audio_mute( int* mute )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::set_audio_mute( int mute )
 {
     MPLOCK;
 
     GST_Player* mp = get_mp();
 
-    if ( mute != 0 )
-    {
-        mute = 1;
-    }
+    if ( mute != 0 ) mute = 1;
 
     tplog( "[%p] <- set_audio_mute(%d)", mp, mute );
 
@@ -600,8 +546,6 @@ int Media::set_audio_mute( int mute )
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int Media::get_loop_flag( bool* loop )
 {
@@ -624,8 +568,6 @@ int Media::get_loop_flag( bool* loop )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::set_loop_flag( bool loop )
 {
     MPLOCK;
@@ -643,8 +585,6 @@ int Media::set_loop_flag( bool loop )
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-
 int Media::play_sound( const char* uri )
 {
     GST_Player* mp = get_mp();
@@ -657,7 +597,6 @@ int Media::play_sound( const char* uri )
 
     return 0;
 }
-//-----------------------------------------------------------------------------
 
 void* Media::get_viewport_texture()
 {
@@ -665,16 +604,10 @@ void* Media::get_viewport_texture()
 
     GST_Player* mp = get_mp();
 
-    if ( !mp->get_viewport_texture )
-    {
-        return NULL;
-    }
+    if ( !mp->get_viewport_texture ) return NULL;
 
     return mp->get_viewport_texture( mp );
 }
-
-
-//-----------------------------------------------------------------------------
 
 StringPairList Media::get_tags()
 {
@@ -691,21 +624,15 @@ void Media::loaded()
     post_event( Event::make( Event::LOADED ) );
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::error( int code, const char* message )
 {
     post_event( Event::make( Event::ERROR, code, message ) );
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::end_of_stream()
 {
     post_event( Event::make( Event::EOS ) );
 }
-
-//-----------------------------------------------------------------------------
 
 void Media::tag_found( const char* name, const char* value )
 {
@@ -715,7 +642,6 @@ void Media::tag_found( const char* name, const char* value )
 //-----------------------------------------------------------------------------
 // Puts the event in the queue and adds an idle source that will process
 // events in the main thread
-
 void Media::post_event( Event* event )
 {
     g_async_queue_push( queue, event );
@@ -723,16 +649,11 @@ void Media::post_event( Event* event )
     g_idle_add_full( TRICKPLAY_PRIORITY , process_events, this, NULL );
 }
 
-//-----------------------------------------------------------------------------
-// Process the events
-
 gboolean Media::process_events( gpointer data )
 {
     ( ( Media* )data )->process_events();
     return FALSE;
 }
-
-//-----------------------------------------------------------------------------
 
 void Media::process_events()
 {
@@ -760,11 +681,7 @@ void Media::process_events()
 
                 if ( state == TP_MEDIAPLAYER_LOADING || state == TP_MEDIAPLAYER_IDLE )
                 {
-                    // Take it back to IDLE
-                    if ( state != TP_MEDIAPLAYER_IDLE )
-                    {
-                        reset();
-                    }
+                    if ( state != TP_MEDIAPLAYER_IDLE ) reset(); // back to IDLE
 
                     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
                     {
@@ -809,8 +726,6 @@ void Media::process_events()
     }
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::clear_events()
 {
     while ( Event* event = ( Event* )g_async_queue_try_pop( queue ) )
@@ -819,27 +734,17 @@ void Media::clear_events()
     }
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::add_delegate( Delegate* delegate )
 {
-    if ( !delegate )
-    {
-        return;
-    }
+    if ( !delegate ) return;
 
     MPLOCK;
     delegates.insert( delegate );
 }
 
-//-----------------------------------------------------------------------------
-
 void Media::remove_delegate( Delegate* delegate )
 {
-    if ( !delegate )
-    {
-        return;
-    }
+    if ( !delegate ) return;
 
     MPLOCK;
     delegates.erase( delegate );
@@ -849,15 +754,11 @@ void Media::remove_delegate( Delegate* delegate )
 // External callbacks
 //=============================================================================
 
-//-----------------------------------------------------------------------------
-
 void tp_mediaplayer_loaded( GST_Player* mp )
 {
     tplog( "[%p] -> tp_media_player_loaded", mp );
     Media::get( mp )->loaded();
 }
-
-//-----------------------------------------------------------------------------
 
 void tp_mediaplayer_error( GST_Player* mp, int code, const char* message )
 {
@@ -865,23 +766,15 @@ void tp_mediaplayer_error( GST_Player* mp, int code, const char* message )
     Media::get( mp )->error( code, message );
 }
 
-
-//-----------------------------------------------------------------------------
-
 void tp_mediaplayer_end_of_stream( GST_Player* mp )
 {
     tplog( "[%p] -> tp_media_player_end_of_stream", mp );
     Media::get( mp )->end_of_stream();
 }
 
-//-----------------------------------------------------------------------------
-
 void tp_mediaplayer_tag_found( GST_Player* mp, const char* name, const char* value )
 {
     tplog( "[%p] -> tp_media_player_tag_found('%s','%s')", mp, name, value );
 
-    if ( name && value )
-    {
-        Media::get( mp )->tag_found( name, value );
-    }
+    if ( name && value ) Media::get( mp )->tag_found( name, value );
 }

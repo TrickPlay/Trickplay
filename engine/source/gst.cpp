@@ -41,9 +41,14 @@ void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
     USERDATA( mp );
 
-    tp_mediaplayer_end_of_stream( mp );
-
-    if ( ud->loop ) gst_seek( mp, 0.0 );
+    if ( ud->loop )
+    {
+        gst_seek( mp, 0.0 );
+    }
+    else
+    {
+        tp_mediaplayer_end_of_stream( mp );
+    }
 
     clutter_media_set_playing( cm, ud->loop );
 }
@@ -144,17 +149,12 @@ void get_stream_information( GST_Player* mp )
     g_object_get( G_OBJECT( pipeline ), "n-audio", &n_audio, NULL );
 
     if ( n_video ) { ud->media_type |= TP_MEDIA_TYPE_VIDEO; }
-
     if ( n_audio ) { ud->media_type |= TP_MEDIA_TYPE_AUDIO; }
 
 #endif
 
-    //.........................................................................
-    // If there is a video stream, we get the video sink and try to find the
-    // video size
-
     if ( ud->media_type & TP_MEDIA_TYPE_VIDEO )
-    {
+    { // If there is a video stream, get the video sink to find the video size
         GstElement* video_sink = NULL;
 
         g_object_get( G_OBJECT( pipeline ), "video-sink", &video_sink, NULL );
@@ -354,7 +354,7 @@ void gst_reset( GST_Player* mp )
     ud->video_height = 0;
     ud->media_type   = 0;
 
-    // Reset should do more - it should truly forget all about the resource
+    // TODO: Reset truly forget all about the resource
 
     clutter_media_set_playing( cm, FALSE );
     clutter_media_set_progress( cm, 0 );
@@ -555,10 +555,8 @@ void* gst_get_viewport_texture( GST_Player* mp )
 
 //-----------------------------------------------------------------------------
 
-int gst_constructor( GST_Player* mp, ClutterActor * actor )
+int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
 {
-    ClutterActor* video_texture = actor ? actor : clutter_gst_video_texture_new();
-
     if ( !video_texture )
     {
         g_warning( "FAILED TO CREATE CLUTTER GST VIDEO TEXTURE" );
@@ -571,8 +569,7 @@ int gst_constructor( GST_Player* mp, ClutterActor * actor )
     g_signal_connect( video_texture, "eos", G_CALLBACK( gst_end_of_stream ), mp );
     g_signal_connect( video_texture, "error", G_CALLBACK( gst_error ), mp );
 
-    // We use gmalloc0 to zero out the whole structure
-    UserData* user_data = ( UserData* ) g_malloc0( sizeof( UserData ) );
+    UserData* user_data = ( UserData* ) g_malloc0( sizeof( UserData ) ); // zero out the whole structure
 
     user_data->vt = video_texture;
 
@@ -599,8 +596,7 @@ int gst_constructor( GST_Player* mp, ClutterActor * actor )
     mp->play_sound = gst_play_sound;
     mp->get_viewport_texture = gst_get_viewport_texture;
 
-    // Initialize volume
-    gst_set_audio_volume( mp, 0.5 );
+    gst_set_audio_volume( mp, 0.5 ); // Initialize volume
 
     return 0;
 }
