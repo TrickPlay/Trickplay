@@ -757,9 +757,8 @@ class TrickplayInspector(QWidget):
                         self.preventChanges = True
                         db = QFontDatabase()
                         db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
-                        for family in db.families():
-                            print family, "***"
-
+                        #for family in db.families():
+                            #print family, "***"
 
                         fontDialog = QFontDialog()
                         fontDialog.setCurrentFont(defaultFont)
