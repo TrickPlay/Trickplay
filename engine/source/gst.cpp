@@ -19,14 +19,14 @@ UserData;
 
 //-----------------------------------------------------------------------------
 
-static int gst_seek( GST_Player* mp, double seconds );
+int gst_seek( GST_Player* mp, double seconds );
 
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
 
 //-----------------------------------------------------------------------------
 
-static inline void g_info( const gchar* format, ... )
+inline void g_info( const gchar* format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -37,7 +37,7 @@ static inline void g_info( const gchar* format, ... )
 //-----------------------------------------------------------------------------
 // Signal handlers
 
-static void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
+void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
     USERDATA( mp );
 
@@ -48,7 +48,7 @@ static void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
     clutter_media_set_playing( cm, ud->loop );
 }
 
-static void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
+void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
 {
     tp_mediaplayer_error( mp, error->code, error->message );
     //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
@@ -83,7 +83,7 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 //-----------------------------------------------------------------------------
 // Looks for the stream types and video size
 
-static void get_stream_information( GST_Player* mp )
+void get_stream_information( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -207,7 +207,7 @@ static void get_stream_information( GST_Player* mp )
 //-----------------------------------------------------------------------------
 // Used to disconnect the loading_messages signal handler during a reset
 
-static void disconnect_loading_messages( GST_Player* mp )
+void disconnect_loading_messages( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -235,7 +235,7 @@ static void disconnect_loading_messages( GST_Player* mp )
 //-----------------------------------------------------------------------------
 // gstreamer messages we receive while we are loading
 
-static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
+void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 {
     USERDATA( mp );
 
@@ -277,7 +277,7 @@ static void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 //-----------------------------------------------------------------------------
 // Implementation of GST_Player functions
 
-static void gst_destroy( GST_Player* mp )
+void gst_destroy( GST_Player* mp )
 {
     USERDATA( mp );
 
@@ -289,7 +289,7 @@ static void gst_destroy( GST_Player* mp )
     }
 }
 
-static int gst_load( GST_Player* mp, const char* uri, const char* extra )
+int gst_load( GST_Player* mp, const char* uri, const char* extra )
 {
     USERDATA( mp );
     CM( ud );
@@ -343,7 +343,7 @@ static int gst_load( GST_Player* mp, const char* uri, const char* extra )
     return 0;
 }
 
-static void gst_reset( GST_Player* mp )
+void gst_reset( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -362,7 +362,7 @@ static void gst_reset( GST_Player* mp )
     //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
-static int gst_play( GST_Player* mp )
+int gst_play( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -374,7 +374,7 @@ static int gst_play( GST_Player* mp )
     return 0;
 }
 
-static int gst_seek( GST_Player* mp, double seconds )
+int gst_seek( GST_Player* mp, double seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -385,7 +385,7 @@ static int gst_seek( GST_Player* mp, double seconds )
     return 0;
 }
 
-static int gst_pause( GST_Player* mp )
+int gst_pause( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -394,12 +394,12 @@ static int gst_pause( GST_Player* mp )
     return 0;
 }
 
-static int gst_set_playback_rate( GST_Player* mp, int rate )
+int gst_set_playback_rate( GST_Player* mp, int rate )
 {
     return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
 }
 
-static int gst_get_position( GST_Player* mp, double* seconds )
+int gst_get_position( GST_Player* mp, double* seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -408,7 +408,7 @@ static int gst_get_position( GST_Player* mp, double* seconds )
     return 0;
 }
 
-static int gst_get_duration( GST_Player* mp, double* seconds )
+int gst_get_duration( GST_Player* mp, double* seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -417,7 +417,7 @@ static int gst_get_duration( GST_Player* mp, double* seconds )
     return 0;
 }
 
-static int gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* end_seconds )
+int gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* end_seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -427,7 +427,7 @@ static int gst_get_buffered_duration( GST_Player* mp, double* start_seconds, dou
     return 0;
 }
 
-static int gst_get_video_size( GST_Player* mp, int* width, int* height )
+int gst_get_video_size( GST_Player* mp, int* width, int* height )
 {
     USERDATA( mp );
 
@@ -439,14 +439,14 @@ static int gst_get_video_size( GST_Player* mp, int* width, int* height )
     return 0;
 }
 
-static int gst_get_media_type( GST_Player* mp, int* type )
+int gst_get_media_type( GST_Player* mp, int* type )
 {
     USERDATA( mp );
     *type = ud->media_type;
     return 0;
 }
 
-static int gst_get_audio_volume( GST_Player* mp, double* volume )
+int gst_get_audio_volume( GST_Player* mp, double* volume )
 {
     USERDATA( mp );
     CM( ud );
@@ -456,7 +456,7 @@ static int gst_get_audio_volume( GST_Player* mp, double* volume )
     return 0;
 }
 
-static int gst_set_audio_volume( GST_Player* mp, double volume )
+int gst_set_audio_volume( GST_Player* mp, double volume )
 {
     USERDATA( mp );
     CM( ud );
@@ -468,7 +468,7 @@ static int gst_set_audio_volume( GST_Player* mp, double volume )
     return 0;
 }
 
-static int gst_get_audio_mute( GST_Player* mp, int* mute )
+int gst_get_audio_mute( GST_Player* mp, int* mute )
 {
     USERDATA( mp );
 
@@ -477,7 +477,7 @@ static int gst_get_audio_mute( GST_Player* mp, int* mute )
     return 0;
 }
 
-static int gst_set_audio_mute( GST_Player* mp, int mute )
+int gst_set_audio_mute( GST_Player* mp, int mute )
 {
     USERDATA( mp );
     CM( ud );
@@ -501,7 +501,7 @@ static int gst_set_audio_mute( GST_Player* mp, int mute )
     return 0;
 }
 
-static int gst_get_loop_flag( GST_Player* mp, bool* loop )
+int gst_get_loop_flag( GST_Player* mp, bool* loop )
 {
     USERDATA( mp );
 
@@ -510,7 +510,7 @@ static int gst_get_loop_flag( GST_Player* mp, bool* loop )
     return 0;
 }
 
-static int gst_set_loop_flag( GST_Player* mp, bool flag )
+int gst_set_loop_flag( GST_Player* mp, bool flag )
 {
     USERDATA( mp );
 
@@ -519,14 +519,14 @@ static int gst_set_loop_flag( GST_Player* mp, bool flag )
     return 0;
 }
 
-static void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
+void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
 {
     gst_element_set_state( playbin, GST_STATE_NULL );
 
     gst_object_unref( GST_OBJECT( playbin ) );
 }
 
-static int gst_play_sound( GST_Player* mp, const char* uri )
+int gst_play_sound( GST_Player* mp, const char* uri )
 {
     GstElement* playbin = gst_element_factory_make( "playbin" , "play" );
 
@@ -546,7 +546,7 @@ static int gst_play_sound( GST_Player* mp, const char* uri )
     return 0;
 }
 
-static void* gst_get_viewport_texture( GST_Player* mp )
+void* gst_get_viewport_texture( GST_Player* mp )
 {
     USERDATA( mp );
 
