@@ -50,6 +50,7 @@ class TrickplayEmulatorManager(QWidget):
             self.main.sendLuaCommand("WL.Style","WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
             self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
+        self.getStInfo()
 
     def setUIInfo(self, gid, property, value, n=None):
         if n:
@@ -320,18 +321,21 @@ class TrickplayEmulatorManager(QWidget):
                         except:
                             print("error :/(")
 
-                    if luaCmd == "repStInfo":
+                    if luaCmd == "repStInfo" or luaCmd == "getStInfo":
                         if self.main.command == "openFile" :
                             return
-                        self.inspector.inspectorModel.styleData = sdata
-                        self.inspector.preventChanges = True
-                        if self.inspector.cbStyle is not None:
-                            self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
-                            if self.ve_ready == False :
-                                self.unsavedChanges = True
-                            self.ve_ready = False
-                        self.inspector.preventChanges = False
-                        return
+                        elif self.main.command == "setCurrentProject":
+                            pass
+                        else:
+                            self.inspector.inspectorModel.styleData = sdata
+                            self.inspector.preventChanges = True
+                            if self.inspector.cbStyle is not None:
+                                self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+                                if self.ve_ready == False :
+                                    self.unsavedChanges = True
+                                self.ve_ready = False
+                            self.inspector.preventChanges = False
+                            return
                     elif luaCmd == "repUIInfo":
                         self.pdata = self.pdata[0]
                         if self.main.command == "openFile" :
