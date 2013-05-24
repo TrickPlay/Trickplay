@@ -12,6 +12,7 @@ typedef struct
     gint            video_height;
     int             media_type;
     int             mute;
+    bool            loop;
     double          volume;
 }
 UserData;
@@ -21,6 +22,8 @@ UserData;
 extern void* connect_audio_sampler( TPContext* context );
 
 extern void disconnect_audio_sampler( void* sampler );
+
+static int gst_seek( GST_Player* mp, double seconds );
 
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
@@ -42,8 +45,13 @@ static inline void g_info( const gchar* format, ... )
 
 static void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
+    USERDATA( mp );
+
     tp_mediaplayer_end_of_stream( mp );
-    clutter_media_set_playing( cm, FALSE );
+
+    if ( ud->loop ) gst_seek( mp, 0.0 );
+
+    clutter_media_set_playing( cm, ud->loop );
 }
 
 static void gst_error( ClutterMedia* cm, GError* error, GST_Player* mp )
@@ -569,6 +577,24 @@ static int gst_set_audio_mute( GST_Player* mp, int mute )
     return 0;
 }
 
+static int gst_get_loop_flag( GST_Player* mp, bool* loop )
+{
+    USERDATA( mp );
+
+    *loop = ud->loop;
+
+    return 0;
+}
+
+static int gst_set_loop_flag( GST_Player* mp, bool flag )
+{
+    USERDATA( mp );
+
+    ud->loop = flag;
+
+    return 0;
+}
+
 static void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
 {
     gst_element_set_state( playbin, GST_STATE_NULL );
@@ -673,6 +699,8 @@ int gst_constructor( GST_Player* mp, TPContext * _context, ClutterActor * actor 
     mp->set_audio_volume = gst_set_audio_volume;
     mp->get_audio_mute = gst_get_audio_mute;
     mp->set_audio_mute = gst_set_audio_mute;
+    mp->get_loop_flag = gst_get_loop_flag;
+    mp->set_loop_flag = gst_set_loop_flag;
     mp->play_sound = gst_play_sound;
     mp->get_viewport_texture = gst_get_viewport_texture;
 

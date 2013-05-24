@@ -592,6 +592,38 @@ class Media [[ClutterActor*]] actor
         ]];
 
     /*
+        Property: loop
+
+        The loop property is a boolean flag indicating whether or not the media playback is repeated (true=repeated).
+
+        *Default Setting:* false (media playback is not repeated)
+    */
+
+    bool loop
+        [[
+            bool l;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->get_loop_flag( &l )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                loop = false;
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+            }
+            else
+            {
+                loop = l;
+            }
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_loop_flag( loop );
+        ]];
+
+
+    /*
         Function: reset
 
         The reset() function places the mediaplayer in an IDLE state. If any media resource had been playing, it is stopped.

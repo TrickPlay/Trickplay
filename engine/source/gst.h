@@ -53,6 +53,8 @@ struct GST_Player
     int (*set_audio_volume)( GST_Player * mp, double volume);
     int (*get_audio_mute)( GST_Player * mp, int * mute);
     int (*set_audio_mute)( GST_Player * mp, int mute);
+    int (*get_loop_flag)( GST_Player* mp, bool * flag );
+    int (*set_loop_flag)( GST_Player* mp, bool flag );
     int (*play_sound)( GST_Player * mp, const char * uri);
     void * (*get_viewport_texture)( GST_Player * mp);
 };

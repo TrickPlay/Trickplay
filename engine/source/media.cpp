@@ -65,7 +65,7 @@ Media* Media::make( TPContext* context , GST_PlayerConstructor constructor, Dele
 
 //-----------------------------------------------------------------------------
 
-Media::Media( TPContext* c , Wrapper* w, Delegate* d )
+Media::Media( TPContext* c, Wrapper* w, Delegate* d )
     :
     context( c ),
     wrapper( w ),
@@ -83,9 +83,9 @@ Media::Media( TPContext* c , Wrapper* w, Delegate* d )
 
     add_delegate( d );
 
-    StringVector s = split_string( context->get( TP_MEDIAPLAYER_SCHEMES , TP_MEDIAPLAYER_SCHEMES_DEFAULT ) , "," );
+    StringVector s = split_string( context->get( TP_MEDIAPLAYER_SCHEMES, TP_MEDIAPLAYER_SCHEMES_DEFAULT ), "," );
 
-    schemes.insert( s.begin() , s.end() );
+    schemes.insert( s.begin(), s.end() );
 }
 
 //-----------------------------------------------------------------------------
@@ -599,6 +599,48 @@ int Media::set_audio_mute( int mute )
     tplog( "[%p] <- set_audio_mute(%d)", mp, mute );
 
     if ( int result = mp->set_audio_mute( mp, mute ) )
+    {
+        g_warning( "MP[%p]    FAILED %d", mp, result );
+        return result;
+    }
+
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+int Media::get_loop_flag( bool* loop )
+{
+    MPLOCK;
+
+    GST_Player* mp = get_mp();
+
+    g_assert( loop );
+
+    tplog( "[%p] <- get_loop_flag", mp );
+
+    if ( int result = mp->get_loop_flag( mp, loop ) )
+    {
+        g_warning( "MP[%p]    FAILED %d", mp, result );
+        return result;
+    }
+
+    tplog( "[%p]    RETURNED %d", mp, *loop );
+
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+int Media::set_loop_flag( bool loop )
+{
+    MPLOCK;
+
+    GST_Player* mp = get_mp();
+
+    tplog( "[%p] <- set_loop_flag(%d)", mp, loop );
+
+    if ( int result = mp->set_loop_flag( mp, loop ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
