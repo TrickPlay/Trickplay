@@ -196,8 +196,7 @@ class TrickplayEmulatorManager(QWidget):
                             item = self.inspector.inspectorModel.itemFromIndex(index)
                             if item['gid'] == fgid :
                                 if self.inspector.main.command is not "setUIInfo" :
-                                    self.inspector.deselectItem(item)
-                                    self.inspector.selectItem(item, "f")
+                                    self.inspector.propertyFill(item.TPJSON())
                         except:
                             pass
 
@@ -211,8 +210,7 @@ class TrickplayEmulatorManager(QWidget):
                             item['position'] = [int(posX), int(posY), 0]
 
                             if self.inspector.main.command is not "setUIInfo" :
-                                self.inspector.deselectItem(item)
-                                self.inspector.selectItem(item, "f")
+                                self.inspector.propertyFill(item.TPJSON())
                             self.unsavedChanges = True
                         except:
                             pass
@@ -341,7 +339,7 @@ class TrickplayEmulatorManager(QWidget):
                         elif self.main.command == "duplicate" or self.main.command == "clone":
                             curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
                             if not self.inspector.search(self.pdata['gid'], 'gid') :
-                                self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
+                                self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False, True)
                                 self.inspector.deselectItems()
                                 newItem = self.inspector.search(self.pdata['gid'], 'gid')
                                 self.inspector.selectItem(newItem, False)
@@ -349,7 +347,7 @@ class TrickplayEmulatorManager(QWidget):
                         elif self.main.command == "newLayer" :
                             self.main.command = ""
                             screenItem = self.inspector.search(self.inspector.screenGid, 'gid')
-                            self.inspector.inspectorModel.insertElement(screenItem, self.pdata, screenItem.TPJSON(), False)
+                            self.inspector.inspectorModel.insertElement(screenItem, self.pdata, screenItem.TPJSON(), False, True)
                             self.inspector.deselectItems()
                             newItem = self.inspector.search(self.pdata['gid'], 'gid')
                             self.inspector.selectItem(newItem, False)
@@ -357,18 +355,23 @@ class TrickplayEmulatorManager(QWidget):
                         elif self.main.command == "insertUIElement" :
                             self.main.command = ""
                             curLayerItem = self.inspector.search(self.inspector.curLayerGid, 'gid')
-                            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False)
+                            self.inspector.inspectorModel.insertElement(curLayerItem, self.pdata, curLayerItem.TPJSON(), False, True)
                             self.inspector.deselectItems()
                             newItem = self.inspector.search(self.pdata['gid'], 'gid')
                             self.inspector.selectItem(newItem, False)
 
-                            # Group : remove group's contents from the layer
                             if self.pdata['type'] == 'Widget_Group' :
                                 for c in self.pdata['children'] :
                                     i = self.inspector.search(c['gid'], 'gid')
                                     i.parent().removeRow(i.row())
 
                             return
+                        elif self.main.command == "setUIInfo" :
+                            self.inspector.preventChanges = True
+                            item = self.inspector.search(self.pdata['gid'], 'gid')
+                            item.setTPJSON(self.pdata)
+                            self.unsavedChanges = True
+                            self.inspector.preventChanges = False
                         else:
                             self.inspector.curData = self.pdata
                             if self.inspector.curItemGid == self.inspector.curData['gid'] :
@@ -382,6 +385,7 @@ class TrickplayEmulatorManager(QWidget):
 
                     if sdata is not None and self.pdata is not None:
                         self.inspector.preventChanges = True
+                        self.contentMoveBlock = True
                         self.inspector.clearTree()
                         self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
 
