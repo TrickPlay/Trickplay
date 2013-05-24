@@ -89,11 +89,7 @@ Media::~Media()
 
         reset();
 
-        if ( wrapper->mp.destroy )
-        {
-            tplog( "[%p] <- destroy", get_mp() );
-            wrapper->mp.destroy( get_mp() );
-        }
+        wrapper->mp.gst_destroy( get_mp() );
 
         wrapper->marker = NULL;
         wrapper->player = NULL;
@@ -164,14 +160,11 @@ void Media::reset()
 
     if ( state == TP_MEDIAPLAYER_IDLE ) return;
 
-    if ( wrapper->mp.reset )
-    {
-        tplog( "MP[%p] <- reset", get_mp() );
+    tplog( "MP[%p] <- reset", get_mp() );
 
-        check( TP_MEDIAPLAYER_LOADING | TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED );
+    check( TP_MEDIAPLAYER_LOADING | TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED );
 
-        wrapper->mp.reset( get_mp() );
-    }
+    wrapper->mp.gst_reset( get_mp() );
 
     clear_events(); // Flush all pending events
 
@@ -198,7 +191,7 @@ int Media::load( const char* uri, const char* extra )
 
     tplog( "[%p] <- load('%s','%s')", mp, unescaped_uri , extra );
 
-    if ( int result = mp->load( mp, unescaped_uri, extra ) )
+    if ( int result = mp->gst_load( mp, unescaped_uri, extra ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         g_free( unescaped_uri );
@@ -226,7 +219,7 @@ int Media::play()
 
     tplog( "[%p] <- play", mp );
 
-    if ( int result = mp->play( mp ) )
+    if ( int result = mp->gst_play( mp ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -251,7 +244,7 @@ int Media::seek( double seconds )
 
     tplog( "[%p] <- seek(%f)", mp, seconds );
 
-    if ( int result = mp->seek( mp, seconds ) )
+    if ( int result = mp->gst_seek( mp, seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -274,42 +267,13 @@ int Media::pause()
 
     tplog( "[%p] <- pause", mp );
 
-    if ( int result = mp->pause( mp ) )
+    if ( int result = mp->gst_pause( mp ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
     }
 
     state = TP_MEDIAPLAYER_PAUSED;
-
-    return 0;
-}
-
-int Media::set_playback_rate( int rate )
-{
-    MPLOCK;
-
-    GST_Player* mp = get_mp();
-
-    if ( rate == 0 )
-    {
-        g_warning( "MP[%p]    set_playback_rate CALLED WITH INVALID RATE %d", mp, rate );
-        return TP_MEDIAPLAYER_ERROR_BAD_PARAMETER;
-    }
-
-    if ( !( state & ( TP_MEDIAPLAYER_PLAYING ) ) )
-    {
-        g_warning( "MP[%p]    set_playback_rate CALLED IN INVALID STATE", mp );
-        return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
-    }
-
-    tplog( "[%p] <- set_playback_rate(%d)", mp, rate );
-
-    if ( int result = mp->set_playback_rate( mp, rate ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", mp, result );
-        return result;
-    }
 
     return 0;
 }

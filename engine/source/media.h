@@ -42,7 +42,6 @@ public:
     int play();
     int seek( double seconds );
     int pause();
-    int set_playback_rate( int rate );
     int get_position( double* seconds );
     int get_duration( double* seconds );
     int get_buffered_duration( double* start_seconds, double* end_seconds );

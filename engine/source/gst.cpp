@@ -19,7 +19,7 @@ UserData;
 
 //-----------------------------------------------------------------------------
 
-int gst_seek( GST_Player* mp, double seconds );
+//int GST_Player::gst_seek( GST_Player* mp, double seconds );
 
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
@@ -42,7 +42,7 @@ void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 
     if ( ud->loop )
     {
-        gst_seek( mp, 0.0 ); // Do not trigger end_of_stream callback if loop is true
+        mp->gst_seek( mp, 0.0 ); // Do not trigger end_of_stream callback if loop is true
     }
     else
     {
@@ -276,7 +276,7 @@ void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 //-----------------------------------------------------------------------------
 // Implementation of GST_Player functions
 
-void gst_destroy( GST_Player* mp )
+void GST_Player::gst_destroy( GST_Player* mp )
 {
     USERDATA( mp );
 
@@ -288,7 +288,7 @@ void gst_destroy( GST_Player* mp )
     }
 }
 
-int gst_load( GST_Player* mp, const char* uri, const char* extra )
+int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
 {
     USERDATA( mp );
     CM( ud );
@@ -342,7 +342,7 @@ int gst_load( GST_Player* mp, const char* uri, const char* extra )
     return 0;
 }
 
-void gst_reset( GST_Player* mp )
+void GST_Player::gst_reset( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -361,7 +361,7 @@ void gst_reset( GST_Player* mp )
     //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
-int gst_play( GST_Player* mp )
+int GST_Player::gst_play( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
@@ -373,7 +373,7 @@ int gst_play( GST_Player* mp )
     return 0;
 }
 
-int gst_seek( GST_Player* mp, double seconds )
+int GST_Player::gst_seek( GST_Player* mp, double seconds )
 {
     USERDATA( mp );
     CM( ud );
@@ -384,18 +384,13 @@ int gst_seek( GST_Player* mp, double seconds )
     return 0;
 }
 
-int gst_pause( GST_Player* mp )
+int GST_Player::gst_pause( GST_Player* mp )
 {
     USERDATA( mp );
     CM( ud );
 
     clutter_media_set_playing( cm, FALSE );
     return 0;
-}
-
-int gst_set_playback_rate( GST_Player* mp, int rate )
-{
-    return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
 }
 
 int gst_get_position( GST_Player* mp, double* seconds )
@@ -574,13 +569,6 @@ int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
 
     mp->user_data = user_data;
 
-    mp->destroy = gst_destroy;
-    mp->load = gst_load;
-    mp->reset = gst_reset;
-    mp->play = gst_play;
-    mp->seek = gst_seek;
-    mp->pause = gst_pause;
-    mp->set_playback_rate = gst_set_playback_rate;
     mp->get_position = gst_get_position;
     mp->get_duration = gst_get_duration;
     mp->get_buffered_duration = gst_get_buffered_duration;
@@ -596,7 +584,6 @@ int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
     mp->get_viewport_texture = gst_get_viewport_texture;
 
     gst_set_audio_volume( mp, 0.5 ); // Initialize volume
-    g_warning("---%d---",CLUTTER_GST_MAJOR_VERSION);
 
     return 0;
 }

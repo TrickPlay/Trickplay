@@ -37,13 +37,12 @@ struct GST_Player
 {
     void * user_data;
 
-    void (*destroy)( GST_Player * mp);
-    int (*load)( GST_Player * mp, const char * uri, const char * extra);
-    void (*reset)( GST_Player * mp);
-    int (*play)( GST_Player * mp);
-    int (*seek)( GST_Player * mp, double seconds);
-    int (*pause)( GST_Player * mp);
-    int (*set_playback_rate)( GST_Player * mp, int rate);
+    void gst_destroy( GST_Player * mp);
+    int  gst_load   ( GST_Player * mp, const char * uri, const char * extra);
+    void gst_reset  ( GST_Player * mp);
+    int  gst_play   ( GST_Player * mp);
+    int  gst_seek   ( GST_Player * mp, double seconds);
+    int  gst_pause  ( GST_Player * mp);
     int (*get_position)( GST_Player * mp, double * seconds);
     int (*get_duration)( GST_Player * mp, double * seconds);
     int (*get_buffered_duration)( GST_Player * mp, double * start_seconds, double * end_seconds);

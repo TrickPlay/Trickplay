@@ -751,33 +751,6 @@ class Media [[ClutterActor*]] actor
         ]];
 
     /*
-        Function: set_playback_rate
-
-        The set_playback_rate() function specifies the playback speed of a media resource.
-
-        The playback speed is designated as a numeric value, where positive values advance the resource forward and negative values play in reverse. A playback rate of 1 plays forward at normal speed. A value of 2 plays the resource forward at twice the normal speed. A value of -1 plays the resource at its normal speed, but in reverse. A playback rate of zero is invalid.
-
-        The default playback rate is 1, i.e., forward at normal speed.
-
-        *Arguments:*
-
-            rate - non-zero integer playback rate
-
-        *Return Value:* If the playback rate was set successfully, returns 0, else returns a non-zero error value
-
-        *See Also:* the <play> function
-    */
-
-    int set_playback_rate(int rate)
-        [[
-            result = MediaExtra::get( self, L )->get_player()
-                   ? MediaExtra::get( self, L )->get_player()->set_playback_rate(rate)
-                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-
-            if( result ) g_warning("AT %s", Util::where_am_i_lua(L).c_str());
-        ]];
-
-    /*
         Function: play_sound
 
         The play_sound() function plays the audio sound contained in a specified URI.
