@@ -1002,28 +1002,6 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    Property: clip_to_size
-
-    The clip_to_size property is a boolean value that enables and disables clipping on a <Group at file:clutter_group-lb.html> object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
-
-    Clipping on a Group object can also be enabled by defining a clipping rectangle via the <clip> property.
-
-    The clip_to_size property affects objects of type Group only; it has no effect on other object types.
-
-    *Default Setting:* false (clipping in the Group is disabled)
-
-    *See Also:* the <Group at file:clutter_group-lb.html> class and the <clip> and <has_clip> properties
-*/
-
-    bool clip_to_size
-        [[
-            clip_to_size = clutter_actor_get_clip_to_allocation( self );
-        ]]
-        [[
-            clutter_actor_set_clip_to_allocation( self , clip_to_size );
-        ]];
-
-/***************************************
     Property: parent
 
     The parent property contains the parent UIElement object of the current object. An object has a parent if it is contained within a <Group at file:clutter_group-lb.html#Group> or has been added to the <screen at file:clutter_screen-lb.html#screen> global variable. If the object has no parent, the parent property contains nil.
