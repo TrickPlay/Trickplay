@@ -89,7 +89,7 @@ Media::~Media()
 
         reset();
 
-        wrapper->mp.gst_destroy( get_mp() );
+        wrapper->mp.gst_destroy();
 
         wrapper->marker = NULL;
         wrapper->player = NULL;
@@ -164,7 +164,7 @@ void Media::reset()
 
     check( TP_MEDIAPLAYER_LOADING | TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED );
 
-    wrapper->mp.gst_reset( get_mp() );
+    wrapper->mp.gst_reset();
 
     clear_events(); // Flush all pending events
 
@@ -219,7 +219,7 @@ int Media::play()
 
     tplog( "[%p] <- play", mp );
 
-    if ( int result = mp->gst_play( mp ) )
+    if ( int result = mp->gst_play() )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -267,7 +267,7 @@ int Media::pause()
 
     tplog( "[%p] <- pause", mp );
 
-    if ( int result = mp->gst_pause( mp ) )
+    if ( int result = mp->gst_pause() )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -553,7 +553,7 @@ int Media::play_sound( const char* uri )
 {
     GST_Player* mp = get_mp();
 
-    if ( int result = mp->gst_play_sound( mp, uri ) )
+    if ( int result = mp->gst_play_sound( uri ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;

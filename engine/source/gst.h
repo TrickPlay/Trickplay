@@ -37,24 +37,28 @@ struct GST_Player
 {
     void * user_data;
 
-    void gst_destroy     ( GST_Player * mp);
-    int  gst_load        ( GST_Player * mp, const char * uri, const char * extra);
-    void gst_reset       ( GST_Player * mp);
-    int  gst_play        ( GST_Player * mp);
-    int  gst_seek        ( GST_Player * mp, double seconds);
-    int  gst_pause       ( GST_Player * mp);
-    int  gst_get_position( GST_Player * mp, double * seconds);
-    int  gst_get_duration( GST_Player * mp, double * seconds);
-    int  gst_get_buffered_duration( GST_Player * mp, double * start_seconds, double * end_seconds);
-    int  gst_get_video_size( GST_Player * mp, int * width, int * height); 
-    int  gst_get_media_type( GST_Player * mp, int * type);
-    int  gst_get_audio_volume( GST_Player * mp, double * volume); 
-    int  gst_set_audio_volume( GST_Player * mp, double volume);
-    int  gst_get_audio_mute( GST_Player * mp, int * mute);
-    int  gst_set_audio_mute( GST_Player * mp, int mute);
-    int  gst_get_loop_flag( GST_Player* mp, bool * flag );
-    int  gst_set_loop_flag( GST_Player* mp, bool flag );
-    int  gst_play_sound( GST_Player * mp, const char * uri);
+    void gst_destroy              ();
+    void gst_reset                ();
+    int  gst_pause                ();
+    int  gst_play                 ();
+    int  gst_play_sound           ( const char * uri );
+    int  gst_get_duration         ( GST_Player * mp, double * seconds );
+    int  gst_load                 ( GST_Player * mp, const char * uri, const char * extra );
+    int  gst_get_buffered_duration( GST_Player * mp, double * start_seconds, double * end_seconds );
+    int  gst_get_video_size       ( GST_Player * mp, int * width, int * height );
+    int  gst_get_media_type       ( GST_Player * mp, int * type );
+
+    int  gst_seek                 ( GST_Player * mp, double seconds );
+    int  gst_get_position         ( GST_Player * mp, double * seconds );
+
+    int  gst_get_audio_volume     ( GST_Player * mp, double * volume );
+    int  gst_set_audio_volume     ( GST_Player * mp, double volume );
+
+    int  gst_get_audio_mute       ( GST_Player * mp, int * mute );
+    int  gst_set_audio_mute       ( GST_Player * mp, int mute );
+
+    int  gst_get_loop_flag        ( GST_Player* mp, bool * flag );
+    int  gst_set_loop_flag        ( GST_Player* mp, bool flag );
 };
 
 extern int gst_constructor( GST_Player* mp, ClutterActor * actor );

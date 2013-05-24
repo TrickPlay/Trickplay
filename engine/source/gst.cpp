@@ -40,16 +40,24 @@ void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
 {
     USERDATA( mp );
 
-    if ( ud->loop )
-    {
-        mp->gst_seek( mp, 0.0 ); // Do not trigger end_of_stream callback if loop is true
-    }
-    else
-    {
-        //clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( cm ), clutter_texture_get_cogl_material( CLUTTER_TEXTURE( cm ) ) );
-        clutter_media_set_progress( cm, 0.5 );
-        tp_mediaplayer_end_of_stream( mp );
-    }
+    if ( ! ud->loop ) tp_mediaplayer_end_of_stream( mp );
+
+/* Keep last frame on screen after video is done
+#if (CLUTTER_GST_MAJOR_VERSION<1)
+        GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#else
+        GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#endif
+
+        int attempts = 0;
+        gboolean re;
+        do {
+            re = ! gst_element_seek( pipeline, -1.0, GST_FORMAT_TIME,
+                ( GstSeekFlags ) ( GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE ),
+                GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_END, 0 );
+            if ( re ) sleep( 1 );
+        } while ( re && ++attempts > 3 );
+*/
 
     clutter_media_set_playing( cm, ud->loop );
 }
@@ -278,15 +286,13 @@ void loading_messages( GstBus* bus, GstMessage* message, GST_Player* mp )
 //-----------------------------------------------------------------------------
 // Implementation of GST_Player functions
 
-void GST_Player::gst_destroy( GST_Player* mp )
+void GST_Player::gst_destroy()
 {
-    USERDATA( mp );
-
-    if ( ud )
+    if ( user_data )
     {
-        g_object_unref( G_OBJECT( ud->vt ) );
-        g_free( ud );
-        mp->user_data = NULL;
+        g_object_unref( G_OBJECT( ( ( UserData * ) user_data ) -> vt ) );
+        g_free( user_data );
+        user_data = NULL;
     }
 }
 
@@ -294,7 +300,7 @@ int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
 {
     USERDATA( mp );
     CM( ud );
-g_warning("%s:%d %s",__FILE__,__LINE__,__FUNCTION__);
+
     clutter_media_set_uri( cm, uri );
 
 #if (CLUTTER_GST_MAJOR_VERSION<1)
@@ -340,17 +346,16 @@ g_warning("%s:%d %s",__FILE__,__LINE__,__FUNCTION__);
             break;
         }
     }
-g_warning("%s:%d %s",__FILE__,__LINE__,__FUNCTION__);
 
     return 0;
 }
 
-void GST_Player::gst_reset( GST_Player* mp )
+void GST_Player::gst_reset()
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
-    disconnect_loading_messages( mp );
+    disconnect_loading_messages( this );
 
     ud->video_width  = 0;
     ud->video_height = 0;
@@ -360,18 +365,14 @@ void GST_Player::gst_reset( GST_Player* mp )
 
     clutter_media_set_playing( cm, FALSE );
     clutter_media_set_progress( cm, 0 );
-
-    //clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }
 
-int GST_Player::gst_play( GST_Player* mp )
+int GST_Player::gst_play()
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     clutter_media_set_playing( cm, TRUE );
-
-    if ( ud->media_type & TP_MEDIA_TYPE_VIDEO ) clutter_actor_show( CLUTTER_ACTOR( cm ) );
 
     return 0;
 }
@@ -387,9 +388,9 @@ int GST_Player::gst_seek( GST_Player* mp, double seconds )
     return 0;
 }
 
-int GST_Player::gst_pause( GST_Player* mp )
+int GST_Player::gst_pause()
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     clutter_media_set_playing( cm, FALSE );
@@ -524,27 +525,38 @@ void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
     gst_object_unref( GST_OBJECT( playbin ) );
 }
 
-int GST_Player::gst_play_sound( GST_Player* mp, const char* uri )
+int GST_Player::gst_play_sound( const char* uri )
 {
-    GstElement* playbin = gst_element_factory_make( "playbin" , "play" );
+    UserData * ud = ( UserData * ) user_data;
+    CM( ud );
 
-    GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( playbin ) );
+#if (CLUTTER_GST_MAJOR_VERSION < 1)
+    GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#else
+    GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#endif
 
-    g_object_set( G_OBJECT( playbin ), "uri", uri, NULL );
+    GstElement* audio_sink = NULL;
+    g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
+
+    if ( !audio_sink ) return 2;
+
+    GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( audio_sink ) );
+
+    g_object_set( G_OBJECT( audio_sink ), "uri", uri, NULL );
 
     gst_bus_add_signal_watch( bus );
 
-    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), playbin, G_CONNECT_AFTER );
-    g_signal_connect_object( bus, "message::eos", G_CALLBACK( play_sound_done ), playbin, G_CONNECT_AFTER );
+    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
+    g_signal_connect_object( bus, "message::eos",    G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
 
     gst_object_unref( GST_OBJECT( bus ) );
+    gst_object_unref( GST_OBJECT( audio_sink ) );
 
-    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( playbin, GST_STATE_PLAYING ) ) return 2;
+    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( audio_sink, GST_STATE_PLAYING ) ) return 2;
 
     return 0;
 }
-
-//-----------------------------------------------------------------------------
 
 int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
 {
