@@ -657,7 +657,6 @@ _VE_.setUIInfo = function(gid, property, value, n)
     elseif property == "anchor_point" then 
         ax = table.remove(value, 1)
         ay = table.remove(value, 1) 
-        print (ax, ay, "&&&")
         uiInstance:move_anchor_point(ax, ay)
 	    screen_ui.selected(uiInstance) 
     elseif n ~= nil then 
