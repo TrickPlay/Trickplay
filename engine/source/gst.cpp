@@ -46,6 +46,8 @@ void gst_end_of_stream( ClutterMedia* cm, GST_Player* mp )
     }
     else
     {
+        //clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( cm ), clutter_texture_get_cogl_material( CLUTTER_TEXTURE( cm ) ) );
+        clutter_media_set_progress( cm, 0.5 );
         tp_mediaplayer_end_of_stream( mp );
     }
 
@@ -292,7 +294,7 @@ int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
 {
     USERDATA( mp );
     CM( ud );
-
+g_warning("%s:%d %s",__FILE__,__LINE__,__FUNCTION__);
     clutter_media_set_uri( cm, uri );
 
 #if (CLUTTER_GST_MAJOR_VERSION<1)
@@ -338,6 +340,7 @@ int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
             break;
         }
     }
+g_warning("%s:%d %s",__FILE__,__LINE__,__FUNCTION__);
 
     return 0;
 }
@@ -507,10 +510,11 @@ int GST_Player::gst_get_loop_flag( GST_Player* mp, bool* loop )
 int GST_Player::gst_set_loop_flag( GST_Player* mp, bool flag )
 {
     USERDATA( mp );
+    CM( ud );
 
     ud->loop = flag;
 
-    return 0;
+    return flag && !clutter_media_get_can_seek( cm );
 }
 
 void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )

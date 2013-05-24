@@ -542,7 +542,7 @@ int Media::set_loop_flag( bool loop )
 
     if ( int result = mp->gst_set_loop_flag( mp, loop ) )
     {
-        g_warning( "MP[%p]    FAILED %d", mp, result );
+        g_warning( "MP[%p]    FAILED %d. Loop mode is not supported", mp, result );
         return result;
     }
 
