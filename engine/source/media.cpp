@@ -244,7 +244,7 @@ int Media::seek( double seconds )
 
     tplog( "[%p] <- seek(%f)", mp, seconds );
 
-    if ( int result = mp->gst_seek( mp, seconds ) )
+    if ( int result = mp->gst_seek( seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -294,7 +294,7 @@ int Media::get_position( double* seconds )
 
     tplog( "[%p] <- get_position", mp );
 
-    if ( int result = mp->gst_get_position( mp, seconds ) )
+    if ( int result = mp->gst_get_position( seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -321,7 +321,7 @@ int Media::get_duration( double* seconds )
 
     tplog( "[%p] <- get_duration", mp );
 
-    if ( int result = mp->gst_get_duration( mp, seconds ) )
+    if ( int result = mp->gst_get_duration( seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -425,7 +425,7 @@ int Media::get_audio_volume( double* volume )
 
     tplog( "[%p] <- get_audio_volume", mp );
 
-    if ( int result = mp->gst_get_audio_volume( mp, volume ) )
+    if ( int result = mp->gst_get_audio_volume( volume ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -462,7 +462,7 @@ int Media::set_audio_volume( double volume )
 
     tplog( "[%p] <- set_audio_volume(%f)", mp, volume );
 
-    if ( int result = mp->gst_set_audio_volume( mp, volume ) )
+    if ( int result = mp->gst_set_audio_volume( volume ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -481,7 +481,7 @@ int Media::get_audio_mute( int* mute )
 
     tplog( "[%p] <- get_audio_mute", mp );
 
-    if ( int result = mp->gst_get_audio_mute( mp, mute ) )
+    if ( int result = mp->gst_get_audio_mute( mute ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -502,7 +502,7 @@ int Media::set_audio_mute( int mute )
 
     tplog( "[%p] <- set_audio_mute(%d)", mp, mute );
 
-    if ( int result = mp->gst_set_audio_mute( mp, mute ) )
+    if ( int result = mp->gst_set_audio_mute( mute ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -521,7 +521,7 @@ int Media::get_loop_flag( bool* loop )
 
     tplog( "[%p] <- get_loop_flag", mp );
 
-    if ( int result = mp->gst_get_loop_flag( mp, loop ) )
+    if ( int result = mp->gst_get_loop_flag( loop ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -540,7 +540,7 @@ int Media::set_loop_flag( bool loop )
 
     tplog( "[%p] <- set_loop_flag(%d)", mp, loop );
 
-    if ( int result = mp->gst_set_loop_flag( mp, loop ) )
+    if ( int result = mp->gst_set_loop_flag( loop ) )
     {
         g_warning( "MP[%p]    FAILED %d. Loop mode is not supported", mp, result );
         return result;

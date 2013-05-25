@@ -17,10 +17,6 @@ typedef struct
 }
 UserData;
 
-//-----------------------------------------------------------------------------
-
-//int GST_Player::gst_seek( GST_Player* mp, double seconds );
-
 #define USERDATA(mp) UserData * ud=(UserData*)(mp->user_data)
 #define CM(ud)       ClutterMedia * cm=CLUTTER_MEDIA(ud->vt)
 
@@ -377,9 +373,9 @@ int GST_Player::gst_play()
     return 0;
 }
 
-int GST_Player::gst_seek( GST_Player* mp, double seconds )
+int GST_Player::gst_seek( double seconds )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     if ( !clutter_media_get_can_seek( cm ) ) return 1;
@@ -397,18 +393,19 @@ int GST_Player::gst_pause()
     return 0;
 }
 
-int GST_Player::gst_get_position( GST_Player* mp, double* seconds )
+int GST_Player::gst_get_position( double * seconds )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     *seconds = clutter_media_get_duration( cm ) * clutter_media_get_progress( cm );
+
     return 0;
 }
 
-int GST_Player::gst_get_duration( GST_Player* mp, double* seconds )
+int GST_Player::gst_get_duration( double * seconds )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     *seconds = clutter_media_get_duration( cm );
@@ -444,9 +441,9 @@ int GST_Player::gst_get_media_type( GST_Player* mp, int* type )
     return 0;
 }
 
-int GST_Player::gst_get_audio_volume( GST_Player* mp, double* volume )
+int GST_Player::gst_get_audio_volume( double* volume )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     * volume = ud->mute ? ud->volume : clutter_media_get_audio_volume( cm );
@@ -454,9 +451,9 @@ int GST_Player::gst_get_audio_volume( GST_Player* mp, double* volume )
     return 0;
 }
 
-int GST_Player::gst_set_audio_volume( GST_Player* mp, double volume )
+int GST_Player::gst_set_audio_volume( double volume )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     ud->volume = volume;
@@ -466,18 +463,18 @@ int GST_Player::gst_set_audio_volume( GST_Player* mp, double volume )
     return 0;
 }
 
-int GST_Player::gst_get_audio_mute( GST_Player* mp, int* mute )
+int GST_Player::gst_get_audio_mute( int* mute )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
 
     *mute = ud->mute;
 
     return 0;
 }
 
-int GST_Player::gst_set_audio_mute( GST_Player* mp, int mute )
+int GST_Player::gst_set_audio_mute( int mute )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     int old_mute = ud->mute;
@@ -499,18 +496,18 @@ int GST_Player::gst_set_audio_mute( GST_Player* mp, int mute )
     return 0;
 }
 
-int GST_Player::gst_get_loop_flag( GST_Player* mp, bool* loop )
+int GST_Player::gst_get_loop_flag( bool* loop )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
 
     *loop = ud->loop;
 
     return 0;
 }
 
-int GST_Player::gst_set_loop_flag( GST_Player* mp, bool flag )
+int GST_Player::gst_set_loop_flag( bool flag )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     ud->loop = flag;
@@ -578,7 +575,7 @@ int gst_constructor( GST_Player* mp, ClutterActor * video_texture )
 
     mp->user_data = user_data;
 
-    mp->gst_set_audio_volume( mp, 0.5 ); // Initialize volume
+    mp->gst_set_audio_volume( 0.5 ); // Initialize volume
 
     return 0;
 }
