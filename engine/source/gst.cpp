@@ -292,9 +292,9 @@ void GST_Player::gst_destroy()
     }
 }
 
-int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
+int GST_Player::gst_load( const char* uri, const char* extra )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     clutter_media_set_uri( cm, uri );
@@ -321,8 +321,8 @@ int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
         case GST_STATE_CHANGE_SUCCESS:
         case GST_STATE_CHANGE_NO_PREROLL:
         {
-            get_stream_information( mp );
-            tp_mediaplayer_loaded( mp );
+            get_stream_information( this );
+            tp_mediaplayer_loaded( this );
             break;
         }
 
@@ -335,7 +335,7 @@ int GST_Player::gst_load( GST_Player* mp, const char* uri, const char* extra )
 
             if ( !bus ) return 3;
 
-            ud->load_signal = g_signal_connect( bus, "message", G_CALLBACK( loading_messages ), mp );
+            ud->load_signal = g_signal_connect( bus, "message", G_CALLBACK( loading_messages ), this );
 
             gst_object_unref( GST_OBJECT( bus ) );
 
@@ -412,9 +412,9 @@ int GST_Player::gst_get_duration( double * seconds )
     return 0;
 }
 
-int GST_Player::gst_get_buffered_duration( GST_Player* mp, double* start_seconds, double* end_seconds )
+int GST_Player::gst_get_buffered_duration( double* start_seconds, double* end_seconds )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     CM( ud );
 
     *start_seconds = 0;
@@ -422,21 +422,21 @@ int GST_Player::gst_get_buffered_duration( GST_Player* mp, double* start_seconds
     return 0;
 }
 
-int GST_Player::gst_get_video_size( GST_Player* mp, int* width, int* height )
+int GST_Player::gst_get_video_size( int* width, int* height )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
 
     if ( !( ud->media_type & TP_MEDIA_TYPE_VIDEO ) ) return TP_MEDIAPLAYER_ERROR_NA;
 
-    *width = ud->video_width;
+    *width  = ud->video_width;
     *height = ud->video_height;
 
     return 0;
 }
 
-int GST_Player::gst_get_media_type( GST_Player* mp, int* type )
+int GST_Player::gst_get_media_type( int * type )
 {
-    USERDATA( mp );
+    UserData * ud = ( UserData * ) user_data;
     *type = ud->media_type;
     return 0;
 }

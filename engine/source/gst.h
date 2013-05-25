@@ -43,10 +43,10 @@ struct GST_Player
     int  gst_play                 ();
     int  gst_play_sound           ( const char * uri );
     int  gst_get_duration         ( double * seconds );
-    int  gst_load                 ( GST_Player * mp, const char * uri, const char * extra );
-    int  gst_get_buffered_duration( GST_Player * mp, double * start_seconds, double * end_seconds );
-    int  gst_get_video_size       ( GST_Player * mp, int * width, int * height );
-    int  gst_get_media_type       ( GST_Player * mp, int * type );
+    int  gst_load                 ( const char * uri, const char * extra );
+    int  gst_get_buffered_duration( double * start_seconds, double * end_seconds );
+    int  gst_get_video_size       ( int * width, int * height );
+    int  gst_get_media_type       ( int * type );
 
     int  gst_seek                 ( double seconds );
     int  gst_get_position         ( double * seconds );

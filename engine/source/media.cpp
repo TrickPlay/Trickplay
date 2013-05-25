@@ -191,7 +191,7 @@ int Media::load( const char* uri, const char* extra )
 
     tplog( "[%p] <- load('%s','%s')", mp, unescaped_uri , extra );
 
-    if ( int result = mp->gst_load( mp, unescaped_uri, extra ) )
+    if ( int result = mp->gst_load( unescaped_uri, extra ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         g_free( unescaped_uri );
@@ -349,7 +349,7 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
 
     tplog( "[%p] <- get_buffered_duration", mp );
 
-    if ( int result = mp->gst_get_buffered_duration( mp, start_seconds, end_seconds ) )
+    if ( int result = mp->gst_get_buffered_duration( start_seconds, end_seconds ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -377,7 +377,7 @@ int Media::get_video_size( int* width, int* height )
 
     tplog( "[%p] <- get_video_size", mp );
 
-    if ( int result = mp->gst_get_video_size( mp, width, height ) )
+    if ( int result = mp->gst_get_video_size( width, height ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
@@ -404,7 +404,7 @@ int Media::get_media_type( int* type )
 
     tplog( "[%p] <- get_media_type", mp );
 
-    if ( int result = mp->gst_get_media_type( mp, type ) )
+    if ( int result = mp->gst_get_media_type( type ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
         return result;
