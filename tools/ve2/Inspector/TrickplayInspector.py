@@ -757,9 +757,8 @@ class TrickplayInspector(QWidget):
                         self.preventChanges = True
                         db = QFontDatabase()
                         db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
-                        for family in db.families():
-                            print family, "***"
-
+                        #for family in db.families():
+                            #print family, "***"
 
                         fontDialog = QFontDialog()
                         fontDialog.setCurrentFont(defaultFont)
@@ -1402,7 +1401,8 @@ class TrickplayInspector(QWidget):
             self.cbStyle_textChanged = False
         else:
             self.sendData(self.getGid(), "style", self.style_name)
-        self.main._emulatorManager.repStInfo()
+        self.main._emulatorManager.getStInfo()
+        #self.main._emulatorManager.repStInfo()
 
     def selectionChanged(self, selected, deselected):
         """
