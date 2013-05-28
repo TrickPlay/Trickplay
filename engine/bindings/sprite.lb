@@ -61,12 +61,11 @@ struct SpriteBinding
 
         /* TODO: replace strcmp with something safe */
         SpriteSheet::Sprite * s = sheet ? sheet->get_sprite( new_id ) : NULL;
+
         if ( s ) {
             if ( id && id_to_free ) g_free(id);
             id = (char *) (s->get_id());
             id_to_free = false;
-            sprite = s;
-            update_sprite();
         } else {
             if ( !id || strcmp(id, new_id) )
             {
@@ -75,6 +74,9 @@ struct SpriteBinding
             }
             id_to_free = true;
         }
+
+        sprite = s;
+        update_sprite();
     }
 
     void update_sprite()
