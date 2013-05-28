@@ -128,11 +128,11 @@ class Bitmap [[ Bitmap * ]]
                         read_tags = lua_toboolean( L , 3 );
                     }
                 }
-            }
-            else
-            {
-                (void)lb_checktable( L , 1 );
 
+                self = lb_construct( Bitmap , new Bitmap( L , src.c_str() , async , read_tags ) );
+            }
+            else if ( lua_type( L, 1 ) == LUA_TTABLE)
+            {
                 lua_getfield( L , 1 , "src" );
                 if ( lua_type( L , -1 ) == LUA_TSTRING )
                 {
@@ -153,9 +153,13 @@ class Bitmap [[ Bitmap * ]]
                     read_tags = lua_toboolean( L , -1 );
                 }
                 lua_pop( L , 1 );
-            }
 
-            self = lb_construct( Bitmap , new Bitmap( L , src.c_str() , async , read_tags ) );
+                self = lb_construct( Bitmap , new Bitmap( L , src.c_str() , async , read_tags ) );
+            }
+            else
+            {
+                g_warning("BAD BITMAP CONSTRUCTOR: EXPECTED TABLE AT '%s'", Util::where_am_i_lua(L).c_str());
+            }
         ]];
 
     ~Bitmap()

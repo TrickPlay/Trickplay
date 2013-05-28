@@ -332,6 +332,8 @@ struct UserData
 
     bool gc_tag( const gchar* comment );
 
+    lua_State* get_lua_state() { return L; }
+
 private:
 
     friend struct Handle;
