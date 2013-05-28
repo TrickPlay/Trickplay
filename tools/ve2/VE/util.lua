@@ -43,7 +43,7 @@ local uiElementName_map =
 }
 
 function util.getSelectedObjs()
-    local seleced_objs = {}
+    local selected_objs = {}
     for m,n in ipairs (screen.children) do
         if n.name and string.find(n.name, "border") ~= nil then 
             table.insert(selected_objs, n.name)
