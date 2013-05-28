@@ -230,12 +230,30 @@ global screen [[ClutterActor*]] actor , container
 
 
     # This doesn't seem to work
+*/
+
+    /*
+        # Function: get_object_at
+
+        *Arguments:*
+
+        x       -   The x position to find the object at
+        y       -   The y position to find the object at
+
+        *Returns:*
+
+        The topmost object at the specified position in the screen.  Be careful on scaled screens – the pixel positions of edges of objects may have rounding errors that cause unexpected "misses".
+    */
 
     udata get_object_at( double x , double y )
     [[
-        wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),CLUTTER_PICK_ALL,x,y));
+        // Adjust x and y for the screen's scale since we need x,y relative to the stage, not the screen
+        ClutterVertex on_screen = { x, y, 0 };
+        ClutterVertex on_stage;
+        clutter_actor_apply_transform_to_point(self, &on_screen, &on_stage);
+        ClutterUtil::wrap_concrete_actor(L,clutter_stage_get_actor_at_pos(CLUTTER_STAGE(App::get(L)->get_context()->get_stage()),CLUTTER_PICK_ALL,on_stage.x,on_stage.y));
     ]];
-    */
+
 
 
 /*

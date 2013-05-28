@@ -152,7 +152,7 @@ class TrickplayElementModel(QStandardItemModel):
         self.tpData = None
         self.getInspectorData()
 
-    def insertElement(self, parent, data, parentData, screen):
+    def insertElement(self, parent, data, parentData, screen, afterTreeBuild=False):
         """
         Recursively add UI Elements to the tree
         """
@@ -207,7 +207,7 @@ class TrickplayElementModel(QStandardItemModel):
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)
-        #print "[VE] Inspector :", node['gid'], node['name']
+        #print "[VE] Inspector :", node['gid'], node['name'], "Under ", parentData['name']
 
         # Add a checkbox for everything but screen
         if not screen:
@@ -246,7 +246,9 @@ class TrickplayElementModel(QStandardItemModel):
                 partner = tempnode.partner()
                 partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
                 partner.setData("", Qt.DisplayRole)
+                self.inspector.main._emulatorManager.contentMoveBlock = True
                 node.appendRow([tempnode, partner])
+                self.inspector.main._emulatorManager.contentMoveBlock = False
                 for c in range (0, len(tabs[r]['contents']['children'])) :
                     self.insertElement(tempnode, tabs[r]['contents']['children'][c], data, False)
 
@@ -263,7 +265,9 @@ class TrickplayElementModel(QStandardItemModel):
                 partner = tempnode.partner()
                 partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
                 partner.setData("", Qt.DisplayRole)
+                self.inspector.main._emulatorManager.contentMoveBlock = True
                 node.appendRow([tempnode, partner])
+                self.inspector.main._emulatorManager.contentMoveBlock = False
                 for c in range (0, len(cells[0])) :
                     if type(cells[r][c]) == dict:
                         self.insertElement(tempnode, cells[r][c], data, False)
@@ -273,7 +277,9 @@ class TrickplayElementModel(QStandardItemModel):
                         partner = emptynode.partner()
                         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
                         partner.setData("", Qt.DisplayRole)
+                        self.inspector.main._emulatorManager.contentMoveBlock = True
                         tempnode.appendRow([emptynode, partner])
+                        self.inspector.main._emulatorManager.contentMoveBlock = False
 
         # Element has no cells
         except KeyError:
@@ -306,7 +312,8 @@ class TrickplayElementModel(QStandardItemModel):
             for i in range(len(children)-1, -1, -1):
                 self.insertElement(node, children[i], data, False)
                 # keep the tree information :)
-                self.node = node
+                if not afterTreeBuild :
+                    self.node = node
 
         # Element has no children
         except KeyError:
