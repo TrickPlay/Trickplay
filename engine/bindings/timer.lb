@@ -3,6 +3,7 @@ module timer;
 [[
 #include "glib.h"
 #include "common.h"
+#include "util.h"
 
 /*
     You can create a timer in two ways:
@@ -283,7 +284,10 @@ void timer::start( UserData * ud )
         return;
 
     if (interval<=0)
+    {
+        g_warning("Will not start timer that has no interval set, at '%s'", Util::where_am_i_lua(ud->get_lua_state()).c_str());
         return;
+    }
 
     source = g_timeout_source_new( interval );
 

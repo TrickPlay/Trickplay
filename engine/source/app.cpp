@@ -882,9 +882,7 @@ App* App::load( TPContext* context, const App::Metadata& md, const LaunchInfo& l
 
 int App::lua_panic_handler( lua_State* L )
 {
-    g_critical( "%s", String( 60, '=' ).c_str() );
     g_critical( "LUA PANIC : %s", lua_tostring( L, -1 ) );
-    g_critical( "%s", String( 60, '=' ).c_str() );
 
     throw LUA_ERRRUN;
 }

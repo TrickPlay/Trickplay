@@ -226,6 +226,12 @@ int World::create_body( int element , int properties , const char* metatable )
 
     clutter_actor_get_size( actor , & width , & height );
 
+    if(width * height < FLT_EPSILON)
+    {
+        g_critical("CANNOT CREATE PHYSICS BODY ON UIELEMENT THAT IS SO SMALL AT %s", Util::where_am_i_lua(L).c_str());
+        return 0;
+    }
+
     //.........................................................................
     // Move the anchor point to the center of the actor. This doesn't change
     // its position relative to its parent.

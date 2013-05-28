@@ -185,6 +185,7 @@ function editor.group()
     blockReport = false
 
 	input_mode = hdr.S_SELECT
+	uiGroup.size = {math.floor(uiGroup.w),math.floor(uiGroup.h)}
 
     return uiGroup
 end

@@ -757,9 +757,8 @@ class TrickplayInspector(QWidget):
                         self.preventChanges = True
                         db = QFontDatabase()
                         db.addApplicationFont("/home/hjkim/code/trickplay/resources/fonts/GraublauWeb/GraublauWeb.otf")
-                        for family in db.families():
-                            print family, "***"
-
+                        #for family in db.families():
+                            #print family, "***"
 
                         fontDialog = QFontDialog()
                         fontDialog.setCurrentFont(defaultFont)
@@ -1402,7 +1401,8 @@ class TrickplayInspector(QWidget):
             self.cbStyle_textChanged = False
         else:
             self.sendData(self.getGid(), "style", self.style_name)
-        self.main._emulatorManager.repStInfo()
+        self.main._emulatorManager.getStInfo()
+        #self.main._emulatorManager.repStInfo()
 
     def selectionChanged(self, selected, deselected):
         """
@@ -1657,7 +1657,7 @@ class TrickplayInspector(QWidget):
         theData = item.TPJSON()
         self.main._emulatorManager.contentMoveBlock = True
         pItem.removeRow(item.row()) # cause to send _VE_.deselectUIElement()
-        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False)
+        self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False, True)
         self.main._emulatorManager.contentMoveBlock = False
         self.ui.inspector.expandAll()
 
@@ -1673,7 +1673,7 @@ class TrickplayInspector(QWidget):
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
 
             self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
-            item[str(pItem.whatsThis(0))] = tValue
+            #item[str(pItem.whatsThis(0))] = tValue
         else :
             theItem = self.search(self.getGid(), 'gid')
             if self.getType() == "Tab":

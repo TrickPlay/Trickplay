@@ -165,6 +165,7 @@ _VE_.contentMove = function(newChildGid, newParentGid, lmRow, lmCol, lmChild,lmP
             end 
         end 
 		newChild.group_position = {0,0,0}
+		newChild.position = {0,0,0}
         newChild.is_in_group = false
         newChild.parent_group = nil
         newChild.reactive = true
@@ -656,7 +657,6 @@ _VE_.setUIInfo = function(gid, property, value, n)
     elseif property == "anchor_point" then 
         ax = table.remove(value, 1)
         ay = table.remove(value, 1) 
-        print (ax, ay, "&&&")
         uiInstance:move_anchor_point(ax, ay)
 	    screen_ui.selected(uiInstance) 
     elseif n ~= nil then 
@@ -666,6 +666,7 @@ _VE_.setUIInfo = function(gid, property, value, n)
         uiInstance[property] = value 
 	    screen_ui.selected(uiInstance) 
     end 
+    _VE_.repUIInfo(uiInstance)
 end 
 
 -- REPORT 
