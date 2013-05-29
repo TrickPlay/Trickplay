@@ -598,12 +598,12 @@ protected:
         /* Add spritesheet uri */
         ns_detail = ( sheet && strlen( sheet->get_json_uri() ) > 0 )
                   ? String( SAFE_ANSI_COLOR_FG_WHITE )
-                    + String( "sheet = \"" )
+                    + String( " sheet = \"" )
                     + sheet->get_json_uri()
                     + String( "\"," )
                   : String( SAFE_ANSI_COLOR_RESET ) + "]";
 
-        g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s [ %s%s",
+        g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s [%s%s",
             CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
             clutter_actor_has_key_focus( actor ) ? "> " : "  ",
             String( indent, ' ' ).c_str(),
