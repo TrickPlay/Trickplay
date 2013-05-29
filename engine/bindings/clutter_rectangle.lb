@@ -7,6 +7,7 @@ module clutter_rectangle;
 #include "clutter_util.h"
 ]]
 
+
 /***************************************
     Class: Rectangle
 
@@ -23,8 +24,20 @@ class Rectangle [[ClutterActor*]] actor
             // We do this to avoid triggering the toggle ref a bunch of
             // times during construction.
 
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
+
+            ClutterLayoutManager *grid = clutter_grid_layout_new();
+            clutter_actor_set_layout_manager (self, grid);
+
+            ClutterActor *inner = clutter_actor_new();
+            clutter_actor_set_x_expand (inner, TRUE);
+            clutter_actor_set_y_expand (inner, TRUE);
+
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 0, 3, 1); // Padding on top
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), inner, 1, 1, 1, 1);
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 2, 3, 1); // Padding on bottom
+
             ClutterUtil::set_props_from_table(L,props);
             g_object_unref( self );
         ]];
@@ -59,13 +72,31 @@ class Rectangle [[ClutterActor*]] actor
     table color
         [[
             ClutterColor color;
-            clutter_rectangle_get_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+            clutter_actor_get_background_color(inner, &color);
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+
+            // Need to deal with easing state in case this is an animation -- just copy from parent
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_save_easing_state( inner );
+                clutter_actor_set_easing_duration( inner, clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_delay( inner, clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_mode( inner, clutter_actor_get_easing_mode(self) );
+            }
+
+            clutter_actor_set_background_color(inner, &color);
+
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_restore_easing_state( inner );
+            }
+
         ]];
 
 /***************************************
@@ -79,8 +110,13 @@ class Rectangle [[ClutterActor*]] actor
 */
 
     int border_width
-        [[border_width=clutter_rectangle_get_border_width(CLUTTER_RECTANGLE(self));]]
-        [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
+        [[
+            border_width=clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)));
+        ]]
+        [[
+            clutter_grid_layout_set_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
+            clutter_grid_layout_set_row_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
+        ]];
 
 /***************************************
     Property: border_color
@@ -97,13 +133,13 @@ class Rectangle [[ClutterActor*]] actor
     table border_color
         [[
             ClutterColor color;
-            clutter_rectangle_get_border_color(CLUTTER_RECTANGLE(self),&color);
+            clutter_actor_get_background_color(self,&color);
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
+            clutter_actor_set_background_color(self,&color);
         ]];
 }
 
