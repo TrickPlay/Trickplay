@@ -1328,9 +1328,7 @@ void App::run_part2( const StringSet& allowed_names , RunCallback run_callback )
 
     if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
     {
-        g_critical( "%s", String( 60, '=' ).c_str() );
         g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
-        g_critical( "%s", String( 60, '=' ).c_str() );
 
         lua_pop( L , lua_gettop( L ) - top );
 
