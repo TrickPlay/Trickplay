@@ -69,7 +69,6 @@ class NineSlice [[ClutterActor*]] actor
             ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
 
             GObject * layout = nineslice_layout_new();
-            clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
 
             g_signal_connect_data( G_OBJECT( layout ), "load-finished",
                 (GCallback) NineSlice_on_loaded,
