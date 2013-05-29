@@ -408,6 +408,7 @@ class TrickplayEmulatorManager(QWidget):
                         try :
                             if self.main.menuCommand == "newProject" :
                                 self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
+                                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"\")")
                                 self.main.menuCommand = ""
                         except:
                             pass
