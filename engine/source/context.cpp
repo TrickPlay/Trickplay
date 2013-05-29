@@ -405,7 +405,9 @@ gboolean TPContext::escape_handler( ClutterActor* actor, ClutterEvent* event, gp
 
         TPContext* context = ( TPContext* ) _context;
 
-        if ( ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
+        // Only exit if the window was closed, or if this is not the first app, or if first_app_exits is true
+
+        if ( event->any.type == CLUTTER_DELETE || ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
         {
             context->close_app();
             return TRUE;
