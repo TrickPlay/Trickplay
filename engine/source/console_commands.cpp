@@ -595,11 +595,14 @@ protected:
 
         SpriteSheet * sheet = nineslice->get_sheet();
 
+        if ( !sheet ) return;
+
         /* Add spritesheet uri */
         if ( strlen( sheet->get_json_uri() ) > 0 )
         {
             extra = String( indent + 4, ' ' ).c_str()
-                  + String( "[ " ) + SAFE_ANSI_COLOR_FG_YELLOW
+                  + String( "[ " )
+                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
                   + String( "sheet=\"" )
                   + sheet->get_json_uri()
                   + String( "\"" );
@@ -644,7 +647,7 @@ protected:
             if ( nineslice->get_id(i).empty() ) continue;
 
             extra += String( indent + 11 - extra.length() - strlen( keys[i] ), ' ' ).c_str()
-                  + String(SAFE_ANSI_COLOR_FG_YELLOW)
+                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
                   + String(keys[i])
                   + "=\""
                   + nineslice->get_layout()->priv->slices[i].sprite->get_id()
