@@ -264,11 +264,8 @@ SpriteSheet::SpriteSheet() : app( NULL ), extra( G_OBJECT( g_object_new( G_TYPE_
 {
     g_object_set_data( extra, "tp-sheet", this );
 
-    static bool init( true );
-
-    if ( init )
+    if ( g_signal_lookup( "load-finished", G_TYPE_OBJECT ) == 0 )
     {
-        init = false;
         g_signal_new( "load-finished", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
                 0, 0, 0, 0, G_TYPE_NONE, 1, G_TYPE_POINTER );
     }
