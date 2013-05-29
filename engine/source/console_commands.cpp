@@ -13,8 +13,9 @@
 #include "versions.h"
 #include "images.h"
 #include "sysdb.h"
-
+#include "spritesheet.h"
 #include "ansi_color.h"
+#include "nineslice.h"
 
 namespace ConsoleCommands
 {
@@ -584,14 +585,92 @@ protected:
         std::map< String, std::list<ClutterActor*> > actors_by_type;
     };
 
-    static void dump_actors( ClutterActor* actor, gpointer dump_info )
+    static void dump_nineslice( ClutterActor* actor, guint indent )
     {
-        if ( !actor )
+        if ( !actor ) return;
+
+        String extra;
+
+        NineSliceBinding * nineslice = ( NineSliceBinding * ) g_object_get_data( G_OBJECT( actor ), "tp-binding" );
+
+        SpriteSheet * sheet = nineslice->get_sheet();
+
+        if ( !sheet ) return;
+
+        /* Add spritesheet uri */
+        if ( strlen( sheet->get_json_uri() ) > 0 )
         {
+            extra = String( indent + 4, ' ' ).c_str()
+                  + String( "[ " )
+                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
+                  + String( "sheet=\"" )
+                  + sheet->get_json_uri()
+                  + String( "\"" );
+        }
+
+        /* add 9 ids */
+
+        gboolean all_empty = true;
+        int last_nonempty = -1;
+        for ( int i = 8; i >= 0 && all_empty; i-- )
+        {
+            if ( !nineslice->get_id(i).empty() )
+            {
+                all_empty = false;
+                last_nonempty = i;
+            }
+        }
+
+        if ( all_empty )
+        {
+            if ( !extra.empty() )
+            {
+                g_info( "%s%s ]", extra.c_str()
+                                , CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE );
+            }
             return;
         }
 
-        DumpInfo* info = ( DumpInfo* )dump_info;
+        if ( extra.empty() )
+        {
+            extra = String( "[ " );
+        }
+        else
+        {
+            g_info( "%s,%s", extra.c_str()
+                           , CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE );
+            extra = String("");
+        }
+
+        for ( int i = 0; i < 9; i++ )
+        {
+            if ( nineslice->get_id(i).empty() ) continue;
+
+            extra += String( indent + 11 - extra.length() - strlen( keys[i] ), ' ' ).c_str()
+                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
+                  + String(keys[i])
+                  + "=\""
+                  + nineslice->get_layout()->priv->slices[i].sprite->get_id()
+                  + "\"";
+
+            if ( i == last_nonempty )
+            {
+                g_info("%s%s ]", extra.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+            }
+            else
+            {
+                g_info("%s,%s", extra.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+            }
+
+            extra = String("");
+        }
+    }
+
+    static void dump_actors( ClutterActor* actor, gpointer dump_info )
+    {
+        if ( !actor ) return;
+
+        DumpInfo* info = ( DumpInfo* ) dump_info;
 
         ClutterGeometry g;
 
@@ -639,13 +718,17 @@ protected:
                 extra = String( "[src='" ) + src + "']";
             }
         }
-        else if ( CLUTTER_IS_RECTANGLE( actor ) )
+        else if ( !g_strcmp0(type, "Rectangle") )
         {
-            ClutterColor color;
+            ClutterColor color, border_color;
+            guint border_width;
 
-            clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &color );
+            clutter_actor_get_background_color( clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager( actor )), 1, 1), &color );
+            clutter_actor_get_background_color(actor, &border_color);
+            border_width = clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(actor)));
 
-            gchar* c = g_strdup_printf( "[color=(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha );
+            gchar* c = g_strdup_printf( "[color=(%u,%u,%u,%u), border=%ux(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha,
+                                                                                            border_width, border_color.red, border_color.green, border_color.blue, border_color.alpha );
 
             extra = c;
 
@@ -729,8 +812,17 @@ protected:
                     extra.empty() ? "" : extra.c_str(),
                     SAFE_ANSI_COLOR_RESET );
 
-        if ( CLUTTER_IS_CONTAINER( actor ) )
-    {
+        /* Detailed information for Nineslice. Skip information about children
+         */
+        if ( g_strcmp0(type, "Nineslice") == 0 )
+        {
+            dump_nineslice( actor, info->indent );
+        }
+
+        if ( CLUTTER_IS_CONTAINER( actor ) &&
+              g_strcmp0(type, "Nineslice") && // Ignore these types and do not recurse into them
+              g_strcmp0(type, "Rectangle"))
+        {
             info->indent += 2;
             ClutterActorIter iter;
             ClutterActor* child;
@@ -801,7 +893,7 @@ protected:
         }
         else
         {
-            dump_actors( first , & info );
+            dump_actors( first, & info );
 
             g_info( "" );
             g_info( "SUMMARY" );
