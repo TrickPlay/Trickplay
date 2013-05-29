@@ -82,9 +82,9 @@ class NineSlice [[ClutterActor*]] actor
                 get_binding(self)->set_all_sprites();
             }
 
-            g_signal_connect_data( G_OBJECT( layout ), "load-finished",
+            g_signal_connect( G_OBJECT( layout ), "load-finished",
                 (GCallback) NineSlice_on_loaded,
-                L, 0, GConnectFlags( 0 ) );
+                L );
 
             g_object_unref( self );
         ]];
