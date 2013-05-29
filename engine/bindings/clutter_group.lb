@@ -153,6 +153,7 @@ class Group [[ClutterActor*]] actor , container
     Group(table props = 0 )
         [[
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
+            clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY );
             ClutterUtil::initialize_actor(L,self,GROUP_METATABLE);
             ClutterUtil::set_props_from_table(L,props);
             g_object_unref( self );
