@@ -1054,10 +1054,14 @@ _VE_.black = function()
     BG_IMAGE_import.opacity = 0
 end
 
-_VE_.backgroundImage = function(path)
+_VE_.backgroundImage = function(dir_path, image_path)
     _VE_.black()
-    BG_IMAGE_import.src = path  
-    BG_IMAGE_import.opacity = 255  
+    editor_lb:change_app_path(dir_path)
+    BG_IMAGE_import.src = image_path  
+    if BG_IMAGE_import.loaded == true then
+        BG_IMAGE_import.opacity = 255  
+        editor_lb:change_app_path(current_dir)
+    end
 end
 
 _VE_.smallGrid = function()
