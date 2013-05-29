@@ -597,11 +597,10 @@ protected:
 
         /* Add spritesheet uri */
         ns_detail = ( sheet && strlen( sheet->get_json_uri() ) > 0 )
-                  ? String( SAFE_ANSI_COLOR_FG_WHITE )
-                    + String( " sheet = \"" )
+                  ? String( " sheet = \"" )
                     + sheet->get_json_uri()
                     + String( "\"," )
-                  : String( SAFE_ANSI_COLOR_RESET ) + "]";
+                  : String( "]" );
 
         g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s [%s%s",
             CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
@@ -636,14 +635,11 @@ protected:
 
         if ( all_empty ) return;
 
-        ns_detail = String("");
-
         for ( int i = 0; i < 9; i++ )
         {
             if ( nineslice->get_id(i).empty() ) continue;
 
-            ns_detail += String( indent + 4, ' ' ).c_str()
-                      + String( SAFE_ANSI_COLOR_FG_WHITE )
+            ns_detail = String( indent + 4, ' ' ).c_str()
                       + String(keys[i])
                       + String( 3 - strlen( keys[i] ), ' ' ).c_str()
                       + "= \""
@@ -652,14 +648,12 @@ protected:
 
             if ( i == last_nonempty )
             {
-                g_info("%s%s ]", ns_detail.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+                g_info( "%s ]", ns_detail.c_str() );
             }
             else
             {
-                g_info("%s,%s", ns_detail.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+                g_info( "%s,", ns_detail.c_str() );
             }
-
-            ns_detail = String("");
         }
     }
 
