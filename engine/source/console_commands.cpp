@@ -715,13 +715,17 @@ protected:
                 extra = String( "[src='" ) + src + "']";
             }
         }
-        else if ( CLUTTER_IS_RECTANGLE( actor ) )
+        else if ( !g_strcmp0(type, "Rectangle") )
         {
-            ClutterColor color;
+            ClutterColor color, border_color;
+            guint border_width;
 
-            clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &color );
+            clutter_actor_get_background_color( clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager( actor )), 1, 1), &color );
+            clutter_actor_get_background_color(actor, &border_color);
+            border_width = clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(actor)));
 
-            gchar* c = g_strdup_printf( "[color=(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha );
+            gchar* c = g_strdup_printf( "[color=(%u,%u,%u,%u), border=%ux(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha,
+                                                                                            border_width, border_color.red, border_color.green, border_color.blue, border_color.alpha );
 
             extra = c;
 
@@ -812,7 +816,9 @@ protected:
             dump_nineslice( actor, info->indent );
         }
 
-        if ( CLUTTER_IS_CONTAINER( actor ) )
+        if ( CLUTTER_IS_CONTAINER( actor ) &&
+              g_strcmp0(type, "Nineslice") && // Ignore these types and do not recurse into them
+              g_strcmp0(type, "Rectangle"))
         {
             info->indent += 2;
             ClutterActorIter iter;
@@ -821,10 +827,7 @@ protected:
 
             while ( clutter_actor_iter_next( &iter, &child ) )
             {
-                if ( g_strcmp0(type, "Nineslice") != 0 )
-                {
-                    dump_actors( child, info );
-                }
+                dump_actors( child, info );
             }
 
             info->indent -= 2;
