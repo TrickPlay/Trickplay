@@ -597,18 +597,18 @@ protected:
 
         /* Add spritesheet uri */
         ns_detail = ( sheet && strlen( sheet->get_json_uri() ) > 0 )
-                  ? String( SAFE_ANSI_COLOR_FG_YELLOW )
+                  ? String( SAFE_ANSI_COLOR_FG_WHITE )
                     + String( "sheet = \"" )
                     + sheet->get_json_uri()
                     + String( "\"," )
-                  : "]";
+                  : String( SAFE_ANSI_COLOR_RESET ) + "]";
 
         g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s [ %s%s",
             CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
             clutter_actor_has_key_focus( actor ) ? "> " : "  ",
             String( indent, ' ' ).c_str(),
             type,
-            name ? String( String( " " ) + SAFE_ANSI_COLOR_FG_YELLOW + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
+            name ? String( String( " " ) + SAFE_ANSI_COLOR_FG_WHITE + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
             actor,
             g.x,
             g.y,
@@ -643,7 +643,7 @@ protected:
             if ( nineslice->get_id(i).empty() ) continue;
 
             ns_detail += String( indent + 4, ' ' ).c_str()
-                      + String( SAFE_ANSI_COLOR_FG_YELLOW )
+                      + String( SAFE_ANSI_COLOR_FG_WHITE )
                       + String(keys[i])
                       + String( 3 - strlen( keys[i] ), ' ' ).c_str()
                       + "= \""
