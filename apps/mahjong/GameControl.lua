@@ -84,7 +84,7 @@ function(ctrl, router, ...)
 
     function ctrl:reset_game(number)
         --print("game resetting")
-        if not number then 
+        if not number then
             router:set_active_component(Components.GAME)
         end
 
@@ -117,10 +117,11 @@ function(ctrl, router, ...)
     local loops = 0
     function ctrl:shuffle_game()
         --print("game re-shuffling")
+        state:reset()
         state:shuffle()
         state:set_tile_tables()
         grid = state:get_grid()
-        
+
         -- check for at least one playable move
         local i = 0
         for _,__ in pairs(state:get_matching_tiles()) do
@@ -264,7 +265,7 @@ function(ctrl, router, ...)
                             * 180/math.pi
                     end
                     -- check against comparing tiles in the wrong direction
-                    if -1 == dir[1] and (tile.position[1] >= x 
+                    if -1 == dir[1] and (tile.position[1] >= x
                       or (angle and (angle < -60 or angle > 60))) then
                         -- dont compare
                     elseif 1 == dir[1] and (tile.position[1] <= x
@@ -337,11 +338,11 @@ function(ctrl, router, ...)
             pres:move_focus()
         end
     end
-    
+
     function ctrl:hide_focus()
         pres:hide_focus()
     end
-    
+
     function ctrl:restore_focus()
         pres:restore_focus()
     end
