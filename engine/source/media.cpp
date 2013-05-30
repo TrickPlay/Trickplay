@@ -12,11 +12,13 @@
 
 Media::Event* Media::Event::make( Type type, int code, const gchar* message, const gchar* value )
 {
-    Event* result = g_slice_new( Event );
-    result->type = type;
-    result->code = code;
+    Event* result   = g_slice_new( Event );
+
+    result->type    = type;
+    result->code    = code;
     result->message = message ? g_strdup( message ) : NULL;
-    result->value = value ? g_strdup( value ) : NULL;
+    result->value   = value ? g_strdup( value ) : NULL;
+
     return result;
 }
 
@@ -79,9 +81,7 @@ Media::~Media()
 
         check( TP_MEDIAPLAYER_ANY_STATE );
 
-        // Reset to return state to IDLE
-
-        reset();
+        reset(); // return state to IDLE
 
         g_object_unref( G_OBJECT( vt ) );
 
@@ -341,18 +341,9 @@ int Media::set_audio_volume( double _volume )
 {
     MPLOCK;
 
-    if ( _volume < 0.0 )
-    {
-        volume = 0.0;
-    }
-    else if ( _volume > 1.0 )
-    {
-        volume = 1.0;
-    }
-    else
-    {
-        volume = _volume;
-    }
+    if      ( _volume < 0.0 ) { volume = 0.0; }
+    else if ( _volume > 1.0 ) { volume = 1.0; }
+    else                      { volume = _volume; }
 
     ClutterMedia * cm = CLUTTER_MEDIA( vt );
 

@@ -8,7 +8,6 @@
 class Media
 {
   public:
-
     class Delegate // Delegate class to handle events
     {
       public:
@@ -20,10 +19,7 @@ class Media
 
     static Media* make( TPContext* context , Delegate* delegate, ClutterActor * actor ); // Constructing a media player
 
-    ~Media();
-
     // Functions called from Lua
-
     int get_state();
     void reset();
     int load( const char* uri, const char* extra );
@@ -46,35 +42,26 @@ class Media
 
     void add_delegate( Delegate* delegate );
     void remove_delegate( Delegate* delegate );
-
     const StringSet& get_valid_schemes() const { return schemes; }
 
     bool get_loop() { return loop; }
     gulong get_load_signal() { return load_signal; }
     void set_load_signal( gulong _load_signal ) { load_signal = _load_signal; }
 
+    ~Media();
+
   private:
+    // Constructor given a delegate (from make)
+    Media( TPContext*, Delegate*, ClutterActor* );
 
-    // The external callbacks. They push an event into the queue and post an
-    // idle source to process the event in the main thread.
-
-    void loaded();
-    void error( int code, const char* message );
-    void end_of_stream();
-    void tag_found( const char* name, const char* value );
+    Media()               { g_assert( FALSE ); } // Not allowed
+    Media( const Media& ) { g_assert( FALSE ); } // Not allowed
 
     void disconnect_loading_messages();
     void get_stream_information();
     int  gst_load( const char* uri, const char* extra );
 
-    // The external functions are friends
-
-    friend void tp_mediaplayer_loaded( Media* media );
-    friend void tp_mediaplayer_error( Media* media, int code, const char* message );
-    friend void tp_mediaplayer_end_of_stream( Media* media );
-    friend void tp_mediaplayer_tag_found( Media* media, const char* name, const char* value );
-
-    friend void loading_messages( GstBus* bus, GstMessage* message, Media* media );
+    void check( int valid_states ); // Checks whether the input state is valid
 
     struct Event // Structure to hold an event
     {
@@ -89,41 +76,26 @@ class Media
         gchar * value;
     };
 
-    void post_event( Event* event ); // Post an event and add an idle source to process it later
-
+    void post_event( Event* event );                 // Post an event, add an idle source to process later
     static gboolean process_events( gpointer data ); // Callback from the idle source to process events
+    void process_events();                           // Actually process the events
+    void clear_events();                             // Clear all pending events
 
-    void process_events(); // Actually process the events
+    // The external callbacks. They push an event into the queue and post an
+    // idle source to process the event in the main thread.
+    void loaded();
+    void error( int code, const char* message );
+    void end_of_stream();
+    void tag_found( const char* name, const char* value );
 
-    void clear_events(); // Clear all pending events
-
-    // Constructor given a wrapper and a delegate (from make)
-    Media( TPContext*, Delegate*, ClutterActor* );
-
-    // Not allowed
-    Media()               { g_assert( FALSE ); }
-    Media( const Media& ) { g_assert( FALSE ); }
-
-    // Checks the sanity of the wrapper and that the state is one of the valid
-    // states passed in.
-    void check( int valid_states );
-
+    // Privte member fields
     typedef std::set<Delegate*> DelegateSet;
-
     TPContext*      context;
     int             state;
-
-#ifndef GLIB_VERSION_2_32
-    GStaticRecMutex mutex;
-#else
-    GRecMutex       mutex;
-#endif
-
     GAsyncQueue*    queue;
     DelegateSet     delegates;
     StringPairList  tags;
     StringSet       schemes;
-
     ClutterActor*   vt;
     gulong          load_signal;
     gint            video_width;
@@ -132,6 +104,19 @@ class Media
     int             mute;
     bool            loop;
     double          volume;
+
+#ifndef GLIB_VERSION_2_32
+    GStaticRecMutex mutex;
+#else
+    GRecMutex       mutex;
+#endif
+
+    // External friend functions
+    friend void tp_mediaplayer_loaded( Media* media );
+    friend void tp_mediaplayer_error( Media* media, int code, const char* message );
+    friend void tp_mediaplayer_end_of_stream( Media* media );
+    friend void tp_mediaplayer_tag_found( Media* media, const char* name, const char* value );
+    friend void loading_messages( GstBus* bus, GstMessage* message, Media* media );
 };
 
 void gst_end_of_stream( ClutterMedia* cm, Media* media );
