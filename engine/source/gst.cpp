@@ -191,11 +191,10 @@ void get_stream_information( GST_Player* mp )
         }
     }
 
-    /*if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
+    if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
     {
-        GstElement* audio_sink = NULL;
-        g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
-        //GstElement* audio_sink = gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
+        //g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
+        GstElement* audio_sink = gst_element_factory_make( "autoaudiosink", NULL );
 
         if ( !audio_sink )
         {
@@ -203,10 +202,10 @@ void get_stream_information( GST_Player* mp )
         }
         else
         {
-            gst_object_unref( GST_OBJECT( audio_sink ) );
-            //g_object_set( G_OBJECT( pipeline ), "audio-sink", audio_sink, NULL );
+            //gst_object_unref( GST_OBJECT( audio_sink ) );
+            g_object_set( G_OBJECT( pipeline ), "audio-sink", audio_sink, NULL );
         }
-    }*/
+    }
 }
 
 //-----------------------------------------------------------------------------
