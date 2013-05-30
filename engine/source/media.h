@@ -66,21 +66,6 @@ class Media
     void disconnect_loading_messages();
     void get_stream_information();
     int  gst_load( const char* uri, const char* extra );
-    int  gst_play();
-    int  gst_seek( double seconds );
-    int  gst_pause();
-    int  gst_get_position( double * seconds );
-    int  gst_get_duration( double * seconds );
-    int  gst_get_buffered_duration( double* start_seconds, double* end_seconds );
-    int  gst_get_video_size( int* width, int* height );
-    int  gst_get_media_type( int * type );
-    int  gst_get_audio_volume( double* volume );
-    int  gst_set_audio_volume( double _volume );
-    int  gst_get_audio_mute( int* _mute );
-    int  gst_set_audio_mute( int _mute );
-    int  gst_get_loop_flag( bool* _loop );
-    int  gst_set_loop_flag( bool flag );
-    int  gst_play_sound( const char* uri );
 
     // The external functions are friends
 

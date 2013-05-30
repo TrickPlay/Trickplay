@@ -4,7 +4,6 @@ module media_module;
 
 #include "clutter_util.h"
 #include "tp-clutter.h"
-#include "gst.h"
 #include "media.h"
 #include "app.h"
 #include "context.h"

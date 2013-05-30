@@ -34,8 +34,6 @@ void Media::Event::destroy( Event* event )
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor )
 {
-    tplog( "[%p] <- constructor", this );
-
     if ( !actor )
     {
         tplog( "[%p]    FAILED TO CREATE CLUTTER GST VIDEO TEXTURE %d", this, TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER );
@@ -71,7 +69,7 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     g_signal_connect( actor, "eos", G_CALLBACK( gst_end_of_stream ), this );
     g_signal_connect( actor, "error", G_CALLBACK( gst_error ), this );
 
-    gst_set_audio_volume( 0.5 ); // Initialize volume
+    set_audio_volume( 0.5 ); // Initialize volume
 }
 
 Media::~Media()
@@ -110,7 +108,9 @@ void Media::check( int valid_states )
 int Media::get_state()
 {
     MPLOCK;
+
     check( TP_MEDIAPLAYER_ANY_STATE );
+
     return state;
 }
 
@@ -119,8 +119,6 @@ void Media::reset()
     MPLOCK;
 
     if ( state == TP_MEDIAPLAYER_IDLE ) return;
-
-    tplog( "MP[%p] <- reset", this );
 
     check( TP_MEDIAPLAYER_LOADING | TP_MEDIAPLAYER_PLAYING | TP_MEDIAPLAYER_PAUSED );
 
@@ -182,13 +180,9 @@ int Media::play()
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- play", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_play() )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
+    clutter_media_set_playing( cm, TRUE );
 
     state = TP_MEDIAPLAYER_PLAYING;
 
@@ -205,13 +199,11 @@ int Media::seek( double seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- seek(%f)", this, seconds );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_seek( seconds ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
+    if ( !clutter_media_get_can_seek( cm ) ) return 1;
+
+    clutter_media_set_progress( cm, seconds / clutter_media_get_duration( cm ) );
 
     return 0;
 }
@@ -226,13 +218,9 @@ int Media::pause()
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- pause", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_pause() )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
+    clutter_media_set_playing( cm, FALSE );
 
     state = TP_MEDIAPLAYER_PAUSED;
 
@@ -251,15 +239,9 @@ int Media::get_position( double* seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- get_position", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_get_position( seconds ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %f", this, *seconds );
+    * seconds = clutter_media_get_duration( cm ) * clutter_media_get_progress( cm );
 
     return 0;
 }
@@ -276,15 +258,9 @@ int Media::get_duration( double* seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- get_duration", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_get_duration( seconds ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %f", this, *seconds );
+    *seconds = clutter_media_get_duration( cm );
 
     return 0;
 }
@@ -302,15 +278,10 @@ int Media::get_buffered_duration( double* start_seconds, double* end_seconds )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- get_buffered_duration", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_get_buffered_duration( start_seconds, end_seconds ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %f,%f", this, *start_seconds, *end_seconds );
+    * start_seconds = 0;
+    * end_seconds   = clutter_media_get_duration( cm ) * clutter_media_get_buffer_fill( cm );
 
     return 0;
 }
@@ -328,15 +299,10 @@ int Media::get_video_size( int* width, int* height )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- get_video_size", this );
+    if ( !( media_type & TP_MEDIA_TYPE_VIDEO ) ) return TP_MEDIAPLAYER_ERROR_NA;
 
-    if ( int result = gst_get_video_size( width, height ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %d,%d", this, *width, *height );
+    *width  = video_width;
+    *height = video_height;
 
     return 0;
 }
@@ -353,147 +319,142 @@ int Media::get_media_type( int* type )
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
 
-    tplog( "[%p] <- get_media_type", this );
-
-    if ( int result = gst_get_media_type( type ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %d", this, *type );
+    *type = media_type;
 
     return 0;
 }
 
-int Media::get_audio_volume( double* volume )
+int Media::get_audio_volume( double* _volume )
 {
     MPLOCK;
 
-    g_assert( volume );
+    g_assert( _volume );
 
-    tplog( "[%p] <- get_audio_volume", this );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_get_audio_volume( volume ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %f", this, *volume );
-
-    if ( *volume < 0 )
-    {
-        *volume = 0;
-    }
-    else if ( *volume > 1 )
-    {
-        *volume = 1;
-    }
+    * _volume = mute ? volume : clutter_media_get_audio_volume( cm );
 
     return 0;
 }
 
-int Media::set_audio_volume( double volume )
+int Media::set_audio_volume( double _volume )
 {
     MPLOCK;
 
-    if ( volume < 0 )
+    if ( _volume < 0.0 )
     {
-        volume = 0;
+        volume = 0.0;
     }
-    else if ( volume > 1 )
+    else if ( _volume > 1.0 )
     {
-        volume = 1;
+        volume = 1.0;
+    }
+    else
+    {
+        volume = _volume;
     }
 
-    tplog( "[%p] <- set_audio_volume(%f)", this, volume );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_set_audio_volume( volume ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
+    if ( !mute ) clutter_media_set_audio_volume( cm, volume );
 
     return 0;
 }
 
-int Media::get_audio_mute( int* mute )
+int Media::get_audio_mute( int* _mute )
 {
     MPLOCK;
 
-    g_assert( mute );
+    g_assert( _mute );
 
-    tplog( "[%p] <- get_audio_mute", this );
-
-    if ( int result = gst_get_audio_mute( mute ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %d", this, *mute );
+    * _mute = mute;
 
     return 0;
 }
 
-int Media::set_audio_mute( int mute )
+int Media::set_audio_mute( int _mute )
 {
     MPLOCK;
 
     if ( mute != 0 ) mute = 1;
 
-    tplog( "[%p] <- set_audio_mute(%d)", this, mute );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_set_audio_mute( mute ) )
+    int old_mute = mute;
+
+    mute = _mute ? 1 : 0;
+
+    if ( old_mute != mute )
     {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
+        clutter_media_set_audio_volume( cm, mute ? 0 : volume );
     }
 
     return 0;
 }
 
-int Media::get_loop_flag( bool* loop )
+int Media::get_loop_flag( bool* _loop )
 {
     MPLOCK;
 
-    g_assert( loop );
+    g_assert( _loop );
 
-    tplog( "[%p] <- get_loop_flag", this );
-
-    if ( int result = gst_get_loop_flag( loop ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
-    }
-
-    tplog( "[%p]    RETURNED %d", this, *loop );
+    * _loop = loop;
 
     return 0;
 }
 
-int Media::set_loop_flag( bool loop )
+int Media::set_loop_flag( bool _loop )
 {
     MPLOCK;
 
-    tplog( "[%p] <- set_loop_flag(%d)", this, loop );
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
 
-    if ( int result = gst_set_loop_flag( loop ) )
+    loop = _loop;
+
+    int result = loop && !clutter_media_get_can_seek( cm );
+    if ( result )
     {
         g_warning( "MP[%p]    FAILED %d. Loop mode is not supported", this, result );
-        return result;
     }
 
-    return 0;
+    return result;
 }
 
 int Media::play_sound( const char* uri )
 {
-    if ( int result = gst_play_sound( uri ) )
+    ClutterMedia * cm = CLUTTER_MEDIA( vt );
+
+#if (CLUTTER_GST_MAJOR_VERSION < 1)
+    GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#else
+    GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+#endif
+
+    GstElement* audio_sink = NULL;
+    g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
+
+    if ( !audio_sink )
     {
-        g_warning( "MP[%p]    FAILED %d", this, result );
-        return result;
+        g_warning( "MP[%p]    FAILED %d", this, 2 );
+        return 2;
+    }
+
+    GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( audio_sink ) );
+
+    g_object_set( G_OBJECT( audio_sink ), "uri", uri, NULL );
+
+    gst_bus_add_signal_watch( bus );
+
+    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
+    g_signal_connect_object( bus, "message::eos",    G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
+
+    gst_object_unref( GST_OBJECT( bus ) );
+    gst_object_unref( GST_OBJECT( audio_sink ) );
+
+    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( audio_sink, GST_STATE_PLAYING ) )
+    {
+        g_warning( "MP[%p]    FAILED %d", this, 2 );
+        return 2;
     }
 
     return 0;
@@ -630,17 +591,6 @@ void Media::remove_delegate( Delegate* delegate )
 
     MPLOCK;
     delegates.erase( delegate );
-}
-
-int Media::gst_set_audio_volume( double _volume )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    volume = _volume;
-
-    if ( !mute ) clutter_media_set_audio_volume( cm, volume );
-
-    return 0;
 }
 
 void Media::disconnect_loading_messages()
@@ -897,170 +847,6 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
     g_value_unset( &original_value );
 }
 
-int Media::gst_play()
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    clutter_media_set_playing( cm, TRUE );
-
-    return 0;
-}
-
-int Media::gst_seek( double seconds )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    if ( !clutter_media_get_can_seek( cm ) ) return 1;
-
-    clutter_media_set_progress( cm, seconds / clutter_media_get_duration( cm ) );
-
-    return 0;
-}
-
-int Media::gst_pause()
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    clutter_media_set_playing( cm, FALSE );
-    return 0;
-}
-
-int Media::gst_get_position( double * seconds )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    *seconds = clutter_media_get_duration( cm ) * clutter_media_get_progress( cm );
-
-    return 0;
-}
-
-int Media::gst_get_duration( double * seconds )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    *seconds = clutter_media_get_duration( cm );
-    return 0;
-}
-
-int Media::gst_get_buffered_duration( double* start_seconds, double* end_seconds )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    *start_seconds = 0;
-    *end_seconds = clutter_media_get_duration( cm ) * clutter_media_get_buffer_fill( cm );
-    return 0;
-}
-
-int Media::gst_get_video_size( int* width, int* height )
-{
-    if ( !( media_type & TP_MEDIA_TYPE_VIDEO ) ) return TP_MEDIAPLAYER_ERROR_NA;
-
-    *width  = video_width;
-    *height = video_height;
-
-    return 0;
-}
-
-int Media::gst_get_media_type( int * type )
-{
-    *type = media_type;
-    return 0;
-}
-
-int Media::gst_get_audio_volume( double* _volume )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    * _volume = mute ? volume : clutter_media_get_audio_volume( cm );
-
-    return 0;
-}
-
-int Media::gst_get_audio_mute( int* _mute )
-{
-    * _mute = mute;
-
-    return 0;
-}
-
-int Media::gst_set_audio_mute( int _mute )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    int old_mute = mute;
-
-    mute = _mute ? 1 : 0;
-
-    if ( old_mute != mute )
-    {
-        if ( mute )
-        {
-            clutter_media_set_audio_volume( cm, 0 );
-        }
-        else
-        {
-            clutter_media_set_audio_volume( cm, volume );
-        }
-    }
-
-    return 0;
-}
-
-int Media::gst_get_loop_flag( bool* _loop )
-{
-    *_loop = loop;
-
-    return 0;
-}
-
-int Media::gst_set_loop_flag( bool flag )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-    loop = flag;
-
-    return flag && !clutter_media_get_can_seek( cm );
-}
-
-void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
-{
-    gst_element_set_state( playbin, GST_STATE_NULL );
-
-    gst_object_unref( GST_OBJECT( playbin ) );
-}
-
-int Media::gst_play_sound( const char* uri )
-{
-    ClutterMedia * cm = CLUTTER_MEDIA( vt );
-
-#if (CLUTTER_GST_MAJOR_VERSION < 1)
-    GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
-#else
-    GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
-#endif
-
-    GstElement* audio_sink = NULL;
-    g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
-
-    if ( !audio_sink ) return 2;
-
-    GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( audio_sink ) );
-
-    g_object_set( G_OBJECT( audio_sink ), "uri", uri, NULL );
-
-    gst_bus_add_signal_watch( bus );
-
-    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
-    g_signal_connect_object( bus, "message::eos",    G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
-
-    gst_object_unref( GST_OBJECT( bus ) );
-    gst_object_unref( GST_OBJECT( audio_sink ) );
-
-    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( audio_sink, GST_STATE_PLAYING ) ) return 2;
-
-    return 0;
-}
-
 //=============================================================================
 // External callbacks
 //=============================================================================
@@ -1120,4 +906,11 @@ void gst_error( ClutterMedia* cm, GError* error, Media* media )
 {
     tp_mediaplayer_error( media, error->code, error->message );
     clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+}
+
+void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
+{
+    gst_element_set_state( playbin, GST_STATE_NULL );
+
+    gst_object_unref( GST_OBJECT( playbin ) );
 }
