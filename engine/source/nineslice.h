@@ -31,7 +31,7 @@ void nineslice_layout_set_sprite( NineSliceLayout* layout, unsigned i, SpriteShe
 
 bool nineslice_layout_is_done( NineSliceLayout* layout );
 bool nineslice_layout_is_loaded( NineSliceLayout* layout );
-void nineslice_layout_signal_loaded_later( NineSliceLayout* layout );  // fires "load_finished" signal if true
+void nineslice_layout_signal_loaded_later( NineSliceLayout* layout );  // fires "load-finished" signal if true
 
 // There are 6 tile parameters (see nineslice.lb); set/get them individually or as an array
 
