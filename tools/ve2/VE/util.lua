@@ -427,16 +427,19 @@ end
 
 local function change_image_name (uiTypeStr)
     local imgFileName, i, j
-    i, j = string.find(uiTypeStr, ".png")
-        
-    if i ~= nil then 
-        imgFileName = string.sub(uiTypeStr, 1, i-1)
-    else 
-        i, j = string.find(uiTypeStr, ".gif")
+
+    for a, b  in pairs (hdr.imageExtensions) do 
+        i, j = string.find(uiTypeStr, b)
         if i ~= nil then 
             imgFileName = string.sub(uiTypeStr, 1, i-1)
-        end
+            break
+        end 
     end 
+
+    if imgFileName == nil then 
+        imgFileName = uiTypeStr
+    end 
+
     imgFileName = string.gsub(imgFileName, "/", "_S_")
     imgFileName = string.gsub(imgFileName, "%.", "_P_")
     imgFileName = string.gsub(imgFileName, "-", "_D_")

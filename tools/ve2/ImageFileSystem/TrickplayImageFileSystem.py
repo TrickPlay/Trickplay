@@ -236,19 +236,22 @@ class TrickplayImageFileSystem(QWidget):
         else:
             return True
 
-    def imageJsonItemSub(self, org, new) :
+    def imageJsonItemSub(self, org, new, createNewFolder = False) :
+
+        searchPrefix = '\"id\": \"'
+
         if self.main._emulatorManager.fscontentMoveBlock == True :
             return
         f = open(self.main.imageJsonFile)
         jsonFileContents = f.read()
 
         f = open(self.main.imageJsonFile, 'w')
-        f.write(jsonFileContents.replace(org, new))
+        f.write(jsonFileContents.replace(searchPrefix+org, searchPrefix+new))
         f.close()
 
-        if org and new :
+        if org and new and createNewFolder == False :
             self.main.sendLuaCommand("imageNameChange", '_VE_.imageNameChange("'+str(org)+'", "'+str(new)+'")')
-        self.imageCommand = "replace"
+            self.imageCommand = "replace"
         self.main.sendLuaCommand("buildVF", '_VE_.buildVF()')
 
     def dragNdrop(self, dragFrom, dropTo):
@@ -347,11 +350,11 @@ class TrickplayImageFileSystem(QWidget):
             #orgId = str(item.whatsThis(0))
             if self.isDir(orgId) == True:
                 orgId = "}\n\t],"
-                newFolderInfo = "},\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path+"\" }\n\t],"
+                newFolderInfo = "},\n\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+str(new_path)+"\" }\n\t],"
             else:
-                newFolderInfo = orgId+"\" },\n\t\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+new_path
+                newFolderInfo = str(orgId)+"\" },\n\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+str(new_path)
 
-            self.imageJsonItemSub(orgId, newFolderInfo)
+            self.imageJsonItemSub(orgId, newFolderInfo, True)
 
     def fileItemChanged(self, item, col):
         orgId = str(item.whatsThis(0))

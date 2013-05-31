@@ -41,6 +41,9 @@ hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", 
 hdr.uiContainersFixedContents = {"LayoutManager", "MenuButton"} 
 hdr.uiContainersChildrenContents = {"DialogBox", "ScrollPane", "Widget_Group", "ArrowPane"} 
 
+-- image file extension 
+hdr.imageExtensions = {".png", ".gif", ".tif", ".jpg", ".tiff", ".bmp"}
+
 -------------------------------
 -- UI Element Creation Function Map 
 -------------------------------

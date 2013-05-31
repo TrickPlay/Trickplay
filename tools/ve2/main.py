@@ -690,6 +690,7 @@ class MainWindow(QMainWindow):
             self._ifilesystem.ui.fileSystemTree.clear()
             self._ifilesystem.orgCnt = 0
             self._ifilesystem.idCnt = 0
+            self.imageJsonFile = str(os.path.join(self.path, "assets/images/images.json"))
 
             while self.inspector.ui.screenCombo.count() > 0 :
                 curIdx = self.inspector.ui.screenCombo.currentIndex()
