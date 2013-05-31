@@ -70,10 +70,6 @@ class NineSlice [[ClutterActor*]] actor
 
             GObject * layout = nineslice_layout_new();
 
-            g_signal_connect_data( G_OBJECT( layout ), "load-finished",
-                (GCallback) NineSlice_on_loaded,
-                L, 0, GConnectFlags( 0 ) );
-
             g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_LAYOUT( layout ), self ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
@@ -85,6 +81,10 @@ class NineSlice [[ClutterActor*]] actor
                 get_binding(self)->constructing = false;
                 get_binding(self)->set_all_sprites();
             }
+
+            g_signal_connect( G_OBJECT( layout ), "load-finished",
+                (GCallback) NineSlice_on_loaded,
+                L );
 
             g_object_unref( self );
         ]];

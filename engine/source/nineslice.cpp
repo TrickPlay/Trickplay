@@ -58,6 +58,12 @@ class SignalLoadedLater : public Action
 
 GObject* nineslice_layout_new()
 {
+    if ( g_signal_lookup( "load-finished", G_TYPE_OBJECT ) == 0 )
+    {
+        g_signal_new( "load-finished", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
+                0, 0, 0, 0, G_TYPE_NONE, 1, G_TYPE_POINTER );
+    }
+
     return ( GObject* ) g_object_new( TYPE_NINESLICE_LAYOUT, NULL );
 }
 

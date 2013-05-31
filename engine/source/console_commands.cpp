@@ -585,28 +585,40 @@ protected:
         std::map< String, std::list<ClutterActor*> > actors_by_type;
     };
 
-    static void dump_nineslice( ClutterActor* actor, guint indent )
+    static void dump_nineslice( ClutterActor* actor, guint indent, const gchar* type, const gchar* name, ClutterGeometry &g, String &details, String &extra )
     {
         if ( !actor ) return;
 
-        String extra;
+        String ns_detail;
 
         NineSliceBinding * nineslice = ( NineSliceBinding * ) g_object_get_data( G_OBJECT( actor ), "tp-binding" );
 
         SpriteSheet * sheet = nineslice->get_sheet();
 
-        if ( !sheet ) return;
-
         /* Add spritesheet uri */
-        if ( strlen( sheet->get_json_uri() ) > 0 )
-        {
-            extra = String( indent + 4, ' ' ).c_str()
-                  + String( "[ " )
-                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
-                  + String( "sheet=\"" )
-                  + sheet->get_json_uri()
-                  + String( "\"" );
-        }
+        ns_detail = ( sheet && strlen( sheet->get_json_uri() ) > 0 )
+                  ? String( " sheet = \"" )
+                    + sheet->get_json_uri()
+                    + String( "\"," )
+                  : String( "]" );
+
+        g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s [%s%s",
+            CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
+            clutter_actor_has_key_focus( actor ) ? "> " : "  ",
+            String( indent, ' ' ).c_str(),
+            type,
+            name ? String( String( " " ) + SAFE_ANSI_COLOR_FG_WHITE + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
+            actor,
+            g.x,
+            g.y,
+            g.width,
+            g.height,
+            details.empty() ? "" : details.c_str(),
+            extra.empty() ? "" : extra.c_str(),
+            ns_detail.c_str(),
+            SAFE_ANSI_COLOR_RESET );
+
+        if ( !sheet ) return;
 
         /* add 9 ids */
 
@@ -621,48 +633,27 @@ protected:
             }
         }
 
-        if ( all_empty )
-        {
-            if ( !extra.empty() )
-            {
-                g_info( "%s%s ]", extra.c_str()
-                                , CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE );
-            }
-            return;
-        }
-
-        if ( extra.empty() )
-        {
-            extra = String( "[ " );
-        }
-        else
-        {
-            g_info( "%s,%s", extra.c_str()
-                           , CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE );
-            extra = String("");
-        }
+        if ( all_empty ) return;
 
         for ( int i = 0; i < 9; i++ )
         {
             if ( nineslice->get_id(i).empty() ) continue;
 
-            extra += String( indent + 11 - extra.length() - strlen( keys[i] ), ' ' ).c_str()
-                  + String( SAFE_ANSI_COLOR_FG_YELLOW )
-                  + String(keys[i])
-                  + "=\""
-                  + nineslice->get_layout()->priv->slices[i].sprite->get_id()
-                  + "\"";
+            ns_detail = String( indent + 4, ' ' ).c_str()
+                      + String(keys[i])
+                      + String( 3 - strlen( keys[i] ), ' ' ).c_str()
+                      + "= \""
+                      + nineslice->get_layout()->priv->slices[i].sprite->get_id()
+                      + "\"";
 
             if ( i == last_nonempty )
             {
-                g_info("%s%s ]", extra.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+                g_info( "%s ]", ns_detail.c_str() );
             }
             else
             {
-                g_info("%s,%s", extra.c_str(), CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE);
+                g_info( "%s,", ns_detail.c_str() );
             }
-
-            extra = String("");
         }
     }
 
@@ -797,7 +788,11 @@ protected:
             details += " HIDDEN";
         }
 
-        g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s%s",
+        /* Detailed information for Nineslice. Skip information about children
+         */
+        if ( g_strcmp0(type, "Nineslice") )
+        {
+            g_info( "%s%s%s%s:%s [%p]: (%d,%d %ux%u)%s%s%s",
                 CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
                 clutter_actor_has_key_focus( actor ) ? "> " : "  ",
                 String( info->indent, ' ' ).c_str(),
@@ -811,12 +806,10 @@ protected:
                     details.empty() ? "" : details.c_str(),
                     extra.empty() ? "" : extra.c_str(),
                     SAFE_ANSI_COLOR_RESET );
-
-        /* Detailed information for Nineslice. Skip information about children
-         */
-        if ( g_strcmp0(type, "Nineslice") == 0 )
+        }
+        else
         {
-            dump_nineslice( actor, info->indent );
+            dump_nineslice( actor, info->indent, type, name, g, details, extra );
         }
 
         if ( CLUTTER_IS_CONTAINER( actor ) &&
