@@ -1021,6 +1021,7 @@ Style = setmetatable({},
                     text            = function() return text            end,
                     attributes      = function()
                         return {
+                            text        = text.attributes,
                             spritesheet = instance.spritesheet,
                             name        = instance.name,
                             type        = instance.type,
