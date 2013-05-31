@@ -44,7 +44,7 @@ class Media
     void remove_delegate( Delegate* delegate );
     const StringSet& get_valid_schemes() const { return schemes; }
 
-    bool get_loop() { return loop; }
+    gboolean get_loop() { return loop; }
     gulong get_load_signal() { return load_signal; }
     void set_load_signal( gulong _load_signal ) { load_signal = _load_signal; }
 
@@ -97,6 +97,8 @@ class Media
     StringPairList  tags;
     StringSet       schemes;
     ClutterActor*   vt;
+    GstElement*     pipeline;
+    ClutterMedia*   cm;
     gulong          load_signal;
     gint            video_width;
     gint            video_height;
@@ -112,11 +114,10 @@ class Media
 #endif
 
     // External friend functions
-    friend void tp_mediaplayer_loaded( Media* media );
-    friend void tp_mediaplayer_error( Media* media, int code, const char* message );
-    friend void tp_mediaplayer_end_of_stream( Media* media );
-    friend void tp_mediaplayer_tag_found( Media* media, const char* name, const char* value );
     friend void loading_messages( GstBus* bus, GstMessage* message, Media* media );
+    friend void gst_end_of_stream( ClutterMedia* cm, Media* media );
+    friend void gst_error( ClutterMedia* cm, GError* error, Media* media );
+    friend void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data );
 };
 
 void gst_end_of_stream( ClutterMedia* cm, Media* media );
