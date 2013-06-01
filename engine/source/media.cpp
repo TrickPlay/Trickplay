@@ -53,7 +53,8 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     context( c ),
     state( TP_MEDIAPLAYER_IDLE ),
     queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
-    vt( actor )
+    vt( actor ),
+    pipeline( NULL )
 {
 #ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
@@ -73,7 +74,7 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     g_signal_connect( actor, "eos", G_CALLBACK( gst_end_of_stream ), this );
     g_signal_connect( actor, "error", G_CALLBACK( gst_error ), this );
 
-    set_audio_volume( 0.5 ); // Initialize volume
+    set_audio_volume( 1.0 ); // Initialize volume
 }
 
 Media::~Media()
@@ -137,7 +138,7 @@ void Media::reset()
     // TODO: Reset truly forget all about the resource
 
     clutter_media_set_playing ( cm, FALSE );
-    clutter_media_set_progress( cm, 0 );
+    clutter_media_set_progress( cm, 0.0 );
 
     clear_events(); // Flush all pending events
 
@@ -587,11 +588,16 @@ void Media::disconnect_loading_messages()
 
 int Media::gst_load( const char* uri, const char* extra )
 {
+    if ( !pipeline )
+    {
 #if (CLUTTER_GST_MAJOR_VERSION < 1)
-    pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+        pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
 #else
-    pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
+        pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
 #endif
+    }
+
+    if ( !pipeline ) return 1;
 
     clutter_media_set_uri( cm, uri );
 

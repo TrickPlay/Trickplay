@@ -54,7 +54,7 @@ class MediaExtra : private Media::Delegate
         return instance;
     }
 
-    /*bool load_media()
+    /*bool load_media( char * uri, )
     {
         g_assert( L );
         g_assert( actor );
