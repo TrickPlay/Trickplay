@@ -746,9 +746,9 @@ Widget_SpriteSheet = function(parameters)
 
         error("Widget_SpriteSheet expects to receive a json file uri for its map",2)
 
-    elseif SpriteSheet_lookup[parameters.map] then
+    --elseif SpriteSheet_lookup[parameters.map] then
 
-        return SpriteSheet_lookup[parameters.map]
+        --return SpriteSheet_lookup[parameters.map]
 
     end
 
@@ -777,7 +777,8 @@ Widget_Sprite = function(parameters)
 
             if type(v) == "string" then
 
-                v = Widget_SpriteSheet{map=v}
+                v = SpriteSheet_lookup[v] or
+                    Widget_SpriteSheet{map=v}
 
             end
 
