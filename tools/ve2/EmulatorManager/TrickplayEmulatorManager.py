@@ -335,7 +335,6 @@ class TrickplayEmulatorManager(QWidget):
                                     self.unsavedChanges = True
                                 self.ve_ready = False
                             self.inspector.preventChanges = False
-                            return
                     elif luaCmd == "repUIInfo":
                         self.pdata = self.pdata[0]
                         if self.main.command == "openFile" :
@@ -387,7 +386,7 @@ class TrickplayEmulatorManager(QWidget):
                                     self.ve_ready = False
                             self.inspector.preventChanges = False
 
-                    if sdata is not None and self.pdata is not None:
+                    if sdata is not None and self.pdata is not None and self.main.command is not "getStInfo" :
                         self.inspector.preventChanges = True
                         self.contentMoveBlock = True
                         self.inspector.clearTree()
