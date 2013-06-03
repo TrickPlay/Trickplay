@@ -376,13 +376,11 @@ class Media [[ClutterActor*]] actor
 
     readonly bool has_video
         [[
-            int type;
             int result = MediaExtra::get( self, L )->get_player()
-                       ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                       ? MediaExtra::get( self, L )->get_player()->has_media_type( &has_video, true )
                        : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            has_video = result ? false : type & TP_MEDIA_TYPE_VIDEO;
-
+            if ( result ) has_video = false;
         ]];
 
     /*
@@ -397,13 +395,11 @@ class Media [[ClutterActor*]] actor
 
     readonly bool has_audio
         [[
-            int type;
             int result = MediaExtra::get( self, L )->get_player()
-                       ? MediaExtra::get( self, L )->get_player()->get_media_type( &type )
+                       ? MediaExtra::get( self, L )->get_player()->has_media_type( &has_audio, false )
                        : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            has_audio = result ? false : type & TP_MEDIA_TYPE_AUDIO;
-
+            if ( result ) has_audio = false;
         ]];
 
     /*
@@ -624,43 +620,6 @@ class Media [[ClutterActor*]] actor
             result = MediaExtra::get( self, L )->get_player()
                    ? MediaExtra::get( self, L )->get_player()->seek(seconds)
                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-
-            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
-        ]];
-
-    /*
-        Function: play_sound
-
-        The play_sound() function plays the audio sound contained in a specified URI.
-
-        The audio played by play_sound() does not abide by the mediaplayer variable's <volume> or <mute> properties. Also, it is not possible to <pause> playback of the audio, nor does play_sound() invoke any event handlers when the audio has completed or an error occurs. If an application requires any of these characteristics, it should use the <load> and <play> functions, instead.
-
-        Note: A "file:"-type URI is not supported for security reasons. An audio file stored in the application's app bundle can be loaded by specifying the file's path within the bundle's directory structure.
-
-        *Arguments:*
-
-            uri - string URI specifying the audio source to play
-
-        *Return Value:* Returns 0 if successful, else returns non-zero error value
-
-        *See Also:* the <load> and <play> functions
-    */
-
-    int play_sound()
-        [[
-            char * uri = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
-
-            if ( Media * mp = MediaExtra::get( self, L )->get_player() )
-            {
-                AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() );
-                result = resource
-                       ? mp->play_sound( resource.get_uri().c_str() )
-                       : TP_MEDIAPLAYER_ERROR_INVALID_URI;
-            }
-            else
-            {
-                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            }
 
             if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
         ]];

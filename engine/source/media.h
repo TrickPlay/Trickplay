@@ -30,14 +30,13 @@ class Media
     int get_duration( double* seconds );
     int get_buffered_duration( double* start_seconds, double* end_seconds );
     int get_video_size( int* width, int* height );
-    int get_media_type( int* type );
     int get_audio_volume( double* volume );
     int set_audio_volume( double volume );
     int get_audio_mute( int* mute );
     int set_audio_mute( int mute );
     int get_loop_flag( bool* loop );
     int set_loop_flag( bool mute );
-    int play_sound( const char* uri );
+    int has_media_type( bool * has_type, bool check_video );
     StringPairList get_tags();
 
     void add_delegate( Delegate* delegate );
@@ -58,6 +57,7 @@ class Media
     Media( const Media& ) { g_assert( FALSE ); } // Not allowed
 
     void disconnect_loading_messages();
+    int  get_media_type( int* type );
     void get_stream_information();
     int  gst_load( const char* uri, const char* extra );
 
@@ -124,6 +124,5 @@ void gst_end_of_stream( ClutterMedia* cm, Media* media );
 void gst_error( ClutterMedia* cm, GError* error, Media* media );
 void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data );
 void loading_messages( GstBus* bus, GstMessage* message, Media* media );
-void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin );
 
 #endif // _TRICKPLAY_MEDIA_H

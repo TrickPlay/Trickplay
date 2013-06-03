@@ -181,10 +181,18 @@ int Media::play()
 {
     MPLOCK;
 
-    if ( !( state & ( TP_MEDIAPLAYER_PAUSED ) ) )
+    int media_type;
+
+    if ( !( state & ( TP_MEDIAPLAYER_PAUSED ) ) || get_media_type( &media_type ) )
     {
         g_warning( "MP[%p]    play CALLED IN INVALID STATE", this );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
+    }
+
+    if ( !( media_type & TP_MEDIA_TYPE_VIDEO ) )
+    {
+        g_assert ( media_type & TP_MEDIA_TYPE_AUDIO );
+        clutter_actor_hide( CLUTTER_ACTOR( cm ) );
     }
 
     clutter_media_set_playing( cm, TRUE );
@@ -323,6 +331,21 @@ int Media::get_media_type( int* type )
     return 0;
 }
 
+int Media::has_media_type( bool * has_type, bool check_video )
+{
+    MPLOCK;
+
+    int type;
+
+    int ret = get_media_type( &type );
+
+    *has_type = ret
+              ? false
+              : type & ( check_video ? TP_MEDIA_TYPE_VIDEO : TP_MEDIA_TYPE_AUDIO );
+
+    return ret;
+}
+
 int Media::get_audio_volume( double* _volume )
 {
     MPLOCK;
@@ -400,41 +423,6 @@ int Media::set_loop_flag( bool _loop )
     }
 
     return result;
-}
-
-int Media::play_sound( const char* uri )
-{
-    GstElement* audio_sink = NULL;
-
-    g_assert( pipeline );
-
-    g_object_get( G_OBJECT( pipeline ), "audio-sink", &audio_sink, NULL );
-
-    if ( !audio_sink )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, 2 );
-        return 2;
-    }
-
-    GstBus* bus = gst_pipeline_get_bus( GST_PIPELINE( audio_sink ) );
-
-    g_object_set( G_OBJECT( audio_sink ), "uri", uri, NULL );
-
-    gst_bus_add_signal_watch( bus );
-
-    g_signal_connect_object( bus, "message::error" , G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
-    g_signal_connect_object( bus, "message::eos",    G_CALLBACK( play_sound_done ), audio_sink, G_CONNECT_AFTER );
-
-    gst_object_unref( GST_OBJECT( bus ) );
-    gst_object_unref( GST_OBJECT( audio_sink ) );
-
-    if ( GST_STATE_CHANGE_FAILURE == gst_element_set_state( audio_sink, GST_STATE_PLAYING ) )
-    {
-        g_warning( "MP[%p]    FAILED %d", this, 2 );
-        return 2;
-    }
-
-    return 0;
 }
 
 StringPairList Media::get_tags()
@@ -814,11 +802,4 @@ void gst_error( ClutterMedia* cm, GError* error, Media* media )
 {
     media->error( error->code, error->message );
     clutter_actor_hide( CLUTTER_ACTOR( cm ) );
-}
-
-void play_sound_done( GstBus* bus, GstMessage* message, GstElement* playbin )
-{
-    gst_element_set_state( playbin, GST_STATE_NULL );
-
-    gst_object_unref( GST_OBJECT( playbin ) );
 }
