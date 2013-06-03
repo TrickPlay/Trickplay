@@ -54,7 +54,7 @@ class TrickplayEmulatorManager(QWidget):
 
     def setUIInfo(self, gid, property, value, n=None):
         if n:
-            self.main.sendLuaCommand("setUIInfo","_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
+            self.main.sendLuaCommand("setUIInfo", "_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"','"+str(value)+"',"+str(n)+")")
         else:
             self.main.sendLuaCommand("setUIInfo", "_VE_.setUIInfo('"+str(gid)+"','"+str(property)+"',"+str(value)+")")
 

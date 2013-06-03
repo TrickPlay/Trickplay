@@ -279,7 +279,9 @@ function screen_ui.n_selected(obj)
 	 end 
 
 	-- remove red border
-    screen:remove(screen:find_child(obj.name.."border"))
+    while screen:find_child(obj.name.."border") ~= nil do
+        screen:remove(screen:find_child(obj.name.."border"))
+    end
 	-- remove red cross mark showing anchor point
 	screen:remove(screen:find_child(obj.name.."a_m"))
     obj.extra.ve_selected = false
