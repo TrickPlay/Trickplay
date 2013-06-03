@@ -165,6 +165,7 @@ class TrickplayImageFileSystem(QWidget):
         self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
         # id changed
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.fileItemChanged)
+        QObject.connect(self.ui.fileSystemTree, SIGNAL("itemClicked(QTreeWidgetItem*, int)"), self.itemClicked)
 
         # tool button handlers
         QObject.connect(self.ui.importButton, SIGNAL('clicked()'), self.importAsset)
@@ -355,6 +356,9 @@ class TrickplayImageFileSystem(QWidget):
                 newFolderInfo = str(orgId)+"\" },\n\t{ \"x\": 0, \"y\": 0, \"w\": 0, \"h\": 0, \"id\": \""+str(new_path)
 
             self.imageJsonItemSub(orgId, newFolderInfo, True)
+
+    def itemClicked(self, item, col):
+        print("item clicked")
 
     def fileItemChanged(self, item, col):
         orgId = str(item.whatsThis(0))

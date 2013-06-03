@@ -430,8 +430,8 @@ class TrickplayInspector(QWidget):
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
         self.currentScreenName = "Default"
-        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
-        self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
+        #self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
+        #self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
 
         self.ui.deleteScreen.clicked.connect(self.removeScreen)
         self.ui.screenCombo.currentIndexChanged.connect(self.screenChanged)
@@ -1361,13 +1361,19 @@ class TrickplayInspector(QWidget):
                 self.ui.screenCombo.removeItem(curIdx-1)
         else:
             # show the screen items
+            self.screenChanging = True
+            self.defaultLayer = None
+            
             for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked
                 if len(theLayer) > 0 :
                     theItem = self.search(str(theLayer), 'name')
                     if theItem is not None:
-
                         if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
+                            if self.defaultLayer is None :
+                                self.defaultLayer = theItem['gid']
+                                #print theItem['name'], "default layer"
+                                #print theItem['gid'], "default layer"
                             self.sendData(theItem['gid'], "is_visible", True)
                             theItem.setCheckState(Qt.Checked)
                         # the layer is not in this selected screen and if it is checked
@@ -1375,13 +1381,7 @@ class TrickplayInspector(QWidget):
                             self.sendData(theItem['gid'], "is_visible", False)
                             theItem.setCheckState(Qt.Unchecked)
 
-            """
-            if theItem :
-                self.curLayerGid = theItem['gid']
-                self.ui.inspector.setCurrentIndex(theItem.index())
-            """
-
-
+            self.screenChanging = False
 
 
     def styleActivated(self, index):
@@ -1451,7 +1451,14 @@ class TrickplayInspector(QWidget):
         for selIdx in selectedList :
             selItem = self.inspectorModel.itemFromIndex(selIdx)
             try :
-                self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
+                if self.screenChanging == False:
+                    self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(selItem.TPJSON()['gid'])+"',"+multiSelect+")")
+                else:
+                    #self.main.sendLuaCommand("selectUIElement", "_VE_.selectUIElement('"+str(self.defaultLayer)+"',"+multiSelect+")")
+                    self.main.sendLuaCommand("openInspector", "_VE_.openInspector('"+str(self.defaultLayer)+"', false)")
+                    #self.main.sendLuaCommand("openInspector", "_VE_.openInspector(screen.gid, false)")
+
+
             except:
                 pass
         deselectedList = deselected.indexes()

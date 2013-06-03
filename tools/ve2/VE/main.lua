@@ -652,7 +652,11 @@ _VE_.setUIInfo = function(gid, property, value, n)
         if value == false then 
             _VE_.deselectUIElement(uiInstance.gid, false)
         else
-            _VE_.selectUIElement(uiInstance.gid, false)
+            if string.find(uiInstance.name, "Layer") == nil then  
+                _VE_.selectUIElement(uiInstance.gid, false)
+            else 
+                _VE_.deselectUIElement(uiInstance.gid, false)
+            end
         end
     elseif property == "anchor_point" then 
         ax = table.remove(value, 1)
