@@ -7,7 +7,6 @@ module media_module;
 #include "media.h"
 #include "app.h"
 #include "context.h"
-#include "app_resource.h"
 
 // A thin shell to hold a real Media and act as its delegate. It owns a new media player
 class MediaExtra : private Media::Delegate
@@ -50,41 +49,18 @@ class MediaExtra : private Media::Delegate
         return instance;
     }
 
-    /*bool load_media( char * uri, )
+    void load_media()
     {
-        g_assert( L );
-        g_assert( actor );
+        if ( constructing ) return;
 
-        int result;
-
-        // Don't load when constructing. Not all properties may have been set yet 
-        if ( constructing ) return false;
-
-        tags = JSON::Object();
-
-        loaded_flag = false;
-
-        //.........................................................................
-        // Get the media source
         char * uri = ( char * ) g_object_get_data( G_OBJECT( actor ), "tp-src" );
-        if ( !uri ) return false;
 
-        if ( player )
-        {
-            AppResource resource = AppResource( L , uri , 0 , player->get_valid_schemes() );
+        if ( !uri || ( strlen( uri ) == 0 ) ) return;
 
-            result = resource ? player->load( resource.get_uri().c_str(), "" )
-                              : TP_MEDIAPLAYER_ERROR_INVALID_URI;
-        }   
-        else
-        {   
-            result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-        }   
+        int result = player ? player->load( L, uri , "" ) : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-        g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
-
-        return true;
-    }*/
+        if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+    }
 
     bool get_loaded_flag() { return loaded_flag; }
 
@@ -122,7 +98,6 @@ class MediaExtra : private Media::Delegate
     Global: mediaplayer
 
     The mediaplayer global variable enables a TrickPlay application to play and manage audio and video files. An extended code example that shows how to play a video is described in the <Run a Video in a TrickPlay Application> section.
-
 */
 
 class Media [[ClutterActor*]] actor
@@ -141,7 +116,7 @@ class Media [[ClutterActor*]] actor
 
             media->constructing = FALSE;
 
-            //media->load_media();
+            media->load_media();
 
             g_object_unref( self );
         ]];
@@ -190,7 +165,7 @@ class Media [[ClutterActor*]] actor
         [[
             g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free );
 
-            //MediaExtra::get( self, L )->load_media();
+            MediaExtra::get( self, L )->load_media();
         ]];
 
     /*
@@ -318,7 +293,7 @@ class Media [[ClutterActor*]] actor
             if ( result )
             {
                 lua_pushnil( L );
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
@@ -352,7 +327,7 @@ class Media [[ClutterActor*]] actor
             if ( result )
             {
                 lua_pushnil( L );
-                g_warning("AT %s", Util::where_am_i_lua(L).c_str());
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
             }
             else
             {
@@ -518,43 +493,6 @@ class Media [[ClutterActor*]] actor
         [[
             if (MediaExtra::get( self, L )->get_player())
                 MediaExtra::get( self, L )->get_player()->reset();
-        ]];
-
-    /*
-        Function: load
-
-        The load() function prepares a media resource for playback. The media resource is specified in a string URI. Preparation may include asynchronously loading the entire file or only a portion of the file, or doing nothing at all; the actual preparation performed may vary between mediaplayer implementations.
-
-        When the preparation is finished, the <on_loaded> event is fired. If a loading error occurs, an <on_error> event is fired.
-
-        Note: A "file:"-type URI is not supported for security reasons. A media file stored in the application's app bundle can be prepared by specifying the file's path within the bundle's directory structure.
-
-        *Arguments:*
-
-            uri - string URI specifying the media resource to prepare
-            extra - reserved for future enhancements
-
-        *Return Value:* If the load operation began successfully, returns 0. Hook the <on_loaded> and <on_error> events to receive notification when the operation is complete. If the load operation did not begin successfully, a non-zero error value is returned.
-
-        *See Also:* the <on_loaded> and <on_error> events
-    */
-
-    int load()
-        [[
-            char * uri = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
-
-            if ( Media * mp = MediaExtra::get( self, L )->get_player() )
-            {
-                AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() );
-
-                result = resource
-                       ? mp->load( resource.get_uri().c_str() , "" )
-                       : TP_MEDIAPLAYER_ERROR_INVALID_URI;
-            }
-            else
-            {
-                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            }
         ]];
 
     /*

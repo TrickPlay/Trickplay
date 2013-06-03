@@ -22,7 +22,7 @@ class Media
     // Functions called from Lua
     int get_state();
     void reset();
-    int load( const char* uri, const char* extra );
+    int load( lua_State* L, const char* uri, const char* extra );
     int play();
     int seek( double seconds );
     int pause();
@@ -41,7 +41,6 @@ class Media
 
     void add_delegate( Delegate* delegate );
     void remove_delegate( Delegate* delegate );
-    const StringSet& get_valid_schemes() const { return schemes; }
 
     gboolean get_loop() { return loop; }
     gulong get_load_signal() { return load_signal; }
@@ -56,6 +55,7 @@ class Media
     Media()               { g_assert( FALSE ); } // Not allowed
     Media( const Media& ) { g_assert( FALSE ); } // Not allowed
 
+    const StringSet& get_valid_schemes() const { return schemes; }
     void disconnect_loading_messages();
     int  get_media_type( int* type );
     void get_stream_information();

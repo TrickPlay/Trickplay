@@ -2,6 +2,7 @@
 #include "media.h"
 #include "util.h"
 #include "context.h"
+#include "app_resource.h"
 
 #define TP_LOG_DOMAIN   "MP"
 #define TP_LOG_ON       false
@@ -147,14 +148,20 @@ void Media::reset()
     state = TP_MEDIAPLAYER_IDLE;
 }
 
-int Media::load( const char* uri, const char* extra )
+int Media::load( lua_State * L, const char* uri, const char* extra )
 {
     MPLOCK;
 
     reset(); // back to IDLE
 
-    gchar* unescaped_uri = g_uri_unescape_string( uri , 0 );
+    AppResource resource = AppResource( L , uri , 0 , get_valid_schemes() );
+    if ( !resource )
+    {
+        g_warning( "MP[%p] INVALID URI '%s'" , this , uri );
+        return TP_MEDIAPLAYER_ERROR_INVALID_URI;
+    }
 
+    gchar* unescaped_uri = g_uri_unescape_string( resource.get_uri().c_str() , 0 );
     if ( ! unescaped_uri )
     {
         g_warning( "MP[%p] INVALID URI '%s'" , this , uri );
