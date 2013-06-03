@@ -14,7 +14,7 @@ class MediaExtra : private Media::Delegate
   public:
 
     MediaExtra( ClutterActor * _actor, lua_State * l )
-        : constructing( false ), loaded_flag( false ), actor( _actor ), L( l ), player( NULL )
+        : constructing( false ), actor( _actor ), L( l ), player( NULL )
     {
         player = Media::make( App::get( L )->get_context(), this, actor );
 
@@ -62,8 +62,6 @@ class MediaExtra : private Media::Delegate
         if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
     }
 
-    bool get_loaded_flag() { return loaded_flag; }
-
     bool  constructing;
 
   private:
@@ -86,7 +84,6 @@ class MediaExtra : private Media::Delegate
         lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
     }
 
-    bool           loaded_flag;
     ClutterActor * actor;
     lua_State    * L;
     Media        * player;
@@ -192,7 +189,9 @@ class Media [[ClutterActor*]] actor
 
     readonly bool loaded
         [[
-            loaded = MediaExtra::get( self, L )->get_loaded_flag();
+            loaded = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->get_loaded_flag()
+                   : false;
         ]];
 
     /*

@@ -50,12 +50,12 @@ Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor
 
 
 Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
-    :
-    context( c ),
-    state( TP_MEDIAPLAYER_IDLE ),
-    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
-    vt( actor ),
-    pipeline( NULL )
+    : context( c )
+    , state( TP_MEDIAPLAYER_IDLE )
+    , queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
+    , vt( actor )
+    , pipeline( NULL )
+    , loaded_flag( false )
 {
 #ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
@@ -72,8 +72,8 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     cm = CLUTTER_MEDIA( vt );
 
     // Connect signals
-    g_signal_connect( actor, "eos", G_CALLBACK( gst_end_of_stream ), this );
-    g_signal_connect( actor, "error", G_CALLBACK( gst_error ), this );
+    g_signal_connect( actor, "eos",   G_CALLBACK( gst_end_of_stream ), this );
+    g_signal_connect( actor, "error", G_CALLBACK( gst_error ),         this );
 
     set_audio_volume( 1.0 ); // Initialize volume
 }
@@ -443,11 +443,13 @@ StringPairList Media::get_tags()
 
 void Media::loaded()
 {
+    loaded_flag = true;
     post_event( Event::make( Event::LOADED ) );
 }
 
 void Media::error( int code, const char* message )
 {
+    loaded_flag = false;
     post_event( Event::make( Event::ERROR, code, message ) );
 }
 

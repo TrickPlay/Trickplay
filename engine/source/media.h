@@ -21,7 +21,6 @@ class Media
 
     // Functions called from Lua
     int get_state();
-    void reset();
     int load( lua_State* L, const char* uri, const char* extra );
     int play();
     int seek( double seconds );
@@ -34,17 +33,17 @@ class Media
     int set_audio_volume( double volume );
     int get_audio_mute( int* mute );
     int set_audio_mute( int mute );
-    int get_loop_flag( bool* loop );
-    int set_loop_flag( bool mute );
+    int get_loop_flag( bool* _loop );
+    int set_loop_flag( bool _loop );
     int has_media_type( bool * has_type, bool check_video );
+    void reset();
     StringPairList get_tags();
 
     void add_delegate( Delegate* delegate );
     void remove_delegate( Delegate* delegate );
 
-    gboolean get_loop() { return loop; }
-    gulong get_load_signal() { return load_signal; }
-    void set_load_signal( gulong _load_signal ) { load_signal = _load_signal; }
+    gboolean get_loop()        { return loop; }
+    gboolean get_loaded_flag() { return loaded_flag; }
 
     ~Media();
 
@@ -60,6 +59,8 @@ class Media
     int  get_media_type( int* type );
     void get_stream_information();
     int  gst_load( const char* uri, const char* extra );
+    gulong get_load_signal() { return load_signal; }
+    void set_load_signal( gulong _load_signal ) { load_signal = _load_signal; }
 
     void check( int valid_states ); // Checks whether the input state is valid
 
@@ -106,6 +107,7 @@ class Media
     int             mute;
     bool            loop;
     double          volume;
+    bool            loaded_flag;
 
 #ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
