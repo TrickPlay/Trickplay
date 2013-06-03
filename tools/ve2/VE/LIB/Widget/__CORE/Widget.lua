@@ -777,7 +777,8 @@ Widget_Sprite = function(parameters)
 
             if type(v) == "string" then
 
-                v = Widget_SpriteSheet{map=v}
+                v = SpriteSheet_lookup[v] or
+                    Widget_SpriteSheet{map=v}
 
             end
 
