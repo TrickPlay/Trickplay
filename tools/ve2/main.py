@@ -972,6 +972,7 @@ class MainWindow(QMainWindow):
 
     def run(self):
         self.inspector.clearTree()
+        self.ifilesystem.ui.fileSystemTree.clear()
         self._emulatorManager.run()
 
     def exit(self):
