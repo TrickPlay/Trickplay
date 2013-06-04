@@ -8,13 +8,12 @@ module media_module;
 #include "app.h"
 #include "context.h"
 
-// A thin shell to hold a real Media and act as its delegate. It owns a new media player
 class MediaExtra : private Media::Delegate
-{
+{ /* A thin shell to hold a real Media, own a media player and act as its delegate */
   public:
 
     MediaExtra( ClutterActor * _actor, lua_State * l )
-        : constructing( false ), actor( _actor ), L( l ), player( NULL )
+        : constructing( false ), actor( _actor ), L( l ), player( NULL ), uri ( NULL )
     {
         player = Media::make( App::get( L )->get_context(), this, actor );
 
@@ -32,11 +31,16 @@ class MediaExtra : private Media::Delegate
 
     Media * get_player() { return player; }
 
-    static void destroy( MediaExtra * me ) { delete me; }
+    static void destroy( MediaExtra * me )
+    {
+        if ( me->uri ) g_free(me->uri);
+        delete me;
+    }
 
     static MediaExtra* get( ClutterActor * actor, lua_State * l )
     {
-        g_assert( actor );
+        if ( !actor ) return NULL;
+
         MediaExtra* instance = ( MediaExtra* ) g_object_get_data( G_OBJECT( actor ), "tp-media-extra" );
 
         if ( !instance )
@@ -51,21 +55,38 @@ class MediaExtra : private Media::Delegate
 
     void load_media()
     {
-        if ( constructing ) return;
-
-        char * uri = ( char * ) g_object_get_data( G_OBJECT( actor ), "tp-src" );
-
-        if ( !uri || ( strlen( uri ) == 0 ) ) return;
+        if ( constructing || !uri || ( strlen( uri ) == 0 ) ) return;
 
         int result = player ? player->load( L, uri , "" ) : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
         if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
     }
 
+    void set_uri( const char * _uri )
+    {
+        if ( uri && _uri )
+        {
+            if ( !strcmp( uri, _uri ) ) return;
+
+            if ( player ) player->reset(); /* Reset before loading a new media uri */
+        }
+
+        if ( uri ) g_free( uri );
+
+        uri = _uri ? g_strdup( _uri ) : NULL;
+    }
+
+    char * get_uri() { return uri; }
+
     bool  constructing;
 
   private:
-    // Delegate methods
+    ClutterActor * actor;
+    lua_State    * L;
+    Media        * player;
+    char         * uri;
+
+    /* Delegate methods */
 
     virtual void loaded( Media * player )
     {
@@ -83,12 +104,7 @@ class MediaExtra : private Media::Delegate
     {
         lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
     }
-
-    ClutterActor * actor;
-    lua_State    * L;
-    Media        * player;
 };
-
 ]]
 
 /*
@@ -157,10 +173,10 @@ class Media [[ClutterActor*]] actor
 
     string src
         [[
-            src = ( char * ) g_object_get_data( G_OBJECT( self ), "tp-src" );
+            src = MediaExtra::get( self, L )->get_uri();
         ]]
         [[
-            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( src ), g_free );
+            MediaExtra::get( self, L )->set_uri( src );
 
             MediaExtra::get( self, L )->load_media();
         ]];
@@ -218,12 +234,14 @@ class Media [[ClutterActor*]] actor
             end
             (end)
 
-        *See Also:* the <load>, <pause>, <play> and <reset> functions
+        *See Also:* the <load>, <pause>, <play> functions
     */
 
     readonly int state
         [[
-            state = MediaExtra::get( self, L )->get_player() ? MediaExtra::get( self, L )->get_player()->get_state() : TP_MEDIAPLAYER_IDLE;
+            state = MediaExtra::get( self, L )->get_player()
+                  ? MediaExtra::get( self, L )->get_player()->get_state()
+                  : TP_MEDIAPLAYER_IDLE;
         ]];
 
     /*
@@ -474,24 +492,6 @@ class Media [[ClutterActor*]] actor
         [[
             if ( MediaExtra::get( self, L )->get_player() )
                 MediaExtra::get( self, L )->get_player()->set_loop_flag( loop );
-        ]];
-
-    /*
-        Function: reset
-
-        The reset() function places the mediaplayer in an IDLE state. If any media resource had been playing, it is stopped.
-
-        *Arguments:* None
-
-        *Return Value:* None
-
-        *See Also:* the <state> property
-    */
-
-    reset()
-        [[
-            if (MediaExtra::get( self, L )->get_player())
-                MediaExtra::get( self, L )->get_player()->reset();
         ]];
 
     /*

@@ -52,10 +52,11 @@ Media* Media::make( TPContext* context, Delegate* delegate, ClutterActor * actor
 Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     : context( c )
     , state( TP_MEDIAPLAYER_IDLE )
-    , queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
+    , queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) )
     , vt( actor )
     , pipeline( NULL )
     , loaded_flag( false )
+    , actor_hidden( false )
 {
 #ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
@@ -141,6 +142,12 @@ void Media::reset()
     clutter_media_set_playing ( cm, FALSE );
     clutter_media_set_progress( cm, 0.0 );
 
+    if ( actor_hidden )
+    { // Hide actor when playing music files, or when there is an error
+        clutter_actor_show( CLUTTER_ACTOR( cm ) );
+        actor_hidden = false;
+    }
+
     clear_events(); // Flush all pending events
 
     tags.clear(); // Clear tags
@@ -199,7 +206,10 @@ int Media::play()
     if ( !( media_type & TP_MEDIA_TYPE_VIDEO ) )
     {
         g_assert ( media_type & TP_MEDIA_TYPE_AUDIO );
+
+        g_assert( !actor_hidden );
         clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+        actor_hidden = true;
     }
 
     clutter_media_set_playing( cm, TRUE );
@@ -638,10 +648,8 @@ void Media::get_stream_information()
 {
     g_assert( pipeline );
 
-    //.........................................................................
-    // Use stream info to get the type of each stream
-
 #if (CLUTTER_GST_MAJOR_VERSION < 1)
+    // Use stream info to get the type of each stream
     GValueArray* info_array = NULL;
     g_object_get( G_OBJECT( pipeline ), "stream-info-value-array", &info_array, NULL );
     if ( info_array ) { // Each entry in the array is information for a single stream
@@ -783,8 +791,6 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 // Signal handlers
 void gst_end_of_stream( ClutterMedia* cm, Media* media )
 {
-    if ( ! media->get_loop() ) media->end_of_stream();
-
 /* Keep last frame on screen after video is done
 #if (CLUTTER_GST_MAJOR_VERSION<1)
         GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
@@ -805,10 +811,17 @@ void gst_end_of_stream( ClutterMedia* cm, Media* media )
     clutter_media_set_progress( cm, 0.0 );
 
     clutter_media_set_playing( cm, media->get_loop() );
+
+    if ( ! media->get_loop() ) media->end_of_stream();
 }
 
 void gst_error( ClutterMedia* cm, GError* error, Media* media )
 {
+    if ( !( media->get_actor_hidden() ) )
+    {
+        clutter_actor_hide( CLUTTER_ACTOR( cm ) );
+        media->set_actor_hidden( true );
+    }
+
     media->error( error->code, error->message );
-    clutter_actor_hide( CLUTTER_ACTOR( cm ) );
 }

@@ -45,6 +45,9 @@ class Media
     gboolean get_loop()        { return loop; }
     gboolean get_loaded_flag() { return loaded_flag; }
 
+    gboolean get_actor_hidden() { return actor_hidden; }
+    void set_actor_hidden( bool _actor_hidden ) { actor_hidden = _actor_hidden; }
+
     ~Media();
 
   private:
@@ -108,6 +111,7 @@ class Media
     bool            loop;
     double          volume;
     bool            loaded_flag;
+    bool            actor_hidden;
 
 #ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;
