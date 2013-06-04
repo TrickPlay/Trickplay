@@ -369,7 +369,12 @@ int Media::get_audio_volume( double* _volume )
 
     g_assert( _volume );
 
-    * _volume = mute ? volume : clutter_media_get_audio_volume( cm );
+    /* Cannot get volume by using
+     * volume = clutter_media_get_audio_volume( cm );
+     * as the media may not be played yet
+     */
+
+    * _volume = volume;
 
     return 0;
 }
@@ -410,7 +415,7 @@ int Media::set_audio_mute( int _mute )
 
     if ( old_mute != mute )
     {
-        clutter_media_set_audio_volume( cm, mute ? 0 : volume );
+        clutter_media_set_audio_volume( cm, mute ? 0.0 : volume );
     }
 
     return 0;

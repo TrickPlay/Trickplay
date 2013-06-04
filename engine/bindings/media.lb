@@ -425,7 +425,7 @@ class Media [[ClutterActor*]] actor
 
         The volume property is a value between 0-1, inclusive, that specifies the audio volume. The lowest volume is 0.
 
-        *Default Setting:* 0
+        *Default Setting:* 1
 
         *See Also:* the <mute> property
     */
