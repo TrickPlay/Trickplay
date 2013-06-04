@@ -191,7 +191,6 @@ class TrickplayEmulatorManager(QWidget):
                             item['focused'] = True
                         else:
                             item['focused'] = False
-                        item = self.inspector.search(str(fgid), 'gid')
                         index = self.inspector.selected (self.inspector.ui.inspector)
                         try :
                             item = self.inspector.inspectorModel.itemFromIndex(index)

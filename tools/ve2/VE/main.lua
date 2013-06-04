@@ -725,9 +725,9 @@ end
 
 _VE_.setAppPath = function(path)
     current_dir = path
+    currentProjectPath = path 
     editor_lb:change_app_path(path)
     WL = dofile("LIB/Widget/Widget_Library.lua")
-    currentProjectPath = path 
 end 
 
 _VE_.buildVF = function(path)
@@ -922,7 +922,6 @@ local codeExist = function(contents, layer, obj)
 end 
 
 local objCodeGen = function(contents, layer, lowLayer, obj) 
-    print (contents, layer, lowLayer, obj.name, obj.widget_type) 
 
     if obj.widget_type == "Button" then 
         contents = contents.."-- BEGIN "..layer.."."..obj.name.." SECTION [DO NOT CHANGE THIS LINE]\n\t" 
@@ -944,7 +943,6 @@ local objCodeGen = function(contents, layer, lowLayer, obj)
 end 
 
 local codeGen = function()
-
     for a,b in ipairs (screen.children) do 
         if b.name and string.find(b.name, "Layer") then 
             local layerName = b.name
@@ -995,10 +993,11 @@ local codeGen = function()
                     if b.elements[l] == nil then  
                         c, d = string.find(contents_last, " BEGIN "..layerName.."."..l.." SECTION")
                         temp_first = string.sub(contents_last, 1, c-1)
+                        --e, f = string.find(contents_last, "-- END "..layerName.."."..l.." SECTION [DO NOT CHANGE THIS LINE]")
                         e, f = string.find(contents_last, "-- END "..layerName.."."..l.." SECTION")
-                        temp_last = string.sub(contents_last, f+1, -1)
-                        temp_middle = string.sub(contents_last, c, f)
-                        contents_last = temp_first.."[["..temp_middle.." ]]"..temp_last
+                        temp_last = string.sub(contents_last, f+27, -1)
+                        temp_middle = string.sub(contents_last, c, f+26)
+                        contents_last = temp_first.."[=["..temp_middle.." ]=]"..temp_last
                     end 
                 end 
 
@@ -1038,14 +1037,12 @@ _VE_.saveFile = function(scrJson)
 
     table.insert(style_t, json:parse(WL.get_all_styles()))
 
-
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
     _VE_.setAppPath(currentProjectPath)
     _VE_.openFile(currentProjectPath)
-
     codeGen()
 
 end 
