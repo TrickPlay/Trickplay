@@ -734,13 +734,16 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
-        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        if self.command == "newLayer" :
+            self.setAppPath()
+        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\','"+self.path+"')")
         self._emulatorManager.unsavedChanges = False
         return True
 
     def save(self):
-        self.setAppPath()
-        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        if self.command == "newLayer" :
+            self.setAppPath()
+        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\','"+self.path+"')")
         self._emulatorManager.unsavedChanges = False
         return True
 
@@ -972,6 +975,7 @@ class MainWindow(QMainWindow):
 
     def run(self):
         self.inspector.clearTree()
+        self.ifilesystem.ui.fileSystemTree.clear()
         self._emulatorManager.run()
 
     def exit(self):

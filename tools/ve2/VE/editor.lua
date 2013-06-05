@@ -353,7 +353,6 @@ local copy_selected_objs = {}
 function editor.arrange_prep (gid) 
 
     util.getCurLayer(gid)
-    blockReport = true
 
 	if util.getSelectedObjCnt() == 0 then 
         screen:grab_key_focus()
@@ -374,12 +373,11 @@ end
 
 function editor.arrange_end (gid, obj, sel_objs) 
 
+    blockReport = true
     util.ang_cord()
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     blockReport = false
-    _VE_.refresh() 
-    _VE_.refreshDone()
     screen_ui.n_selected_all()
 end 
 
