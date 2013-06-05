@@ -1,11 +1,32 @@
 
 local functional_areas = { "Live TV", "On Demand", "Apps", "Store", "Search" }
 
-local menubar = Group {}
+local menubar = Group {name = "Root Menu"}
+root_bar = menubar
 
+
+
+-----------------------------------------------------------
+local date_time = Text {
+    name = "date",
+    color = "AliceBlue", opacity = 128,
+    font = "Lato Bold 32px",
+    text = os.date("%a %I:%M %p"),
+}
+        date_time.x = screen_w-date_time.w-100
+--date_time.anchor_point = { date_time.w, date_time.h/2 }
+date_time.extra.updater = Timer {
+    interval = ( 60 - os.date("*t").sec ) * 1000,
+    on_timer = function(t)
+        date_time.text = os.date("%a %I:%M %p")
+        t.interval = ( 60 - os.date("*t").sec ) * 1000
+        date_time.x = screen_w-date_time.w-100
+    end,
+}
+------------------------------------------------------------
 local bar_highlight, blue_overlay
-local bar_slice
-
+local bar_slice = Rectangle{w=screen.w,h=45,color ="black"}
+---[=[]]
 bar_slice = Canvas( 1, 45 )
 -- 1 pixel of #0E1924, gradient for 43 pixels from (75,75,75) to (0,0,0), then one pixel of #0E1924
 bar_slice:rectangle(-1,1, 3,43)
@@ -17,12 +38,12 @@ bar_slice:add_source_pattern_color_stop( 0, "#4B4B4B" )
 bar_slice:add_source_pattern_color_stop( 1, "#000000" )
 bar_slice:fill()
 
-bar_slice = bar_slice:Image( { width = screen.w, tile = { true, false } } )
-
-bar_highlight = Image { src = "assets/menubar/bar-highlight.png", x = 100 }
+bar_slice = bar_slice:Image( { width = screen.w, })--tile = { true, false } } )
+--]=]
+bar_highlight = Sprite { sheet=ui_sprites, id = "menubar/bar-highlight.png", x = 100 }
 bar_highlight.y = -bar_highlight.h/2
 
-blue_overlay = Image { src = "assets/menubar/blue-overlay.png", x = 100 }
+blue_overlay = Sprite { sheet=ui_sprites, id = "menubar/blue-overlay.png", x = 100 }
 
 menubar:add(bar_slice)
 menubar:add(bar_highlight)
@@ -32,10 +53,12 @@ menubar:add(blue_overlay)
 local labels = Group { }
 -- Inner labels group is for sliding the menu depending on the selected item
 local inner_labels = Group { }
-labels:add(inner_labels)
+labels:add(
+    inner_labels
+)
 for _,i in pairs(functional_areas) do
     local sub_menu = dofile("launcher/"..i..".lua")
-    local label = Text { font = FONT_NAME.." 34px", text = sub_menu.label, color = "AliceBlue", opacity = 128 }
+    local label = Text { font = FONT_NAME.." 32px", text = sub_menu.label, color = "AliceBlue", opacity = 128 }
     label.x = inner_labels.w + 100
     label.extra.activate = sub_menu.activate
     label.extra.deactivate = sub_menu.deactivate
@@ -46,45 +69,58 @@ for _,i in pairs(functional_areas) do
 end
 local active_label = 1
 inner_labels.children[active_label]:activate()
-menubar:add(labels)
+menubar:add(labels,date_time)
 
 local menubar_animationstate = AnimationState( {
-                                                    duration = 500,
-                                                    mode = EASE_IN_OUT_SINE,
-                                                    transitions = {
-                                                        {
-                                                            source = "*",
-                                                            target = "visible",
-                                                            keys = {
-                                                                { bar_slice, "y", "EASE_IN_OUT_SINE", 0, 0.0, 0.5 },
-                                                                { labels, "x", "EASE_IN_OUT_SINE", 180, 0.5, 0 },
-                                                                { bar_highlight, "opacity", "EASE_IN_OUT_SINE", 255, 0.5, 0 },
-                                                                { blue_overlay, "opacity", "EASE_IN_OUT_SINE", 255, 0.5, 0 },
-                                                            },
-                                                        },
-                                                        {
-                                                            source = "*",
-                                                            target = "hidden",
-                                                            keys = {
-                                                                { bar_slice, "y", "EASE_IN_OUT_SINE", 200, 0.5, 0 },
-                                                                { labels, "x", "EASE_IN_OUT_SINE", -labels.w, 0, 0.5 },
-                                                                { bar_highlight, "opacity", "EASE_IN_OUT_SINE", 0, 0, 0.5 },
-                                                                { blue_overlay, "opacity", "EASE_IN_OUT_SINE", 0, 0, 0.5 },
-                                                            },
-                                                        },
-                                                    },
+        duration = 500,
+        mode = EASE_IN_OUT_SINE,
+        transitions = {
+            {
+                source = "*",
+                target = "visible",
+                keys = {
+                    { bar_slice, "y", "EASE_IN_OUT_SINE", 0, 0.0, 0.5 },
+                    { labels, "x", "EASE_IN_OUT_SINE", 180, 0.5, 0 },
+                    { bar_highlight, "opacity", "EASE_IN_OUT_SINE", 255, 0.5, 0 },
+                    { blue_overlay, "opacity", "EASE_IN_OUT_SINE", 255, 0.5, 0 },
+                    { menubar, "opacity", "LINEAR", 255,  0 },
+                },
+            },
+            {
+                source = "*",
+                target = "hidden",
+                keys = {
+                    { bar_slice, "y", "EASE_IN_OUT_SINE", 200, 0.5, 0 },
+                    { labels, "x", "EASE_IN_OUT_SINE", -labels.w, 0, 0.5 },
+                    { bar_highlight, "opacity", "EASE_IN_OUT_SINE", 0, 0, 0.5 },
+                    { blue_overlay, "opacity", "EASE_IN_OUT_SINE", 0, 0, 0.5 },
+                    { menubar, "opacity", "LINEAR", 0, 0, 0 },
+                },
+            },
+        },
 } )
 
-
+local menubar_animationstate_on_completed
+function menubar_animationstate.timeline.on_completed()
+    if menubar_animationstate_on_completed then
+        menubar_animationstate_on_completed()
+        menubar_animationstate_on_completed = nil
+    end
+end
 menubar_animationstate:warp("hidden")
 
 menubar.appear = function(self)
     menubar_animationstate.state = "visible"
 end
 
-menubar.goaway = function(self)
-    menubar_animationstate.state = "hidden"
+local submenu_active = false
+menubar.goaway = function(self,f)
+    dolater(300,function()
+        menubar_animationstate.state = "hidden"
+        menubar_animationstate_on_completed = f
+    end)
     inner_labels.children[active_label]:sleep()
+    submenu_active = false
 end
 
 function menubar:start_item(item)
@@ -98,7 +134,6 @@ function menubar:start_item(item)
     end
 end
 
-local submenu_active = false
 function menubar:on_key_down(key)
     -- By default, dispatch the keypress to the submenu
     -- If the submenu doesn't handle the keypress, it's because it wants us to do so
@@ -114,7 +149,8 @@ function menubar:on_key_down(key)
 
             inner_labels:animate({ duration = 250, x = 100-inner_labels.children[active_label].x })
 
-            inner_labels.children[orig_active]:deactivate(inner_labels.children[active_label])
+            inner_labels.children[orig_active]:deactivate()
+            inner_labels.children[active_label]:activate()
         elseif(keys.Up == key or keys.OK == key) then
             -- We handle "Up" by waking the submenu so that it will know to navigate internally
             inner_labels.children[active_label]:wake()

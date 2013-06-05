@@ -1,13 +1,14 @@
 make_MoreInfoBacking = function(p)
 
-local backing = Group()
+local backing = Group{clip={0,0,screen_w,p.expanded_h}}
+local backing_inner = Group()
 
 
 local set_incoming_show, set_current_show, hide_current_show
 
 do
     local r = Rectangle{color="black",w=screen.w,opacity=155}
-    backing:add(r)
+    backing_inner:add(r)
     backing.extra.anim = AnimationState {
                             duration = 250,
                             mode = "EASE_OUT_SINE",
@@ -16,7 +17,7 @@ do
                                     source = "*",
                                     target = "hidden",
                                     keys = {
-                                        { r, "y", p.expanded_h },
+                                        { backing_inner, "y", p.expanded_h },
                                         { r, "h",            0 },
                                     },
                                 },
@@ -24,7 +25,7 @@ do
                                     source = "*",
                                     target = "full",
                                     keys = {
-                                        { r, "y",            0 },
+                                        { backing_inner, "y",            0 },
                                         { r, "h", p.expanded_h },
                                     },
                                 },
@@ -32,7 +33,11 @@ do
     }---[[
     function backing.extra.anim.timeline.on_started()
         if backing.extra.anim.state ~= "full" then
+
+        elseif backing.parent == nil then
+            p.parent:add(backing)
             backing:hide_current()
+            backing:lower_to_bottom()
         end
     end
     function backing.extra.anim.timeline.on_completed()
@@ -41,6 +46,8 @@ do
                 p.get_current(),
                 "right"
             )
+        else
+            backing:unparent()
         end
     end
     --]]
@@ -124,23 +131,31 @@ do
             end
         }
     end
-
+---[[
     function backing:hide_current()
-
+        displaying.opacity=0
+        --[[
+        backing_inner:animate{
+            duration=200,
+            y=p.expanded_h,
+            on_completed = function()
+                backing_inner.y = 0
+            end
+        }
         displaying:animate{
             duration=200,
             opacity=0,
-            y=displaying.y+p.expanded_h,
-            on_completed = function()
-                displaying.y = displaying.y -p.expanded_h
-            end
         }
-    end
+        --]]
+    end--]]
     function backing:set_current(curr)
         displaying:set_meta(curr)
     end
-    backing:add(displaying,incoming)
-
+    function backing:add_over_contents(child)
+        backing_inner:add(child)
+    end
+    backing_inner:add(displaying,incoming)
+    backing:add(backing_inner)
 end
 return backing
 end

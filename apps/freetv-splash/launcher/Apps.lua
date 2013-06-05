@@ -4,11 +4,9 @@ local icon_h = 270
 local unsel_scale = .75
 local   sel_scale = 1.25
 local launcher_icons = {}
-generic_launcher_icon = Image{src="assets/generic-app-icon.jpg"}
-screen:add( generic_launcher_icon )
-generic_launcher_icon:hide()
 
-
+local Apps_G = Group{name="Apps"}
+screen:add(Apps_G)
 local padding=10
 local function make_icon(v)
 
@@ -16,7 +14,7 @@ local function make_icon(v)
     if not(i:load_app_icon(v.id,"launcher-icon.png") or
         i:load_app_icon(v.id,"launcher-icon.jpg")) then
 
-        i = Clone{source=generic_launcher_icon}
+        i = Sprite{sheet=ui_sprites,id="generic-app-icon.jpg"}
     end
     i.size = {icon_w,icon_h}
     local g = Group()
@@ -35,11 +33,12 @@ local function make_icon(v)
         ellipsize = "END",
         color = "white",
         text=v.name,
-        font = FONT_NAME.." 34px"
+        font = FONT_NAME.." 32px"
     }
     t.anchor_point={0,t.h/2}
     local duration = 250
     local mode     = "EASE_OUT_SINE"
+
     g.slogan = v.long_name or v.name
     g.description = v.description or lorem_ipsum
     g.name = v.id
@@ -102,34 +101,32 @@ local function make_icon(v)
         end
     end
     anim:warp("unfocus")
+
+    function g:launch()
+        apps:launch(v.id)
+    end
     return g
 end
 
 local app_list = {}
-do
-    for k,v in pairs(apps:get_for_current_profile()) do
 
-        if not v.attributes.nolauncher    and
-            k ~= "com.trickplay.launcher" and
-            k ~= "com.trickplay.empty"    and
-            k ~= "com.trickplay.app-shop" and
-            k ~= "com.trickplay.editor"   then
-
-            --local g=make_icon(v)
-
-            --table.insert(launcher_icons,g)
-            table.insert(app_list,v)
-        end
-
+for k,v in pairs(apps:get_for_current_profile()) do
+    if not v.attributes.nolauncher    and
+        k ~= "com.trickplay.launcher" and
+        k ~= "com.trickplay.empty"    and
+        k ~= "com.trickplay.app-shop" and
+        k ~= "com.trickplay.editor"   then
+        table.insert(app_list,v)
     end
 end
 
 
-local menubar = make_sliding_bar__expanded_focus{
-    items = app_list,
-    make_item = make_icon,
+
+local menubar    = make_sliding_bar__expanded_focus{
+    items        = app_list,
+    make_item    = make_icon,
     unsel_offset = icon_w*(sel_scale-unsel_scale)/2,
-    spacing = 30+icon_w*unsel_scale,
+    spacing      = 30+icon_w*unsel_scale,
 }
 local app_offset = -icon_w*.25
 local active_app = 2
@@ -137,6 +134,7 @@ local active_app = 2
 local backing = make_MoreInfoBacking{
     info_x     = 740,
     expanded_h = 423,
+    parent     = Apps_G,
     get_current = function() return menubar:curr() or {description=lorem_ipsum} end,
     create_more_info = function()
         local g = Group()
@@ -147,7 +145,7 @@ local backing = make_MoreInfoBacking{
             wrap_mode = "WORD",
             w=text_w,
             color = "white",
-            font = FONT_NAME.." 26px",
+            font = FONT_NAME.." 24px",
         }
         g:add( g.description )
         return g
@@ -161,22 +159,24 @@ local function show_bar()
     --menubar:show()
     backing.anim.state = "full"
     menubar:anim_in()
+    Apps_G:add(menubar)
 end
 
 local function hide_bar()
     --menubar:hide()
     backing.anim.state = "hidden"
-    menubar:anim_out()
+    menubar:anim_out(function()
+        menubar:unparent()
+    end)
 end
 
 
 local function on_activate(label)
+    label:stop_animation()
     label:animate({ duration = 250, opacity = 255 })
     --if(menubar.count == 0) then build_bar() end
     if menubar.parent == nil then
 
-        screen:add(backing,menubar)
-        menubar:hide()
         menubar.x = -300
         menubar.y = 812.5-313
         backing.y = 812.5-313
@@ -185,6 +185,7 @@ local function on_activate(label)
 end
 
 local function on_deactivate(label, new_active)
+    label:stop_animation()
     label:animate{
         duration = 250,
         opacity = 128,
@@ -222,6 +223,9 @@ local key_events = {
     [keys.Up] = function()
         backing.anim.state = "full"
         return true
+    end,
+    [keys.OK] = function()
+        menubar:curr():launch()
     end,
 }
 
