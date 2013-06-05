@@ -670,7 +670,12 @@ _VE_.setUIInfo = function(gid, property, value, n)
         uiInstance[property] = value 
 	    screen_ui.selected(uiInstance) 
     end 
-    _VE_.repUIInfo(uiInstance)
+    if property == 'style' then 
+        _VE_.refresh()
+        _VE_.refreshDone()
+    else 
+        _VE_.repUIInfo(uiInstance)
+    end
 end 
 
 -- REPORT 
@@ -993,7 +998,6 @@ local codeGen = function()
                     if b.elements[l] == nil then  
                         c, d = string.find(contents_last, " BEGIN "..layerName.."."..l.." SECTION")
                         temp_first = string.sub(contents_last, 1, c-1)
-                        --e, f = string.find(contents_last, "-- END "..layerName.."."..l.." SECTION [DO NOT CHANGE THIS LINE]")
                         e, f = string.find(contents_last, "-- END "..layerName.."."..l.." SECTION")
                         temp_last = string.sub(contents_last, f+27, -1)
                         temp_middle = string.sub(contents_last, c, f+26)
@@ -1024,10 +1028,12 @@ local codeGen = function()
 
 end 
 
-_VE_.saveFile = function(scrJson)
+_VE_.saveFile = function(scrJson, path)
 
     local layer_t = {}
     local style_t = {}
+
+    table.insert(style_t, json:parse(WL.get_all_styles()))
 
     for a, b in ipairs (screen.children) do
         if b.to_json then -- s1.b1
@@ -1035,12 +1041,14 @@ _VE_.saveFile = function(scrJson)
         end
     end
 
-    table.insert(style_t, json:parse(WL.get_all_styles()))
-
     editor_lb:writefile("/screens/layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     editor_lb:writefile("/screens/styles.json", json:stringify(style_t), true) 
     editor_lb:writefile("/screens/screens.json", scrJson, true) 
     
+    if currentProjectPath == nil and path ~= nil then 
+        currentProjectPath = path
+    end 
+
     _VE_.setAppPath(currentProjectPath)
     _VE_.openFile(currentProjectPath)
     codeGen()
