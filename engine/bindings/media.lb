@@ -213,13 +213,13 @@ class Media [[ClutterActor*]] actor
     /*
         Property: state
 
-        The state property is an integer value indicating the Media's current state.
+        The state property is an integer value indicating the mediaplayer's current state.
 
         Possible Media states are listed below. Note: When referencing a state, it must be referenced through the Media variable. See the Code Example for a demonstration.
 
         IDLE - the mediaplayer is performing no operation
         LOADING - the mediaplayer is preparing to play a Media resource
-        PAUSED - the mediaplayer has paused playing a Media resource
+        PAUSED - the mediaplayer has paused playing a Media resource or has finished playing
         PLAYING - the mediaplayer is playing a Media resource
 
         *Default Setting:* mediaplayer.IDLE
@@ -260,7 +260,7 @@ class Media [[ClutterActor*]] actor
                        ? MediaExtra::get( self, L )->get_player()->get_position( & playback_position )
                        : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if ( result ) playback_position = 0;
+            if ( result ) playback_position = 0.0;
         ]];
 
     /*
@@ -279,7 +279,7 @@ class Media [[ClutterActor*]] actor
                          ? MediaExtra::get( self, L )->get_player()->get_duration(&duration)
                          : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if ( result ) duration = 0;
+            if ( result ) duration = 0.0;
         ]];
 
     /*
@@ -334,8 +334,8 @@ class Media [[ClutterActor*]] actor
 
     readonly table video_size
         [[
-            int width;
-            int height;
+            int width = 0;
+            int height = 0;
 
             int result = MediaExtra::get( self, L )->get_player()
                          ? MediaExtra::get( self, L )->get_player()->get_video_size( &width, &height )
@@ -436,7 +436,7 @@ class Media [[ClutterActor*]] actor
                          ? MediaExtra::get( self, L )->get_player()->get_audio_volume(&volume)
                          : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
-            if ( result ) volume = 0;
+            if ( result ) volume = 0.0;
 
         ]]
         [[
@@ -552,10 +552,10 @@ class Media [[ClutterActor*]] actor
         *See Also:* the <play> function
     */
 
-    int seek(double seconds)
+    int seek( double seconds )
         [[
             result = MediaExtra::get( self, L )->get_player()
-                   ? MediaExtra::get( self, L )->get_player()->seek(seconds)
+                   ? MediaExtra::get( self, L )->get_player()->seek( seconds )
                    : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
 
             if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
