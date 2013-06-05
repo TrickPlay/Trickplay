@@ -5,6 +5,7 @@ app=
     version     = "1.1",
     name        = "Mahjong",
     author      = "James Fenley",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Play Mahjong! I hear that new turtle layout is to die for.",
 }
 

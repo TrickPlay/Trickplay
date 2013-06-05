@@ -5,4 +5,5 @@ app=
     version     = "1.0",
     name        = "Craftymind",
     author      = "TrickPlay, Inc.",
+    description = "Crafty minds think alike. This app will stress test your device.",
 }
