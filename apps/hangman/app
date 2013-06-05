@@ -6,5 +6,6 @@ app=
     name        = "The Hangman's Challenge",
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc.",
-    attributes = {"gameservice"},
+    attributes  = {"gameservice"},
+    description = "Play hangman with your friends.",
 }

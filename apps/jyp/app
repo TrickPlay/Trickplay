@@ -7,5 +7,6 @@ app=
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc.",
     attributes  = { "nolauncher" },
+    description = "J. Y. P. easy as 1 2 3"
 }
 

@@ -4,6 +4,7 @@ app=
     release     = "1",
     version     = "1.0",
     name        = "TrickPlay App Shop",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Give us all of your money"
 }
 

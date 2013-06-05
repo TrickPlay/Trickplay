@@ -5,6 +5,7 @@ app=
     version     = "2.0",
     name        = "Poker Dawgz",
     author      = "Darren, Devin, and Rex",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "The purrfect mixture of dogs and gambling."
 }
 

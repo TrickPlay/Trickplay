@@ -5,6 +5,7 @@ app=
     version     = "1.2",
     name        = "Pandamonium",
     author      = "Alex Indaco",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda panda"
 }
 
