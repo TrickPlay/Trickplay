@@ -105,8 +105,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     local deletion_duration = 250
     local deleting = false
     local again = false
-    function instance:delete(d_r,d_c,n)
-        n = n or 1
+    function instance:delete(d_r,d_c)
 
         if deleting then return end
 
@@ -117,8 +116,11 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
         for r,row in ipairs(entries) do
             for c,item in ipairs(row) do
+
+                --items towards the upper-left begin moving before the items
+                --towards the lower-right
                 local t_start = dur*(r-1+(c-1)/#entries[1])/(#entries+1)
-                local t_end   = 0--t_start+dur
+
                 if r < d_r or r==d_r and c < d_c then
                     --ignore these
                 elseif r == d_r and c == d_c then
@@ -130,10 +132,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 source = item,
                                 name   = "opacity",
                                 keys   = {
-                                    {0.0,"EASE_OUT_CIRC",255},
+                                    {0.0,    "EASE_OUT_CIRC",255},
                                     {t_start,"EASE_OUT_CIRC",255},
-                                    {t_end,"EASE_OUT_CIRC",  0},
-                                    {1.0,"EASE_OUT_CIRC",  0},
+                                    {1.0,    "EASE_OUT_CIRC",  0},
                                 },
                             }
                         )
@@ -147,10 +148,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "x",
                             keys   = {
-                                {0.0,"EASE_OUT_CIRC",item.x},
+                                {0.0,    "EASE_OUT_CIRC",item.x},
                                 {t_start,"EASE_OUT_CIRC",item.x},
-                                {t_end,"EASE_OUT_CIRC",w-(cell_w)},
-                                {1.0,"EASE_OUT_CIRC",w-(cell_w)},
+                                {1.0,    "EASE_OUT_CIRC",w-(cell_w)},
                             },
                         }
                     )
@@ -162,7 +162,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             keys   = {
                                 {0.0,"EASE_OUT_CIRC",item.y},
                                 {t_start,"EASE_OUT_CIRC",item.y},
-                                {t_end,"EASE_OUT_CIRC",item.y-(cell_h+y_spacing)},
                                 {1.0,"EASE_OUT_CIRC",item.y-(cell_h+y_spacing)},
                             },
                         }
@@ -177,7 +176,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 keys   = {
                                     {0.0,    "EASE_OUT_CIRC",item.opacity},
                                     {t_start,"EASE_OUT_CIRC",item.opacity},
-                                    {t_end,  "EASE_OUT_CIRC",         255},
                                     {1.0,    "EASE_OUT_CIRC",         255},
                                 },
                             }
@@ -193,7 +191,6 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             keys   = {
                                 {0.0,"EASE_OUT_CIRC",item.x},
                                 {t_start,"EASE_OUT_CIRC",item.x},
-                                {t_end,"EASE_OUT_CIRC",item.x-(cell_w+x_spacing)},
                                 {1.0,"EASE_OUT_CIRC",item.x-(cell_w+x_spacing)},
                             },
                         }
@@ -277,7 +274,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                 instance:delete(d_r,d_c)
 
             end
-        end        a:start()
+        end
+
+        a:start()
     end
 
     ----------------------------------------------------------
@@ -319,11 +318,20 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     ----------------------------------------------------------
     --key events
     local key_events = {
+        --delete the selected icon
         [keys.OK] = function()
+
+            if apps then apps:launch("com.lgi.dawn-ui") end
+            --if there more than one left
             if entries[1][2] then
                 instance:delete(sel_r,sel_c)
+                --if you are deleting to icon at the very end,
+                --then move the highlight to the next one
                 if sel_r == #entries and sel_c == #entries[#entries] then
+                    --if the last icon is in the leftmost column
                     if  sel_c == 1 then
+                        --then the highlight needs to wrap around to
+                        --the rightmost columns
                         sel_r = sel_r-1
                         sel_c = #entries[sel_r-1]
                     else
@@ -370,7 +378,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                 sel_r = 1
                 sel_c = 1
                 move_hl()
-                if not deleting then instance:delete(sel_r,sel_c,20) end
+                if not deleting then instance:delete(sel_r,sel_c) end
             end
         end,
     }

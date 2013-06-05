@@ -16,13 +16,13 @@ class Matrix [[CoglMatrix*]]
         [[
             g_slice_free( CoglMatrix , self );
         ]];
-        
+
     table table
         [[
             lua_newtable( L );
-            
+
             const float * a = cogl_matrix_get_array( self );
-            
+
             for ( int i = 0; i < 16; ++i , ++a )
             {
                 lua_pushnumber( L , * a );
@@ -31,7 +31,7 @@ class Matrix [[CoglMatrix*]]
         ]]
         [[
             float m[16];
-            
+
             lua_pushnil( L );
             int i = 0;
             while( lua_next( L , 2 ) )
@@ -107,7 +107,7 @@ class Matrix [[CoglMatrix*]]
         ]];
 
     # Returns a new one
-    
+
     Matrix inverse()
         [[
             CoglMatrix * m = g_slice_new( CoglMatrix );
@@ -120,7 +120,7 @@ class Matrix [[CoglMatrix*]]
         ]];
 
     # Returns a new one
-    
+
     Matrix copy()
         [[
             CoglMatrix * m = g_slice_new( CoglMatrix );
@@ -131,7 +131,7 @@ class Matrix [[CoglMatrix*]]
             lua_setmetatable( L , -2 );
             ud->initialize_with_client( m );
         ]];
-        
+
     table transform_point( table point )
         [[
             float p[4] = { 0 , 0 , 0 , 0 };
@@ -164,13 +164,13 @@ class Matrix [[CoglMatrix*]]
                 lua_rawseti( L , -2 , i + 1 );
             }
         ]];
-        
+
     Matrix set( Matrix other )
         [[
             CoglMatrix * source = ( CoglMatrix * ) UserData::get_client( L , other );
-            
+
             cogl_matrix_init_from_array( self , cogl_matrix_get_array( source ) );
-            
+
             lua_pushvalue( L , 1 );
-        ]];        
+        ]];
 }

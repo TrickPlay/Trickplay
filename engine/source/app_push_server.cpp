@@ -18,7 +18,7 @@
 
 //.............................................................................
 
-AppPushServer * AppPushServer::make( TPContext * context )
+AppPushServer* AppPushServer::make( TPContext* context )
 {
 #ifdef TP_PRODUCTION
     return 0;
@@ -36,9 +36,9 @@ AppPushServer * AppPushServer::make( TPContext * context )
 
 //.............................................................................
 
-AppPushServer::AppPushServer( TPContext * _context )
-:
-	HttpServer::RequestHandler( _context->get_http_server() , "/push" ),
+AppPushServer::AppPushServer( TPContext* _context )
+    :
+    HttpServer::RequestHandler( _context->get_http_server() , "/push" ),
     context( _context ),
     current_push_path( 0 )
 {
@@ -54,7 +54,7 @@ AppPushServer::~AppPushServer()
 
 //.............................................................................
 
-void AppPushServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
+void AppPushServer::handle_http_post( const HttpServer::Request& request , HttpServer::Response& response )
 {
     response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
 
@@ -93,7 +93,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     //.........................................................................
     // Get the body of the request
 
-    const HttpServer::Request::Body & body( request.get_body() );
+    const HttpServer::Request::Body& body( request.get_body() );
 
     if ( 0 == body.get_length() || 0 == body.get_data() )
     {
@@ -131,7 +131,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
     for ( Array::Vector::iterator it = files.begin(); it != files.end(); ++it )
     {
-        Array & parts = it->as<Array>();
+        Array& parts = it->as<Array>();
 
         if ( parts.size() < 3 )
         {
@@ -154,7 +154,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
 #else
 
-    JsonParser * parser = json_parser_new();
+    JsonParser* parser = json_parser_new();
 
     if ( ! parser )
     {
@@ -168,7 +168,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         return;
     }
 
-    JsonNode * root = json_parser_get_root( parser );
+    JsonNode* root = json_parser_get_root( parser );
 
     if ( ! root )
     {
@@ -180,7 +180,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         return;
     }
 
-    JsonObject * object = json_node_get_object( root );
+    JsonObject* object = json_node_get_object( root );
 
     if ( ! object )
     {
@@ -193,8 +193,8 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     // array of 3 element arrays. Each one has the file name, the md5
     // hash of the file and the size of the file.
 
-    JsonNode * app = json_object_get_member( object , "app" );
-    JsonNode * files = json_object_get_member( object , "files" );
+    JsonNode* app = json_object_get_member( object , "app" );
+    JsonNode* files = json_object_get_member( object , "files" );
 
     if ( ! app || ! files )
     {
@@ -208,26 +208,26 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
     app_contents = json_node_get_string( app );
 
-    JsonArray * files_array = json_node_get_array( files );
+    JsonArray* files_array = json_node_get_array( files );
 
     if ( ! files_array )
     {
         return;
     }
 
-    for( guint i = 0; i < json_array_get_length( files_array ); ++i )
+    for ( guint i = 0; i < json_array_get_length( files_array ); ++i )
     {
-        JsonNode * element = json_array_get_element( files_array , i );
+        JsonNode* element = json_array_get_element( files_array , i );
 
         if ( element && JSON_NODE_TYPE( element ) == JSON_NODE_ARRAY )
         {
-            if ( JsonArray * file_parts = json_node_get_array( element ) )
+            if ( JsonArray* file_parts = json_node_get_array( element ) )
             {
                 if ( json_array_get_length( file_parts ) >= 3 )
                 {
-                    JsonNode * file_name_node = json_array_get_element( file_parts , 0 );
-                    JsonNode * hash_node = json_array_get_element( file_parts , 1 );
-                    JsonNode * size_node = json_array_get_element( file_parts , 2 );
+                    JsonNode* file_name_node = json_array_get_element( file_parts , 0 );
+                    JsonNode* hash_node = json_array_get_element( file_parts , 1 );
+                    JsonNode* size_node = json_array_get_element( file_parts , 2 );
 
                     if ( JSON_NODE_TYPE( file_name_node ) == JSON_NODE_VALUE &&
                             JSON_NODE_TYPE( hash_node ) == JSON_NODE_VALUE &&
@@ -291,9 +291,9 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
             String s = Util::format( "%ld:%ld:%s" , t.tv_sec , t.tv_usec , push_info.metadata.id.c_str() );
 
-            GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
+            GChecksum* ck = g_checksum_new( G_CHECKSUM_MD5 );
 
-            g_checksum_update( ck , ( const guchar * ) s.c_str() , s.length() );
+            g_checksum_update( ck , ( const guchar* ) s.c_str() , s.length() );
 
             current_push_path = g_strdup_printf( "/push/%s" , g_checksum_get_string( ck ) );
 
@@ -304,7 +304,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
             set_response( response , false , false , "" , push_info.target_files.front().source.name , current_push_path );
         }
     }
-    catch( const String & e )
+    catch ( const String& e )
     {
         set_response( response , true , true , e );
     }
@@ -312,7 +312,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
 //.............................................................................
 
-void AppPushServer::set_response( HttpServer::Response & response , bool done , bool failed , const String & msg , const String & file , const String & url )
+void AppPushServer::set_response( HttpServer::Response& response , bool done , bool failed , const String& msg , const String& file , const String& url )
 {
     using namespace JSON;
 
@@ -339,7 +339,7 @@ void AppPushServer::set_response( HttpServer::Response & response , bool done , 
 
 //.............................................................................
 
-AppPushServer::PushInfo AppPushServer::compare_files( const String & app_contents , const FileInfo::List & source_files )
+AppPushServer::PushInfo AppPushServer::compare_files( const String& app_contents , const FileInfo::List& source_files )
 {
     FreeLater free_later;
 
@@ -361,7 +361,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
     //.........................................................................
     // Create the root destination path
 
-    gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
+    gchar* app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
 
     push_info.metadata.set_root( app_path );
 
@@ -411,7 +411,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         //.....................................................................
         // It exists. Lets get a GFile for it.
 
-        GFile * file = g_file_new_for_path( target_path.c_str() );
+        GFile* file = g_file_new_for_path( target_path.c_str() );
 
         free_later( file , g_object_unref );
 
@@ -421,7 +421,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         // Try to get the file's current size. If it is different than the size
         // of the source file, we don't have to hash it to know that it changed.
 
-        GFileInfo * file_info = g_file_query_info( file , G_FILE_ATTRIBUTE_STANDARD_SIZE , G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS , 0 , 0 );
+        GFileInfo* file_info = g_file_query_info( file , G_FILE_ATTRIBUTE_STANDARD_SIZE , G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS , 0 , 0 );
 
         if ( file_info )
         {
@@ -448,11 +448,11 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         //.....................................................................
         // Otherwise, we have to get the target file's MD5 hash.
 
-        if ( GFileInputStream * input = g_file_read( file , NULL , NULL ) )
+        if ( GFileInputStream* input = g_file_read( file , NULL , NULL ) )
         {
             free_later( input , g_object_unref );
 
-            if ( GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 ) )
+            if ( GChecksum* ck = g_checksum_new( G_CHECKSUM_MD5 ) )
             {
                 static guint BUFFER_SIZE = 1024;
 
@@ -516,10 +516,10 @@ struct CancelPush
 
 private:
 
-    gchar * * path;
+    gchar** path;
 };
 
-void AppPushServer::handle_push_file( const HttpServer::Request & request , HttpServer::Response & response )
+void AppPushServer::handle_push_file( const HttpServer::Request& request , HttpServer::Response& response )
 {
     response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
 
@@ -545,7 +545,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
     //.........................................................................
     // Get the body of the request
 
-    const HttpServer::Request::Body & body( request.get_body() );
+    const HttpServer::Request::Body& body( request.get_body() );
 
     if ( 0 == body.get_data() )
     {
@@ -560,7 +560,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
         return;
     }
 
-    TargetInfo & target_info = current_push_info.target_files.front();
+    TargetInfo& target_info = current_push_info.target_files.front();
 
     // The file that they sent us doesn't match the original size they
     // told us. Bail.
@@ -573,7 +573,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
     // The md5 hash for what they sent us does not match what they told
     // us when they started the push.
 
-    gchar * ck = g_compute_checksum_for_data( G_CHECKSUM_MD5 , ( const guchar * ) body.get_data() , body.get_length() );
+    gchar* ck = g_compute_checksum_for_data( G_CHECKSUM_MD5 , ( const guchar* ) body.get_data() , body.get_length() );
 
     bool match = ! strcmp( ck , target_info.source.md5.c_str() );
 
@@ -590,7 +590,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
     {
         write_file( target_info , body );
     }
-    catch ( const String & e )
+    catch ( const String& e )
     {
         set_response( response , true , true , e );
 
@@ -624,7 +624,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
 
 //.............................................................................
 
-void AppPushServer::write_file( const TargetInfo & target_info , const HttpServer::Request::Body & body )
+void AppPushServer::write_file( const TargetInfo& target_info , const HttpServer::Request::Body& body )
 {
     g_assert( body.get_data() );
 
@@ -632,7 +632,7 @@ void AppPushServer::write_file( const TargetInfo & target_info , const HttpServe
     {
         FreeLater free_later;
 
-        gchar * d = g_path_get_dirname( target_info.path.c_str() );
+        gchar* d = g_path_get_dirname( target_info.path.c_str() );
 
         if ( ! d )
         {
@@ -669,13 +669,13 @@ bool AppPushServer::launch_it( )
     // uninstall its debugger so that it a) will clear pending commands
     // and b) won't break while it is closing.
 
-	if ( App * current_app = context->get_current_app() )
-	{
-        if ( Debugger * debugger = current_app->get_debugger() )
+    if ( App* current_app = context->get_current_app() )
+    {
+        if ( Debugger* debugger = current_app->get_debugger() )
         {
-        	debugger->uninstall();
+            debugger->uninstall();
         }
-	}
+    }
 
     context->close_current_app();
 

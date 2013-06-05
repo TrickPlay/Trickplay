@@ -28,19 +28,19 @@ struct UserData
         //.....................................................................
         // Create one from a user data you have.
 
-        static Handle * make( UserData * user_data , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
+        static Handle* make( UserData* user_data , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
 
         //.....................................................................
         // Creates one from a user data on the stack.
 
-        static Handle * make( lua_State * L , int index = 1 , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
+        static Handle* make( lua_State* L , int index = 1 , gpointer user = 0 , GDestroyNotify user_destroy = 0 );
 
         //.....................................................................
         // Just a cast.
 
-        inline static Handle * get( gpointer handle )
+        inline static Handle* get( gpointer handle )
         {
-            return ( Handle * ) handle;
+            return ( Handle* ) handle;
         }
 
         //.....................................................................
@@ -62,7 +62,7 @@ struct UserData
         // Gets the user data associated with this handle. May return NULL if
         // the Lua state is gone.
 
-        UserData * get_user_data()
+        UserData* get_user_data()
         {
             return UserData::get( master );
         }
@@ -70,19 +70,19 @@ struct UserData
         //.....................................................................
         // Gets the Lua state for it. It can be NULL if the Lua state is gone
 
-        lua_State * get_lua_state();
+        lua_State* get_lua_state();
 
         //.....................................................................
         // A shortcut to invoke a callback using the handle. It doesn't take
         // arguments because it assumes the owner of the handle doesn't keep
         // the Lua state - and therefore cannot push arguments.
 
-        int invoke_callback( const char * name , int nresults = 0 );
-        int invoke_callbacks( const char * name , int nresults = 0 , int default_ret = 0 );
+        int invoke_callback( const char* name , int nresults = 0 );
+        int invoke_callbacks( const char* name , int nresults = 0 , int default_ret = 0 );
 
     private:
 
-        GObject *       master;
+        GObject*        master;
         gpointer        user;
         GDestroyNotify  user_destroy;
     };
@@ -91,7 +91,7 @@ struct UserData
     // Creates a new user data and sets its initial state. It is not complete
     // until you call initialize.
 
-    static UserData * make( lua_State * L , const gchar * type );
+    static UserData* make( lua_State* L , const gchar* type );
 
     //.........................................................................
     // Initializes the user data with a newly created GObject which is used
@@ -125,14 +125,14 @@ struct UserData
     //.........................................................................
     // Returns the client associated with it.
 
-    inline static gpointer get_client( lua_State * L , int index = 1 )
+    inline static gpointer get_client( lua_State* L , int index = 1 )
     {
         return UserData::get( L , index )->client;
     }
 
     //.........................................................................
 
-    inline GObject * get_master() const
+    inline GObject* get_master() const
     {
         return master;
     }
@@ -146,30 +146,30 @@ struct UserData
 
     //.........................................................................
 
-    inline const char * get_type() const
+    inline const char* get_type() const
     {
         return type;
     }
 
     //.........................................................................
 
-    static std::string describe( lua_State * L , int index );
+    static std::string describe( lua_State* L , int index );
 
     //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
-    inline static UserData * get( lua_State * L , int index = 1 )
+    inline static UserData* get( lua_State* L , int index = 1 )
     {
         g_assert( L );
 
-        UserData * result = ( UserData * ) lua_touserdata( L , index );
+        UserData* result = ( UserData* ) lua_touserdata( L , index );
 
         g_assert( result );
 
         return result;
     }
 
-    inline static UserData * get_check( lua_State * L , int index = 1 )
+    inline static UserData* get_check( lua_State* L , int index = 1 )
     {
         g_assert( L );
 
@@ -183,16 +183,16 @@ struct UserData
             return 0;
         }
 
-        UserData * result = ( UserData * ) lua_touserdata( L , index );
+        UserData* result = ( UserData* ) lua_touserdata( L , index );
 
         g_assert( result );
 
         return result;
     }
 
-    inline static gpointer get_client_check( lua_State * L , int index = 1 )
+    inline static gpointer get_client_check( lua_State* L , int index = 1 )
     {
-        UserData * ud = get_check( L , index );
+        UserData* ud = get_check( L , index );
 
         return ud ? ud->client : 0;
     }
@@ -201,16 +201,16 @@ struct UserData
     // Gets the user data given a master object - can return NULL if the
     // user data/Lua state are gone.
 
-    inline static UserData * get( GObject * master)
+    inline static UserData* get( GObject* master )
     {
         g_assert( master );
 
-        return ( UserData * ) g_object_get_qdata( master , get_key_quark() );
+        return ( UserData* ) g_object_get_qdata( master , get_key_quark() );
     }
 
     //.........................................................................
 
-    inline static UserData * get_from_client( gpointer client )
+    inline static UserData* get_from_client( gpointer client )
     {
         gpointer master = g_hash_table_lookup( get_client_map() , client );
 
@@ -226,61 +226,61 @@ struct UserData
     //.........................................................................
     // This is called when the Lua object is destroyed.
 
-    static void finalize( lua_State * L , int index = 1 );
+    static void finalize( lua_State* L , int index = 1 );
 
     //.........................................................................
     // Install a callback on this user data
 
-    static int set_callback( const char * name , lua_State * L , int index = -2 , int function_index = -1 );
+    static int set_callback( const char* name , lua_State* L , int index = -2 , int function_index = -1 );
 
     //.........................................................................
     // Check if there is at least one callback of type 'name' on this user data
 
-    bool callback_attached( const char * name );
+    bool callback_attached( const char* name );
 
     //.........................................................................
     // Add callback with given name on this user data
 
-    int add_callback( char * name , lua_State * L );
+    int add_callback( char* name , lua_State* L );
 
     //.........................................................................
     // Sets last callback with given name on this user data
 
-    void set_last_callback( char * name , lua_State * L );
+    void set_last_callback( char* name , lua_State* L );
 
     //.........................................................................
     // Remove callback with given name and reference on this user data
 
-    void remove_callback( char * name, lua_State * L );
+    void remove_callback( char* name, lua_State* L );
 
     //.........................................................................
     // Invoke all callbacks with given name on this user data
 
-    int invoke_callbacks( const char * name , int nargs , int nresults , int default_ret=0 );
+    int invoke_callbacks( const char* name , int nargs , int nresults , int default_ret = 0 );
 
     //.........................................................................
     // Get last callback in list
 
-    int get_last_callback( char* name , lua_State * L );
+    int get_last_callback( char* name , lua_State* L );
 
     //.........................................................................
     // Remove last callback in list
 
-    GSList * remove_last_callback( char* name , lua_State * L );
+    GSList* remove_last_callback( char* name , lua_State* L );
 
     //.........................................................................
     // Retrieve a callback - will always push a value, nil or otherwise.
 
-    static int get_callback( const char * name , lua_State * L , int index = -1 );
+    static int get_callback( const char* name , lua_State* L , int index = -1 );
 
     //.........................................................................
     // Returns true if the given callback is attached to this user data.
 
-    static int is_callback_attached( const char * name , lua_State * L , int index = -1 );
+    static int is_callback_attached( const char* name , lua_State* L , int index = -1 );
 
     //.........................................................................
 
-    static void clear_callbacks( lua_State * L , int index = 1 );
+    static void clear_callbacks( lua_State* L , int index = 1 );
 
     void clear_callbacks();
 
@@ -289,60 +289,62 @@ struct UserData
     // given callback. It expects that nargs have been pushed on to the stack
     // already. In any case, it pops nargs.
 
-    static int invoke_callback( gpointer client , const char * name , int nargs , int nresults, lua_State * L );
-    static int invoke_callbacks( gpointer client , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
+    static int invoke_callback( gpointer client , const char* name , int nargs , int nresults, lua_State* L );
+    static int invoke_callbacks( gpointer client , const char* name , int nargs , int nresults, lua_State* L , int default_ret = 0 );
 
     //.........................................................................
     // Same as above, but can be used when you already know the master object,
     // so it skips the client lookup.
 
-    static int invoke_callback( GObject * master , const char * name , int nargs , int nresults, lua_State * L );
-    static int invoke_callbacks( GObject * master , const char * name , int nargs , int nresults, lua_State * L , int default_ret = 0 );
+    static int invoke_callback( GObject* master , const char* name , int nargs , int nresults, lua_State* L );
+    static int invoke_callbacks( GObject* master , const char* name , int nargs , int nresults, lua_State* L , int default_ret = 0 );
 
     //.........................................................................
     // If you already have the user data pointer, you can call this one.
 
-    int invoke_callback( const char * name , int nargs , int nresults );
+    int invoke_callback( const char* name , int nargs , int nresults );
 
     //.........................................................................
 
-    static int invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults );
-    static int invoke_global_callbacks( lua_State * L , const char * global , const char * name , int nargs , int nresults , int default_ret = 0 );
+    static int invoke_global_callback( lua_State* L , const char* global , const char* name , int nargs , int nresults );
+    static int invoke_global_callbacks( lua_State* L , const char* global , const char* name , int nargs , int nresults , int default_ret = 0 );
 
     //.........................................................................
     // Connect a signal handler to the master. We do this so that we can
     // track the connected handlers and disconnect them all when the proxy
     // object goes away.
 
-    void connect_signal( const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags = 0 );
+    void connect_signal( const gchar* name, const gchar* detailed_signal, GCallback handler, gpointer data, int flags = 0 );
 
-    void connect_signal_if( bool condition , const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags = 0 );
+    void connect_signal_if( bool condition , const gchar* name, const gchar* detailed_signal, GCallback handler, gpointer data, int flags = 0 );
 
     //.........................................................................
     // Disconnect a signal by name
 
-    void disconnect_signal( const gchar * name );
+    void disconnect_signal( const gchar* name );
 
     //.........................................................................
     // Debugging.
 
-    static void dump_cb( lua_State * L , int index = 1 );
+    static void dump_cb( lua_State* L , int index = 1 );
 
     static void dump();
 
-    bool gc_tag( const gchar * comment );
+    bool gc_tag( const gchar* comment );
+
+    lua_State* get_lua_state() { return L; }
 
 private:
 
     friend struct Handle;
 
-    GSList * remove_callback( GSList * link , GSList * list , char * name , lua_State *L );
+    GSList* remove_callback( GSList* link , GSList* list , char* name , lua_State* L );
 
     //.........................................................................
 
-    inline static GHashTable * get_client_map()
+    inline static GHashTable* get_client_map()
     {
-        static GHashTable * client_map = 0;
+        static GHashTable* client_map = 0;
 
         if ( client_map == 0 )
         {
@@ -358,7 +360,7 @@ private:
 
     inline static GQuark get_key_quark()
     {
-        static const char * key = "_tp_master_data_";
+        static const char* key = "_tp_master_data_";
 
         static GQuark key_quark = 0;
 
@@ -373,14 +375,14 @@ private:
     //.........................................................................
     // Non-static version.
 
-    int get_callback( const char * name );
+    int get_callback( const char* name );
 
     //.........................................................................
     // This gets called when our toggle ref is the last one or is not. When it
     // is the last one, we switch our proxy ref to weak, so it can be collected.
     // When it is not the last one, we switch it to strong, so it is kept around.
 
-    static void toggle_notify( UserData * self , GObject * master , gboolean is_last_ref );
+    static void toggle_notify( UserData* self , GObject* master , gboolean is_last_ref );
 
     //.........................................................................
 
@@ -388,11 +390,11 @@ private:
 
     //.........................................................................
 
-    lua_State *     L;
+    lua_State*      L;
 
     //.........................................................................
 
-    gchar *         type;
+    gchar*          type;
 
     //.........................................................................
     // The controlling GObject - if one is not provided, we create one. This
@@ -400,7 +402,7 @@ private:
     // we have a ref to it. Once we are finalized, it can continue to remain
     // alive if someone else has a ref to it.
 
-    GObject *       master;
+    GObject*        master;
 
     //.........................................................................
     // The user's pointer. His data is bolted here and is opaque to us.
@@ -429,7 +431,7 @@ private:
 
     typedef std::map< String , gulong > SignalMap;
 
-    SignalMap *     signals;
+    SignalMap*      signals;
 
     //.........................................................................
 
@@ -442,7 +444,7 @@ private:
 
     class GCTag;
 
-    GCTag *            gctag;
+    GCTag*             gctag;
 
 #endif
 };

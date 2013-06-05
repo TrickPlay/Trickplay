@@ -4,19 +4,19 @@
 ]]
 
 /*
-	UndocumentedGlobal: system
-	
-	The system global variable provides functions to acquire and release various keyboard devices.
-	
-	Currently, these functions are not useful/relevant, so the system global variable is not included in the Engine Reference. When the variable becomes relevant in the future, it can be re-instated in the "System Info" section.
+    UndocumentedGlobal: system
+
+    The system global variable provides functions to acquire and release various keyboard devices.
+
+    Currently, these functions are not useful/relevant, so the system global variable is not included in the Engine Reference. When the variable becomes relevant in the future, it can be re-instated in the "System Info" section.
 */
 
 global system [[TPContext*]]
 {
     system()
         [[
-        	self=lb_construct( TPContext , App::get(L)->get_context() );
-       	]];
+            self=lb_construct( TPContext , App::get(L)->get_context() );
+        ]];
 
     # UndocumentedFunction: acquire_numeric_keypad
     # Requests access to the numeric keypad. This can be used to allow the user
@@ -26,21 +26,21 @@ global system [[TPContext*]]
     # Returns:
     # true - If the app can access the numeric keypad
     # false - Otherwise
-        
+
     bool acquire_numeric_keypad()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_NUMERIC_KEYPAD);
         ]];
-        
+
     # UndocumentedFunction: release_numeric_keypad
     # Notifies the device that the application no longer requires the
     # numeric keypad
-        
+
     release_numeric_keypad()
         [[
             self->notify(self,TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD);
         ]];
-        
+
     # UndocumentedFunction: acquire_transport_control_keys
     # Requests access to transport control keys such as play, pause, etc. You
     # should call <release_transport_control_keys> when you are done using the
@@ -49,21 +49,21 @@ global system [[TPContext*]]
     # Returns:
     # true - If the app can access transport control keys
     # false - Otherwise
-    
+
     bool acquire_transport_control_keys()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_TRANSPORT_CONTROL_KEYS);
         ]];
-        
+
     # UndocumentedFunction: release_transport_control_keys
     # Notifies the device that the app no longer needs the transport control
     # keys.
-    
+
     release_transport_control_keys()
         [[
             self->notify(self,TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS);
         ]];
-    
+
     # UndocumentedFunction: acquire_keyboard
     # Requests access to a keyboard or keyboard-like input device. If the device
     # does not have a keyboard or the app is not allowed to use it, it will
@@ -74,18 +74,18 @@ global system [[TPContext*]]
     # Returns:
     # true - If the app can access the keyboard
     # false - Otherwise
-    
+
     bool acquire_keyboard()
         [[
             result=self->request(TP_REQUEST_ACQUIRE_KEYBOARD);
         ]];
-        
+
     # UndocumentedFunction: release_keyboard
     # Notifies the device that the app no longer needs the keyboard.
-    
+
     release_keyboard()
         [[
             self->notify(self,TP_NOTIFICATION_RELEASE_KEYBOARD);
         ]];
-    
+
 }

@@ -14,8 +14,8 @@
 
 //=============================================================================
 
-Actions::Actions( TPContext * _context )
-:
+Actions::Actions( TPContext* _context )
+    :
     context( _context )
 {
 }
@@ -23,13 +23,13 @@ Actions::Actions( TPContext * _context )
 //.............................................................................
 
 bool Actions::launch_action(
-        const char * caller,
-        const char * app_id,
-        const char * action_name,
-        const char * uri,
-        const char * type,
-        const char * parameters,
-        SystemDatabase::AppActionMap & matches )
+        const char* caller,
+        const char* app_id,
+        const char* action_name,
+        const char* uri,
+        const char* type,
+        const char* parameters,
+        SystemDatabase::AppActionMap& matches )
 {
     // Caller can not be NULL - all of the others can.
 
@@ -53,7 +53,7 @@ bool Actions::launch_action(
 
     for ( SystemDatabase::AppActionMap::const_iterator it = actions.begin(); it != actions.end(); ++it )
     {
-        const App::Action::Map & app_actions( it->second );
+        const App::Action::Map& app_actions( it->second );
 
         // If an app id was provided and it does not match this app, skip the rest
 
@@ -150,7 +150,7 @@ bool Actions::launch_action(
 
 //.............................................................................
 
-bool Actions::match_pattern( const char * source, const String & pattern )
+bool Actions::match_pattern( const char* source, const String& pattern )
 {
     bool result = false;
 

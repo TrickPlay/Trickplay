@@ -7,10 +7,11 @@ module clutter_rectangle;
 #include "clutter_util.h"
 ]]
 
+
 /***************************************
     Class: Rectangle
 
-	The Rectangle data type is a simple four-cornered rectangle.
+    The Rectangle data type is a simple four-cornered rectangle.
 
     In addition to the properties and functions described on this page, the Rectangle data type also supports all the properties and functions defined in the <UIElement> interface.
 */
@@ -19,91 +20,126 @@ class Rectangle [[ClutterActor*]] actor
 {
     Rectangle(table props = 0)
         [[
-        	// This call adds an extra ref to the created actor.
-        	// We do this to avoid triggering the toggle ref a bunch of
-        	// times during construction.
+            // This call adds an extra ref to the created actor.
+            // We do this to avoid triggering the toggle ref a bunch of
+            // times during construction.
 
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_rectangle_new ) );
-	    	ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
-	    	ClutterUtil::set_props_from_table(L,props);
-	    	g_object_unref( self );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
+            ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
+
+            ClutterLayoutManager *grid = clutter_grid_layout_new();
+            clutter_actor_set_layout_manager (self, grid);
+
+            ClutterActor *inner = clutter_actor_new();
+            clutter_actor_set_x_expand (inner, TRUE);
+            clutter_actor_set_y_expand (inner, TRUE);
+
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 0, 3, 1); // Padding on top
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), inner, 1, 1, 1, 1);
+            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 2, 3, 1); // Padding on bottom
+
+            ClutterUtil::set_props_from_table(L,props);
+            g_object_unref( self );
         ]];
 
     ~Rectangle()
-		[[
-		]];
+        [[
+        ]];
 
 /***************************************
-	Property: color
+    Property: color
 
-	The color property specifies the object's fill color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+    The color property specifies the object's fill color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-	*Default Setting:* rgba(255,255,255,255)
+    *Default Setting:* rgba(255,255,255,255)
 
-	*Code Example:* Set rectangle's color using a table
+    *Code Example:* Set rectangle's color using a table
 
-		(code)
-		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
-		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
-		(end)
+        (code)
+        r.color = { 255, 0, 255 }       -- RGB values with default/opaque alpha
+        r.color = { 255, 0, 255, 100 }  -- RGB with explicit alpha
+        (end)
 
-	*Code Example:* Set rectangle's color using a string
+    *Code Example:* Set rectangle's color using a string
 
-		(code)
-		r.color = "#FF00FF"      -- RGB values with default 0xFF/opaque alpha
-		r.color = "#FF00FF40"    -- RGB values with explicit alpha
-		r.color = "#FF00FF"      -- RGB values, default alpha
-		(end)
+        (code)
+        r.color = "#FF00FF"      -- RGB values with default 0xFF/opaque alpha
+        r.color = "#FF00FF40"    -- RGB values with explicit alpha
+        r.color = "#FF00FF"      -- RGB values, default alpha
+        (end)
 */
 
     table color
         [[
             ClutterColor color;
-            clutter_rectangle_get_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+            clutter_actor_get_background_color(inner, &color);
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            clutter_rectangle_set_color(CLUTTER_RECTANGLE(self),&color);
+            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+
+            // Need to deal with easing state in case this is an animation -- just copy from parent
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_save_easing_state( inner );
+                clutter_actor_set_easing_duration( inner, clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_delay( inner, clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_mode( inner, clutter_actor_get_easing_mode(self) );
+            }
+
+            clutter_actor_set_background_color(inner, &color);
+
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_restore_easing_state( inner );
+            }
+
         ]];
 
 /***************************************
-	Property: border_width
+    Property: border_width
 
-	The border_width property specifies the Rectangle's border in pixels.
+    The border_width property specifies the Rectangle's border in pixels.
 
-   	*Default Setting:* A border width of 0 pixels, i.e., no border.
+    *Default Setting:* A border width of 0 pixels, i.e., no border.
 
-   	*See Also:* the <border_color> property
+    *See Also:* the <border_color> property
 */
 
     int border_width
-        [[border_width=clutter_rectangle_get_border_width(CLUTTER_RECTANGLE(self));]]
-        [[clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(self),border_width);]];
+        [[
+            border_width=clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)));
+        ]]
+        [[
+            clutter_grid_layout_set_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
+            clutter_grid_layout_set_row_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
+        ]];
 
 /***************************************
-	Property: border_color
+    Property: border_color
 
-	The border_color property specifies the color of the Rectangle's border. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+    The border_color property specifies the color of the Rectangle's border. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 
-	For the border_color property to have an effect, the Rectangle's border_width property must be greater than 0.
+    For the border_color property to have an effect, the Rectangle's border_width property must be greater than 0.
 
-   	*Default Setting:* rgba(255,255,255,255)
+    *Default Setting:* rgba(255,255,255,255)
 
-   	*See Also:* the <border_width> property
+    *See Also:* the <border_width> property
 */
 
     table border_color
         [[
             ClutterColor color;
-            clutter_rectangle_get_border_color(CLUTTER_RECTANGLE(self),&color);
+            clutter_actor_get_background_color(self,&color);
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
+            clutter_actor_set_background_color(self,&color);
         ]];
 }
 
