@@ -51,10 +51,13 @@
        <item>
         <widget class="QLineEdit" name="directory">
          <property name="text">
-          <string>Project Directory</string>
+          <string/>
          </property>
          <property name="readOnly">
           <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string>Project Directory</string>
          </property>
         </widget>
        </item>

@@ -1,0 +1,122 @@
+[{
+  "sprites": [
+    { "x": 1, "y": 1, "w": 481, "h": 40, "id": "menubar/blue-overlay.png" },
+    { "x": 1, "y": 43, "w": 480, "h": 270, "id": "generic-app-icon.jpg" },
+    { "x": 1, "y": 315, "w": 369, "h": 101, "id": "paytv_logos/bbox.png" },
+    { "x": 372, "y": 315, "w": 369, "h": 101, "id": "paytv_logos/bouygues.png" },
+    { "x": 1, "y": 418, "w": 369, "h": 101, "id": "paytv_logos/bt.png" },
+    { "x": 372, "y": 418, "w": 369, "h": 101, "id": "paytv_logos/cablevision.png" },
+    { "x": 1, "y": 521, "w": 369, "h": 101, "id": "paytv_logos/charter.png" },
+    { "x": 372, "y": 521, "w": 369, "h": 101, "id": "paytv_logos/cox.png" },
+    { "x": 1, "y": 624, "w": 369, "h": 101, "id": "paytv_logos/directv.png" },
+    { "x": 372, "y": 624, "w": 369, "h": 101, "id": "paytv_logos/kt.png" },
+    { "x": 1, "y": 727, "w": 369, "h": 101, "id": "paytv_logos/uverse.png" },
+    { "x": 372, "y": 727, "w": 369, "h": 101, "id": "paytv_logos/xfinity.png" },
+    { "x": 1, "y": 830, "w": 360, "h": 77, "id": "epg/timeline-interval.png" },
+    { "x": 1, "y": 909, "w": 350, "h": 115, "id": "epg-episode-blue-focus.png" },
+    { "x": 1, "y": 1026, "w": 50, "h": 290, "id": "line-separator-vertical.png" },
+    { "x": 53, "y": 1026, "w": 280, "h": 5, "id": "epg/logo-list-bg.png" },
+    { "x": 53, "y": 1033, "w": 259, "h": 148, "id": "channel-logos/KRONDT.png" },
+    { "x": 314, "y": 1033, "w": 259, "h": 148, "id": "channel-logos/KTVUDT.png" },
+    { "x": 483, "y": 43, "w": 259, "h": 148, "id": "channel-logos/KRCB.png" },
+    { "x": 575, "y": 1033, "w": 229, "h": 148, "id": "channel-logos/WDSIDT.png" },
+    { "x": 53, "y": 1183, "w": 215, "h": 148, "id": "channel-logos/KNTVDT.png" },
+    { "x": 1, "y": 1318, "w": 5, "h": 210, "id": "epg/channel-bg-current.png" },
+    { "x": 8, "y": 1318, "w": 5, "h": 210, "id": "epg/channel-bg.png" },
+    { "x": 15, "y": 1318, "w": 5, "h": 210, "id": "epg/epg-focus-bg.png" },
+    { "x": 22, "y": 1318, "w": 5, "h": 210, "id": "epg/epg-header-bg.png" },
+    { "x": 29, "y": 1318, "w": 5, "h": 210, "id": "epg/epg-timeline-bg.png" },
+    { "x": 36, "y": 1318, "w": 2, "h": 210, "id": "epg/show-border.png" },
+    { "x": 270, "y": 1183, "w": 193, "h": 148, "id": "channel-logos/KOFYDT.png" },
+    { "x": 465, "y": 1183, "w": 190, "h": 148, "id": "channel-logos/KICUDT.png" },
+    { "x": 53, "y": 1333, "w": 185, "h": 148, "id": "channel-logos/KBCWDT.png" },
+    { "x": 240, "y": 1333, "w": 184, "h": 148, "id": "channel-logos/KQEDDT.png" },
+    { "x": 40, "y": 1318, "w": 10, "h": 176, "id": "epg/epg-behind-channel-bg.png" },
+    { "x": 53, "y": 1483, "w": 10, "h": 170, "id": "epg/epg-non-focus.png" },
+    { "x": 65, "y": 1483, "w": 10, "h": 170, "id": "epg/epg-focus-blue.png" },
+    { "x": 657, "y": 1183, "w": 145, "h": 148, "id": "channel-logos/KDTVDT.png" },
+    { "x": 426, "y": 1333, "w": 132, "h": 148, "id": "channel-logos/KPIXDT.png" },
+    { "x": 560, "y": 1333, "w": 121, "h": 148, "id": "channel-logos/KGODT.png" },
+    { "x": 744, "y": 43, "w": 10, "h": 148, "id": "channelbar/channel-bar-focus.png" },
+    { "x": 756, "y": 43, "w": 10, "h": 148, "id": "channelbar/channel-bar.png" },
+    { "x": 77, "y": 1483, "w": 47, "h": 144, "id": "search-letter-focus.png" },
+    { "x": 126, "y": 1483, "w": 137, "h": 137, "id": "epg-cast-focus.png" },
+    { "x": 265, "y": 1483, "w": 130, "h": 129, "id": "VOD_icons/icon-recommended-focus.png" },
+    { "x": 397, "y": 1483, "w": 130, "h": 129, "id": "VOD_icons/icon-new-releases-focus.png" },
+    { "x": 529, "y": 1483, "w": 130, "h": 129, "id": "VOD_icons/icon-catchup-tv-focus.png" },
+    { "x": 661, "y": 1483, "w": 130, "h": 129, "id": "VOD_icons/icon-movies-focus.png" },
+    { "x": 265, "y": 1614, "w": 130, "h": 129, "id": "VOD_icons/icon-top-picks-focus.png" },
+    { "x": 397, "y": 1614, "w": 130, "h": 129, "id": "VOD_icons/icon-catchup-tv.png" },
+    { "x": 529, "y": 1614, "w": 130, "h": 129, "id": "VOD_icons/icon-movies.png" },
+    { "x": 661, "y": 1614, "w": 130, "h": 129, "id": "VOD_icons/icon-new-releases.png" },
+    { "x": 265, "y": 1745, "w": 130, "h": 129, "id": "VOD_icons/icon-recommended.png" },
+    { "x": 397, "y": 1745, "w": 130, "h": 129, "id": "VOD_icons/icon-top-picks.png" },
+    { "x": 529, "y": 1745, "w": 118, "h": 118, "id": "cast1.png" },
+    { "x": 649, "y": 1745, "w": 118, "h": 118, "id": "cast2.png" },
+    { "x": 126, "y": 1622, "w": 118, "h": 118, "id": "cast3.png" },
+    { "x": 126, "y": 1742, "w": 118, "h": 118, "id": "cast4.png" },
+    { "x": 483, "y": 193, "w": 118, "h": 118, "id": "cast5.png" },
+    { "x": 603, "y": 193, "w": 118, "h": 118, "id": "cast6.png" },
+    { "x": 683, "y": 1333, "w": 118, "h": 118, "id": "cast7.png" },
+    { "x": 53, "y": 1655, "w": 10, "h": 115, "id": "epg-episode-blue-bg.png" },
+    { "x": 353, "y": 909, "w": 93, "h": 10, "id": "epg-glow-left-side.png" },
+    { "x": 484, "y": 1, "w": 72, "h": 40, "id": "live-tv-et.png" },
+    { "x": 558, "y": 1, "w": 72, "h": 40, "id": "live-tv-showbiz.png" },
+    { "x": 632, "y": 1, "w": 72, "h": 40, "id": "live-tv-tmz.png" },
+    { "x": 448, "y": 909, "w": 4, "h": 59, "id": "epg-line-btwn-channels.png" },
+    { "x": 454, "y": 909, "w": 27, "h": 26, "id": "check-mark-orange.png" },
+    { "x": 53, "y": 1772, "w": 10, "h": 25, "id": "epg/epg-cell-text-coverup.png" },
+    { "x": 483, "y": 909, "w": 22, "h": 22, "id": "search-yellow-dot.png" },
+    { "x": 483, "y": 933, "w": 22, "h": 22, "id": "search-green-dot.png" },
+    { "x": 483, "y": 957, "w": 22, "h": 22, "id": "search-red-dot.png" }
+  ],
+  "img": "assets-0.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 700, "h": 366, "id": "blue-glow.png" }
+  ],
+  "img": "assets-1.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 1175, "h": 470, "id": "tp_logo.png" }
+  ],
+  "img": "assets-2.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 525, "h": 50, "id": "menubar/bar-highlight.png" }
+  ],
+  "img": "assets-3.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 1280, "h": 10, "id": "epg/epg-overlay-black.png" }
+  ],
+  "img": "assets-4.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 640, "h": 366, "id": "epg/blue-glow.png" }
+  ],
+  "img": "assets-5.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 1920, "h": 1080, "id": "background/bg-3.jpg" }
+  ],
+  "img": "assets-6.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 1920, "h": 1080, "id": "background/bg-2.jpg" }
+  ],
+  "img": "assets-7.png"
+},
+{
+  "sprites": [
+    { "x": 0, "y": 0, "w": 1920, "h": 1080, "id": "background/bg-1.jpg" }
+  ],
+  "img": "assets-8.png"
+}]

@@ -204,7 +204,7 @@ TextStyle = function(parameters)
 	parameters = is_table_or_nil("TextStyle",parameters)
     local colors = ColorScheme(default_text_colors)
     local properties = {
-        font  = "Sans 40px",
+        font  = "FreeSans 40px",
         alignment = "CENTER",
         justify = true,
         wrap    = true,
@@ -1021,6 +1021,7 @@ Style = setmetatable({},
                     text            = function() return text            end,
                     attributes      = function()
                         return {
+                            text        = text.attributes,
                             spritesheet = instance.spritesheet,
                             name        = instance.name,
                             type        = instance.type,
@@ -1029,7 +1030,7 @@ Style = setmetatable({},
                 }
                 getmetatable(instance).__index    = __index(meta_getters)
 
-                for id,_ in pairs(spritesheet:get_ids()) do
+                for _,id in ipairs(spritesheet.ids) do
                     meta_getters[id] = function()
                         return id--Sprite{ sheet = default_spritesheet, id = id }
                     end

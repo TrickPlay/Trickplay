@@ -10,58 +10,65 @@
 
 namespace JPEGUtils
 {
-	//.........................................................................
+//.........................................................................
 
-	int get_exif_orientation( const char * filename );
+int get_exif_orientation( const char* filename );
 
-	//.........................................................................
+//.........................................................................
 
-	int get_exif_orientation( const unsigned char * data , unsigned int size );
+int get_exif_orientation( const unsigned char* data , unsigned int size );
 
-	//.........................................................................
+//.........................................................................
 
-    class Rotator
+class Rotator
+{
+public:
+
+    Rotator( int orientation , unsigned int width , unsigned int height , unsigned int depth );
+
+    virtual ~Rotator();
+
+    inline unsigned int get_transformed_location( unsigned int x , unsigned int y ) const
     {
-    public:
+        switch ( orientation )
+        {
+            case 2: return ( ( y * width + width - x ) - 1 ) * depth;
 
-		Rotator( int orientation , unsigned int width , unsigned int height , unsigned int depth );
+            case 3: return ( ( ( height - y  - 1 ) * width + width - x ) - 1 ) * depth;
 
-		virtual ~Rotator();
+            case 4: return ( ( height - y - 1 ) * width + x ) * depth;
 
-    	inline unsigned int get_transformed_location( unsigned int x , unsigned int y ) const
-    	{
-        	switch( orientation )
-        	{
-        	case 2: return ( ( y * width + width - x ) - 1 ) * depth;
-        	case 3: return ( ( ( height - y  - 1 ) * width + width - x ) - 1 ) * depth;
-        	case 4: return ( ( height - y - 1 ) * width + x ) * depth;
-        	case 5: return ( x * height + y ) * depth;
-        	case 6: return ( ( x * height + height - y ) - 1 ) * depth ;
-        	case 7: return ( ( ( width - x - 1 ) * height + height - y ) - 1 ) * depth;
-        	case 8:	return ( ( width - x - 1 ) * height + y ) * depth;
-        	}
-        	return ( y * width + x ) * depth;
-    	}
+            case 5: return ( x * height + y ) * depth;
 
-    	inline unsigned int get_transformed_height() const
-    	{
-    		return orientation <= 4 ? height : width;
-    	}
+            case 6: return ( ( x * height + height - y ) - 1 ) * depth ;
 
-    	inline unsigned int get_transformed_width() const
-    	{
-    		return orientation <= 4 ? width : height;
-    	}
+            case 7: return ( ( ( width - x - 1 ) * height + height - y ) - 1 ) * depth;
 
-    private:
+            case 8: return ( ( width - x - 1 ) * height + y ) * depth;
+        }
 
-    	Rotator();
+        return ( y * width + x ) * depth;
+    }
 
-    	const int 			orientation;
-    	const unsigned int 	width;
-    	const unsigned int 	height;
-    	const unsigned int 	depth;
-    };
+    inline unsigned int get_transformed_height() const
+    {
+        return orientation <= 4 ? height : width;
+    }
+
+    inline unsigned int get_transformed_width() const
+    {
+        return orientation <= 4 ? width : height;
+    }
+
+private:
+
+    Rotator();
+
+    const int           orientation;
+    const unsigned int  width;
+    const unsigned int  height;
+    const unsigned int  depth;
+};
 };
 
 #endif // _TRICKPLAY_JPEG_UTILS_H

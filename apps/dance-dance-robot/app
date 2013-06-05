@@ -5,5 +5,6 @@ app=
     version     = "1.0",
     name        = "Dance Dance Robot",
     copyright   = "© Trickplay Inc.",
+    description = "This is like a game or something",
 }
 

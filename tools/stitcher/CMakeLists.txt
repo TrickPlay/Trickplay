@@ -3,10 +3,10 @@ add_definitions( -DG_LOG_DOMAIN="\\"stitcher\\"" )
 
 include( FindPkgConfig )
 
-pkg_search_module(GLIB2         REQUIRED    glib-2.0 )
-pkg_search_module(GOBJECT2      REQUIRED    gobject-2.0 )
-pkg_search_module(JSON_GLIB     REQUIRED    json-glib-1.0 )
-pkg_search_module(MAGICKCORE    REQUIRED    MagickCore )
+pkg_check_modules(GLIB2         REQUIRED    glib-2.0 )
+pkg_check_modules(GOBJECT2      REQUIRED    gobject-2.0 )
+pkg_check_modules(JSON_GLIB     REQUIRED    json-glib-1.0 )
+pkg_check_modules(MAGICKCORE    REQUIRED    MagickCore )
 
 include_directories(
                     ${GLIB2_INCLUDE_DIRS}
@@ -39,8 +39,10 @@ target_link_libraries( stitcher
         ${GOBJECT2_LIBRARIES}
         ${JSON_GLIB_LIBRARIES}
         ${MAGICKCORE_LIBRARIES}
-		-lm
+        -lm
 )
+
+string(REPLACE ";" " " MAGICKCORE_CFLAGS_OTHER "${MAGICKCORE_CFLAGS_OTHER}")
 
 set_target_properties( stitcher
     PROPERTIES

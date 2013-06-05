@@ -43,83 +43,83 @@
 // Bindings
 //-----------------------------------------------------------------------------
 
-extern int luaopen_clutter_actor( lua_State * L );
-extern int luaopen_clutter_container( lua_State * L );
-extern int luaopen_clutter_screen( lua_State * L );
-extern int luaopen_clutter_text( lua_State * L );
-extern int luaopen_clutter_rectangle( lua_State * L );
-extern int luaopen_clutter_clone( lua_State * L );
-extern int luaopen_clutter_group( lua_State * L );
-extern int luaopen_clutter_image( lua_State * L );
+extern int luaopen_clutter_actor( lua_State* L );
+extern int luaopen_clutter_container( lua_State* L );
+extern int luaopen_clutter_screen( lua_State* L );
+extern int luaopen_clutter_text( lua_State* L );
+extern int luaopen_clutter_rectangle( lua_State* L );
+extern int luaopen_clutter_clone( lua_State* L );
+extern int luaopen_clutter_group( lua_State* L );
+extern int luaopen_clutter_image( lua_State* L );
 
-extern int luaopen_sprite_sheet( lua_State * L );
-extern int luaopen_sprite( lua_State * L );
-extern int luaopen_nineslice( lua_State * L );
+extern int luaopen_sprite_sheet( lua_State* L );
+extern int luaopen_sprite( lua_State* L );
+extern int luaopen_nineslice( lua_State* L );
 
-extern int luaopen_clutter_timeline( lua_State * L );
-extern int luaopen_clutter_animator( lua_State * L );
-extern int luaopen_clutter_state( lua_State * L );
-extern int luaopen_clutter_score( lua_State * L );
-extern int luaopen_clutter_alpha( lua_State * L );
-extern int luaopen_clutter_interval( lua_State * L );
-extern int luaopen_clutter_path( lua_State * L );
-extern int luaopen_clutter_constraint( lua_State * L );
+extern int luaopen_clutter_timeline( lua_State* L );
+extern int luaopen_clutter_animator( lua_State* L );
+extern int luaopen_clutter_state( lua_State* L );
+extern int luaopen_clutter_score( lua_State* L );
+extern int luaopen_clutter_alpha( lua_State* L );
+extern int luaopen_clutter_interval( lua_State* L );
+extern int luaopen_clutter_path( lua_State* L );
+extern int luaopen_clutter_constraint( lua_State* L );
 
-extern int luaopen_idle( lua_State * L );
-extern int luaopen_timer( lua_State * L );
-extern int luaopen_url_request( lua_State * L );
-extern int luaopen_globals( lua_State * L );
-extern int luaopen_app( lua_State * L );
-extern int luaopen_system( lua_State * L );
-extern int luaopen_settings( lua_State * L );
-extern int luaopen_profile( lua_State * L );
-extern int luaopen_xml( lua_State * L );
-extern int luaopen_controllers( lua_State * L );
-extern int luaopen_Controller( lua_State * L );
-extern int luaopen_tuners( lua_State * L );
-extern int luaopen_Tuner( lua_State * L );
-extern int luaopen_mediaplayer_module( lua_State * L );
-extern int luaopen_stopwatch( lua_State * L );
-extern int luaopen_json( lua_State * L );
-extern int luaopen_regex( lua_State * L);
+extern int luaopen_idle( lua_State* L );
+extern int luaopen_timer( lua_State* L );
+extern int luaopen_url_request( lua_State* L );
+extern int luaopen_globals( lua_State* L );
+extern int luaopen_app( lua_State* L );
+extern int luaopen_system( lua_State* L );
+extern int luaopen_settings( lua_State* L );
+extern int luaopen_profile( lua_State* L );
+extern int luaopen_xml( lua_State* L );
+extern int luaopen_controllers( lua_State* L );
+extern int luaopen_Controller( lua_State* L );
+extern int luaopen_tuners( lua_State* L );
+extern int luaopen_Tuner( lua_State* L );
+extern int luaopen_mediaplayer_module( lua_State* L );
+extern int luaopen_stopwatch( lua_State* L );
+extern int luaopen_json( lua_State* L );
+extern int luaopen_regex( lua_State* L );
 
-extern int luaopen_socket( lua_State * L );
+extern int luaopen_socket( lua_State* L );
 
-extern int luaopen_uri( lua_State * L );
-extern int luaopen_physics_module( lua_State * L );
-extern int luaopen_physics_bullet( lua_State * L );
-extern int luaopen_editor( lua_State * L );
-extern int luaopen_trickplay( lua_State * L );
-extern int luaopen_bitmap( lua_State * L );
-extern int luaopen_canvas( lua_State * L );
-extern int luaopen_keyboard( lua_State * L );
-extern int luaopen_http_module( lua_State * L );
-extern int luaopen_ease( lua_State * L );
-extern int luaopen_matrix( lua_State * L );
+extern int luaopen_uri( lua_State* L );
+extern int luaopen_physics_module( lua_State* L );
+extern int luaopen_physics_bullet( lua_State* L );
+extern int luaopen_editor( lua_State* L );
+extern int luaopen_trickplay( lua_State* L );
+extern int luaopen_bitmap( lua_State* L );
+extern int luaopen_canvas( lua_State* L );
+extern int luaopen_keyboard( lua_State* L );
+extern int luaopen_http_module( lua_State* L );
+extern int luaopen_ease( lua_State* L );
+extern int luaopen_matrix( lua_State* L );
 
 #ifdef TP_WITH_GAMESERVICE
-extern int luaopen_gameservice( lua_State * L );
+extern int luaopen_gameservice( lua_State* L );
 #endif
 
 #ifdef TP_WITH_WEBGL
-extern int luaopen_typed_array( lua_State * L );
-extern int luaopen_webgl( lua_State * L );
+extern int luaopen_typed_array( lua_State* L );
+extern int luaopen_webgl( lua_State* L );
 #endif
 
 #ifndef TP_PRODUCTION
-extern int luaopen_devtools( lua_State * L );
+extern int luaopen_devtools( lua_State* L );
 #endif
 
 #ifdef TP_UPNP_CLIENT
-extern int luaopen_upnp( lua_State * L );
+extern int luaopen_upnp( lua_State* L );
 #endif
 
-extern int luaopen_restricted( lua_State * L );
-extern int luaopen_apps( lua_State * L );
+extern int luaopen_restricted( lua_State* L );
+extern int luaopen_apps( lua_State* L );
 
 // This one comes from keys.cpp and is not generated by lb
 
-extern void luaopen_keys( lua_State * L );
+extern void luaopen_keys( lua_State* L );
 
 // The address to use as a key for the app itself
 
@@ -129,25 +129,25 @@ static char TP_APP_KEY = 0;
 
 //=============================================================================
 
-LuaStateProxy::LuaStateProxy( lua_State * l )
+LuaStateProxy::LuaStateProxy( lua_State* l )
     :
     L( l )
 {
-//    g_debug( "CREATED LSP %p", this );
+    //    g_debug( "CREATED LSP %p", this );
 }
 
 LuaStateProxy::~LuaStateProxy()
 {
-//    g_debug( "DESTROYED LSP %p", this );
+    //    g_debug( "DESTROYED LSP %p", this );
 }
 
 void LuaStateProxy::invalidate()
 {
     L = NULL;
-//    g_debug( "INVALIDATED LSP %p", this );
+    //    g_debug( "INVALIDATED LSP %p", this );
 }
 
-lua_State * LuaStateProxy::get_lua_state()
+lua_State* LuaStateProxy::get_lua_state()
 {
     return L;
 }
@@ -159,13 +159,13 @@ bool LuaStateProxy::is_valid()
 
 //=============================================================================
 
-bool App::Metadata::set_root( const String & uri_or_native_path )
+bool App::Metadata::set_root( const String& uri_or_native_path )
 {
-    GFile * file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
+    GFile* file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
 
-    char * uri = g_file_get_uri( file );
+    char* uri = g_file_get_uri( file );
 
-    char * path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
+    char* path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
 
     g_object_unref( file );
 
@@ -187,21 +187,21 @@ class LuaAPIPlugin
 {
 public:
 
-    static void call_open( lua_State * L )
+    static void call_open( lua_State* L )
     {
-        App * app = App::get( L );
+        App* app = App::get( L );
 
         String app_id = app->get_id();
 
-        List * list = get_list( app->get_context() );
+        List* list = get_list( app->get_context() );
 
         for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
         {
-            tplog2( "CALLING OPEN ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+            tplog2( "CALLING OPEN ON PLUGIN '%s'..." , ( *it )->plugin->name().c_str() );
 
             int top_before = lua_gettop( L );
 
-            int result = (*it)->open( L , app_id.c_str() , (*it)->plugin->user_data() );
+            int result = ( *it )->open( L , app_id.c_str() , ( *it )->plugin->user_data() );
 
             if ( 0 != result )
             {
@@ -227,21 +227,21 @@ public:
         }
     }
 
-    static void call_close( lua_State * L )
+    static void call_close( lua_State* L )
     {
-        App * app = App::get( L );
+        App* app = App::get( L );
 
         String app_id = app->get_id();
 
-        List * list = get_list( app->get_context() );
+        List* list = get_list( app->get_context() );
 
         for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
         {
-            tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+            tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , ( *it )->plugin->name().c_str() );
 
             int top_before = lua_gettop( L );
 
-            (*it)->close( L , app_id.c_str() , (*it)->plugin->user_data() );
+            ( *it )->close( L , app_id.c_str() , ( *it )->plugin->user_data() );
 
             tplog2( "  PLUGIN CLOSED" );
 
@@ -262,8 +262,8 @@ public:
 
 private:
 
-    LuaAPIPlugin( TrickPlay::Plugin * _plugin )
-    :
+    LuaAPIPlugin( TrickPlay::Plugin* _plugin )
+        :
         plugin( _plugin )
     {
         g_assert( plugin );
@@ -280,13 +280,13 @@ private:
         delete plugin;
     }
 
-    typedef std::list< LuaAPIPlugin * > List;
+    typedef std::list< LuaAPIPlugin* > List;
 
-    static List * get_list( TPContext * context )
+    static List* get_list( TPContext* context )
     {
         static char key = 0;
 
-        List * result = ( List * ) context->get_internal( & key );
+        List* result = ( List* ) context->get_internal( & key );
 
         if ( ! result )
         {
@@ -313,7 +313,7 @@ private:
     {
         g_assert( _list );
 
-        List * list = ( List * ) _list;
+        List* list = ( List* ) _list;
 
         for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
         {
@@ -323,7 +323,7 @@ private:
         delete list;
     }
 
-    TrickPlay::Plugin *    plugin;
+    TrickPlay::Plugin*     plugin;
     TPLuaAPIOpen        open;
     TPLuaAPIClose        close;
 };
@@ -334,8 +334,8 @@ class App::RunAction : public ::Action
 {
 public:
 
-    RunAction( App * _app , const StringSet & _allowed_names , RunCallback _run_callback , ClutterActor * _splash )
-    :
+    RunAction( App* _app , const StringSet& _allowed_names , RunCallback _run_callback , ClutterActor* _splash )
+        :
         app( _app ),
         allowed_names( _allowed_names ),
         run_callback( _run_callback ),
@@ -370,13 +370,9 @@ protected:
 
         if ( splash )
         {
-            if ( ClutterActor * parent = clutter_actor_get_parent( splash ) )
+            if ( ClutterActor* parent = clutter_actor_get_parent( splash ) )
             {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_remove_child( parent, splash );
-#else
-                clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , splash );
-#endif
             }
         }
 
@@ -385,17 +381,17 @@ protected:
 
 private:
 
-    App *               app;
+    App*                app;
     StringSet           allowed_names;
     App::RunCallback    run_callback;
-    ClutterActor *      splash;
+    ClutterActor*       splash;
 
 };
 
 
 //=============================================================================
 
-bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
+bool App::load_metadata_from_data( const gchar* data ,  Metadata& md )
 {
     // To clear the incoming metadata
 
@@ -403,7 +399,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 
     // Open a state with no libraries - not even the base one
 
-    lua_State * L = luaL_newstate( );
+    lua_State* L = luaL_newstate( );
 
     g_assert( L );
 
@@ -443,6 +439,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
         // Look for the 'app' global
 
         lua_getglobal( L, APP_TABLE_NAME );
+
         if ( !lua_istable( L, -1 ) )
         {
             throw String( "MISSING OR INVALID 'app' TABLE" );
@@ -450,6 +447,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 
         // Look for the id
         lua_getfield( L, -1, APP_FIELD_ID );
+
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
             throw String( "MISSING OR INVALID APP ID" );
@@ -458,16 +456,16 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
         // Validate the id
 
         size_t len;
-        const char * s = lua_tolstring( L, -1, &len );
+        const char* s = lua_tolstring( L, -1, &len );
 
         if ( len > 64 )
         {
             throw String( "APP ID IS TOO LONG" );
         }
 
-        static const char * valid_id_characters = "_-.";
+        static const char* valid_id_characters = "_-.";
 
-        for ( const char * c = s; *c; ++c )
+        for ( const char* c = s; *c; ++c )
         {
             if ( !g_ascii_isalnum( *c ) )
             {
@@ -500,70 +498,87 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 
         // Look for the other fields
         lua_getfield( L, -1, APP_FIELD_NAME );
+
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
             throw String( "MISSING OR INVALID APP NAME" );
         }
+
         md.name = lua_tostring( L, -1 );
         lua_pop( L, 1 );
 
         lua_getfield( L, -1, APP_FIELD_RELEASE );
+
         if ( lua_tointeger( L, -1 ) <= 0 )
         {
             throw String( "MISSING OR INVALID APP RELEASE, IT MUST BE A NUMBER GREATER THAN 0" );
         }
+
         md.release = lua_tointeger( L, -1 );
         lua_pop( L, 1 );
 
         lua_getfield( L, -1, APP_FIELD_VERSION );
+
         if ( lua_type( L, -1 ) != LUA_TSTRING )
         {
             throw String( "MISSING OR INVALID APP VERSION" );
         }
+
         md.version = lua_tostring( L, -1 );
         lua_pop( L, 1 );
 
         lua_getfield( L, -1, APP_FIELD_DESCRIPTION );
+
         if ( lua_isstring( L, -1 ) )
         {
             md.description = lua_tostring( L, -1 );
         }
+
         lua_pop( L, 1 );
 
         lua_getfield( L, -1, APP_FIELD_AUTHOR );
+
         if ( lua_isstring( L, -1 ) )
         {
             md.author = lua_tostring( L, -1 );
         }
+
         lua_pop( L, 1 );
 
         lua_getfield( L, -1, APP_FIELD_COPYRIGHT );
+
         if ( lua_isstring( L, -1 ) )
         {
             md.copyright = lua_tostring( L, -1 );
         }
+
         lua_pop( L, 1 );
 
         // Look for attributes
 
         lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+
         if ( lua_istable( L , -1 ) )
         {
             lua_pushnil( L );
-            while( lua_next( L , -2 ) )
+
+            while ( lua_next( L , -2 ) )
             {
                 if ( lua_type( L , -1 ) == LUA_TSTRING )
                 {
                     md.attributes.insert( lua_tostring( L , -1 ) );
                 }
+
                 lua_pop( L , 1 );
             }
         }
+
         lua_pop( L , 1 );
 
         // Look for actions
 
         lua_getfield( L, -1, APP_FIELD_ACTIONS );
+
         if ( lua_type( L, -1 ) == LUA_TTABLE )
         {
             lua_pushnil( L );
@@ -578,24 +593,30 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
                     String description;
 
                     lua_getfield( L, -1, "description" );
+
                     if ( lua_isstring( L, -1 ) )
                     {
                         description = lua_tostring( L, -1 );
                     }
+
                     lua_pop( L, 1 );
 
                     lua_getfield( L, -1, "uri" );
+
                     if ( lua_isstring( L, -1 ) )
                     {
                         uri = lua_tostring( L, -1 );
                     }
+
                     lua_pop( L, 1 );
 
                     lua_getfield( L, -1, "type" );
+
                     if ( lua_isstring( L, -1 ) )
                     {
                         type = lua_tostring( L , -1 );
                     }
+
                     lua_pop( L, 1 );
 
                     md.actions[ action_name ] = Action( description, uri, type );
@@ -604,6 +625,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
                 }
             }
         }
+
         lua_pop( L, 1 );
 
 
@@ -612,7 +634,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 
         return true;
     }
-    catch ( const String & e )
+    catch ( const String& e )
     {
         lua_close( L );
         g_warning( "FAILED TO LOAD APP METADATA FILE : %s", e.c_str() );
@@ -620,7 +642,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
     }
 }
 
-bool App::load_metadata( const char * app_path, App::Metadata & md )
+bool App::load_metadata( const char* app_path, App::Metadata& md )
 {
     g_assert( app_path );
 
@@ -644,7 +666,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
 //-----------------------------------------------------------------------------
 
-void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, const char * installed_apps_root, bool force )
+void App::scan_app_sources( SystemDatabase* sysdb, const char* app_sources, const char* installed_apps_root, bool force )
 {
     FreeLater free_later;
 
@@ -668,13 +690,13 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
     //.........................................................................
     // First scan app sources
 
-    gchar ** paths = g_strsplit( app_sources, ";", 0 );
+    gchar** paths = g_strsplit( app_sources, ";", 0 );
 
-    for ( gchar ** p = paths; *p; ++p )
+    for ( gchar** p = paths; *p; ++p )
     {
-        gchar * path = g_strstrip( *p );
+        gchar* path = g_strstrip( *p );
 
-        GDir * dir = g_dir_open( path, 0, NULL );
+        GDir* dir = g_dir_open( path, 0, NULL );
 
         if ( !dir )
         {
@@ -682,9 +704,9 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
         }
         else
         {
-            while ( const gchar * base = g_dir_read_name( dir ) )
+            while ( const gchar* base = g_dir_read_name( dir ) )
             {
-                gchar * md_file_name = g_build_filename( path, base, "app", NULL );
+                gchar* md_file_name = g_build_filename( path, base, "app", NULL );
                 free_later( md_file_name );
 
                 if ( !g_file_test( md_file_name, G_FILE_TEST_IS_REGULAR ) )
@@ -692,7 +714,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
                     continue;
                 }
 
-                gchar * app_path = g_build_filename( path, base, NULL );
+                gchar* app_path = g_build_filename( path, base, NULL );
                 free_later( app_path );
 
                 Metadata md;
@@ -720,7 +742,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
 
     if ( g_file_test( installed_apps_root, G_FILE_TEST_EXISTS ) )
     {
-        GDir * dir = g_dir_open( installed_apps_root, 0, NULL );
+        GDir* dir = g_dir_open( installed_apps_root, 0, NULL );
 
         if ( !dir )
         {
@@ -728,12 +750,12 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
         }
         else
         {
-            while ( const gchar * base = g_dir_read_name( dir ) )
+            while ( const gchar* base = g_dir_read_name( dir ) )
             {
-                gchar * app_path = g_build_filename( installed_apps_root, base, "source", NULL );
+                gchar* app_path = g_build_filename( installed_apps_root, base, "source", NULL );
                 free_later( app_path );
 
-                gchar * md_file_name = g_build_filename( app_path, "app", NULL );
+                gchar* md_file_name = g_build_filename( app_path, "app", NULL );
                 free_later( md_file_name );
 
                 if ( !g_file_test( md_file_name, G_FILE_TEST_IS_REGULAR ) )
@@ -775,7 +797,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
             {
                 // Get a reference to the list, so it is easier to deal with
 
-                const Metadata::List & versions( it->second );
+                const Metadata::List& versions( it->second );
 
                 // Now, we point an iterator to the first one in the list. If one of the
                 // others has a greater release number, we point the iterator at it.
@@ -812,7 +834,7 @@ void App::scan_app_sources( SystemDatabase * sysdb, const char * app_sources, co
 
 //-----------------------------------------------------------------------------
 
-String App::get_data_directory( TPContext * context, const String & app_id )
+String App::get_data_directory( TPContext* context, const String& app_id )
 {
     FreeLater free_later;
 
@@ -820,11 +842,11 @@ String App::get_data_directory( TPContext * context, const String & app_id )
 
     // Get the data directory ready
 
-    gchar * id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, app_id.c_str(), -1 );
+    gchar* id_hash = g_compute_checksum_for_string( G_CHECKSUM_SHA1, app_id.c_str(), -1 );
 
     free_later( id_hash );
 
-    gchar * app_data_path = g_build_filename( context->get( TP_DATA_PATH ), "apps", id_hash, NULL );
+    gchar* app_data_path = g_build_filename( context->get( TP_DATA_PATH ), "apps", id_hash, NULL );
 
     free_later( app_data_path );
 
@@ -844,7 +866,7 @@ String App::get_data_directory( TPContext * context, const String & app_id )
 
 //-----------------------------------------------------------------------------
 
-App * App::load( TPContext * context, const App::Metadata & md, const LaunchInfo & launch )
+App* App::load( TPContext* context, const App::Metadata& md, const LaunchInfo& launch )
 {
     String app_data_path = get_data_directory( context, md.id );
 
@@ -858,11 +880,9 @@ App * App::load( TPContext * context, const App::Metadata & md, const LaunchInfo
 
 //-----------------------------------------------------------------------------
 
-int App::lua_panic_handler( lua_State * L )
+int App::lua_panic_handler( lua_State* L )
 {
-    g_critical( "%s", String( 60, '=' ).c_str() );
     g_critical( "LUA PANIC : %s", lua_tostring( L, -1 ) );
-    g_critical( "%s", String( 60, '=' ).c_str() );
 
     throw LUA_ERRRUN;
 }
@@ -870,21 +890,22 @@ int App::lua_panic_handler( lua_State * L )
 
 static gboolean lua_gc_every_frame( gpointer state )
 {
-    static GTimer *gc_timer = g_timer_new();
+    static GTimer* gc_timer = g_timer_new();
     static unsigned num_steps = 0;
 
-    lua_State *L = (lua_State *)state;
+    lua_State* L = ( lua_State* )state;
 
-    g_timer_stop(gc_timer); // In case it was running -- ie the first time
-    g_timer_continue(gc_timer);
-    int result = lua_gc( L, LUA_GCSTEP, 1);
-    g_timer_stop(gc_timer);
+    g_timer_stop( gc_timer ); // In case it was running -- ie the first time
+    g_timer_continue( gc_timer );
+    int result = lua_gc( L, LUA_GCSTEP, 1 );
+    g_timer_stop( gc_timer );
     num_steps++;
-    if(1 == result)
+
+    if ( 1 == result )
     {
-        tplog2("GC completed; total time: %fms, num steps = %d", g_timer_elapsed( gc_timer, NULL )*1000, num_steps);
-        g_timer_reset(gc_timer);
-        num_steps=0;
+        tplog2( "GC completed; total time: %fms, num steps = %d", g_timer_elapsed( gc_timer, NULL ) * 1000, num_steps );
+        g_timer_reset( gc_timer );
+        num_steps = 0;
     }
 
     return true;
@@ -892,7 +913,9 @@ static gboolean lua_gc_every_frame( gpointer state )
 
 //-----------------------------------------------------------------------------
 
-App::App( TPContext * c, const App::Metadata & md, const String & dp, const LaunchInfo & _launch )
+unsigned App::rotation = 0;
+
+App::App( TPContext* c, const App::Metadata& md, const String& dp, const LaunchInfo& _launch )
     :
     context( c ),
     metadata( md ),
@@ -905,23 +928,25 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
     screen( NULL ),
     launch( _launch ),
     stage_allocation_handler( 0 ),
-    lua_gc_func ( 0 )
+    lua_gc_func( 0 )
 
 #ifndef TP_PRODUCTION
 
-    ,debugger( this )
+    , debugger( this )
 
 #endif
 {
+    rotation = c->get_int( TP_SCREEN_ROTATION );
+
     // Create the user agent
 
     user_agent = Network::format_user_agent(
-                     context->get( TP_SYSTEM_LANGUAGE ),
-                     context->get( TP_SYSTEM_COUNTRY ),
-                     md.id.c_str(),
-                     md.release,
-                     context->get( TP_SYSTEM_NAME ),
-                     context->get( TP_SYSTEM_VERSION ) );
+            context->get( TP_SYSTEM_LANGUAGE ),
+            context->get( TP_SYSTEM_COUNTRY ),
+            md.id.c_str(),
+            md.release,
+            context->get( TP_SYSTEM_NAME ),
+            context->get( TP_SYSTEM_VERSION ) );
 
     // Create the network
 
@@ -957,7 +982,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 }
 
 #if 0
-void debug_hook( lua_State * L, lua_Debug * ar )
+void debug_hook( lua_State* L, lua_Debug* ar )
 {
     printf( "DEBUG: %d\n", ar->event );
 
@@ -984,18 +1009,29 @@ void debug_hook( lua_State * L, lua_Debug * ar )
 // Signal handler that tells us when the stage changes dimensions, so we can
 // update the screen's scale.
 
-void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer screen )
+void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer the_screen )
 {
-    if ( screen )
+    if ( the_screen )
     {
-        ClutterActor * stage = CLUTTER_ACTOR( the_stage );
+        ClutterActor* stage = CLUTTER_ACTOR( the_stage );
+        ClutterActor* screen = CLUTTER_ACTOR( the_screen );
 
         gfloat width;
         gfloat height;
+        gfloat s_width;
+        gfloat s_height;
 
         clutter_actor_get_size( stage , & width , & height );
+        clutter_actor_get_size( screen , & s_width , & s_height );
 
-        clutter_actor_set_scale( CLUTTER_ACTOR( screen ), width / 1920, height / 1080 );
+        // Scale depends on rotation!
+        if(rotation % 2 != 0)
+        {
+            // Swap width for height
+            clutter_actor_set_scale( screen, width / s_height, height / s_width );
+        } else {
+            clutter_actor_set_scale( screen, width / s_width, height / s_height );
+        }
 
         g_debug( "DISPLAY SIZE CHANGED TO %1.0fx%1.0f" , width , height );
     }
@@ -1003,7 +1039,7 @@ void App::stage_allocation_notify( gpointer the_stage , gpointer , gpointer scre
 
 //-----------------------------------------------------------------------------
 
-void App::run( const StringSet & allowed_names , RunCallback run_callback )
+void App::run( const StringSet& allowed_names , RunCallback run_callback )
 {
     FreeLater free_later;
 
@@ -1011,16 +1047,16 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     // Get the screen ready for the app
 
-    ClutterActor * stage = context->get_stage();
+    ClutterActor* stage = context->get_stage();
 
     g_assert( stage );
 
     //.........................................................................
     // Look for a splash image
 
-    ClutterActor * splash = 0;
+    ClutterActor* splash = 0;
 
-    Image * splash_image = 0;
+    Image* splash_image = 0;
 
     if ( AppResource( this , "default.jpg" ).exists( this ) )
     {
@@ -1046,11 +1082,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
         clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, splash );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
-#endif
 
         clutter_actor_show( stage );
 
@@ -1068,7 +1100,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
 //-----------------------------------------------------------------------------
 
-int App::global_tracker( lua_State * L )
+int App::global_tracker( lua_State* L )
 {
     lua_pushvalue( L , 2 );
     lua_pushvalue( L , 3 );
@@ -1076,7 +1108,7 @@ int App::global_tracker( lua_State * L )
 
     if ( lua_type( L , 2 ) == LUA_TSTRING )
     {
-        if ( App * app = App::get( L ) )
+        if ( App* app = App::get( L ) )
         {
             String where;
 
@@ -1102,7 +1134,7 @@ int App::global_tracker( lua_State * L )
 
 //-----------------------------------------------------------------------------
 
-void App::run_part2( const StringSet & allowed_names , RunCallback run_callback )
+void App::run_part2( const StringSet& allowed_names , RunCallback run_callback )
 {
     PROFILER( "App::run" , PROFILER_INTERNAL_CALLS );
 
@@ -1110,20 +1142,27 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     Util::GTimer t;
 
-    ClutterActor * stage = context->get_stage();
+    ClutterActor* stage = context->get_stage();
 
     g_assert( stage );
 
-#ifdef CLUTTER_VERSION_1_10
+    gfloat width;
+    gfloat height;
+    clutter_actor_get_size(stage, &width, &height);
+
     screen = clutter_actor_new();
-#else
-    screen = clutter_group_new();
-#endif
 
     g_assert( screen );
 
-    clutter_actor_set_position( screen, 0, 0 );
-    clutter_actor_set_size( screen, 1920, 1080 );
+    clutter_actor_set_position( screen, width/2, height/2 );
+    clutter_actor_set_anchor_point(screen, context->get_int( TP_VIRTUAL_WIDTH )/2, context->get_int( TP_VIRTUAL_HEIGHT )/2);
+    clutter_actor_set_size( screen, context->get_int( TP_VIRTUAL_WIDTH ), context->get_int( TP_VIRTUAL_HEIGHT ) );
+
+    if ( rotation > 0 && rotation < 4 )
+    {
+        clutter_actor_set_rotation(screen, CLUTTER_Z_AXIS, rotation * 90, 0, 0, 0);
+        g_debug("ROTATED SCREEN TO ORIENTATION %d", rotation);
+    }
 
     clutter_actor_set_name( screen , "screen" );
 
@@ -1209,21 +1248,23 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 #endif
 
 #ifdef TP_WITH_GAMESERVICE
+
     if ( context->get_bool( TP_GAMESERVICE_ENABLED ) )
     {
-        if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end())
+        if ( metadata.attributes.find( APP_FIELD_GAMESERVICE_ATTRIBUTE ) != metadata.attributes.end() )
         {
-            g_info("Performing luaopen_gameservice()");
+            g_info( "Performing luaopen_gameservice()" );
             luaopen_gameservice( L );
 
-			AppId appId(metadata.id, 1);
-		//	g_info("calling gameservice->RegisterApp(%s, %d) ", metadata.id.c_str(), 1);
-		//	context->get_gameservice()->RegisterApp(appId);
+            AppId appId( metadata.id, 1 );
+            //  g_info("calling gameservice->RegisterApp(%s, %d) ", metadata.id.c_str(), 1);
+            //  context->get_gameservice()->RegisterApp(appId);
 
-			g_info("calling gameservice->OpenApp(%s, %d) ", metadata.id.c_str(), 1);
-			context->get_gameservice()->OpenApp(appId);
-		}
+            g_info( "calling gameservice->OpenApp(%s, %d) ", metadata.id.c_str(), 1 );
+            context->get_gameservice()->OpenApp( appId );
+        }
     }
+
 #endif
 
     luaopen_apps( L );
@@ -1273,7 +1314,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     // Collect garbage every frame
 
     lua_gc_func = clutter_threads_add_repaint_func( lua_gc_every_frame, L, 0 );
-    lua_gc( L, LUA_GCGEN, 0 ); // Switch to generational colletor
+    lua_gc( L, LUA_GCGEN, 0 ); // Switch to generational collector
+    lua_gc( L, LUA_GCSETMAJORINC, 110 ); // Reduce threshold for major collection
 
     //.........................................................................
     // Run the script
@@ -1286,9 +1328,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
     {
-        g_critical( "%s", String( 60, '=' ).c_str() );
         g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
-        g_critical( "%s", String( 60, '=' ).c_str() );
 
         lua_pop( L , lua_gettop( L ) - top );
 
@@ -1305,11 +1345,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
         // By adding it to the stage, the ref is sunk, so we don't need
         // to unref it here.
 
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_add_child( stage, screen );
-#else
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
-#endif
 
         g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
@@ -1381,14 +1417,14 @@ App::~App()
 //-----------------------------------------------------------------------------
 // Replacement function for math.randomseed that does nothing
 
-static int disabled_randomseed( lua_State * )
+static int disabled_randomseed( lua_State* )
 {
     return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-void App::secure_lua_state( const StringSet & allowed_names )
+void App::secure_lua_state( const StringSet& allowed_names )
 {
     //.........................................................................
     // Open standard libs
@@ -1412,10 +1448,10 @@ void App::secure_lua_state( const StringSet & allowed_names )
         { NULL, NULL }
     };
 
-    for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
+    for ( const luaL_Reg* lib = lualibs; lib->func; ++lib )
     {
-        luaL_requiref(L, lib->name, lib->func, 1);
-        lua_pop(L, 1);  /* remove lib */
+        luaL_requiref( L, lib->name, lib->func, 1 );
+        lua_pop( L, 1 ); /* remove lib */
     }
 
     //.........................................................................
@@ -1423,7 +1459,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
 
     lua_getglobal( L, "os" );
 
-    const char * os_nuke[] =
+    const char* os_nuke[] =
     {
         "execute",
         "exit",
@@ -1435,7 +1471,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
         NULL
     };
 
-    for( const char * * name = os_nuke; * name; ++name )
+    for ( const char * * name = os_nuke; * name; ++name )
     {
         lua_pushstring( L, * name );
         lua_pushnil( L );
@@ -1449,7 +1485,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
 
     lua_getglobal( L, "package" );
 
-    const char * package_nuke[] =
+    const char* package_nuke[] =
     {
         "cpath",
         "loaders",
@@ -1459,7 +1495,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
         NULL
     };
 
-    for( const char * * name = package_nuke; * name; ++name )
+    for ( const char * * name = package_nuke; * name; ++name )
     {
         lua_pushstring( L, * name );
         lua_pushnil( L );
@@ -1481,7 +1517,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
     //.........................................................................
     // Nuke globals
 
-    const char * global_nuke[] =
+    const char* global_nuke[] =
     {
         "require",
         "load",
@@ -1490,7 +1526,7 @@ void App::secure_lua_state( const StringSet & allowed_names )
         0
     };
 
-    for( const char * * name = global_nuke; * name; ++name )
+    for ( const char * * name = global_nuke; * name; ++name )
     {
         lua_pushnil( L );
         lua_setglobal( L, * name );
@@ -1533,12 +1569,12 @@ void App::secure_lua_state( const StringSet & allowed_names )
 
 //-----------------------------------------------------------------------------
 
-App * App::get( lua_State * L )
+App* App::get( lua_State* L )
 {
     g_assert( L );
     lua_pushlightuserdata( L, &TP_APP_KEY );
     lua_rawget( L, LUA_REGISTRYINDEX );
-    App * result = ( App * )lua_touserdata( L, -1 );
+    App* result = ( App* )lua_touserdata( L, -1 );
     lua_pop( L, 1 );
     g_assert( result );
     return result;
@@ -1546,7 +1582,7 @@ App * App::get( lua_State * L )
 
 //-----------------------------------------------------------------------------
 
-TPContext * App::get_context()
+TPContext* App::get_context()
 {
     return context;
 }
@@ -1568,21 +1604,21 @@ int App::get_profile_id() const
 
 //-----------------------------------------------------------------------------
 
-const App::Metadata & App::get_metadata() const
+const App::Metadata& App::get_metadata() const
 {
     return metadata;
 }
 
 //-----------------------------------------------------------------------------
 
-const String & App::get_id() const
+const String& App::get_id() const
 {
     return metadata.id;
 }
 
 //-----------------------------------------------------------------------------
 
-const App::LaunchInfo & App::get_launch_info() const
+const App::LaunchInfo& App::get_launch_info() const
 {
     return launch;
 }
@@ -1597,16 +1633,16 @@ void App::release_cookie_jar()
 
 //-----------------------------------------------------------------------------
 
-Network::CookieJar * App::get_cookie_jar()
+Network::CookieJar* App::get_cookie_jar()
 {
     if ( !cookie_jar )
     {
         FreeLater free_later;
 
-        gchar * name = g_strdup_printf( "cookies-%d.txt", get_profile_id() );
+        gchar* name = g_strdup_printf( "cookies-%d.txt", get_profile_id() );
         free_later( name );
 
-        gchar * file_name = g_build_filename( data_path.c_str(), name, NULL );
+        gchar* file_name = g_build_filename( data_path.c_str(), name, NULL );
         free_later( file_name );
 
         cookie_jar = Network::cookie_jar_new( file_name );
@@ -1617,7 +1653,7 @@ Network::CookieJar * App::get_cookie_jar()
 
 //-----------------------------------------------------------------------------
 
-Network * App::get_network()
+Network* App::get_network()
 {
     return network;
 }
@@ -1632,17 +1668,17 @@ String App::get_user_agent() const
 //-----------------------------------------------------------------------------
 // This one forwards all notifications from the context to our listeners
 
-void App::forward_notification_handler( TPContext * context , const char * subject, void * data )
+void App::forward_notification_handler( TPContext* context , const char* subject, void* data )
 {
-    ( ( App * )data )->notify( context , subject );
+    ( ( App* )data )->notify( context , subject );
 }
 
 //-----------------------------------------------------------------------------
 // Notification handler for profile switches
 
-void App::profile_notification_handler( TPContext * context , const char * subject, void * data )
+void App::profile_notification_handler( TPContext* context , const char* subject, void* data )
 {
-    ( ( App * )data )->profile_switch();
+    ( ( App* )data )->profile_switch();
 }
 
 //-----------------------------------------------------------------------------
@@ -1654,14 +1690,14 @@ void App::profile_switch()
 
 //-----------------------------------------------------------------------------
 
-lua_State * App::get_lua_state()
+lua_State* App::get_lua_state()
 {
     return L;
 }
 
 //-----------------------------------------------------------------------------
 
-LuaStateProxy * App::ref_lua_state_proxy()
+LuaStateProxy* App::ref_lua_state_proxy()
 {
     lua_state_proxy->ref();
 
@@ -1670,14 +1706,14 @@ LuaStateProxy * App::ref_lua_state_proxy()
 
 //-----------------------------------------------------------------------------
 
-EventGroup * App::get_event_group()
+EventGroup* App::get_event_group()
 {
     return event_group;
 }
 
 //-----------------------------------------------------------------------------
 
-bool App::change_app_path( const char * path )
+bool App::change_app_path( const char* path )
 {
     g_assert( path );
 
@@ -1698,14 +1734,14 @@ bool App::change_app_path( const char * path )
 
 //-----------------------------------------------------------------------------
 
-ClutterActor * App::get_screen() const
+ClutterActor* App::get_screen() const
 {
     return screen;
 }
 
 //-----------------------------------------------------------------------------
 
-Debugger * App::get_debugger()
+Debugger* App::get_debugger()
 {
 #ifndef TP_PRODUCTION
 
@@ -1743,49 +1779,49 @@ void App::animate_in()
         return;
     }
 
-    ClutterActor * stage = get_context()->get_stage();
+    ClutterActor* stage = get_context()->get_stage();
 
     gfloat width;
     gfloat height;
+    gfloat s_width;
+    gfloat s_height;
 
     clutter_actor_get_size( stage, &width , &height );
+    clutter_actor_get_size( screen, &s_width , &s_height );
 
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
     // screen and unref it when the timeline completes.
     // unless TP_APP_ANIMATIONS_ENABLED is false
 
-#ifdef CLUTTER_VERSION_1_10
     clutter_actor_set_child_above_sibling( stage, screen, NULL );
-#else
-    clutter_actor_raise_top( screen );
-#endif
 
-    clutter_actor_set_scale( screen, width / 1920, height / 1080 );
+    // Scale depends on rotation!
+    if(rotation % 2 != 0)
+    {
+        // Swap width for height
+        clutter_actor_set_scale( screen, width / s_height, height / s_width );
+    } else {
+        clutter_actor_set_scale( screen, width / s_width, height / s_height );
+    }
 
     clutter_actor_grab_key_focus( screen );
 }
 
 //-----------------------------------------------------------------------------
 
-static void animate_out_completed( ClutterAnimation *anim , ClutterActor * actor )
+static void animate_out_completed( ClutterAnimation* anim , ClutterActor* actor )
 {
-    ClutterActor * parent = clutter_actor_get_parent( actor );
+    ClutterActor* parent = clutter_actor_get_parent( actor );
 
     if ( parent )
     {
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_remove_child( parent, actor );
-#else
-        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
-#endif
     }
-   // Something is holding an extra ref.  We'll release it here, but this is wrong
-   // We cannot find where the extra ref is being taken; our hope is de-reffing it
-   // will one day cause a crash that we can then track down!
-   g_object_unref( G_OBJECT ( actor ) );
-   g_object_unref( G_OBJECT ( actor ) );
-   if(anim) g_object_unref( G_OBJECT ( anim ) );
+
+    g_object_unref( G_OBJECT( actor ) );
+
+    if ( anim ) { g_object_unref( G_OBJECT( anim ) ); }
 }
 
 void App::animate_out()
@@ -1812,9 +1848,9 @@ void App::animate_out()
 
 gboolean App::animate_out_callback( gpointer s )
 {
-    ClutterActor * screen = CLUTTER_ACTOR( s );
+    ClutterActor* screen = CLUTTER_ACTOR( s );
 
-    ClutterActor * parent = clutter_actor_get_parent( screen );
+    ClutterActor* parent = clutter_actor_get_parent( screen );
 
     if ( parent )
     {
@@ -1828,32 +1864,38 @@ gboolean App::animate_out_callback( gpointer s )
         gfloat width;
         gfloat height;
 
-        clutter_actor_get_size( parent, &width, &height );
+        gfloat s_width;
+        gfloat s_height;
 
-        clutter_actor_set_anchor_point( screen, 960, 540 );
+        clutter_actor_get_size( parent, &width, &height );
+        clutter_actor_get_size( parent, &s_width, &s_height );
+
+        clutter_actor_set_anchor_point( screen, s_width / 2, s_height / 2 );
 
         clutter_actor_set_position( screen, width / 2, height / 2 );
 
-        clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
+        clutter_actor_set_clip( screen, 0, 0, s_width, s_height );
 
-        ClutterAnimator *animator = clutter_animator_new();
-        clutter_animator_set_duration(animator, 750);
-        clutter_animator_set(animator,
-                                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
-                                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
-                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
-                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
-                                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
-                                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
-                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-                                NULL
+        ClutterAnimator* animator = clutter_animator_new();
+        clutter_animator_set_duration( animator, 750 );
+        clutter_animator_set( animator,
+                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
+                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
+                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
+                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
+                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
+                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
+                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                NULL
                             );
-        ClutterTimeline *timeline = clutter_animator_start(animator);
+        ClutterTimeline* timeline = clutter_animator_start( animator );
 
-        g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
-    } else {
-	g_object_unref( G_OBJECT( screen ) );
+        g_signal_connect_after( timeline, "completed", G_CALLBACK( animate_out_completed ), screen );
+    }
+    else
+    {
+        g_object_unref( G_OBJECT( screen ) );
     }
 
     return FALSE;
@@ -1861,7 +1903,7 @@ gboolean App::animate_out_callback( gpointer s )
 
 //-----------------------------------------------------------------------------
 
-Image * App::load_image( const gchar * source , bool read_tags )
+Image* App::load_image( const gchar* source , bool read_tags )
 {
     tplog( "LOADING SYNC '%s'" , source );
 
@@ -1877,7 +1919,7 @@ Image * App::load_image( const gchar * source , bool read_tags )
         return 0;
     }
 
-    Image * image = 0;
+    Image* image = 0;
 
     if ( resource.is_http() )
     {
@@ -1920,7 +1962,7 @@ class ImageResponseClosure
 public:
 
     ImageResponseClosure( bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
-    :
+        :
         read_tags( _read_tags ),
         callback( _callback ),
         user( _user ),
@@ -1928,9 +1970,9 @@ public:
     {
     }
 
-    static void response_callback( const Network::Response & response , gpointer me )
+    static void response_callback( const Network::Response& response , gpointer me )
     {
-        ImageResponseClosure * self = ( ImageResponseClosure * ) me;
+        ImageResponseClosure* self = ( ImageResponseClosure* ) me;
 
         if ( response.failed || response.body->len == 0 )
         {
@@ -1955,7 +1997,7 @@ public:
 
     static void destroy( gpointer me )
     {
-        ImageResponseClosure * self = ( ImageResponseClosure * ) me;
+        ImageResponseClosure* self = ( ImageResponseClosure* ) me;
 
         if ( self->destroy_notify )
         {
@@ -1975,7 +2017,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-bool App::load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+bool App::load_image_async( const gchar* source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     tplog( "LOADING ASYNC '%s'" , source );
 
@@ -2010,11 +2052,11 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         Network::Request request( get_user_agent() , resource.get_uri() );
 
         get_network()->perform_request_async(
-            request,
-            get_cookie_jar(),
-            ImageResponseClosure::response_callback,
-            new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
-            ImageResponseClosure::destroy );
+                request,
+                get_cookie_jar(),
+                ImageResponseClosure::response_callback,
+                new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
+                ImageResponseClosure::destroy );
     }
     else if ( resource.is_native() )
     {
@@ -2031,7 +2073,7 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
 
 //-----------------------------------------------------------------------------
 
-void App::audio_match( const String & json )
+void App::audio_match( const String& json )
 {
     // TODO: Not terribly excited about doing it this way
 
@@ -2043,7 +2085,7 @@ void App::audio_match( const String & json )
         return;
     }
 
-    if ( UserData * ud = UserData::get( L , lua_gettop( L ) ) )
+    if ( UserData* ud = UserData::get( L , lua_gettop( L ) ) )
     {
         JSON::parse( L , json.c_str() );
 

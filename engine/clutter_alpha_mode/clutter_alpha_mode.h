@@ -22,37 +22,37 @@
 extern "C" {
 #endif
 
-double clutter_am_linear( double progress );
-double clutter_am_ease_in_quad( double progress );
-double clutter_am_ease_out_quad( double progress );
-double clutter_am_ease_in_out_quad( double progress );
-double clutter_am_ease_in_cubic( double progress );
-double clutter_am_ease_out_cubic( double progress );
-double clutter_am_ease_in_out_cubic( double progress );
-double clutter_am_ease_in_quart( double progress );
-double clutter_am_ease_out_quart( double progress );
-double clutter_am_ease_in_out_quart( double progress );
-double clutter_am_ease_in_quint( double progress );
-double clutter_am_ease_out_quint( double progress );
-double clutter_am_ease_in_out_quint( double progress );
-double clutter_am_ease_in_sine( double progress );
-double clutter_am_ease_out_sine( double progress );
-double clutter_am_ease_in_out_sine( double progress );
-double clutter_am_ease_in_expo( double progress );
-double clutter_am_ease_out_expo( double progress );
-double clutter_am_ease_in_out_expo( double progress );
-double clutter_am_ease_in_circ( double progress );
-double clutter_am_ease_out_circ( double progress );
-double clutter_am_ease_in_out_circ( double progress );
-double clutter_am_ease_in_elastic( double progress );
-double clutter_am_ease_out_elastic( double progress );
-double clutter_am_ease_in_out_elastic( double progress );
-double clutter_am_ease_in_back( double progress );
-double clutter_am_ease_out_back( double progress );
-double clutter_am_ease_in_out_back( double progress );
-double clutter_am_ease_in_bounce( double progress );
-double clutter_am_ease_out_bounce( double progress );
-double clutter_am_ease_in_out_bounce( double progress );
+    double clutter_am_linear( double progress );
+    double clutter_am_ease_in_quad( double progress );
+    double clutter_am_ease_out_quad( double progress );
+    double clutter_am_ease_in_out_quad( double progress );
+    double clutter_am_ease_in_cubic( double progress );
+    double clutter_am_ease_out_cubic( double progress );
+    double clutter_am_ease_in_out_cubic( double progress );
+    double clutter_am_ease_in_quart( double progress );
+    double clutter_am_ease_out_quart( double progress );
+    double clutter_am_ease_in_out_quart( double progress );
+    double clutter_am_ease_in_quint( double progress );
+    double clutter_am_ease_out_quint( double progress );
+    double clutter_am_ease_in_out_quint( double progress );
+    double clutter_am_ease_in_sine( double progress );
+    double clutter_am_ease_out_sine( double progress );
+    double clutter_am_ease_in_out_sine( double progress );
+    double clutter_am_ease_in_expo( double progress );
+    double clutter_am_ease_out_expo( double progress );
+    double clutter_am_ease_in_out_expo( double progress );
+    double clutter_am_ease_in_circ( double progress );
+    double clutter_am_ease_out_circ( double progress );
+    double clutter_am_ease_in_out_circ( double progress );
+    double clutter_am_ease_in_elastic( double progress );
+    double clutter_am_ease_out_elastic( double progress );
+    double clutter_am_ease_in_out_elastic( double progress );
+    double clutter_am_ease_in_back( double progress );
+    double clutter_am_ease_out_back( double progress );
+    double clutter_am_ease_in_out_back( double progress );
+    double clutter_am_ease_in_bounce( double progress );
+    double clutter_am_ease_out_bounce( double progress );
+    double clutter_am_ease_in_out_bounce( double progress );
 
 #ifdef __cplusplus
 }

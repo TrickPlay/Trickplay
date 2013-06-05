@@ -1,7 +1,7 @@
 modelToDataTable = {
-    
+
     'source': lambda v: ('source',  toString(v)),
-    'activation': lambda v: ('activation', colors(v)), 
+    'activation': lambda v: ('activation', colors(v)),
     'default': lambda v: ('default', colors(v)),
     'focus': lambda v: ('focus', colors(v)),
     'num_dots': lambda v: ('num_dots',  int(v)),
@@ -16,6 +16,7 @@ modelToDataTable = {
     'focused': lambda v: ('focused', toBool(v)),
     'enabled': lambda v: ('enabled', toBool(v)),
     'editable': lambda v: ('editable', toBool(v)),
+    'clip_to_size': lambda v: ('clip_to_size', toBool(v)),
     'justify': lambda v: ('justify', toBool(v)),
     'single_line': lambda v: ('single_line', toBool(v)),
     'use_markup': lambda v: ('use_markup', toBool(v)),
@@ -58,7 +59,7 @@ modelToDataTable = {
     'message_font': lambda v: ('message_font',  toString(v)),
     'src': lambda v: ('src', toString(v)),
     'opacity': lambda v: ('opacity',  opacity(v)),
-    'width': lambda v: ('width',  toFloat(v)), 
+    'width': lambda v: ('width',  toFloat(v)),
     'height': lambda v: ('height',  toFloat(v)),
     'track_w': lambda v: ('track_w',  toFloat(v)),
     'track_h': lambda v: ('track_h',  toFloat(v)),
@@ -84,49 +85,48 @@ modelToDataTable = {
     'window_w': lambda v: ('window_w',  toFloat(v)),
     'animate_duration': lambda v: ('animate_duration',  toFloat(v)),
     'password_char': lambda v: ('password_char',  toFloat(v)),
-    'corner_radius': lambda v: ('corner_radius',  toFloat(v)), 
-    'sizew': lambda v: ('width',  toFloat(v)), 
-    'width': lambda v: ('width',  toFloat(v)), 
-    'sizeh': lambda v: ('height',  toFloat(v)), 
-    'size': lambda v: ('size',  toFloat(v)), 
-    'border_width': lambda v: ('border_width',  int(v)), 
-    'new_attra': lambda v: ('a attr',  toFloat(v['a'])), 
-    'new_attrb': lambda v: ('b attr',  toFloat(v['b'])), 
-    'new_attrc': lambda v: ('c attr',  v['c']), 
-    #'positionx': lambda v: ('x',  toFloat(v['x'])), 
-    #'positiony': lambda v: ('y',  toFloat(v['y'])), 
-    #'positionz': lambda v: ('depth',  toFloat(v['z'])),
-    'animate_in_duration': lambda v: ('animate_in_duration',  toFloat(v)), 
-    'animate_out_duration': lambda v: ('animate_out_duration',  toFloat(v)), 
-    'horizontal_alignment': lambda v: ('horizontal_alignment',  toString(v)), 
-    'vertical_alignment': lambda v: ('vertical_alignment',  toString(v)), 
-    'orientation': lambda v: ('orientation',  toString(v)), 
-    'horizontal_spacing': lambda v: ('horizontal_spacing',  toFloat(v)), 
-    'offset': lambda v: ('offset',  toFloat(v)), 
-    'vertical_spacing': lambda v: ('vertical_spacing',  toFloat(v)), 
-    'number_of_cols': lambda v: ('number_of_cols',  toFloat(v)), 
-    'number_of_rows': lambda v: ('number_of_rows',  toFloat(v)), 
-    'horizontal_icon_padding': lambda v: ('horizontal_icon_padding',  toFloat(v)), 
-    'horizontal_message_padding': lambda v: ('horizontal_message_padding',  toFloat(v)), 
-    'vertical_icon_padding': lambda v: ('vertical_icon_padding',  toFloat(v)), 
-    'vertical_message_padding': lambda v: ('vertical_message_padding',  toFloat(v)), 
-    'on_screen_duration': lambda v: ('on_screen_duration',  toFloat(v)), 
-    'positionx': lambda v: ('x',  toFloat(v)), 
-    'positiony': lambda v: ('y',  toFloat(v)), 
+    'corner_radius': lambda v: ('corner_radius',  toFloat(v)),
+    'sizew': lambda v: ('width',  toFloat(v)),
+    'width': lambda v: ('width',  toFloat(v)),
+    'sizeh': lambda v: ('height',  toFloat(v)),
+    'size': lambda v: ('size',  toFloat(v)),
+    'border_width': lambda v: ('border_width',  int(v)),
+    'new_attra': lambda v: ('a attr',  toFloat(v['a'])),
+    'new_attrb': lambda v: ('b attr',  toFloat(v['b'])),
+    'new_attrc': lambda v: ('c attr',  v['c']),
+    'animate_in_duration': lambda v: ('animate_in_duration',  toFloat(v)),
+    'animate_out_duration': lambda v: ('animate_out_duration',  toFloat(v)),
+    'horizontal_alignment': lambda v: ('horizontal_alignment',  toString(v)),
+    'vertical_alignment': lambda v: ('vertical_alignment',  toString(v)),
+    'orientation': lambda v: ('orientation',  toString(v)),
+    'horizontal_spacing': lambda v: ('horizontal_spacing',  toFloat(v)),
+    'offset': lambda v: ('offset',  toFloat(v)),
+    'vertical_spacing': lambda v: ('vertical_spacing',  toFloat(v)),
+    'number_of_cols': lambda v: ('number_of_cols',  toFloat(v)),
+    'number_of_rows': lambda v: ('number_of_rows',  toFloat(v)),
+    'horizontal_icon_padding': lambda v: ('horizontal_icon_padding',  toFloat(v)),
+    'horizontal_message_padding': lambda v: ('horizontal_message_padding',  toFloat(v)),
+    'vertical_icon_padding': lambda v: ('vertical_icon_padding',  toFloat(v)),
+    'vertical_message_padding': lambda v: ('vertical_message_padding',  toFloat(v)),
+    'on_screen_duration': lambda v: ('on_screen_duration',  toFloat(v)),
+    'positionx': lambda v: ('x',  toFloat(v)),
+    'positiony': lambda v: ('y',  toFloat(v)),
     'positionz': lambda v: ('z',  toFloat(v)),
     'separator_y': lambda v: ('separator_y',  toFloat(v)),
     'x_rotationangle': lambda v: ('rotation-angle-x',  toFloat(v)),
     'y_rotationangle': lambda v: ('rotation-angle-y',  toFloat(v['angle'])),
     'z_rotationangle': lambda v: ('rotation-angle-z',  toFloat(v['angle'])),
     'label': lambda v: ('label',  toString(v)),
+    'x_offset': lambda v: ('x_offset',  toFloat(v)),
+    'y_offset': lambda v: ('y_offset',  toFloat(v)),
 }
 
 dataToModelTable = {
 
     'source': lambda v: ('source', summarizeSource(v)),
-    'type': lambda v: ('type', typeTextureToImage(v)), 
-    'is_visible': lambda v: ('visible', bool(v)), 
-    'tile': lambda v: ('tile', tileToBool(v)), 
+    'type': lambda v: ('type', typeTextureToImage(v)),
+    'is_visible': lambda v: ('visible', bool(v)),
+    'tile': lambda v: ('tile', tileToBool(v)),
     'source': lambda v: ('source', summarizeSource(v)),
     'scale': lambda v: ('scale', scaleToFloat(v)),
     'x_rotation': lambda v: ('x_rotation', angleToFloat(v)),
@@ -136,8 +136,8 @@ dataToModelTable = {
 }
 
 def colors(v):
-    v = v[1:] 
-    v = v[:len(v)-1] 
+    v = v[1:]
+    v = v[:len(v)-1]
     v = "{"+v+"}"
     return v
 
@@ -152,7 +152,7 @@ def scaleToFloat(v):
     v['x'] = float(v['x'])
     v['y'] = float(v['y'])
     return v
-    
+
 def summarizeSource(v):
     """
     Summarize clone data into a string
@@ -160,14 +160,14 @@ def summarizeSource(v):
     """
     # Clone may not have source
     try:
-        s = str(v['gid']) 
+        s = str(v['gid'])
         name = v['name']
         if '' != name:
             s += ' : ' + name
         return s
-        
+
     except:
-        return '' 
+        return ''
 
 def tileToBool(v):
     v['x'] = toBool(v['x'])
@@ -179,23 +179,23 @@ def typeTextureToImage(v):
         return "Image"
     else:
         return v
-    
+
 def dataToModel(title, value):
 
     title, value = dataToModelTable.get(title, lambda v: (title, value))(value)
     simple = not isinstance(value, dict)
-    
+
     return (title, value, simple)
 
 def modelToData(title, value):
-    
+
     return modelToDataTable[str(title)](value)
 
 def color(v):
     return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(float(v['a'])/255) + ')'
 
 def toBool(v):
-    if str(v) == "True" or str(v) == "true": 
+    if str(v) == "True" or str(v) == "true":
         return "true"
     elif str(v) == "False" or str(v) == "false":
         return "false"

@@ -36,29 +36,29 @@
 // use a configuration variable instead to disable color.  Note that the isatty() thing is only checking
 // stderr, and so if you redirect stderr, you won't get color on the telnet console, and vice-versa.
 
-inline const char* _SAFE_ANSI_COLOR_RESET(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_RESET : ""; }
-inline const char* _SAFE_ANSI_COLOR_BOLD(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BOLD : ""; }
-inline const char* _SAFE_ANSI_COLOR_NORMAL(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_NORMAL : ""; }
-inline const char* _SAFE_ANSI_COLOR_NEGATIVE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_NEGATIVE : ""; }
-inline const char* _SAFE_ANSI_COLOR_POSITIVE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_POSITIVE : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_BLACK(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_BLACK : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_RED(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_RED : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_GREEN(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_GREEN : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_YELLOW(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_YELLOW : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_BLUE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_BLUE : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_MAGENTA(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_MAGENTA : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_CYAN(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_CYAN : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_WHITE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_WHITE : ""; }
-inline const char* _SAFE_ANSI_COLOR_FG_DEFAULT(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_FG_DEFAULT : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_BLACK(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_BLACK : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_RED(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_RED : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_GREEN(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_GREEN : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_YELLOW(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_YELLOW : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_BLUE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_BLUE : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_MAGENTA(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_MAGENTA : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_CYAN(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_CYAN : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_WHITE(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_WHITE : ""; }
-inline const char* _SAFE_ANSI_COLOR_BG_DEFAULT(void) { return isatty(STDERR_FILENO) ? ANSI_COLOR_BG_DEFAULT : ""; }
+inline const char* _SAFE_ANSI_COLOR_RESET( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_RESET : ""; }
+inline const char* _SAFE_ANSI_COLOR_BOLD( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BOLD : ""; }
+inline const char* _SAFE_ANSI_COLOR_NORMAL( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_NORMAL : ""; }
+inline const char* _SAFE_ANSI_COLOR_NEGATIVE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_NEGATIVE : ""; }
+inline const char* _SAFE_ANSI_COLOR_POSITIVE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_POSITIVE : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_BLACK( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_BLACK : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_RED( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_RED : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_GREEN( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_GREEN : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_YELLOW( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_YELLOW : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_BLUE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_BLUE : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_MAGENTA( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_MAGENTA : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_CYAN( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_CYAN : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_WHITE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_WHITE : ""; }
+inline const char* _SAFE_ANSI_COLOR_FG_DEFAULT( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_FG_DEFAULT : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_BLACK( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_BLACK : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_RED( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_RED : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_GREEN( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_GREEN : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_YELLOW( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_YELLOW : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_BLUE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_BLUE : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_MAGENTA( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_MAGENTA : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_CYAN( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_CYAN : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_WHITE( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_WHITE : ""; }
+inline const char* _SAFE_ANSI_COLOR_BG_DEFAULT( void ) { return isatty( STDERR_FILENO ) ? ANSI_COLOR_BG_DEFAULT : ""; }
 
 #define SAFE_ANSI_COLOR_RESET       _SAFE_ANSI_COLOR_RESET()
 #define SAFE_ANSI_COLOR_BOLD        _SAFE_ANSI_COLOR_BOLD()

@@ -11,23 +11,8 @@ local info_attr_t_idx = {"name","label","progress","left", "top", "width", "heig
 
 local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","focus_colorr","focus_colorg","focus_colorb","focus_colora",  "colorr", "colorg", "colorb", "colora","title", "title_colorr","title_colorg","title_colorb","title_colora","title_font", "message","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","focus_bar_color_innerr", "focus_bar_color_innerg","focus_bar_color_innerb","focus_bar_color_innera", "focus_bar_color_outerr","focus_bar_color_outerg","focus_bar_color_outerb","focus_bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "focus_arrow_colorr", "focus_arrow_colorg", "focus_arrow_colorb", "focus_arrow_colora",  "check_width", "check_height",  "rows","columns","variable_cell_size", "cell_width","cell_height","cell_spacing_width","cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","border_colorr", "border_colorg", "border_colorb", "border_colora", "focus_border_colorr","focus_border_colorg","focus_border_colorb","focus_border_colora", "box_colorr","box_colorg","box_colorb","box_colora", "focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","button_colorr","button_colorg","button_colorb","button_colora", "focus_button_colorr","focus_button_colorg","focus_button_colorb","focus_button_colora", "cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","text_colorr","text_colorg","text_colorb","text_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "text_font","padding", "border_width","border_corner_radius",  "button_width", "button_height", "tab_position", "tab_spacing", "display_width", "display_height", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "display_border_width", "display_border_colorr", "display_border_colorg", "display_border_colorb", "display_border_colora", "display_fill_colorr",  "display_fill_colorg",  "display_fill_colorb",  "display_fill_colora", "arrow_size", "arrow_dist_to_frame", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","alignment","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location", "show_ring", "selected_item","box_border_width", "scroll_distance", "box_height","selected_items","items","reactive", "focus"} 
 
---"focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora", cursor_color 
 
 local attr_t_idx 
-
---[[
-local icon_map = 
-{
-	["Left Edge      "] = function() icon = icon_l return icon end, 
-    ["Right Edge    "] = function() icon = icon_r return icon end, 
-    ["Top             "] = function() icon = icon_t return icon end, 
-    ["Bottom        "] = function() icon = icon_b return icon end, 
-    ["Horiz. Center   "] = function() icon = icon_hc return icon end, 
-    ["Vert. Center    "] = function() icon = icon_vc return icon end, 
-    ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
-    ["Vertically 	  "] = function() icon = icon_dvc return icon end 
-}
-]]
 
 local color_map =
 {
@@ -207,7 +192,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		--plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
@@ -240,7 +224,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		--plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
 
 		plus.position = {text.x + text.w + PADDING_X, 0}
@@ -411,19 +394,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		if item_type then 
         	item.item_type = item_type
 	    end 
-		--local minus = assets("lib/assets/li-btn-dim-minus.png")
-		--minus = assets("lib/assets/li-btn-dim-minus.png")
 		local minus = Image {src = "lib/assets/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
-		--local up = assets("lib/assets/li-btn-dim-up.png")
-		--up = assets("lib/assets/li-btn-dim-up.png")
 
 		local up = Image{src = "lib/assets/li-btn-dim-up.png"}
 	    up.name = "item_up"..tostring(i)
 		up.reactive = true
-		--local down = assets("lib/assets/li-btn-dim-down.png")
-		--down = assets("lib/assets/li-btn-dim-down.png")
 		local down = Image {src = "lib/assets/li-btn-dim-down.png"}
 
 	    down.name = "item_down"..tostring(i)

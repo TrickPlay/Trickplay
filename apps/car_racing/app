@@ -5,5 +5,6 @@ app=
     version     = "1.1",
     name        = "Racing",
     author      = "Francesco Alex Indaco",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Kangyun Speedster is on a daring adventure to Las Vegas, until things go wrong..."
 }
