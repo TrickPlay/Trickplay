@@ -847,14 +847,7 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 // Signal handlers
 void gst_end_of_stream( ClutterMedia* cm, Media* media )
 {
-/* Keep last frame on screen after video is done
-#if (CLUTTER_GST_MAJOR_VERSION<1)
-        GstElement* pipeline = clutter_gst_video_texture_get_playbin( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
-#else
-        GstElement* pipeline = clutter_gst_video_texture_get_pipeline( CLUTTER_GST_VIDEO_TEXTURE( cm ) );
-#endif
-
-        int attempts = 0;
+/*      int attempts = 0;
         gboolean re;
         do {
             re = ! gst_element_seek( pipeline, -1.0, GST_FORMAT_TIME,
@@ -864,11 +857,19 @@ void gst_end_of_stream( ClutterMedia* cm, Media* media )
         } while ( re && ++attempts > 3 );
 */
 
-    clutter_media_set_progress( cm, 0.0 );
-
-    clutter_media_set_playing( cm, media->get_loop() );
-
-    if ( ! media->get_loop() ) media->end_of_stream();
+    if ( media->get_loop() )
+    {
+        clutter_media_set_progress( cm, 0.0 );
+        clutter_media_set_playing( cm, TRUE );
+    }
+    else
+    {
+        /*g_warning("%d",__LINE__);
+        clutter_media_set_progress( cm, 0.5 );
+        g_warning("%d",__LINE__);
+        clutter_media_set_playing( cm, FALSE );*/
+        media->end_of_stream();
+    }
 }
 
 void gst_error( ClutterMedia* cm, GError* error, Media* media )
