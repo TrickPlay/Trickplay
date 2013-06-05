@@ -1,6 +1,40 @@
+local category_max = 20
+local t_new_releases = {}
+local t_top_picks    = {}
+local t_movies       = {}
+local t_tv_catchup   = {}
+local t_recommended  = {}
+
+movie_hash = {}
+for i=1,25 do
+    local m = table.remove(movie_data,1)
+
+    movie_hash[m.name:upper()] = m.name
+    if #t_top_picks < category_max then table.insert(t_top_picks,m) end
+    if m.year > 2010 then
+        if #t_new_releases < category_max then table.insert(t_new_releases,m) end
+    end
+end
+while #movie_data > 0 do
+    local m = table.remove(movie_data,1)
+
+    movie_hash[m.name:upper()] = m.name
+    if m.year >= 2010 then
+        if #t_new_releases < category_max then table.insert(t_new_releases,m) end
+    end
+    local r = math.random(1,3)
+    if r == 1 then
+        if #t_movies < category_max then table.insert(t_movies,m) end
+    elseif r == 2 then
+        if #t_tv_catchup < category_max then table.insert(t_tv_catchup,m) end
+    else
+        if #t_recommended < category_max then table.insert(t_recommended,m) end
+    end
+end
+
 
 local movie_w = 180
-    local grey_color = "a0a9b0"
+local grey_color = "a0a9b0"
 local curr_menu
 
 local default_vod_info = {
@@ -18,9 +52,12 @@ local empty_vod_info = {
     rating      = "",
     run_time    = "",
 }
+local VOD_G = Group{name="On Demand"}
+screen:add(VOD_G)
 local backing = make_MoreInfoBacking{
     info_x     = 200,
-    expanded_h = 670,
+    expanded_h = 830,
+    parent     = VOD_G,
     create_more_info = function()
         local text_w = 800
         local duration = 200
@@ -31,228 +68,78 @@ local backing = make_MoreInfoBacking{
             --w=text_w,
             --ellipsize = "END",
             color = "white",
-            font = FONT_NAME.." Bold 28px",
+            font = "Lato Bold 40px",
             --text = "Hugo Cabret"
         }
         g.year = Text{
-            y = g.title.y+10,
-            x = g.title.x + g.title.w + 10,
+            y = g.title.y+20,
+            x = g.title.x + g.title.w + 15,
             --w=text_w,
             --ellipsize = "END",
             color = grey_color,
-            font = FONT_NAME.." 16px",
+            font = FONT_NAME.." 18px",
             --text = "(2011)"
         }
         g.description = Text{
-            y=g.title.y+80,
+            y=g.title.y+120,
             x=g.title.x,
             wrap=true,
             wrap_mode = "WORD",
-            w=text_w,
+            w = text_w,
+            h = 170,
+            ellipsize = "END",
             color = grey_color,
-            font = FONT_NAME.." 20px",
+            font = FONT_NAME.." 24px",
             --text = lorem_ipsum,
         }
         g.rating = Text{
-            y=g.title.y+g.title.h+10,
-            x=g.title.x,
+            y=g.title.y+g.title.h+20,
+            x=g.title.x+4,
             --w=text_w,
             color = grey_color,
-            font = FONT_NAME.." 16px",
+            font = "Lato Bold 18px",
             --text = "PG",
+        }
+        g.rating_box = Rectangle{
+            color = "00000000",
+            border_width = 1,
+            border_color = g.rating.color,
+            y = g.rating.y,
+            x = g.rating.x-4,
+            h = g.rating.h+1,
         }
         g.run_time = Text{
             y=g.rating.y,
             x=g.rating.x+g.rating.w+10,
             --w=text_w,
             color = grey_color,
-            font = FONT_NAME.." 16px",
+            font = FONT_NAME.." 18px",
             --text = "126 min",
         }
         g:add(
             g.title,
             g.description,
             g.year,
+            g.rating_box,
             g.rating,
             g.run_time
         )
         return g
     end,
     populate = function(g,show)
-            g.title.text       = show.title
-            g.description.text = show.description
-            g.year.text        = show.year
+            show = show.data
+            --dumptable(show)
+            g.title.text       = show.name or "Hugo Cabret"
+            g.description.text = show.plot or show.plot_simple or lorem_ipsum
+            g.year.text        = show.year or "2002"
             g.year.x           = g.title.x + g.title.w + 10
-            g.rating.text      = show.rating
-            g.run_time.text    = show.run_time
-            g.run_time.x       = g.rating.x + g.rating.w + 10
+            g.rating.text      = string.gsub(show.rated or "NOT_RATED","_"," ")
+            g.rating_box.w     = g.rating.w+8
+            g.run_time.text    = show.runtime and show.runtime[1] or "120 min"
+            g.run_time.x       = g.rating.x + g.rating.w + 30
     end,
     empty_info = empty_vod_info,
-    get_current = function() return default_vod_info end,
-}
-
-local catch_up = {
-    {
-        name = "Battle: Los Angeles",
-        poster= "battle-los-angeles.jpg",
-    },
-    {
-        name = "Beginners",
-        poster= "beginners.jpg",
-    },
-    {
-        name = "A Very Harold & Kumar 3D Christmas",
-        poster= "harold-and-kumar-christmas.jpg",
-    },
-}
-local new_releases = {
-    {
-        name = "The Tree of Life",
-        poster= "tree-of-life.jpg",
-    },
-    {
-        name = "The Ides of March",
-        poster= "ides-of-march.jpg",
-    },
-    {
-        name = "MI: Ghost Protocol",
-        poster= "ghost-protocol.jpg",
-    },
-    {
-        name = "Red Tails",
-        poster= "red-tail.jpg",
-    },
-    {
-        name = "Ronin",
-        poster= "ronin.jpg",
-    },
-    {
-        name = "X-Men: First Class",
-        poster= "x-men.jpg",
-    },
-    {
-        name = "Happy Feet 2",
-        poster= "happy-feet-two.jpg",
-    },
-    {
-        name = "Hugo",
-        poster= "hugo.jpg",
-    },
-}
-local top_picks = {
-    {
-        name = "Glee The Concert Movie",
-        poster= "glee-concert-movie.jpg",
-    },
-    {
-        name = "Haywire",
-        poster= "haywire.jpg",
-    },
-    {
-        name = "New Year's Eve",
-        poster= "new-years-eve.jpg",
-    },
-    {
-        name = "Source Code",
-        poster= "source-code.jpg",
-    },
-}
-local recommended = {
-    {
-        name = "Cars 2",
-        poster= "cars-2.jpg",
-    },
-    {
-        name = "Scream 4",
-        poster= "scream-4.jpg",
-    },
-    {
-        name = "Chipmunks Chipwrecked",
-        poster= "chipmunks-chipwrecked.jpg",
-    },
-    {
-        name = "Hoodwinked 2",
-        poster= "hoodwinked.jpg",
-    },
-    {
-        name = "Spy Kids 4D",
-        poster= "spy-kids-4d.jpg",
-    },
-    {
-        name = "Chronicle",
-        poster= "chronicle.jpg",
-    },
-}
-local movies =
-{
-	{
-		name = "Harry Potter and the Deathly Hallows - Part 2",
-		poster=	"harry-potter-death-hallows.jpg",
-	},
-	{
-		name = "Horrible Bosses",
-		poster=	"horrible-bosses.jpg",
-	},
-	{
-		name = "Mr. Popper's Penguins",
-		poster=	"mr-poppers-penguins.jpg",
-	},
-	{
-		name = "Puss in Boots",
-		poster=	"puss-n-boots.jpg",
-	},
-	{
-		name = "Straw Dogs",
-		poster=	"straw-dogs.jpg",
-	},
-	{
-		name = "The Muppets",
-		poster=	"the-muppets.jpg",
-	},
-	{
-		name = "The Pool Boys",
-		poster=	"the-pool-boys.jpg",
-	},
-	{
-		name = "Water for Elephants",
-		poster=	"water-for-elephants.jpg",
-	},
-	{
-		name = "Your Highness",
-		poster=	"your-highness.jpg",
-	},
-	{
-		name = "The Green Hornet",
-		poster=	"green-hornet.jpg",
-	},
-	{
-		name = "Secretariat",
-		poster=	"secretariat.jpg",
-	},
-	{
-		name = "The Vow",
-		poster=	"the-vow.jpg",
-	},
-	{
-		name = "The Secret World of Arrietty",
-		poster=	"arriettty.jpg",
-	},
-	{
-		name = "The Iron Lady",
-		poster=	"iron-lady.jpg",
-	},
-	{
-		name = "One Day",
-		poster=	"one-day.jpg",
-	},
-	{
-		name = "One for the Money",
-		poster=	"one-for-the-money.jpg",
-	},
-	{
-		name = "The Grey",
-		poster=	"the-grey.jpg",
-	},
+    get_current = function() return curr_menu:curr() end,
 }
 
 local   sel_scale = 2.5
@@ -263,12 +150,12 @@ local function make_poster(item)
     local mode = "EASE_OUT_SINE"
     local poster  = Group()
     local inner_g = Group()
-    local img = Image { src = "assets/movie_posters/"..item.poster, x = 2 }
+    local img = Sprite { sheet=imdb_sprites, id = item.poster:sub(1+("assets/imdb_posters/"):len()), x = 2,w=180,h=240 }
     local img_scrim = Rectangle { color = grey, w = img.w + 4, h = img.h + 4 }
 
     local title_grp = Group { w = img.w }
     local title   = Text {
-        font      = FONT_NAME.." 38px",
+        font      = FONT_NAME.." 40px",
         color     = "white",
         text      = item.name,
         x         = 6,
@@ -325,8 +212,8 @@ local function make_poster(item)
         --title_grp.clip_to_size = false
         self.anim.state = "focus"
         if x then
-            poster:stop_animation()
-            poster:animate{
+            self:complete_animation()
+            self:animate{
                 duration=duration,
                 mode = mode,
                 x = x,
@@ -338,8 +225,8 @@ local function make_poster(item)
         --title_grp.clip_to_size = true
         self.anim.state = "unfocus"
         if x then
-            poster:stop_animation()
-            poster:animate{
+            self:complete_animation()
+            self:animate{
                 duration=duration,
                 mode = mode,
                 x = x,
@@ -347,22 +234,32 @@ local function make_poster(item)
         end
     end
     poster.anim:warp("unfocus")
-
+    poster.data = item
+    poster.h = poster.h + 150
     return poster
-end
+end--[[
 local sub_menu = make_sliding_bar__expanded_focus{
     items = movies,
     make_item = make_poster,
     unsel_offset = movie_w*2/2-30,
     spacing = 10+movie_w,
 }
-
-local function make_category(_, data,channel_bar,channel_bar_focus)
-    local bar_height = channel_bar.h
+--]]
+local function make_category(data,channel_bar,channel_bar_focus)
+    local bar_height = 148--channel_bar.h
     local category = Group { name = data.label }
-    local logo = Clone{source=data.logo}
+    local logo = Sprite {
+        sheet=ui_sprites,
+        id = data.logo,
+    }
     logo.anchor_point = { 0, logo.h/2 }
     logo.position = { 30, bar_height/2 }
+    local logo_f = Sprite {
+        sheet=ui_sprites,
+        id = data.logo_f,
+    }
+    logo_f.anchor_point = { 0, logo_f.h/2 }
+    logo_f.position = { 30, bar_height/2 }
     --local channel_num = Text { color = "grey35", text = ""..channel_num, font = FONT_NAME.." 192px" }
     local label = Text { color = "white", text = data.label, font = FONT_NAME.." 40px" }
     label.anchor_point = { 0, label.h/2 }
@@ -370,15 +267,10 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
     --channel_num.x = 15
     --channel_num.y = -48
 
-    local bg_focus = Clone {
-        source = channel_bar_focus,
+    local bg_focus = Sprite {
+        sheet=ui_sprites,
+        id = "channelbar/channel-bar-focus.png",
         name = "bg-focus",
-        x = 1,
-        w = label.x + label.w + 30
-    }
-    local bg_unfocus = Clone {
-        source = channel_bar,
-        name = "bg-unfocus",
         x = 1,
         w = label.x + label.w + 30
     }
@@ -390,7 +282,6 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
             size = { 1, bar_height }
         },
         bg_focus,
-        bg_unfocus,
         Rectangle {
             name = "edge",
             color = "#2d414e",
@@ -399,6 +290,7 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
         },
         --channel_num,
         logo,
+        logo_f,
         label
     )
 
@@ -411,8 +303,8 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
                 target = "focus",
                 keys = {
                     { bg_focus, "opacity", 255 },
-                    { bg_unfocus, "opacity", 0 },
-                    { logo, "opacity", 255 },
+                    { logo, "opacity", 0 },
+                    { logo_f, "opacity", 255 },
                     --{ channel_num, "opacity", 255 },
                     { label, "opacity", 255 },
                 },
@@ -422,8 +314,8 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
                 target = "unfocus",
                 keys = {
                     { bg_focus, "opacity", 0 },
-                    { bg_unfocus, "opacity", 255 },
-                    { logo, "opacity", 64 },
+                    { logo, "opacity", 255 },
+                    { logo_f, "opacity", 0 },
                     --{ channel_num, "opacity", 64 },
                     { label, "opacity", 64 },
                 },
@@ -443,37 +335,22 @@ local function make_category(_, data,channel_bar,channel_bar_focus)
     category.sub_menu   = data.sub_menu
     return category
 end
-local clone_src = Group { name = "Clone sources" }
-screen:add(clone_src)
-clone_src:hide()
-local catchup_tv_icon   = Image { src = "assets/VOD_icons/icon-catchup-tv.png"   }
-local movies_icon       = Image { src = "assets/VOD_icons/icon-movies.png"       }
-local new_releases_icon = Image { src = "assets/VOD_icons/icon-new-releases.png" }
-local recommended_icon  = Image { src = "assets/VOD_icons/icon-recommended.png"  }
-local top_picks_icon    = Image { src = "assets/VOD_icons/icon-top-picks.png"    }
-clone_src:add(
-    catchup_tv_icon,
-    movies_icon,
-    new_releases_icon,
-    recommended_icon,
-    top_picks_icon
-)
 local ppv_menu = Group()
 do
-    local button_group = Group{name="Buttons",x=700,y=550}
-    local poster = Clone{y=105,x=200}
+    local button_group = Group{name="Buttons",x=700,y=630-105}
+    local poster = Clone {x=200}
     local right_side = Group()
     local buttons = {
-        "Free\nPreview",
-        "$4.99\nTV (2 day)",
-        "$3.99\nNetflix",
-        "$4.95\nHulu",
+        {"Free","Preview"},
+        {"$4.99","TV (2 day)"},
+        {"$3.99","Netflix"},
+        {"$4.95","Hulu"},
     }
     local genre = Text{
         color = grey_color,
         text = "Adventure | Drama | Family | Mystery",
         font = FONT_NAME.." 20px",
-        y = 400,
+        y = 440-105,
         x = button_group.x,
     }
     local director = Text{
@@ -521,25 +398,43 @@ do
     local i = 1
     for i,v in ipairs(buttons) do
         local w = 210
-        local focused = Clone{w=w,source = channel_bar_focus}
-        local unfocused = Clone{w=w,source = channel_bar}
-        local label  = Text{
+        local h = 148/2--channel_bar.h/2
+        local focused = Sprite{sheet=ui_sprites,w=w,h=h,id = "channelbar/channel-bar-focus.png"}
+        local unfocused = Sprite{sheet=ui_sprites,w=w,h=h,id = "channelbar/channel-bar.png"}
+        local line1  = Text{
             color = "white",
-            text = v,
-            font = FONT_NAME.." 30px",
+            text = v[1],
+            font = "Lato Bold 20px",
             alignment = "CENTER",
         }
-        label.anchor_point = {label.w/2,label.h/2}
-        label.position = {w/2,channel_bar.h/2}
+        line1.anchor_point = {line1.w/2,line1.h}
+        local line2  = Text{
+            color = "white",
+            text = v[2],
+            font = FONT_NAME.." 20px",
+            alignment = "CENTER",
+        }
+        line2.anchor_point = {line2.w/2,0}
+        line1.position = {w/2,h/2}
+        line2.position = {w/2,h/2}
         buttons[i]   = Group{
-            name     = v,
+            name     = v[1].." "..v[2],
             x        = w*(i-1),
             children = {
                 unfocused,
                 focused,
-                Rectangle { name = "edge", color = "#2d414e", size = { 2, channel_bar.h } },
-                Rectangle { name = "edge", color = "#2d414e", size = { 2, channel_bar.h },x=w },
-                label,
+                Rectangle {
+                    name = "edge",
+                    color = "#2d414e",
+                    size = { 2, h }
+                },
+                Rectangle {
+                    name = "edge",
+                    color = "#2d414e",
+                    size = { 2, h },
+                    x=w
+                },
+                line2,line1
             }
         }
         buttons[i].anim = AnimationState{
@@ -551,7 +446,6 @@ do
                     target = "focus",
                     keys = {
                         { focused, "opacity", 255 },
-                        --{ unfocused, "opacity", 0 },
                     },
                 },
                 {
@@ -559,7 +453,6 @@ do
                     target = "unfocus",
                     keys = {
                         { focused, "opacity", 0 },
-                        --{ unfocused, "opacity", 255 },
                     },
                 },
             },
@@ -571,7 +464,7 @@ do
     ppv_menu:add(right_side,poster)
     buttons[i].anim.state = "focus"
     function ppv_menu.press_left(self)
-        if i == 1 then return true end
+        if i == 1 then return self:press_down() end
         buttons[i].anim.state = "unfocus"
         i = i - 1
         buttons[i].anim.state = "focus"
@@ -592,6 +485,7 @@ do
         end)
         return true
     end
+    ppv_menu.press_back = ppv_menu.press_down
     function ppv_menu:fade_out(f)
         button_group:animate{
             duration = 100,
@@ -606,25 +500,53 @@ do
             on_completed = f,
         }
     end
+    function ppv_menu:populate(show_data)
+        -----------------------------------------------------------
+        director_name.text = ""
+        for i,director in ipairs(show_data.directors) do
+            if i > 3 then break end
+            director_name.text = director_name.text..
+                director.."\n"
+        end
+        -----------------------------------------------------------
+        writer_names.text = ""
+        for i,writer in ipairs(show_data.writers) do
+            if i > 3 then break end
+            writer_names.text = writer_names.text..
+                writer.."\n"
+        end
+        -----------------------------------------------------------
+        star_names.text = ""
+        for i,actor in ipairs(show_data.actors) do
+            if i > 3 then break end
+            star_names.text = star_names.text..
+                actor.."\n"
+        end
+        -----------------------------------------------------------
+        --star_names
+    end
     ppv_menu.poster = poster
 end
 local function show_movie_details(sub_menu)
     ppv_menu.prev = sub_menu
     ppv_menu:fade_in()
     sub_menu:fade_out()
-    screen:add(ppv_menu)
+    ppv_menu:populate(curr_menu:curr().data)
+    backing:add_over_contents(ppv_menu)
     curr_menu = ppv_menu
     ppv_menu.poster.source = sub_menu:curr()
 end
+
 local menubar
 menubar       = make_sliding_bar__highlighted_focus{
     make_item = make_category,
     items     = {
         {
-            label    = "Movies",
-            logo     = movies_icon,
+            label    = "TV Catch Up",
+            logo     = "VOD_icons/icon-catchup-tv.png",
+            logo_f   = "VOD_icons/icon-catchup-tv-focus.png",
             sub_menu = make_sliding_bar__expanded_focus{
-                items        = movies,
+                items        = t_tv_catchup,
                 make_item    = make_poster,
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
@@ -641,23 +563,24 @@ menubar       = make_sliding_bar__highlighted_focus{
                 end,
                 press_left = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "right"
                     )
                 end,
             },
         },
         {
-            label    = "TV Catch Up",
-            logo     = catchup_tv_icon,
+            label    = "Movies",
+            logo     = "VOD_icons/icon-movies.png",
+            logo_f   = "VOD_icons/icon-movies-focus.png",
             sub_menu = make_sliding_bar__expanded_focus{
-                items        = catch_up,
+                items        = t_movies,
                 make_item    = make_poster,
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
@@ -674,13 +597,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                 end,
                 press_left = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "right"
                     )
                 end,
@@ -688,9 +611,10 @@ menubar       = make_sliding_bar__highlighted_focus{
         },
         {
             label    = "New Releases",
-            logo     = new_releases_icon,
+            logo     = "VOD_icons/icon-new-releases.png",
+            logo_f   = "VOD_icons/icon-new-releases-focus.png",
             sub_menu = make_sliding_bar__expanded_focus{
-                items        = new_releases,
+                items        = t_new_releases,
                 make_item    = make_poster,
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
@@ -707,13 +631,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                 end,
                 press_left = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "right"
                     )
                 end,
@@ -721,9 +645,10 @@ menubar       = make_sliding_bar__highlighted_focus{
         },
         {
             label    = "Top Picks",
-            logo     = top_picks_icon,
+            logo     = "VOD_icons/icon-top-picks.png",
+            logo_f   = "VOD_icons/icon-top-picks-focus.png",
             sub_menu = make_sliding_bar__expanded_focus{
-                items        = top_picks,
+                items        = t_top_picks,
                 make_item    = make_poster,
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
@@ -740,23 +665,24 @@ menubar       = make_sliding_bar__highlighted_focus{
                 end,
                 press_left = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "right"
                     )
                 end,
             },
         },
         {
-            label    = "Recommened",
-            logo     = recommended_icon,
+            label    = "Recommended",
+            logo     = "VOD_icons/icon-recommended.png",
+            logo_f   = "VOD_icons/icon-recommended-focus.png",
             sub_menu = make_sliding_bar__expanded_focus{
-                items        = recommended,
+                items        = t_recommended,
                 make_item    = make_poster,
                 unsel_offset = movie_w*2/2-30,
                 spacing      = 10+movie_w,
@@ -773,13 +699,13 @@ menubar       = make_sliding_bar__highlighted_focus{
                 end,
                 press_left = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "left"
                     )
                 end,
                 press_right = function( self )
                     backing:set_incoming(
-                        default_vod_info,--self:curr(),
+                        self:curr(),
                         "right"
                     )
                 end,
@@ -788,12 +714,14 @@ menubar       = make_sliding_bar__highlighted_focus{
     },
     press_up = function(self)
         --print(self,curr_menu)
-        screen:add(self:curr().sub_menu)
+        local sub_menu = self:curr().sub_menu
+        VOD_G:add(sub_menu)
+        sub_menu:lower_to_bottom()
         --self:curr().sub_menu:hide()
-        self:curr().sub_menu.x = -200
-        self:curr().sub_menu.y = 105
-        self:curr().sub_menu:anim_in()
-        curr_menu = self:curr().sub_menu
+        sub_menu.x = -200
+        sub_menu.y = 105
+        sub_menu:anim_in()
+        curr_menu = sub_menu
         backing.anim.state = "full"
         return true
     end,
@@ -805,22 +733,35 @@ curr_menu = menubar
 
 local function show_bar()
     menubar:anim_in()
+    VOD_G:add(menubar)
 end
 
 local function hide_bar()
-    menubar:anim_out()
+
+    dolater(150,menubar.anim_out)
+    if curr_menu == ppv_menu then
+        ppv_menu.prev:anim_out(function()
+            ppv_menu:unparent()
+            ppv_menu.prev.opacity = 255
+        end)
+        --ppv_menu:fade_out()
+    elseif curr_menu ~= menubar then
+        curr_menu:anim_out()
+    end
+    curr_menu = menubar
     backing.anim.state = "hidden"
 end
 
 
 
 local function on_activate(label)
+    label:stop_animation()
     label:animate({ duration = 250, opacity = 255 })
     if(menubar.count == 0) then build_bar() end
     if menubar.parent == nil then
-        screen:add(backing,menubar)
+        --screen:add(menubar)
         --sub_menu:hide()
-        menubar:hide()
+        --menubar:hide()
         menubar.y = 925 - 150
         --sub_menu.y = 400
         backing.y = 105--menubar.y
@@ -829,6 +770,7 @@ local function on_activate(label)
 end
 
 local function on_deactivate(label, new_active)
+    label:stop_animation()
     label:animate{
         duration = 250,
         opacity = 128,
@@ -864,6 +806,9 @@ local key_events = {
     end,
     [keys.OK] = function()
         return curr_menu.press_ok    and curr_menu:press_ok()--true
+    end,
+    [keys.BACK] = function()
+        return curr_menu.press_back    and curr_menu:press_back()--true
     end,
 }
 
