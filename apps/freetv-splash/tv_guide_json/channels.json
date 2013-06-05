@@ -1,0 +1,2522 @@
+{
+   "559" : {
+      "name" : "Independent Film Channel",
+      "url" : "www.ifc.com",
+      "id" : "IFC"
+   },
+   "127" : {
+      "name" : "DITV127",
+      "url" : null,
+      "id" : "DITV127"
+   },
+   "276" : {
+      "name" : "KBTXDT2 (KBTX-DT2)",
+      "url" : "www.kbtx.com/",
+      "id" : "KBTXDT2"
+   },
+   "443" : {
+      "name" : "HISTORY CHANNEL EN ESPANOL",
+      "url" : "www.HistoryChannel.com",
+      "id" : "HISTE"
+   },
+   "206" : {
+      "name" : "ESPNHD",
+      "url" : "www.espn.com",
+      "id" : "ESPNHD"
+   },
+   "118" : {
+      "name" : "DITV118",
+      "url" : null,
+      "id" : "DITV118"
+   },
+   "620" : {
+      "name" : "KATVDT3 (KATV-DT3)",
+      "url" : null,
+      "id" : "KATVDT3"
+   },
+   "882" : {
+      "name" : "DMX: Italian Contemporary",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "CONITAL"
+   },
+   "331" : {
+      "name" : "MTV - Music Television",
+      "url" : "www.mtv.com",
+      "id" : "MTV"
+   },
+   "891" : {
+      "name" : "KOFY",
+      "url" : "www.wb20.com",
+      "id" : "KOFY"
+   },
+   "767" : {
+      "name" : "Time Warner Raleigh Game 3",
+      "url" : "WWW.PPV.COM",
+      "id" : "GAM3RL"
+   },
+   "580" : {
+      "name" : "Special Events Channel",
+      "url" : null,
+      "id" : "SPEVENT"
+   },
+   "805" : {
+      "name" : "DMX: 80's Hits",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "80HITS"
+   },
+   "233" : {
+      "name" : "GSN",
+      "url" : "www.gsn.com",
+      "id" : "GSN"
+   },
+   "437" : {
+      "name" : "TV Chile Internacional",
+      "url" : "www.tvchile.cl/parilla.aspx",
+      "id" : "TVNI"
+   },
+   "517" : {
+      "name" : "MoreMAX",
+      "url" : "www.cinemax.com",
+      "id" : "MOMAX"
+   },
+   "458" : {
+      "name" : "KOBGLD (KOBG-LD)",
+      "url" : "www.kobtv.com",
+      "id" : "KOBGLD"
+   },
+   "368" : {
+      "name" : "K50AM",
+      "url" : "www.kx4.com",
+      "id" : "K50AM"
+   },
+   "872" : {
+      "name" : "DMX: Music of the Americas",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "MUSAMER"
+   },
+   "451" : {
+      "name" : "TVB2",
+      "url" : null,
+      "id" : "TVB2"
+   },
+   "454" : {
+      "name" : "CCTV4--China Central TV",
+      "url" : "WWW.CCTV-4.com",
+      "id" : "CCTV4"
+   },
+   "316" : {
+      "name" : "ShopNBC",
+      "url" : "www.vvtv.com",
+      "id" : "SHOPNBC"
+   },
+   "163" : {
+      "name" : "DITV161 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV161"
+   },
+   "395" : {
+      "name" : "XETV",
+      "url" : "www.fox6.com",
+      "id" : "XETV"
+   },
+   "634" : {
+      "name" : "Madison Square Garden Network",
+      "url" : "www.msgnetwork.com",
+      "id" : "MSG"
+   },
+   "849" : {
+      "name" : "DMX: Soft Hits",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SFTHITS"
+   },
+   "842" : {
+      "name" : "DMX: Classic R&B",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "CLASSRB"
+   },
+   "695" : {
+      "name" : "Regional Sports Alt. Message Channel",
+      "url" : null,
+      "id" : "RSPALT"
+   },
+   "511" : {
+      "name" : "HBO Latino",
+      "url" : "www.hbo.com",
+      "id" : "HBOLAT"
+   },
+   "2140" : {
+      "name" : "Channel One Russia Worldwide Network",
+      "url" : "www.channelonerussia.com",
+      "id" : "C1RWN"
+   },
+   "665" : {
+      "name" : "Cox Tulsa In Demand 01",
+      "url" : null,
+      "id" : "TULIN01"
+   },
+   "434" : {
+      "name" : "Create",
+      "url" : null,
+      "id" : "CREATE"
+   },
+   "865" : {
+      "name" : "DMX: Piano",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "PIANO"
+   },
+   "292" : {
+      "name" : "Disney XD",
+      "url" : "disney.go.com/DisneyChannel/toondisney/",
+      "id" : "DXD"
+   },
+   "889" : {
+      "name" : "KNTV",
+      "url" : "www.kntv.com/",
+      "id" : "KNTV"
+   },
+   "350" : {
+      "name" : "CSPAN",
+      "url" : "www.c-span.org",
+      "id" : "CSPAN"
+   },
+   "291" : {
+      "name" : "Disney Channel (Pacific)",
+      "url" : "www.disneychannel.com",
+      "id" : "DISNP"
+   },
+   "904" : {
+      "name" : "KCSMDT (KCSM-DT)",
+      "url" : null,
+      "id" : "KCSMDT"
+   },
+   "374" : {
+      "name" : "BYU-TV",
+      "url" : "WWW.KBYU.BYU.EDU",
+      "id" : "BYUTV"
+   },
+   "540" : {
+      "name" : "Encore Drama",
+      "url" : "www.starzsuperpak.com",
+      "id" : "ENCRD"
+   },
+   "199" : {
+      "name" : "DITV199",
+      "url" : null,
+      "id" : "DITV199"
+   },
+   "684" : {
+      "name" : "ROOT Sports Rocky Mountain West",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "RTR1"
+   },
+   "649" : {
+      "name" : "SportSouth",
+      "url" : "www.turnersouth.com",
+      "id" : "SPSOUTH"
+   },
+   "211" : {
+      "name" : "ESPN2 (Alternate)",
+      "url" : null,
+      "id" : "ESPN2A"
+   },
+   "009" : {
+      "name" : "KQEDDT (KQED-DT)",
+      "url" : "WWW.KQED.ORG",
+      "id" : "KQEDDT"
+   },
+   "527" : {
+      "name" : "Starz",
+      "url" : "www.starzencore.com",
+      "id" : "STARZ"
+   },
+   "014" : {
+      "name" : "KDTVDT (KDTV-DT)",
+      "url" : "www.univision.com",
+      "id" : "KDTVDT"
+   },
+   "337" : {
+      "name" : "VH1 Classic",
+      "url" : "www.vh1.com/music/vh1classic/main.jhtml",
+      "id" : "VH1CL"
+   },
+   "886" : {
+      "name" : "KPIX",
+      "url" : "cbs5.com",
+      "id" : "KPIX"
+   },
+   "642" : {
+      "name" : "Comcast SportsNet Mid-Atlantic",
+      "url" : "www.CSNWashington.com",
+      "id" : "CSNDC"
+   },
+   "340" : {
+      "name" : "AXS TV",
+      "url" : null,
+      "id" : "AXSTV"
+   },
+   "311" : {
+      "name" : "ABC Family",
+      "url" : "www.abcfamily.go.com",
+      "id" : "ABCF"
+   },
+   "833" : {
+      "name" : "DMX: Classic Rock",
+      "url" : null,
+      "id" : "CLSROCK"
+   },
+   "002" : {
+      "name" : "KTVUDT (KTVU-DT)",
+      "url" : "WWW.BAYINSIDER.COM/KTVU",
+      "id" : "KTVUDT"
+   },
+   "241" : {
+      "name" : "Spike TV",
+      "url" : "www.spiketv.com",
+      "id" : "SPIKETV"
+   },
+   "198" : {
+      "name" : "DITV198",
+      "url" : null,
+      "id" : "DITV198"
+   },
+   "139" : {
+      "name" : "DITV133 (DirecTv)",
+      "url" : null,
+      "id" : "DITV133"
+   },
+   "825" : {
+      "name" : "DMX: Hot Jamz",
+      "url" : null,
+      "id" : "HTJAMZ"
+   },
+   "129" : {
+      "name" : "DITV129",
+      "url" : null,
+      "id" : "DITV129"
+   },
+   "327" : {
+      "name" : "Country Music Television",
+      "url" : "www.country.com",
+      "id" : "CMTV"
+   },
+   "548" : {
+      "name" : "Showtime Showcase",
+      "url" : "www.showtimeonline.com",
+      "id" : "SHOCSE"
+   },
+   "859" : {
+      "name" : "DMX: Dance",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "DANCE"
+   },
+   "876" : {
+      "name" : "DMX: Mariachi",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "MACHI"
+   },
+   "662" : {
+      "name" : "MLB Extra Innings 748",
+      "url" : null,
+      "id" : "MLBD748"
+   },
+   "036" : {
+      "name" : "KICUDT (KICU-DT)",
+      "url" : "WWW.KICU.COM",
+      "id" : "KICUDT"
+   },
+   "280" : {
+      "name" : "The Learning Channel",
+      "url" : "tlc.discovery.com",
+      "id" : "TLC"
+   },
+   "273" : {
+      "name" : "TV Guide Network",
+      "url" : null,
+      "id" : "TVGN"
+   },
+   "758" : {
+      "name" : "WKOIDT5 (WKOI-DT5)",
+      "url" : "www.tbn.org",
+      "id" : "WKOIDT5"
+   },
+   "471" : {
+      "name" : "MLS Direct Kick - Direct TV - MLSSO",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO"
+   },
+   "236" : {
+      "name" : "E! Entertainment Television",
+      "url" : "www.eonline.com",
+      "id" : "E"
+   },
+   "706" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST3",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST3"
+   },
+   "249" : {
+      "name" : "Comedy Central",
+      "url" : "www.comedycentral.com",
+      "id" : "COMEDY"
+   },
+   "218" : {
+      "name" : "The Golf Channel",
+      "url" : "www.thegolfchannel.com",
+      "id" : "GOLF"
+   },
+   "202" : {
+      "name" : "Cable News Network",
+      "url" : "www.cnn.com",
+      "id" : "CNN"
+   },
+   "168" : {
+      "name" : "DITV168",
+      "url" : null,
+      "id" : "DITV168"
+   },
+   "184" : {
+      "name" : "DITV184",
+      "url" : null,
+      "id" : "DITV184"
+   },
+   "819" : {
+      "name" : "DMX: Love Songs",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "LOVESNG"
+   },
+   "348" : {
+      "name" : "Free Speech TV",
+      "url" : "www.freespeech.org",
+      "id" : "FSTV"
+   },
+   "776" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI8",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI8"
+   },
+   "145" : {
+      "name" : "DITV145",
+      "url" : null,
+      "id" : "DITV145"
+   },
+   "894" : {
+      "name" : "KKPX",
+      "url" : "www.pax.tv/stations/default.cfm?station=kkpx",
+      "id" : "KKPX"
+   },
+   "789" : {
+      "name" : "DirecTV - ESPN GamePlan - ESPGP4",
+      "url" : null,
+      "id" : "ESPGP4"
+   },
+   "834" : {
+      "name" : "DMX: Alternative",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "ALTERN"
+   },
+   "858" : {
+      "name" : "DMX: Subterranean",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SUBTER"
+   },
+   "2183" : {
+      "name" : "Descriptive Video - Prime TV",
+      "url" : null,
+      "id" : "DVPTV"
+   },
+   "285" : {
+      "name" : "Investigation Discovery",
+      "url" : "times.discovery.com",
+      "id" : "ID"
+   },
+   "140" : {
+      "name" : "DITV140",
+      "url" : null,
+      "id" : "DITV140"
+   },
+   "772" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI4",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI4"
+   },
+   "124" : {
+      "name" : "DITV124",
+      "url" : null,
+      "id" : "DITV124"
+   },
+   "627" : {
+      "name" : "GOLTV (English)",
+      "url" : null,
+      "id" : "GOLTVE"
+   },
+   "594" : {
+      "name" : "WOPXDT3 (WOPX-DT3)",
+      "url" : null,
+      "id" : "WOPXDT3"
+   },
+   "502" : {
+      "name" : "HBO2",
+      "url" : "www.hbo.com",
+      "id" : "HBO2"
+   },
+   "314" : {
+      "name" : "KLCWDT2 (KLCW-DT2)",
+      "url" : "www.myfoxlubbock.com/myfox",
+      "id" : "KLCWDT2"
+   },
+   "307" : {
+      "name" : "WGN America",
+      "url" : "www.wgntv.com/",
+      "id" : "WGNAMER"
+   },
+   "801" : {
+      "name" : "DMX: Big Band/Swing",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SWING"
+   },
+   "007" : {
+      "name" : "KGODT (KGO-DT)",
+      "url" : "WWW.ABC7NEWS.COM",
+      "id" : "KGODT"
+   },
+   "715" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST12",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST12"
+   },
+   "154" : {
+      "name" : "DITV154",
+      "url" : null,
+      "id" : "DITV154"
+   },
+   "653" : {
+      "name" : "Sun Sports",
+      "url" : "www.sunshinenetwork.com",
+      "id" : "SUNNET"
+   },
+   "355" : {
+      "name" : "CNBC",
+      "url" : "www.cnbc.com",
+      "id" : "CNBC"
+   },
+   "747" : {
+      "name" : "Audio XM: Big Tracks",
+      "url" : "www.xmradio.com",
+      "id" : "XMBIG"
+   },
+   "159" : {
+      "name" : "DITV159",
+      "url" : null,
+      "id" : "DITV159"
+   },
+   "2058" : {
+      "name" : "TVB8",
+      "url" : null,
+      "id" : "TVB8"
+   },
+   "704" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST"
+   },
+   "486" : {
+      "name" : "KEYUDT3 (KEYU-DT3)",
+      "url" : null,
+      "id" : "KEYUDT3"
+   },
+   "326" : {
+      "name" : "Great American Country",
+      "url" : "www.countrystars.com",
+      "id" : "GAC"
+   },
+   "2134" : {
+      "name" : "Rede Globo TV Internacional",
+      "url" : "www.globotvinternational.com",
+      "id" : "RGTI"
+   },
+   "160" : {
+      "name" : "DITV160",
+      "url" : null,
+      "id" : "DITV160"
+   },
+   "555" : {
+      "name" : "The Movie Channel (Pacific)",
+      "url" : "www.sho.com",
+      "id" : "TMCP"
+   },
+   "367" : {
+      "name" : "World Harvest Television",
+      "url" : "www.lesea.com",
+      "id" : "WHMBSAT"
+   },
+   "716" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST13",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST13"
+   },
+   "619" : {
+      "name" : "Fox Soccer",
+      "url" : "msn.foxsports.com/foxsoccer",
+      "id" : "FSC"
+   },
+   "335" : {
+      "name" : "VH1",
+      "url" : "www.vh1.com",
+      "id" : "VH1"
+   },
+   "855" : {
+      "name" : "DMX: Great Standards",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "GREATS"
+   },
+   "686" : {
+      "name" : "Fox Sports Arizona - FSAZ",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSAZ"
+   },
+   "698" : {
+      "name" : "Oceanic Primetime on Demand",
+      "url" : null,
+      "id" : "OCPRMOD"
+   },
+   "485" : {
+      "name" : "WJLA-DT3 (WJLA-DT3)",
+      "url" : "WWW.ABCNEWS.COM/LOCAL/WJLA/ONAIR/",
+      "id" : "WJLADT3"
+   },
+   "195" : {
+      "name" : "DITV195",
+      "url" : null,
+      "id" : "DITV195"
+   },
+   "391" : {
+      "name" : "KCBS",
+      "url" : "www.channel2000.com/",
+      "id" : "KCBS"
+   },
+   "778" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI10",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI10"
+   },
+   "538" : {
+      "name" : "Encore Westerns",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCRWS"
+   },
+   "554" : {
+      "name" : "The Movie Channel",
+      "url" : "www.sho.com",
+      "id" : "TMC"
+   },
+   "679" : {
+      "name" : "Fox Sports Southwest (Zone 4)",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSS4"
+   },
+   "831" : {
+      "name" : "DMX: College Rock",
+      "url" : null,
+      "id" : "COLROK"
+   },
+   "460" : {
+      "name" : "TVE America Television Espanola",
+      "url" : "www.rtve.es",
+      "id" : "TVEI"
+   },
+   "119" : {
+      "name" : "DITV119",
+      "url" : null,
+      "id" : "DITV119"
+   },
+   "586" : {
+      "name" : "PLAYBOY EN ESPANOL",
+      "url" : null,
+      "id" : "PLAYESP"
+   },
+   "453" : {
+      "name" : "TVBE",
+      "url" : "www.tvbusa.com",
+      "id" : "TVBE"
+   },
+   "324" : {
+      "name" : "Charming China",
+      "url" : "www.hanyastar.com",
+      "id" : "HXTV"
+   },
+   "180" : {
+      "name" : "DITV180",
+      "url" : null,
+      "id" : "DITV180"
+   },
+   "244" : {
+      "name" : "Syfy",
+      "url" : "www.scifi.com",
+      "id" : "SYFY"
+   },
+   "162" : {
+      "name" : "DITV162",
+      "url" : null,
+      "id" : "DITV162"
+   },
+   "780" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI12",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI12"
+   },
+   "637" : {
+      "name" : "MSG (Alt. feed) - MSG2 OVERFLOW",
+      "url" : "www.msgnetwork.com",
+      "id" : "MSG2"
+   },
+   "351" : {
+      "name" : "CSPAN2",
+      "url" : "www.c-span.org",
+      "id" : "CSPAN2"
+   },
+   "410" : {
+      "name" : "Mun2",
+      "url" : "www.holamun2.com/grid",
+      "id" : "MUN2"
+   },
+   "246" : {
+      "name" : "truTV",
+      "url" : "www.courttv.com",
+      "id" : "TRUTV"
+   },
+   "240" : {
+      "name" : "Home Shopping Network",
+      "url" : null,
+      "id" : "HSN"
+   },
+   "890" : {
+      "name" : "KDTV",
+      "url" : "www.univision.com",
+      "id" : "KDTV"
+   },
+   "230" : {
+      "name" : "Do-It-Yourself Network",
+      "url" : "www.diynet.com",
+      "id" : "DIY"
+   },
+   "299" : {
+      "name" : "Nickelodeon",
+      "url" : "www.nick.com",
+      "id" : "NIK"
+   },
+   "115" : {
+      "name" : "DITV115",
+      "url" : null,
+      "id" : "DITV115"
+   },
+   "447" : {
+      "name" : "XEIPN US Feed (Canal Once)",
+      "url" : "www.alternatv.us",
+      "id" : "XEIPNUS"
+   },
+   "602" : {
+      "name" : "TV Games Network",
+      "url" : "www.tvgnetwork.com",
+      "id" : "TVG"
+   },
+   "536" : {
+      "name" : "Encore (Pacific)",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCORP"
+   },
+   "201" : {
+      "name" : "Local Origination - LOOR201",
+      "url" : null,
+      "id" : "LOOR201"
+   },
+   "841" : {
+      "name" : "DMX: Spike",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "DMXSPKE"
+   },
+   "901" : {
+      "name" : "KBCW",
+      "url" : "www.upn44.com/",
+      "id" : "KBCW"
+   },
+   "719" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST16",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST16"
+   },
+   "152" : {
+      "name" : "DITV152",
+      "url" : null,
+      "id" : "DITV152"
+   },
+   "189" : {
+      "name" : "DITV188 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV188"
+   },
+   "902" : {
+      "name" : "KSTS",
+      "url" : "www.telemundo48.com/",
+      "id" : "KSTS"
+   },
+   "452" : {
+      "name" : "TVBS",
+      "url" : null,
+      "id" : "TVBS"
+   },
+   "827" : {
+      "name" : "DMX: Gospel Glory",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "GOSPEL"
+   },
+   "266" : {
+      "name" : "The Biography Channel",
+      "url" : "Biography.com",
+      "id" : "BIO"
+   },
+   "535" : {
+      "name" : "Encore",
+      "url" : "www.starzencore.com",
+      "id" : "ENCORE"
+   },
+   "701" : {
+      "name" : "Kids and Teens On Demand",
+      "url" : null,
+      "id" : "KDTNDM"
+   },
+   "820" : {
+      "name" : "DMX: Beautiful Instrumentals",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "BEAINST"
+   },
+   "474" : {
+      "name" : "MLS Direct Kick - Direct TV - MLSSO4",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO4"
+   },
+   "174" : {
+      "name" : "DITV174",
+      "url" : null,
+      "id" : "DITV174"
+   },
+   "683" : {
+      "name" : "ROOT Sports Rocky Mountain",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "RTRM"
+   },
+   "541" : {
+      "name" : "Encore Action",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCRA"
+   },
+   "508" : {
+      "name" : "HBO Family (Pacific)",
+      "url" : "www.hbo.com",
+      "id" : "HBOFP"
+   },
+   "564" : {
+      "name" : "Universal HD",
+      "url" : null,
+      "id" : "UHD"
+   },
+   "905" : {
+      "name" : "KFSF (formerly KPST)",
+      "url" : "www.kpst.com/",
+      "id" : "KFSF"
+   },
+   "817" : {
+      "name" : "DMX: Y2k Hits",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "Y2KHITS"
+   },
+   "563" : {
+      "name" : "WCFEDT3 (WCFE-DT3)",
+      "url" : "www.mountainlake.org/",
+      "id" : "WCFEDT3"
+   },
+   "558" : {
+      "name" : "Sundance Channel",
+      "url" : "www.sundancechannel.com",
+      "id" : "SUNDANC"
+   },
+   "417" : {
+      "name" : "CARACOL INTERNATIONAL",
+      "url" : "www.caracolinternacional.com",
+      "id" : "CARAI"
+   },
+   "668" : {
+      "name" : "Fox Sports Net North (Non-Metro & PPV)",
+      "url" : "www.channel4000.com/sports/msc/",
+      "id" : "FSNO2"
+   },
+   "881" : {
+      "name" : "WJTVDT2 (WJTV-DT2)",
+      "url" : "www.wjtv.com",
+      "id" : "WJTVDT2"
+   },
+   "750" : {
+      "name" : "NBA League Pass 10",
+      "url" : "WWW.NBA.COM",
+      "id" : "TEA10"
+   },
+   "688" : {
+      "name" : "ROOT Sports Northwest (Alt.) - RTN2",
+      "url" : null,
+      "id" : "RTN2"
+   },
+   "312" : {
+      "name" : "Hallmark Channel",
+      "url" : "www.hallmarkchannel.com",
+      "id" : "HALL"
+   },
+   "302" : {
+      "name" : "Nicktoons Network",
+      "url" : "nicktoons.nick.com",
+      "id" : "NIKTON"
+   },
+   "078" : {
+      "name" : "Comedy Movies on Demand",
+      "url" : null,
+      "id" : "COMOVDM"
+   },
+   "774" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI6",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI6"
+   },
+   "229" : {
+      "name" : "Home & Garden Television",
+      "url" : "www.hgtv.com",
+      "id" : "HGTV"
+   },
+   "507" : {
+      "name" : "HBO Family",
+      "url" : "www.hbo.com",
+      "id" : "HBOF"
+   },
+   "405" : {
+      "name" : "Local Origination - LOOR1200",
+      "url" : null,
+      "id" : "LOOR1200"
+   },
+   "260" : {
+      "name" : "WE tv",
+      "url" : "www.wetv.com",
+      "id" : "WE"
+   },
+   "020" : {
+      "name" : "KOFYDT (KOFY-DT)",
+      "url" : null,
+      "id" : "KOFYDT"
+   },
+   "866" : {
+      "name" : "DMX: Lite Classical",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "LTECLAS"
+   },
+   "910" : {
+      "name" : "KMTP",
+      "url" : "www.kmtp.org",
+      "id" : "KMTP"
+   },
+   "2061" : {
+      "name" : "L Charleston IL 16",
+      "url" : null,
+      "id" : "YOUR13"
+   },
+   "237" : {
+      "name" : "Bravo",
+      "url" : "www.bravotv.com/home/",
+      "id" : "BRAVO"
+   },
+   "693" : {
+      "name" : "Fox Sports Prime Ticket",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "PRIME"
+   },
+   "673" : {
+      "name" : "Fox Sports Indiana",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSI"
+   },
+   "503" : {
+      "name" : "HBO Signature",
+      "url" : "www.hbo.com",
+      "id" : "HBOSIG"
+   },
+   "370" : {
+      "name" : "Eternal Word Television Network",
+      "url" : "www.ewtn.com",
+      "id" : "EWTN"
+   },
+   "770" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI2",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI2"
+   },
+   "762" : {
+      "name" : "MLB Extra Innings 735",
+      "url" : null,
+      "id" : "MLBD735"
+   },
+   "188" : {
+      "name" : "DITV179 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV179"
+   },
+   "638" : {
+      "name" : "MSG PLUS Overflow",
+      "url" : null,
+      "id" : "MSGPLOV"
+   },
+   "402" : {
+      "name" : "Univision Network",
+      "url" : "www.univision.com",
+      "id" : "UNI"
+   },
+   "416" : {
+      "name" : "TV Colombia",
+      "url" : "www.tvcolombia.com",
+      "id" : "TVCOL"
+   },
+   "893" : {
+      "name" : "KTSF",
+      "url" : "www.ktsf.com/",
+      "id" : "KTSF"
+   },
+   "338" : {
+      "name" : "KPXGDT (KPXG-DT)",
+      "url" : "www.pax.tv/stations/default.cfm?station=kpxg",
+      "id" : "KPXGDT"
+   },
+   "082" : {
+      "name" : "Local Origination - LOOR299",
+      "url" : null,
+      "id" : "LOOR299"
+   },
+   "761" : {
+      "name" : "MLB Extra Innings 734",
+      "url" : null,
+      "id" : "MLBD734"
+   },
+   "300" : {
+      "name" : "Nickelodeon (Pacific)",
+      "url" : "www.nick.com",
+      "id" : "NIKP"
+   },
+   "2146" : {
+      "name" : "NTV America (HTB)",
+      "url" : "www.ntvamerica.com",
+      "id" : "NTVA"
+   },
+   "824" : {
+      "name" : "DMX: Groove Lounge",
+      "url" : null,
+      "id" : "GROOVE"
+   },
+   "640" : {
+      "name" : "KPHELP",
+      "url" : "www.bohemiavisualmusic.com",
+      "id" : "KPHELP"
+   },
+   "661" : {
+      "name" : "Fox Sports Ohio 2 (Cincinnati feed)",
+      "url" : null,
+      "id" : "FSNOH2"
+   },
+   "2079" : {
+      "name" : "Charter Media Marketplace San Gabriel Valley",
+      "url" : null,
+      "id" : "CHTSG"
+   },
+   "286" : {
+      "name" : "Destination America",
+      "url" : "www.planetgreen.discovery.com",
+      "id" : "DEST"
+   },
+   "120" : {
+      "name" : "DITV120",
+      "url" : null,
+      "id" : "DITV120"
+   },
+   "870" : {
+      "name" : "DMX: Fiesta Tropical",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "FTROP"
+   },
+   "804" : {
+      "name" : "DMX: 70's Hits",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "70HITS"
+   },
+   "896" : {
+      "name" : "KCNS",
+      "url" : "www.kcnstv.com/",
+      "id" : "KCNS"
+   },
+   "906" : {
+      "name" : "KTLN",
+      "url" : "WWW.KTLN.TV",
+      "id" : "KTLN"
+   },
+   "392" : {
+      "name" : "WNBC",
+      "url" : "www.wnbc.com/",
+      "id" : "WNBC"
+   },
+   "254" : {
+      "name" : "AMC",
+      "url" : "www.amctv.com",
+      "id" : "AMC"
+   },
+   "623" : {
+      "name" : "Fox College Sports - Central",
+      "url" : null,
+      "id" : "FCSC"
+   },
+   "044" : {
+      "name" : "KBCWDT (KBCW-DT)",
+      "url" : null,
+      "id" : "KBCWDT"
+   },
+   "177" : {
+      "name" : "DITV176 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV176"
+   },
+   "678" : {
+      "name" : "Fox Sports Southwest Zone 2",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSS2"
+   },
+   "001" : {
+      "name" : "Information Channel - INFO001",
+      "url" : null,
+      "id" : "INFO001"
+   },
+   "605" : {
+      "name" : "The Sportsman Channel",
+      "url" : "www.thesportsmanchannel.com",
+      "id" : "SPRTMAN"
+   },
+   "373" : {
+      "name" : "The Word Network",
+      "url" : "www.thewordnetwork.org",
+      "id" : "WORD"
+   },
+   "217" : {
+      "name" : "Tennis Channel",
+      "url" : "www.thetennischannel.com",
+      "id" : "TENNIS"
+   },
+   "328" : {
+      "name" : "TV ONE",
+      "url" : null,
+      "id" : "TVONE"
+   },
+   "755" : {
+      "name" : "WKOIDT3 (WKOI-DT3)",
+      "url" : "www.tbn.org",
+      "id" : "WKOIDT3"
+   },
+   "777" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI9",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI9"
+   },
+   "607" : {
+      "name" : "Speed Channel",
+      "url" : "www.speedtv.com",
+      "id" : "SPEED"
+   },
+   "122" : {
+      "name" : "DITV122",
+      "url" : null,
+      "id" : "DITV122"
+   },
+   "773" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI5",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI5"
+   },
+   "813" : {
+      "name" : "DMX: Folk Rock",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "FLKROCK"
+   },
+   "143" : {
+      "name" : "WCBBDT5 (WCBB-DT5)",
+      "url" : "WWW.MPBC.ORG",
+      "id" : "WCBBDT5"
+   },
+   "878" : {
+      "name" : "DMX: Rock en Espanol",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "ROCKESP"
+   },
+   "628" : {
+      "name" : "New England Sports Network",
+      "url" : "www.nesn.com",
+      "id" : "NESN"
+   },
+   "281" : {
+      "name" : "Velocity",
+      "url" : null,
+      "id" : "VEL"
+   },
+   "269" : {
+      "name" : "History",
+      "url" : "www.HistoryChannel.com",
+      "id" : "HISTORY"
+   },
+   "158" : {
+      "name" : "DITV156 (DirecTv)",
+      "url" : null,
+      "id" : "DITV156"
+   },
+   "363" : {
+      "name" : "Golden Eagle Broadcasting",
+      "url" : "www.golden-eagle-tv.com/",
+      "id" : "GEB"
+   },
+   "644" : {
+      "name" : "WPXEDT3 (WPXE-DT3)",
+      "url" : null,
+      "id" : "WPXEDT3"
+   },
+   "851" : {
+      "name" : "DMX: Smooth Jazz",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SMJAZZ"
+   },
+   "399" : {
+      "name" : "KTTV",
+      "url" : "www.myfoxla.com",
+      "id" : "KTTV"
+   },
+   "066" : {
+      "name" : "WDSIDT (WDSI-DT)",
+      "url" : "www.fox61tv.com/",
+      "id" : "WDSIDT"
+   },
+   "235" : {
+      "name" : "Style",
+      "url" : "WWW.EONLINE.COM",
+      "id" : "STYLE"
+   },
+   "301" : {
+      "name" : "Nick Jr",
+      "url" : "www.nickjr.com",
+      "id" : "NICJR"
+   },
+   "630" : {
+      "name" : "Comcast Sportsnet New England",
+      "url" : "foxsports.com/newengland",
+      "id" : "CSNNE"
+   },
+   "183" : {
+      "name" : "DITV183",
+      "url" : null,
+      "id" : "DITV183"
+   },
+   "748" : {
+      "name" : "Audio XM: XM Chill",
+      "url" : "www.xmradio.com",
+      "id" : "XMCHILL"
+   },
+   "472" : {
+      "name" : "MLS Direct Kick - Direct TV  - MLSSO2",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO2"
+   },
+   "456" : {
+      "name" : "GOL TV",
+      "url" : "www.goltv.tv/index.php",
+      "id" : "GOLTV"
+   },
+   "362" : {
+      "name" : "The Weather Channel",
+      "url" : "www.weather.com",
+      "id" : "TWC"
+   },
+   "874" : {
+      "name" : "DMX: Salsa",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SALSA"
+   },
+   "317" : {
+      "name" : "QVC",
+      "url" : "www.qvc.com",
+      "id" : "QVC"
+   },
+   "296" : {
+      "name" : "Cartoon Network",
+      "url" : "www.cartoonnetwork.com",
+      "id" : "TOON"
+   },
+   "265" : {
+      "name" : "A & E Network",
+      "url" : "www.AETV.com",
+      "id" : "AETV"
+   },
+   "711" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST8",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST8"
+   },
+   "411" : {
+      "name" : "Telefe Internacional",
+      "url" : "www.telefeinternational.com",
+      "id" : "TEFEI"
+   },
+   "169" : {
+      "name" : "PPV - PPV169",
+      "url" : null,
+      "id" : "PPV169"
+   },
+   "132" : {
+      "name" : "DITV132",
+      "url" : null,
+      "id" : "DITV132"
+   },
+   "791" : {
+      "name" : "Sports Pay-Per-View 4",
+      "url" : null,
+      "id" : "ESPNPPV4"
+   },
+   "705" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST2",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST2"
+   },
+   "171" : {
+      "name" : "DITV171",
+      "url" : null,
+      "id" : "DITV171"
+   },
+   "011" : {
+      "name" : "KNTVDT(KNTV-DT)",
+      "url" : "WWW.NEWSCHANNEL11.COM",
+      "id" : "KNTVDT"
+   },
+   "398" : {
+      "name" : "WNYW",
+      "url" : "www.fox5ny.com/",
+      "id" : "WNYW"
+   },
+   "022" : {
+      "name" : "KRCB",
+      "url" : "www.krcb.org/",
+      "id" : "KRCB"
+   },
+   "546" : {
+      "name" : "Showtime (Pacific)",
+      "url" : "www.sho.com",
+      "id" : "SHOWP"
+   },
+   "004" : {
+      "name" : "KRONDT (KRON-DT)",
+      "url" : "WWW.SFGATES.COM",
+      "id" : "KRONDT"
+   },
+   "537" : {
+      "name" : "Encore Love",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCRL"
+   },
+   "407" : {
+      "name" : "Telemundo Television Network (Pacific)",
+      "url" : null,
+      "id" : "TELEP"
+   },
+   "445" : {
+      "name" : "Tr3s: MTV, Musica y Mas",
+      "url" : "www.tr3s.com",
+      "id" : "TR3S"
+   },
+   "376" : {
+      "name" : "K58CT",
+      "url" : "www.kval.com/",
+      "id" : "K58CT"
+   },
+   "844" : {
+      "name" : "DMX: Old School Funk",
+      "url" : null,
+      "id" : "OSFUNK"
+   },
+   "125" : {
+      "name" : "DITV125",
+      "url" : null,
+      "id" : "DITV125"
+   },
+   "329" : {
+      "name" : "BET",
+      "url" : "www.bet.com",
+      "id" : "BET"
+   },
+   "599" : {
+      "name" : "KWSEDT (KWSE-DT)",
+      "url" : "www.pptv.org/",
+      "id" : "KWSEDT"
+   },
+   "161" : {
+      "name" : "DITV158 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV158"
+   },
+   "190" : {
+      "name" : "DITV190",
+      "url" : null,
+      "id" : "DITV190"
+   },
+   "775" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI7",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI7"
+   },
+   "298" : {
+      "name" : "Boomerang",
+      "url" : null,
+      "id" : "BOOM"
+   },
+   "714" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST11",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST11"
+   },
+   "2001" : {
+      "name" : "KETGDT4 (KETG-DT4)",
+      "url" : "www.aetn.org/",
+      "id" : "KETGDT4"
+   },
+   "313" : {
+      "name" : "Jewelry Television",
+      "url" : "WWW.ACNTV.COM",
+      "id" : "JWLTV"
+   },
+   "109" : {
+      "name" : "DITV109",
+      "url" : null,
+      "id" : "DITV109"
+   },
+   "231" : {
+      "name" : "Food Network",
+      "url" : "www.foodtv.com",
+      "id" : "FOOD"
+   },
+   "888" : {
+      "name" : "KQED",
+      "url" : "www.kqed.org/",
+      "id" : "KQED"
+   },
+   "779" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI11",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI11"
+   },
+   "633" : {
+      "name" : "Yankees Entertainment & Sports Network",
+      "url" : "www.yesnetworktv.com",
+      "id" : "YES"
+   },
+   "2051" : {
+      "name" : "SPORTS PPV 06 (Premium)",
+      "url" : null,
+      "id" : "PPV06"
+   },
+   "529" : {
+      "name" : "Starz Edge",
+      "url" : "www.starzsuperpak.com",
+      "id" : "STZE"
+   },
+   "151" : {
+      "name" : "DITV151",
+      "url" : null,
+      "id" : "DITV151"
+   },
+   "2115" : {
+      "name" : "Phoenix Satellite TV",
+      "url" : null,
+      "id" : "PNAX"
+   },
+   "148" : {
+      "name" : "DITV148",
+      "url" : null,
+      "id" : "DITV148"
+   },
+   "753" : {
+      "name" : "WKOIDT2 (WKOI-DT2)",
+      "url" : "www.tbn.org",
+      "id" : "WKOIDT2"
+   },
+   "557" : {
+      "name" : "Flix",
+      "url" : "www.sho.com",
+      "id" : "FLIX"
+   },
+   "504" : {
+      "name" : "HBO (Pacific)",
+      "url" : "www.hbo.com",
+      "id" : "HBOP"
+   },
+   "718" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST15",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST15"
+   },
+   "697" : {
+      "name" : "Comcast SportsNet Plus 2",
+      "url" : "WWW.SPORTSCHANNEL.PACIFIC.COM",
+      "id" : "CSNP2"
+   },
+   "287" : {
+      "name" : "The Military Channel",
+      "url" : "www.discovery.com/diginets/wings/wings.html",
+      "id" : "MILI"
+   },
+   "475" : {
+      "name" : "MLS Direct Kick - Direct TV - MLSSO5",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO5"
+   },
+   "441" : {
+      "name" : "Azteca America Network",
+      "url" : "www.aztecaamerica.com",
+      "id" : "AZTECAE"
+   },
+   "868" : {
+      "name" : "DMX: The Playground",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "PLAYGRD"
+   },
+   "294" : {
+      "name" : "The Hub",
+      "url" : "www.hubworld.com/",
+      "id" : "HUB"
+   },
+   "397" : {
+      "name" : "KABCDT (KABC-DT)",
+      "url" : "WWW.ABC7.COM",
+      "id" : "KABCDT"
+   },
+   "413" : {
+      "name" : "Discovery en Espanol",
+      "url" : "www.tudiscovery.com/",
+      "id" : "TDCES"
+   },
+   "672" : {
+      "name" : "Fox Sports Midwest (Kansas City)",
+      "url" : null,
+      "id" : "FSM3"
+   },
+   "769" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI1",
+      "url" : null,
+      "id" : "NHLCI1"
+   },
+   "707" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST4",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST4"
+   },
+   "157" : {
+      "name" : "DITV157",
+      "url" : null,
+      "id" : "DITV157"
+   },
+   "515" : {
+      "name" : "CineMAX",
+      "url" : "www.cinemax.com",
+      "id" : "MAX"
+   },
+   "203" : {
+      "name" : "KQETDT5 (KQET-DT5)",
+      "url" : null,
+      "id" : "KQETDT5"
+   },
+   "261" : {
+      "name" : "Discovery Fit and Health",
+      "url" : "www.health.discovery.com",
+      "id" : "DFH"
+   },
+   "138" : {
+      "name" : "DITV138",
+      "url" : null,
+      "id" : "DITV138"
+   },
+   "751" : {
+      "name" : "WELFDT5 (WELF-DT5)",
+      "url" : "www.tbn.org",
+      "id" : "WELFDT5"
+   },
+   "606" : {
+      "name" : "Outdoor Channel",
+      "url" : "www.outdoorchannel.com",
+      "id" : "OUTD"
+   },
+   "908" : {
+      "name" : "KEMO",
+      "url" : null,
+      "id" : "KEMO"
+   },
+   "432" : {
+      "name" : "ESPN Deportes",
+      "url" : "www.espnmediazone3.com/us",
+      "id" : "ESPND"
+   },
+   "792" : {
+      "name" : "Sports Pay-Per-View 5",
+      "url" : null,
+      "id" : "ESPNPPV5"
+   },
+   "624" : {
+      "name" : "Fox Deportes",
+      "url" : "www.msn.foxsports.com/fse",
+      "id" : "FXDEP"
+   },
+   "2084" : {
+      "name" : "KGNSDT2 (KGNS-DT2)",
+      "url" : null,
+      "id" : "KGNSDT2"
+   },
+   "284" : {
+      "name" : "Science",
+      "url" : "www.discovery.com/diginets/science/science.html",
+      "id" : "SCIENCE"
+   },
+   "823" : {
+      "name" : "DMX: Show Tunes",
+      "url" : null,
+      "id" : "SHOWTUN"
+   },
+   "903" : {
+      "name" : "KQEH",
+      "url" : "www.kteh.org/",
+      "id" : "KQEH"
+   },
+   "247" : {
+      "name" : "Turner Broadcasting System",
+      "url" : "www.tbssuperstation.com",
+      "id" : "TBS"
+   },
+   "371" : {
+      "name" : "The Church Channel",
+      "url" : "www.churchchannel.org",
+      "id" : "CHURCH"
+   },
+   "204" : {
+      "name" : "HLN (Formerly Headline News)",
+      "url" : "www.cnn.com/QUICKNEWS/",
+      "id" : "HLN"
+   },
+   "165" : {
+      "name" : "DITV165",
+      "url" : null,
+      "id" : "DITV165"
+   },
+   "346" : {
+      "name" : "NASA TV",
+      "url" : "www.nasa.gov",
+      "id" : "NASA"
+   },
+   "771" : {
+      "name" : "DirecTV - NHL Center Ice - NHLCI3",
+      "url" : "www.nhl.com/nhlhq/centerice/",
+      "id" : "NHLCI3"
+   },
+   "2119" : {
+      "name" : "CCTV News",
+      "url" : "www.cctv.com/english/",
+      "id" : "CCTVNWS"
+   },
+   "814" : {
+      "name" : "DMX: Modern Country",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "MODCTRY"
+   },
+   "808" : {
+      "name" : "DMX: Traditional Country",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "TRACTRY"
+   },
+   "427" : {
+      "name" : "TyC Sports",
+      "url" : "www.tycsports.com",
+      "id" : "TYC"
+   },
+   "845" : {
+      "name" : "DMX: Retro Disco",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "RETROD"
+   },
+   "677" : {
+      "name" : "Fox Sports Southwest (Zone 3)",
+      "url" : "www.foxsports.com.nf",
+      "id" : "FSS3"
+   },
+   "2072" : {
+      "name" : "Saigon Broadcasting Network",
+      "url" : "www.sbtn.net/",
+      "id" : "SBN"
+   },
+   "907" : {
+      "name" : "KTNC",
+      "url" : "www.ktnc.com",
+      "id" : "KTNC"
+   },
+   "708" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST5",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST5"
+   },
+   "885" : {
+      "name" : "KRON",
+      "url" : "www.kron.com/",
+      "id" : "KRON"
+   },
+   "884" : {
+      "name" : "KTVU",
+      "url" : "www.bayinsider.com/partners/ktvu/",
+      "id" : "KTVU"
+   },
+   "110" : {
+      "name" : "DITV110",
+      "url" : null,
+      "id" : "DITV110"
+   },
+   "147" : {
+      "name" : "DITV147",
+      "url" : null,
+      "id" : "DITV147"
+   },
+   "333" : {
+      "name" : "MTV2: Music Television",
+      "url" : "www.mtv.com",
+      "id" : "MTV2"
+   },
+   "339" : {
+      "name" : "Fuse",
+      "url" : "www.muchmusic.com/usa",
+      "id" : "FUSE"
+   },
+   "710" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST7",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST7"
+   },
+   "228" : {
+      "name" : "Gem Shopping Network",
+      "url" : "www.gemshopping.com",
+      "id" : "GEM"
+   },
+   "863" : {
+      "name" : "DMX: Reggae",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "REGGAE"
+   },
+   "590" : {
+      "name" : "Playboy TV",
+      "url" : "www.playboy.com",
+      "id" : "PLAYBOY"
+   },
+   "895" : {
+      "name" : "KICU",
+      "url" : "www.kicu.com/",
+      "id" : "KICU"
+   },
+   "749" : {
+      "name" : "Audio XM US Country",
+      "url" : "www.xmradio.com",
+      "id" : "XMUSCN"
+   },
+   "856" : {
+      "name" : "DMX: New Age",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "NEWAGE"
+   },
+   "345" : {
+      "name" : "RFD TV",
+      "url" : "www.rfdtv.com",
+      "id" : "RFDTV"
+   },
+   "545" : {
+      "name" : "Showtime HD",
+      "url" : "www.sho.com",
+      "id" : "SHOWHD"
+   },
+   "172" : {
+      "name" : "DITV167 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV167"
+   },
+   "191" : {
+      "name" : "DITV191",
+      "url" : null,
+      "id" : "DITV191"
+   },
+   "404" : {
+      "name" : "Galavision Cable Network",
+      "url" : "www.galavision.com",
+      "id" : "GALA"
+   },
+   "613" : {
+      "name" : "CBS Sports Network",
+      "url" : null,
+      "id" : "CBSSN"
+   },
+   "516" : {
+      "name" : "CineMAX (Pacific)",
+      "url" : "www.cinemax.com",
+      "id" : "MAXP"
+   },
+   "646" : {
+      "name" : "Fox Sports South - Main Feed",
+      "url" : null,
+      "id" : "FSSO"
+   },
+   "756" : {
+      "name" : "WKOIDT4 (WKOI-DT4)",
+      "url" : "www.tbn.org",
+      "id" : "WKOIDT4"
+   },
+   "446" : {
+      "name" : "XEIMT International (US feed)",
+      "url" : "www.22mx.tv",
+      "id" : "XEIMTUS"
+   },
+   "669" : {
+      "name" : "Fox Sports Net North - Wisc.",
+      "url" : "www.channel4000.com/sports/msc/",
+      "id" : "FSNO3"
+   },
+   "282" : {
+      "name" : "Animal Planet",
+      "url" : "www.animal.discovery.com",
+      "id" : "APL"
+   },
+   "005" : {
+      "name" : "KPIXDT (KPIX-DT)",
+      "url" : "cbs5.com",
+      "id" : "KPIXDT"
+   },
+   "2060" : {
+      "name" : "The Filipino Channel (Pacific)",
+      "url" : "www.abs-cbni.com/",
+      "id" : "FILIP"
+   },
+   "262" : {
+      "name" : "SoapNet",
+      "url" : "WWW.SOAPNET.COM",
+      "id" : "SOAP"
+   },
+   "121" : {
+      "name" : "DITV121",
+      "url" : null,
+      "id" : "DITV121"
+   },
+   "702" : {
+      "name" : "Sports and Fitness On Demand",
+      "url" : null,
+      "id" : "SPFTDM"
+   },
+   "212" : {
+      "name" : "NFL NETWORK",
+      "url" : null,
+      "id" : "NFLNET"
+   },
+   "639" : {
+      "name" : "KEYTDT (KEYT-DT)",
+      "url" : "www.keyt.com",
+      "id" : "KEYTDT"
+   },
+   "487" : {
+      "name" : "Pioneer Long Distance Channel 152",
+      "url" : null,
+      "id" : "PLD152"
+   },
+   "126" : {
+      "name" : "DITV126",
+      "url" : null,
+      "id" : "DITV126"
+   },
+   "251" : {
+      "name" : "Oxygen",
+      "url" : "www.oxygen.com",
+      "id" : "OXYGEN"
+   },
+   "426" : {
+      "name" : "K04QPD (K04QP-D)",
+      "url" : "www.kvoa.com/",
+      "id" : "K04QPD"
+   },
+   "873" : {
+      "name" : "DMX: Regional Mexican",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "REGMEX"
+   },
+   "542" : {
+      "name" : "Encore Family",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCFAM"
+   },
+   "369" : {
+      "name" : "Daystar Television Network",
+      "url" : "www.daystar.com/satellite.pdf",
+      "id" : "DYSTR"
+   },
+   "253" : {
+      "name" : "Lifetime Movie Network",
+      "url" : "www.lifetimetv.com/cgi/home.cgi",
+      "id" : "LMN"
+   },
+   "561" : {
+      "name" : "HDNet Movies",
+      "url" : null,
+      "id" : "HDNETMV"
+   },
+   "2112" : {
+      "name" : "CTI  Zhong Tian Channel",
+      "url" : "www.internationalnetworks.com/24hourpaychannels/chinese/default.aspx",
+      "id" : "CTIZTC"
+   },
+   "176" : {
+      "name" : "DITV172 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV172"
+   },
+   "448" : {
+      "name" : "ETBN Enlace USA",
+      "url" : "www.tbnenlaceusa.com/espanol/",
+      "id" : "ENLUSA"
+   },
+   "209" : {
+      "name" : "KDSEDT3 (KDSE-DT3)",
+      "url" : "www.pptv.org/",
+      "id" : "KDSEDT3"
+   },
+   "629" : {
+      "name" : "Local Origination - LOOR830",
+      "url" : null,
+      "id" : "LOOR830"
+   },
+   "483" : {
+      "name" : "KLUZDT2 (KLUZ-DT2)",
+      "url" : "WWW.UNIVISION.NET",
+      "id" : "KLUZDT2"
+   },
+   "216" : {
+      "name" : "NBA TV",
+      "url" : null,
+      "id" : "NBATV"
+   },
+   "256" : {
+      "name" : "Turner Classic Movies",
+      "url" : "www.tcm.com",
+      "id" : "TCM"
+   },
+   "357" : {
+      "name" : "CNBC World",
+      "url" : "www.nbcmv.com/cnbc",
+      "id" : "CNBCWLD"
+   },
+   "117" : {
+      "name" : "DITV117",
+      "url" : null,
+      "id" : "DITV117"
+   },
+   "372" : {
+      "name" : "Trinity Broadcasting Network",
+      "url" : "www.tbn.org",
+      "id" : "TBN"
+   },
+   "852" : {
+      "name" : "DMX: Jazz",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "JAZZ"
+   },
+   "643" : {
+      "name" : "Comcast SportsNet Mid-Atlantic HD",
+      "url" : null,
+      "id" : "CSNDCHD"
+   },
+   "170" : {
+      "name" : "DITV170",
+      "url" : null,
+      "id" : "DITV170"
+   },
+   "660" : {
+      "name" : "WCSHDT3 (WCHS-DT3)",
+      "url" : null,
+      "id" : "WCSHDT3"
+   },
+   "428" : {
+      "name" : "Comcast Sportsnet Chicago",
+      "url" : null,
+      "id" : "CSNCH"
+   },
+   "887" : {
+      "name" : "KGO",
+      "url" : "www.kgo.com/",
+      "id" : "KGO"
+   },
+   "600" : {
+      "name" : "DirecTV Sports Mix",
+      "url" : null,
+      "id" : "SPMIX"
+   },
+   "821" : {
+      "name" : "DMX: Adult Contemporary",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "ADCONT"
+   },
+   "179" : {
+      "name" : "DITV177 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV177"
+   },
+   "696" : {
+      "name" : "Comcast SportsNet Bay Area",
+      "url" : "WWW.SPORTSCHANNEL-PACIFIC.COM",
+      "id" : "CSNBA"
+   },
+   "806" : {
+      "name" : "DMX: 90's Hits",
+      "url" : null,
+      "id" : "90HITS"
+   },
+   "264" : {
+      "name" : "BBC America",
+      "url" : "www.bbcamerica.com",
+      "id" : "BBCA"
+   },
+   "297" : {
+      "name" : "Cartoon Network (Pacific)",
+      "url" : "www.cartoonnetwork.com",
+      "id" : "TOONP"
+   },
+   "790" : {
+      "name" : "DirecTV - ESPN GamePlan - ESPGP5",
+      "url" : null,
+      "id" : "ESPGP5"
+   },
+   "713" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST10",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST10"
+   },
+   "182" : {
+      "name" : "DITV182",
+      "url" : null,
+      "id" : "DITV182"
+   },
+   "2080" : {
+      "name" : "SBS TV Korea",
+      "url" : "tv.sbs.co.kr",
+      "id" : "SBS"
+   },
+   "676" : {
+      "name" : "Fox Sports Southwest (Main Feed)",
+      "url" : null,
+      "id" : "FSS"
+   },
+   "108" : {
+      "name" : "DITV108",
+      "url" : null,
+      "id" : "DITV108"
+   },
+   "277" : {
+      "name" : "The Travel Channel",
+      "url" : "www.travelchannel.com",
+      "id" : "TRAV"
+   },
+   "879" : {
+      "name" : "DMX: Latin Jazz",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "LATJZZ"
+   },
+   "717" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST14",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST14"
+   },
+   "232" : {
+      "name" : "Cooking Channel",
+      "url" : null,
+      "id" : "COOK"
+   },
+   "843" : {
+      "name" : "DMX: Silky Soul",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SILKYSL"
+   },
+   "815" : {
+      "name" : "DMX: Holiday & Happenings",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "HOLHAP"
+   },
+   "671" : {
+      "name" : "Fox Sports Midwest",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSM"
+   },
+   "2083" : {
+      "name" : "Government Access - GOAC854",
+      "url" : null,
+      "id" : "GOAC854"
+   },
+   "207" : {
+      "name" : "ESPNEWS",
+      "url" : "espn.go.com",
+      "id" : "ESPNEWS"
+   },
+   "142" : {
+      "name" : "DITV142",
+      "url" : null,
+      "id" : "DITV142"
+   },
+   "330" : {
+      "name" : "Centric",
+      "url" : "www.bet.com/atBET",
+      "id" : "CTRC"
+   },
+   "167" : {
+      "name" : "DITV163 (DIRECTV)",
+      "url" : null,
+      "id" : "DITV163"
+   },
+   "394" : {
+      "name" : "WDCW",
+      "url" : "www.wbdc.com/",
+      "id" : "WDCW"
+   },
+   "505" : {
+      "name" : "HBO2 (Pacific)",
+      "url" : "www.hbo.com",
+      "id" : "HB2P"
+   },
+   "360" : {
+      "name" : "Fox News Channel",
+      "url" : "www.foxnews.com",
+      "id" : "FNC"
+   },
+   "692" : {
+      "name" : "Fox Sports West",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSW"
+   },
+   "419" : {
+      "name" : "CNN En Espanol- Mexico and US",
+      "url" : "WWW.turnertapkit.COM",
+      "id" : "CNNLM"
+   },
+   "837" : {
+      "name" : "DMX: Classic Hits Blend",
+      "url" : null,
+      "id" : "CHTBLD"
+   },
+   "663" : {
+      "name" : "Fox Sports Detroit - FSD",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "FSD"
+   },
+   "290" : {
+      "name" : "Disney Channel",
+      "url" : "www.disneychannel.com",
+      "id" : "DISN"
+   },
+   "149" : {
+      "name" : "DITV149",
+      "url" : null,
+      "id" : "DITV149"
+   },
+   "123" : {
+      "name" : "DITV123",
+      "url" : null,
+      "id" : "DITV123"
+   },
+   "304" : {
+      "name" : "TV Land",
+      "url" : "www.tvland.com",
+      "id" : "TVLAND"
+   },
+   "476" : {
+      "name" : "MLS Direct Kick - Direct TV - MLSSO6",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO6"
+   },
+   "854" : {
+      "name" : "DMX: Blues",
+      "url" : null,
+      "id" : "BLUES"
+   },
+   "712" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST9",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST9"
+   },
+   "547" : {
+      "name" : "SHO 2",
+      "url" : "www.sho.com",
+      "id" : "SHO2"
+   },
+   "210" : {
+      "name" : "ESPN (Alternate)",
+      "url" : null,
+      "id" : "ESPNA"
+   },
+   "406" : {
+      "name" : "Telemundo Television Network",
+      "url" : "www.telemundo.com",
+      "id" : "TELE"
+   },
+   "258" : {
+      "name" : "Fox Movie Channel",
+      "url" : "www.fxnetworks.com",
+      "id" : "FMC"
+   },
+   "396" : {
+      "name" : "WABC",
+      "url" : "abclocal.go.com/wabc/",
+      "id" : "WABC"
+   },
+   "510" : {
+      "name" : "Program Guide Message Channel",
+      "url" : null,
+      "id" : "PRGDE"
+   },
+   "2141" : {
+      "name" : "RTR Planeta",
+      "url" : "www.rtr-planeta.com",
+      "id" : "RTR"
+   },
+   "173" : {
+      "name" : "PPV - PPV173",
+      "url" : null,
+      "id" : "PPV173"
+   },
+   "530" : {
+      "name" : "Starz in Black",
+      "url" : "www.bet.com/atBET",
+      "id" : "STZIB"
+   },
+   "499" : {
+      "name" : "KETHDT2 (KETH-DT2)",
+      "url" : "www.communityedtv.org/keth/",
+      "id" : "KETHDT2"
+   },
+   "393" : {
+      "name" : "KNBC",
+      "url" : "www.nbc4.tv",
+      "id" : "KNBC"
+   },
+   "449" : {
+      "name" : "HITN",
+      "url" : "WWW.HITN.ORG",
+      "id" : "HITN"
+   },
+   "293" : {
+      "name" : "KSDILD (KSDI-LD)",
+      "url" : null,
+      "id" : "KSDILD"
+   },
+   "274" : {
+      "name" : "Ovation TV",
+      "url" : "www.ovationtv.com",
+      "id" : "OVATION"
+   },
+   "763" : {
+      "name" : "MLB Extra Innings 736",
+      "url" : null,
+      "id" : "MLBD736"
+   },
+   "549" : {
+      "name" : "Showtime Extreme",
+      "url" : "www.sho.com",
+      "id" : "SHOWX"
+   },
+   "659" : {
+      "name" : "ROOT Sports Pittsburgh (Main Transponder)",
+      "url" : "WWW.FOXNETWORK.COM/",
+      "id" : "RTNP"
+   },
+   "839" : {
+      "name" : "DMX: Flashback New Wave",
+      "url" : null,
+      "id" : "FLASH"
+   },
+   "645" : {
+      "name" : "Fox Sports Carolinas - North Carolina Central",
+      "url" : null,
+      "id" : "FSCR2"
+   },
+   "793" : {
+      "name" : "Sports Pay-Per-View 6",
+      "url" : null,
+      "id" : "ESPNPPV6"
+   },
+   "682" : {
+      "name" : "Altitude Sports Channel (Non-Avalanch Feed)",
+      "url" : null,
+      "id" : "ALTSPT1"
+   },
+   "635" : {
+      "name" : "MSG Plus",
+      "url" : "foxsports.com/newyork",
+      "id" : "MSGPL"
+   },
+   "166" : {
+      "name" : "Cutting Edge On Demand",
+      "url" : null,
+      "id" : "CEDGDM"
+   },
+   "353" : {
+      "name" : "Bloomberg Business Television",
+      "url" : "www.bloomberg.com/tv",
+      "id" : "BLOOM"
+   },
+   "375" : {
+      "name" : "Link TV",
+      "url" : "www.worldlinktv.org",
+      "id" : "LINKTV"
+   },
+   "141" : {
+      "name" : "DITV141",
+      "url" : null,
+      "id" : "DITV141"
+   },
+   "654" : {
+      "name" : "Fox Sports Florida",
+      "url" : "WWW.PUREFLORIDASPORTS.COM",
+      "id" : "FSNFL"
+   },
+   "788" : {
+      "name" : "DirecTV - ESPN GamePlan - ESPGP3",
+      "url" : null,
+      "id" : "ESPGP3"
+   },
+   "709" : {
+      "name" : "DirecTV - NFL Sunday Ticket - NFLST6",
+      "url" : "www.nfl.com/ticket/",
+      "id" : "NFLST6"
+   },
+   "128" : {
+      "name" : "DITV128",
+      "url" : null,
+      "id" : "DITV128"
+   },
+   "403" : {
+      "name" : "Univision Network (Pacific)",
+      "url" : "www.univision.com",
+      "id" : "UNIP"
+   },
+   "252" : {
+      "name" : "Lifetime",
+      "url" : "www.mylifetime.com",
+      "id" : "LIFE"
+   },
+   "883" : {
+      "name" : "DMX: Irish",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "IRISH"
+   },
+   "134" : {
+      "name" : "DITV134",
+      "url" : null,
+      "id" : "DITV134"
+   },
+   "156" : {
+      "name" : "DITV139 (DirecTv)",
+      "url" : null,
+      "id" : "DITV139"
+   },
+   "618" : {
+      "name" : "Fuel TV",
+      "url" : null,
+      "id" : "FUEL"
+   },
+   "2148" : {
+      "name" : "RTV International",
+      "url" : "www.rtvi.ru",
+      "id" : "RTVINT"
+   },
+   "192" : {
+      "name" : "DITV192",
+      "url" : null,
+      "id" : "DITV192"
+   },
+   "250" : {
+      "name" : "WMDNDT2 (WMDN-DT2)",
+      "url" : "wmdn.cbsnow.com/",
+      "id" : "WMDNDT2"
+   },
+   "848" : {
+      "name" : "DMX: Coffeehouse Rock",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "COFFEE"
+   },
+   "614" : {
+      "name" : "ESPN Classic",
+      "url" : "espn.go.com",
+      "id" : "ESPNCL"
+   },
+   "501" : {
+      "name" : "HBO HD",
+      "url" : "www.hbo.com",
+      "id" : "HBOHD"
+   },
+   "687" : {
+      "name" : "ROOT Sports Northwest",
+      "url" : "foxsports.com/northwest",
+      "id" : "RTNW"
+   },
+   "450" : {
+      "name" : "TVB1",
+      "url" : null,
+      "id" : "TVB1"
+   },
+   "278" : {
+      "name" : "The Discovery Channel",
+      "url" : "Discovery.com",
+      "id" : "DSC"
+   },
+   "818" : {
+      "name" : "DMX: Hot Hits",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "HOTHIT"
+   },
+   "490" : {
+      "name" : "Oceanic iSHO",
+      "url" : null,
+      "id" : "OCISHO"
+   },
+   "150" : {
+      "name" : "DITV150",
+      "url" : null,
+      "id" : "DITV150"
+   },
+   "271" : {
+      "name" : "History International",
+      "url" : null,
+      "id" : "H2"
+   },
+   "130" : {
+      "name" : "DITV130",
+      "url" : null,
+      "id" : "DITV130"
+   },
+   "155" : {
+      "name" : "DITV155",
+      "url" : null,
+      "id" : "DITV155"
+   },
+   "245" : {
+      "name" : "Turner Network TV HD",
+      "url" : "www.tnt.tv/",
+      "id" : "TNTHD"
+   },
+   "2104" : {
+      "name" : "Shorts HD",
+      "url" : null,
+      "id" : "SHORTSH"
+   },
+   "864" : {
+      "name" : "DMX: Symphonic",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "SYMPH"
+   },
+   "826" : {
+      "name" : "DMX: The Spirit",
+      "url" : "WWW.MUSICCHOICE.COM",
+      "id" : "DMXSPRT"
+   },
+   "219" : {
+      "name" : "WTTWDT4 (WTTW-DT4)",
+      "url" : null,
+      "id" : "WTTWDT4"
+   },
+   "473" : {
+      "name" : "MLS Direct Kick - Direct TV - MLSSO3",
+      "url" : "www.mlsnet.com/special/shootout.html",
+      "id" : "MLSSO3"
+   },
+   "840" : {
+      "name" : "DMX: 8-Tracks",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "8TRACKS"
+   },
+   "185" : {
+      "name" : "DITV185",
+      "url" : null,
+      "id" : "DITV185"
+   },
+   "597" : {
+      "name" : "Disney XD HD (Pacific)",
+      "url" : "disney.go.com/DisneyChannel/toondisney/",
+      "id" : "DXDHDP"
+   },
+   "248" : {
+      "name" : "FX",
+      "url" : "www.fxnetworks.com/main.html",
+      "id" : "FX"
+   },
+   "390" : {
+      "name" : "WCBS",
+      "url" : "cbs2.com",
+      "id" : "WCBS"
+   },
+   "111" : {
+      "name" : "DITV111",
+      "url" : null,
+      "id" : "DITV111"
+   },
+   "802" : {
+      "name" : "DMX: Malt Shop Oldies",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "GDOLD"
+   },
+   "356" : {
+      "name" : "MSNBC",
+      "url" : "www.msnbc.com",
+      "id" : "MSNBC"
+   },
+   "408" : {
+      "name" : "UniMas West Satellite Feed",
+      "url" : null,
+      "id" : "UNIMWST"
+   },
+   "832" : {
+      "name" : "DMX: Adult Alternative",
+      "url" : "WWW.DMXMUSIC.COM",
+      "id" : "ADUALT"
+   },
+   "528" : {
+      "name" : "Starz (Pacific)",
+      "url" : "www.starzencore.com",
+      "id" : "STARZP"
+   },
+   "539" : {
+      "name" : "Encore Suspense",
+      "url" : "www.encoremedia.com",
+      "id" : "ENCSUS"
+   },
+   "196" : {
+      "name" : "DITV196",
+      "url" : null,
+      "id" : "DITV196"
+   },
+   "781" : {
+      "name" : "DirecTV- NHL Center Ice",
+      "url" : null,
+      "id" : "NHLCI13"
+   },
+   "603" : {
+      "name" : "KOZKDT3 (KOZK-DT3)",
+      "url" : "www.optv.org/",
+      "id" : "KOZKDT3"
+   },
+   "242" : {
+      "name" : "USA Network",
+      "url" : "www.usanetwork.com",
+      "id" : "USA"
+   }
+}

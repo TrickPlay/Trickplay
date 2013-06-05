@@ -1357,7 +1357,8 @@ class TrickplayInspector(QWidget):
                 self.screens[self.currentScreenName].append(layerName)
             if self.old_screen_name == "Default":
                 curIdx = self.ui.screenCombo.currentIndex()
-                del self.screens[self.old_screen_name]
+                if self.screens.has_key(self.old_screen_name):
+                    del self.screens[self.old_screen_name]
                 self.ui.screenCombo.removeItem(curIdx-1)
         else:
             # show the screen items
@@ -1401,8 +1402,6 @@ class TrickplayInspector(QWidget):
             self.cbStyle_textChanged = False
         else:
             self.sendData(self.getGid(), "style", self.style_name)
-        self.main._emulatorManager.getStInfo()
-        #self.main._emulatorManager.repStInfo()
 
     def selectionChanged(self, selected, deselected):
         """

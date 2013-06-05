@@ -50,7 +50,7 @@ class TrickplayEmulatorManager(QWidget):
             self.main.sendLuaCommand("WL.Style","WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
             self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
-        self.getStInfo()
+        #self.getStInfo()
 
     def setUIInfo(self, gid, property, value, n=None):
         if n:
@@ -191,13 +191,14 @@ class TrickplayEmulatorManager(QWidget):
                             item['focused'] = True
                         else:
                             item['focused'] = False
-                        item = self.inspector.search(str(fgid), 'gid')
                         index = self.inspector.selected (self.inspector.ui.inspector)
                         try :
                             item = self.inspector.inspectorModel.itemFromIndex(index)
                             if item['gid'] == fgid :
                                 if self.inspector.main.command is not "setUIInfo" :
+                                    self.inspector.preventChanges = True
                                     self.inspector.propertyFill(item.TPJSON())
+                                    self.inspector.preventChanges = False
                         except:
                             pass
 
@@ -211,7 +212,9 @@ class TrickplayEmulatorManager(QWidget):
                             item['position'] = [int(posX), int(posY), 0]
 
                             if self.inspector.main.command is not "setUIInfo" :
+                                self.inspector.preventChanges = True
                                 self.inspector.propertyFill(item.TPJSON())
+                                self.inspector.preventChanges = False
                             self.unsavedChanges = True
                         except:
                             pass

@@ -59,7 +59,6 @@ end
 --used by make_grid to create each of its elements
 local function make_icon(item)
     local instance = Group()
-
     local r = Sprite{sheet = assets,id=item.src}
     local checkbox = Sprite{sheet=assets,id="checkbox.png"}
 
@@ -233,35 +232,54 @@ return function ( items )
 
         modal_menu.z = -400
         modal_menu:animate{
-            duration = 250*dur_mult,
+            duration = 300*dur_mult,
+            mode = "EASE_OUT_QUAD",
             opacity = 255,
         }
         modal_menu:animate{
-            duration = 300*dur_mult,
+            duration = 500*dur_mult,
             mode = "EASE_OUT_BACK",
             z = 0,
             on_completed = function()
                 if loop then
-                    modal_menu:unfocus()
+                    if modal_menu_delay and modal_menu_delay > 0 then
+                        dolater(modal_menu_delay,function()
+                            if loop and modal_menu.is_animating == false then
+                                modal_menu:unfocus()
+                            end
+                        end)
+                    else
+                        modal_menu:unfocus()
+                    end
                 else
                     modal_menu:grab_key_focus()
                 end
             end
         }
         modal_menu_skim:animate{
-            duration = 250*dur_mult,
+            duration = 200*dur_mult,
             opacity = 150,
         }
 
     end
     function modal_menu:unfocus()
         modal_menu:animate{
-            duration = 250*dur_mult,
+            duration = 350*dur_mult,
             opacity = 0,
             z = -400,
             on_completed = function()
                 if loop then
-                    modal_menu:focus(prev_menu)
+                    if modal_menu_delay and modal_menu_delay > 0 then
+                        dolater(modal_menu_delay,function()
+                            if loop and modal_menu.is_animating == false then
+                                modal_menu:focus(prev_menu)
+                            else
+                                prev_menu:grab_key_focus()
+                            end
+                        end)
+                    else
+                        modal_menu:focus(prev_menu)
+                    end
                 else
                     modal_menu:unparent()
                     prev_menu:grab_key_focus()
@@ -269,7 +287,7 @@ return function ( items )
             end
         }
         modal_menu_skim:animate{
-            duration = 250*dur_mult,
+            duration = 350*dur_mult,
             opacity  = 0,
         }
     end

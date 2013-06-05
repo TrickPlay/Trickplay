@@ -4,7 +4,11 @@
 local function make_icon(item)
     local instance = Group()
 
+    instance.app = item.app
+
     local s = Sprite{sheet = assets,id=item.src}
+
+    instance.icon = s
 
     local t   = Text{
         text  = item.text,
@@ -102,7 +106,10 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     instance.anchor_point = {w/2,0}
 
     ----------------------------------------------------------
-    local deletion_duration = 250
+    local        fly_duration = 1250
+    local grid_slide_duration = 1000
+    local     mode = "EASE_OUT_EXPO"
+    local fly_mode = "EASE_IN_OUT_BACK"
     local deleting = false
     local again = false
     function instance:delete(d_r,d_c)
@@ -111,7 +118,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
 
         deleting = true
 
-        local dur = .5
+        local dur = (.5*grid_slide_duration)/fly_duration
+        local grid_end = grid_slide_duration/fly_duration
         local properties = {}
 
         for r,row in ipairs(entries) do
@@ -132,9 +140,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 source = item,
                                 name   = "opacity",
                                 keys   = {
-                                    {0.0,    "EASE_OUT_CIRC",255},
-                                    {t_start,"EASE_OUT_CIRC",255},
-                                    {1.0,    "EASE_OUT_CIRC",  0},
+                                    {0.0,    mode,255},
+                                    {t_start,mode,255},
+                                    {grid_end,    mode,  0},
                                 },
                             }
                         )
@@ -148,9 +156,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "x",
                             keys   = {
-                                {0.0,    "EASE_OUT_CIRC",item.x},
-                                {t_start,"EASE_OUT_CIRC",item.x},
-                                {1.0,    "EASE_OUT_CIRC",w-(cell_w)},
+                                {0.0,    fly_mode,item.x},
+                                {t_start,fly_mode,item.x},
+                                {1.0,    fly_mode,w-(cell_w)},
                             },
                         }
                     )
@@ -160,9 +168,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "y",
                             keys   = {
-                                {0.0,"EASE_OUT_CIRC",item.y},
-                                {t_start,"EASE_OUT_CIRC",item.y},
-                                {1.0,"EASE_OUT_CIRC",item.y-(cell_h+y_spacing)},
+                                {0.0,    fly_mode,item.y},
+                                {t_start,fly_mode,item.y},
+                                {1.0,    fly_mode,item.y-(cell_h+y_spacing)},
                             },
                         }
                     )
@@ -174,9 +182,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                                 source = item,
                                 name   = "opacity",
                                 keys   = {
-                                    {0.0,    "EASE_OUT_CIRC",item.opacity},
-                                    {t_start,"EASE_OUT_CIRC",item.opacity},
-                                    {1.0,    "EASE_OUT_CIRC",         255},
+                                    {0.0,    mode,item.opacity},
+                                    {t_start,mode,item.opacity},
+                                    {1.0,    mode,         255},
                                 },
                             }
                         )
@@ -189,9 +197,9 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                             source = item,
                             name   = "x",
                             keys   = {
-                                {0.0,"EASE_OUT_CIRC",item.x},
-                                {t_start,"EASE_OUT_CIRC",item.x},
-                                {1.0,"EASE_OUT_CIRC",item.x-(cell_w+x_spacing)},
+                                {0.0,      mode,item.x},
+                                {t_start,  mode,item.x},
+                                {grid_end, mode,item.x-(cell_w+x_spacing)},
                             },
                         }
                     )
@@ -200,7 +208,7 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         end
 
         local a = Animator{
-            duration   = deletion_duration*dur_mult,
+            duration   = grid_slide_duration*dur_mult,
             properties = properties
         }
         function a.timeline.on_completed()
@@ -225,14 +233,14 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
             if #entries < 3 then
                 local new_rows = {
                     {
-                        {text="Google Earth",  src="icon-google-earth.png"},
-                        {text="Forky",         src="icon-forky.png"},
-                        {text="LG Smart",      src="icon-lg-smart.png"},
-                        {text="3D World",      src="icon-3d-on.png"},
-                        {text="Nat Geo",       src="icon-national-geo.png"},
-                        {text="Gystle",        src="icon-gystle.png"},
-                        {text="Netflix",       src="icon-netflix.png"},
-                        {text="NHL",           src="icon-nhl.png"},
+                        {text="Poker",         src="icons-poker-dawgz.png",        app="com.trickplay.poker-dawgz"},
+                        {text="Physics",       src="icon-physics-trickplay.png",   app="com.trickplay.physics-showcase"},
+                        {text="Weather",       src="icon-weather-trickplay.png",   app="com.trickplay.weather"},
+                        {text="Groupon",       src="icon-groupon-trickplay.png",   app="com.trickplay.groupon"},
+                        {text="Dawn",          src="icon-liberty-global.png",      app="com.lgi.dawn-ui"},
+                        {text="App Shop",      src="icon-apps-trickplay.png",      app="com.trickplay.app-shop"},
+                        {text="On Demand",     src="icon-vod-trickplay.png",       app="com.trickplay.jyp"},
+                        {text="Penguins",      src="icon-penguin.png",             app="com.trickplay.penguins"},
                         {text="O2",            src="icon-o2.png"},
                         {text="Simplelink",    src="icon-simple-link.png"},
                     },
@@ -268,11 +276,20 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
                 end
             end
             -----------------------------------------------------------
-            deleting = false
+            --deleting = false
 
             if again then
-                instance:delete(d_r,d_c)
-
+                if deletion_delay and deletion_delay > 0 then
+                    dolater(deletion_delay,function()
+                        deleting = false
+                        instance:delete(d_r,d_c)
+                    end)
+                else
+                    deleting = false
+                    instance:delete(d_r,d_c)
+                end
+            else
+                deleting = false
             end
         end
 
@@ -310,8 +327,8 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
         hl:animate{
             duration = 100*dur_mult,
             mode="EASE_OUT_QUAD",
-            x = entries[sel_r][sel_c].x+55,
-            y = entries[sel_r][sel_c].y+70,
+            x = (cell_w+x_spacing)*(sel_c-1)+55,
+            y = (cell_h+y_spacing)*(sel_r-1)+70,
         }
     end
     move_hl()
@@ -320,24 +337,44 @@ return function(items,cell_w,cell_h,x_spacing,y_spacing)
     local key_events = {
         --delete the selected icon
         [keys.OK] = function()
+            print(apps,entries[sel_r][sel_c].app)
+            if apps and entries[sel_r][sel_c].app then
 
-            if apps then apps:launch("com.lgi.dawn-ui") end
-            --if there more than one left
-            if entries[1][2] then
-                instance:delete(sel_r,sel_c)
-                --if you are deleting to icon at the very end,
-                --then move the highlight to the next one
-                if sel_r == #entries and sel_c == #entries[#entries] then
-                    --if the last icon is in the leftmost column
-                    if  sel_c == 1 then
-                        --then the highlight needs to wrap around to
-                        --the rightmost columns
-                        sel_r = sel_r-1
-                        sel_c = #entries[sel_r-1]
-                    else
-                        sel_c = sel_c - 1
+                local dur = 250
+
+                screen:animate{duration=dur,opacity=0}
+
+                local c = entries[sel_r][sel_c].icon
+                c = Clone{source =c,position= c.transformed_position}
+                screen:add(c)
+
+                c:animate{
+                    duration = dur,
+                    scale = {screen.w/c.w,screen.w/c.w},
+                    x=0,y=0,
+                    on_completed = function()
+                        apps:launch(entries[sel_r][sel_c].app)
                     end
-                    move_hl()
+                }
+                screen:grab_key_focus()
+            elseif not deleting then
+                --if there more than one left
+                if entries[1][2] then
+                    instance:delete(sel_r,sel_c)
+                    --if you are deleting to icon at the very end,
+                    --then move the highlight to the next one
+                    if sel_r == #entries and sel_c == #entries[#entries] then
+                        --if the last icon is in the leftmost column
+                        if  sel_c == 1 then
+                            --then the highlight needs to wrap around to
+                            --the rightmost columns
+                            sel_r = sel_r-1
+                            sel_c = #entries[sel_r-1]
+                        else
+                            sel_c = sel_c - 1
+                        end
+                        move_hl()
+                    end
                 end
             end
         end,
