@@ -495,6 +495,25 @@ class Media [[ClutterActor*]] actor
         ]];
 
     /*
+        Property: keep_aspect_ratio
+
+        The keep_aspect_ratio property is a boolean flag indicating whether or not the media's aspect ratio is preserved during playback. If the property is set to true and the specified resolution has an aspect ratio different from the media, the resolution will be shrinked to keep the media aspect ratio.
+
+        *Default Setting:* false
+    */
+
+    bool keep_aspect_ratio
+        [[
+            keep_aspect_ratio = MediaExtra::get( self, L )->get_player()
+                              ? MediaExtra::get( self, L )->get_player()->get_keep_aspect_ratio()
+                              : false;
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_keep_aspect_ratio( keep_aspect_ratio );
+        ]];
+
+    /*
         Function: play
 
         The play() function begins or resumes playing a media resource.

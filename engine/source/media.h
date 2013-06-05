@@ -48,6 +48,9 @@ class Media
     gboolean get_actor_hidden() { return actor_hidden; }
     void set_actor_hidden( bool _actor_hidden ) { actor_hidden = _actor_hidden; }
 
+    gboolean get_keep_aspect_ratio() { return keep_aspect_ratio; }
+    void set_keep_aspect_ratio( bool _keep_aspect_ratio ) { keep_aspect_ratio = _keep_aspect_ratio; }
+
     ~Media();
 
   private:
@@ -64,6 +67,7 @@ class Media
     int  gst_load( const char* uri, const char* extra );
     gulong get_load_signal() { return load_signal; }
     void set_load_signal( gulong _load_signal ) { load_signal = _load_signal; }
+    void set_actor_size();
 
     void check( int valid_states ); // Checks whether the input state is valid
 
@@ -112,6 +116,7 @@ class Media
     double          volume;
     bool            loaded_flag;
     bool            actor_hidden;
+    bool            keep_aspect_ratio;
 
 #ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;

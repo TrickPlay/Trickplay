@@ -57,6 +57,7 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     , pipeline( NULL )
     , loaded_flag( false )
     , actor_hidden( false )
+    , keep_aspect_ratio( false )
 {
 #ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
@@ -649,6 +650,54 @@ int Media::gst_load( const char* uri, const char* extra )
     return 0;
 }
 
+void Media::set_actor_size()
+{
+    gboolean explicit_height, explicit_width; // Whether width/height been set explicitly
+    guint actor_width, actor_height;
+    gfloat f_width, f_height; // floating point value used in calculation
+
+    if ( ( video_width == 0 ) || ( video_height == 0 ) ) return;
+
+    g_object_get( G_OBJECT( vt ), "natural-height-set", &explicit_height, NULL );
+    g_object_get( G_OBJECT( vt ), "natural-width-set",  &explicit_width,  NULL );
+
+    clutter_actor_get_size( vt, &f_width, &f_height );
+    actor_width  = f_width;
+    actor_height = f_height;
+
+    if ( explicit_height && explicit_width )
+    {
+        // Check whether consistent with video aspect ratio
+        // Use multiplication instead of division to make it accurate
+        if ( keep_aspect_ratio && ( video_width * actor_height != video_height * actor_width ) )
+        {
+            // Update actor width and height to preserve aspect ratio
+            if ( video_width * actor_height > video_height * actor_width )
+            {
+                f_height = video_height * actor_width / video_width;
+            }
+            else
+            {
+                f_width = video_width * actor_height / video_height;
+            }
+
+            clutter_actor_set_size( vt, f_width, f_height );
+        }
+    }
+    else if ( !explicit_height && !explicit_width )
+    { // Set actor size as the video size
+        clutter_actor_set_size( vt, ( gfloat ) video_width, ( gfloat ) video_height );
+    }
+    else if ( explicit_height )
+    { // Use the specifiec height and keep the video aspect ratio
+        clutter_actor_set_size( vt, video_width * actor_height / video_height , f_height );
+    }
+    else /* explicit_width is true */
+    { // Use the specifiec width and keep the video aspect ratio
+        clutter_actor_set_size( vt, f_width, video_height * actor_width / video_width );
+    }
+}
+
 void Media::get_stream_information()
 {
     g_assert( pipeline );
@@ -706,6 +755,8 @@ void Media::get_stream_information()
             }
 
             gst_object_unref( GST_OBJECT( video_sink ) );
+
+            set_actor_size();
         }
     }
 
