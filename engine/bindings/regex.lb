@@ -16,7 +16,7 @@ int ceilLog10(const int n) {
     if(n < 10000) return 4;
     if(n < 100000) return 5;
     if(n < 1000000) return 6;
-    
+
     g_critical("Dude, that's way too many captures.  Try something less insane.");
     return -1;
 }
@@ -24,9 +24,9 @@ int ceilLog10(const int n) {
 ]]
 
 /*
-	Global: regex
-	
-	The regex global variable provides sophisticated regular expression capabilities similar to those available in the <Perl programming language at http://perldoc.perl.org/perlre.html>. The regex functions mirror the Lua string library functions string.replace(), string.find(), and string.match(), but the regex versions recognize a powerful Perl-compatible syntax to specify patterns. It is not necessary to understand Perl or complex regular expressions before using the regex functions. Refer to the description of the <replace> function for an introduction to regular expressions.
+    Global: regex
+
+    The regex global variable provides sophisticated regular expression capabilities similar to those available in the <Perl programming language at http://perldoc.perl.org/perlre.html>. The regex functions mirror the Lua string library functions string.replace(), string.find(), and string.match(), but the regex versions recognize a powerful Perl-compatible syntax to specify patterns. It is not necessary to understand Perl or complex regular expressions before using the regex functions. Refer to the description of the <replace> function for an introduction to regular expressions.
 */
 
 global regex [[void*]]
@@ -39,10 +39,10 @@ global regex [[void*]]
 
         *Arguments:*
 
-	        origin - string to process
-	        pattern - regular expression string specifying text to search for
-			replacement - regular expression string specifying replacement text. This string must be UTF-8 encoded.
-			start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
+            origin - string to process
+            pattern - regular expression string specifying text to search for
+            replacement - regular expression string specifying replacement text. This string must be UTF-8 encoded.
+            start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
 
         *Return Value:* modified string, if successful, else the original string. Note: The resulting string should not contain NUL characters.
 
@@ -51,29 +51,29 @@ global regex [[void*]]
         (code)
         -- Replace "Hello" with "Good-bye"
         print( regex:replace( "Hello World", "Hello", "Good-bye" ) )
-        
+
         Outputs:
-        	Good-bye World
+            Good-bye World
         (end)
-        
+
         For Perl programmers, the equivalent Perl code for the Lua-based replace() function is shown below.
-        
+
         (code)
         -- Lua version
         str = regex:replace( original, find, replacement )
-        
+
         -- Perl version
         $_ = $original;
         s/$find/$replacement/;
         $str = $_;
         (end)
-        
+
         There may be times when the exact matched text is unknown--such as matching any digit between 0-9 or extracting the first word from a string--and that matched text must be part of the replacement string. For example, say you wanted to reformat a text string. A regular expression could be used to parse the text into individual words or "tokens." The tokens can then be reorganized in the desired format by including them in a replacement regular expression. In Perl terminology, you want to "capture" each token and then reference the captured token in the replacement regular expression. Perl stores captured text in "capture variables." The first group of captured text is stored in the variable $1. If multiple groups of text are captured, the capture variables $2, $3, etc. are used for each subsequent group. There is no upper limit on the number of capture variables.
-        
+
         In the Lua-based regex:replace() function, the equivalent to Perl's $1 capture variable is \\1. (Note: The actual Lua capture variable is \1, but the backslash character must be escaped to be interpreted correctly.) Subsequent Lua capture variables use the names \\2, \\3, etc.. The capture variable \\0 is special; it contains the entire matched text, not just any captured subsections.
-        
+
         The code sample below formats a raw telephone number using capture variables.
-        
+
         (code)
         -- Format telephone number as (nnn) nnn - nnnn
         -- The search regular expression looks for sequences of 3 digits, 3 digits and 4 digits. Each sequence is captured in
@@ -82,33 +82,33 @@ global regex [[void*]]
                               "([0-9]{3})([0-9]{3})([0-9]{4})",
                               "(\\1) \\2 - \\3" ) )
         Outputs:
-        	John Doe, phone: (408) 306 - 3517
+            John Doe, phone: (408) 306 - 3517
         (end)
-        
+
         Specifying capture variables using the \\1 syntax is sometimes insufficient. For example, say we want to change the second digit in any two-digit sequence to zero, such as changing "99" to "90 and "34" to "30". If we capture the first digit in capture variable \\1 (as in the regular expression of "([0-9])[1-9]") then the replacement regular expression to append a zero to the capture variable would be "\\10" (i.e., the \\1 capture variable and the appended '0'). However, this does not work because the ending zero is interpreted as being part of the capture variable, i.e., \\10. To reference the capture variable \\1 and append a '0' to the resulting string, we need to reference the capture variable using a different syntax.
-        
+
         In Perl, the "\g{1}" syntax is an equivalent reference to the Perl $1 capture variable. In the Lua-based regex:replace() function, the "\\g<1>" syntax is equivalent to referencing the "\\1" capture variable. Subsequent capture variables (\\2, \\3, etc.) use the same syntax (\\g<2>, \\g<3>, etc.).
-         
+
          The code segment below demonstrates this alternative syntax for capture variables with the replace() function.
 
         (code)
         -- Replace ".dd" with ".d0" where 'd' is any digit 0-9
         print( regex:replace( "MSRP: $10.99, Sale Price: $6.45", ".([0-9])[1-9]", ".\\g<1>0" ) )
-        
+
         Outputs:
-        	MSRP: $10.90, Sale Price: $6.40
+            MSRP: $10.90, Sale Price: $6.40
         (end)
 
-		Captured text can also be assigned a name by using the syntax (?<name>...). The name can subsequently be used to reference the related capture variable (\\1, etc.). When referencing a capture name, the syntax is \\g<name>, as in \\g<Group1>. A version of the earlier phone-number formatting example that uses capture names is shown below.
-		
-		(code)
-		-- Format a telephone number as (nnn) nnn - nnnn. Use capture names.
-		print( regex:replace( "John Doe, phone: 4083063517",
+        Captured text can also be assigned a name by using the syntax (?<name>...). The name can subsequently be used to reference the related capture variable (\\1, etc.). When referencing a capture name, the syntax is \\g<name>, as in \\g<Group1>. A version of the earlier phone-number formatting example that uses capture names is shown below.
+
+        (code)
+        -- Format a telephone number as (nnn) nnn - nnnn. Use capture names.
+        print( regex:replace( "John Doe, phone: 4083063517",
                               "(?<area>[0-9]{3})(?<group1>[0-9]{3})(?<group2>[0-9]{4})",
                               "(\\g<area>) \\g<group1> - \\g<group2>" ) )
         Outputs:
-        	John Doe, phone: (408) 306 - 3517
-		(end)
+            John Doe, phone: (408) 306 - 3517
+        (end)
 
         *See Also:* <Perl regular expression documentation at http://perldoc.perl.org/perlre.html>
     */
@@ -140,13 +140,13 @@ global regex [[void*]]
                 else
                 {
                     free_later( replaced );
-                    
+
                     result = replaced;
                 }
             }
 
             if ( re_pat )
-            {            
+            {
                 g_regex_unref( re_pat );
             }
         ]];
@@ -158,21 +158,21 @@ global regex [[void*]]
 
         *Arguments:*
 
-	        origin - string to process
-	        pattern - regular expression string specifying text to search for
-			start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
+            origin - string to process
+            pattern - regular expression string specifying text to search for
+            start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
 
         *Return Value:* If an instance of the pattern is found, returns a pair of values representing the starting and ending indices of the first instance of the matched string. If the pattern contains captures, then returns the starting and ending indices followed by a list of the captured text strings in the order found. If the pattern was not found, returns nil.
 
-		*Code Examples:* Demonstrate find() return values
-		
-			(code)
-	        regex:find( "test", "te" )     --> Returns: 1, 2
-    	    regex:find( "test", "(t)(e)" ) --> Returns: 1, 2, "t", "e"
-    	    regex:find( "test", "t(e)" )   --> Returns: 1, 2, "e"
-    	    (end)
+        *Code Examples:* Demonstrate find() return values
 
-		*See Also:* the <replace> and <match> functions
+            (code)
+            regex:find( "test", "te" )     --> Returns: 1, 2
+            regex:find( "test", "(t)(e)" ) --> Returns: 1, 2, "t", "e"
+            regex:find( "test", "t(e)" )   --> Returns: 1, 2, "e"
+            (end)
+
+        *See Also:* the <replace> and <match> functions
     */
 
     multi find ( lstring origin, string pattern, int start_pos = 1 )
@@ -186,13 +186,13 @@ global regex [[void*]]
         {
             String message( error->message );
             g_clear_error( & error );
-            return luaL_error( L , "FAILED TO COMPILE REGEX '%s' : %s",pattern,message.c_str() ); 
+            return luaL_error( L , "FAILED TO COMPILE REGEX '%s' : %s",pattern,message.c_str() );
         }
 
 
         GMatchInfo * match_info = 0;
         gboolean result = g_regex_match_full( re_pat, origin, origin_len, start_pos-1, (GRegexMatchFlags) 0, &match_info, &error );
-        
+
         if (error)
         {
             g_warning("FAILED IN REGEX MATCH: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
@@ -240,7 +240,7 @@ global regex [[void*]]
         {
             g_match_info_free(match_info);
         }
-        
+
         g_regex_unref( re_pat );
 
         if (error)
@@ -248,38 +248,38 @@ global regex [[void*]]
             g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s (%s)",error->message, Util::where_am_i_lua(L).c_str());
             g_clear_error(&error);
         }
-        
+
         return num_matches;
     ]];
 
     /*
         Function: match
-        
+
         The match() function locates and returns a substring within a string. The substring can specify a <Perl-compatible regular expression pattern at http://perldoc.perl.org/perlre.html>. Perl-style text captures can be included in the substring. An introduction to using regular expression patterns is contained in the description of the <replace> function.
-        
+
         *Arguments:*
-        
-	        origin - string to process
-	        pattern - regular expression string specifying text to search for
-			start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
+
+            origin - string to process
+            pattern - regular expression string specifying text to search for
+            start_pos - optional one-based index within origin argument at which to begin searching. If not specified, the search begins with the first character in the origin argument (index 1).
 
         *Return Value:* If the pattern contains no captures, the full matched string is returned. If the pattern contains captures, a list of the captures is returned in the order found.
 
         *Code Examples:* Demonstrate match() return values
 
-        	(code)
-	        regex:match( "test", "te" )     --> Returns: "te"
-	        regex:match( "test", "(t)(e)" ) --> Returns: "t", "e"
-    	    regex:match( "test", "t(e)" )   --> Returns: "e"
-    	    (end)
-    	    
-    	*See Also:* the <replace> and <find> functions
+            (code)
+            regex:match( "test", "te" )     --> Returns: "te"
+            regex:match( "test", "(t)(e)" ) --> Returns: "t", "e"
+            regex:match( "test", "t(e)" )   --> Returns: "e"
+            (end)
+
+        *See Also:* the <replace> and <find> functions
     */
 
     multi match ( lstring origin, string pattern, int start_pos = 1 )
     [[
         GError * error = 0;
-        
+
         gint num_matches = 0;
 
         GRegex * re_pat = g_regex_new( pattern, (GRegexCompileFlags) (G_REGEX_MULTILINE | G_REGEX_DOTALL), (GRegexMatchFlags) 0, &error );
@@ -325,7 +325,7 @@ global regex [[void*]]
                         lua_pushstring( L, word );
                         g_free( word );
                         g_match_info_next( match_info, &error );
-                        
+
                         num_matches = 1;
                     }
                 }
@@ -340,7 +340,7 @@ global regex [[void*]]
                 g_clear_error(&error);
             }
         }
-        
+
         return num_matches;
     ]];
 

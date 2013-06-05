@@ -2,7 +2,7 @@ local hdr = {}
 
 WL = dofile("LIB/Widget/Widget_Library.lua")
 
-dofile("LIB/VE/ve_runtime")
+VL = dofile("LIB/VE/ve_runtime")
 
 hdr.test = 0
 ----------------
@@ -38,6 +38,11 @@ hdr.uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGro
                   "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
 
 hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Widget_Group", "ArrowPane", "TabBar", "MenuButton"} 
+hdr.uiContainersFixedContents = {"LayoutManager", "MenuButton"} 
+hdr.uiContainersChildrenContents = {"DialogBox", "ScrollPane", "Widget_Group", "ArrowPane"} 
+
+-- image file extension 
+hdr.imageExtensions = {".png", ".gif", ".tif", ".jpg", ".tiff", ".bmp"}
 
 -------------------------------
 -- UI Element Creation Function Map 
@@ -74,6 +79,36 @@ hdr.uiElementCreate_map =
         ['MenuButton'] = function(p)  return WL.MenuButton(p) end, 
     }
 
+hdr.uiNum_map = 
+    {
+        ['Clone'] = 0,
+        ['Widget_Clone'] = 0,
+        ['Group'] = 0,
+        ['Widget_Group'] = 0,
+        ['Rectangle'] = 0,
+        ['Widget_Rectangle'] = 0,
+        ['Text'] = 0,
+        ['Widget_Text'] = 0,
+        ['Image'] = 0,
+        ['Widget_Sprite'] = 0,
+    
+        ['Button'] = 0,
+        ['DialogBox'] =0, 
+        ['ToastAlert'] = 0,
+        ['ProgressSpinner'] = 0,
+        ['ProgressBar'] = 0,
+        ['OrbittingDots'] = 0,
+        ['TextInput'] = 0,
+        ['RadioButton'] = 0,
+        ['CheckBox'] = 0,
+        ['LayoutManager'] = 0,
+        ['Slider'] = 0,
+        ['ArrowPane'] = 0,
+        ['ScrollPane'] = 0,
+        ['TabBar'] = 0,
+        ['ButtonPicker'] = 0,
+        ['MenuButton'] = 0,
+    }
 
 hdr.neighberKey_map = 
     {
@@ -89,38 +124,26 @@ hdr.neighberKey_map =
 ---------------------
 editor_lb = editor
 buildInsp = false
---editor_use = false
 
 current_dir 	   = ""
---current_inspector  = nil 
---current_fn  	   = ""
---restore_fn  	   = ""
 debugger_script = "trickplay-debugger"
 current_focus 	   = nil
-current_screen 	   = ""
---prev_tab 		   = nil
 selected_container = nil
 selected_content   = nil
 
 input_mode         = hdr.S_SELECT
---menu_hide          = false
 
 focusKey = nil
 
--- table for mouse dragging information 
---dragging          = nil
-
 mouse_state       = hdr.BUTTON_UP
---contents    	  = ""
---item_num 	      = 0
 
 -- UI Element / Layer Naming Number 
 uiNum = 0
 layerNum = 0
 
 -- current Layer 
---curLayerGid = nil
 curLayer= nil
+
 -- block report flag 
 blockReport= false
 
@@ -131,53 +154,9 @@ snapToGuide	      = true
 h_guideline       = 0
 v_guideline       = 0
 
--- key focuses 
---focus_type        = ""
-
--- cursor 
---cursor_type 	  = 68
-
 -- for the modifier keys 
 shift 		      = false
 control 	      = false
-
---menu_bar_hover 	  = false
-
--- table for skin 
---skins = {}
-
--- table for ui elements selcection 
-selected_objs	  = {}
-
--- table for undo/redo 
---undo_list 	  	  = {}
---redo_list 	      = {}
-
--- Table g contains all the ui elements in the screen 
---g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
-
-
--- Screen ui functions 
---screen_ui = dofile("screen_ui")
-
-
--- background images 
---[[
-BG_IMAGE_20 = assets("assets/transparency-grid-20-2.png")
-BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
-BG_IMAGE_40 = assets("assets/transparency-grid-40-2.png")
-BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_80 = assets("assets/transparency-grid-80-2.png")
-BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_white = assets("assets/white.png")
-BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_import = Image{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_20 = nil
-BG_IMAGE_40 = nil
-BG_IMAGE_80 = nil
-BG_IMAGE_white = nil
-BG_IMAGE_import = nil
-]]
 
 -- guide line  
 guideline_inspector_on = false
@@ -195,6 +174,9 @@ ui = {
 editor = dofile("editor")
 screen_ui = dofile("screen_ui")
 
+function aa ()
+    _VE_.openFile("/Users/hjkim/TEST/trickplay.myTestApp12")
+end
 function dump_properties( o )
         local t = {}
         local l = 0
@@ -215,9 +197,6 @@ function dump_properties( o )
             print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
         end
 end
-
-
-
 
 return hdr
 

@@ -27,11 +27,11 @@
 #include "util.h"
 #include "trickplay/trickplay.h"
 
-static String clean_version( const gchar * dirty )
+static String clean_version( const gchar* dirty )
 {
     String result( dirty );
 
-    gchar ** parts = g_strsplit( dirty, "\n" , 2 );
+    gchar** parts = g_strsplit( dirty, "\n" , 2 );
 
     if ( g_strv_length( parts ) > 0 )
     {
@@ -45,7 +45,7 @@ static String clean_version( const gchar * dirty )
 
 // If build passes us a GIT revision then use it, otherwise just define it as blank
 #if !defined(TP_GIT_VERSION)
-	#define TP_GIT_VERSION "nogit"
+#define TP_GIT_VERSION "nogit"
 #endif
 
 void dump_versions()
@@ -59,7 +59,7 @@ void dump_versions()
 
     for ( VersionMap::iterator it = v.begin(); it != v.end(); ++it )
     {
-        const StringVector & vs( it->second );
+        const StringVector& vs( it->second );
 
         String line( vs[ 0 ] );
 
@@ -111,7 +111,7 @@ VersionMap get_versions()
 
     result[ "jpeg" ].push_back( Util::format( "%d" , JPEG_LIB_VERSION ) );
 
-    result[ "png" ].push_back( png_get_libpng_ver(NULL) );
+    result[ "png" ].push_back( png_get_libpng_ver( NULL ) );
     result[ "png" ].push_back( PNG_LIBPNG_VER_STRING );
 
     result[ "freetype" ].push_back( Util::format( "%d.%d.%d" , FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH ) );
@@ -125,11 +125,7 @@ VersionMap get_versions()
 
     result[ "clutter" ].push_back( Util::format( "%d.%d.%d" , clutter_major_version , clutter_minor_version , clutter_micro_version ) );
     result[ "clutter" ].push_back( CLUTTER_VERSION_S );
-#ifdef CLUTTER_VERSION_1_10
-    result[ "clutter" ].push_back( Util::format( "%s" , g_type_name(G_TYPE_FROM_INSTANCE(clutter_get_default_backend())) ) );
-#else
-    result[ "clutter" ].push_back( Util::format( "%s-%s" , CLUTTER_FLAVOUR, CLUTTER_COGL ) );
-#endif
+    result[ "clutter" ].push_back( Util::format( "%s" , g_type_name( G_TYPE_FROM_INSTANCE( clutter_get_default_backend() ) ) ) );
 
     result[ "sndfile" ].push_back( sf_version_string() );
 

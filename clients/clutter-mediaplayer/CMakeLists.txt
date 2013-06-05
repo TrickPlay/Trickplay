@@ -1,8 +1,8 @@
 include( FindPkgConfig )
 
 IF( PKG_CONFIG_FOUND )
-    pkg_search_module(CLUTTER_GST   REQUIRED    clutter-gst-1.0 )
-    pkg_check_modules(GSTVIDEO      REQUIRED    gstreamer-video-0.10)
+    pkg_search_module(CLUTTER_GST   REQUIRED    clutter-gst-2.0 )
+    pkg_check_modules(GSTVIDEO      REQUIRED    gstreamer-video-1.0)
     pkg_check_modules(COGL                      cogl-1.0)
 
     list( APPEND        TPCMP_INCLUDE_DIRS

@@ -41,6 +41,7 @@ OrbittingDots = setmetatable(
         },
         public = {
             properties = {
+                --[[
                 image = function(instance,_ENV)
                     return function(oldf) return image     end,
                     function(oldf,self,v)
@@ -78,6 +79,7 @@ OrbittingDots = setmetatable(
 
                     end
                 end,
+                --]]
                 animating = function(instance,_ENV)
                     return function(oldf) return animating     end,
                     function(oldf,self,v)
@@ -128,6 +130,7 @@ OrbittingDots = setmetatable(
                 widget_type = function(instance,_ENV)
                     return function() return "OrbittingDots" end
                 end,
+                --[[
                 dot_size = function(instance,_ENV)
                     return function(oldf) return dot_size     end,
                     function(oldf,self,v)
@@ -140,11 +143,12 @@ OrbittingDots = setmetatable(
                         flag_for_recalc_size = true
                     end
                 end,
+                --]]
                 num_dots = function(instance,_ENV)
                     return function(oldf) return num     end,
                     function(oldf,self,v)
                         if v == num then return end
-
+                        ---[[
                         --if new number is smaller than the previous number
                         if num > v then
 
@@ -159,11 +163,9 @@ OrbittingDots = setmetatable(
 
                             --add more
                             for i = num+1,v do
-                                clones[i] = Clone{
-                                    source       = image,
-                                    anchor_point = {dot_size/2,dot_size/2},
-                                    w            = dot_size,
-                                    h            = dot_size,
+                                clones[i] = Sprite{
+                                    sheet  = self.style.spritesheet,
+                                    id     = self.style["OrbitingDots/icon.png"],
                                 }
                                 add( instance, clones[i])
                             end
@@ -171,6 +173,7 @@ OrbittingDots = setmetatable(
                         end
 
                         num = v
+                        --]]
 
                         --reposition_clones()
                         reposition = true
@@ -190,6 +193,7 @@ OrbittingDots = setmetatable(
                         t.animating = self.animating
                         t.duration = self.duration
                         t.num_dots = instance.num_dots
+                        --[[
                         t.dot_size = instance.dot_size
 
                         if (not canvas) and image.src and image.src ~= "[canvas]" then
@@ -197,6 +201,7 @@ OrbittingDots = setmetatable(
                             t.image = image.src
 
                         end
+                        --]]
                         t.type = "OrbittingDots"
 
                         return t
@@ -253,6 +258,7 @@ OrbittingDots = setmetatable(
                     h = new_h
                 end
             end,
+            --[[
             make_canvas = function(instance,_ENV)
                 return function()
 
@@ -305,15 +311,18 @@ OrbittingDots = setmetatable(
                     return true
                 end
             end,
+            --]]
             update = function(instance,_ENV)
                 return function()
                     if  flag_for_redraw then
                         flag_for_redraw = false
+                        --[[
                         if canvas then
                             make_canvas()
                         else
                             resize_images()
                         end
+                        --]]
                         flag_for_recalc_size = true
                     end
                     if  reposition then
@@ -372,10 +381,12 @@ OrbittingDots = setmetatable(
             reposition = true
             w = 1
             h = 1
+            --[[
             style_flags = {
                 border      = "flag_for_redraw",
                 fill_colors = "flag_for_redraw",
             }
+            --]]
 
             setup_object(self,instance,_ENV)
 

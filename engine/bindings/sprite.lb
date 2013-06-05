@@ -27,13 +27,13 @@ struct SpriteBinding
         }
     };
 
-    SpriteBinding( ClutterActor * _actor ) : async( false ), loaded( false ), can_fire( true ), constructing( false ),
-                                             actor( _actor ), sprite( NULL ), sheet( NULL ), id( NULL ), texture( NULL ),
-                                             action( NULL ) {}
+    SpriteBinding( ClutterActor * _actor ) : async( false ), can_fire( true ), constructing( false ),
+                                             actor( _actor ), sprite( NULL ), sheet( NULL ), texture( NULL ), 
+                                             action( NULL ), id_to_free( false ), id( NULL ) {}
 
     ~SpriteBinding()
     {
-        if ( id ) {
+        if ( id && id_to_free) {
             g_free( id );
             id = NULL;
         }
@@ -52,22 +52,45 @@ struct SpriteBinding
             can_fire = true;
         }
     }
-    
-    const char * get_id() { return id; }
-    
+
+    const char * get_id() { return id_to_free ? id : sprite->get_id(); }
+
     void set_id( const char * new_id )
     {
         g_assert( new_id );
 
         /* TODO: replace strcmp with something safe */
-        if ( !id || strcmp( id, new_id ) )
-        {
-            if ( id ) g_free( id );
-            id = new_id ? g_strdup( new_id ) : NULL;
+        SpriteSheet::Sprite * s = sheet ? sheet->get_sprite( new_id ) : NULL;
+
+        if ( s ) {
+            if ( id && id_to_free ) g_free(id);
+            id = (char *) (s->get_id());
+            id_to_free = false;
+        } else {
+            if ( !id || strcmp(id, new_id) )
+            {
+                if ( id && id_to_free ) g_free( id );
+                id = g_strdup( new_id );
+            }
+            id_to_free = true;
         }
 
+        sprite = s;
         update_sprite();
+    }
 
+    void update_sprite()
+    {
+        if ( constructing ) return;
+
+        if ( sprite )
+        {
+            ping.assign( sprite, SpriteBinding::on_ping, this, !async );
+        }
+        else
+        {
+            g_warning( "Spritesheet does not contain the id '%s'", id );
+        }
     }
 
     void set_sheet( SpriteSheet * _sheet )
@@ -80,21 +103,37 @@ struct SpriteBinding
 
         sheet = _sheet;
 
-        if ( _sheet ) {
-            RefCounted::ref( _sheet );
-        }
+        if ( !_sheet ) return;
 
-        update_sprite();
+        RefCounted::ref( _sheet );
+
+        if ( !id ) return;
+
+        SpriteSheet::Sprite *s = sheet->get_sprite( id );
+        if ( s )
+        {
+            sprite = s;
+            if ( id && id_to_free ) g_free(id);
+            id = (char *) (s->get_id());
+            id_to_free = false;
+            update_sprite();
+        }
+        else
+        {
+            if ( id_to_free ) return;
+            /* Previously id maps to a valid sprite, now invalid */
+            id_to_free = true;
+            id = g_strdup( sprite->get_id() );
+            sprite = NULL;
+        }
     };
 
     void update()
     {
         static CoglHandle null_texture = cogl_texture_new_with_size( 1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_A_8 );
 
-        loaded = sprite && sprite->is_real();
-        CoglHandle new_texture = loaded ? sprite->get_texture() : null_texture;
-
-        g_assert( new_texture );
+        CoglHandle new_texture = null_texture;
+        if ( sprite && sprite->get_texture() ) new_texture = sprite->get_texture();
 
         if ( texture != new_texture ) {
 
@@ -115,7 +154,7 @@ struct SpriteBinding
         {
             GError * error = NULL;
 
-            if ( !sprite || sprite->is_failed() || !sprite->is_real() )
+            if ( !sprite || sprite->is_failed() || !(sprite->get_texture()) )
             {
                 g_set_error( &error, CLUTTER_TEXTURE_ERROR, CLUTTER_TEXTURE_ERROR_BAD_FORMAT, "?" );
             }
@@ -134,27 +173,12 @@ struct SpriteBinding
         }
     }
 
-    void update_sprite()
+    bool is_loaded()
     {
-        if ( sheet && id )
-        {
-            sprite = sheet->get_sprite( id );
-
-            if ( constructing ) return;
-
-            if ( sprite )
-            {
-                ping.assign( sprite, SpriteBinding::on_ping, this, !async );
-            }
-            else
-            {
-                g_warning( "Spritesheet does not contain the id '%s'", id );
-            }
-        }
+        return sprite && sprite->is_loaded();
     }
 
     bool async;
-    bool loaded;
     bool can_fire;
     bool constructing;
 
@@ -170,9 +194,11 @@ private:
 
     SpriteSheet::Sprite * sprite;
     SpriteSheet         * sheet;
-    char * id;
     CoglHandle texture;
     SignalLoadedLater   * action;
+
+    bool id_to_free;
+    char * id;
 };
 
 void set_sheet_first( lua_State * L , int table )
@@ -202,15 +228,15 @@ void Sprite_on_loaded( ClutterTexture * self, gpointer error, lua_State * L );
 /***************************************
     Class: Sprite
 
-	The Sprite data type references an image stored in a <SpriteSheet> object. Refer to the description of the <SpriteSheet> data type for additional information on the relationship between Sprite and SpriteSheet objects.
+    The Sprite data type references an image stored in a <SpriteSheet> object. Refer to the description of the <SpriteSheet> data type for additional information on the relationship between Sprite and SpriteSheet objects.
 
-	A Sprite object can reference any image contained in a SpriteSheet. The Sprite references a particular image by setting its <sheet> and <id> properties. The sheet property references a SpriteSheet object and the id property contains the unique string ID that identifies a particular image in the SpriteSheet. By changing the settings of the sheet and id properties, a Sprite object can bounce between multiple images quickly.
+    A Sprite object can reference any image contained in a SpriteSheet. The Sprite references a particular image by setting its <sheet> and <id> properties. The sheet property references a SpriteSheet object and the id property contains the unique string ID that identifies a particular image in the SpriteSheet. By changing the settings of the sheet and id properties, a Sprite object can bounce between multiple images quickly.
 
-	The Sprite data type is similar to the <Image> data type, but can be more efficient in circumstances where a large number of images must be loaded and processed by a TrickPlay application.
+    The Sprite data type is similar to the <Image> data type, but can be more efficient in circumstances where a large number of images must be loaded and processed by a TrickPlay application.
 
     In addition to the properties and functions described on this page, the Sprite data type also supports all the properties and functions defined in the <UIElement> interface.
 
-	*See Also:* the <SpriteSheet> data type
+    *See Also:* the <SpriteSheet> data type
 */
 
 class Sprite [[ClutterActor*]] actor
@@ -223,38 +249,38 @@ class Sprite [[ClutterActor*]] actor
 
     *Arguments:*
 
-		props - optional table of Sprite property settings.
+        props - optional table of Sprite property settings.
 
     *Return Value:* reference to the constructed Sprite object
 
-	*Code Example:* Create a Sprite object and reference various images on various SpriteSheet objects
+    *Code Example:* Create a Sprite object and reference various images on various SpriteSheet objects
 
-		(code)
-		-- Create a SpriteSheet object
-		imageSheet = SpriteSheet( { map = "animationFrames.json" } )
+        (code)
+        -- Create a SpriteSheet object
+        imageSheet = SpriteSheet( { map = "animationFrames.json" } )
 
-		-- Create a Sprite and initialize it to reference an image on the imageSheet
-		mainSprite = Sprite( { sheet = imageSheet,
-							   id    = "firstImage" } )
+        -- Create a Sprite and initialize it to reference an image on the imageSheet
+        mainSprite = Sprite( { sheet = imageSheet,
+                               id    = "firstImage" } )
 
-		-- Add the Sprite to the screen so it will be displayed
-		-- Note: Only need to do this one time for a Sprite object
-		screen:add( mainSprite )
+        -- Add the Sprite to the screen so it will be displayed
+        -- Note: Only need to do this one time for a Sprite object
+        screen:add( mainSprite )
 
-		...
-		-- Later in the program, reference another image on the sheet
-		-- Note: No need to add the Sprite to the screen again. When the screen
-		-- is updated, it will display the newly-referenced image.
-		mainSprite.id = "secondImage"
+        ...
+        -- Later in the program, reference another image on the sheet
+        -- Note: No need to add the Sprite to the screen again. When the screen
+        -- is updated, it will display the newly-referenced image.
+        mainSprite.id = "secondImage"
 
-		...
-		-- To reference an image on a different SpriteSheet, change the sheet
-		-- property, then set the id of the image on that sheet.
-		mainSprite.sheet = secondSheet			-- assign the SpriteSheet first
-		mainSprite.id    = "firstImage"			-- then set the desired image's ID
-		(end)
+        ...
+        -- To reference an image on a different SpriteSheet, change the sheet
+        -- property, then set the id of the image on that sheet.
+        mainSprite.sheet = secondSheet          -- assign the SpriteSheet first
+        mainSprite.id    = "firstImage"         -- then set the desired image's ID
+        (end)
 
-	*See Also:* the <sheet> and <id> properties
+    *See Also:* the <sheet> and <id> properties
 */
 
     Sprite( table props = 0 )
@@ -294,13 +320,13 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: sheet
 
-	The sheet property references a <SpriteSheet> object. To reference a particular image in the SpriteSheet, set the Sprite object's <id> property.
+    The sheet property references a <SpriteSheet> object. To reference a particular image in the SpriteSheet, set the Sprite object's <id> property.
 
-	If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
+    If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
 
-	*Default Setting:* nil
+    *Default Setting:* nil
 
-	*See Also:* the <id> property
+    *See Also:* the <id> property
 */
 
     SpriteSheet sheet
@@ -330,13 +356,13 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: id
 
-	The id property specifies the unique string ID of a particular image contained on a SpriteSheet.
+    The id property specifies the unique string ID of a particular image contained on a SpriteSheet.
 
-	If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
+    If both the SpriteSheet and the image ID must be changed, modify the SpriteSheet referenced by the sheet property first; afterward, set the id property.
 
-	*Default Setting:* nil
+    *Default Setting:* nil
 
-	*See Also:* the <sheet> property
+    *See Also:* the <sheet> property
 */
 
     string id
@@ -347,8 +373,9 @@ class Sprite [[ClutterActor*]] actor
             SpriteBinding * binding = get_binding( self );
             const char * new_id = lua_tostring( L , -1 );
 
-            g_object_set_data_full( G_OBJECT( self ), "tp-src",
-                g_strdup_printf( "[Sprite] \"%s\"", new_id ? new_id : "" ), g_free );
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( "[Sprite]" ) , g_free );
+            //g_object_set_data_full( G_OBJECT( self ), "tp-src",
+                //g_strdup_printf( "[Sprite] \"%s\"", new_id ? new_id : "" ), g_free );
 
             binding->set_id( new_id );
         ]];
@@ -380,9 +407,9 @@ class Sprite [[ClutterActor*]] actor
 /***************************************
     Property: loaded
 
-	The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image referenced by the object's <sheet> and <id> properties (true=success).
+    The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image referenced by the object's <sheet> and <id> properties (true=success).
 
-	Note: The loaded property cannot be used to determine the result or status of an asynchonously-loaded image. To receive status notification of an asynchronously-loaded image, register an <on_loaded> event handler.
+    Note: The loaded property cannot be used to determine the result or status of an asynchonously-loaded image. To receive status notification of an asynchronously-loaded image, register an <on_loaded> event handler.
 
     *Default Setting:* false
 
@@ -391,7 +418,7 @@ class Sprite [[ClutterActor*]] actor
 
     readonly bool loaded
         [[
-            loaded = get_binding( self )->loaded;
+            loaded = get_binding( self )->is_loaded();
         ]];
 
 /***************************************
@@ -407,9 +434,9 @@ class Sprite [[ClutterActor*]] actor
 
     *Handler Prototype:*
 
-		(code)
-		f( loadedSprite, failed )
-		(end)
+        (code)
+        f( loadedSprite, failed )
+        (end)
 
     *Handler Arguments:*
 

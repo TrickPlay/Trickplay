@@ -530,9 +530,10 @@ Widget = function(parameters)
 
     return instance, _ENV
 end
-Widget_Group = function(parameters)
 
-    local instance =  Widgetize(  Group()  )
+function Widget_Group(parameters)
+
+    local instance = Widgetize(  Group()  )
 
 	override_property(instance,"widget_type",
         function(oldf,self) return "Widget_Group" end
@@ -600,7 +601,6 @@ Widget_Group = function(parameters)
     return parameters and instance:set(parameters) or instance
 
 end
-
 --------------------------------------------------------------------------------
 local rectangle_properties = {
     "color","border_width","border_color",
@@ -746,9 +746,9 @@ Widget_SpriteSheet = function(parameters)
 
         error("Widget_SpriteSheet expects to receive a json file uri for its map",2)
 
-    elseif SpriteSheet_lookup[parameters.map] then
+    --elseif SpriteSheet_lookup[parameters.map] then
 
-        return SpriteSheet_lookup[parameters.map]
+        --return SpriteSheet_lookup[parameters.map]
 
     end
 
@@ -777,7 +777,8 @@ Widget_Sprite = function(parameters)
 
             if type(v) == "string" then
 
-                v = Widget_SpriteSheet{map=v}
+                v = SpriteSheet_lookup[v] or
+                    Widget_SpriteSheet{map=v}
 
             end
 

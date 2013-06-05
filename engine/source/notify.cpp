@@ -2,14 +2,14 @@
 
 //-----------------------------------------------------------------------------
 
-void Notify::add_notification_handler( const char * subject, TPNotificationHandler handler, void * data )
+void Notify::add_notification_handler( const char* subject, TPNotificationHandler handler, void* data )
 {
     handlers.insert( std::make_pair( String( subject ), HandlerClosure( handler, data ) ) );
 }
 
 //-----------------------------------------------------------------------------
 
-void Notify::remove_notification_handler( const char * subject, TPNotificationHandler handler, void * data )
+void Notify::remove_notification_handler( const char* subject, TPNotificationHandler handler, void* data )
 {
     std::pair<HandlerMultiMap::iterator, HandlerMultiMap::iterator>
     range = handlers.equal_range( String( subject ) );
@@ -29,7 +29,7 @@ void Notify::remove_notification_handler( const char * subject, TPNotificationHa
 
 //-----------------------------------------------------------------------------
 
-void Notify::notify( TPContext * context , const char * subject )
+void Notify::notify( TPContext* context , const char* subject )
 {
     std::pair<HandlerMultiMap::const_iterator, HandlerMultiMap::const_iterator>
     range = handlers.equal_range( String( subject ) );

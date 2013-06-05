@@ -3,5 +3,6 @@ app = {
 	release = "2",
 	version = "1.5",
 	name = "Penguin Zip-Zip",
-	copyright = "Trickplay Inc."
+	copyright = "Trickplay Inc.",
+    description = "Peggy the Penguin has lost her way and must zip zip all the way home",
 }

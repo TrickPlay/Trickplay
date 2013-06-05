@@ -10,7 +10,7 @@
 
 /*
     Global: trickplay
-    
+
     The trickplay global variable stores information associated with the TrickPlay Engine.
 */
 
@@ -20,7 +20,7 @@ global trickplay [[void*]]
         Property: version
 
         The version property is a string containing the TrickPlay Engine version number in the format "MM.mm.pp", where MM is the major version, mm is the minor version, and pp is the patch version.
-        
+
         *See Also:* the <build> property
     */
 
@@ -30,14 +30,14 @@ global trickplay [[void*]]
 
             version = v.c_str();
         ]];
-        
+
     /*
         Property: build
-        
+
         The build property is a string containing the TrickPlay Engine build number. The build number comprises the Engine's <version> number followed by additional identification data. The additional data is uninterpretable; for this reason, applications should use the version stored in the version property.
-        
+
         *See Also:* the <version> property
-    */        
+    */
 
     readonly string build
         [[
@@ -46,7 +46,7 @@ global trickplay [[void*]]
 
     /*
        Property: production
-       
+
        The production property is a boolean flag indicating whether the TrickPlay Engine is a production or a debug release (true=production).
     */
 
@@ -61,7 +61,7 @@ global trickplay [[void*]]
 
     /*
         Property: profiling
-        
+
         The profiling property is a boolean flag indicating whether or not the TrickPlay Engine was built with application profiling enabled (true=profiling enabled).
     */
 
@@ -76,14 +76,14 @@ global trickplay [[void*]]
 
     /*
         Property: libraries
-        
+
         The libraries property is a table that contains the version numbers in string format for many of the libraries incorporated into the TrickPlay Engine.
-        
+
         *Code Example:* Output to the TrickPlay Console the version numbers of the TrickPlay Engine's libraries
-        
-        	(code)
-        	dumptable( trickplay.libraries )
-        	(end)
+
+            (code)
+            dumptable( trickplay.libraries )
+            (end)
     */
 
     readonly table libraries
@@ -111,20 +111,20 @@ global trickplay [[void*]]
 
     /*
         Property: config
-        
-        In debug versions of the TrickPlay Engine, the config property is a table that contains the Engine's configuration parameters as key/value pairs, where key is the string configuration key and value is the configuration key's setting in string format.
-        
-        In production versions of the Engine, configuration keys are considered private, so the config property is an empty table.
-        
-        To determine whether the TrickPlay Engine is a production or debug version, refer to the <production> property.
-        
-        *Code Example:* Output to the TrickPlay Console the table of configuration keys
-        
-        	(code)
-        	dumptable( trickplay.config )
-        	(end)
 
-		*See Also:* the <production> property
+        In debug versions of the TrickPlay Engine, the config property is a table that contains the Engine's configuration parameters as key/value pairs, where key is the string configuration key and value is the configuration key's setting in string format.
+
+        In production versions of the Engine, configuration keys are considered private, so the config property is an empty table.
+
+        To determine whether the TrickPlay Engine is a production or debug version, refer to the <production> property.
+
+        *Code Example:* Output to the TrickPlay Console the table of configuration keys
+
+            (code)
+            dumptable( trickplay.config )
+            (end)
+
+        *See Also:* the <production> property
     */
 
     readonly table config
@@ -150,23 +150,23 @@ global trickplay [[void*]]
         ]];
 
     /*
-       	Property: system
-       
-       	The system property is a table that contains information about the system the TrickPlay Engine is running on.
-       
-       	The table is formatted as key/value pairs, where key is one of the strings listed below, and value is the key's setting in string format. The table will contain all the following keys, but individual settings may be empty strings.
-       
-       		"name" - system's name
-       		"version" - system's version number in string format
-       		"country" - system's country code
-       		"language" - system's language code
-       		"uuid" - system's Universal Unique ID string
-       
-		*Code Example:* Output to the TrickPlay Console the contents of the system table
+        Property: system
 
-			(code)
-			dumptable( trickplay.system )
-			(end)
+        The system property is a table that contains information about the system the TrickPlay Engine is running on.
+
+        The table is formatted as key/value pairs, where key is one of the strings listed below, and value is the key's setting in string format. The table will contain all the following keys, but individual settings may be empty strings.
+
+            "name" - system's name
+            "version" - system's version number in string format
+            "country" - system's country code
+            "language" - system's language code
+            "uuid" - system's Universal Unique ID string
+
+        *Code Example:* Output to the TrickPlay Console the contents of the system table
+
+            (code)
+            dumptable( trickplay.system )
+            (end)
     */
 
     readonly table system
@@ -198,16 +198,16 @@ global trickplay [[void*]]
 
     /*
         Property: fonts
-        
+
         The fonts property is a table that contains the family names of the fonts available to the application.
-        
-		*Code Example:* Output to the TrickPlay Console the list of available fonts
-        
-        	(code)
-        	dumptable( trickplay.fonts )
-        	(end)
+
+        *Code Example:* Output to the TrickPlay Console the list of available fonts
+
+            (code)
+            dumptable( trickplay.fonts )
+            (end)
     */
-    
+
     readonly table fonts
         [[
             StringSet names;
@@ -229,36 +229,36 @@ global trickplay [[void*]]
             g_free( families );
 
             lua_newtable( L );
-            
+
             int i = 1;
-            
+
             for ( StringSet::const_iterator it = names.begin(); it != names.end(); ++it , ++i )
             {
                 lua_pushstring( L , it->c_str() );
                 lua_rawseti( L , -2 , i );
             }
-            
+
         ]];
-    
+
     /*
         Function: check_version
-        
+
         The check_version() function checks whether or not the current TrickPlay Engine version is equal to or later than a specified version (true=equal or later).
-        
+
         *Argument:*
-        
-        	version - string version number to compare to current Engine version. Format should be "MM.mm.pp" where MM is the major version, mm is the minor version, and pp is the patch version.
-        	
+
+            version - string version number to compare to current Engine version. Format should be "MM.mm.pp" where MM is the major version, mm is the minor version, and pp is the patch version.
+
         *Return Value:* If current Engine version is equal to or later than specified version, returns true. Else returns false.
-        
+
         *Code Example:* Check that appropriate Engine version is running
-        
-        	(code)
-			if( trickplay:check_version( "1.24.0" ) == false )then
-				print( "This program requires TrickPlay Engine version 1.24.0 or later" )
-        		exit();
-        	end
-        	(end)
+
+            (code)
+            if( trickplay:check_version( "1.24.0" ) == false )then
+                print( "This program requires TrickPlay Engine version 1.24.0 or later" )
+                exit();
+            end
+            (end)
     */
 
     bool check_version( string version )

@@ -12,7 +12,7 @@
 
 #if CUSTOM_IMAGE_DECODER
 
-int my_image_decoder( void * buffer, unsigned long int size, TPImage * image, void * data )
+int my_image_decoder( void* buffer, unsigned long int size, TPImage* image, void* data )
 {
 
     if ( ! image )
@@ -33,17 +33,17 @@ int my_image_decoder( void * buffer, unsigned long int size, TPImage * image, vo
 
 //-----------------------------------------------------------------------------
 
-static TPContext * context = 0;
+static TPContext* context = 0;
 
 static void quit( int sig )
 {
-	if ( context )
-	{
-		tp_context_quit( context );
-	}
+    if ( context )
+    {
+        tp_context_quit( context );
+    }
 }
 
-int main( int argc, char * argv[ ] )
+int main( int argc, char* argv[ ] )
 {
     signal( SIGINT , quit );
 

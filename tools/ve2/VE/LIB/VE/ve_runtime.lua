@@ -64,6 +64,8 @@ screen_json = screen_json..']'
 
 ]=]
 --------------------------------------------------------------------------------
+local ve = {}
+
 local color_scheme_uri = 'app/color_schemes.json'
 local style_uri        = 'app/styles.json'
 local layer_dir        = 'app/'
@@ -113,7 +115,7 @@ end
 
 local styles
 
-function load_styles(str)
+function ve.load_styles(str)
 
 
     if type(styles) == "table" then
@@ -242,7 +244,7 @@ construct = function(t)
 end
 
 
-function load_layer(str)
+function ve.load_layer(str)
 
     names = {}
     neigbor_info = {}
@@ -304,8 +306,9 @@ function load_layer(str)
 end
 
 
+local currentScreen 
 
-function transit_to (screens, nextScreen, effect)
+function ve.transit_to (screens, nextScreen, effect)
 	
     local img_t = {}
     table.insert(img_t, json:parse(screens))
@@ -365,4 +368,4 @@ function transit_to (screens, nextScreen, effect)
 	screen:grab_key_focus()
 end 
 
-
+return ve

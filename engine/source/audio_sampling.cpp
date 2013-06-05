@@ -29,11 +29,11 @@ struct TPAudioSampler
     {
     public:
 
-        Thread( TPContext * _context );
+        Thread( TPContext* _context );
 
         ~Thread();
 
-        void submit_buffer( TPAudioBuffer * buffer );
+        void submit_buffer( TPAudioBuffer* buffer );
 
         void source_changed();
 
@@ -45,17 +45,17 @@ struct TPAudioSampler
 
         //.....................................................................
 
-        bool scan_for_plugins( TPContext * context );
+        bool scan_for_plugins( TPContext* context );
 
         //.....................................................................
         // Frees a buffer and its associated samples
 
-        static void destroy_buffer( TPAudioBuffer * buffer );
+        static void destroy_buffer( TPAudioBuffer* buffer );
 
         //.....................................................................
         // Frees a detection result
 
-        static void destroy_result( TPAudioDetectionResult * result );
+        static void destroy_result( TPAudioDetectionResult* result );
 
         //.........................................................................
         // When we copy a buffer's samples, we use this as the new free_samples
@@ -68,14 +68,14 @@ struct TPAudioSampler
 
         static gpointer process( gpointer me )
         {
-            ( ( Thread * ) me )->process();
+            ( ( Thread* ) me )->process();
             return 0;
         }
 
         //.....................................................................
         // List of buffers
 
-        typedef std::pair< TPAudioBuffer * , SF_INFO > BufferPair;
+        typedef std::pair< TPAudioBuffer* , SF_INFO > BufferPair;
 
         typedef std::list< BufferPair > BufferList;
 
@@ -86,27 +86,27 @@ struct TPAudioSampler
         {
         public:
 
-        	ADPlugin( TrickPlay::Plugin * _plugin )
-        	:
-        		plugin( _plugin ),
-        		next_request( 0 ),
-        		last_response( 0 )
-        	{
-        		g_assert( plugin );
+            ADPlugin( TrickPlay::Plugin* _plugin )
+                :
+                plugin( _plugin ),
+                next_request( 0 ),
+                last_response( 0 )
+            {
+                g_assert( plugin );
 
-        		process_samples = ( TPAudioDetectionProcessSamples ) plugin->get_symbol( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
-        		reset = ( TPAudioDetectionReset ) plugin->get_symbol( TP_AUDIO_DETECTION_RESET );
+                process_samples = ( TPAudioDetectionProcessSamples ) plugin->get_symbol( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+                reset = ( TPAudioDetectionReset ) plugin->get_symbol( TP_AUDIO_DETECTION_RESET );
 
-        		g_assert( process_samples );
-        		g_assert( reset );
-        	}
+                g_assert( process_samples );
+                g_assert( reset );
+            }
 
             ~ADPlugin()
             {
-            	delete plugin;
+                delete plugin;
             }
 
-            TrickPlay::Plugin *				plugin;
+            TrickPlay::Plugin*              plugin;
             TPAudioDetectionProcessSamples  process_samples;
             TPAudioDetectionReset           reset;
             guint32                         next_request;
@@ -116,15 +116,15 @@ struct TPAudioSampler
 
         };
 
-        typedef std::list< ADPlugin * > ADPluginList;
+        typedef std::list< ADPlugin* > ADPluginList;
 
         //.....................................................................
 
-        void invoke_plugins( SF_INFO * info , const float * samples );
+        void invoke_plugins( SF_INFO* info , const float* samples );
 
         void invoke_plugins_reset( );
 
-        void got_a_match( const char * json );
+        void got_a_match( const char* json );
 
         //.....................................................................
 
@@ -143,22 +143,22 @@ struct TPAudioSampler
             }
             Type;
 
-            static Event * make( Type type );
+            static Event* make( Type type );
 
-            static Event * make( TPAudioBuffer * buffer );
+            static Event* make( TPAudioBuffer* buffer );
 
-            static Event * make( TPAudioDetectionResult * result ,
-                    GByteArray * response ,
-                    ADPlugin * plugin,
-                    guint32 request);
+            static Event* make( TPAudioDetectionResult* result ,
+                    GByteArray* response ,
+                    ADPlugin* plugin,
+                    guint32 request );
 
-            static void destroy( Event * event );
+            static void destroy( Event* event );
 
             Type                        type;
-            TPAudioBuffer *             buffer;
-            TPAudioDetectionResult *    result;
-            GByteArray *                response;
-            ADPlugin *                  plugin;
+            TPAudioBuffer*              buffer;
+            TPAudioDetectionResult*     result;
+            GByteArray*                 response;
+            ADPlugin*                   plugin;
             guint32                     request;
 
         private:
@@ -173,7 +173,7 @@ struct TPAudioSampler
         //.....................................................................
         // Push an event
 
-        void push_event( Event * event );
+        void push_event( Event* event );
 
         //.....................................................................
         // Process samples
@@ -182,10 +182,10 @@ struct TPAudioSampler
 
         //.....................................................................
 
-        TPContext *     context;
-        GMutex *        mutex;
-        GAsyncQueue *   queue;
-        GThread *       thread;
+        TPContext*      context;
+        GMutex*         mutex;
+        GAsyncQueue*    queue;
+        GThread*        thread;
         ADPluginList    plugins;
         guint32         max_buffer_kb;
         guint           max_interval;
@@ -195,8 +195,8 @@ struct TPAudioSampler
 
         struct RequestClosure
         {
-            RequestClosure( GAsyncQueue * _queue , TPAudioDetectionResult * _result , ADPlugin * _plugin )
-            :
+            RequestClosure( GAsyncQueue* _queue , TPAudioDetectionResult* _result , ADPlugin* _plugin )
+                :
                 queue( g_async_queue_ref( _queue ) ),
                 result( _result ),
                 plugin( _plugin ),
@@ -216,35 +216,35 @@ struct TPAudioSampler
                 g_async_queue_unref( queue );
             }
 
-            static void destroy( RequestClosure * me )
+            static void destroy( RequestClosure* me )
             {
                 delete me;
             }
 
-            GAsyncQueue *               queue;
-            TPAudioDetectionResult *    result;
-            ADPlugin *                  plugin;
+            GAsyncQueue*                queue;
+            TPAudioDetectionResult*     result;
+            ADPlugin*                   plugin;
             guint32                     request;
         };
 
-        static void response_callback( const Network::Response & response , gpointer closure );
+        static void response_callback( const Network::Response& response , gpointer closure );
 
-        EventGroup *            event_group;
-        Network *               network;
+        EventGroup*             event_group;
+        Network*                network;
     };
 
     //==========================================================================
 
 
-    TPAudioSampler( TPContext * context )
-    :
+    TPAudioSampler( TPContext* context )
+        :
         thread( context )
     {
     }
 
     //.............................................................................
 
-    void submit_buffer( TPAudioBuffer * buffer )
+    void submit_buffer( TPAudioBuffer* buffer )
     {
         thread.submit_buffer( buffer );
     }
@@ -272,7 +272,7 @@ struct TPAudioSampler
 
     //.............................................................................
 
-    static void destroy( TPAudioSampler * me )
+    static void destroy( TPAudioSampler* me )
     {
         delete me;
     }
@@ -288,8 +288,8 @@ private:
 
 struct VirtualIO
 {
-    VirtualIO( TPAudioBuffer * _buffer )
-    :
+    VirtualIO( TPAudioBuffer* _buffer )
+        :
         buffer( _buffer ),
         position( 0 )
     {
@@ -304,16 +304,16 @@ struct VirtualIO
         virtual_io.tell = tell;
     }
 
-    static sf_count_t get_filelen( void * user_data )
+    static sf_count_t get_filelen( void* user_data )
     {
-        VirtualIO * v = ( VirtualIO * ) user_data;
+        VirtualIO* v = ( VirtualIO* ) user_data;
 
         return v->buffer->size;
     }
 
-    static sf_count_t seek( sf_count_t offset , int whence , void * user_data )
+    static sf_count_t seek( sf_count_t offset , int whence , void* user_data )
     {
-        VirtualIO * v = ( VirtualIO * ) user_data;
+        VirtualIO* v = ( VirtualIO* ) user_data;
 
         sf_count_t new_position = -1;
 
@@ -342,9 +342,9 @@ struct VirtualIO
         return 0;
     }
 
-    static sf_count_t read( void * ptr , sf_count_t count , void * user_data )
+    static sf_count_t read( void* ptr , sf_count_t count , void* user_data )
     {
-        VirtualIO * v = ( VirtualIO * ) user_data;
+        VirtualIO* v = ( VirtualIO* ) user_data;
 
         sf_count_t result = count;
 
@@ -358,42 +358,42 @@ struct VirtualIO
             return 0;
         }
 
-        guint8 * src = ( ( guint8 * ) v->buffer->samples ) + v->position;
+        guint8* src = ( ( guint8* ) v->buffer->samples ) + v->position;
 
         memcpy( ptr , src , result );
 
         return result;
     }
 
-    static sf_count_t tell( void * user_data )
+    static sf_count_t tell( void* user_data )
     {
-        VirtualIO * v = ( VirtualIO * ) user_data;
+        VirtualIO* v = ( VirtualIO* ) user_data;
 
         return v->position;
     }
 
     SF_VIRTUAL_IO   virtual_io;
-    TPAudioBuffer * buffer;
+    TPAudioBuffer* buffer;
     sf_count_t      position;
 };
 
 //=============================================================================
 // TPAudioSampler::Thread::Event
 
-TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( Type type )
+TPAudioSampler::Thread::Event* TPAudioSampler::Thread::Event::make( Type type )
 {
-    Event * event = g_slice_new0( Event );
+    Event* event = g_slice_new0( Event );
 
     event->type = type;
 
     return event;
 }
 
-TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioBuffer * buffer )
+TPAudioSampler::Thread::Event* TPAudioSampler::Thread::Event::make( TPAudioBuffer* buffer )
 {
     g_assert( buffer );
 
-    Event * event = g_slice_new0( Event );
+    Event* event = g_slice_new0( Event );
 
     event->type = SUBMIT_BUFFER;
     event->buffer = buffer;
@@ -401,13 +401,13 @@ TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioBuff
     return event;
 }
 
-TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response , ADPlugin * plugin , guint32 request )
+TPAudioSampler::Thread::Event* TPAudioSampler::Thread::Event::make( TPAudioDetectionResult* result , GByteArray* response , ADPlugin* plugin , guint32 request )
 {
     g_assert( result );
     g_assert( response );
     g_assert( plugin );
 
-    Event * event = g_slice_new0( Event );
+    Event* event = g_slice_new0( Event );
 
     event->type = URL_RESPONSE;
     event->result = result;
@@ -420,7 +420,7 @@ TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDete
     return event;
 }
 
-void TPAudioSampler::Thread::Event::destroy( Event * event )
+void TPAudioSampler::Thread::Event::destroy( Event* event )
 {
     g_assert( event );
 
@@ -445,8 +445,8 @@ void TPAudioSampler::Thread::Event::destroy( Event * event )
 //=============================================================================
 // TPAudioSampler::Thread
 
-TPAudioSampler::Thread::Thread( TPContext * _context )
-:
+TPAudioSampler::Thread::Thread( TPContext* _context )
+    :
     context( _context ),
 #ifndef GLIB_VERSION_2_32
     mutex( g_mutex_new() ),
@@ -461,8 +461,9 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
     network( 0 )
 {
 #ifdef GLIB_VERSION_2_32
-    g_mutex_init(mutex);
+    g_mutex_init( mutex );
 #endif
+
     if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
         tpwarn( "AUDIO SAMPLER IS DISABLED" );
@@ -491,7 +492,7 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             // Create the thread that will process the audio samples
 
-            GError * error = 0;
+            GError* error = 0;
 
 #ifndef GLIB_VERSION_2_32
             thread = g_thread_create( process , this , TRUE , & error );
@@ -509,7 +510,7 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             if ( thread )
             {
-// Since 2.32, thread priorities no longer have any effect: http://developer.gnome.org/glib/2.32/glib-Deprecated-Thread-APIs.html#g-thread-set-priority
+                // Since 2.32, thread priorities no longer have any effect: http://developer.gnome.org/glib/2.32/glib-Deprecated-Thread-APIs.html#g-thread-set-priority
 #ifndef GLIB_VERSION_2_32
                 g_thread_set_priority( thread , G_THREAD_PRIORITY_LOW );
 #endif
@@ -571,25 +572,25 @@ TPAudioSampler::Thread::~Thread()
 
 //.........................................................................
 
-bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
+bool TPAudioSampler::Thread::scan_for_plugins( TPContext* context )
 {
-	StringList symbols;
-	symbols.push_back( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
-	symbols.push_back( TP_AUDIO_DETECTION_RESET );
+    StringList symbols;
+    symbols.push_back( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+    symbols.push_back( TP_AUDIO_DETECTION_RESET );
 
-	TrickPlay::Plugin::List list = TrickPlay::Plugin::scan( context , "tp_audio_detection-" , symbols );
+    TrickPlay::Plugin::List list = TrickPlay::Plugin::scan( context , "tp_audio_detection-" , symbols );
 
-	for ( TrickPlay::Plugin::List::iterator it = list.begin(); it != list.end(); ++it )
-	{
-		plugins.push_back( new ADPlugin( * it ) );
-	}
+    for ( TrickPlay::Plugin::List::iterator it = list.begin(); it != list.end(); ++it )
+    {
+        plugins.push_back( new ADPlugin( * it ) );
+    }
 
     return ! plugins.empty();
 }
 
 //.........................................................................
 
-void TPAudioSampler::Thread::destroy_buffer( TPAudioBuffer * buffer )
+void TPAudioSampler::Thread::destroy_buffer( TPAudioBuffer* buffer )
 {
     g_assert( buffer );
 
@@ -603,7 +604,7 @@ void TPAudioSampler::Thread::destroy_buffer( TPAudioBuffer * buffer )
 
 //.........................................................................
 
-void TPAudioSampler::Thread::destroy_result( TPAudioDetectionResult * result )
+void TPAudioSampler::Thread::destroy_result( TPAudioDetectionResult* result )
 {
     g_assert( result );
 
@@ -622,7 +623,7 @@ void TPAudioSampler::Thread::free_samples( gpointer samples , gpointer )
 
 //.........................................................................
 
-void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
+void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer* _buffer )
 {
     g_assert( _buffer );
 
@@ -659,7 +660,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
         return;
     }
 
-    if ( _buffer->size == 0  )
+    if ( _buffer->size == 0 )
     {
         tpwarn( "INVALID AUDIO BUFFER : size == 0" );
         return;
@@ -673,7 +674,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 
     // Make a copy of the buffer struct itself
 
-    TPAudioBuffer * buffer = g_slice_dup( TPAudioBuffer , _buffer );
+    TPAudioBuffer* buffer = g_slice_dup( TPAudioBuffer , _buffer );
 
     if ( ! buffer )
     {
@@ -757,7 +758,7 @@ void TPAudioSampler::Thread::resume()
 
 //.........................................................................
 
-void TPAudioSampler::Thread::push_event( Event * event )
+void TPAudioSampler::Thread::push_event( Event* event )
 {
     g_assert( event );
 
@@ -793,11 +794,11 @@ void TPAudioSampler::Thread::process()
 
     int paused = 0;
 
-    while( ! done )
+    while ( ! done )
     {
         // Pop an event from the queue, waiting if necessary up to 10 seconds
 
-        Event * event = ( Event * ) Util::g_async_queue_timeout_pop( queue , 10 * G_USEC_PER_SEC );
+        Event* event = ( Event* ) Util::g_async_queue_timeout_pop( queue , 10 * G_USEC_PER_SEC );
 
         // Nothing in the queue, carry on
 
@@ -808,7 +809,7 @@ void TPAudioSampler::Thread::process()
 
         //.................................................................
 
-        switch( event->type )
+        switch ( event->type )
         {
             case Event::QUIT:
 
@@ -851,54 +852,55 @@ void TPAudioSampler::Thread::process()
                 {
                     --paused;
                 }
+
                 break;
 
             case Event::SUBMIT_BUFFER:
+            {
+                // We are going to try to 'open' this buffer with sndfile to make
+                // sure that we can deal with it - and also get its duration in
+                // seconds. If we can't deal with it, we dump it. Otherwise
+                // we add it to the buffer list.
+
+                // Create the virtual IO structure for this buffer
+
+                VirtualIO vio( event->buffer );
+
+                // The sndfile info
+
+                SF_INFO info;
+
+                memset( & info , 0 , sizeof( info ) );
+
+                info.channels = event->buffer->channels;
+                info.format = SF_FORMAT_RAW | ( event->buffer->format & SF_FORMAT_ENDMASK ) | ( event->buffer->format & SF_FORMAT_SUBMASK );
+                info.samplerate = event->buffer->sample_rate;
+
+                // Now try to open it
+
+                SNDFILE* sf = sf_open_virtual( & vio.virtual_io , SFM_READ , & info , & vio );
+
+                if ( ! sf )
                 {
-                    // We are going to try to 'open' this buffer with sndfile to make
-                    // sure that we can deal with it - and also get its duration in
-                    // seconds. If we can't deal with it, we dump it. Otherwise
-                    // we add it to the buffer list.
-
-                    // Create the virtual IO structure for this buffer
-
-                    VirtualIO vio( event->buffer );
-
-                    // The sndfile info
-
-                    SF_INFO info;
-
-                    memset( & info , 0 , sizeof( info ) );
-
-                    info.channels = event->buffer->channels;
-                    info.format = SF_FORMAT_RAW | ( event->buffer->format & SF_FORMAT_ENDMASK ) | ( event->buffer->format & SF_FORMAT_SUBMASK );
-                    info.samplerate = event->buffer->sample_rate;
-
-                    // Now try to open it
-
-                    SNDFILE * sf = sf_open_virtual( & vio.virtual_io , SFM_READ , & info , & vio );
-
-                    if ( ! sf )
-                    {
-                        tplog( "FAILED TO OPEN AUDIO BUFFER" );
-                    }
-                    else
-                    {
-                        sf_close( sf );
-
-                        buffered_seconds += gdouble( info.frames ) / gdouble( info.samplerate );
-
-                        buffered_kb += event->buffer->size / 1024.0;
-
-                        // We put the buffer in our list and steal it
-                        // from the event - so that it won't free it.
-
-                        buffers.push_back( BufferPair( event->buffer , info ) );
-
-                        event->buffer = 0;
-                    }
+                    tplog( "FAILED TO OPEN AUDIO BUFFER" );
                 }
-                break;
+                else
+                {
+                    sf_close( sf );
+
+                    buffered_seconds += gdouble( info.frames ) / gdouble( info.samplerate );
+
+                    buffered_kb += event->buffer->size / 1024.0;
+
+                    // We put the buffer in our list and steal it
+                    // from the event - so that it won't free it.
+
+                    buffers.push_back( BufferPair( event->buffer , info ) );
+
+                    event->buffer = 0;
+                }
+            }
+            break;
 
             case Event::URL_RESPONSE:
 
@@ -927,7 +929,7 @@ void TPAudioSampler::Thread::process()
 
                         // We use strndup to make sure it is NULL terminated
 
-                        gchar * json = g_strndup( ( gchar * ) event->response->data , event->response->len );
+                        gchar* json = g_strndup( ( gchar* ) event->response->data , event->response->len );
 
                         got_a_match( json );
 
@@ -939,7 +941,7 @@ void TPAudioSampler::Thread::process()
 
                         tplog( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
 
-                        event->result->parse_response( event->result , ( const char * ) event->response->data , event->response->len );
+                        event->result->parse_response( event->result , ( const char* ) event->response->data , event->response->len );
 
                         // The plugin should have stored the parsed response in 'json'.
 
@@ -996,7 +998,7 @@ void TPAudioSampler::Thread::process()
 
                 while ( buffered_kb > target && ! buffers.empty() )
                 {
-                    BufferPair & item( buffers.front() );
+                    BufferPair& item( buffers.front() );
 
                     buffered_kb -= item.first->size / 1024.0;
 
@@ -1028,7 +1030,7 @@ void TPAudioSampler::Thread::process()
 
         for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
         {
-            TPAudioBuffer * buffer = it->first;
+            TPAudioBuffer* buffer = it->first;
 
             tplog2( "PROCESSING BUFFER" );
 
@@ -1048,7 +1050,7 @@ void TPAudioSampler::Thread::process()
 
             // Now try to open it
 
-            SNDFILE * sf = sf_open_virtual( & vio.virtual_io , SFM_READ , & info , & vio );
+            SNDFILE* sf = sf_open_virtual( & vio.virtual_io , SFM_READ , & info , & vio );
 
             if ( ! sf )
             {
@@ -1060,7 +1062,7 @@ void TPAudioSampler::Thread::process()
 
                 // Now, we read from the audio buffer a new buffer that uses float samples
 
-                gfloat * float_samples = g_new( float , info.frames * info.channels );
+                gfloat* float_samples = g_new( float , info.frames * info.channels );
 
                 if ( ! float_samples )
                 {
@@ -1119,7 +1121,7 @@ void TPAudioSampler::Thread::process()
 
 //.........................................................................
 
-void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samples )
+void TPAudioSampler::Thread::invoke_plugins( SF_INFO* info , const float* samples )
 {
     TPAudioDetectionSamples s;
 
@@ -1128,15 +1130,15 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
     s.frames = info->frames;
     s.samples = samples;
 
-    for( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+    for ( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
     {
-        ADPlugin * plugin = * it;
+        ADPlugin* plugin = * it;
 
         g_assert( plugin );
 
         tplog2( "  CALLING %s" , plugin->info.name );
 
-        TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->plugin->user_data() );
+        TPAudioDetectionResult* result = plugin->process_samples( & s , plugin->plugin->user_data() );
 
         // The plugin returned NULL, we carry on
 
@@ -1226,9 +1228,9 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
 void TPAudioSampler::Thread::invoke_plugins_reset( )
 {
-    for( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+    for ( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
     {
-        ADPlugin * plugin = * it;
+        ADPlugin* plugin = * it;
 
         plugin->reset( plugin->plugin->user_data() );
 
@@ -1246,9 +1248,9 @@ void TPAudioSampler::Thread::invoke_plugins_reset( )
 //
 // This callback happens in the main thread.
 
-void TPAudioSampler::Thread::response_callback( const Network::Response & response , gpointer closure )
+void TPAudioSampler::Thread::response_callback( const Network::Response& response , gpointer closure )
 {
-    RequestClosure * rc = ( RequestClosure * ) closure;
+    RequestClosure* rc = ( RequestClosure* ) closure;
 
     if ( response.failed )
     {
@@ -1280,7 +1282,7 @@ void TPAudioSampler::Thread::response_callback( const Network::Response & respon
 // We need to bubble up this JSON result to the engine and
 // give it a chance to act on it.
 
-void TPAudioSampler::Thread::got_a_match( const char * json )
+void TPAudioSampler::Thread::got_a_match( const char* json )
 {
     g_assert( json );
 
@@ -1290,13 +1292,13 @@ void TPAudioSampler::Thread::got_a_match( const char * json )
 //=============================================================================
 // External functions
 
-TPAudioSampler * tp_context_get_audio_sampler( TPContext * context )
+TPAudioSampler* tp_context_get_audio_sampler( TPContext* context )
 {
     g_assert( context );
 
     static char key = 0;
 
-    TPAudioSampler * sampler = ( TPAudioSampler * ) context->get_internal( & key );
+    TPAudioSampler* sampler = ( TPAudioSampler* ) context->get_internal( & key );
 
     if ( ! sampler )
     {
@@ -1310,7 +1312,7 @@ TPAudioSampler * tp_context_get_audio_sampler( TPContext * context )
 
 //.............................................................................
 
-void tp_audio_sampler_submit_buffer( TPAudioSampler * sampler , TPAudioBuffer * buffer )
+void tp_audio_sampler_submit_buffer( TPAudioSampler* sampler , TPAudioBuffer* buffer )
 {
     g_assert( sampler );
 
@@ -1319,7 +1321,7 @@ void tp_audio_sampler_submit_buffer( TPAudioSampler * sampler , TPAudioBuffer * 
 
 //.............................................................................
 
-void tp_audio_sampler_source_changed( TPAudioSampler * sampler )
+void tp_audio_sampler_source_changed( TPAudioSampler* sampler )
 {
     g_assert( sampler );
 
@@ -1328,7 +1330,7 @@ void tp_audio_sampler_source_changed( TPAudioSampler * sampler )
 
 //.............................................................................
 
-void tp_audio_sampler_pause( TPAudioSampler * sampler )
+void tp_audio_sampler_pause( TPAudioSampler* sampler )
 {
     g_assert( sampler );
 
@@ -1337,7 +1339,7 @@ void tp_audio_sampler_pause( TPAudioSampler * sampler )
 
 //.............................................................................
 
-void tp_audio_sampler_resume( TPAudioSampler * sampler )
+void tp_audio_sampler_resume( TPAudioSampler* sampler )
 {
     g_assert( sampler );
 

@@ -50,57 +50,57 @@ module clutter_group;
     display of the children; by default, a Group's children will display even
     if they exist outside the Group's size region. To clip children that lie
     outside a particular region, define a clipping area by setting the
-    <UIElement.clip> property or set the <UIElement.clip_to_size> property to
+    <UIElement.clip> property or set the <clip_to_size> property to
     true. A code snippet demonstrating how to clip a region using a clipping
     rectangle is included in an Example section below.
 
     *Example:* Determine the width and height of a Group's boundary
 
-		(code)
-		-- Calculate the width and height of myGroup's boundary
-		function calculateBoundary( myGroup )
-			local width, height = 0, 0
-			local minX, maxX, minY, maxY = nil, nil, nil, nil
-			local children = myGroup.children  -- use local version for efficiency
+        (code)
+        -- Calculate the width and height of myGroup's boundary
+        function calculateBoundary( myGroup )
+            local width, height = 0, 0
+            local minX, maxX, minY, maxY = nil, nil, nil, nil
+            local children = myGroup.children  -- use local version for efficiency
 
-			-- Cycle through each object in myGroup
-			for _,child in ipairs( children ) do
-				-- Is this the right-most edge so far?
-				if( minX == nil ) or (child.x < minX ) then
-				  -- Yes, store it
-				  minX = child.x
-				end
+            -- Cycle through each object in myGroup
+            for _,child in ipairs( children ) do
+                -- Is this the right-most edge so far?
+                if( minX == nil ) or (child.x < minX ) then
+                  -- Yes, store it
+                  minX = child.x
+                end
 
-				-- Is this the left-most edge so far?
-				if( maxX == nil ) or (child.x + child.width > maxX ) then
-				  -- Yes, store it
-				  maxX = child.x + child.width
-				end
+                -- Is this the left-most edge so far?
+                if( maxX == nil ) or (child.x + child.width > maxX ) then
+                  -- Yes, store it
+                  maxX = child.x + child.width
+                end
 
-				-- Is this the top-most edge so far?
-				if( minY == nil ) or (child.y < minY ) then
-				  -- Yes, store it
-				  minY = child.y
-				end
+                -- Is this the top-most edge so far?
+                if( minY == nil ) or (child.y < minY ) then
+                  -- Yes, store it
+                  minY = child.y
+                end
 
-				-- Is this the bottom-most edge so far?
-				if( maxY == nil ) or (child.y + child.height > maxY ) then
-				  -- Yes, store it
-				  maxY = child.y + child.height
-				end
-			end
+                -- Is this the bottom-most edge so far?
+                if( maxY == nil ) or (child.y + child.height > maxY ) then
+                  -- Yes, store it
+                  maxY = child.y + child.height
+                end
+            end
 
-			-- Were there any children in this Group?
-			if( minX ~= nil ) then
-			  -- Yes, calculate boundary's width and height
-			  width  = maxX - minX
-			  height = maxY - minY
-			end
+            -- Were there any children in this Group?
+            if( minX ~= nil ) then
+              -- Yes, calculate boundary's width and height
+              width  = maxX - minX
+              height = maxY - minY
+            end
 
-			-- Return width and height of Group's boundary, if any
-			return width, height
-		end
-		(end)
+            -- Return width and height of Group's boundary, if any
+            return width, height
+        end
+        (end)
 
 
     *Example:* Create three rectangles, place them in a Group, and then
@@ -143,26 +143,74 @@ module clutter_group;
     -- To unclip the Rectangles, undefine the Group's clip property
     RectGroup.clip = nil
     -- -----------------------------------------------------
-	(end)
+    (end)
 
-    *See Also:* the <UIElement> and <Container> interfaces and the <UIElement.clip> and <UIElement.clip_to_size> properties
+    *See Also:* the <UIElement> and <Container> interfaces and the <UIElement.clip> and <UIElement.has_clip> properties
 */
 
 class Group [[ClutterActor*]] actor , container
 {
     Group(table props = 0 )
         [[
-#ifdef CLUTTER_VERSION_1_10
-          	self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
-#else
-          	self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_group_new ) );
-#endif
-		    ClutterUtil::initialize_actor(L,self,GROUP_METATABLE);
-		    ClutterUtil::set_props_from_table(L,props);
-		    g_object_unref( self );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
+            ClutterUtil::initialize_actor(L,self,GROUP_METATABLE);
+            ClutterUtil::set_props_from_table(L,props);
+            g_object_unref( self );
         ]];
 
     ~Group()
-		[[
-		]];
+        [[
+        ]];
+
+/***************************************
+    Property: clip_to_size
+
+    The clip_to_size property is a boolean value that enables and disables clipping on a Group object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
+
+    Clipping on a Group object can also be enabled by defining a clipping rectangle via the <UIElement.clip> property.
+
+    *Default Setting:* false (clipping in the Group is disabled)
+
+    *See Also:* the <UIElement.clip> and <UIElement.has_clip> properties
+*/
+
+    bool clip_to_size
+        [[
+            clip_to_size = clutter_actor_get_clip_to_allocation( self );
+        ]]
+        [[
+            clutter_actor_set_clip_to_allocation( self , clip_to_size );
+        ]];
+
+
+/***************************************
+    Property: pre_composite
+
+    The pre_composite property is a boolean value that enables and disables off-screen pre-composition of the elements of a group.  This affects the treatment of opacity on the group.  With this setting set to false (the default), opacity will be applied to each element of the group multiplicatively while they are all being drawn on-screen.  If the property is set to true, then the elements will be drawn off-screen, and then opacity applied to that composited image.  This typically will have slower performance than the default, but will eliminate a "glassy" effect that might be undesirable.
+
+    *Default Setting:* false (off-screen pre-compositing is disabled)
+
+    *Example:* Visual difference between pre_composite=true and pre_composite=false
+
+    (code)
+        bg = Rectangle { size = { 250, 250 }, color = "green" }
+        g = Group { position = { 50, 50 }, opacity = 128 }
+        r1 = Rectangle { size = { 100, 100 }, color = "red" }
+        r2 = Rectangle { size = { 100, 100 }, position = { 50, 50 }, color = "blue" }
+        g:add(r1,r2)
+        screen:add(bg,g)
+        g.pre_composite=true -- comment this line out for the default (=false)
+    (end)
+
+    (see noPreCompositeGroup.png)
+    (see preCompositeGroup.png)
+*/
+    bool pre_composite
+    [[
+        pre_composite = (clutter_actor_get_offscreen_redirect(self) == CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
+    ]]
+    [[
+        clutter_actor_set_offscreen_redirect( self, pre_composite ? CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY : (ClutterOffscreenRedirect)0);
+    ]];
+
 }

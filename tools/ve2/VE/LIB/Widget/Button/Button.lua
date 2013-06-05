@@ -1,4 +1,3 @@
-BUTTON = true
 
 local external = ({...})[1] or _G
 local _ENV     = ({...})[2] or _ENV
@@ -10,14 +9,14 @@ Button = setmetatable(
     {},
     {
     __index = function(self,k)
-        
+
         return getmetatable(self)[k]
-        
+
     end,
     __call = function(self,p)
-        
+
         return self:declare():set(p or {})
-        
+
     end,
     subscriptions = {
     },
@@ -61,18 +60,18 @@ Button = setmetatable(
             end,
             images = function(instance,_ENV)
                 return function(oldf)
-                    
+
                     return images
-                    
+
                 end,
                 function(oldf,self,v)
-                    
+
                     return v == nil and make_canvases() or
-                        
+
                         type(v) == "table" and setup_images(v) or
-                        
+
                         error("Button.images expected type 'table'. Received "..type(v),2)
-                    
+
                 end
             end,
             widget_type = function(instance,_ENV)
@@ -93,34 +92,34 @@ Button = setmetatable(
             attributes = function(instance,_ENV)
                 return function(oldf,self)
                     local t = oldf(self)
-                        
+
                     t.label = self.label
-                    
+
                     if not canvas then
-                        
+
                         t.images = {}
-                        
+
                         for state, img in pairs(self.images) do
-                            
+
                             while img.source do img = img.source end
-                            
+
                             if img.src and img.src ~= "[canvas]" then t.images[state] = img.src end
                         end
-                        
+
                     end
-                    
+
                     t.type = "Button"
-                    
+
                     return t
                 end
             end,
             create_canvas = function(instance,_ENV)
                 return function(oldf) return create_canvas     end,
-                function(oldf,self,v) 
-                    
-                    create_canvas = v 
+                function(oldf,self,v)
+
+                    create_canvas = v
                     if canvas then
-                        flag_for_redraw = true 
+                        flag_for_redraw = true
                     end
                 end
             end,
@@ -142,9 +141,9 @@ Button = setmetatable(
             end,
             size = function(instance,_ENV)
                 return function(oldf) return {w,h}     end,
-                function(oldf,self,v) 
-                    flag_for_redraw = true 
-                    size_is_set = true 
+                function(oldf,self,v)
+                    flag_for_redraw = true
+                    size_is_set = true
                     w = v[1]
                     h = v[2]
                 end
@@ -153,46 +152,46 @@ Button = setmetatable(
         functions = {
             click = function(instance,_ENV)
                 return function(old_function,self)
-                    
+
                     instance:press()
-                    
+
                     dolater( 150, function()   instance:release()   end)
                 end
             end,
             press = function(instance,_ENV)
                 return function(old_function,self)
-                    
+
                     if pressed then return end
-                    
+
                     pressed = true
-                    
+
                     --image
-                    if image_states.activation then  
-                        image_states.activation.state = "ON"  
+                    if image_states.activation then
+                        image_states.activation.state = "ON"
                     end
                     --text
                     label_state.state = "ACTIVATION"
                     --event callback
                     if on_pressed then on_pressed(instance) end
-                    
+
                 end
             end,
             release = function(instance,_ENV)
                 return function(old_function,self)
-                    
+
                     if not pressed then return end
-                    
+
                     pressed = false
-                    
+
                     --image
-                    if image_states.activation then  
-                        image_states.activation.state = "OFF"  
+                    if image_states.activation then
+                        image_states.activation.state = "OFF"
                     end
                     --text
                     label_state.state = instance.focused and "FOCUS" or "DEFAULT"
                     --event callback
                     if on_released then on_released(instance) end
-                    
+
                 end
             end,
         },
@@ -200,21 +199,21 @@ Button = setmetatable(
     private = {
             update = function(instance,_ENV)
                 return function()
-                    
+
                     if flag_for_redraw then
-                        
+
                         flag_for_redraw = false
                         if canvas then
                             make_canvases()
                         else
                             resize_images()
                         end
-                        
+
                         if not text_style_changed then
                             center_label()
                         end
                     end
-                    
+
                     if text_style_changed then
                         text_style_changed = false
                         update_label()
@@ -228,7 +227,7 @@ Button = setmetatable(
             end,
             define_image_animation = function(instance,_ENV)
                 return function(image,state)
-                    
+
                     local prev_state = image_states[state].state
                     local a = AnimationState{
                         duration    = 100,
@@ -243,26 +242,26 @@ Button = setmetatable(
                             },
                         }
                     }
-                    
+
                     a:warp(prev_state or "OFF")
-                    
+
                     return a
                 end
             end,
             define_label_animation = function(instance,_ENV)
                 return function()
-                    
+
                     local label_colors = instance.style.text.colors
                     local prev_state
                     local label = label
                     if label_state then
-                        
+
                         prev_state = label_state.state
                         if  label_state.timeline then
                             label_state.timeline:stop()
                         end
                     end
-                    
+
                     label_state = AnimationState{
                         duration    = 100,
                         transitions = {
@@ -280,36 +279,36 @@ Button = setmetatable(
                             },
                         }
                     }
-                    
+
                     label_state:warp(prev_state or "DEFAULT")
-                    
+
                 end
             end,
             center_label = function(instance,_ENV)
                 return function()
-                    
+
                     label.w = w
                     label.y = instance.style.text.y_offset + h/2
                 end
             end,
             resize_images = function(instance,_ENV)
                 return function()
-                    
+
                     if not size_is_set then return end
-                    
+
                     for k,img in pairs(images) do img.w = w end
                     for k,img in pairs(images) do img.h = h end
-                    
+
                     center_label()
                 end
             end,
-            
+
             make_canvases = function(instance,_ENV)
                 return function()
                     images = {}
                     clear(instance)
                     for _,state in pairs(states) do
-                        images[state] = create_canvas(instance,state)
+                        images[state] = create_canvas(instance,state,_ENV)
                         add(instance,images[state])
                         if state ~= "default" then
                             image_states[state] = define_image_animation(images[state],state)
@@ -319,76 +318,76 @@ Button = setmetatable(
                     return true
                     --[[
                     flag_for_redraw = false
-                    
+
                     canvas = true
-                    
+
                     images = {}
-                    
+
                     clear(instance)
-                    
+
                     for _,state in pairs(states) do
-                        
+
                         images[state] = create_canvas(instance,state)
                         add(instance,images[state])
                         if state ~= "default" then
                             image_states[state] = define_image_animation(images[state],state)
                         end
                     end
-                    
+
                     add(instance, label )
-                    
+
                     return true
                     --]]
                 end
             end,
-            
+
             setup_images = function(instance,_ENV)
                 return function(new_images)
-                    
+
                     canvas = false
-                    
+
                     clear(instance)
-                    
+
                     for _,state in pairs(states) do
-                        
+
                         if new_images[state] then
                             new_images[state] = type(new_images[state] ) == "string" and
                                 Image{src=new_images[state]} or new_images[state]
-                            
+
                             add(instance,new_images[state])
-                            
+
                             if state ~= "default" then
                                 image_states[state] = define_image_animation(new_images[state],state)
                             end
-                            
+
                         else
                             image_states[state] = {state = "OFF"}
                         end
-                        
+
                     end
-                    
+
                     images = new_images
-                    
+
                     add(instance,label )
-                    
+
                     if size_is_set then
-                        
+
                         resize_images()
-                        
+
                     else
                         --so that the label centers properly
                         instance.size = new_images.default.size
-                        
+
                         instance:reset_size_flag()
-                        
+
                         center_label()
-                        
+
                     end
-                    
+
                     return true
                 end
             end,
-            
+
             canvas_callback  = function(instance,_ENV)
                 return function()
                     if canvas then
@@ -396,14 +395,14 @@ Button = setmetatable(
                     end
                 end
             end,
-            
+
             update_label  = function(instance,_ENV)
                 return function()
-                    
+
                     text_style = instance.style.text
-                    
+
                     label:set(   text_style:get_table()   )
-                    
+
                     label.anchor_point = {0,label.h/2}
                     label.x            = text_style.x_offset
                     label.y            = text_style.y_offset + instance.h/2
@@ -411,32 +410,32 @@ Button = setmetatable(
                 end
             end,
     },
-    
-    
+
+
     declare = function(self,parameters)
-        
+
         parameters = parameters or {}
-        
+
         local instance, _ENV = Widget()
-        print("button",_ENV)
+        --print("button",_ENV)
         ----------------------------------------------------------------------------
         --Key events
-        function instance:on_key_focus_in()    instance.focused = true  end 
-        function instance:on_key_focus_out()   instance.focused = false end 
-        
+        function instance:on_key_focus_in()    instance.focused = true  end
+        function instance:on_key_focus_out()   instance.focused = false end
+
         instance:add_key_handler(   keys.OK, function() instance:click()   end)
-        
+
         ----------------------------------------------------------------------------
         --Mouse events
-        
+
         function instance:on_enter()        instance.focused = true   end
-        function instance:on_leave()        instance.focused = false  instance:release() end 
+        function instance:on_leave()        instance.focused = false  instance:release() end
         function instance:on_button_down()  instance:press()          end
         function instance:on_button_up()    instance:release()        end
-        
-        
+
+
         local getter, setter
-        
+
         style_flags = {
             border = "flag_for_redraw",
             text = {
@@ -445,8 +444,8 @@ Button = setmetatable(
             },
             fill_colors = "flag_for_redraw"
         }
-        
-        
+
+
         canvas = true
         --states = states
         pressed = false
@@ -467,10 +466,10 @@ Button = setmetatable(
         --create_canvas = create_canvas
         states = {"default","focus","activation"}
         --default create_canvas function
-        create_canvas = function(self,state)
+        create_canvas = function(self,state,_ENV)
             --print(state)
             --if type(self.style.fill_colors[state]) == "table" then dumptable(self.style.fill_colors[state]) end
-            
+
             return NineSlice{
                 name   = state,
                 w      = self.w,
@@ -488,22 +487,22 @@ Button = setmetatable(
                     se = self.style[self.widget_type.."/"..state.."/se.png"],
                 }
             }
-            
+
         end
-        
+
         image_states = {}
         for _,state in pairs(states) do
             if state ~= "default" then image_states[state] = {state = "OFF"} end
         end
-        
+
         setup_object(self,instance,_ENV)
-        
+
         updating = true
         instance:set(parameters)
         updating = false
-        
+
         return instance, _ENV
-        
+
     end
 })
 

@@ -18,7 +18,7 @@
 
 inline double timestamp()
 {
-    static GTimer * timer = 0;
+    static GTimer* timer = 0;
 
     if ( ! timer )
     {
@@ -30,7 +30,7 @@ inline double timestamp()
 
 //-----------------------------------------------------------------------------
 
-inline void g_info( const gchar * format, ... )
+inline void g_info( const gchar* format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -42,7 +42,7 @@ inline void g_info( const gchar * format, ... )
 // If the expression is true, this throws a string exception
 #ifndef CLANG_ANALYZER_NORETURN
 #ifndef __has_feature         // Optional of course.
-  #define __has_feature(x) 0  // Compatibility with non-clang compilers.
+#define __has_feature(x) 0  // Compatibility with non-clang compilers.
 #endif
 #if __has_feature(attribute_analyzer_noreturn)
 #define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))
@@ -50,15 +50,15 @@ inline void g_info( const gchar * format, ... )
 #define CLANG_ANALYZER_NORETURN
 #endif
 #endif
-void failif( bool expression, const gchar * format, ... ) CLANG_ANALYZER_NORETURN;
+void failif( bool expression, const gchar* format, ... ) CLANG_ANALYZER_NORETURN;
 
-inline void failif( bool expression, const gchar * format, ... )
+inline void failif( bool expression, const gchar* format, ... )
 {
     if ( expression )
     {
         va_list args;
         va_start( args, format );
-        gchar * s = g_strdup_vprintf( format, args );
+        gchar* s = g_strdup_vprintf( format, args );
         va_end( args );
 
         String result( s );
@@ -70,7 +70,7 @@ inline void failif( bool expression, const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 
-inline StringVector split_string( const gchar * source , const gchar * delimiter , gint max_tokens = 0 )
+inline StringVector split_string( const gchar* source , const gchar* delimiter , gint max_tokens = 0 )
 {
     StringVector result;
 
@@ -96,7 +96,7 @@ inline StringVector split_string( const gchar * source , const gchar * delimiter
     return result;
 }
 
-inline StringVector split_string( const String & source , const gchar * delimiter , gint max_tokens = 0 )
+inline StringVector split_string( const String& source , const gchar* delimiter , gint max_tokens = 0 )
 {
     return split_string( source.c_str() , delimiter , max_tokens );
 }
@@ -129,27 +129,29 @@ public:
         }
     }
 
-    static RefCounted * ref( RefCounted * rc )
+    static RefCounted* ref( RefCounted* rc )
     {
         if ( rc )
         {
             rc->ref();
         }
+
         return rc;
     }
 
-    static RefCounted * unref( RefCounted * rc )
+    static RefCounted* unref( RefCounted* rc )
     {
         if ( rc )
         {
             rc->unref();
         }
+
         return NULL;
     }
 
     static void ref_counted_destroy( gpointer rc )
     {
-        RefCounted::unref( ( RefCounted * ) rc );
+        RefCounted::unref( ( RefCounted* ) rc );
     }
 
 protected:
@@ -159,7 +161,7 @@ protected:
 
 private:
 
-    RefCounted( const RefCounted & )
+    RefCounted( const RefCounted& )
     {}
 
     gint ref_count;
@@ -173,8 +175,8 @@ class imstream : private std::streambuf, public std::istream
 
 public:
 
-    imstream( char * buf, size_t size )
-    :
+    imstream( char* buf, size_t size )
+        :
         std::istream( this )
     {
         setg( buf, buf, buf + size );
@@ -186,8 +188,8 @@ protected:
     {
         if ( which & std::ios_base::in )
         {
-            char * b = eback();
-            char * p = b + sp;
+            char* b = eback();
+            char* p = b + sp;
 
             if ( p >= b && p < egptr() )
             {
@@ -204,8 +206,11 @@ protected:
         switch ( way )
         {
             case std::ios_base::beg: return seekpos( off, which );
+
             case std::ios_base::cur: return seekpos( gptr() + off - eback(), which );
+
             case std::ios_base::end: return seekpos( egptr() + off - eback(), which );
+
             default: return -1;
         }
     }
@@ -223,12 +228,12 @@ public:
 
     FreeLater( gpointer data = NULL, GDestroyNotify destroy = g_free )
     {
-        (*this)( data, destroy );
+        ( *this )( data, destroy );
     }
 
     ~FreeLater()
     {
-        for( FreeList::reverse_iterator it = list.rbegin(); it != list.rend(); ++it )
+        for ( FreeList::reverse_iterator it = list.rbegin(); it != list.rend(); ++it )
         {
             it->second( it->first );
         }
@@ -242,7 +247,7 @@ public:
         }
     }
 
-    inline void operator()( gchar ** data )
+    inline void operator()( gchar** data )
     {
         if ( data )
         {
@@ -252,9 +257,9 @@ public:
 
 private:
 
-    FreeLater( const FreeLater & ) {}
+    FreeLater( const FreeLater& ) {}
 
-    const FreeLater & operator = ( const FreeLater & ) { return * this; }
+    const FreeLater& operator = ( const FreeLater& ) { return * this; }
 
     typedef std::pair< gpointer, GDestroyNotify > FreePair;
 
@@ -271,38 +276,38 @@ class Action
 {
 public:
 
-    Action(): cancel_handle(0) {}
+    Action(): cancel_handle( 0 ) {}
     virtual ~Action();
 
     // Cancel this action if it was posted
 
-    static void cancel( Action * action ) { if ( action->cancel_handle ) g_source_remove( action->cancel_handle ); }
+    static void cancel( Action* action ) { if ( action->cancel_handle ) { g_source_remove( action->cancel_handle ); } }
 
     static void destroy( gpointer action );
 
     // Posts this action to run as an idle, or a timeout if interval_ms > -1
     // Returns the source tag.
 
-    static guint post( Action * action , int interval_ms = -1 );
+    static guint post( Action* action , int interval_ms = -1 );
 
     // Pushes the action into the queue
 
-    static void push( GAsyncQueue * queue , Action * action );
+    static void push( GAsyncQueue* queue , Action* action );
 
     // Tries to pop and run one from the queue, waiting if wait_ms > 0.
     // Returns true if one ran.
 
-    static bool run_one( GAsyncQueue * queue , gulong wait_ms );
+    static bool run_one( GAsyncQueue* queue , gulong wait_ms );
 
     // Tries to run as many as it can pop from the queue, without
     // waiting. Returns how many ran.
 
-    static int run_all( GAsyncQueue * queue );
+    static int run_all( GAsyncQueue* queue );
 
     // Posts an idle action that will call run_all from the given
     // queue when it executes. Refs the queue and then unrefs it.
 
-    static void post_run_all( GAsyncQueue * queue );
+    static void post_run_all( GAsyncQueue* queue );
 
 protected:
 
@@ -315,7 +320,7 @@ protected:
 
 private:
 
-    static gboolean run_internal( Action * action );
+    static gboolean run_internal( Action* action );
 
     guint cancel_handle;
 };
@@ -324,188 +329,188 @@ private:
 
 namespace Util
 {
-	inline String format( const gchar * format, ... )
-    {
-        va_list args;
-        va_start( args, format );
-        gchar * s = g_strdup_vprintf( format, args );
-        va_end( args );
+inline String format( const gchar* format, ... )
+{
+    va_list args;
+    va_start( args, format );
+    gchar* s = g_strdup_vprintf( format, args );
+    va_end( args );
 
-        String result( s );
-        g_free( s );
-        return result;
+    String result( s );
+    g_free( s );
+    return result;
+}
+
+String random_string( guint length );
+
+gpointer g_async_queue_timeout_pop( GAsyncQueue* queue , guint64 timeout );
+
+String where_am_i_lua( lua_State* L );
+
+//-----------------------------------------------------------------------------
+
+class GMutexLock
+{
+public:
+
+    GMutexLock( GMutex* mutex ) : m( mutex )
+    {
+        g_mutex_lock( m );
+    }
+    ~GMutexLock()
+    {
+        g_mutex_unlock( m );
     }
 
-    String random_string( guint length );
+private:
 
-    gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
+    GMutexLock() {}
+    GMutexLock( const GMutexLock& ) {}
 
-    String where_am_i_lua( lua_State *L );
+    GMutex* m;
+};
 
-    //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-    class GMutexLock
+class GSRMutexLock
+{
+public:
+
+#ifndef GLIB_VERSION_2_32
+    GSRMutexLock( GStaticRecMutex* mutex ) : m( mutex )
+#else
+    GSRMutexLock( GRecMutex* mutex ) : m( mutex )
+#endif
     {
-    public:
-
-        GMutexLock( GMutex * mutex ) : m( mutex )
-        {
-            g_mutex_lock( m );
-        }
-        ~GMutexLock()
-        {
-            g_mutex_unlock( m );
-        }
-
-    private:
-
-        GMutexLock() {}
-        GMutexLock( const GMutexLock & ) {}
-
-        GMutex * m;
-    };
-
-    //-----------------------------------------------------------------------------
-
-    class GSRMutexLock
+#ifndef GLIB_VERSION_2_32
+        g_static_rec_mutex_lock( m );
+#else
+        g_rec_mutex_lock( m );
+#endif
+    }
+    ~GSRMutexLock()
     {
-    public:
+#ifndef GLIB_VERSION_2_32
+        g_static_rec_mutex_unlock( m );
+#else
+        g_rec_mutex_unlock( m );
+#endif
+    }
+
+private:
+
+    GSRMutexLock() {}
+    GSRMutexLock( const GSRMutexLock& ) {}
 
 #ifndef GLIB_VERSION_2_32
-        GSRMutexLock( GStaticRecMutex * mutex ) : m( mutex )
+    GStaticRecMutex* m;
 #else
-        GSRMutexLock( GRecMutex * mutex ) : m( mutex )
+    GRecMutex* m;
 #endif
-        {
-#ifndef GLIB_VERSION_2_32
-            g_static_rec_mutex_lock( m );
-#else
-            g_rec_mutex_lock( m );
-#endif
-        }
-        ~GSRMutexLock()
-        {
-#ifndef GLIB_VERSION_2_32
-            g_static_rec_mutex_unlock( m );
-#else
-            g_rec_mutex_unlock( m );
-#endif
-        }
+};
 
-    private:
+//-----------------------------------------------------------------------------
 
-        GSRMutexLock() {}
-        GSRMutexLock( const GSRMutexLock & ) {}
+class GTimer
+{
+public:
 
-#ifndef GLIB_VERSION_2_32
-        GStaticRecMutex * m;
-#else
-        GRecMutex * m;
-#endif
-    };
-
-    //-----------------------------------------------------------------------------
-
-    class GTimer
-    {
-    public:
-
-        GTimer()
+    GTimer()
         :
-            timer( g_timer_new() )
-        {}
+        timer( g_timer_new() )
+    {}
 
-        ~GTimer()
-        {
-            g_timer_destroy( timer );
-        }
-
-        gdouble elapsed() const
-        {
-            return g_timer_elapsed( timer, NULL );
-        }
-
-        void stop()
-        {
-            g_timer_stop( timer );
-        }
-
-        void go()
-        {
-            g_timer_continue( timer );
-        }
-
-        void reset()
-        {
-            g_timer_start( timer );
-        }
-
-    private:
-
-        GTimer( const GTimer & )
-        {}
-
-        ::GTimer *  timer;
-    };
-
-    //-------------------------------------------------------------------------
-    // This takes a path that came from a configuration file or command line
-    // and ensures that it is an absolute, canonical path. It accepts file:
-    // URIs. If the path is relative, it will be made absolute with respect
-    // to the current working directory.
-    //
-    // This should NOT be used for paths that come from Lua apps.
-    //
-    // If there is an error, it will return an empty string, unless
-    // abort_on_error is true, in which case it will abort.
-
-    String canonical_external_path( const char * path , bool abort_on_error = true );
-
-    //-----------------------------------------------------------------------------
-
-    String make_v1_uuid();
-
-    String make_v4_uuid();
-
-    //-----------------------------------------------------------------------------
-
-    class Buffer
+    ~GTimer()
     {
-    public:
+        g_timer_destroy( timer );
+    }
 
-    	typedef enum { MEMORY_USE_TAKE , MEMORY_USE_COPY } MemoryUse;
+    gdouble elapsed() const
+    {
+        return g_timer_elapsed( timer, NULL );
+    }
 
-    	Buffer();
+    void stop()
+    {
+        g_timer_stop( timer );
+    }
 
-    	Buffer( gconstpointer data , guint length );
+    void go()
+    {
+        g_timer_continue( timer );
+    }
 
-    	Buffer( MemoryUse memory_use , gpointer data , guint length );
+    void reset()
+    {
+        g_timer_start( timer );
+    }
 
-    	Buffer( GByteArray * _bytes );
+private:
 
-    	Buffer( const Buffer & other );
+    GTimer( const GTimer& )
+    {}
 
-    	virtual ~Buffer();
+    ::GTimer*   timer;
+};
 
-    	const Buffer & operator = ( const Buffer & other );
+//-------------------------------------------------------------------------
+// This takes a path that came from a configuration file or command line
+// and ensures that it is an absolute, canonical path. It accepts file:
+// URIs. If the path is relative, it will be made absolute with respect
+// to the current working directory.
+//
+// This should NOT be used for paths that come from Lua apps.
+//
+// If there is an error, it will return an empty string, unless
+// abort_on_error is true, in which case it will abort.
 
-    	bool good() const;
+String canonical_external_path( const char* path , bool abort_on_error = true );
 
-    	operator bool () const;
+//-----------------------------------------------------------------------------
 
-    	const char * data() const;
+String make_v1_uuid();
 
-    	guint length() const;
+String make_v4_uuid();
 
-    private:
+//-----------------------------------------------------------------------------
 
-    	GByteArray * bytes;
-    };
+class Buffer
+{
+public:
+
+    typedef enum { MEMORY_USE_TAKE , MEMORY_USE_COPY } MemoryUse;
+
+    Buffer();
+
+    Buffer( gconstpointer data , guint length );
+
+    Buffer( MemoryUse memory_use , gpointer data , guint length );
+
+    Buffer( GByteArray* _bytes );
+
+    Buffer( const Buffer& other );
+
+    virtual ~Buffer();
+
+    const Buffer& operator = ( const Buffer& other );
+
+    bool good() const;
+
+    operator bool () const;
+
+    const char* data() const;
+
+    guint length() const;
+
+private:
+
+    GByteArray* bytes;
+};
 
 
-	String describe_lua_value( lua_State * L , int index );
+String describe_lua_value( lua_State* L , int index );
 
-    void convert_bitmask_to_table( lua_State * L );
+void convert_bitmask_to_table( lua_State* L );
 }
 
 #endif // _TRICKPLAY_UTIL_H

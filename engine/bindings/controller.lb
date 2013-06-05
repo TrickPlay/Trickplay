@@ -61,7 +61,7 @@ interface Controller [[ControllerDelegate*]]
 
         The name property is a string the external device has defined to identify itself. Each connected device is guaranteed to have a unique name property.
 
-		*See Also:* the <id> property
+        *See Also:* the <id> property
     */
 
     readonly string name
@@ -77,7 +77,7 @@ interface Controller [[ControllerDelegate*]]
 
         Note: When a device disconnects and reconnects, its id property is not guaranteed to remain the same for each session.
 
-		*See Also:* the <name> property
+        *See Also:* the <name> property
     */
 
     readonly string id
@@ -154,13 +154,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Property: has_accelerometer
 
-		The has_accelerometer property is a Boolean flag indicating whether or not the device has the capability to send accelerometer events (true=can send accelerometer events). Accelerometer data can be interpreted to determine the device's orientation and movement.
+        The has_accelerometer property is a Boolean flag indicating whether or not the device has the capability to send accelerometer events (true=can send accelerometer events). Accelerometer data can be interpreted to determine the device's orientation and movement.
 
-		If the has_accelerometer property is true, the application can enable/disable the generation of accelerometer events by calling the object's <start_accelerometer> and <stop_accelerometer> functions. To monitor accelerometer events, the program can hook the object's <on_accelerometer> event.
+        If the has_accelerometer property is true, the application can enable/disable the generation of accelerometer events by calling the object's <start_accelerometer> and <stop_accelerometer> functions. To monitor accelerometer events, the program can hook the object's <on_accelerometer> event.
 
-		*Possible Settings:* true=device can send accelerometer events, else false
+        *Possible Settings:* true=device can send accelerometer events, else false
 
-		*See Also:* the <start_accelerometer> and <stop_accelerometer> functions and the <on_accelerometer> event
+        *See Also:* the <start_accelerometer> and <stop_accelerometer> functions and the <on_accelerometer> event
     */
 
     readonly bool has_accelerometer
@@ -171,13 +171,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Property: has_fullmotion
 
-		The has_fullmotion property is a Boolean flag indicating whether or not the device has the capability to send motion events (true=can send events) beyond simple accelerometer data. Included are Gyroscope (rotation) data, Magnetometer (field flux density), and Attitude (roll, pitch, yaw).
+        The has_fullmotion property is a Boolean flag indicating whether or not the device has the capability to send motion events (true=can send events) beyond simple accelerometer data. Included are Gyroscope (rotation) data, Magnetometer (field flux density), and Attitude (roll, pitch, yaw).
 
-		If the has_fullmotion property is true, the application can enable/disable the generation of events by calling the object's <start_gyroscope> and <stop_gyroscope>, <start_magnetometer> and <stop_magnetometer>, and <start_attitude> and <stop_attitude> functions. To monitor events, the program can hook the object's <on_gyroscope>, <on_magnetometer>, and <on_attitude> events.
+        If the has_fullmotion property is true, the application can enable/disable the generation of events by calling the object's <start_gyroscope> and <stop_gyroscope>, <start_magnetometer> and <stop_magnetometer>, and <start_attitude> and <stop_attitude> functions. To monitor events, the program can hook the object's <on_gyroscope>, <on_magnetometer>, and <on_attitude> events.
 
-		*Possible Settings:* true=device can send events, else false
+        *Possible Settings:* true=device can send events, else false
 
-		*See Also:* the <start_gyroscope> and <stop_gyroscope>, <start_magnetometer> and <stop_magnetometer>, and <start_attitude> and <stop_attitude> functions and the <on_gyroscope>, <on_magnetometer>, and <on_attitude> events
+        *See Also:* the <start_gyroscope> and <stop_gyroscope>, <start_magnetometer> and <stop_magnetometer>, and <start_attitude> and <stop_attitude> functions and the <on_gyroscope>, <on_magnetometer>, and <on_attitude> events
     */
 
     readonly bool has_fullmotion
@@ -187,9 +187,9 @@ interface Controller [[ControllerDelegate*]]
 
 
     /*
-    	UndocumentedProperty: has_clicks
+        UndocumentedProperty: has_clicks
 
-    	*** This is a non-existent capability.
+        *** This is a non-existent capability.
     */
     readonly bool has_clicks
         [[
@@ -199,13 +199,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Property: has_pointer
 
-		The has_pointer property is a Boolean flag indicating whether or not the device has the capability to send pointer-type events, typical of mouse-type devices (true=can send pointer-type events).
+        The has_pointer property is a Boolean flag indicating whether or not the device has the capability to send pointer-type events, typical of mouse-type devices (true=can send pointer-type events).
 
-		If the has_pointer property is true, the application can enable/disable the generation of pointer-type events by calling the object's <start_pointer> and <stop_pointer> functions. To monitor the pointer-type events, the program can hook the object's <on_pointer_move>, <on_pointer_button_down> and <on_pointer_button_up> events.
+        If the has_pointer property is true, the application can enable/disable the generation of pointer-type events by calling the object's <start_pointer> and <stop_pointer> functions. To monitor the pointer-type events, the program can hook the object's <on_pointer_move>, <on_pointer_button_down> and <on_pointer_button_up> events.
 
-		*Possible Settings:* true=device can send pointer-type events, else false
+        *Possible Settings:* true=device can send pointer-type events, else false
 
-		*See Also:* the <start_pointer> and <stop_pointer> functions and the <on_pointer_move>, <on_pointer_button_down> and <on_pointer_button_up> events
+        *See Also:* the <start_pointer> and <stop_pointer> functions and the <on_pointer_move>, <on_pointer_button_down> and <on_pointer_button_up> events
     */
 
     readonly bool has_pointer
@@ -220,9 +220,9 @@ interface Controller [[ControllerDelegate*]]
 
         Before accessing the has_pointer_cursor property, verify that the <has_pointer> property is true. If has_pointer is false then the has_pointer_cursor property is not relevant.
 
-		*Possible Settings:* true=device can display its own cursor, else false
+        *Possible Settings:* true=device can display its own cursor, else false
 
-		*See Also:* the <has_pointer> property and the <show_pointer_cursor>, <hide_pointer_cursor> and <set_pointer_cursor> functions
+        *See Also:* the <has_pointer> property and the <show_pointer_cursor>, <hide_pointer_cursor> and <set_pointer_cursor> functions
     */
 
     readonly bool has_pointer_cursor
@@ -409,9 +409,9 @@ interface Controller [[ControllerDelegate*]]
 
         If the has_virtual_remote property is true, the application can display or hide the virtual remote control by calling the object's <show_virtual_remote> or <hide_virtual_remote> functions. Input with the virtual remote generates regular key events, regardless of the actual input device used. Key events are processed through the <on_key_up> and <on_key_down> events.
 
-		*Possible Settings:* true=device supports a virtual remote control, else false
+        *Possible Settings:* true=device supports a virtual remote control, else false
 
-		*See Also:* the <show_virtual_remote> and <hide_virtual_remote> functions
+        *See Also:* the <show_virtual_remote> and <hide_virtual_remote> functions
     */
 
     readonly bool has_virtual_remote
@@ -443,12 +443,12 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	filter - string specifying a filter to apply to the raw accelerometer data. A low-pass filter reduces the effect of brief accelerations and smoothes the acceleration curve. A high-pass filter reduces the influence of gravity on the accelerometer and focuses on the device's movements. For iPhone and iPad devices, general-purpose low-pass and high-pass software filters are provided in the TrickPlay SDK libraries. A filter argument of "L" filters the accelerometer data through the low-pass filter; an argument of "H" filters the data through the high-pass filter.  If an empty string is specified, no filter is used, and raw accelerometer data is sent. Other accelerometer-enabled devices may support their own filters.
-        	interval - floating point interval in seconds between accelerometer events. This value is a suggestion; the actual events may occur more or less frequently.
+            filter - string specifying a filter to apply to the raw accelerometer data. A low-pass filter reduces the effect of brief accelerations and smoothes the acceleration curve. A high-pass filter reduces the influence of gravity on the accelerometer and focuses on the device's movements. For iPhone and iPad devices, general-purpose low-pass and high-pass software filters are provided in the TrickPlay SDK libraries. A filter argument of "L" filters the accelerometer data through the low-pass filter; an argument of "H" filters the data through the high-pass filter.  If an empty string is specified, no filter is used, and raw accelerometer data is sent. Other accelerometer-enabled devices may support their own filters.
+            interval - floating point interval in seconds between accelerometer events. This value is a suggestion; the actual events may occur more or less frequently.
 
         *Return Value:* true if accelerometer events were started, else false
 
-		*See Also:* the <has_accelerometer> property, <stop_accelerometer> function and the <on_accelerometer> event
+        *See Also:* the <has_accelerometer> property, <stop_accelerometer> function and the <on_accelerometer> event
     */
 
     bool start_accelerometer(string filter, double interval)
@@ -496,11 +496,11 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	interval - floating point interval in seconds between gyroscope events. This value is a suggestion; the actual events may occur more or less frequently.
+            interval - floating point interval in seconds between gyroscope events. This value is a suggestion; the actual events may occur more or less frequently.
 
         *Return Value:* true if gyroscope events were started, else false
 
-		*See Also:* the <has_fullmotion> property, <stop_gyroscope> function and the <on_gyroscope> event
+        *See Also:* the <has_fullmotion> property, <stop_gyroscope> function and the <on_gyroscope> event
     */
 
     bool start_gyroscope(double interval)
@@ -534,11 +534,11 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	interval - floating point interval in seconds between magnetometer events. This value is a suggestion; the actual events may occur more or less frequently.
+            interval - floating point interval in seconds between magnetometer events. This value is a suggestion; the actual events may occur more or less frequently.
 
         *Return Value:* true if magnetometer events were started, else false
 
-		*See Also:* the <has_fullmotion> property, <stop_magnetometer> function and the <on_magnetometer> event
+        *See Also:* the <has_fullmotion> property, <stop_magnetometer> function and the <on_magnetometer> event
     */
 
     bool start_magnetometer(double interval)
@@ -572,11 +572,11 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	interval - floating point interval in seconds between attitude events. This value is a suggestion; the actual events may occur more or less frequently.
+            interval - floating point interval in seconds between attitude events. This value is a suggestion; the actual events may occur more or less frequently.
 
         *Return Value:* true if attitude events were started, else false
 
-		*See Also:* the <has_fullmotion> property, <stop_attitude> function and the <on_attitude> event
+        *See Also:* the <has_fullmotion> property, <stop_attitude> function and the <on_attitude> event
     */
 
     bool start_attitude(double interval)
@@ -679,9 +679,9 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	x - X coordinate at which to position the cursor
-        	y - Y coordinate at which to position the cursor
-        	image - string referencing the URI (Uniform Resource Identifier) address of the image resource to use for the cursor
+            x - X coordinate at which to position the cursor
+            y - Y coordinate at which to position the cursor
+            image - string referencing the URI (Uniform Resource Identifier) address of the image resource to use for the cursor
 
         *Return Value:* true if the cursor image was successfully set, else false
 
@@ -736,11 +736,11 @@ interface Controller [[ControllerDelegate*]]
             result=self->get_controller()->stop_touches();
         ]];
 
-	/*
-		DeprecatedFunction: show_multiple_choice_ui
+    /*
+        DeprecatedFunction: show_multiple_choice_ui
 
-		*** Deprecated, use show_multiple_choice() instead
-	*/
+        *** Deprecated, use show_multiple_choice() instead
+    */
 
     bool show_multiple_choice_ui()
         [[
@@ -759,32 +759,32 @@ interface Controller [[ControllerDelegate*]]
 
         *Prototype:*
 
-        	(code)
-        	bool show_multiple_choice( string label, string choice01_id, string choice01, ... )
-        	(end)
+            (code)
+            bool show_multiple_choice( string label, string choice01_id, string choice01, ... )
+            (end)
 
         *Arguments:*
 
-        	label - query string. The device will typically display this string above the list of choices.
-        	choice01_id - unique string ID associated with choice01. If choice01 is selected, its associated ID is passed to the on_ui_event event handler(s).
-        	choice01 - string for one choice in the list
-        	choiceNN_id, choiceNN - subsequent ID/choice pairs to form list of available choices
+            label - query string. The device will typically display this string above the list of choices.
+            choice01_id - unique string ID associated with choice01. If choice01 is selected, its associated ID is passed to the on_ui_event event handler(s).
+            choice01 - string for one choice in the list
+            choiceNN_id, choiceNN - subsequent ID/choice pairs to form list of available choices
 
-        	Some sample multiple-choice forms are shown below.
+            Some sample multiple-choice forms are shown below.
 
-        	(code)
-        	device:show_multiple_choice( "Sound",
-        	                                 "1", "On",
-        	                                 "2", "Off" )
-        	device:show_multiple_choice( "Text Size",
-        	                                 "1", "Large",
-        	                                 "2", "Medium",
-        	                                 "3", "Small" )
-        	device:show_multiple_choice( "There are unsaved changes",
-        	                                 "1", "Close without saving",
-        	                                 "2", "Save and close",
-        	                                 "3", "Cancel" )
-        	(end)
+            (code)
+            device:show_multiple_choice( "Sound",
+                                             "1", "On",
+                                             "2", "Off" )
+            device:show_multiple_choice( "Text Size",
+                                             "1", "Large",
+                                             "2", "Medium",
+                                             "3", "Small" )
+            device:show_multiple_choice( "There are unsaved changes",
+                                             "1", "Close without saving",
+                                             "2", "Save and close",
+                                             "3", "Cancel" )
+            (end)
 
         *Return Value:* true if query and list of choices were displayed, else false
 
@@ -827,9 +827,9 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
     /*
-    	DeprecatedFunction: set_background()
+        DeprecatedFunction: set_background()
 
-    	*** Deprecated, use set_ui_background() instead
+        *** Deprecated, use set_ui_background() instead
     */
 
     bool set_background(string resource)
@@ -845,18 +845,18 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	resource - string name of the image resource declared by the declare_resource() function
-        	mode - string specifying the positioning method to use if the image does not exactly fit the display. Supported modes are described below.
+            resource - string name of the image resource declared by the declare_resource() function
+            mode - string specifying the positioning method to use if the image does not exactly fit the display. Supported modes are described below.
 
         *Supported mode Values:*
 
-        	"C" - center the image in the display using the image's original size
-        	"T" - tile the image both vertically and horizontally to fill the display
-        	"STRETCH" - scale the image vertically and horizontally to fill the display. If no mode argument is specified, the Stretch mode is the default.
+            "C" - center the image in the display using the image's original size
+            "T" - tile the image both vertically and horizontally to fill the display
+            "STRETCH" - scale the image vertically and horizontally to fill the display. If no mode argument is specified, the Stretch mode is the default.
 
-		*Return Value:* true if the background was set, else false
+        *Return Value:* true if the background was set, else false
 
-		*See Also:* the <has_ui> property and <set_ui_image> function
+        *See Also:* the <has_ui> property and <set_ui_image> function
     */
 
     bool set_ui_background(string resource, string mode="STRETCH")
@@ -887,14 +887,14 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	resource - string name of the image resource declared by the declare_resource() function
-        	x, y - X,Y display coordinate at which to place the image. The upper-left corner of the image will be positioned at this location.
-        	width - image's numeric width in pixels
-        	height - image's numeric height in pixels
+            resource - string name of the image resource declared by the declare_resource() function
+            x, y - X,Y display coordinate at which to place the image. The upper-left corner of the image will be positioned at this location.
+            width - image's numeric width in pixels
+            height - image's numeric height in pixels
 
-		*Return Value:* true if the image was displayed, else false
+        *Return Value:* true if the image was displayed, else false
 
-		*See Also:* the <has_ui> property and the <set_ui_background> function
+        *See Also:* the <has_ui> property and the <set_ui_background> function
     */
 
     bool set_ui_image(string resource,int x,int y,int width,int height)
@@ -909,8 +909,8 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	resource - string name of the audio resource declared by the declare_resource() function
-        	loop - number of times to play the sound. If 0, the sound will play repeatedly until the <stop_sound> function is called.
+            resource - string name of the audio resource declared by the declare_resource() function
+            loop - number of times to play the sound. If 0, the sound will play repeatedly until the <stop_sound> function is called.
 
         *Return Value:* true if the sound was played, else false
 
@@ -946,8 +946,8 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	resource - string name to associate with the resource. This string is used in subsequent function calls that accept a resource argument, such as the <play_sound>, <set_ui_background>, <set_ui_image> and <request_image> functions.
-        	url - string filename or URL address of the resource
+            resource - string name to associate with the resource. This string is used in subsequent function calls that accept a resource argument, such as the <play_sound>, <set_ui_background>, <set_ui_image> and <request_image> functions.
+            url - string filename or URL address of the resource
 
         *Return Value:* true if the resource was succesfully processed, else false
 
@@ -973,14 +973,14 @@ interface Controller [[ControllerDelegate*]]
 
         When the text input is complete and accepted, the <on_ui_event> event is fired. The application can hook the event to retrieve the entered text.
 
-		*Arguments:*
+        *Arguments:*
 
-			label - string label or query to display alongside the text-entry field
-			text - initial string value of text field. This may be an empty string.
+            label - string label or query to display alongside the text-entry field
+            text - initial string value of text field. This may be an empty string.
 
-		*Return Value:* true if the text-entry screen was displayed, else false
+        *Return Value:* true if the text-entry screen was displayed, else false
 
-		*See Also:* the <has_text_entry> property and <on_ui_event> event
+        *See Also:* the <has_text_entry> property and <on_ui_event> event
     */
 
     bool enter_text(string label,string text)
@@ -997,19 +997,19 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:* All arguments are optional and will use default values if not specified.
 
-        	max_dimensions - table specifying the image's maximum width and height in pixels. The table's format is { width, height }. If not specified or if both values are zero, an image of any size is acceptable.
+            max_dimensions - table specifying the image's maximum width and height in pixels. The table's format is { width, height }. If not specified or if both values are zero, an image of any size is acceptable.
 
-			edit - boolean flag indicating whether or not the device may enable the user to edit the image before it is sent (true=user may edit the image). If not specified, the default value is false.
+            edit - boolean flag indicating whether or not the device may enable the user to edit the image before it is sent (true=user may edit the image). If not specified, the default value is false.
 
-			mask - string reference to an image mask to combine with the requested image to form a composite image. The resulting composite image is available when handling the on_image event. The mask must already have been processed by the <declare_resource> function. The mask string should be the string name that declare_resource() associates with the actual resource. If no mask is desired, specify an empty string (""). If the mask argument is not specified, the mask defaults to an empty string.
+            mask - string reference to an image mask to combine with the requested image to form a composite image. The resulting composite image is available when handling the on_image event. The mask must already have been processed by the <declare_resource> function. The mask string should be the string name that declare_resource() associates with the actual resource. If no mask is desired, specify an empty string (""). If the mask argument is not specified, the mask defaults to an empty string.
 
-			dialog_label - string containing the user prompt to place on the device's screen. If not specified, a default prompt of "SendImageToTV" is displayed.
+            dialog_label - string containing the user prompt to place on the device's screen. If not specified, a default prompt of "SendImageToTV" is displayed.
 
-			cancel_label - string containing the text label displayed in the Cancel button. If the user selects this button, the on_image_cancelled event is fired. If not specified, a default label of "Cancel" is displayed.
+            cancel_label - string containing the text label displayed in the Cancel button. If the user selects this button, the on_image_cancelled event is fired. If not specified, a default label of "Cancel" is displayed.
 
-		*Return Value:* true if the request was successfully submitted, else false. Note: This value does not indicate whether or not an image was actually received. To determine image reception, hook the on_image and on_image_cancelled events.
+        *Return Value:* true if the request was successfully submitted, else false. Note: This value does not indicate whether or not an image was actually received. To determine image reception, hook the on_image and on_image_cancelled events.
 
-		*See Also:* the <has_images> property and the <on_image> and <on_image_cancelled> events
+        *See Also:* the <has_images> property and the <on_image> and <on_image_cancelled> events
     */
 
     bool request_image( table max_dimensions = 0 , bool edit = false , string mask = "", string dialog_label = "SendImageToTV", string cancel_label = "Cancel" )
@@ -1104,7 +1104,7 @@ interface Controller [[ControllerDelegate*]]
 
         *Arguments:*
 
-        	payload - table of JSON-formatted input data
+            payload - table of JSON-formatted input data
 
         *Return Value:* None
 
@@ -1171,29 +1171,29 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_ondisconnected_listener
+    Function: add_ondisconnected_listener
 
-	The add_ondisconnected_listener() function registers a handler function for <on_disconnected> events.
+    The add_ondisconnected_listener() function registers a handler function for <on_disconnected> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ondisconnected_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ondisconnected_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller )
-		(end)
+        (code)
+        f( controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that has disconnected
+        controller - the Controller device that has disconnected
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_disconnected> event, the <remove_ondisconnected_listener> function and the <controllers.connected> table of connected devices
+    *See Also:* the <on_disconnected> event, the <remove_ondisconnected_listener> function and the <controllers.connected> table of connected devices
 */
 
     int add_ondisconnected_listener( function f )
@@ -1202,17 +1202,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_ondisconnected_listener
+    Function: remove_ondisconnected_listener
 
-	The remove_ondisconnected_listener() function unregisters the specified event handler.
+    The remove_ondisconnected_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ondisconnected_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ondisconnected_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ondisconnected_listener> function and the <on_disconnected> event
+    *See Also:* the <add_ondisconnected_listener> function and the <on_disconnected> event
 */
 
     remove_ondisconnected_listener( int ref )
@@ -1221,34 +1221,34 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onkeydown_listener
+    Function: add_onkeydown_listener
 
-	The add_onkeydown_listener() function registers a handler function for <on_key_down> events.
+    The add_onkeydown_listener() function registers a handler function for <on_key_down> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeydown_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeydown_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, key_code, unicode, modifiers )
-		(end)
+        (code)
+        boolean f( controller, key_code, unicode, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	key_code - integer key identifier in the <keys> global variable
-       	unicode - key's integer Unicode character value, if any, else zero
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the key_code. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        key_code - integer key identifier in the <keys> global variable
+        unicode - key's integer Unicode character value, if any, else zero
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the key_code. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false.
+    *Handler Return Value:* true to propagate the event up the event chain, else false.
 
-	The on_key_down events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_key_down events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_key_down> event and the <remove_onkeydown_listener> function
+    *See Also:* the <on_key_down> event and the <remove_onkeydown_listener> function
 */
 
     int add_onkeydown_listener( function f )
@@ -1257,17 +1257,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onkeydown_listener
+    Function: remove_onkeydown_listener
 
-	The remove_onkeydown_listener() function unregisters the specified event handler.
+    The remove_onkeydown_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeydown_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeydown_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeydown_listener> function and the <on_key_down> event
+    *See Also:* the <add_onkeydown_listener> function and the <on_key_down> event
 */
 
     remove_onkeydown_listener( int ref )
@@ -1276,34 +1276,34 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onkeyup_listener
+    Function: add_onkeyup_listener
 
-	The add_onkeyup_listener() function registers a handler function for <on_key_up> events.
+    The add_onkeyup_listener() function registers a handler function for <on_key_up> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyup_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onkeyup_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, key_code, unicode, modifiers )
-		(end)
+        (code)
+        boolean f( controller, key_code, unicode, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	key_code - integer key identifier in the <keys> global variable
-       	unicode - key's integer Unicode character value, if any, else zero
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the key_code. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        key_code - integer key identifier in the <keys> global variable
+        unicode - key's integer Unicode character value, if any, else zero
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the key_code. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false.
+    *Handler Return Value:* true to propagate the event up the event chain, else false.
 
-	The on_key_up events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_key_up events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_key_up> event and the <remove_onkeydown_listener> function
+    *See Also:* the <on_key_up> event and the <remove_onkeydown_listener> function
 */
 
     int add_onkeyup_listener( function f )
@@ -1312,17 +1312,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onkeyup_listener
+    Function: remove_onkeyup_listener
 
-	The remove_onkeyup_listener() function unregisters the specified event handler.
+    The remove_onkeyup_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onkeyup_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onkeyup_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onkeyup_listener> function and the <on_key_up> event
+    *See Also:* the <add_onkeyup_listener> function and the <on_key_up> event
 */
 
     remove_onkeyup_listener( int ref )
@@ -1331,31 +1331,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onaccelerometer_listener
+    Function: add_onaccelerometer_listener
 
-	The add_onaccelerometer_listener() function registers a handler function for <on_accelerometer> events.
+    The add_onaccelerometer_listener() function registers a handler function for <on_accelerometer> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onaccelerometer_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onaccelerometer_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, x, y, z, modifiers )
-		(end)
+        (code)
+        f( controller, x, y, z, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-    	x, y, z - accelerometer floating-point values for each axis
-    	modifiers - table of <keys.Key Modifiers> pressed in combination with the accelerometer reading. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        x, y, z - accelerometer floating-point values for each axis
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the accelerometer reading. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_accelerometer> event and the <remove_onaccelerometer_listener> function
+    *See Also:* the <on_accelerometer> event and the <remove_onaccelerometer_listener> function
 */
 
     int add_onaccelerometer_listener( function f )
@@ -1364,17 +1364,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onaccelerometer_listener
+    Function: remove_onaccelerometer_listener
 
-	The remove_onaccelerometer_listener() function unregisters the specified event handler.
+    The remove_onaccelerometer_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onaccelerometer_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onaccelerometer_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onaccelerometer_listener> function
+    *See Also:* the <add_onaccelerometer_listener> function
 */
 
     remove_onaccelerometer_listener( int ref )
@@ -1383,31 +1383,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_ongyroscope_listener
+    Function: add_ongyroscope_listener
 
-	The add_ongyroscope_listener() function registers a handler function for <on_gyroscope> events.
+    The add_ongyroscope_listener() function registers a handler function for <on_gyroscope> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ongyroscope_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ongyroscope_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, x, y, z, modifiers )
-		(end)
+        (code)
+        f( controller, x, y, z, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	x, y, z - signed floating point rotation rate about the given axis in radians per second. The sign follows the right-hand rule: If the right hand is wrapped around the axis such that the tip of the thumb points toward the positive direction in that axis, a positive rotation is one towards the tips of the other four fingers.
-    	modifiers - table of <keys.Key Modifiers> pressed in combination with the gyroscope reading. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        x, y, z - signed floating point rotation rate about the given axis in radians per second. The sign follows the right-hand rule: If the right hand is wrapped around the axis such that the tip of the thumb points toward the positive direction in that axis, a positive rotation is one towards the tips of the other four fingers.
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the gyroscope reading. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_gyroscope> event and the <remove_ongyroscope_listener> function
+    *See Also:* the <on_gyroscope> event and the <remove_ongyroscope_listener> function
 */
 
     int add_ongyroscope_listener( function f )
@@ -1416,17 +1416,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_ongyroscope_listener
+    Function: remove_ongyroscope_listener
 
-	The remove_ongyroscope_listener() function unregisters the specified event handler.
+    The remove_ongyroscope_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ongyroscope_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ongyroscope_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ongyroscope_listener> function
+    *See Also:* the <add_ongyroscope_listener> function
 */
 
     remove_ongyroscope_listener( int ref )
@@ -1435,31 +1435,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onmagnetometer_listener
+    Function: add_onmagnetometer_listener
 
-	The add_onmagnetometer_listener() function registers a handler function for <on_magnetometer> events.
+    The add_onmagnetometer_listener() function registers a handler function for <on_magnetometer> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmagnetometer_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onmagnetometer_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, x, y, z, modifiers )
-		(end)
+        (code)
+        f( controller, x, y, z, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         x, y, z - for each axis, the floating point magnetic field value in microteslas
         modifiers - table of <keys.Key Modifiers> pressed in combination with the magnetometer reading. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_magnetometer> event and the <remove_onmagnetometer_listener> function
+    *See Also:* the <on_magnetometer> event and the <remove_onmagnetometer_listener> function
 */
 
     int add_onmagnetometer_listener( function f )
@@ -1468,17 +1468,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onmagnetometer_listener
+    Function: remove_onmagnetometer_listener
 
-	The remove_onmagnetometer_listener() function unregisters the specified event handler.
+    The remove_onmagnetometer_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onmagnetometer_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onmagnetometer_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onmagnetometer_listener> function
+    *See Also:* the <add_onmagnetometer_listener> function
 */
 
     remove_onmagnetometer_listener( int ref )
@@ -1487,33 +1487,33 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onattitude_listener
+    Function: add_onattitude_listener
 
-	The add_onattitude_listener() function registers a handler function for <on_attitude> events.
+    The add_onattitude_listener() function registers a handler function for <on_attitude> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onattitude_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onattitude_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, roll, pitch, yaw, modifiers )
-		(end)
+        (code)
+        f( controller, roll, pitch, yaw, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         roll - floating point value specifying the roll of the device in radians. A roll is a rotation around a longitudinal axis that passes through the device from its top to bottom.
         pitch - floating point value specifying the pitch of the device in radians. A pitch is a rotation around a lateral axis that passes through the device from side to side.
         yaw - floating point value specifying the yaw of the device in radians. A yaw is a rotation around an axis that runs vertically through the device. It is perpendicular to the body of the device, with its origin at the center of gravity and directed toward the bottom of the device.
         modifiers - table of <keys.Key Modifiers> pressed in combination with the attitude reading. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_attitude> event and the <remove_onattitude_listener> function
+    *See Also:* the <on_attitude> event and the <remove_onattitude_listener> function
 */
 
     int add_onattitude_listener( function f )
@@ -1522,17 +1522,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onattitude_listener
+    Function: remove_onattitude_listener
 
-	The remove_onattitude_listener() function unregisters the specified event handler.
+    The remove_onattitude_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onattitude_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onattitude_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onattitude_listener> function
+    *See Also:* the <add_onattitude_listener> function
 */
 
     remove_onattitude_listener( int ref )
@@ -1541,34 +1541,34 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onpointerbuttondown_listener
+    Function: add_onpointerbuttondown_listener
 
-	The add_onpointerbuttondown_listener() function registers a handler function for <on_pointer_button_down> events.
+    The add_onpointerbuttondown_listener() function registers a handler function for <on_pointer_button_down> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerbuttondown_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerbuttondown_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, button, x, y, modifiers )
-		(end)
+        (code)
+        boolean f( controller, button, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-    	button - integer button number, where the first button is number 1
-    	x, y - pointer's integer X and Y coordinates when the button was pressed
+        controller - the Controller device that generated the event
+        button - integer button number, where the first button is number 1
+        x, y - pointer's integer X and Y coordinates when the button was pressed
         modifiers - table of <keys.Key Modifiers> pressed in combination with the button-press. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false
+    *Handler Return Value:* true to propagate the event up the event chain, else false
 
-	The on_pointer_button_down events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_button_down> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_pointer_button_down events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_button_down> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_pointer_button_down> and <UIElement.on_button_down> events and the <remove_onpointerbuttondown_listener> function
+    *See Also:* the <on_pointer_button_down> and <UIElement.on_button_down> events and the <remove_onpointerbuttondown_listener> function
 */
 
     int add_onpointerbuttondown_listener( function f )
@@ -1577,17 +1577,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onpointerbuttondown_listener
+    Function: remove_onpointerbuttondown_listener
 
-	The remove_onpointerbuttondown_listener() function unregisters the specified event handler.
+    The remove_onpointerbuttondown_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpointerbuttondown_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpointerbuttondown_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpointerbuttondown_listener> function
+    *See Also:* the <add_onpointerbuttondown_listener> function
 */
 
     remove_onpointerbuttondown_listener( int ref )
@@ -1596,33 +1596,33 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onpointermove_listener
+    Function: add_onpointermove_listener
 
-	The add_onpointermove_listener() function registers a handler function for <on_pointer_move> events.
+    The add_onpointermove_listener() function registers a handler function for <on_pointer_move> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointermove_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointermove_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, x, y, modifiers )
-		(end)
+        (code)
+        boolean f( controller, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-    	x, y - pointer's integer X and Y coordinate location
+        controller - the Controller device that generated the event
+        x, y - pointer's integer X and Y coordinate location
         modifiers - table of <keys.Key Modifiers> pressed in combination with the pointer movement. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false
+    *Handler Return Value:* true to propagate the event up the event chain, else false
 
-	The on_pointer_move events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_motion> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_pointer_move events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_motion> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_pointer_move> and <UIElement.on_motion> events and the <remove_onpointermove_listener> function
+    *See Also:* the <on_pointer_move> and <UIElement.on_motion> events and the <remove_onpointermove_listener> function
 */
 
     int add_onpointermove_listener( function f )
@@ -1631,17 +1631,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onpointermove_listener
+    Function: remove_onpointermove_listener
 
-	The remove_onpointermove_listener() function unregisters the specified event handler.
+    The remove_onpointermove_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpointermove_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpointermove_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpointermove_listener> function
+    *See Also:* the <add_onpointermove_listener> function
 */
 
     remove_onpointermove_listener( int ref )
@@ -1650,34 +1650,34 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onpointerbuttonup_listener
+    Function: add_onpointerbuttonup_listener
 
-	The add_onpointerbuttonup_listener() function registers a handler function for <on_pointer_button_up> events.
+    The add_onpointerbuttonup_listener() function registers a handler function for <on_pointer_button_up> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerbuttonup_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerbuttonup_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, button, x, y, modifiers )
-		(end)
+        (code)
+        boolean f( controller, button, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-    	button - button's integer identifier, where the first button has number 1
-    	x, y - pointer's integer X and Y coordinates where the button was released
+        controller - the Controller device that generated the event
+        button - button's integer identifier, where the first button has number 1
+        x, y - pointer's integer X and Y coordinates where the button was released
         modifiers - table of <keys.Key Modifiers> pressed in combination with the button-release. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false
+    *Handler Return Value:* true to propagate the event up the event chain, else false
 
-	The on_pointer_button_up events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_button_up> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_pointer_button_up events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_button_up> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_pointer_button_up> and <UIElement.on_button_up> events and the <remove_onpointerbuttonup_listener> function
+    *See Also:* the <on_pointer_button_up> and <UIElement.on_button_up> events and the <remove_onpointerbuttonup_listener> function
 */
 
     int add_onpointerbuttonup_listener( function f )
@@ -1686,17 +1686,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onpointerbuttonup_listener
+    Function: remove_onpointerbuttonup_listener
 
-	The remove_onpointerbuttonup_listener() function unregisters the specified event handler.
+    The remove_onpointerbuttonup_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpointerbuttonup_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpointerbuttonup_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpointerbuttonup_listener> function
+    *See Also:* the <add_onpointerbuttonup_listener> function
 */
 
     remove_onpointerbuttonup_listener( int ref )
@@ -1705,29 +1705,29 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onpointeractive_listener
+    Function: add_onpointeractive_listener
 
-	The add_onpointeractive_listener() function registers a handler function for <on_pointer_active> events.
+    The add_onpointeractive_listener() function registers a handler function for <on_pointer_active> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointeractive_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointeractive_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller )
-		(end)
+        (code)
+        f( controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_pointer_active> event and the <remove_onpointeractive_listener> function
+    *See Also:* the <on_pointer_active> event and the <remove_onpointeractive_listener> function
 */
 
     int add_onpointeractive_listener( function f )
@@ -1736,17 +1736,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onpointeractive_listener
+    Function: remove_onpointeractive_listener
 
-	The remove_onpointeractive_listener() function unregisters the specified event handler.
+    The remove_onpointeractive_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpointeractive_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpointeractive_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpointeractive_listener> function
+    *See Also:* the <add_onpointeractive_listener> function
 */
 
     remove_onpointeractive_listener( int ref )
@@ -1755,29 +1755,29 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onpointerinactive_listener
+    Function: add_onpointerinactive_listener
 
-	The add_onpointerinactive_listener() function registers a handler function for <on_pointer_inactive> events.
+    The add_onpointerinactive_listener() function registers a handler function for <on_pointer_inactive> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerinactive_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onpointerinactive_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller )
-		(end)
+        (code)
+        f( controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_pointer_inactive> event and the <remove_onpointerinactive_listener> function
+    *See Also:* the <on_pointer_inactive> event and the <remove_onpointerinactive_listener> function
 */
 
     int add_onpointerinactive_listener( function f )
@@ -1786,17 +1786,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onpointerinactive_listener
+    Function: remove_onpointerinactive_listener
 
-	The remove_onpointerinactive_listener() function unregisters the specified event handler.
+    The remove_onpointerinactive_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onpointerinactive_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onpointerinactive_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onpointerinactive_listener> function
+    *See Also:* the <add_onpointerinactive_listener> function
 */
 
     remove_onpointerinactive_listener( int ref )
@@ -1805,32 +1805,32 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_ontouchdown_listener
+    Function: add_ontouchdown_listener
 
-	The add_ontouchdown_listener() function registers a handler function for <on_touch_down> events.
+    The add_ontouchdown_listener() function registers a handler function for <on_touch_down> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchdown_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchdown_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, finger, x, y, modifiers )
-		(end)
+        (code)
+        f( controller, finger, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	finger - unique integer ID identifying the finger that has touched the device
-       	x, y - finger's integer X and Y coordinates where the finger touched the device
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-touch. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        finger - unique integer ID identifying the finger that has touched the device
+        x, y - finger's integer X and Y coordinates where the finger touched the device
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-touch. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_touch_down> event and the <remove_ontouchdown_listener> function
+    *See Also:* the <on_touch_down> event and the <remove_ontouchdown_listener> function
 */
 
     int add_ontouchdown_listener( function f )
@@ -1839,17 +1839,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_ontouchdown_listener
+    Function: remove_ontouchdown_listener
 
-	The remove_ontouchdown_listener() function unregisters the specified event handler.
+    The remove_ontouchdown_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ontouchdown_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ontouchdown_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ontouchdown_listener> function
+    *See Also:* the <add_ontouchdown_listener> function
 */
 
     remove_ontouchdown_listener( int ref )
@@ -1858,32 +1858,32 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_ontouchmove_listener
+    Function: add_ontouchmove_listener
 
-	The add_ontouchmove_listener() function registers a handler function for <on_touch_move> events.
+    The add_ontouchmove_listener() function registers a handler function for <on_touch_move> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchmove_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchmove_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, finger, x, y, modifiers )
-		(end)
+        (code)
+        f( controller, finger, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	finger - unique integer ID identifying the finger that has touched the device
-       	x, y - finger's integer X and Y coordinates where the finger has moved to
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-movement. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        finger - unique integer ID identifying the finger that has touched the device
+        x, y - finger's integer X and Y coordinates where the finger has moved to
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-movement. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_touch_move> event and the <remove_ontouchmove_listener> function
+    *See Also:* the <on_touch_move> event and the <remove_ontouchmove_listener> function
 */
 
     int add_ontouchmove_listener( function f )
@@ -1892,17 +1892,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_ontouchmove_listener
+    Function: remove_ontouchmove_listener
 
-	The remove_ontouchmmove_listener() function unregisters the specified event handler.
+    The remove_ontouchmmove_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ontouchmove_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ontouchmove_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ontouchmove_listener> function
+    *See Also:* the <add_ontouchmove_listener> function
 */
 
     remove_ontouchmove_listener( int ref )
@@ -1911,32 +1911,32 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_ontouchup_listener
+    Function: add_ontouchup_listener
 
-	The add_ontouchup_listener() function registers a handler function for <on_touch_up> events.
+    The add_ontouchup_listener() function registers a handler function for <on_touch_up> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchup_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_ontouchup_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, finger, x, y, modifiers )
-		(end)
+        (code)
+        f( controller, finger, x, y, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	finger - unique integer ID identifying the finger that has lifted off the device
-       	x, y - finger's integer X and Y coordinates where the finger lifted off the device
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-lift. If no modifier keys were pressed, set to nil.
+        controller - the Controller device that generated the event
+        finger - unique integer ID identifying the finger that has lifted off the device
+        x, y - finger's integer X and Y coordinates where the finger lifted off the device
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the finger-lift. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_touch_up> event and the <remove_ontouchup_listener> function
+    *See Also:* the <on_touch_up> event and the <remove_ontouchup_listener> function
 */
 
     int add_ontouchup_listener( function f )
@@ -1945,17 +1945,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_ontouchup_listener
+    Function: remove_ontouchup_listener
 
-	The remove_ontouchup_listener() function unregisters the specified event handler.
+    The remove_ontouchup_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_ontouchup_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_ontouchup_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_ontouchup_listener> function
+    *See Also:* the <add_ontouchup_listener> function
 */
 
     remove_ontouchup_listener( int ref )
@@ -1964,33 +1964,33 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onscroll_listener
+    Function: add_onscroll_listener
 
-	The add_onscroll_listener() function registers a handler function for <on_scroll> events.
+    The add_onscroll_listener() function registers a handler function for <on_scroll> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onscroll_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onscroll_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		boolean f( controller, direction, modifiers )
-		(end)
+        (code)
+        boolean f( controller, direction, modifiers )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         direction - 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
-       	modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll wheel movement. If no modifier keys were pressed, set to nil.
+        modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll wheel movement. If no modifier keys were pressed, set to nil.
 
-	*Handler Return Value:* true to propagate the event up the event chain, else false
+    *Handler Return Value:* true to propagate the event up the event chain, else false
 
-	The on_scroll events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_scroll> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
+    The on_scroll events are processed by two levels of handlers: (1) those of the relevant Controller object and (2) by any UIElement-based object with registered handlers for <UIElement.on_scroll> events. The Controller handlers process the events first. All the Controller handlers are invoked, even if one or more of them return false to prevent propagation of the event up the event chain. If all the Controller handlers return true, then the UIElement handlers are invoked.
 
-	*See Also:* the <on_scroll> and <UIElement.on_scroll> events and the <remove_onscroll_listener> function
+    *See Also:* the <on_scroll> and <UIElement.on_scroll> events and the <remove_onscroll_listener> function
 */
 
     int add_onscroll_listener( function f )
@@ -1999,17 +1999,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onscroll_listener
+    Function: remove_onscroll_listener
 
-	The remove_onscroll_listener() function unregisters the specified event handler.
+    The remove_onscroll_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onscroll_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onscroll_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onscroll_listener> function
+    *See Also:* the <add_onscroll_listener> function
 */
 
     remove_onscroll_listener( int ref )
@@ -2018,30 +2018,30 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onuievent_listener
+    Function: add_onuievent_listener
 
-	The add_onuievent_listener() function registers a handler function for <on_ui_event> events.
+    The add_onuievent_listener() function registers a handler function for <on_ui_event> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onuievent_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onuievent_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, text )
-		(end)
+        (code)
+        f( controller, text )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-		text - string. If the on_ui_event occurred in response to a show_multiple_choice() function, the text argument contains the ID of the selected choice. If the event is a response to an enter_text() function, the text argument contains the text the user entered.
+        controller - the Controller device that generated the event
+        text - string. If the on_ui_event occurred in response to a show_multiple_choice() function, the text argument contains the ID of the selected choice. If the event is a response to an enter_text() function, the text argument contains the text the user entered.
 
-	*Handler Return Value:* None
+    *Handler Return Value:* None
 
-	*See Also:* the <on_ui_event> event and the <remove_onuievent_listener> function
+    *See Also:* the <on_ui_event> event and the <remove_onuievent_listener> function
 */
 
     int add_onuievent_listener( function f )
@@ -2050,17 +2050,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onuievent_listener
+    Function: remove_onuievent_listener
 
-	The remove_onuievent_listener() function unregisters the specified event handler.
+    The remove_onuievent_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onuievent_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onuievent_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onuievent_listener> function
+    *See Also:* the <add_onuievent_listener> function
 */
 
     remove_onuievent_listener( int ref )
@@ -2069,30 +2069,30 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onimage_listener
+    Function: add_onimage_listener
 
-	The add_onimage_listener() function registers a handler function for <on_image> events.
+    The add_onimage_listener() function registers a handler function for <on_image> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onimage_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onimage_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, bitmap )
-		(end)
+        (code)
+        f( controller, bitmap )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-       	bitmap - <Bitmap> object containing the received image
+        controller - the Controller device that generated the event
+        bitmap - <Bitmap> object containing the received image
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_image> event and the <remove_onimage_listener> function
+    *See Also:* the <on_image> event and the <remove_onimage_listener> function
 */
 
     int add_onimage_listener( function f )
@@ -2101,17 +2101,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onimage_listener
+    Function: remove_onimage_listener
 
-	The remove_onimage_listener() function unregisters the specified event handler.
+    The remove_onimage_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onimage_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onimage_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onimage_listener> function
+    *See Also:* the <add_onimage_listener> function
 */
 
     remove_onimage_listener( int ref )
@@ -2120,29 +2120,29 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onimagecancelled_listener
+    Function: add_onimagecancelled_listener
 
-	The add_onimagecancelled_listener() function registers a handler function for <on_image_cancelled> events.
+    The add_onimagecancelled_listener() function registers a handler function for <on_image_cancelled> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onimagecancelled_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onimagecancelled_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller )
-		(end)
+        (code)
+        f( controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_image_cancelled> event and the <remove_onimagecancelled_listener> function
+    *See Also:* the <on_image_cancelled> event and the <remove_onimagecancelled_listener> function
 */
 
     int add_onimagecancelled_listener( function f )
@@ -2151,17 +2151,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onimagecancelled_listener
+    Function: remove_onimagecancelled_listener
 
-	The remove_onimagecancelled_listener() function unregisters the specified event handler.
+    The remove_onimagecancelled_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onimagecancelled_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onimagecancelled_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onimagecancelled_listener> function
+    *See Also:* the <add_onimagecancelled_listener> function
 */
 
     remove_onimagecancelled_listener( int ref )
@@ -2170,29 +2170,29 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onadvanceduiready_listener
+    Function: add_onadvanceduiready_listener
 
-	The add_onadvanceduiready_listener() function registers a handler function for <on_advanced_ui_ready> events.
+    The add_onadvanceduiready_listener() function registers a handler function for <on_advanced_ui_ready> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onadvanceduiready_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onadvanceduiready_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller )
-		(end)
+        (code)
+        f( controller )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_advanced_ui_ready> event, the <remove_onadvanceduiready_listener> function and the <has_advanced_ui> property
+    *See Also:* the <on_advanced_ui_ready> event, the <remove_onadvanceduiready_listener> function and the <has_advanced_ui> property
 */
 
     int add_onadvanceduiready_listener( function f )
@@ -2201,17 +2201,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onadvanceduiready_listener
+    Function: remove_onadvanceduiready_listener
 
-	The remove_onadvanceduiready_listener() function unregisters the specified event handler.
+    The remove_onadvanceduiready_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onadvanceduiready_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onadvanceduiready_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onadvanceduiready_listener> function
+    *See Also:* the <add_onadvanceduiready_listener> function
 */
 
     remove_onadvanceduiready_listener( int ref )
@@ -2220,32 +2220,32 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	InternalFunction: add_onadvanceduievent_listener
+    InternalFunction: add_onadvanceduievent_listener
 
     *** The on_advanced_ui_event event is fired by the "Advanced UI" Lua library to communicate with the TakeControl framework. It should never be called directly by a TrickPlay application. Therefore, the supporting add_onadvanceduievent_listener() function will remain undocumented to the public.
 
-	The add_onadvanceduievent_listener() function registers a handler function for <on_advanced_ui_event> events.
+    The add_onadvanceduievent_listener() function registers a handler function for <on_advanced_ui_event> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onadvanceduievent_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onadvanceduievent_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, JSON_data )
-		(end)
+        (code)
+        f( controller, JSON_data )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-    	JSON_data - string of JSON-formatted text data returned from the device
+        controller - the Controller device that generated the event
+        JSON_data - string of JSON-formatted text data returned from the device
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_advanced_ui_event> event and the <remove_onadvanceduievent_listener> function
+    *See Also:* the <on_advanced_ui_event> event and the <remove_onadvanceduievent_listener> function
 */
 
     int add_onadvanceduievent_listener( function f )
@@ -2254,17 +2254,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	InternalFunction: remove_onadvanceduievent_listener
+    InternalFunction: remove_onadvanceduievent_listener
 
-	The remove_onadvanceduievent_listener() function unregisters the specified event handler.
+    The remove_onadvanceduievent_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onadvanceduievent_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onadvanceduievent_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onadvanceduievent_listener> function
+    *See Also:* the <add_onadvanceduievent_listener> function
 */
 
     remove_onadvanceduievent_listener( int ref )
@@ -2274,30 +2274,30 @@ interface Controller [[ControllerDelegate*]]
 
 
 /***************************************
-	Function: add_onstreamingvideoconnected_listener
+    Function: add_onstreamingvideoconnected_listener
 
-	The add_onstreamingvideoconnected_listener() function registers a handler function for <on_streaming_video_connected> events.
+    The add_onstreamingvideoconnected_listener() function registers a handler function for <on_streaming_video_connected> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideoconnected_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideoconnected_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, address )
-		(end)
+        (code)
+        f( controller, address )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         address - the address that was connected to
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_streaming_video_connected> event and the <remove_onstreamingvideoconnected_listener> function
+    *See Also:* the <on_streaming_video_connected> event and the <remove_onstreamingvideoconnected_listener> function
 */
 
     int add_onstreamingvideoconnected_listener( function f )
@@ -2306,17 +2306,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onstreamingvideoconnected_listener
+    Function: remove_onstreamingvideoconnected_listener
 
-	The remove_onstreamingvideoconnected_listener() function unregisters the specified event handler.
+    The remove_onstreamingvideoconnected_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideoconnected_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideoconnected_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstreamingvideoconnected_listener> function
+    *See Also:* the <add_onstreamingvideoconnected_listener> function
 */
 
     remove_onstreamingvideoconnected_listener( int ref )
@@ -2325,31 +2325,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onstreamingvideofailed_listener
+    Function: add_onstreamingvideofailed_listener
 
-	The add_onstreamingvideofailed_listener() function registers a handler function for <on_streaming_video_failed> events.
+    The add_onstreamingvideofailed_listener() function registers a handler function for <on_streaming_video_failed> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideofailed_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideofailed_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, address, description )
-		(end)
+        (code)
+        f( controller, address, description )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         address - the address that was connected to
         description - string describing the reason for the failure
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_streaming_video_failed> event and the <remove_onstreamingvideofailed_listener> function
+    *See Also:* the <on_streaming_video_failed> event and the <remove_onstreamingvideofailed_listener> function
 */
 
     int add_onstreamingvideofailed_listener( function f )
@@ -2358,17 +2358,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onstreamingvideofailed_listener
+    Function: remove_onstreamingvideofailed_listener
 
-	The remove_onstreamingvideofailed_listener() function unregisters the specified event handler.
+    The remove_onstreamingvideofailed_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideofailed_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideofailed_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstreamingvideofailed_listener> function
+    *See Also:* the <add_onstreamingvideofailed_listener> function
 */
 
     remove_onstreamingvideofailed_listener( int ref )
@@ -2377,31 +2377,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onstreamingvideodropped_listener
+    Function: add_onstreamingvideodropped_listener
 
-	The add_onstreamingvideodropped_listener() function registers a handler function for <on_streaming_video_dropped> events.
+    The add_onstreamingvideodropped_listener() function registers a handler function for <on_streaming_video_dropped> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideodropped_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideodropped_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, address, description )
-		(end)
+        (code)
+        f( controller, address, description )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         address - the address that was connected to
         description - string describing the reason for the failure
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_streaming_video_dropped> event and the <remove_onstreamingvideodropped_listener> function
+    *See Also:* the <on_streaming_video_dropped> event and the <remove_onstreamingvideodropped_listener> function
 */
 
     int add_onstreamingvideodropped_listener( function f )
@@ -2410,17 +2410,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onstreamingvideodropped_listener
+    Function: remove_onstreamingvideodropped_listener
 
-	The remove_onstreamingvideodropped_listener() function unregisters the specified event handler.
+    The remove_onstreamingvideodropped_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideodropped_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideodropped_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstreamingvideodropped_listener> function
+    *See Also:* the <add_onstreamingvideodropped_listener> function
 */
 
     remove_onstreamingvideodropped_listener( int ref )
@@ -2429,31 +2429,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onstreamingvideoended_listener
+    Function: add_onstreamingvideoended_listener
 
-	The add_onstreamingvideoended_listener() function registers a handler function for <on_streaming_video_ended> events.
+    The add_onstreamingvideoended_listener() function registers a handler function for <on_streaming_video_ended> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideoended_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideoended_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, address, description )
-		(end)
+        (code)
+        f( controller, address, description )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
+        controller - the Controller device that generated the event
         address - the address that was connected to
         description - string describing who terminated the call
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_streaming_video_ended> event and the <remove_onstreamingvideoended_listener> function
+    *See Also:* the <on_streaming_video_ended> event and the <remove_onstreamingvideoended_listener> function
 */
 
     int add_onstreamingvideoended_listener( function f )
@@ -2462,17 +2462,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onstreamingvideoended_listener
+    Function: remove_onstreamingvideoended_listener
 
-	The remove_onstreamingvideoended_listener() function unregisters the specified event handler.
+    The remove_onstreamingvideoended_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideoended_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideoended_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstreamingvideoended_listener> function
+    *See Also:* the <add_onstreamingvideoended_listener> function
 */
 
     remove_onstreamingvideoended_listener( int ref )
@@ -2481,31 +2481,31 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: add_onstreamingvideostatus_listener
+    Function: add_onstreamingvideostatus_listener
 
-	The add_onstreamingvideostatus_listener() function registers a handler function for <on_streaming_video_status> events.
+    The add_onstreamingvideostatus_listener() function registers a handler function for <on_streaming_video_status> events.
 
-	*Arguments:*
+    *Arguments:*
 
-		f - reference to handler function. The function prototype is described below.
+        f - reference to handler function. The function prototype is described below.
 
-	*Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideostatus_listener> function to unregister the handler.
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onstreamingvideostatus_listener> function to unregister the handler.
 
-	*Handler Prototype:*
+    *Handler Prototype:*
 
-		(code)
-		f( controller, status, arg )
-		(end)
+        (code)
+        f( controller, status, arg )
+        (end)
 
-	*Handler Arguments:*
+    *Handler Arguments:*
 
-       	controller - the Controller device that generated the event
-		status - the current status
-		arg - optional argument, depending on status
+        controller - the Controller device that generated the event
+        status - the current status
+        arg - optional argument, depending on status
 
     *Handler Return Value:* None
 
-	*See Also:* the <on_streaming_video_status> event and the <remove_onstreamingvideostatus_listener> function
+    *See Also:* the <on_streaming_video_status> event and the <remove_onstreamingvideostatus_listener> function
 */
 
     int add_onstreamingvideostatus_listener( function f )
@@ -2514,17 +2514,17 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Function: remove_onstreamingvideostatus_listener
+    Function: remove_onstreamingvideostatus_listener
 
-	The remove_onstreamingvideostatus_listener() function unregisters the specified event handler.
+    The remove_onstreamingvideostatus_listener() function unregisters the specified event handler.
 
-	*Arguments:*
+    *Arguments:*
 
-		ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideostatus_listener> function.
+        ref - handle for event handler to unregister. This handle is returned by the <add_onstreamingvideostatus_listener> function.
 
-	*Return Value:* None
+    *Return Value:* None
 
-	*See Also:* the <add_onstreamingvideostatus_listener> function
+    *See Also:* the <add_onstreamingvideostatus_listener> function
 */
 
     remove_onstreamingvideostatus_listener( int ref )
@@ -2537,7 +2537,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_disconnected event occurs when the device disconnects from the TrickPlay system. When a device disconnects, it is removed from the <controllers.connected> table of connected devices.
 
-	*See Also:* the <add_ondisconnected_listener> function
+    *See Also:* the <add_ondisconnected_listener> function
 */
 
     function on_disconnected
@@ -2553,7 +2553,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_key_down event occurs when a key is pressed or a key on the virtual remote control is pressed.
 
-	*See Also:* the <add_onkeydown_listener> function and the <on_key_up> and <UIElement.on_key_down> events
+    *See Also:* the <add_onkeydown_listener> function and the <on_key_up> and <UIElement.on_key_down> events
 */
 
     function on_key_down
@@ -2569,7 +2569,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_key_up event occurs when a key is released or a key on the virtual remote control is released.
 
-	*See Also:* the <add_onkeyup_listener> function and the <on_key_down> and <UIElement.on_key_up> events
+    *See Also:* the <add_onkeyup_listener> function and the <on_key_down> and <UIElement.on_key_up> events
 */
 
     function on_key_up
@@ -2585,7 +2585,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_accelerometer event is fired when an accelerometer event occurs.
 
-	*See Also:* the <add_onaccelerometer_listener> function
+    *See Also:* the <add_onaccelerometer_listener> function
 */
 
     function on_accelerometer
@@ -2601,7 +2601,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_gyroscope event is fired when a gyroscope event occurs.
 
-	*See Also:* the <add_ongyroscope_listener> function
+    *See Also:* the <add_ongyroscope_listener> function
 */
 
     function on_gyroscope
@@ -2617,7 +2617,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_magnetometer event is fired when a magnetometer event occurs.
 
-	*See Also:* the <add_onmagnetometer_listener> function
+    *See Also:* the <add_onmagnetometer_listener> function
     */
 
     function on_magnetometer
@@ -2649,7 +2649,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_pointer_button_down event occurs when a pointer device's button is pressed. For devices with multiple buttons, it is possible to identify which button was pressed.
 
-	*See Also:* the <add_onpointerbuttondown_listener> function
+    *See Also:* the <add_onpointerbuttondown_listener> function
     */
 
     function on_pointer_button_down
@@ -2665,7 +2665,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_pointer_move event occurs when a pointer device moves.
 
-	*See Also:* the <add_onpointermove_listener> function
+    *See Also:* the <add_onpointermove_listener> function
     */
 
     function on_pointer_move
@@ -2679,9 +2679,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_pointer_button_up
 
-	The on_pointer_button_up event occurs when a pointer device's button is released. For devices with multiple buttons, it's possible to identify which button was released.
+    The on_pointer_button_up event occurs when a pointer device's button is released. For devices with multiple buttons, it's possible to identify which button was released.
 
-	*See Also:* the <add_onpointerbuttonup_listener> function
+    *See Also:* the <add_onpointerbuttonup_listener> function
 */
 
     function on_pointer_button_up
@@ -2693,11 +2693,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_pointer_active
+    Event: on_pointer_active
 
-	The on_pointer_active event occurs when a pointer device becomes active from a suspended state.
+    The on_pointer_active event occurs when a pointer device becomes active from a suspended state.
 
-	*See Also:* the <add_onpointeractive_listener> function
+    *See Also:* the <add_onpointeractive_listener> function
 */
 
     function on_pointer_active
@@ -2709,11 +2709,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_pointer_inactive
+    Event: on_pointer_inactive
 
     The on_pointer_inactive event occurs when a pointer device becomes inactive, such as when it is turned off or suspends itself.
 
-	*See Also:* the <add_onpointerinactive_listener> function
+    *See Also:* the <add_onpointerinactive_listener> function
 */
 
     function on_pointer_inactive
@@ -2729,7 +2729,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_touch_down event occurs when a finger initially touches the device. Subsequent movements by the finger generate <on_touch_move> events. When the finger is lifted from the device, an <on_touch_up> event occurs.
 
-	*See Also:* the <add_ontouchdown_listener> function
+    *See Also:* the <add_ontouchdown_listener> function
 */
 
     function on_touch_down
@@ -2741,11 +2741,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_touch_move
+    Event: on_touch_move
 
-	The on_touch_move event occurs when a finger drags across the device.
+    The on_touch_move event occurs when a finger drags across the device.
 
-	*See Also:* the <add_ontouchmove_listener> function
+    *See Also:* the <add_ontouchmove_listener> function
 */
 
     function on_touch_move
@@ -2757,11 +2757,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_touch_up
+    Event: on_touch_up
 
-	The on_touch_up event occurs when a finger lifts off the device.
+    The on_touch_up event occurs when a finger lifts off the device.
 
-	*See Also:* the <add_ontouchup_listener> function
+    *See Also:* the <add_ontouchup_listener> function
 */
 
     function on_touch_up
@@ -2773,11 +2773,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_scroll
+    Event: on_scroll
 
-	The on_scroll event occurs when the scroll wheel is moved.
+    The on_scroll event occurs when the scroll wheel is moved.
 
-	*See Also:* the <add_onscroll_listener> function
+    *See Also:* the <add_onscroll_listener> function
 */
 
     function on_scroll
@@ -2789,11 +2789,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_ui_event
+    Event: on_ui_event
 
-	The on_ui_event event occurs when the user makes a selection from a <show_multiple_choice> list or when the user has finished entering text for the <enter_text> function. The selection or entered text is passed as an argument to the handlers registered for the event.
+    The on_ui_event event occurs when the user makes a selection from a <show_multiple_choice> list or when the user has finished entering text for the <enter_text> function. The selection or entered text is passed as an argument to the handlers registered for the event.
 
-	*See Also:* the <add_onuievent_listener> function
+    *See Also:* the <add_onuievent_listener> function
 */
 
     function on_ui_event
@@ -2805,11 +2805,11 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	Event: on_image
+    Event: on_image
 
-	The on_image event occurs when an image is received from the device in response to a call to the <request_image> function.
+    The on_image event occurs when an image is received from the device in response to a call to the <request_image> function.
 
-	*See Also:* the <add_onimage_listener> function
+    *See Also:* the <add_onimage_listener> function
 */
 
     function on_image
@@ -2825,7 +2825,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_image_cancelled event occurs when the user cancels the sending of an image in response to a call to the <request_image> function.
 
-	*See Also:* the <add_onimagecancelled_listener> function
+    *See Also:* the <add_onimagecancelled_listener> function
 */
 
     function on_image_cancelled
@@ -2856,7 +2856,7 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: add_onaudioclipcancelled_listener
+    UndocumentedFunction: add_onaudioclipcancelled_listener
 
 
 */
@@ -2866,7 +2866,7 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: remove_onaudioclipcancelled_listener
+    UndocumentedFunction: remove_onaudioclipcancelled_listener
 
 
 */
@@ -2881,7 +2881,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_advanced_ui_ready event occurs when a TrickPlay-enabled device is prepared to connect to a TrickPlay application. At this point, the application can load the necessary libraries to make the connection. Refer to <Interacting with an External Smart Device> for further information.
 
-	*See Also:* the <add_onadvanceduiready_listener> function
+    *See Also:* the <add_onadvanceduiready_listener> function
 */
 
     function on_advanced_ui_ready
@@ -2899,7 +2899,7 @@ interface Controller [[ControllerDelegate*]]
 
     The on_advanced_ui_event event occurs when an "Advanced UI" event is fired in response to a call to the <advanced_ui> function.
 
-	*See Also:* the <add_onadvanceduievent_listener> function
+    *See Also:* the <add_onadvanceduievent_listener> function
 */
 
     function on_advanced_ui_event
@@ -2913,9 +2913,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_streaming_video_connected
 
-	The on_streaming_video_connected event occurs when...
+    The on_streaming_video_connected event occurs when...
 
-	*See Also:* the <add_onstreamingvideoconnected_listener> function
+    *See Also:* the <add_onstreamingvideoconnected_listener> function
 */
 
     function on_streaming_video_connected
@@ -2929,9 +2929,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_streaming_video_failed
 
-	The on_streaming_video_failed event occurs when ...
+    The on_streaming_video_failed event occurs when ...
 
-	*See Also:* the <add_onstreamingvideofailed_listener> function
+    *See Also:* the <add_onstreamingvideofailed_listener> function
 */
 
     function on_streaming_video_failed
@@ -2945,9 +2945,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_streaming_video_dropped
 
-	The on_streaming_video_dropped event occurs when ...
+    The on_streaming_video_dropped event occurs when ...
 
-	*See Also:* the <add_onstreamingvideodropped_listener> function
+    *See Also:* the <add_onstreamingvideodropped_listener> function
 */
 
     function on_streaming_video_dropped
@@ -2961,9 +2961,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_streaming_video_ended
 
-	The on_streaming_video_ended event occurs when ...
+    The on_streaming_video_ended event occurs when ...
 
-	*See Also:* the <add_onstreamingvideoended_listener> function
+    *See Also:* the <add_onstreamingvideoended_listener> function
 */
 
     function on_streaming_video_ended
@@ -2977,9 +2977,9 @@ interface Controller [[ControllerDelegate*]]
 /***************************************
     Event: on_streaming_video_status
 
-	The on_streaming_video_status event occurs when ...
+    The on_streaming_video_status event occurs when ...
 
-	*See Also:* the <add_onstreamingvideostatus_listener> function
+    *See Also:* the <add_onstreamingvideostatus_listener> function
 */
 
     function on_streaming_video_status
@@ -2991,7 +2991,7 @@ interface Controller [[ControllerDelegate*]]
         ]];
 
 /***************************************
-	UndocumentedFunction: save_key_map
+    UndocumentedFunction: save_key_map
 
     TODO:Undocumented. We may want to restrict this one or move it somewhere else
 

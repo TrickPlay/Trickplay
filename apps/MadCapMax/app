@@ -5,6 +5,7 @@ app=
     version     = "1.2",
     name        = "MadCap Max",
     author      = "Alex Indaco",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Max's poop-tacular adventure."
 }
 

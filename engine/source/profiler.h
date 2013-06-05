@@ -36,7 +36,7 @@ class Profiler
 
 public:
 
-    Profiler( const char * name , int type );
+    Profiler( const char* name , int type );
 
     ~Profiler();
 
@@ -44,9 +44,9 @@ public:
 
     static void reset();
 
-    static void created( const char * name, gpointer p );
+    static void created( const char* name, gpointer p );
 
-    static void destroyed( const char * name, gpointer p );
+    static void destroyed( const char* name, gpointer p );
 
     static void dump_objects();
 
@@ -54,15 +54,15 @@ private:
 
     typedef std::string String;
 
-    static GQueue * get_queue();
+    static GQueue* get_queue();
 
     static void lock( bool _lock );
 
-    Profiler( const Profiler & );
+    Profiler( const Profiler& );
 
-    const char *    name;
+    const char*     name;
     int             type;
-    GTimer *        timer;
+    GTimer*         timer;
 
     struct Entry
     {
@@ -77,7 +77,7 @@ private:
 
     typedef std::vector< std::pair< String, Entry > > EntryVector;
 
-    static void dump( EntryVector & v );
+    static void dump( EntryVector& v );
 
     static bool compare( std::pair< String, Entry > a, std::pair< String, Entry > b );
 
@@ -85,7 +85,7 @@ private:
 
     struct ObjectEntry
     {
-        ObjectEntry() : created(0), destroyed(0) {}
+        ObjectEntry() : created( 0 ), destroyed( 0 ) {}
 
         guint   created;
         guint   destroyed;

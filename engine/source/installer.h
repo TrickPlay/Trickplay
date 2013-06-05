@@ -10,7 +10,7 @@ class Installer : private Downloads::Delegate
 {
 public:
 
-    Installer( TPContext * context );
+    Installer( TPContext* context );
 
     virtual ~Installer();
 
@@ -26,14 +26,14 @@ public:
     // the app is not running.
 
     guint download_and_install_app(
-            const String & owner,
-            const String & app_id,
-            const String & app_name,
+            const String& owner,
+            const String& app_id,
+            const String& app_name,
             bool locked,
-            const Network::Request & request,
-            Network::CookieJar * cookie_jar,
-            const StringSet & required_fingerprints = StringSet(),
-            const StringMap & extra = StringMap() );
+            const Network::Request& request,
+            Network::CookieJar* cookie_jar,
+            const StringSet& required_fingerprints = StringSet(),
+            const StringMap& extra = StringMap() );
 
     //.........................................................................
     // An installation that is FINISHED, may still need a bit of processing
@@ -57,7 +57,7 @@ public:
         enum InfoStatus { DOWNLOADING, INSTALLING, FAILED, FINISHED };
 
         Info()
-        :
+            :
             id( 0 ),
             status( FAILED ),
             locked( false ),
@@ -68,14 +68,14 @@ public:
         {}
 
         Info( guint _id,
-                const String & _app_id,
-                const String & _app_name,
-                const String & _owner,
+                const String& _app_id,
+                const String& _app_name,
+                const String& _owner,
                 bool _locked,
                 guint _download_id,
-                const StringSet & _required_fingerprints,
-                const StringMap & _extra )
-        :
+                const StringSet& _required_fingerprints,
+                const StringMap& _extra )
+            :
             id( _id ),
             status( DOWNLOADING ),
             app_id( _app_id ),
@@ -110,7 +110,7 @@ public:
 
     //.........................................................................
 
-    Info * get_install( guint id );
+    Info* get_install( guint id );
 
     //.........................................................................
 
@@ -125,31 +125,31 @@ public:
     {
     public:
 
-        virtual void download_progress( const Info & install_info, const Downloads::Info & download_info ) = 0;
-        virtual void download_finished( const Info & install_info, const Downloads::Info & download_info ) = 0;
-        virtual void install_progress( const Info & install_info ) = 0;
-        virtual void install_finished( const Info & install_info ) = 0;
+        virtual void download_progress( const Info& install_info, const Downloads::Info& download_info ) = 0;
+        virtual void download_finished( const Info& install_info, const Downloads::Info& download_info ) = 0;
+        virtual void install_progress( const Info& install_info ) = 0;
+        virtual void install_finished( const Info& install_info ) = 0;
     };
 
-    void add_delegate( Delegate * delegate );
-    void remove_delegate( Delegate * delegate );
+    void add_delegate( Delegate* delegate );
+    void remove_delegate( Delegate* delegate );
 
 private:
 
     //.........................................................................
 
-    Info * get_info_for_download( guint download_id );
+    Info* get_info_for_download( guint download_id );
 
     //.........................................................................
     // Downloads::Delegate methods
 
-    virtual void download_progress( const Downloads::Info & dl_info );
+    virtual void download_progress( const Downloads::Info& dl_info );
 
-    virtual void download_finished( const Downloads::Info & dl_info );
+    virtual void download_finished( const Downloads::Info& dl_info );
 
     //.........................................................................
 
-    void install_progress( const Installer::Info & progress_info );
+    void install_progress( const Installer::Info& progress_info );
 
     //.........................................................................
 
@@ -157,14 +157,14 @@ private:
 
     //.........................................................................
 
-    TPContext *     context;
+    TPContext*      context;
     guint           next_id;
     ThreadPool      thread_pool;
 
     //.........................................................................
     // A map of Info structures by id
 
-    typedef std::map<guint,Info>    InfoMap;
+    typedef std::map<guint, Info>    InfoMap;
 
     InfoMap         info_map;
 
