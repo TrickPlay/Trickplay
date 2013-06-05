@@ -297,24 +297,12 @@ static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua
     return result;
 }
 
-#ifdef CLUTTER_VERSION_1_10
 static void transitions_completed(ClutterActor * actor, lua_State *L)
 {
     ClutterUtil::wrap_concrete_actor(L, actor);
 
     UserData::invoke_callback(G_OBJECT(actor), "on_completed",1,0,L);
 }
-
-#else
-
-static void animation_completed(ClutterAnimation * animation,lua_State * L)
-{
-    ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
-
-    UserData::invoke_callback(G_OBJECT(animation),"on_completed",1,0,L);
-}
-
-#endif
 
 ]]
 
@@ -545,6 +533,29 @@ interface actor [[ClutterActor*]]
     double height
         [[ height = clutter_actor_get_height( self ); ]]
         [[ clutter_actor_set_height( self , height ); ]];
+
+/***************************************
+    Property: explicit_height
+
+    Has the height been explicitly set, or just calculated internally?
+*/
+
+    readonly bool explicit_height
+    [[
+        g_object_get(G_OBJECT(self), "natural-height-set", &explicit_height, NULL);
+    ]];
+
+/***************************************
+    Property: explicit_width
+
+    Has the width been explicitly set, or just calculated internally?
+*/
+
+    readonly bool explicit_width
+    [[
+        g_object_get(G_OBJECT(self), "natural-width-set", &explicit_width, NULL);
+    ]];
+
 
 /***************************************
     Property: size
@@ -991,28 +1002,6 @@ interface actor [[ClutterActor*]]
         ]];
 
 /***************************************
-    Property: clip_to_size
-
-    The clip_to_size property is a boolean value that enables and disables clipping on a <Group at file:clutter_group-lb.html> object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
-
-    Clipping on a Group object can also be enabled by defining a clipping rectangle via the <clip> property.
-
-    The clip_to_size property affects objects of type Group only; it has no effect on other object types.
-
-    *Default Setting:* false (clipping in the Group is disabled)
-
-    *See Also:* the <Group at file:clutter_group-lb.html> class and the <clip> and <has_clip> properties
-*/
-
-    bool clip_to_size
-        [[
-            clip_to_size = clutter_actor_get_clip_to_allocation( self );
-        ]]
-        [[
-            clutter_actor_set_clip_to_allocation( self , clip_to_size );
-        ]];
-
-/***************************************
     Property: parent
 
     The parent property contains the parent UIElement object of the current object. An object has a parent if it is contained within a <Group at file:clutter_group-lb.html#Group> or has been added to the <screen at file:clutter_screen-lb.html#screen> global variable. If the object has no parent, the parent property contains nil.
@@ -1244,11 +1233,7 @@ interface actor [[ClutterActor*]]
 
     readonly bool is_animating
     [[
-#ifdef CLUTTER_VERSION_1_10
         is_animating =  for_each_property(self,L,is_animating_check_function,NULL);
-#else
-        is_animating=clutter_actor_get_animation(self)!=NULL;
-#endif
     ]];
 
 /***************************************
@@ -1330,11 +1315,7 @@ interface actor [[ClutterActor*]]
 
     show_all()
         [[
-#ifndef CLUTTER_VERSION_1_10
-            clutter_actor_show_all(self);
-#else
             clutter_actor_show(self);
-#endif
         ]];
 
 /***************************************
@@ -1386,11 +1367,7 @@ interface actor [[ClutterActor*]]
 
     hide_all()
         [[
-#ifndef CLUTTER_VERSION_1_10
-            clutter_actor_hide_all(self);
-#else
             clutter_actor_hide(self);
-#endif
         ]];
 
 /***************************************
@@ -1438,11 +1415,7 @@ interface actor [[ClutterActor*]]
     [[
         if(ClutterActor * parent=clutter_actor_get_parent(self))
         {
-#ifdef CLUTTER_VERSION_1_10
         clutter_actor_remove_child( parent, self );
-#else
-        clutter_container_remove_actor(CLUTTER_CONTAINER(parent),self);
-#endif
         }
     ]];
 
@@ -1487,11 +1460,7 @@ interface actor [[ClutterActor*]]
             ClutterActor* source =ClutterUtil::user_data_to_actor(L,above);
             if(source)
             {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_above_sibling( parent, self, source );
-#else
-                clutter_actor_raise(self,source);
-#endif
             }
         }
         else
@@ -1525,11 +1494,7 @@ interface actor [[ClutterActor*]]
             ClutterActor* source =ClutterUtil::user_data_to_actor(L,below);
             if(source)
             {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_below_sibling( parent, self, source );
-#else
-                clutter_actor_lower(self,source);
-#endif
             }
         }
         else
@@ -1554,11 +1519,7 @@ interface actor [[ClutterActor*]]
     [[
         if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_above_sibling( parent, self, NULL );
-#else
-                clutter_actor_raise_top(self);
-#endif
         }
         else
         {
@@ -1582,11 +1543,7 @@ interface actor [[ClutterActor*]]
     [[
         if(ClutterActor * parent G_GNUC_UNUSED =clutter_actor_get_parent(self))
         {
-#ifdef CLUTTER_VERSION_1_10
                 clutter_actor_set_child_below_sibling( parent, self, NULL );
-#else
-                clutter_actor_lower_bottom(self);
-#endif
         }
         else
         {
@@ -1980,7 +1937,6 @@ interface actor [[ClutterActor*]]
         gulong mode=ClutterUtil::to_clutter_animation_mode(lua_tostring(L,-1));
         lua_pop(L,1);
 
-#ifdef CLUTTER_VERSION_1_10
         lua_getfield(L,props,"on_completed");
 
         UserData * ud = UserData::get( L );
@@ -2062,333 +2018,6 @@ interface actor [[ClutterActor*]]
         }
 
         clutter_actor_restore_easing_state( self );
-#else
-        GPtrArray * names=g_ptr_array_new_with_free_func(g_free);
-#ifndef GLIB_VERSION_2_32
-        GValueArray * values=g_value_array_new(6);
-#else
-        GArray * values = g_array_sized_new(FALSE, FALSE, sizeof(GValue), 6);
-#endif
-
-        lua_pushnil(L);
-
-        while(lua_next(L,props))
-        {
-            GValue value={0};
-
-            if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
-            {
-                const char * k=lua_tostring(L,-2);
-
-                if (!strcmp("x",k)||!strcmp("y",k))
-                {
-                    g_value_init(&value,G_TYPE_FLOAT);
-                    g_value_set_float(&value,lua_tonumber(L,-1));
-                    g_ptr_array_add(names,g_strdup(k));
-#ifndef GLIB_VERSION_2_32
-                    g_value_array_append(values,&value);
-#else
-                    g_array_append_val(values,value);
-#endif
-                }
-                else if (!strcmp("w",k)||!strcmp("width",k))
-                {
-                    g_value_init(&value,G_TYPE_FLOAT);
-                    g_value_set_float(&value,lua_tonumber(L,-1));
-                    g_ptr_array_add(names,g_strdup("width"));
-#ifndef GLIB_VERSION_2_32
-                    g_value_array_append(values,&value);
-#else
-                    g_array_append_val(values,value);
-#endif
-                }
-                else if (!strcmp("h",k)||!strcmp("height",k))
-                {
-                    g_value_init(&value,G_TYPE_FLOAT);
-                    g_value_set_float(&value,lua_tonumber(L,-1));
-                    g_ptr_array_add(names,g_strdup("height"));
-#ifndef GLIB_VERSION_2_32
-                    g_value_array_append(values,&value);
-#else
-                    g_array_append_val(values,value);
-#endif
-                }
-                else if (!strcmp("z",k)||!strcmp("depth",k))
-                {
-                    g_value_init(&value,G_TYPE_FLOAT);
-                    g_value_set_float(&value,lua_tonumber(L,-1));
-                    g_ptr_array_add(names,g_strdup("depth"));
-#ifndef GLIB_VERSION_2_32
-                    g_value_array_append(values,&value);
-#else
-                    g_array_append_val(values,value);
-#endif
-                }
-                else if (!strcmp("opacity",k))
-                {
-                    g_value_init(&value,G_TYPE_UINT);
-                    g_value_set_uint(&value,lua_tointeger(L,-1));
-                    g_ptr_array_add(names,g_strdup(k));
-#ifndef GLIB_VERSION_2_32
-                    g_value_array_append(values,&value);
-#else
-                    g_array_append_val(values,value);
-#endif
-                }
-                else if (!strcmp("position",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-                        g_ptr_array_add(names,g_strdup("x"));
-                        g_ptr_array_add(names,g_strdup("y"));
-
-                        lua_rawgeti(L,-1,1);
-                        g_value_init(&value,G_TYPE_FLOAT);
-                        g_value_set_float(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-
-                        lua_rawgeti(L,-1,2);
-                        g_value_unset(&value);
-                        g_value_init(&value,G_TYPE_FLOAT);
-                        g_value_set_float(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-                    }
-                }
-                else if (!strcmp("size",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-                        g_ptr_array_add(names,g_strdup("width"));
-                        g_ptr_array_add(names,g_strdup("height"));
-
-                        lua_rawgeti(L,-1,1);
-                        g_value_init(&value,G_TYPE_FLOAT);
-                        g_value_set_float(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-
-                        lua_rawgeti(L,-1,2);
-                        g_value_unset(&value);
-                        g_value_init(&value,G_TYPE_FLOAT);
-                        g_value_set_float(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-                    }
-                }
-                else if (!strcmp("scale",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-                        g_ptr_array_add(names,g_strdup("scale-x"));
-                        g_ptr_array_add(names,g_strdup("scale-y"));
-
-                        lua_rawgeti(L,-1,1);
-                        g_value_init(&value,G_TYPE_DOUBLE);
-                        g_value_set_double(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-
-                        lua_rawgeti(L,-1,2);
-                        g_value_unset(&value);
-                        g_value_init(&value,G_TYPE_DOUBLE);
-                        g_value_set_double(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                        lua_pop(L,1);
-                    }
-                }
-                else if (!strcmp("x_rotation",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-
-                    }
-                    else
-                    {
-                        g_ptr_array_add(names,g_strdup("rotation-angle-x"));
-                        g_value_init(&value,G_TYPE_DOUBLE);
-                        g_value_set_double(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                    }
-                }
-                else if (!strcmp("y_rotation",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-
-                    }
-                    else
-                    {
-                        g_ptr_array_add(names,g_strdup("rotation-angle-y"));
-                        g_value_init(&value,G_TYPE_DOUBLE);
-                        g_value_set_double(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                    }
-                }
-                else if (!strcmp("z_rotation",k))
-                {
-                    if (lua_type(L,-1)==LUA_TTABLE)
-                    {
-
-                    }
-                    else
-                    {
-                        g_ptr_array_add(names,g_strdup("rotation-angle-z"));
-                        g_value_init(&value,G_TYPE_DOUBLE);
-                        g_value_set_double(&value,lua_tonumber(L,-1));
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                    }
-                }
-                else if ( ! strcmp( "clip" , k ) )
-                {
-                    if ( lua_type( L , - 1 ) == LUA_TTABLE )
-                    {
-                        ClutterGeometry geometry;
-                        ClutterUtil::to_clutter_geometry(L, lua_gettop(L), &geometry);
-
-                        g_ptr_array_add(names,g_strdup("clip"));
-                        g_value_init(&value, CLUTTER_TYPE_GEOMETRY);
-                        g_value_set_boxed(&value, &geometry);
-#ifndef GLIB_VERSION_2_32
-                        g_value_array_append(values,&value);
-#else
-                        g_array_append_val(values,value);
-#endif
-                    }
-                }
-            }
-
-            lua_pop(L,1);
-        }
-
-#ifndef GLIB_VERSION_2_32
-        if ( values->n_values == 0 )
-#else
-        if ( values->len == 0 )
-#endif
-        {
-#ifndef GLIB_VERSION_2_32
-            g_value_array_free(values);
-#else
-            g_array_unref(values);
-#endif
-            g_ptr_array_free(names,TRUE);
-            lua_pushnil( L );
-            luaL_error( L , "Call to animate has no properties" );
-            return 1;
-        }
-
-        ClutterAnimation * a=clutter_actor_animatev(self,mode,duration,
-#ifndef GLIB_VERSION_2_32
-                            values->n_values,
-#else
-                            values->len,
-#endif
-                            (gchar**)names->pdata,
-#ifndef GLIB_VERSION_2_32
-                            values->values
-#else
-                            (const GValue *)values->data
-#endif
-                            );
-
-        if ( ! a )
-        {
-            lua_pushnil( L );
-        }
-        else
-        {
-            UserData * ud = UserData::get( G_OBJECT( a ) );
-
-            if ( ud )
-            {
-                ud->push_proxy();
-            }
-            else
-            {
-                g_object_ref( a );
-
-                lua_pushlightuserdata( L , a );
-                new_Animation( L );
-                lua_remove( L , -2 );
-            }
-
-            int animation = lua_gettop( L );
-
-            lua_getfield(L,props,"loop");
-            clutter_animation_set_loop(a,lua_toboolean(L,-1));
-            lua_pop(L,1);
-
-            // If you call animate several times, clutter reuses the same
-            // ClutterAnimation object. So, if we are not set to loop,
-            // and the user passed an "on_completed" function, we may have
-            // to unref the old function and disconnect the old handler.
-
-            if (!clutter_animation_get_loop(a))
-            {
-                lua_getfield(L,props,"on_completed");
-
-                if (lua_type(L,-1)==LUA_TFUNCTION)
-                {
-                    UserData::set_callback( "on_completed" , L , animation , -1 );
-
-                    UserData * ud = UserData::get( L , animation );
-
-                    ud->connect_signal( "on_completed" , "completed" , G_CALLBACK( animation_completed ) , L , G_CONNECT_AFTER );
-                }
-                else
-                {
-                    lua_pop(L,1);
-                }
-            }
-        }
-
-#ifndef GLIB_VERSION_2_32
-        g_value_array_free(values);
-#else
-        g_array_unref(values);
-#endif
-        g_ptr_array_free(names,TRUE);
-
-#endif
-
     ]];
 
 
@@ -2410,7 +2039,6 @@ interface actor [[ClutterActor*]]
     [[
         result =  false;
 
-#ifdef CLUTTER_VERSION_1_10
         // Check for argument
         if(lua_isstring(L,2))
         {
@@ -2439,22 +2067,6 @@ interface actor [[ClutterActor*]]
         {
             result = for_each_property(self, L, complete_animation_function, NULL);
         }
-#else
-        if(!lua_isuserdata(L,-1))
-        {
-            g_error("This version of clutter does not support multiple animations on different properties.  Stopping all animations.");
-        }
-
-        if ( ClutterAnimation * animation=clutter_actor_get_animation( self ) )
-        {
-            if ( ClutterTimeline * timeline = clutter_animation_get_timeline( animation ) )
-            {
-                clutter_timeline_advance( timeline , clutter_timeline_get_duration( timeline ) );
-
-                result=true;
-            }
-        }
-#endif
     ]];
 
 /***************************************
@@ -2475,7 +2087,6 @@ interface actor [[ClutterActor*]]
     [[
         result = false;
 
-#ifdef CLUTTER_VERSION_1_10
         // Check for argument
         if(lua_isstring(L,-1))
         {
@@ -2504,16 +2115,6 @@ interface actor [[ClutterActor*]]
         {
             result = for_each_property(self, L, stop_animation_function, NULL);
         }
-#else
-        if ( ClutterAnimation *anim = clutter_actor_get_animation( self ) )
-        {
-            ClutterTimeline *timeline = clutter_animation_get_timeline( anim );
-            clutter_timeline_pause( timeline );
-            clutter_actor_detach_animation( self );
-
-            result=true;
-        }
-#endif
     ]];
 
 /***************************************
@@ -2532,12 +2133,7 @@ interface actor [[ClutterActor*]]
 
     bool is_property_animating(string property_name)
     [[
-#ifdef CLUTTER_VERSION_1_10
         result = (clutter_actor_get_transition(self, property_name) != NULL);
-#else
-        g_error("is_property_animating not supported with this version of the clutter library")
-        result = false
-#endif
     ]];
 
 /***************************************

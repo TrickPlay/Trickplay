@@ -11,21 +11,21 @@
 
 #if defined(CLUTTER_WINDOWING_GLX)
 
-	#include <GL/glx.h>
-	#include <clutter/x11/clutter-x11.h>
+#include <GL/glx.h>
+#include <clutter/x11/clutter-x11.h>
 
 #elif defined(CLUTTER_WINDOWING_EGL)
 
-	#include <EGL/egl.h>
-	#include <clutter/egl/clutter-egl.h>
+#include <EGL/egl.h>
+#include <clutter/egl/clutter-egl.h>
 
 #elif defined(CLUTTER_WINDOWING_OSX)
 
-    #import <AppKit/AppKit.h>
+#import <AppKit/AppKit.h>
 
 #else
 
-	#error "CANNOT BUILD WEBGL FOR THIS YET"
+#error "CANNOT BUILD WEBGL FOR THIS YET"
 
 #endif
 
@@ -44,113 +44,113 @@
 
 namespace WebGL
 {
-	//.........................................................................
-	// Clamps a value
+//.........................................................................
+// Clamps a value
 
-	inline GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
-	{
-		return value < min ? min : value > max ? max : value;
-	}
+inline GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
+{
+    return value < min ? min : value > max ? max : value;
+}
 
-	//.........................................................................
-	// Gets a typed array from the Lua stack or converts a Lua table to a
-	// typed array. Checks the type, length and length multiple.
+//.........................................................................
+// Gets a typed array from the Lua stack or converts a Lua table to a
+// typed array. Checks the type, length and length multiple.
 
-	TypedArray * get_valid_array( lua_State * L , int index , FreeLater & free_later , TypedArray::Type type , int multiple );
+TypedArray* get_valid_array( lua_State* L , int index , FreeLater& free_later , TypedArray::Type type , int multiple );
 
-	//.........................................................................
-	// Returns the size of a texel given the format and type. Returns 0 if the
-	// combination is not valid.
+//.........................................................................
+// Returns the size of a texel given the format and type. Returns 0 if the
+// combination is not valid.
 
-	int get_texel_size( GLenum format , GLenum type );
+int get_texel_size( GLenum format , GLenum type );
 
-	//.........................................................................
-	// Class that we bolt onto an actor. Maintains all of our GL state.
+//.........................................................................
+// Class that we bolt onto an actor. Maintains all of our GL state.
 
-	class Context
-	{
-	public:
+class Context
+{
+public:
 
-		static Context * get( ClutterActor * actor , bool detach = false );
+    static Context* get( ClutterActor* actor , bool detach = false );
 
-		void acquire()
-		{
-			if ( ! acquisitions++ )
-			{
-				context_op( SWITCH_TO_MY_CONTEXT );
-			}
-		}
+    void acquire()
+    {
+        if ( ! acquisitions++ )
+        {
+            context_op( SWITCH_TO_MY_CONTEXT );
+        }
+    }
 
-		void release()
-		{
-			if ( ! --acquisitions )
-			{
-				context_op( SWITCH_TO_CLUTTER_CONTEXT );
-			}
-		}
+    void release()
+    {
+        if ( ! --acquisitions )
+        {
+            context_op( SWITCH_TO_CLUTTER_CONTEXT );
+        }
+    }
 
-		inline bool is_current() const
-		{
-			return acquisitions != 0;
-		}
+    inline bool is_current() const
+    {
+        return acquisitions != 0;
+    }
 
-		void bind_framebuffer( GLenum target , GLuint buffer )
-		{
-			if ( target != GL_FRAMEBUFFER )
-			{
-				return;
-			}
+    void bind_framebuffer( GLenum target , GLuint buffer )
+    {
+        if ( target != GL_FRAMEBUFFER )
+        {
+            return;
+        }
 
-			// When it is zero, we bind to our framebuffer, so
-			// that drawing continues to happen to it
+        // When it is zero, we bind to our framebuffer, so
+        // that drawing continues to happen to it
 
-			if ( buffer == 0 )
-			{
-				glBindFramebuffer( target , framebuffer );
-			}
-			else if ( user_framebuffers.find( buffer ) != user_framebuffers.end() )
-			{
-				glBindFramebuffer( target , buffer );
-			}
-		}
+        if ( buffer == 0 )
+        {
+            glBindFramebuffer( target , framebuffer );
+        }
+        else if ( user_framebuffers.find( buffer ) != user_framebuffers.end() )
+        {
+            glBindFramebuffer( target , buffer );
+        }
+    }
 
-		GLuint create_buffer();
-		GLuint create_framebuffer();
-		GLuint create_renderbuffer();
-		GLuint create_texture();
-		GLuint create_program();
-		GLuint create_shader( GLenum shader_type );
+    GLuint create_buffer();
+    GLuint create_framebuffer();
+    GLuint create_renderbuffer();
+    GLuint create_texture();
+    GLuint create_program();
+    GLuint create_shader( GLenum shader_type );
 
-		void delete_buffer( GLuint n );
-		void delete_framebuffer( GLuint n );
-		void delete_renderbuffer( GLuint n );
-		void delete_texture( GLuint n );
-		void delete_program( GLuint n );
-		void delete_shader( GLuint n );
+    void delete_buffer( GLuint n );
+    void delete_framebuffer( GLuint n );
+    void delete_renderbuffer( GLuint n );
+    void delete_texture( GLuint n );
+    void delete_program( GLuint n );
+    void delete_shader( GLuint n );
 
-	    bool            unpack_flip_y;
-	    bool            unpack_premultiply_alpha;
-	    unsigned long   unpack_colorspace_conversion;
-	    bool			have_depth;
-	    bool			have_stencil;
+    bool            unpack_flip_y;
+    bool            unpack_premultiply_alpha;
+    unsigned long   unpack_colorspace_conversion;
+    bool            have_depth;
+    bool            have_stencil;
 
-	private:
+private:
 
-		Context( ClutterActor * actor );
+    Context( ClutterActor* actor );
 
-		virtual ~Context();
+    virtual ~Context();
 
 #if defined(CLUTTER_WINDOWING_GLX)
 
-	    typedef GLXContext ContextType;
+    typedef GLXContext ContextType;
 
 #elif defined(CLUTTER_WINDOWING_EGL)
 
-	    typedef EGLContext ContextType;
+    typedef EGLContext ContextType;
 
 #elif defined(CLUTTER_WINDOWING_OSX)
 
-        typedef NSOpenGLContext *ContextType;
+    typedef NSOpenGLContext* ContextType;
 
 #else
 
@@ -158,32 +158,32 @@ namespace WebGL
 
 #endif
 
-	    enum Operation { CREATE_CONTEXT , SWITCH_TO_CLUTTER_CONTEXT , SWITCH_TO_MY_CONTEXT , DESTROY_MY_CONTEXT };
+    enum Operation { CREATE_CONTEXT , SWITCH_TO_CLUTTER_CONTEXT , SWITCH_TO_MY_CONTEXT , DESTROY_MY_CONTEXT };
 
-	    void context_op( Operation op );
+    void context_op( Operation op );
 
-	    enum FBOTry { FBO_TRY_DEPTH_STENCIL = 0x01 , FBO_TRY_DEPTH = 0x02 , FBO_TRY_STENCIL = 0x04 };
+    enum FBOTry { FBO_TRY_DEPTH_STENCIL = 0x01 , FBO_TRY_DEPTH = 0x02 , FBO_TRY_STENCIL = 0x04 };
 
-	    bool try_create_fbo( GLsizei width , GLsizei height , int flags );
+    bool try_create_fbo( GLsizei width , GLsizei height , int flags );
 
-	    typedef std::set< GLuint> GLuintSet;
+    typedef std::set< GLuint> GLuintSet;
 
-	    guint			acquisitions;
+    guint           acquisitions;
 
-	    ContextType		my_context;
+    ContextType     my_context;
 
-	    GLuint			texture;
-		GLenum			texture_target;
-	    GLuint          framebuffer;
-	    GLuintSet       renderbuffers;
+    GLuint          texture;
+    GLenum          texture_target;
+    GLuint          framebuffer;
+    GLuintSet       renderbuffers;
 
-	    GLuintSet		user_buffers;
-	    GLuintSet		user_framebuffers;
-	    GLuintSet		user_renderbuffers;
-	    GLuintSet		user_textures;
-	    GLuintSet		user_programs;
-	    GLuintSet		user_shaders;
-	};
+    GLuintSet       user_buffers;
+    GLuintSet       user_framebuffers;
+    GLuintSet       user_renderbuffers;
+    GLuintSet       user_textures;
+    GLuintSet       user_programs;
+    GLuintSet       user_shaders;
+};
 
 }
 
@@ -220,18 +220,18 @@ typedef struct _TrickplayWebGLCanvasPrivate      TrickplayWebGLCanvasPrivate;
 
 struct _TrickplayWebGLCanvas
 {
-	ClutterTexture parent_instance;
-	TrickplayWebGLCanvasPrivate *priv;
+    ClutterTexture parent_instance;
+    TrickplayWebGLCanvasPrivate* priv;
 };
 
 struct _TrickplayWebGLCanvasClass
 {
-	ClutterTextureClass parent_class;
+    ClutterTextureClass parent_class;
 };
 
 GType trickplay_webgl_canvas_get_type( void ) G_GNUC_CONST;
 
-ClutterActor * trickplay_webgl_canvas_new();
+ClutterActor* trickplay_webgl_canvas_new();
 
 G_END_DECLS
 

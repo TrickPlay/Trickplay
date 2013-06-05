@@ -11,12 +11,12 @@ global restricted [[TPContext*]]
         [[
             self=lb_construct( TPContext , App::get(L)->get_context() );
         ]];
-        
+
     bool profile_switch(int id)
         [[
-            result=self->profile_switch(id);    
+            result=self->profile_switch(id);
         ]];
-        
+
     int create_profile(string name,string pin)
         [[
             result=self->get_db()->create_profile(name,pin);

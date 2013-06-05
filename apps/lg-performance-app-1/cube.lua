@@ -216,7 +216,7 @@ end
 
 -------------------------------------------------------
 -- Call the constructors to make the 2 sides of the cube
-r1 = make_side{
+local r1 = make_side{
     make_icon_card{
         {text="3D WORLD",      src="title-icon-3d-world.png"},
         {text="Settings",      src="icon-settings.png"},
@@ -264,7 +264,7 @@ r1 = make_side{
 
 }:set{opacity=0}
 
-r2 = make_side{
+local r2 = make_side{
     make_live_card{
         title = "11-1 LGC HD The Blue Earth",
         sub_t = "PM 10:20 - 11:20",
@@ -309,7 +309,7 @@ cube.position={screen.w/2,h/2+50}
 
 -------------------------------------------------------
 --The cube rotation animation
-local phase_one, phase_two
+local rotate_animation
 local animating = false
 local curr_r = r2
 local next_r = r1
@@ -330,16 +330,17 @@ function cube:rotate(outgoing,incoming,direction)
     }
     incoming.opacity = 0
 
-    --the first half of the animation
-    phase_one = Animator{
-        duration = 400*dur_mult,
+    --the animation
+    rotate_animation = Animator{
+        duration = 800*dur_mult,
         properties = {
             {
                 source = outgoing,
                 name   = "y_rotation",
                 keys   = {
                     {0.0,"EASE_IN_SINE",  0},
-                    {1.0,"EASE_IN_SINE", (direction == "LEFT" and end_angle/2 or -end_angle/2)},
+                    {0.5,"EASE_IN_SINE", (direction == "LEFT" and end_angle/2 or -end_angle/2)},
+                    {1.0,"EASE_OUT_SINE",(direction == "LEFT" and end_angle   or -end_angle)},
                 },
             },
             {
@@ -347,7 +348,8 @@ function cube:rotate(outgoing,incoming,direction)
                 name   = "y_rotation",
                 keys   = {
                     {0.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle   or end_angle)},
-                    {1.0,"EASE_IN_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
+                    {0.5,"EASE_IN_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
+                    {1.0,"EASE_OUT_SINE",  0},
                 },
             },
             {
@@ -355,7 +357,16 @@ function cube:rotate(outgoing,incoming,direction)
                 name   = "opacity",
                 keys   = {
                     {0.0,"EASE_IN_SINE",   0},
-                    {1.0,"EASE_IN_SINE", 255},
+                    {0.5,"EASE_IN_SINE", 255},
+                },
+            },
+            {
+                source = outgoing,
+                name   = "opacity",
+                keys   = {
+                    {0.0,"EASE_OUT_SINE", 255},
+                    {0.5,"EASE_OUT_SINE", 255},
+                    {1.0,"EASE_OUT_SINE",   0},
                 },
             },
             {
@@ -363,65 +374,32 @@ function cube:rotate(outgoing,incoming,direction)
                 name   = "z",
                 keys   = {
                     {0.0,"EASE_IN_OUT_SINE", 0},
-                    {1.0,"EASE_IN_OUT_SINE", -w/2},
+                    {0.5,"EASE_IN_OUT_SINE", -w/2},
+                    {1.0,"EASE_IN_OUT_SINE",  0},
                 },
             },
         }
     }
-    function phase_one.timeline.on_completed()
-
+    local tl = rotate_animation.timeline
+    --raise the incoming side to top halfway throught the animation
+    tl:add_marker(
+        "HALFWAY",
+        tl.duration/2
+    )
+    function tl.on_marker_reached(...)
         incoming:raise_to_top()
-        --the second half of the animation
-        phase_two = Animator{
-            duration = 400*dur_mult,
-            properties = {
-                {
-                    source = outgoing,
-                    name   = "y_rotation",
-                    keys   = {
-                        {0.0,"EASE_OUT_SINE",(direction == "LEFT" and end_angle/2 or -end_angle/2)},
-                        {1.0,"EASE_OUT_SINE",(direction == "LEFT" and end_angle   or -end_angle)},
-                    },
-                },
-                {
-                    source = incoming,
-                    name   = "y_rotation",
-                    keys   = {
-                        {0.0,"EASE_OUT_SINE", (direction == "LEFT" and -end_angle/2 or end_angle/2)},
-                        {1.0,"EASE_OUT_SINE",  0},
-                    },
-                },
-                {
-                    source = outgoing,
-                    name   = "opacity",
-                    keys   = {
-                        {0.0,"EASE_OUT_SINE", 255},
-                        {1.0,"EASE_OUT_SINE",   0},
-                    },
-                },
-                {
-                    source = cube,
-                    name   = "z",
-                    keys   = {
-                        {0.0,"EASE_IN_OUT_SINE", -w/2},
-                        {1.0,"EASE_IN_OUT_SINE",  0},
-                    },
-                },
-            }
-        }
-        function phase_two.timeline.on_completed()
-            animating = false
-
-            curr_r = incoming
-            next_r = outgoing
-            outgoing:unparent()
-
-            --repeat if RED was pressed
-            return again and cube:rotate(curr_r,next_r,direction)
-        end
-        phase_two:start()
     end
-    phase_one:start()
+    function tl.on_completed()
+        animating = false
+
+        curr_r = incoming
+        next_r = outgoing
+        outgoing:unparent()
+
+        --repeat if RED was pressed
+        return again and cube:rotate(curr_r,next_r,direction)
+    end
+    rotate_animation:start()
 end
 
 -------------------------------------------------------
@@ -438,6 +416,7 @@ local key_events = {
         again = not again
 
         return again and not animating and
+
             cube:rotate(curr_r,next_r,"LEFT")
     end,
 }

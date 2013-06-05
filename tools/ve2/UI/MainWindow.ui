@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>200</height>
+    <width>527</width>
+    <height>391</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,8 +50,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>688</width>
-     <height>25</height>
+     <width>527</width>
+     <height>22</height>
     </rect>
    </property>
    <property name="font">
@@ -81,6 +81,8 @@
      <string>Windows</string>
     </property>
     <addaction name="actionEditor"/>
+    <addaction name="actionInspector"/>
+    <addaction name="actionImages"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -180,174 +182,6 @@
    <addaction name="menuArrange"/>
    <addaction name="menuView_2"/>
    <addaction name="menuView"/>
-  </widget>
-  <widget class="QDockWidget" name="InspectorDock">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>79</width>
-     <height>41</height>
-    </size>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="contextMenuPolicy">
-    <enum>Qt::NoContextMenu</enum>
-   </property>
-   <property name="floating">
-    <bool>true</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
-   </property>
-   <property name="windowTitle">
-    <string>Inspector</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="InspectorContainer">
-    <layout class="QGridLayout" name="gridLayout_7" rowstretch="0" columnstretch="0">
-     <property name="margin">
-      <number>1</number>
-     </property>
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <item row="0" column="0">
-      <layout class="QGridLayout" name="InspectorLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="fileSystemDock">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>79</width>
-     <height>41</height>
-    </size>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="contextMenuPolicy">
-    <enum>Qt::NoContextMenu</enum>
-   </property>
-   <property name="floating">
-    <bool>true</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
-   </property>
-   <property name="windowTitle">
-    <string>Images</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="fileSystemContainer">
-    <layout class="QGridLayout" name="gridLayout_8" rowstretch="0" columnstretch="0">
-     <property name="margin">
-      <number>1</number>
-     </property>
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <item row="0" column="0">
-      <layout class="QGridLayout" name="fileSystemLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="mainMenuDock">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>56</width>
-     <height>41</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>672</width>
-     <height>50</height>
-    </size>
-   </property>
-   <property name="floating">
-    <bool>true</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="windowTitle">
-    <string/>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>4</number>
-   </attribute>
-   <widget class="QWidget" name="mainMenuContainer">
-    <property name="maximumSize">
-     <size>
-      <width>672</width>
-      <height>25</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <widget class="QWidget" name="gridLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>4</x>
-       <y>0</y>
-       <width>665</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="mainMenuLayout">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-     </layout>
-    </widget>
-   </widget>
   </widget>
   <action name="actionExit">
    <property name="text">
@@ -1037,6 +871,28 @@
    </property>
    <property name="text">
     <string>Editor</string>
+   </property>
+  </action>
+  <action name="actionInspector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+  </action>
+  <action name="actionImages">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Images</string>
    </property>
   </action>
  </widget>

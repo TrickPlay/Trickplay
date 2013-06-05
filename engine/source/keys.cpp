@@ -30,11 +30,11 @@
 //
 //  pcall(handlers[keyval])
 
-static int find_key( lua_State * L )
+static int find_key( lua_State* L )
 {
     struct ki
     {
-        const char * name;
+        const char* name;
         unsigned int value;
     };
 
@@ -2070,13 +2070,13 @@ static int find_key( lua_State * L )
 
     int top = lua_gettop( L );
 
-    switch( lua_type( L , 2 ) )
+    switch ( lua_type( L , 2 ) )
     {
         case LUA_TSTRING:
         {
-            const char * name = lua_tostring( L , 2 );
+            const char* name = lua_tostring( L , 2 );
 
-            for ( const ki * k = ks; k->name; ++k )
+            for ( const ki* k = ks; k->name; ++k )
             {
                 if ( ! strcmp( name , k->name ) )
                 {
@@ -2095,7 +2095,7 @@ static int find_key( lua_State * L )
         {
             unsigned int value = lua_tointeger( L , 2 );
 
-            for ( const ki * k = ks; k->name; ++k )
+            for ( const ki* k = ks; k->name; ++k )
             {
                 if ( k->value == value )
                 {
@@ -2120,12 +2120,12 @@ static int find_key( lua_State * L )
     return 1;
 }
 
-void luaopen_keys( lua_State * L )
+void luaopen_keys( lua_State* L )
 {
     LSG;
 
     lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
-    
+
     lua_pushliteral( L , "keys" );
 
     lua_newtable( L );
@@ -2139,6 +2139,6 @@ void luaopen_keys( lua_State * L )
     lua_rawset( L , -3 );
     lua_pop( L , 1 );
 
-    LSG_END(0);
+    LSG_END( 0 );
 }
 

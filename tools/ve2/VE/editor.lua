@@ -66,9 +66,9 @@ function editor.rectangle_done(x,y)
 
     _VE_.refresh()
     blockReport = false
-    _VE_.selectUIElement(uiRectangle.gid)
     _VE_.refreshDone()
     _VE_.openInspector(uiRectangle.gid, false)
+    _VE_.repUIInfo(uiRectangle)
     screen.grab_key_focus(screen)
 
 end 
@@ -93,7 +93,6 @@ function editor.text(uiText)
     uiText:grab_key_focus()
 
     function uiText:on_key_down(key,u,t,m)
-
     	if key == keys.Return then 
 			uiText:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
@@ -105,6 +104,11 @@ function editor.text(uiText)
 			if(total > uiText.h) then 
 				uiText.h = total 
 			end 
+        end
+
+        _VE_.repUIInfo(uiText)
+
+    	if key == keys.Return then 
 			return true
 	    end 
 
@@ -115,46 +119,33 @@ end
 ---------------------------------------------
 -- Clone ------------------------------------
 ---------------------------------------------
-function editor.clone()
+function editor.clone(gid)
 
     blockReport = true
+    v = devtools:gid(gid)
+	uiClone = WL.Widget_Clone {
+	    source = v,
+        position = {v.x + 20, v.y +20}
+    }
+    util.assign_right_name(uiClone, "Clone")
 
-	if #selected_objs == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
+    util.create_mouse_event_handler(uiClone, "Clone")
 
-	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
-		    screen_ui.n_selected(v)
-		    uiClone = WL.Widget_Clone {
-		        source = v,
-                position = {v.x + 20, v.y +20}
-        	}
-            util.assign_right_name(uiClone, "Clone")
+    curLayer = devtools:gid(gid).parent
+    util.addIntoLayer(uiClone, true)
 
-            util.create_mouse_event_handler(uiClone, "Clone")
+    if v.extra.clone then 
+	    table.insert(v.extra.clone, uiClone.name)
+	else 
+	    v.extra.clone = {}
+		table.insert(v.extra.clone, uiClone.name)
+	end 
 
-            util.addIntoLayer(uiClone, true)
+    curLayer:add(uiClone)
 
-			if v.extra.clone then 
-			    table.insert(v.extra.clone, uiClone.name)
-			else 
-			    v.extra.clone = {}
-			    table.insert(v.extra.clone, uiClone.name)
-			end 
-        end
-	end
-
-    _VE_.refresh()
     blockReport = false
-    _VE_.selectUIElement(uiClone.gid)
-    _VE_.refreshDone()
-    _VE_.openInspector(uiClone.gid, false)
+    _VE_.repUIInfo(uiClone)
 
-	input_mode = hdr.S_SELECT
-	screen:grab_key_focus()
 end
 
 ---------------------------------------------
@@ -164,8 +155,8 @@ function editor.group()
 
     blockReport = true
 
-	if #(selected_objs) == 0 then 
-		print ("there is no selected object !!")
+	if util.getSelectedObjCnt()  == 0 then 
+		print ("there is no selected object")
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return nil
@@ -179,11 +170,11 @@ function editor.group()
 
 
 	for i, v in pairs(curLayer.children) do
-		if(v.selected == true) then
+		if(v.ve_selected == true) then
 			screen_ui.n_selected(v)
 			v:unparent()
 			v.is_in_group = true
-			v.reactive = false
+            v.parent_group = uiGroup
 			v.group_position = uiGroup.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -191,14 +182,10 @@ function editor.group()
 		end 
     end
 
-    _VE_.refresh()
     blockReport = false
-    --_VE_.selectUIElement(uiGroup.gid)
-    --_VE_.refreshDone()
-    --_VE_.openInspector(uiGroup.gid, false)
 
-    screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
+	uiGroup.size = {math.floor(uiGroup.w),math.floor(uiGroup.h)}
 
     return uiGroup
 end
@@ -211,7 +198,7 @@ function editor.ungroup(gid)
 
     util.getCurLayer(gid) 
 
-    if #selected_objs == 0 then 
+    if  util.getSelectedObjCnt() == 0 then 
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
@@ -220,7 +207,7 @@ function editor.ungroup(gid)
     blockReport = true
     for i, v in pairs(curLayer.children) do
         if curLayer:find_child(v.name) then
-		  	if(v.extra.selected == true) then
+		  	if(v.extra.ve_selected == true) then
 				if util.is_this_group(v) == true then
 			     	screen_ui.n_selected(v)
 			     	for i,c in pairs(v.children) do 
@@ -238,13 +225,11 @@ function editor.ungroup(gid)
                         util.addIntoLayer(c, true)
 			     	end
 			     	curLayer:remove(v)
-                    _VE_.refresh()
 		        end 
 		   end 
 		end
 	end
 
-    screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
     blockReport = false
 
@@ -270,11 +255,12 @@ local function duplicate_child(new, org)
 
         n.reactive = false
         n.lock = false
-        n.selected = false
+        n.ve_selected = false
         n.is_in_group = true
 
         if n.subscribe_to then  
-            n:subscribe_to(nil, function() if dragging == nil then  _VE_.repUIInfo(n) end end) 
+            n:subscribe_to({"x", "y", "position"}, function() if dragging == nil then _VE_.posUIInfo(n) end end)
+            n:subscribe_to({"focused"}, function() if dragging == nil then _VE_.focusInfo(n) end  end )
         end 
 
         if uiTypeStr == "Widget_Group" then  
@@ -286,67 +272,74 @@ local function duplicate_child(new, org)
 
 end 
  
+local function contentsNameAssign(v) 
+	local itemType = util.getTypeNameStr(v) 
+    if itemType == "image" then
+        util.assign_right_name(v, v.id)
+    else
+        util.assign_right_name(v, itemType)
+
+        if itemType == "group" or itemType == "DialogBox" then 
+            for i,j in pairs (v.children) do 
+                j = contentsNameAssign(j)
+            end 
+        elseif itemType == "LayoutManager" then 
+            for r = 1, v.number_of_rows, 1 do 
+                for c = 1, v.number_of_cols, 1 do 
+                    local item = v.cells[r][c]
+                    item = contentsNameAssign(item)
+                end 
+            end 
+        elseif itemType == "MenuButton" then 
+            local sz = v.items.length
+            for i=1, sz, 1 do 
+                print (v.items[i].name)
+                v.items[i] = contentsNameAssign(v.items[i])
+                print (v.items[i].name)
+            end
+        end 
+    end 
+
+    return v
+end 
+
 function editor.duplicate(gid)
-
-    -- no selected object 
-	if #(selected_objs) == 0 then 
-        screen:grab_key_focus()
-		input_mode = hdr.S_SELECT
-		return 
-   	end 
-
-    util.getCurLayer(gid)
 
     blockReport = true
 
-    for i, v in pairs(curLayer.children) do
-		if util.is_this_selected(v) == true then 
-		    if uiDuplicate then
-		    	if uiDuplicate.name == v.name then 
-					next_position = {2 * v.x - uiDuplicate.position[1], 2 * v.y - uiDuplicate.position[2]}
-				else 
-					uiDuplicate = nil 
-					next_position = nil 
-			  	end 
-		    end 
+    v = devtools:gid(gid)
 
-			uiTypeStr = util.getTypeStr(v) 
+	if uiDuplicate then
+	    if uiDuplicate.name == v.name then 
+		    next_position = {2 * v.x - uiDuplicate.position[1], 2 * v.y - uiDuplicate.position[2]}
+		else 
+		    uiDuplicate = nil 
+			next_position = nil 
+		end 
+	end 
 
-            if hdr.uiElementCreate_map[uiTypeStr] then
-                uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
-            end 
+	uiTypeStr = util.getTypeStr(v) 
 
-            uiDuplicate.position = {v.x + 20, v.y +20}
+    if hdr.uiElementCreate_map[uiTypeStr] then
+        uiDuplicate = hdr.uiElementCreate_map[uiTypeStr](v.attributes)
+    end 
 
-			uiTypeStr = util.getTypeNameStr(v) 
+    if uiTypeStr == "LayoutManager" then 
+        uiDuplicate.placeholder = WL.Widget_Rectangle{size = {300, 200}, border_width=2, border_color = {255,255,255,255}, color = {255,255,255,0}}
+    end
 
-            util.assign_right_name(uiDuplicate, uiTypeStr)
-            util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
+    uiDuplicate.position = {v.x + 20, v.y +20}
 
-            if uiTypeStr == "Widget_Group" then 
-                duplicate_child(uiDuplicate, v)
-            elseif uiTypeStr == "LayoutManager" then 
-                for r = 1, uiDuplicate.number_of_rows, 1 do 
-                    for c = 1, uiDuplicate.number_of_cols, 1 do 
-                        local item = uiDuplicate.cells[r][c]
-                        local itemType = util.getTypeNameStr(item) 
-                        util.assign_right_name(item, itemType)
-                    end 
-                end 
-            end 
+	uiTypeStr = util.getTypeNameStr(v) 
+    uiDuplicate = contentsNameAssign(uiDuplicate)
 
-            util.addIntoLayer(uiDuplicate)
+    util.create_mouse_event_handler(uiDuplicate, uiTypeStr)
 
-		end --if selected == true
-    end -- for 
+    curLayer = devtools:gid(gid).parent
+    util.addIntoLayer(uiDuplicate, true)
 
     blockReport = false
-    _VE_.selectUIElement(uiDuplicate.gid)
-    _VE_.refreshDone()
-    _VE_.openInspector(uiDuplicate.gid, false)
-
-	input_mode = hdr.S_SELECT
-	screen:grab_key_focus()
+    _VE_.repUIInfo(uiDuplicate)
 
 end
 
@@ -355,12 +348,13 @@ end
 -- Arrange ----------------------------------
 ---------------------------------------------
 
+local copy_selected_objs = {} 
+
 function editor.arrange_prep (gid) 
 
     util.getCurLayer(gid)
-    blockReport = true
 
-	if #selected_objs == 0 then 
+	if util.getSelectedObjCnt() == 0 then 
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
@@ -368,21 +362,23 @@ function editor.arrange_prep (gid)
 
     util.org_cord()
 
-    local basis_obj_name = util.getObjName(selected_objs[1])
+    local sel_objs = util.table_copy(util.getSelectedObjs())
+        
+    local basis_obj_name = util.getObjName(util.getSelectedObjs()[1])
     local basis_obj = curLayer:find_child(basis_obj_name)
 
-    return basis_obj_name, basis_obj
+    return basis_obj_name, basis_obj, sel_objs
 
 end
 
-function editor.arrange_end () 
+function editor.arrange_end (gid, obj, sel_objs) 
 
+    blockReport = true
     util.ang_cord()
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
     blockReport = false
-    _VE_.refresh() 
-
+    screen_ui.n_selected_all()
 end 
 
 return editor

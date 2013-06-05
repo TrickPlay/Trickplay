@@ -244,8 +244,13 @@ interface Body [[ ClutterActor * ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
 
+            luaL_checktype( L, 2, LUA_TTABLE );
+
             lua_rawgeti( L , 2 , 1 );
             lua_rawgeti( L , 2 , 2 );
+
+            luaL_checktype(L,-2,LUA_TNUMBER);
+            luaL_checktype(L,-1,LUA_TNUMBER);
 
             const b2Vec2 pos( me->world->screen_to_world( lua_tonumber( L , -2 ) ) ,
                     me->world->screen_to_world( lua_tonumber( L , -1 ) ) );
@@ -1755,8 +1760,8 @@ interface Body [[ ClutterActor * ]]
     ...
     (end)
 
-	The illustrations below show the actions that occur when two objects collide.
-	
+    The illustrations below show the actions that occur when two objects collide.
+
 (see physics2dCollision1.png)
 (see physics2dCollision2.png)
 

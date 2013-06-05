@@ -1,108 +1,50 @@
 module nineslice;
 
 [[
+
+#include "log.h"
 #include "clutter_util.h"
-#include "util.h"
 #include "nineslice.h"
 
-#include "sprite_sheet.lb.h"
-]]
-
-
-[[
-
-static const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
-
-struct NineSliceBinding
-{
-    NineSliceBinding( NineSliceEffect * _effect ) : async( false ), effect( _effect ), sheet( NULL ) { assert( effect ); };
-
-    NineSliceEffect * get_effect() { return effect; };
-
-    bool get_tile( unsigned i ) { return nineslice_effect_get_tile( effect, i ); }
-    void set_tile( unsigned i, bool t, bool guess ) { nineslice_effect_set_tile( effect, i, t, guess ); }
-
-    bool is_loaded() { return sheet && nineslice_effect_is_loaded( effect ); };
-
-    std::vector< int > * get_borders() { return nineslice_effect_get_borders( effect ); }
-
-    std::string & get_id( unsigned i )
-    {
-        g_assert( i < 9 );
-        return ids[i];
-    };
-
-    void set_id( unsigned i, const std::string & new_id )
-    {
-        g_assert( i < 9 );
-        ids[i] = new_id;
-        nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
-    }
-
-    void set_sheet( SpriteSheet * _sheet )
-    {
-        sheet = _sheet;
-
-        for ( unsigned i = 0; i < 9; ++i )
-        {
-            nineslice_effect_set_sprite( effect, i, sheet ? sheet->get_sprite( ids[i].c_str() ) : NULL, async );
-        }
-    }
-
-    void signal_loaded_later()
-    {
-        if ( async )
-        {
-            nineslice_effect_signal_loaded_later( effect );
-        }
-    }
-
-    bool async;
-    bool can_fire;
-
-private:
-    NineSliceEffect * effect;
-    SpriteSheet * sheet;
-    std::string ids[9];
-};
+const char * keys[9] = { "nw", "n", "ne", "w", "c", "e", "sw", "s", "se" };
 
 #define get_binding( self ) ( (NineSliceBinding *) g_object_get_data( G_OBJECT( self ), "tp-binding" ) )
 #define get_ref( self ) ( (int *) g_object_get_data( G_OBJECT( self ), "tp-sheet-ref" ) )
 
-void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L );
+void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * L );
 
 ]]
 
 /***************************************
     Class: NineSlice
 
-	The NineSlice data type enables images with shaped corners to be scaled while maintaining their corner shapes. Scaling a <Bitmap> or <Image> that has non-straight corners, such as a rounded button being sized around a constructed text string, will often cause the corner shapes to deform. Performing the same operation using a NineSlice object maintains the original corner shapes and applies the scaling operation to the straight lines that connect the corners.
+    The NineSlice data type enables images with shaped corners to be scaled while maintaining their corner shapes. Scaling a <Bitmap> or <Image> that has non-straight corners, such as a rounded button being sized around a constructed text string, will often cause the corner shapes to deform. Performing the same operation using a NineSlice object maintains the original corner shapes and applies the scaling operation to the straight lines that connect the corners.
 
-	A NineSlice object is similar to an Image object; it can be added to the <screen> global variable, and all the common operations, including animation, can be applied to it. In addition to the properties and functions described on this page, the NineSlice data type also supports all the properties and functions defined in the <UIElement> interface.
+    A NineSlice object is similar to an Image object; it can be added to the <screen> global variable, and all the common operations, including animation, can be applied to it. In addition to the properties and functions described on this page, the NineSlice data type also supports all the properties and functions defined in the <UIElement> interface.
 
-	A NineSlice object is a group of multiple <Sprite> objects that are combined to form a single image. The diagram below shows the border of a rounded rectangle divided into nine separate regions. Each region has a unique ID (nw, n, ne, etc.), and each region references one <Sprite> object stored on a <SpriteSheet> object.
+    A NineSlice object is a group of multiple <Sprite> objects that are combined to form a single image. The diagram below shows the border of a rounded rectangle divided into nine separate regions. Each region has a unique ID (nw, n, ne, etc.), and each region references one <Sprite> object stored on a <SpriteSheet> object.
 
-	(see NineSliceCompass.png)
+    (see NineSliceCompass.png)
 
-	When a NineSlice object is scaled, certain regions will remain unchanged, while other regions will scale, but not necessarily in both horizontal and vertical directions. For example, the four corner regions, specified by the nw, ne, sw, and se IDs, will never scale; this maintains the correct shape of the shaped corners. The top and bottom regions, specified by the n and s IDs, will scale, but only horizontally; vertical scaling will never be applied to these regions. Similarly, the left and right regions, specified by the w and e IDs, will also scale, but only vertically; these regions will not be horizontally scaled. Finally, the center region, specified by the c ID, will scale both vertically and horizontally, as applicable. The directions that each region may be scaled are shown in the illustration below.
+    When a NineSlice object is scaled, certain regions will remain unchanged, while other regions will scale, but not necessarily in both horizontal and vertical directions. For example, the four corner regions, specified by the nw, ne, sw, and se IDs, will never scale; this maintains the correct shape of the shaped corners. The top and bottom regions, specified by the n and s IDs, will scale, but only horizontally; vertical scaling will never be applied to these regions. Similarly, the left and right regions, specified by the w and e IDs, will also scale, but only vertically; these regions will not be horizontally scaled. Finally, the center region, specified by the c ID, will scale both vertically and horizontally, as applicable. The directions that each region may be scaled are shown in the illustration below.
 
-	(see NineSliceResizing.png)
+    (see NineSliceResizing.png)
 
-	When scaling occurs, the default action is for the scaled regions to be reduced or increased in size with the existing contents compressed or stretched into the new space. Alternatively, the resized regions can be tiled, so the image contents are repeated using its original size. Refer to the <tile> property for additional information.
+    When scaling occurs, the default action is for the scaled regions to be reduced or increased in size with the existing contents compressed or stretched into the new space. Alternatively, the resized regions can be tiled, so the image contents are repeated using its original size. Refer to the <tile> property for additional information.
 
-	Although the data type is called NineSlice, the actual number of images that comprises the final image can be fewer than nine. For example, a graphic image of a tab, such as those found in a tabbed window interface, may need only three images, one image each for its left, middle and right sides. Or even two (for its left and right sides). Regardless of the number of Sprites in the NineSlice object, each region's directional scaling restrictions described earlier still apply. For example, if you define a NineSlice object with the three regions nw, n, and ne, when the object is scaled, only the n region scales, and it scales in the horizontal direction only. If a NineSlice object is defined with two regions and both regions are non-scaling--for example, an object with only regions nw and ne--subsequent scaling operations performed on the object have no effect.
+    Although the data type is called NineSlice, the actual number of images that comprises the final image can be fewer than nine. For example, a graphic image of a tab, such as those found in a tabbed window interface, may need only three images, one image each for its left, middle and right sides. Or even two (for its left and right sides). Regardless of the number of Sprites in the NineSlice object, each region's directional scaling restrictions described earlier still apply. For example, if you define a NineSlice object with the three regions nw, n, and ne, when the object is scaled, only the n region scales, and it scales in the horizontal direction only. If a NineSlice object is defined with two regions and both regions are non-scaling--for example, an object with only regions nw and ne--subsequent scaling operations performed on the object have no effect.
 
-	The SpriteSheet object used by a NineSlice object is specified in the NineSlice <sheet> property. The Sprite IDs that reference particular images in the SpriteSheet are specified in the NineSlice <ids> property. The ids property is a table of key-value entries, where each key refers to a NineSlice region. Each region key contains the string ID of a Sprite in the SpriteSheet. A sample NineSlice definition is shown below.
+    The SpriteSheet object used by a NineSlice object is specified in the NineSlice <sheet> property. The Sprite IDs that reference particular images in the SpriteSheet are specified in the NineSlice <ids> property. The ids property is a table of key-value entries, where each key refers to a NineSlice region. Each region key contains the string ID of a Sprite in the SpriteSheet. A sample NineSlice definition is shown below.
 
-	(code)
-	-- Define a NineSlice object that uses all nine regions
-	buttonSkin = NineSlice( {
-					sheet = SpriteSheet( { map = "buttonPressed.json } ),
-					ids   = { nw = "top-left",    n = "top",    ne = "top-right",
-					          w  = "left",        c = "middle", e  = "right",
-							  sw = "bottom-left", s = "bottom", se = "bottom-right" },
-	} )
-	(end)
+    (code)
+    -- Define a NineSlice object that uses all nine regions
+    buttonSkin = NineSlice( {
+                    sheet = SpriteSheet( { map = "buttonPressed.json } ),
+                    ids   = { nw = "top-left",    n = "top",    ne = "top-right",
+                              w  = "left",        c = "middle", e  = "right",
+                              sw = "bottom-left", s = "bottom", se = "bottom-right" },
+    } )
+    (end)
 */
 
 class NineSlice [[ClutterActor*]] actor
@@ -114,11 +56,11 @@ class NineSlice [[ClutterActor*]] actor
 
     *Arguments:*
 
-	    props - optional table of NineSlice property settings.
+        props - optional table of NineSlice property settings.
 
     *Return Value:* reference to the constructed NineSlice object
 
-	*See Also:* the <sheet> and <ids> properties
+    *See Also:* the <sheet> and <ids> properties
 */
 
     NineSlice( table props = 0 )
@@ -126,19 +68,23 @@ class NineSlice [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor( L, self, NINESLICE_METATABLE );
 
-            ClutterEffect * effect = nineslice_effect_new();
-            clutter_actor_add_effect_with_name( self,  "tp-nineslice-effect", effect );
-            clutter_actor_set_offscreen_redirect( self, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS );
+            GObject * layout = nineslice_layout_new();
 
-            g_signal_connect_data( G_OBJECT( effect ), "load-finished",
-                (GCallback) NineSlice_on_loaded,
-                L, 0, GConnectFlags( 0 ) );
-
-            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_EFFECT( effect ) ) );
+            g_object_set_data( G_OBJECT( self ), "tp-binding", new NineSliceBinding( NINESLICE_LAYOUT( layout ), self ) );
             g_object_set_data_full( G_OBJECT( self ), "tp-sheet-ref", g_new0( int, 1 ), g_free );
             * get_ref( self ) = LUA_REFNIL;
 
-            ClutterUtil::set_props_from_table( L, props );
+            if ( props )
+            {
+                get_binding(self)->constructing = true;
+                ClutterUtil::set_props_from_table( L, props );
+                get_binding(self)->constructing = false;
+                get_binding(self)->set_all_sprites();
+            }
+
+            g_signal_connect( G_OBJECT( layout ), "load-finished",
+                (GCallback) NineSlice_on_loaded,
+                L );
 
             g_object_unref( self );
         ]];
@@ -152,9 +98,9 @@ class NineSlice [[ClutterActor*]] actor
 /***************************************
     Property: sheet
 
-	The sheet property references a <SpriteSheet> object from which to access individual <Sprite> images. The particular Sprite images used by the NineSlice object are specified in the <ids> property.
+    The sheet property references a <SpriteSheet> object from which to access individual <Sprite> images. The particular Sprite images used by the NineSlice object are specified in the <ids> property.
 
-	*Default Setting:* nil
+    *Default Setting:* nil
 
     *See Also:* the <ids> property
 */
@@ -186,23 +132,23 @@ class NineSlice [[ClutterActor*]] actor
 /***************************************
     Property: ids
 
-	The ids property is a table of key/value pairs, where the key specifies one of the nine NineSlice regions and its value contains the string ID of the <Sprite> to use for that region. Each ID value should reference an existing Sprite in the SpriteSheet definition.
+    The ids property is a table of key/value pairs, where the key specifies one of the nine NineSlice regions and its value contains the string ID of the <Sprite> to use for that region. Each ID value should reference an existing Sprite in the SpriteSheet definition.
 
-	Supported key/region values are listed below. Refer to the discussion at the top of this page to view an illustration of the nine regions.
+    Supported key/region values are listed below. Refer to the discussion at the top of this page to view an illustration of the nine regions.
 
-		nw - top left
-		n  - top center (resizes horizontally only)
-		ne - top right
-		w  - middle left (resizes vertically only)
-		c  - center (resizes horizontally and vertically)
-		e  - middle right (resizes vertically only)
-		sw - bottom left
-		s  - bottom center (resizes horizontally only)
-		se - bottom right
+        nw - top left
+        n  - top center (resizes horizontally only)
+        ne - top right
+        w  - middle left (resizes vertically only)
+        c  - center (resizes horizontally and vertically)
+        e  - middle right (resizes vertically only)
+        sw - bottom left
+        s  - bottom center (resizes horizontally only)
+        se - bottom right
 
-	A NineSlice object need only define the regions it requires; the remaining regions can remain undefined and will contain nil values.
+    A NineSlice object need only define the regions it requires; the remaining regions can remain undefined and will contain nil values.
 
-	*Default Settings:* Each key/region contains a nil value
+    *Default Settings:* Each key/region contains a nil value
 
     *See Also:* the <sheet> property
 */
@@ -244,41 +190,41 @@ class NineSlice [[ClutterActor*]] actor
 /***************************************
     Property: tile
 
-	The tile property is a table of six boolean flags indicating whether a region's sprite should tile when the region is resized. By default, when a region is resized, its image is compressed or stretched to fit the new space. By tiling the sprite, the image is repeated using its original size.
+    The tile property is a table of six boolean flags indicating whether a region's sprite should tile when the region is resized. By default, when a region is resized, its image is compressed or stretched to fit the new space. By tiling the sprite, the image is repeated using its original size.
 
-	Various table formats are recognized when setting the tile property. Each format is shown below and demonstrated in the *Code Examples* section. When retrieving the tile property, the six-boolean-flags table format (Format #1 below) is always returned.
+    Various table formats are recognized when setting the tile property. Each format is shown below and demonstrated in the *Code Examples* section. When retrieving the tile property, the six-boolean-flags table format (Format #1 below) is always returned.
 
-	*Table Format #1:* { C Region/Horizontal, C Region/Vertical, N Region, S Region, W Region, E Region }
+    *Table Format #1:* { C Region/Horizontal, C Region/Vertical, N Region, S Region, W Region, E Region }
 
-	*Table Format #2:* { Tile Horizontally, Tile Vertically }
+    *Table Format #2:* { Tile Horizontally, Tile Vertically }
 
-	*Table Format #3:* single boolean flag indicating whether or not tiling should occur for all resizable regions (true=tile)
+    *Table Format #3:* single boolean flag indicating whether or not tiling should occur for all resizable regions (true=tile)
 
-	*Default Setting:* All flags = false, i.e., no regions are tiled.
+    *Default Setting:* All flags = false, i.e., no regions are tiled.
 
-	*Code Example:* Demonstrate the various table formats recognized when setting the tile property
+    *Code Example:* Demonstrate the various table formats recognized when setting the tile property
 
-		(code)
-		-- Set each region individually in a table
-		mySlice.tile = { true, false, true, false, true, false }
+        (code)
+        -- Set each region individually in a table
+        mySlice.tile = { true, false, true, false, true, false }
 
-		-- Set the regions to tile individually
-		mySlice.tile[ 1 ] = true
-		mySlice.tile[ 2 ] = false
-		mySlice.tile[ 3 ] = true
-		mySlice.tile[ 4 ] = false
-		mySlice.tile[ 5 ] = true
-		mySlice.tile[ 6 ] = false
+        -- Set the regions to tile individually
+        mySlice.tile[ 1 ] = true
+        mySlice.tile[ 2 ] = false
+        mySlice.tile[ 3 ] = true
+        mySlice.tile[ 4 ] = false
+        mySlice.tile[ 5 ] = true
+        mySlice.tile[ 6 ] = false
 
-		-- Set all regions that resize horizontally to tile
-		-- and all regions that resize vertically to compress/stretch
-		mySlice.tile = { true, false }
+        -- Set all regions that resize horizontally to tile
+        -- and all regions that resize vertically to compress/stretch
+        mySlice.tile = { true, false }
 
-		-- Set all resizable regions to tile
-		mySlice.tile = true
-		(end)
+        -- Set all resizable regions to tile
+        mySlice.tile = true
+        (end)
 
-	*See Also:* the NineSlice region illustration at the top of this page
+    *See Also:* the NineSlice region illustration at the top of this page
 */
 
     table tile
@@ -345,9 +291,9 @@ class NineSlice [[ClutterActor*]] actor
 /***************************************
     Property: loaded
 
-	The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image(s) referenced by the object's <sheet> and <ids> properties (true=success).
+    The loaded property is a boolean flag indicating the success or failure of the synchronous loading of the image(s) referenced by the object's <sheet> and <ids> properties (true=success).
 
-	Note: The loaded property cannot be used to determine the result or status of asynchonously-loaded images. To receive status notification of asynchronously-loaded images, register an <on_loaded> event handler.
+    Note: The loaded property cannot be used to determine the result or status of asynchonously-loaded images. To receive status notification of asynchronously-loaded images, register an <on_loaded> event handler.
 
     *Default Setting:* false
 
@@ -362,13 +308,13 @@ class NineSlice [[ClutterActor*]] actor
 /***************************************
     Property: borders
 
-	The borders property is a table of integer values specifying the maximum sizes of the object's sides in their non-scaling dimensions. For example, the NineSlice object's left side is made up of the nw, w, and sw regions. The left side cannot scale in the horizontal direction, i.e, its width cannot change. Thus, the borders table entry for the left side will contain the width of the widest image contained in the three regions. Similarly, the object's top side (comprising the nw, n, and ne regions) cannot be resized vertically (its height cannot change), so the maximum size of the top side is determined by the image in those regions that has the largest height.
+    The borders property is a table of integer values specifying the maximum sizes of the object's sides in their non-scaling dimensions. For example, the NineSlice object's left side is made up of the nw, w, and sw regions. The left side cannot scale in the horizontal direction, i.e, its width cannot change. Thus, the borders table entry for the left side will contain the width of the widest image contained in the three regions. Similarly, the object's top side (comprising the nw, n, and ne regions) cannot be resized vertically (its height cannot change), so the maximum size of the top side is determined by the image in those regions that has the largest height.
 
-	Note: Any images in a side's region that are smaller than the side's largest width/height are stretched to match the side's maximum size.
+    Note: Any images in a side's region that are smaller than the side's largest width/height are stretched to match the side's maximum size.
 
-	*Table Format:* { max left-side width, max right-side width, max top height, max bottom height }
+    *Table Format:* { max left-side width, max right-side width, max top height, max bottom height }
 
-	*See Also:* the <sheet> and <ids> properties
+    *See Also:* the <sheet> and <ids> properties
 */
 
     readonly table borders
@@ -399,9 +345,9 @@ class NineSlice [[ClutterActor*]] actor
 
     *Handler Prototype:*
 
-		(code)
-		f( loadedNineSlice, failed )
-		(end)
+        (code)
+        f( loadedNineSlice, failed )
+        (end)
 
     *Handler Arguments:*
 
@@ -462,14 +408,20 @@ class NineSlice [[ClutterActor*]] actor
 
 [[
 
-void NineSlice_on_loaded( NineSliceEffect * effect, gpointer error, lua_State * L )
+void NineSlice_on_loaded( NineSliceLayout * layout, gpointer error, lua_State * L )
 {
-    ClutterActor * self = clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( effect ) );
+    // NineSliceBinding is gone before all slices are loaded
+    if ( !layout->priv->parent_valid ) return;
+
+    ClutterActor * self = layout->priv->actor;
+    g_assert( self );
 
     if ( get_binding( self )->async )
     {
         lua_pushboolean( L, error ? 1 : 0 );
         UserData::invoke_callbacks( G_OBJECT( self ), "on_loaded", 1, 0, L );
+        layout->priv->can_fire = true;
+        layout->priv->action = NULL;
     }
 }
 

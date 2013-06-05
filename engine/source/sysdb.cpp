@@ -15,78 +15,79 @@
 
 //-----------------------------------------------------------------------------
 
-static const char * schema_create =
+static const char* schema_create =
 
-    "create table generic( key TEXT PRIMARY KEY NOT NULL , value TEXT );"
+        "create table generic( key TEXT PRIMARY KEY NOT NULL , value TEXT );"
 
-    "create table profiles( id INTEGER PRIMARY KEY AUTOINCREMENT,"
-    "                       name TEXT,pin TEXT);"
+        "create table profiles( id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "                       name TEXT,pin TEXT);"
 
-    "create table apps( id TEXT PRIMARY KEY NOT NULL,"
-    "                   path TEXT NOT NULL, "
-    "                   name TEXT,"
-    "                   release INTEGER NOT NULL,"
-    "                   version TEXT NOT NULL,"
-    "                   fingerprints TEXT,"
-    "                   attributes TEXT NOT NULL DEFAULT '');"
+        "create table apps( id TEXT PRIMARY KEY NOT NULL,"
+        "                   path TEXT NOT NULL, "
+        "                   name TEXT,"
+        "                   description TEXT,"
+        "                   release INTEGER NOT NULL,"
+        "                   version TEXT NOT NULL,"
+        "                   fingerprints TEXT,"
+        "                   attributes TEXT NOT NULL DEFAULT '');"
 
-    "create table profile_apps( profile_id INTEGER NOT NULL,"
-    "                           app_id TEXT NOT NULL,"
-    "                           start_count INTEGER NOT NULL DEFAULT 0,"
-    "                           last_start INTEGER NOT NULL DEFAULT 0,"
-    "                           PRIMARY KEY( profile_id, app_id) );"
+        "create table profile_apps( profile_id INTEGER NOT NULL,"
+        "                           app_id TEXT NOT NULL,"
+        "                           start_count INTEGER NOT NULL DEFAULT 0,"
+        "                           last_start INTEGER NOT NULL DEFAULT 0,"
+        "                           PRIMARY KEY( profile_id, app_id) );"
 
-    "create table app_actions( app_id TEXT NOT NULL,"
-    "                          action TEXT NOT NULL,"
-    "                          description TEXT,"
-    "                          uri TEXT,"
-    "                          type TEXT,"
-    "                          PRIMARY KEY( app_id, action ) );"
+        "create table app_actions( app_id TEXT NOT NULL,"
+        "                          action TEXT NOT NULL,"
+        "                          description TEXT,"
+        "                          uri TEXT,"
+        "                          type TEXT,"
+        "                          PRIMARY KEY( app_id, action ) );"
 
-    "create table badges( app_id TEXT NOT NULL,"
-    "                     profile_id INTEGER NOT NULL,"
-    "                     style TEXT,"
-    "                     message TEXT,"
-    "                     PRIMARY KEY( app_id, profile_id ) );"
+        "create table badges( app_id TEXT NOT NULL,"
+        "                     profile_id INTEGER NOT NULL,"
+        "                     style TEXT,"
+        "                     message TEXT,"
+        "                     PRIMARY KEY( app_id, profile_id ) );"
 
-    // When a profile is deleted, all of its apps are also deleted.
+        // When a profile is deleted, all of its apps are also deleted.
 
-    "create trigger profiles_delete after delete on profiles"
-    "   begin"
-    "       delete from profile_apps where profile_id = OLD.id; "
-    "       delete from badges where profile_id = OLD.id; "
-    "   end;"
+        "create trigger profiles_delete after delete on profiles"
+        "   begin"
+        "       delete from profile_apps where profile_id = OLD.id; "
+        "       delete from badges where profile_id = OLD.id; "
+        "   end;"
 
-    // When an app is deleted, it is removed from all profiles
-    // and all of its actions are deleted
+        // When an app is deleted, it is removed from all profiles
+        // and all of its actions are deleted
 
-    "create trigger apps_delete after delete on apps"
-    "   begin"
-    "       delete from profile_apps where app_id = OLD.id;"
-    "       delete from app_actions where app_id = OLD.id;"
-    "       delete from badges where app_id = OLD.id;"
-    "   end;"
+        "create trigger apps_delete after delete on apps"
+        "   begin"
+        "       delete from profile_apps where app_id = OLD.id;"
+        "       delete from app_actions where app_id = OLD.id;"
+        "       delete from badges where app_id = OLD.id;"
+        "   end;"
 
 #if 0
-    // When an app is inserted, we add it to all profiles - if it belongs to none
-    "create trigger apps_profile_apps_insert after insert on apps"
-    "   when ( select 1 from profile_apps where app_id = NEW.id limit 1 ) IS NULL"
-    "   begin"
-    "       insert into profile_apps ( profile_id , app_id ) select id , NEW.id from profiles;"
-    "   end;"
+        // When an app is inserted, we add it to all profiles - if it belongs to none
+        "create trigger apps_profile_apps_insert after insert on apps"
+        "   when ( select 1 from profile_apps where app_id = NEW.id limit 1 ) IS NULL"
+        "   begin"
+        "       insert into profile_apps ( profile_id , app_id ) select id , NEW.id from profiles;"
+        "   end;"
 #endif
 
-    // When an new profile is created, it gets all apps
+        // When an new profile is created, it gets all apps
 
-    "create trigger profiles_profile_apps_insert after insert on profiles"
-    "   begin"
-    "       insert into profile_apps ( profile_id , app_id ) select NEW.id , id from apps;"
-    "   end;"
-    ;
+        "create trigger profiles_profile_apps_insert after insert on profiles"
+        "   begin"
+        "       insert into profile_apps ( profile_id , app_id ) select NEW.id , id from apps;"
+        "   end;"
+        ;
 
 //-----------------------------------------------------------------------------
 
-SystemDatabase * SystemDatabase::open( const char * path )
+SystemDatabase* SystemDatabase::open( const char* path )
 {
     FreeLater free_later;
 
@@ -104,7 +105,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     // Construct the filename for the on-disk db
 
-    gchar * filename = g_build_filename( path, "system.db", NULL );
+    gchar* filename = g_build_filename( path, "system.db", NULL );
     free_later( filename );
 
     bool create = true;
@@ -183,7 +184,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
     // Now, we create an instance of a system database - which will steal the
     // underlying sqlite db from our local instance...we transfer ownership of it.
 
-    SystemDatabase * result = new SystemDatabase( db, path, create );
+    SystemDatabase* result = new SystemDatabase( db, path, create );
 
     // If we fail to populate the database, we should not continue since we may
     // have inconsistent data. Plus, if this fails, it is very likely that
@@ -215,7 +216,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
 //.............................................................................
 
-SystemDatabase::SystemDatabase( SQLite::DB & d, const char * p, bool c )
+SystemDatabase::SystemDatabase( SQLite::DB& d, const char* p, bool c )
     :
     path( p ),
     db( d ),
@@ -242,7 +243,7 @@ bool SystemDatabase::flush()
         return true;
     }
 
-    gchar * backup_filename = g_build_filename( path.c_str(), "system.db.XXXXXX", NULL );
+    gchar* backup_filename = g_build_filename( path.c_str(), "system.db.XXXXXX", NULL );
     free_later( backup_filename );
 
     // Make a temporary file to backup to
@@ -275,7 +276,7 @@ bool SystemDatabase::flush()
 
     // Now move the backup file
 
-    gchar * target_filename = g_build_filename( path.c_str(), "system.db", NULL );
+    gchar* target_filename = g_build_filename( path.c_str(), "system.db", NULL );
     free_later( target_filename );
 
     if ( g_rename( backup_filename, target_filename ) != 0 )
@@ -376,7 +377,7 @@ bool SystemDatabase::insert_initial_data()
 
 //.............................................................................
 
-bool SystemDatabase::set( const char * key, int value )
+bool SystemDatabase::set( const char* key, int value )
 {
     SQLite::Statement insert( db, "insert or replace into generic (key,value) values (?1,?2);" );
     insert.bind( 1, key );
@@ -388,7 +389,7 @@ bool SystemDatabase::set( const char * key, int value )
 
 //.............................................................................
 
-bool SystemDatabase::set( const char * key, const char * value )
+bool SystemDatabase::set( const char* key, const char* value )
 {
     SQLite::Statement insert( db, "insert or replace into generic (key,value) values (?1,?2);" );
     insert.bind( 1, key );
@@ -400,7 +401,7 @@ bool SystemDatabase::set( const char * key, const char * value )
 
 //.............................................................................
 
-bool SystemDatabase::set( const char * key, const String & value )
+bool SystemDatabase::set( const char* key, const String& value )
 {
     SQLite::Statement insert( db, "insert or replace into generic (key,value) values (?1,?2);" );
     insert.bind( 1, key );
@@ -412,33 +413,37 @@ bool SystemDatabase::set( const char * key, const String & value )
 
 //.............................................................................
 
-String SystemDatabase::get_string( const char * key, const char * def )
+String SystemDatabase::get_string( const char* key, const char* def )
 {
     SQLite::Statement select( db, "select value from generic where key=?1;" );
     select.bind( 1, key );
+
     if ( select.step_row() )
     {
         return select.get_string( 0 );
     }
+
     return String( def );
 }
 
 //.............................................................................
 
-int SystemDatabase::get_int( const char * key, int def )
+int SystemDatabase::get_int( const char* key, int def )
 {
     SQLite::Statement select( db, "select value from generic where key=?1;" );
     select.bind( 1, key );
+
     if ( select.step_row() )
     {
         return select.get_int( 0 );
     }
+
     return def;
 }
 
 //.............................................................................
 
-int SystemDatabase::create_profile( const String & name, const String & pin )
+int SystemDatabase::create_profile( const String& name, const String& pin )
 {
     SQLite::Statement insert( db, "insert into profiles (id,name,pin) values (NULL,?1,?2);" );
     insert.bind( 1, name );
@@ -456,12 +461,14 @@ SystemDatabase::Profile SystemDatabase::get_current_profile()
 
     SQLite::Statement select( db, "select p.id,p.name,p.pin from generic g,profiles p where g.key=?1 and g.value=p.id;" );
     select.bind( 1, TP_DB_CURRENT_PROFILE_ID );
+
     if ( select.step_row() )
     {
         result.id = select.get_int( 0 );
         result.name = select.get_string( 1 );
         result.pin = select.get_string( 2 );
     }
+
     return result;
 }
 
@@ -473,12 +480,14 @@ SystemDatabase::Profile SystemDatabase::get_profile( int id )
 
     SQLite::Statement select( db, "select name,pin from profiles where id=?1;" );
     select.bind( 1, id );
+
     if ( select.step_row() )
     {
         result.id = id;
         result.name = select.get_string( 0 );
         result.pin = select.get_string( 1 );
     }
+
     return result;
 }
 
@@ -487,10 +496,12 @@ SystemDatabase::Profile SystemDatabase::get_profile( int id )
 int SystemDatabase::get_app_count()
 {
     SQLite::Statement select( db, "select count(*) from apps;" );
+
     if ( select.step_row() )
     {
         return select.get_int( 0 );
     }
+
     return 0;
 }
 
@@ -506,7 +517,7 @@ bool SystemDatabase::delete_all_apps()
 
 //.............................................................................
 
-bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet & fingerprints )
+bool SystemDatabase::insert_app( const App::Metadata& metadata, const StringSet& fingerprints )
 {
     make_dirty();
 
@@ -530,17 +541,19 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
         {
             attribute_list += ",";
         }
+
         attribute_list += *it;
     }
 
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7);" );
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,description,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7,?8);" );
     insert.bind( 1, metadata.id );
     insert.bind( 2, metadata.get_root_uri() );
     insert.bind( 3, metadata.name );
-    insert.bind( 4, metadata.release );
-    insert.bind( 5, metadata.version );
-    insert.bind( 6, fingerprint_list );
-    insert.bind( 7, attribute_list );
+    insert.bind( 4, metadata.description );
+    insert.bind( 5, metadata.release );
+    insert.bind( 6, metadata.version );
+    insert.bind( 7, fingerprint_list );
+    insert.bind( 8, attribute_list );
     insert.step();
 
     if ( ! insert.ok() )
@@ -578,20 +591,22 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
 
 //.............................................................................
 
-String SystemDatabase::get_app_path( const String & id )
+String SystemDatabase::get_app_path( const String& id )
 {
     SQLite::Statement select( db, "select path from apps where id=?1;" );
     select.bind( 1, id );
+
     if ( select.step_row() )
     {
         return select.get_string( 0 );
     }
+
     return String();
 }
 
 //.............................................................................
 
-SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * select )
+SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement* select )
 {
     g_assert( select );
 
@@ -604,14 +619,15 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
         app.id = select->get_string( 0 );
         app.path = select->get_string( 1 );
         app.name = select->get_string( 2 );
-        app.release = select->get_int( 3 );
-        app.version = select->get_string( 4 );
+        app.description = select->get_string( 3 );
+        app.release = select->get_int( 4 );
+        app.version = select->get_string( 5 );
 
-        StringVector fingerprints = split_string( select->get_string( 5 ) , "," );
+        StringVector fingerprints = split_string( select->get_string( 6 ) , "," );
 
         app.fingerprints.insert( fingerprints.begin() , fingerprints.end() );
 
-        StringVector attributes = split_string( select->get_string( 6 ) , "," );
+        StringVector attributes = split_string( select->get_string( 7 ) , "," );
 
         app.attributes.insert( attributes.begin() , attributes.end() );
 
@@ -625,14 +641,14 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,attributes from apps;" );
+    SQLite::Statement select( db, "select id,path,name,description,release,version,fingerprints,attributes from apps;" );
 
     return get_app_list( &select );
 }
 
 //.............................................................................
 
-void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
+void SystemDatabase::update_all_apps( const App::Metadata::List& apps )
 {
     // First, gather a set of all existing app ids
 
@@ -689,7 +705,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
 //.............................................................................
 
-void SystemDatabase::set_app_badge( const String & id, const String & badge_style, const String & badge_text )
+void SystemDatabase::set_app_badge( const String& id, const String& badge_style, const String& badge_text )
 {
     Profile profile = get_current_profile();
 
@@ -712,7 +728,7 @@ void SystemDatabase::set_app_badge( const String & id, const String & badge_styl
 
 //.............................................................................
 
-bool SystemDatabase::add_app_to_all_profiles( const String & app_id )
+bool SystemDatabase::add_app_to_all_profiles( const String& app_id )
 {
     make_dirty();
 
@@ -725,7 +741,7 @@ bool SystemDatabase::add_app_to_all_profiles( const String & app_id )
 
 //.............................................................................
 
-bool SystemDatabase::add_app_to_current_profile( const String & app_id )
+bool SystemDatabase::add_app_to_current_profile( const String& app_id )
 {
     Profile profile = get_current_profile();
 
@@ -755,8 +771,8 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppS
         return AppInfo::List();
     }
 
-    String s("select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.attributes"
-             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
+    String s( "select a.id,a.path,a.name,a.description,a.release,a.version,a.fingerprints,a.attributes"
+            " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
 
     switch ( sort )
     {
@@ -803,7 +819,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppS
 
 //.............................................................................
 
-bool SystemDatabase::remove_app_from_all_profiles( const String & app_id )
+bool SystemDatabase::remove_app_from_all_profiles( const String& app_id )
 {
     make_dirty();
 
@@ -816,7 +832,7 @@ bool SystemDatabase::remove_app_from_all_profiles( const String & app_id )
 
 //.............................................................................
 
-bool SystemDatabase::remove_app_from_current_profile( const String & app_id )
+bool SystemDatabase::remove_app_from_current_profile( const String& app_id )
 {
     Profile profile = get_current_profile();
 
@@ -837,7 +853,7 @@ bool SystemDatabase::remove_app_from_current_profile( const String & app_id )
 
 //.............................................................................
 
-std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
+std::list<int> SystemDatabase::get_profiles_for_app( const String& app_id )
 {
     std::list<int> result;
 
@@ -845,7 +861,7 @@ std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
 
     select.bind( 1, app_id );
 
-    while( select.step_row() )
+    while ( select.step_row() )
     {
         result.push_back( select.get_int( 0 ) );
     }
@@ -855,7 +871,7 @@ std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
 
 //.............................................................................
 
-bool SystemDatabase::is_app_in_current_profile( const String & app_id )
+bool SystemDatabase::is_app_in_current_profile( const String& app_id )
 {
     Profile profile = get_current_profile();
 
@@ -883,8 +899,8 @@ SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile
     if ( profile.id )
     {
         SQLite::Statement select( db,
-            "select a.app_id, a.action, a.description, a.uri, a.type from app_actions a, profile_apps p"
-            "    where p.profile_id = ?1 and p.app_id = a.app_id;" );
+                "select a.app_id, a.action, a.description, a.uri, a.type from app_actions a, profile_apps p"
+                "    where p.profile_id = ?1 and p.app_id = a.app_id;" );
 
         select.bind( 1, profile.id );
 
@@ -897,7 +913,7 @@ SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile
     return result;
 }
 
-void SystemDatabase::app_launched( const String & app_id )
+void SystemDatabase::app_launched( const String& app_id )
 {
     Profile profile = get_current_profile();
 
