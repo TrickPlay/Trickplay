@@ -44,7 +44,6 @@ Button = setmetatable(
                 return nil,
                 function(oldf,self,v)
                     oldf(self,v)
-                    if not instance.enabled then return end
                     if v then
                         --image
                         if image_states.focus then   image_states.focus.state = "ON"   end
@@ -420,18 +419,41 @@ Button = setmetatable(
         --print("button",_ENV)
         ----------------------------------------------------------------------------
         --Key events
-        function instance:on_key_focus_in()    instance.focused = true  end
-        function instance:on_key_focus_out()   instance.focused = false end
+        function instance:on_key_focus_in()
+            if not instance.enabled then return end
+            if external.editor_mode then return end
+            instance.focused = true
+        end
+        function instance:on_key_focus_out()
+            instance.focused = false
+        end
 
         instance:add_key_handler(   keys.OK, function() instance:click()   end)
 
         ----------------------------------------------------------------------------
         --Mouse events
 
-        function instance:on_enter()        instance.focused = true   end
-        function instance:on_leave()        instance.focused = false  instance:release() end
-        function instance:on_button_down()  instance:press()          end
-        function instance:on_button_up()    instance:release()        end
+        function instance:on_enter()
+            if not instance.enabled then return end
+            if external.editor_mode then return end
+            instance.focused = true
+        end
+        function instance:on_leave()
+            if not instance.enabled then return end
+            if external.editor_mode then return end
+            instance.focused = false
+            instance:release()
+        end
+        function instance:on_button_down()
+            if not instance.enabled then return end
+            if external.editor_mode then return end
+            instance:press()
+        end
+        function instance:on_button_up()
+            if not instance.enabled then return end
+            if external.editor_mode then return end
+            instance:release()
+        end
 
 
         local getter, setter
