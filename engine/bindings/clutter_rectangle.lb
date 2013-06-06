@@ -27,16 +27,51 @@ class Rectangle [[ClutterActor*]] actor
             self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
             ClutterUtil::initialize_actor(L,self,RECTANGLE_METATABLE);
 
-            ClutterLayoutManager *grid = clutter_grid_layout_new();
-            clutter_actor_set_layout_manager (self, grid);
+            // We're going to make a row which contains a border, a column, and a border
+            // The column contains border, inner section, border
+            // We can't just use a Grid layout, because it resizes the borders incorrectly
+
+            ClutterLayoutManager *layout = clutter_box_layout_new();
+            clutter_actor_set_layout_manager (self, layout);
+
+            ClutterActor *column = clutter_actor_new();
+            clutter_actor_set_x_expand(column, TRUE);
+            layout = clutter_box_layout_new();
+            clutter_box_layout_set_orientation(CLUTTER_BOX_LAYOUT(layout), CLUTTER_ORIENTATION_VERTICAL);
+            clutter_actor_set_layout_manager(column, layout);
+
+            ClutterActor *top = clutter_actor_new();
+            clutter_actor_set_name(top, "top");
+            clutter_actor_set_x_expand( top, TRUE );
+            clutter_actor_set_y_align ( top, CLUTTER_ACTOR_ALIGN_START);
 
             ClutterActor *inner = clutter_actor_new();
+            clutter_actor_set_name(inner, "inner");
             clutter_actor_set_x_expand (inner, TRUE);
             clutter_actor_set_y_expand (inner, TRUE);
 
-            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 0, 3, 1); // Padding on top
-            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), inner, 1, 1, 1, 1);
-            clutter_grid_layout_attach(CLUTTER_GRID_LAYOUT(grid), clutter_actor_new(), 0, 2, 3, 1); // Padding on bottom
+            ClutterActor *bottom = clutter_actor_new();
+            clutter_actor_set_name(bottom, "bottom");
+            clutter_actor_set_x_expand( bottom, TRUE );
+            clutter_actor_set_y_align ( bottom, CLUTTER_ACTOR_ALIGN_END);
+
+            clutter_actor_add_child(column, top);
+            clutter_actor_add_child(column, inner);
+            clutter_actor_add_child(column, bottom);
+
+            ClutterActor *left = clutter_actor_new();
+            clutter_actor_set_name(left, "left");
+            clutter_actor_set_x_align ( left, CLUTTER_ACTOR_ALIGN_START);
+            clutter_actor_set_y_expand( left, TRUE );
+
+            ClutterActor *right = clutter_actor_new();
+            clutter_actor_set_name(right, "right");
+            clutter_actor_set_y_expand( right, TRUE );
+            clutter_actor_set_x_align ( right, CLUTTER_ACTOR_ALIGN_END);
+
+            clutter_actor_add_child(self, left);
+            clutter_actor_add_child(self, column);
+            clutter_actor_add_child(self, right);
 
             ClutterUtil::set_props_from_table(L,props);
             g_object_unref( self );
@@ -72,14 +107,14 @@ class Rectangle [[ClutterActor*]] actor
     table color
         [[
             ClutterColor color;
-            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+            ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "inner");
             clutter_actor_get_background_color(inner, &color);
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            ClutterActor *inner = clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), 1, 1);
+            ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "inner");
 
             // Need to deal with easing state in case this is an animation -- just copy from parent
             if(clutter_actor_get_easing_duration(self))
@@ -111,11 +146,20 @@ class Rectangle [[ClutterActor*]] actor
 
     int border_width
         [[
-            border_width=clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)));
+            ClutterActor *top = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "top");
+
+            border_width=clutter_actor_get_height(top);
         ]]
         [[
-            clutter_grid_layout_set_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
-            clutter_grid_layout_set_row_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(self)), border_width);
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "bottom");
+
+            clutter_actor_set_height(top, border_width);
+            clutter_actor_set_width(left, border_width);
+            clutter_actor_set_width(right, border_width);
+            clutter_actor_set_height(bottom, border_width);
         ]];
 
 /***************************************
@@ -133,13 +177,26 @@ class Rectangle [[ClutterActor*]] actor
     table border_color
         [[
             ClutterColor color;
-            clutter_actor_get_background_color(self,&color);
+
+            ClutterActor *top = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "top");
+
+            clutter_actor_get_background_color(top,&color);
+
             ClutterUtil::push_clutter_color(L,&color);
         ]]
         [[
             ClutterColor color;
             ClutterUtil::to_clutter_color(L,2,&color);
-            clutter_actor_set_background_color(self,&color);
+
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "bottom");
+
+            clutter_actor_set_background_color(top, &color);
+            clutter_actor_set_background_color(left, &color);
+            clutter_actor_set_background_color(right, &color);
+            clutter_actor_set_background_color(bottom, &color);
         ]];
 }
 
