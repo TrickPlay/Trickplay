@@ -124,6 +124,9 @@ struct NineSliceBinding
         unsubscrube_sprites();
 
         layout->priv->parent_valid = false; // NineSliceBinding is gone
+
+        if ( sheet ) RefCounted::ref( sheet );
+        sheet = NULL;
     }
 
     NineSliceLayout * get_layout() { return layout; }
@@ -184,11 +187,17 @@ struct NineSliceBinding
 
     void set_sheet( SpriteSheet * _sheet )
     {
+        if ( sheet == _sheet ) return;
+
+        if ( sheet ) RefCounted::unref( sheet );
+
         sheet = _sheet;
 
-        if (constructing) return;
+        if ( _sheet ) RefCounted::ref( _sheet );
 
-        if (sheet) set_all_sprites();
+        if ( constructing ) return;
+
+        if ( _sheet ) set_all_sprites();
     }
 
     void set_all_sprites()
