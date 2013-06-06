@@ -215,7 +215,8 @@ Slider = setmetatable(
                 name = "grip",
                 reactive = true,
                 on_button_down = function(self,...)
-                    print("here",direction_dim)
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
                     pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
 
                     --position_grabbed_from = ({...})[direction_num]
@@ -228,9 +229,13 @@ Slider = setmetatable(
                     return true
                 end,
                 on_motion = function(self,...)
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
                     return g_dragging and g_dragging(...)
                 end,
                 on_button_up = function(self,...)
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
                     grip:ungrab_pointer()
                     g_dragging = nil
                     p = instance.progress
@@ -241,6 +246,8 @@ Slider = setmetatable(
                 name =  "track",
                 reactive = true,
                 on_button_down = function(self,...)
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
 
                     pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
 

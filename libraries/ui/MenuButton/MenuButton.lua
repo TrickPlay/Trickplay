@@ -283,6 +283,8 @@ MenuButton = setmetatable(
             old_on_pressed = button.on_pressed
             ---[[
             function button:on_pressed()
+                if not instance.enabled then return end
+                if external.editor_mode then return end
 
                 old_on_pressed(self)
 

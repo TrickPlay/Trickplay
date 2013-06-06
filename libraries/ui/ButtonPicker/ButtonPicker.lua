@@ -199,7 +199,6 @@ ButtonPicker = setmetatable(
                         local style = instance.style
                         local sheet = style.spritesheet
                         local widget_type = instance.widget_type
-                        print("gurp",window_w,window_h,style[widget_type.."/default/nw.png"],widget_type.."/default/nw.png")
                         bg:set{
                             name   = state,
                             w      = window_w,
@@ -335,6 +334,8 @@ ButtonPicker = setmetatable(
             end,
             prev_i = function(instance,_ENV)
                 return function()
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
                     if list_entries.length <= 1 then return end
                     if not animating then
                         animating  = "BACK"
@@ -349,6 +350,8 @@ ButtonPicker = setmetatable(
             end,
             next_i = function(instance,_ENV)
                 return function()
+                    if not instance.enabled then return end
+                    if external.editor_mode then return end
                     if list_entries.length <= 1 then return end
                     if not animating then
                         animating = "FORWARD"
@@ -383,7 +386,6 @@ ButtonPicker = setmetatable(
             local bg = NineSlice{name="backing"}
             local text = Group{name="text"}
             local window = Widget_Group{name="window",children={bg,text}}
-            print(1)
             local prev_arrow = Button:declare{
                 name = "prev",
                 --style = false,
@@ -391,7 +393,6 @@ ButtonPicker = setmetatable(
                 --create_canvas = create_arrow,
                 reactive = true,
             }
-            print(2)
             local next_arrow = Button:declare{
                 name = "next",
                 --style = false,
@@ -399,7 +400,6 @@ ButtonPicker = setmetatable(
                 --create_canvas = create_arrow,
                 reactive = true,
             }
-            print(3)
             local instance, _ENV  = ListManager:declare{
                 cells = {
                     prev_arrow,
@@ -433,9 +433,7 @@ ButtonPicker = setmetatable(
             window_w   = 200
             window_h   = 70
 
-            print(3.25)
             bg =  NineSlice()--{name   = "Background"}
-            print(3.75)
             --fg = false
 
             list_entries = false
@@ -445,13 +443,11 @@ ButtonPicker = setmetatable(
             prev_item = false
             index_direction = false
             curr_index = 1
-            print("creating array")
             list_entries = ArrayManager{
 
                 node_constructor=function(obj,i)
                     --TODO: fix this to accept any UIElement
 
-                    print("node constr",obj)
                     if type(obj) == "string" then
                         obj = Text{text=obj}
                         obj:set(   instance.style.text:get_table()   )
@@ -482,7 +478,6 @@ ButtonPicker = setmetatable(
                         self[curr_index].position  = next_item.position
 
                     elseif self[curr_index] ~= nil and next_item ~= self[curr_index] then
-                        print("got it")
                         if next_item then next_item:unparent() end
                         next_item = self[curr_index]
                         text:add(next_item)
@@ -494,7 +489,6 @@ ButtonPicker = setmetatable(
 
                 end
             }
-            print("done")
             next_i = false
             prev_i = false
 
