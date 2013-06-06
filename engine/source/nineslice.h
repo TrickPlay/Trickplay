@@ -187,12 +187,17 @@ struct NineSliceBinding
 
     void set_sheet( SpriteSheet * _sheet )
     {
+        if ( sheet == _sheet ) return;
+
+        if ( sheet ) RefCounted::unref( sheet );
+
         sheet = _sheet;
-        RefCounted::ref( sheet );
 
-        if (constructing) return;
+        if ( _sheet ) RefCounted::ref( _sheet );
 
-        if (sheet) set_all_sprites();
+        if ( constructing ) return;
+
+        if ( _sheet ) set_all_sprites();
     }
 
     void set_all_sprites()
