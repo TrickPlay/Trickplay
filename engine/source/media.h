@@ -50,6 +50,11 @@ class Media
 
     gboolean get_keep_aspect_ratio() { return keep_aspect_ratio; }
     void set_keep_aspect_ratio( bool _keep_aspect_ratio ) { keep_aspect_ratio = _keep_aspect_ratio; }
+    GstElement * get_pipeline() { return pipeline; }
+
+    gint get_video_width()  { return video_width; }
+    gint get_video_height() { return video_height; }
+    ClutterActor* get_actor() { return vt; }
 
     ~Media();
 

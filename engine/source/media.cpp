@@ -236,7 +236,9 @@ int Media::seek( double seconds )
     clutter_gst_video_texture_set_seek_flags( CLUTTER_GST_VIDEO_TEXTURE( vt ),
                                               CLUTTER_GST_SEEK_FLAG_ACCURATE );
 
-    clutter_media_set_progress( cm, seconds / clutter_media_get_duration( cm ) );
+    gdouble duration = clutter_media_get_duration( cm );
+
+    if ( duration > 1e-9 ) clutter_media_set_progress( cm, ( seconds > duration ) ? 1.0 : seconds / duration );
 
     return 0;
 }
@@ -491,7 +493,7 @@ void Media::post_event( Event* event )
 
 gboolean Media::process_events( gpointer data )
 {
-    ( ( Media* )data )->process_events();
+    ( ( Media* ) data )->process_events();
     return FALSE;
 }
 
@@ -499,7 +501,7 @@ void Media::process_events()
 {
     MPLOCK;
 
-    while ( Event* event = ( Event* )g_async_queue_try_pop( queue ) )
+    while ( Event* event = ( Event* ) g_async_queue_try_pop( queue ) )
     {
         switch ( event->type )
         {
@@ -847,29 +849,20 @@ void collect_tags( const GstTagList* list, const gchar* tag, gpointer user_data 
 // Signal handlers
 void gst_end_of_stream( ClutterMedia* cm, Media* media )
 {
-/*      int attempts = 0;
-        gboolean re;
-        do {
-            re = ! gst_element_seek( pipeline, -1.0, GST_FORMAT_TIME,
-                ( GstSeekFlags ) ( GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE ),
-                GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_END, 0 );
-            if ( re ) sleep( 1 );
-        } while ( re && ++attempts > 3 );
-*/
-
     if ( media->get_loop() )
     {
         clutter_media_set_progress( cm, 0.0 );
         clutter_media_set_playing( cm, TRUE );
+        return;
     }
-    else
-    {
-        /*g_warning("%d",__LINE__);
-        clutter_media_set_progress( cm, 0.5 );
-        g_warning("%d",__LINE__);
-        clutter_media_set_playing( cm, FALSE );*/
-        media->end_of_stream();
-    }
+
+    ClutterActor* actor = media->get_actor();
+    CoglMaterial *material = cogl_material_copy( ( CoglMaterial * ) clutter_texture_get_cogl_material( CLUTTER_TEXTURE( actor ) ) );
+    clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( actor ), ( CoglHandle ) material );
+
+    //clutter_media_set_playing( cm, FALSE );
+
+    media->end_of_stream();
 }
 
 void gst_error( ClutterMedia* cm, GError* error, Media* media )
