@@ -33,6 +33,9 @@ struct SpriteBinding
 
     ~SpriteBinding()
     {
+        ping.assign( NULL, NULL, NULL, false );
+        sprite = NULL;
+
         if ( id && id_to_free) {
             g_free( id );
             id = NULL;
