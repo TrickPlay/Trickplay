@@ -156,10 +156,39 @@ class Rectangle [[ClutterActor*]] actor
             ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "right");
             ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "bottom");
 
+            // Need to deal with easing state in case this is an animation -- just copy from parent
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_save_easing_state( top    );
+                clutter_actor_save_easing_state( left   );
+                clutter_actor_save_easing_state( right  );
+                clutter_actor_save_easing_state( bottom );
+                clutter_actor_set_easing_duration( top,    clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( left,   clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( right,  clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( bottom, clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_delay( top,    clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( left,   clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( right,  clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( bottom, clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_mode( top,    clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( left,   clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( right,  clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( bottom, clutter_actor_get_easing_mode(self) );
+            }
+
             clutter_actor_set_height(top, border_width);
             clutter_actor_set_width(left, border_width);
             clutter_actor_set_width(right, border_width);
             clutter_actor_set_height(bottom, border_width);
+
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_restore_easing_state( top    );
+                clutter_actor_restore_easing_state( left   );
+                clutter_actor_restore_easing_state( right  );
+                clutter_actor_restore_easing_state( bottom );
+            }
         ]];
 
 /***************************************
@@ -193,10 +222,39 @@ class Rectangle [[ClutterActor*]] actor
             ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "right");
             ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(self), "bottom");
 
+            // Need to deal with easing state in case this is an animation -- just copy from parent
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_save_easing_state( top    );
+                clutter_actor_save_easing_state( left   );
+                clutter_actor_save_easing_state( right  );
+                clutter_actor_save_easing_state( bottom );
+                clutter_actor_set_easing_duration( top,    clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( left,   clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( right,  clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_duration( bottom, clutter_actor_get_easing_duration(self) );
+                clutter_actor_set_easing_delay( top,    clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( left,   clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( right,  clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_delay( bottom, clutter_actor_get_easing_delay(self) );
+                clutter_actor_set_easing_mode( top,    clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( left,   clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( right,  clutter_actor_get_easing_mode(self) );
+                clutter_actor_set_easing_mode( bottom, clutter_actor_get_easing_mode(self) );
+            }
+
             clutter_actor_set_background_color(top, &color);
             clutter_actor_set_background_color(left, &color);
             clutter_actor_set_background_color(right, &color);
             clutter_actor_set_background_color(bottom, &color);
+
+            if(clutter_actor_get_easing_duration(self))
+            {
+                clutter_actor_restore_easing_state( top    );
+                clutter_actor_restore_easing_state( left   );
+                clutter_actor_restore_easing_state( right  );
+                clutter_actor_restore_easing_state( bottom );
+            }
         ]];
 }
 
