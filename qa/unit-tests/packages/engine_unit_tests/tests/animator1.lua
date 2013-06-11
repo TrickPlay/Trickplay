@@ -18,6 +18,8 @@ local rect1 = Rectangle {
 local rect2 = Rectangle {
         size = {100, 100},
         position = { 700, 150, 0},
+        border_width = 10,
+        border_color = "red",
         color = "44AA44"
         }
 
@@ -65,6 +67,22 @@ local ani0 = Animator
             ease_in = true,
             keys = {
                 {0.1, "LINEAR", 10}
+                    }
+            },
+            {
+            source = rect2,
+            name = "border_color",
+            ease_in = true,
+            keys = {
+                {0.1, "LINEAR", "green"}
+                    }
+            },
+            {
+            source = rect2,
+            name = "border_width",
+            ease_in = true,
+            keys = {
+                {0.1, "LINEAR", 20}
                     }
             },
             {
@@ -162,7 +180,7 @@ local ani0 = Animator
 
 }
 
---ani0:start() -- THIS LINE CAUSES SEGFAULT; DISABLING FOR NOW
+ani0:start()
 
 function ani0.timeline.on_completed()
     animator_timeline_completed_called = true
@@ -181,7 +199,8 @@ function test_animator_end_state ()
     assert_equal( rect1.position[2], 650, "rect1.position[2] returned  "..rect1.position[1].." Expected 650")
     assert_equal( rect1.z, 10, "rect1.z returned  ".. rect1.z.." Expected 10")
     assert_equal( rect1.opacity, 50,  "rect1.opacity returned  ".. rect1.opacity.." Expected 50")
-    assert_equal( rect1.depth, 10,  "rect1.depth returned  ".. rect1.depth.." Expected 10")
+    assert_equal( rect2.depth, 10,  "rect2.depth returned  ".. rect1.depth.." Expected 10")
+    assert_equal( rect2.border_width, 20, "rect2.border_width returned ".. rect2.border_width.." Expected 20")
     assert_equal( rect3.size[1], 200,  "rect3.size[1] returned  ".. rect1.size[1].." Expected 200")
     assert_equal( rect3.size[2], 200,"rect3.size[2] returned  "..rect1.size[2].." Expected 200")
     assert_equal( rect2.w, 200, "rect2.w returned  ".. rect2.w.." Expected 200")
