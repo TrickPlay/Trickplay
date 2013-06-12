@@ -172,23 +172,13 @@ int Media::load( lua_State * L, const char* uri, const char* extra )
         return TP_MEDIAPLAYER_ERROR_INVALID_URI;
     }
 
-    gchar* unescaped_uri = g_uri_unescape_string( resource.get_uri().c_str() , 0 );
-    if ( ! unescaped_uri )
-    {
-        g_warning( "MP[%p] INVALID URI '%s'" , this , uri );
-        return TP_MEDIAPLAYER_ERROR_INVALID_URI;
-    }
+    tplog( "[%p] <- load('%s','%s')", this, resource.get_uri().c_str() , extra );
 
-    tplog( "[%p] <- load('%s','%s')", this, unescaped_uri , extra );
-
-    if ( int result = gst_load( unescaped_uri, extra ) )
+    if ( int result = gst_load( resource.get_uri().c_str(), extra ) )
     {
         g_warning( "MP[%p]    FAILED %d", this, result );
-        g_free( unescaped_uri );
         return result;
     }
-
-    g_free( unescaped_uri );
 
     state = TP_MEDIAPLAYER_LOADING;
 
