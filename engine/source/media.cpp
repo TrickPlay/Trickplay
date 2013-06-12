@@ -58,6 +58,7 @@ Media::Media( TPContext* c, Delegate* d, ClutterActor * actor )
     , loaded_flag( false )
     , actor_hidden( false )
     , keep_aspect_ratio( false )
+    , idle_material_set_flag( false )
 {
 #ifndef GLIB_VERSION_2_32
     g_static_rec_mutex_init( &mutex );
@@ -153,6 +154,8 @@ void Media::reset()
 
     tags.clear(); // Clear tags
 
+    clear_idle_material();
+
     state = TP_MEDIAPLAYER_IDLE;
 }
 
@@ -232,9 +235,7 @@ int Media::seek( double seconds )
 
     if ( !clutter_media_get_can_seek( cm ) ) return 1;
 
-    // According to the clutter-gst example program video-player.c
-    clutter_gst_video_texture_set_seek_flags( CLUTTER_GST_VIDEO_TEXTURE( vt ),
-                                              CLUTTER_GST_SEEK_FLAG_ACCURATE );
+    clear_idle_material();
 
     gdouble duration = clutter_media_get_duration( cm );
 
@@ -252,6 +253,8 @@ int Media::pause()
         g_warning( "MP[%p]    pause CALLED IN INVALID STATE", this );
         return TP_MEDIAPLAYER_ERROR_INVALID_STATE;
     }
+
+    clear_idle_material();
 
     clutter_media_set_playing( cm, FALSE );
 
@@ -462,6 +465,11 @@ StringPairList Media::get_tags()
 void Media::loaded()
 {
     loaded_flag = true;
+
+    // According to the clutter-gst example program video-player.c
+    clutter_gst_video_texture_set_seek_flags( CLUTTER_GST_VIDEO_TEXTURE( vt ),
+                                              CLUTTER_GST_SEEK_FLAG_ACCURATE );
+
     post_event( Event::make( Event::LOADED ) );
 }
 
@@ -779,6 +787,15 @@ void Media::get_stream_information()
     }*/
 }
 
+void Media::clear_idle_material()
+{
+    if ( idle_material_set_flag )
+    {
+        clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( vt ), COGL_INVALID_HANDLE );
+        idle_material_set_flag = false;
+    }
+}
+
 //-----------------------------------------------------------------------------
 // Gstreamer messages received while loading
 
@@ -856,9 +873,13 @@ void gst_end_of_stream( ClutterMedia* cm, Media* media )
         return;
     }
 
-    ClutterActor* actor = media->get_actor();
-    CoglMaterial *material = cogl_material_copy( ( CoglMaterial * ) clutter_texture_get_cogl_material( CLUTTER_TEXTURE( actor ) ) );
-    clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( actor ), ( CoglHandle ) material );
+    if ( !media->check_idle_material() )
+    {
+        ClutterActor* actor = media->get_actor();
+        CoglMaterial *material = cogl_material_copy( ( CoglMaterial * ) clutter_texture_get_cogl_material( CLUTTER_TEXTURE( actor ) ) );
+        clutter_gst_video_texture_set_idle_material( CLUTTER_GST_VIDEO_TEXTURE( actor ), ( CoglHandle ) material );
+        media->set_idle_material( true );
+    }
 
     //clutter_media_set_playing( cm, FALSE );
 

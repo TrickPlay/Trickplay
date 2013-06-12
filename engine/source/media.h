@@ -56,6 +56,8 @@ class Media
     gint get_video_height() { return video_height; }
     ClutterActor* get_actor() { return vt; }
 
+    void set_idle_material( bool value ) { idle_material_set_flag = value; }
+
     ~Media();
 
   private:
@@ -75,6 +77,8 @@ class Media
     void set_actor_size();
 
     void check( int valid_states ); // Checks whether the input state is valid
+    void clear_idle_material();
+    bool check_idle_material() { return idle_material_set_flag; }
 
     struct Event // Structure to hold an event
     {
@@ -122,6 +126,7 @@ class Media
     bool            loaded_flag;
     bool            actor_hidden;
     bool            keep_aspect_ratio;
+    bool            idle_material_set_flag;
 
 #ifndef GLIB_VERSION_2_32
     GStaticRecMutex mutex;

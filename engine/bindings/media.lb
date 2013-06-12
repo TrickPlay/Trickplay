@@ -64,12 +64,7 @@ class MediaExtra : private Media::Delegate
 
     void set_uri( const char * _uri )
     {
-        if ( uri && _uri )
-        {
-            if ( !strcmp( uri, _uri ) ) return;
-
-            if ( player ) player->reset(); /* Reset before loading a new media uri */
-        }
+        if ( uri && _uri && !strcmp( uri, _uri ) ) return;
 
         if ( uri ) g_free( uri );
 
