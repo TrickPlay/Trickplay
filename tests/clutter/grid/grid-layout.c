@@ -29,7 +29,7 @@
 
 static gboolean random_size = FALSE;
 static gboolean random_align = FALSE;
-static gboolean default_expand = TRUE;
+static gboolean default_expand = FALSE;
 static gboolean use_box = FALSE;
 static gboolean is_vertical = FALSE;
 
@@ -346,19 +346,19 @@ main (int argc, char *argv[])
                                          CLUTTER_ORIENTATION_VERTICAL);
   box = clutter_actor_new ();
   clutter_actor_set_background_color (box, CLUTTER_COLOR_LightGray);
-  clutter_actor_set_x_expand (box, TRUE);
-  clutter_actor_set_y_expand (box, TRUE);
+  //clutter_actor_set_x_expand (box, TRUE);
+  //clutter_actor_set_y_expand (box, TRUE);
   clutter_actor_set_layout_manager (box, grid_layout);
   clutter_box_layout_pack (CLUTTER_BOX_LAYOUT (stage_layout), box,
                            TRUE, TRUE, TRUE,
                            CLUTTER_BOX_ALIGNMENT_CENTER,
                            CLUTTER_BOX_ALIGNMENT_CENTER);
 
-  add_actor (box, 0, 0, 3, 1, -1, 4);
-  add_actor (box, 0, 1, 1, 1, 4, -1);
-  add_actor (box, 1, 1, 1, 1, -1, -1);
-  add_actor (box, 2, 1, 1, 1, 4, -1);
-  add_actor (box, 0, 2, 3, 1, -1, 4);
+  add_actor (box, 0, 0, 3, 1, 100,200);//-1, 4);
+  //add_actor (box, 0, 1, 1, 1, 4, -1);
+  //add_actor (box, 1, 1, 1, 1, -1, -1);
+  //add_actor (box, 2, 1, 1, 1, 4, -1);
+  //add_actor (box, 0, 2, 3, 1, -1, 4);
 
   instructions = clutter_text_new_with_text ("Sans 12px", INSTRUCTIONS);
   clutter_actor_set_margin_top (instructions, 4);
