@@ -2,7 +2,7 @@ local hdr = {}
 
 WL = dofile("LIB/Widget/Widget_Library.lua")
 
-VL = dofile("LIB/VE/ve_runtime")
+VL = dofile("LIB/VE/ve_runtime")()
 
 hdr.test = 0
 ----------------

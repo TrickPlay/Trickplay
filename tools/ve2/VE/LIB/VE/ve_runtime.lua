@@ -1,69 +1,7 @@
---[[
-dolater(
-dofile,"Button/test.lua"
-)
---]]
---[[
-dolater(
-dofile,"ToggleButton/test.lua"
-)
-dolater(
-dofile,"RadioButtonGroup/test.lua"
-)
---]]
 
---[[
-dolater(
-dofile,"DialogBox/test.lua"
-)
---]]
---[[
-dolater(
-dofile,"ProgressSpinner/test.lua"
-)
---]]
+WL = dofile('LIB/Widget/Widget_Library.lua') --Load widget library
 
---[=[
-screen:show()
-
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("Button/Button.lua")                 end
-
-
---------------------------------------------------------------------------------
-
-
-
-local color_scheme_json = '{"ColorScheme":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (10)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (11)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (12)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (13)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (14)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (15)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (16)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (17)":{"activation":[155,255,255],"default":[255,255,155],"focus":[255,255,155]},"ColorScheme (18)":{"activation":[155,155,155],"default":[80,0,0],"focus":[155,155,155]},"ColorScheme (20)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (21)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (22)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (4)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (5)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (6)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"ColorScheme (7)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (8)":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"ColorScheme (9)":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]}}'
-
-local styles_json = '{"Style (1)":{"arrow":"ArrowStyle (1)","border":"BorderStyle (1)","fill_colors":"ColorScheme (6)","text":"TextStyle (1)"},"Style (2)":{"arrow":"ArrowStyle (2)","border":"BorderStyle (2)","fill_colors":"ColorScheme (9)","text":"TextStyle (2)"},"Style (3)":{"arrow":"ArrowStyle (3)","border":"BorderStyle (3)","fill_colors":"ColorScheme (12)","text":"TextStyle (3)"},"Style (4)":{"arrow":"ArrowStyle (4)","border":"BorderStyle (6)","fill_colors":"ColorScheme (21)","text":"TextStyle (6)"},"Style (5)":{"arrow":"ArrowStyle (5)","border":"BorderStyle (5)","fill_colors":"ColorScheme (18)","text":"TextStyle (5)"},"Style (6)":{"arrow":"ArrowStyle (6)","border":"BorderStyle (4)","fill_colors":"ColorScheme (16)","text":"TextStyle (4)"}}'
-local arrow_json = '{"ArrowStyle (1)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (2)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (3)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (4)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (5)":{"colors":"ColorScheme (22)","offset":10,"size":20},"ArrowStyle (6)":{"colors":"ColorScheme (22)","offset":10,"size":20}}'
-local border_json = '{"BorderStyle (1)":{"colors":"ColorScheme","corner_radius":10,"width":2},"BorderStyle (2)":{"colors":"ColorScheme (4)","corner_radius":10,"width":2},"BorderStyle (3)":{"colors":"ColorScheme (7)","corner_radius":10,"width":2},"BorderStyle (4)":{"colors":"ColorScheme (14)","corner_radius":10,"width":10},"BorderStyle (5)":{"colors":"ColorScheme (13)","corner_radius":10,"width":10},"BorderStyle (6)":{"colors":"ColorScheme (10)","corner_radius":10,"width":2}}'
-local text_json = '{"TextStyle (1)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (5)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (2)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (8)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (3)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (11)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (4)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (15)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0},"TextStyle (5)":{"alignment":"CENTER","color":[255,255,155],"colors":"ColorScheme (17)","font":"Sans 50px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":200,"y_offset":-50},"TextStyle (6)":{"alignment":"CENTER","color":[255,255,255],"colors":"ColorScheme (20)","font":"Sans 40px","justify":true,"type":"TEXTSTYLE","wrap":true,"x_offset":0,"y_offset":0}}'
-
-
-styles_json = '{"style":'..styles_json..',"arrow":'..arrow_json..',"border":'..border_json..',"text":'..text_json..'}'
-
-
-
-local screen_json = '['
-screen_json = screen_json.. '{"name":"b1","anchor_point":[0,0],"focused":false,"gid":22,"h":50,"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (3)","type":"Button","w":200,"x":0,"x_rotation":[0,0,0],"y":0,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b2","anchor_point":[0,0],"focused":false,"gid":17,"h":50,"label":"lAbel","opacity":255,"scale":[1,1,0,0],"style":"Style (5)","type":"Button","w":200,"x":100,"x_rotation":[0,0,0],"y":200,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b3","anchor_point":[0,0],"focused":false,"gid":29,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":400,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b4","anchor_point":[0,0],"focused":false,"gid":34,"h":150,"images":{"default":"Button\/button3.png","focus":"Button\/button-focus.png"},"label":"Button","opacity":255,"scale":[1,1,0,0],"style":"Style (4)","type":"Button","w":300,"x":200,"x_rotation":[0,0,0],"y":600,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..',{"name":"b5","anchor_point":[0,0],"focused":false,"gid":35,"h":100,"label":"new_label","opacity":255,"scale":[1,1,0,0],"style":"Style (6)","type":"Button","w":400,"x":100,"x_rotation":[0,0,0],"y":700,"y_rotation":[0,0,0],"z":0,"z_rotation":[0,0,0]}'
-screen_json = screen_json..']'
-
- 
-
-]=]
---------------------------------------------------------------------------------
+local function ve_init(user_main)
 local ve = {}
 
 local color_scheme_uri = 'app/color_schemes.json'
@@ -74,7 +12,7 @@ local color_schemes
 
 local function load_color_schemes()
 
-    local input = color_scheme_json--readfile(color_scheme_uri)
+    local input = color_scheme_json 
 
     if input == nil then
 
@@ -115,6 +53,7 @@ end
 
 local styles
 
+
 function ve.load_styles(str)
 
 
@@ -148,6 +87,7 @@ function ve.load_styles(str)
 
 end
 
+--------------------------------------------------------------------------------
 
 local names
 local neigbor_info, clone_info
@@ -169,10 +109,23 @@ end
 
 
 local obj_to_elements_map = {}
-local construct
 
+local deep_copy
+deep_copy = function(old_t)
+    local new_t = {}
 
-construct = function(t)
+    for k,v in pairs(old_t) do
+        if type(v) == "table" then
+            v = deep_copy(v)
+        end
+        new_t[k]=v
+    end
+
+    return new_t
+end
+
+local construct_internal
+construct_internal = function(t)
 
     if type(t) ~= "table" then
 
@@ -186,7 +139,7 @@ construct = function(t)
         for i,row in ipairs(t.cells) do
             for j,v in ipairs(row) do
                 if v then -- v == false when no item was specified
-                    t.cells[i][j] = construct(v)
+                    t.cells[i][j] = construct_internal(v)
     
                     elements[t.cells[i][j].name] = t.cells[i][j]
                     elements = concat_elements(elements,obj_to_elements_map[t.cells[i][j]])
@@ -198,7 +151,7 @@ construct = function(t)
         for i,v in ipairs(t.cells) do
 
             if v then -- v == false when no item was specified
-                t.cells[i] = construct(v)
+                t.cells[i] = construct_internal(v)
     
                 elements[t.cells[i].name] = t.cells[i]
                 elements = concat_elements(elements,obj_to_elements_map[t.cells[i]])
@@ -209,7 +162,7 @@ construct = function(t)
         for i,v in ipairs(t.items) do
 
             if v then -- v == false when no item was specified
-                t.items[i] = construct(v)
+                t.items[i] = construct_internal(v)
     
                 elements[t.items[i].name] = t.items[i]
                 elements = concat_elements(elements,obj_to_elements_map[t.items[i]])
@@ -219,8 +172,7 @@ construct = function(t)
         elements = {}
         for i,v in ipairs(t.children) do
 
-
-            t.children[i] = construct(v)
+            t.children[i] = construct_internal(v)
             --print ( t.children[i] )
             elements[t.children[i].name] = t.children[i]
             elements = concat_elements(elements,obj_to_elements_map[t.children[i]])
@@ -243,13 +195,90 @@ construct = function(t)
 
 end
 
+local construct
+function construct(t)
+    
+    return construct_internal(deep_copy(t))
+end
 
-function ve.load_layer(str)
+--------------------------------------------------------------------------------
 
+function ve.load_json(str) -- json string 
+    --load_styles should be called before load_layer
+    if type(styles) ~= "table" then
+        print("WARNING. Styles table is empty")
+    end
+
+    --load_layer expects to receive a json string
+    if type(str) ~= "string" then
+        error("Expected string. Received "..type(str),2)
+    end
+
+    --parse the json
+    local layer = json:parse(str)
+
+    --load_layer expects valid json
+    if type(layer) ~= "table" then
+        error("String is not valid json",2)
+    end
+
+    return layer 
+end 
+
+function ve.load_layer(name) -- layer table
+    local layer
+    local layer_t = ve.layer_t["children"][ve.layer_idx[name]]
     names = {}
     neigbor_info = {}
     clone_info = {}
-    
+
+    if  layer_t.realized == true then 
+        print ("Layer is already realized.", 2) 
+        return 
+    end 
+
+    --the setter for Widget_Group.children calls the appropriate
+    --constructors when it receives an attributes table as an entry
+    layer = construct(layer_t)
+
+    if string.find(layer.name, "Layer") then
+        layer.elements = obj_to_elements_map[layer]
+    end
+
+    for clone,src in pairs(clone_info) do
+        clone.source = names[src]
+    end
+
+    for obj,neighbors in
+        pairs(neigbor_info) do
+
+        for k,v in
+            pairs(neighbors) do
+            obj.neighbors[k] = names[v]
+        end
+    end
+
+    for k,v in pairs(names) do ve.objects[k] = v end
+    ve.layer_t["children"][ve.layer_idx[name]].realized = true 
+    if user_main then 
+        layer = dofile(string.lower(name)..'.lua')(layer,ve)
+    end
+
+    return layer
+end
+
+function ve.unload_layer(name)
+    if  ve.layer_t["children"][ve.layer_idx[name]].realized == false then 
+        print (name.." is already unrealized.", 2) 
+        return 
+    end 
+    ve.layer_t["children"][ve.layer_idx[name]].realized = false 
+end
+
+function ve.org_load_layer(str) 
+    names = {}
+    neigbor_info = {}
+    clone_info = {}
     
       --load_styles should be called before load_layer
     if type(styles) ~= "table" then
@@ -277,7 +306,7 @@ function ve.load_layer(str)
 
     --the setter for Widget_Group.children calls the appropriate
     --constructors when it receives an attributes table as an entry
-    layer = construct(layer)
+    layer = construct_internal(layer)
     --layer.elements = names
     --layer.elements = {}
 
@@ -305,18 +334,26 @@ function ve.load_layer(str)
     return layer
 end
 
+--------------------------------------------------------------------------------
+
+ve.screens = nil
+--ve.layerGroup = WL.Widget_Group{}
+ve.objects = {}
+--ve.layerGroup.objects = {}
 
 local currentScreen 
 
-function ve.transit_to (screens, nextScreen, effect)
+function ve.transit_to (nextScreen, effect)
 	
     local img_t = {}
-    table.insert(img_t, json:parse(screens))
+    local layer
+    table.insert(img_t, json:parse(ve.screens))
 
     if nextScreen == nil then
         currentScreen = img_t[1]["currentScreenName"]
         for i, j in ipairs (img_t[1][currentScreen]) do
-            screen:find_child(j):show()
+            layer = ve.load_layer(j)
+            screen:add(layer)
         end 
         return
     end
@@ -330,8 +367,11 @@ function ve.transit_to (screens, nextScreen, effect)
     	fade_timeline.loop = false
 
         for i, j in ipairs (img_t[1][nextScreen]) do
-            screen:find_child(j).opacity = 0
-            screen:find_child(j):show()
+            layer = ve.load_layer(j)
+            if layer then 
+                layer.opacity = 0
+                screen:add(layer)
+            end
         end 
 
      	function fade_timeline.on_new_frame(t, m, p)
@@ -345,10 +385,12 @@ function ve.transit_to (screens, nextScreen, effect)
 
      	function fade_timeline.on_completed()
             for i, j in ipairs (img_t[1][currentScreen]) do
-                screen:find_child(j):hide()
+                layer = screen:find_child(j)
+                layer:unparent()
+                layer = nil 
+                ve.unload_layer(j) 
             end 
             for i, j in ipairs (img_t[1][nextScreen]) do
-                screen:find_child(j):show()
                 screen:find_child(j).opacity = 255
             end 
             currentScreen = nextScreen
@@ -358,14 +400,66 @@ function ve.transit_to (screens, nextScreen, effect)
 
 	else 
         for i, j in ipairs (img_t[1][currentScreen]) do
-            screen:find_child(j):hide()
+            layer = screen:find_child(j)
+            layer:hide()
+            layer:unparent()
+            ve.unload_layer(layer)
         end 
         for i, j in ipairs (img_t[1][nextScreen]) do
-            screen:find_child(j):show()
+            layer = ve.load_layer(j)
+            if user_main then 
+                layer = dofile(string.lower(j)..'.lua')(layer,ve)
+            end
+            screen:add(layer)
         end 
         currentScreen = nextScreen
 	end 
 	screen:grab_key_focus()
 end 
 
+--------------------------------------------------------------------------------
+
+function ve.ve_main()
+
+    local layers_file = 'screens/layers.json'
+    local styles_file = 'screens/styles.json'
+    local screens_file = 'screens/screens.json'
+    local image_path = 'assets/images/'
+
+    local style = readfile(styles_file)
+    style = string.sub(style, 2, string.len(style)-1)
+    ve.load_styles(style)
+
+    local layer = readfile(layers_file)
+    layer = string.sub(layer, 2, string.len(layer)-1)
+
+    ve.screens = readfile(screens_file)
+    ve.screens = string.sub(ve.screens, 2, string.len(ve.screens)-1)
+    
+    ve.layer_t = json:parse(layer)
+    ve.layer_idx = {}
+    for i, j in ipairs(ve.layer_t["children"]) do 
+        if string.find(j.name, 'Layer') then 
+            j.realized = false
+            ve.layer_idx[j.name] = i
+        end
+    end
+
+    if user_main then 
+        dofile('event.lua')(ve)
+        user_main()
+    end 
+    controllers:start_pointer()
+end
+
+--------------------------------------------------------------------------------
+
+if user_main then 
+    dolater(ve.ve_main)
+end 
+
 return ve
+
+end 
+
+return ve_init
