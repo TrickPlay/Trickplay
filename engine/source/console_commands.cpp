@@ -714,9 +714,9 @@ protected:
             ClutterColor color, border_color;
             guint border_width;
 
-            clutter_actor_get_background_color( clutter_grid_layout_get_child_at(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager( actor )), 1, 1), &color );
-            clutter_actor_get_background_color(actor, &border_color);
-            border_width = clutter_grid_layout_get_column_spacing(CLUTTER_GRID_LAYOUT(clutter_actor_get_layout_manager(actor)));
+            clutter_actor_get_background_color( clutter_container_find_child_by_name(CLUTTER_CONTAINER(actor), "inner"), &color );
+            clutter_actor_get_background_color( clutter_container_find_child_by_name(CLUTTER_CONTAINER(actor), "top"), &border_color);
+            border_width = clutter_actor_get_height(clutter_container_find_child_by_name(CLUTTER_CONTAINER(actor), "top"));
 
             gchar* c = g_strdup_printf( "[color=(%u,%u,%u,%u), border=%ux(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha,
                                                                                             border_width, border_color.red, border_color.green, border_color.blue, border_color.alpha );

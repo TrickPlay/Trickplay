@@ -52,176 +52,176 @@ local button_tests = {
     ----------------------------------------------------------------------------
     -- key & key focus events
     function() -- checks that key events get set
-        
+
         local flag = false
-        
+
         b:add_key_handler(keys.A,function() flag = true end)
-        
+
         b:on_key_down(keys.A)
-        
+
         return flag
-        
+
     end,
     function() -- checks that grabbing key focus sets focus
         screen:grab_key_focus()
         b:grab_key_focus()
-        
+
         return b.focused
-        
+
     end,
     function() -- checks that grabbing key focus sets focus
         b:grab_key_focus()
         screen:grab_key_focus()
-        
+
         return not b.focused
-        
+
     end,
     ----------------------------------------------------------------------------
     -- focus events
     function() -- checks that press calls the callback
-        
+
         local flag = false
-        
+
         function b:on_focus_in() flag = true end
-        
+
         b.focused = false
-        
+
         if flag then return false end
-        
+
         b.focused = true
-        
+
         return flag
-        
+
     end,
     function() -- checks that press doesn't press if pressed
-        
+
         local count = 0
-        
+
         function b:on_focus_in() count = count + 1 end
-        
+
         b.focused = false
         if count ~= 0 then return false end
         b.focused = true
         b.focused = true
         b.focused = true
-        
+
         return count == 1
-        
+
     end,
     function() -- checks that release calls the callback
-        
+
         local flag = false
-        
+
         function b:on_focus_out() flag = true end
-        
+
         b.focused = true
-        
+
         if flag then return false end
-        
+
         b.focused = false
-        
+
         return flag
-        
+
     end,
     function() -- checks that release doesn't release if not pressed
-        
+
         local count = 0
-        
+
         function b:on_focus_out() count = count + 1 end
-        
+
         b.focused = true
         if count ~= 0 then return false end
         b.focused = false
         b.focused = false
         b.focused = false
-        
+
         return count == 1
-        
+
     end,
     ----------------------------------------------------------------------------
     -- press events
     function() -- checks that press calls the callback
-        
+
         local flag = false
-        
+
         function b:on_pressed() flag = true end
-        
+
         b:release()
         if flag then return false end
         b:press()
-        
+
         return flag
-        
+
     end,
     function() -- checks that press doesn't press if pressed
-        
+
         local count = 0
-        
-        
+
+
         function b:on_pressed() count = count + 1 end
-        
+
         b:release()
         if count ~= 0 then return false end
         b:press()
         b:press()
         b:press()
-        
+
         return count == 1
-        
+
     end,
     function() -- checks that release calls the callback
-        
+
         local flag = false
-        
+
         function b:on_released() flag = true end
-        
+
         b:press()
         if flag then return false end
         b:release()
-        
+
         return flag
-        
+
     end,
     function() -- checks that release doesn't release if not pressed
-        
+
         local count = 0
-        
-        
+
+
         function b:on_released() count = count + 1 end
-        
+
         b:press()
         if count ~= 0 then return false end
         b:release()
         b:release()
         b:release()
-        
+
         return count == 1
-        
+
     end,
     --[[
     function() -- checks that click works
-        
+
         local flag1 = false
         local flag2 = false
-        
-        
+
+
         b:release()
-        
+
         function b:on_pressed()  flag1 = true end
         function b:on_released() flag2 = true end
-        
+
         b:click()
-        
+
         return flag1 and flag2
-        
+
     end,
     --]]
 }
 
 for i,test in ipairs(button_tests) do
-    
+
     if not test() then print("button_test "..i.." failed") end
-    
+
 end
 
 
@@ -250,6 +250,7 @@ button_test_group:unparent()
 
 ---[[
 local style = {
+    name = "Gary",
     border = {
         width = 10,
         colors = {
@@ -278,12 +279,14 @@ screen:show()
 
 ---[[
 b1 = WL.Button()
+b1.name = "b1"
 b1.reactive = true
 --]]
 ---[[
 --------------------------------------------------------------------------------
 b2 = WL.Button{x = 100,y = 200, label = "LABEL"}--,style = style}
---b2.style = style
+b2.style = style
+b2.name = "b2"
 --b2.style.text.x_offset = 200
 --b2.style.text.y_offset = -50
 b2.label = "a"
@@ -292,6 +295,7 @@ b2.reactive = true
 --]]
 ---[[
 b3 = WL.Button{x = 100,y = 400, label = "new_label", h = 100}
+b3.name = "b3"
 
 b3.w = 400
 b3.reactive = true
@@ -302,6 +306,7 @@ b4 = WL.Button{
     x = 200,y = 600,
     h = 150
 }
+b4.name = "b4"
 b4.w = 300
 b4.reactive = true
 --]]
@@ -311,12 +316,30 @@ style.text.font = "Sans Bold 40px"
 
 b5 = WL.Button{y=900}
 b5:from_json(    b3:to_json()   )
+b5.name = "b5"
 --print(b3:to_json())
 print(b5:to_json())
 --print(b5.style:to_json())
 b5.y = 700
 b5.reactive = true
 --]]
-screen:add(Rectangle{size = screen.size, color = "000033"},b1,b2,b3,b4,b5)
+wg = WL.Widget_Group{name="WG"}
+wg:add(b1,b2,b3,b4,b5)
+screen:add(wg)
+
+
+style_json = WL.get_all_styles()
+js = wg:to_json()
+print("-----------------------------------------------")
+print(style_json)
+print("-----------------------------------------------")
+print(js)
+print("-----------------------------------------------")
+screen:clear()
+
+screen:add(load_layer(js))
+
+
+
 
 controllers:start_pointer()

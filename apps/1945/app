@@ -5,6 +5,7 @@ app=
     version     = "1.4",
     name        = "Air Combat",
     author      = "Pablo Pissanetzky",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Battle through droves of enemies like its 1945",
 }
 

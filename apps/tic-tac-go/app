@@ -5,6 +5,7 @@ app=
     version     = "1.2",
     name        = "Tic-Tac-Go!",
     author      = "Wood, Steelman & Johansen",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Play tic for tac with your friends in this unconventional rendition of TicTacToe"
 }
 

@@ -6,5 +6,6 @@ app=
     name        = "Mountain Dew",
     author      = "Francesco Alex Indaco",
     copyright   = "© Trickplay Inc.",
-    attributes  = { "nolauncher" }
+    attributes  = { "nolauncher" },
+    description = "Do the dew",
 }

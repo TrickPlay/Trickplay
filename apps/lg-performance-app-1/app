@@ -5,6 +5,7 @@ app=
     version     = "1.1",
     name        = "LG Performance Test",
     author      = "Alex Indaco",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "Nothing sells Smart TVs like a spinning cube."
 }
 

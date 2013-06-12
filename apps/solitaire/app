@@ -5,6 +5,7 @@ app=
     version     = "1.4",
     name        = "Solitaire",
     author      = "James Fenley",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    description = "1 Deck, 1 Man, 1 Game, Solitaire"
 }
 

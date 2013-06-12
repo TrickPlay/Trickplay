@@ -59,7 +59,8 @@ mb1 = WL.MenuButton{name="MB1",
 --]]
 ---[[
 mb2 = WL.MenuButton{name="MB2",
-    x = 600,
+    x = 600,y=200,
+    horizontal_alignment = "right",
     direction = "up",
     items = {
         WL.Button{name="b5"},WL.Button{name="b4"}
@@ -83,6 +84,7 @@ mb4 = WL.MenuButton{name="MB4",
     x = 300, y = 500,
     style = style,
     direction = "left",
+    vertical_alignment = "bottom",
     items = {
         WL.Button{name="b9"},WL.Button{name="b8"}
     }
