@@ -242,11 +242,11 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
     }
     else if (!strcmp("color",k))
     {
-        // Can only animate color on a Rectangle
+        // Can only animate color on a Rectangle or Text
         const gchar* type = ClutterUtil::get_actor_type( object );
-        if(g_strcmp0(type, "Rectangle"))
+        if(g_strcmp0(type, "Rectangle") && g_strcmp0(type, "Text"))
         {
-            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE", k);
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE OR TEXT", k);
         }
 
         if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
@@ -254,12 +254,19 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
             ClutterColor color;
             ClutterUtil::to_clutter_color(L, index, &color);
 
-            ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "inner");
-            g_assert(inner != NULL);
-
             g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
             clutter_value_set_color(&gvalue, &color);
-            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(inner), "background-color", nmode, &gvalue, pre_delay, post_delay);
+
+            if(!g_strcmp0(type, "Rectangle"))
+            {
+                ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "inner");
+                g_assert(inner != NULL);
+
+                clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(inner), "background-color", nmode, &gvalue, pre_delay, post_delay);
+            } else {
+                clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
+            }
+
             g_value_unset(&gvalue);
         }
         else
