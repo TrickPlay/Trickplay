@@ -5,3 +5,4 @@
 #endif
 
 #include "clutter/clutter.h"
+#include <clutter-gst/clutter-gst.h>

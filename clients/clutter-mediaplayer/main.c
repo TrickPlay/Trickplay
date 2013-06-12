@@ -830,7 +830,11 @@ static void quit( int sig )
 
 int main( int argc, char* argv[] )
 {
-    clutter_gst_init( NULL, NULL );
+    if ( clutter_gst_init( NULL, NULL ) != CLUTTER_INIT_SUCCESS )
+    {
+        g_error( "Failed to initialize clutter\n" );
+        return -1;
+    }
 
     signal( SIGINT , quit );
 
