@@ -79,7 +79,7 @@ for RESULT in $RESULTS; do
     elif [ ${PARSED_RESULT[2]} == 'error' ]; then
         >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><error type='error' message='${PARSED_RESULT[3]}'>${PARSED_RESULT[3]}</error></testcase>"
     else
-        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><failure type='failure' message='Reference: <img src=\"../../../../artifact/automated-test-failures/ref-${PARSED_RESULT[0]}.png\" /><br />Test: <img src=\"../../../../artifact/automated-test-failures/test-${PARSED_RESULT[0]}.png\" /><br />Differences: <img src=\"../../../../artifact/automated-test-failures/diff-${PARSED_RESULT[0]}.png\" />'>${PARSED_RESULT[3]}</failure></testcase>"
+        >>"${XML_FILE}" echo "<testcase classname='com.trickplay.gui-test.engine' name='${PARSED_RESULT[0]}' time='${PARSED_RESULT[1]}'><failure type='failure' message='Reference: &lt;img src=\"../../../../artifact/automated-test-failures/ref-${PARSED_RESULT[0]}.png\" /&gt;&lt;br /&gt;Test: &lt;img src=\"../../../../artifact/automated-test-failures/test-${PARSED_RESULT[0]}.png\" /&gt;&lt;br /&gt;Differences: %lt;img src=\"../../../../artifact/automated-test-failures/diff-${PARSED_RESULT[0]}.png\" /%gt;'>${PARSED_RESULT[3]}</failure></testcase>"
     fi
 done
 
