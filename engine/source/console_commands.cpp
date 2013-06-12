@@ -746,11 +746,19 @@ protected:
 
         clutter_actor_get_scale( actor, &sx, &sy );
 
+        {
+            gchar * c = g_strdup_printf( " expand(%d, %d)", clutter_actor_get_x_expand(actor),clutter_actor_get_y_expand(actor));
+
+            details += c;
+
+            g_free(c);
+        }
+
         if ( sx != 1 || sy != 1 )
         {
             gchar* c = g_strdup_printf( " scale(%1.2f,%1.2f)", sx, sy );
 
-            details = c;
+            details += c;
 
             g_free( c );
         }

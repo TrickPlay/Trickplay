@@ -48,8 +48,13 @@ add_actor (ClutterActor *box,
   clutter_actor_set_x_align (rect, CLUTTER_ACTOR_ALIGN_CENTER);
   clutter_actor_set_y_align (rect, CLUTTER_ACTOR_ALIGN_CENTER);
 
-  clutter_actor_add_child (box, rect);
-
+  //clutter_actor_add_child (box, rect);
+  clutter_grid_layout_attach (
+                CLUTTER_GRID_LAYOUT (
+                    clutter_actor_get_layout_manager (box)
+                ),
+                rect,left, top, 1, 1
+            );
   g_warning("CLUTTER ACTOR SIZE: %f,%f", clutter_actor_get_width(rect), clutter_actor_get_height(rect));
 }
 
@@ -85,8 +90,10 @@ main (int argc, char *argv[])
   clutter_stage_set_user_resizable (CLUTTER_STAGE (stage), TRUE);
   grid_layout = clutter_grid_layout_new ();
   clutter_actor_set_layout_manager (the_grid, grid_layout);
+  clutter_grid_layout_set_row_homogeneous(CLUTTER_GRID_LAYOUT(grid_layout), FALSE);
+  clutter_grid_layout_set_column_homogeneous(CLUTTER_GRID_LAYOUT(grid_layout), FALSE);
 
-  add_actor (the_grid, 0, 0, 1, 1, 100,400);//-1, 4);
+  add_actor (the_grid, 1, 4, 1, 1, 100,300);//-1, 4);
   //add_actor (box, 0, 1, 1, 1, 4, -1);
   //add_actor (box, 1, 1, 1, 1, -1, -1);
   //add_actor (box, 2, 1, 1, 1, 4, -1);
