@@ -222,12 +222,19 @@ class AnchorPointGraphicSchene(QWidget):
             self.insp = parent
 
         self.scene = DiagramScene(parent, data)
+        rect = self.scene.sceneRect().toRect()
+
+        rect.setX(rect.x() + 70)
+        rect.setY(rect.y() + 40)
+        rect.setWidth(rect.width() - 210)
+        rect.setHeight(rect.height() - 40)
+
+        self.scene.setSceneRect(QRectF(rect))
 
         self.view = QGraphicsView(self.scene)
-        rect = self.view.sceneRect().toRect()
-        rect.setX(rect.x() - 2)
-        self.view.setSceneRect(QRectF(rect))
         self.view.setRenderHint(QPainter.Antialiasing)
+        self.view.setFrameStyle(QFrame.NoFrame)
+
         layout = QVBoxLayout()
         layout.addWidget(self.view)
         layout.setSpacing(0)
@@ -425,7 +432,7 @@ class TrickplayInspector(QWidget):
         # Models
         self.inspectorModel = TrickplayElementModel(self)
         self.ui.inspector.setModel(self.inspectorModel)
-        self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
+        #self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
 
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
@@ -442,6 +449,7 @@ class TrickplayInspector(QWidget):
         self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
         self.ui.property.setHeaderLabels(['Property', 'Value'])
         self.ui.property.setIndentation(10)
+        self.ui.property.setSelectionMode(QAbstractItemView.NoSelection)
 
         self.itemWidget = None
         self.editable = True
@@ -658,7 +666,8 @@ class TrickplayInspector(QWidget):
 
         # Clear Property Inspector
         self.ui.property.clear()
-        self.ui.property.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
+        #self.ui.property.setStyleSheet("QTreeView { background-color: lightYellow; background-attachment:scroll;}")
+
         self.ui.property.setColumnCount(2)
 
         # Init variables
@@ -683,6 +692,8 @@ class TrickplayInspector(QWidget):
             for p in ['gid', 'name', 'type', 'index', 'label']:
                 if p != 'neighbors':
                     i = QTreeWidgetItem()
+                    #i.setBackground(0, QBrush(QColor("lightYellow")))
+                    #i.setBackground(1, QBrush(QColor("lightYellow")))
                     i.setText (0, p)  # first col : property name
                     i.setText (1, str(data[p])) # second col : property value (text input field)
                     if p == 'label' and self.editable == True:
@@ -967,6 +978,8 @@ class TrickplayInspector(QWidget):
 
             elif p is 'gid':
                 i = QTreeWidgetItem()
+                #i.setBackground(0, QBrush(QColor("lightYellow")))
+                #i.setBackground(1, QBrush(QColor("lightYellow")))
                 i.setText (0, p)  # first col : property name
                 i.setText (1, str(data[p])) # second col : property value (text input field)
                 items.append(i)
@@ -977,6 +990,8 @@ class TrickplayInspector(QWidget):
                 # Text Inputs
 
                 i = QTreeWidgetItem()
+                #i.setBackground(0, QBrush(QColor("lightYellow")))
+                #i.setBackground(1, QBrush(QColor("lightYellow")))
                 #i.setText (0, p)  # first col : property name
                 i.setWhatsThis(0, p)  # first col : property name
                 if PROP_S_LIST.has_key(p):
@@ -1106,6 +1121,8 @@ class TrickplayInspector(QWidget):
                         idx = 0
                         for sp in PropertyIter(p):
                             j = QTreeWidgetItem(i)
+                            #j.setBackground(0, QBrush(QColor("lightYellow")))
+                            #j.setBackground(1, QBrush(QColor("lightYellow")))
                             sp = str(sp)
                             j.setWhatsThis (0, sp)
                             if NESTED_PROP_S_LIST.has_key(sp):
@@ -1125,6 +1142,8 @@ class TrickplayInspector(QWidget):
                         c1 = 1
                         for sp in PropertyIter(p): #'arrow', 'border', 'fill_colors', 'text
                             j = QTreeWidgetItem(i)
+                            #j.setBackground(0, QBrush(QColor("lightYellow")))
+                            #j.setBackground(1, QBrush(QColor("lightYellow")))
                             sp = str(sp)
                             if sp == 'spritesheet_map' :
                                 skinItem = j
@@ -1162,11 +1181,15 @@ class TrickplayInspector(QWidget):
                                 for ssp in PropertyIter(sp): #colors, corner_radius, width, alignment, font, justify, wrap, x-yoffset
                                     if ssp in NESTED_PROP_LIST and  ssp is not 'size':
                                         k = QTreeWidgetItem(j)
+                                        #k.setBackground(0, QBrush(QColor("lightYellow")))
+                                        #k.setBackground(1, QBrush(QColor("lightYellow")))
                                         k.setText (0, ssp)
                                         r = q[ssp]
                                         c3 = 0
                                         for sssp in PropertyIter(ssp):
                                             m = QTreeWidgetItem(k)
+                                            #m.setBackground(0, QBrush(QColor("lightYellow")))
+                                            #m.setBackground(1, QBrush(QColor("lightYellow")))
                                             sssp = str(sssp) #activation, default, focus
                                             m.setWhatsThis(0, sssp) # first col : property name
                                             if NESTED_PROP_S_LIST.has_key(sssp):
@@ -1184,6 +1207,8 @@ class TrickplayInspector(QWidget):
                                             c3 = c3 + 1
                                     else:
                                         l = QTreeWidgetItem(j)
+                                        #l.setBackground(0, QBrush(QColor("lightYellow")))
+                                        #l.setBackground(1, QBrush(QColor("lightYellow")))
                                         l.setWhatsThis(0,ssp)
                                         if NESTED_PROP_S_LIST.has_key(ssp):
                                             l.setText(0, NESTED_PROP_S_LIST[ssp])
@@ -1224,13 +1249,13 @@ class TrickplayInspector(QWidget):
         try :
             if self.skinCB :
                 self.ui.property.setItemWidget(skinItem, 1, self.skinCB)
-                self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}")
+                #self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:10px;padding-top:0px;padding-bottom:0px;width:40px}")
         except:
             pass
 
         if self.anchor :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)
-            self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{ background:lightYellow;margin:-1px;padding:2px}")
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(anchor_n),1).setStyleSheet("QWidget{background:lightYellow}")
 
         if self.itemWidget and data["type"] == "ButtonPicker":
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(items_n), 1, self.itemWidget)
@@ -1238,16 +1263,19 @@ class TrickplayInspector(QWidget):
             for n, cb in colorPushButton.iteritems() :
                 if type(colorNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(colorNumber[n])), 1, cb)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px; padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px; padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(colorNumber[n])),1).setStyleSheet("QPushButton{text-align:left; font-size:9;}")
 
                 else:
                     if len(colorNumber[n]) < 4:
                         self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]), 1, cb)
-                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                        #self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
+                        self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left;font-size:9px;}")
                     else:
                         try :
                             self.ui.property.setItemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]), 1, cb)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(colorNumber[n][0]).child(colorNumber[n][1]).child(colorNumber[n][2]).child(colorNumber[n][3]),1).setStyleSheet("QPushButton{text-align:left; font-size:9px;}")
                         except :
                             pass
 
@@ -1255,12 +1283,14 @@ class TrickplayInspector(QWidget):
             for n, pb in fontPushButton.iteritems() :
                 if type(fontNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(fontNumber[n])), 1, pb)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(fontNumber[n])),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(fontNumber[n])),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
+                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(fontNumber[n])),1).setStyleSheet("QPushButton{text-align:left; font-size:9px;}")
                 else:
                     if len(fontNumber[n]) < 4:
                         try :
                             self.ui.property.setItemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]), 1, pb)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
+                            self.ui.property.itemWidget(self.ui.property.topLevelItem(fontNumber[n][0]).child(fontNumber[n][1]).child(fontNumber[n][2]),1).setStyleSheet("QPushButton{text-align:left; font-size:9px;}")
                         except :
                             pass
 
@@ -1268,12 +1298,12 @@ class TrickplayInspector(QWidget):
             for n, b in boolCheckBox.iteritems() :
                 if type(boolNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(boolNumber[n])), 1, b)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(boolNumber[n])),1).setStyleSheet("QCheckBox{padding-top:-20;padding-bottom:-20px}")
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(boolNumber[n])),1).setStyleSheet("QCheckBox{padding-top:-20;padding-bottom:-20px}")
                 else:
                     if len(boolNumber[n]) < 4:
                         try:
                             self.ui.property.setItemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]), 1, b)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QCheckBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(boolNumber[n][0]).child(boolNumber[n][1]).child(boolNumber[n][2]),1).setStyleSheet("QCheckBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
                         except:
                             pass
 
@@ -1281,12 +1311,12 @@ class TrickplayInspector(QWidget):
             for n, cb in comboBox.iteritems() :
                 if type(comboNumber[n]) is not list :
                     self.ui.property.setItemWidget(self.ui.property.topLevelItem(int(comboNumber[n])), 1, cb)
-                    self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}")
+                    #self.ui.property.itemWidget(self.ui.property.topLevelItem(int(comboNumber[n])),1).setStyleSheet("QComboBox{font-size:10px;padding-top:0px;padding-bottom:0px;width:40px}")
                 else:
                     if len(comboNumber[n]) < 4:
                         try:
                             self.ui.property.setItemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]), 1, cb)
-                            self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:12px;padding-top:0px;padding-bottom:0px;width:40px}")
+                            #self.ui.property.itemWidget(self.ui.property.topLevelItem(comboNumber[n][0]).child(comboNumber[n][1]).child(comboNumber[n][2]),1).setStyleSheet("QComboBox{font-size:10px;padding-top:0px;padding-bottom:0px;width:40px}")
                         except:
                             pass
 
@@ -1294,11 +1324,11 @@ class TrickplayInspector(QWidget):
 
         if source_n is not 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(source_n), 1, source_button)
-            self.ui.property.itemWidget(self.ui.property.topLevelItem(source_n),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(source_n),1).setStyleSheet("QPushButton{text-align:left; padding-left:2px;padding-top: -5px;padding-bottom:-5px;font-size:10px;}")
 
         if style_n is not 0 :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
-            self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top:0px;padding-bottom:0px;font-size:12px;}")
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top:0px;padding-bottom:0px;font-size:10px;}")
 
 
     def screen_json(self):
