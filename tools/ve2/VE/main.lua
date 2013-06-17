@@ -899,8 +899,8 @@ _VE_.getScreenLoc = function()
 end 
 _VE_.setScreenLoc = function(x, y)
     if x == 0 and y == 0  then 
-        screen.y = 300
-        screen.x = 500
+        screen.y = 204
+        screen.x = 338
     else
         screen.y = y
         screen.x = x

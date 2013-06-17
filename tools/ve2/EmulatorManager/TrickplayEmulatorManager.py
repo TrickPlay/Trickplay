@@ -132,8 +132,8 @@ class TrickplayEmulatorManager(QWidget):
                 self.main.y = str(settings.value('y').toInt()[0])
 
                 if self.main.x == None or self.main.y == None:
-                    self.main.y = str(300)
-                    self.main.x = str(500)
+                    self.main.y = str(204)
+                    self.main.x = str(338)
 
                 self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc("+self.main.x+","+self.main.y+")")
                 self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")

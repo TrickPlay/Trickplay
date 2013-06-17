@@ -75,8 +75,8 @@ class MainWindow(QMainWindow):
         self.bar = None
 
         #Trickplay Lua Emulator, default position
-        self.luaEy = 300
-        self.luaEx = 500
+        self.luaEy = 204
+        self.luaEx = 338
 
         QWidget.__init__(self, parent)
 
@@ -265,9 +265,13 @@ class MainWindow(QMainWindow):
             self._inspector.setGeometry((settings.value('inspectorDock').toRect()))
             self._ifilesystem.setGeometry((settings.value('fileSystemDock').toRect()))
         else :
-            self._menubar.setGeometry(self.luaEx,self.luaEy-85,670,100)
-            self._inspector.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
-            self._ifilesystem.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
+            self._menubar.setGeometry(self.luaEx,self.luaEy-23,962,22)
+            self._inspector.setGeometry(self.luaEx-310,self.luaEy+22,309,540)
+            self._ifilesystem.setGeometry(self.luaEx+961,self.luaEy+22,295,540)
+
+            #self._menubar.setGeometry(self.luaEx,self.luaEy-85,670,100)
+            #self._inspector.setGeometry(self.luaEx+965,self.luaEy-25,330,570)
+            #self._ifilesystem.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         self.path =  None
         self.app = app
