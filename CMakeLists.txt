@@ -34,8 +34,6 @@ if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
     set( TP_WITH_WEBGL 1 )
 endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 
-set( TP_NEW_MEDIA 1 )
-
 #------------------------------------------------------------------------------
 # enable TP_WITH_GAMESERVICE by default
 
