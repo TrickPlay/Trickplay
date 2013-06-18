@@ -1,0 +1,312 @@
+module clutter_table_layout;
+
+[[
+#include "tp-clutter.h"
+
+#include "util.h"
+#include "clutter_util.h"
+
+
+static bool
+add_actor (
+            ClutterActor *self,
+            ClutterActor * c,
+            int column_index,
+            int row_index,
+            int column_span,
+            int row_span,
+            ClutterActorAlign x_align,
+            ClutterActorAlign y_align)
+{
+
+        if ( ClutterUtil::is_qualified_child( self, c ) )
+        {
+            clutter_actor_set_x_align(c, x_align);
+            clutter_actor_set_y_align(c, y_align);
+
+            clutter_table_layout_pack (
+                CLUTTER_TABLE_LAYOUT ( clutter_actor_get_layout_manager (self) ),
+                c,column_index, row_index
+            );
+            clutter_table_layout_set_span (
+                CLUTTER_TABLE_LAYOUT ( clutter_actor_get_layout_manager (self) ),
+                c, column_span, row_span
+            );
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+}
+
+]]
+
+/***************************************
+    Class: TableLayout
+
+    The TableLayout data type is similar to the data type Group except it has a
+    layout manager that organizes it's children into rows and columns. All
+    entries into the layout are positioned according the specified row and
+    column indices.
+
+    The row heights and column widths are defined by the largest entry in each
+    row and column, dynamically updating as elements are added and removed.
+
+    logically combines multiple TrickPlay objects (Image,
+    Text, etc.) and enables transformations, such as rotation and scaling, upon
+    the Group's members as if they were a single object. A Group may also be
+    used to define a display region and enforce clipping of members that reside
+    outside the region.
+*/
+
+class TableLayout [[ClutterActor*]] actor, container
+{
+    TableLayout(table props = 0 )
+        [[
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_actor_new ) );
+            ClutterUtil::initialize_actor(L,self,TABLELAYOUT_METATABLE);
+            ClutterUtil::set_props_from_table(L,props);
+            g_object_unref( self );
+
+            ClutterLayoutManager *layout;
+            layout = clutter_table_layout_new ();
+            clutter_actor_set_layout_manager (self, layout);
+
+        ]];
+
+    ~TableLayout()
+        [[
+        ]];
+
+/***************************************
+    Property: dimensions
+
+    The readonly dimensions property is a table of the number of rows and columns of the TableLayout
+
+    *Default Setting:* {0,0}
+*/
+    readonly table dimensions
+        [[
+
+            ClutterLayoutManager *layout = clutter_actor_get_layout_manager (self);
+            double num_rows = clutter_table_layout_get_row_count(
+                CLUTTER_TABLE_LAYOUT (layout)
+            );
+            double num_columns = clutter_table_layout_get_column_count(
+                CLUTTER_TABLE_LAYOUT (layout)
+            );
+
+            lua_newtable(L);
+            lua_pushnumber(L,num_rows);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,num_columns);
+            lua_rawseti(L,-2,2);
+        ]];
+/***************************************
+    Property: spacing
+
+    The spacing property is a table of the number of pixels of spacing between rows and columns
+
+    *Default Setting:* {0,0}
+*/
+    table spacing
+        [[
+
+            ClutterLayoutManager *layout = clutter_actor_get_layout_manager (self);
+            double row_spacing = clutter_table_layout_get_row_spacing(
+                CLUTTER_TABLE_LAYOUT (layout)
+            );
+            double column_spacing = clutter_table_layout_get_column_spacing(
+                CLUTTER_TABLE_LAYOUT (layout)
+            );
+
+            lua_newtable(L);
+            lua_pushnumber(L,row_spacing);
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,column_spacing);
+            lua_rawseti(L,-2,2);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            ClutterLayoutManager *layout = clutter_actor_get_layout_manager (self);
+            clutter_table_layout_set_row_spacing(
+                CLUTTER_TABLE_LAYOUT (layout) ,
+                lua_tonumber(L,-2)
+            );
+            clutter_table_layout_set_column_spacing(
+                CLUTTER_TABLE_LAYOUT (layout) ,
+                lua_tonumber(L,-1)
+            );
+            lua_pop(L,2);
+
+        ]];
+/***************************************
+    Function: add_element_at_position
+
+    The add_element_at_position() function adds one UIElement object to the
+    Layout at the specified column_index and row_index.
+
+    Optionally, the number of rows and columns spanned by the object can be
+    specified as well, the default being 1 for both directions. Cells can
+    overlap each other as well as occupy the same cell, but the behavior for
+    these use cases are largely undefined.
+
+    The alignment of this new entry in its cell can also be defined, accepting
+    the values "START", "CENTER", "END" and "FILL". The default value is
+    "CENTER".
+
+    *Arguments:*
+
+        uiElement - The UIElement to be added
+        column_index - The column index where the child is being added to
+        row_index - The row index where the child is being added to
+        column_span - The number of columns that the child will span, starting from "column_index", default value is 1
+        row_span - The number of rows that the child will span, starting from "row_index", default value is 1
+        x_align - The horizontal alignment of the object in the cells occupied, effects of this property are only visible if the child is smaller than it's cell.
+        y_align - The vertical alignment of the object in the cells occupied, effects of this property are only visible if the child is smaller than it's cell.
+
+    *Return Value:* None
+*/
+    add_element_at_position(
+            UIElement child,
+            int column_index,
+            int row_index,
+            int column_span = 1,
+            int row_span    = 1,
+            string x_align  = "CENTER",
+            string y_align  = "CENTER")
+        [[
+
+            ClutterActor * c = ClutterUtil::user_data_to_actor(L,child);
+
+            ClutterActorAlign xa = CLUTTER_ACTOR_ALIGN_CENTER;
+            ClutterActorAlign ya = CLUTTER_ACTOR_ALIGN_CENTER;
+            if     (!strcmp(x_align,"CENTER")){ xa = CLUTTER_ACTOR_ALIGN_CENTER;}
+            else if(!strcmp(x_align,"START")) { xa = CLUTTER_ACTOR_ALIGN_START;}
+            else if(!strcmp(x_align,"END"))   { xa = CLUTTER_ACTOR_ALIGN_END;}
+            else if(!strcmp(x_align,"FILL"))  { xa = CLUTTER_ACTOR_ALIGN_FILL;}
+            else
+            {
+                luaL_error(L,"Invalid horizontal alignment '%s'",x_align);
+            }
+
+            if     (!strcmp(y_align,"CENTER")){ ya = CLUTTER_ACTOR_ALIGN_CENTER;}
+            else if(!strcmp(y_align,"START")) { ya = CLUTTER_ACTOR_ALIGN_START;}
+            else if(!strcmp(y_align,"END"))   { ya = CLUTTER_ACTOR_ALIGN_END;}
+            else if(!strcmp(y_align,"FILL"))  { ya = CLUTTER_ACTOR_ALIGN_FILL;}
+            else
+            {
+                luaL_error(L,"Invalid vertical alignment '%s'",y_align);
+            }
+            if (!add_actor(
+                self,c,column_index,row_index,column_span,row_span,xa,ya
+                ))
+            {
+
+                g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
+            }
+        ]];
+
+    add(...)
+        [[
+            for(int i=2;i<=lua_gettop(L);++i)
+            {
+                if ( ! lua_isnil( L , i ) )
+                {
+                    ClutterActor * c=ClutterUtil::user_data_to_actor(L,i);
+
+                    if (!add_actor(
+                        self,c,0,0,1,1,CLUTTER_ACTOR_ALIGN_CENTER,CLUTTER_ACTOR_ALIGN_CENTER
+                    ))
+                    {
+
+                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER: %s", Util::where_am_i_lua(L).c_str() );
+                    }
+                }
+            }
+        ]];
+
+/***************************************
+    Function: get_child_at
+
+    The get_child_at() function returns the child at the specified indices.
+    If multiple children occupy the indices, then only the first one found
+    will be returned. A UIElement that occupies a different index, but spans
+    into the queried index will not be returned.
+
+    *Arguments:*
+
+        column_index - The column index being queried
+        row_index - The row index being queried
+
+    *Return Value:* The UIElement at the specified indices, nil if there is none child.
+*/
+    UIElement get_child_at( int column_index, int row_index )
+        [[
+
+            ClutterLayoutManager  *layout = clutter_actor_get_layout_manager (self);
+            ClutterActor *child = NULL;
+            ClutterActorIter iter;
+            gint row,col;
+
+            clutter_actor_iter_init (&iter, self);
+            while (clutter_actor_iter_next (&iter, &child))
+            {
+
+                clutter_layout_manager_child_get(
+                    layout, CLUTTER_CONTAINER(self) ,child,
+                    "row",&row,
+                    "column",&col,
+                    NULL);
+
+
+
+
+                if (col == column_index && row == row_index )
+                {
+                    break;
+                }
+
+
+            }
+            ClutterUtil::wrap_concrete_actor( L, child );
+        ]];
+        /*
+    insert_row( int row_index )
+        [[
+
+            ClutterLayoutManager  *layout = clutter_actor_get_layout_manager (self);
+            ClutterActor *child = NULL;
+            ClutterActorIter iter;
+            gint row;
+
+            clutter_actor_iter_init (&iter, self);
+            while (clutter_actor_iter_next (&iter, &child))
+            {
+
+                clutter_layout_manager_child_get(
+                    layout, CLUTTER_CONTAINER(self) ,child,
+                    "row",&row,
+                    NULL);
+
+
+
+
+                if (row >= row_index )
+                {
+                    row++;
+
+                    clutter_layout_manager_child_set(
+                        layout, CLUTTER_CONTAINER(self) ,child,
+                        "row",&row,
+                        NULL);
+                }
+
+
+            }
+        ]];
+        */
+}

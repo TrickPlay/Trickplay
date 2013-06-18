@@ -208,6 +208,10 @@ Group: Engine Reference {
             File: Text (no auto-title, bindings/clutter_text.lb)
         }
 
+        Group: Layouts {
+            File: TableLayout (no auto-title, bindings/clutter_table_layout.lb)
+        }
+
         Group: Interfaces {
             File: UIElement (no auto-title, bindings/clutter_actor.lb)
             File: Container (no auto-title, bindings/clutter_container.lb)

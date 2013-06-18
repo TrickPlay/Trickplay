@@ -450,7 +450,7 @@ list( APPEND LB_FILES
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
-    ${BINDINGS_SRC}/clutter_grid_layout.lb
+    ${BINDINGS_SRC}/clutter_table_layout.lb
     ${BINDINGS_SRC}/clutter_rectangle.lb
     ${BINDINGS_SRC}/clutter_text.lb
     ${BINDINGS_SRC}/clutter_clone.lb
