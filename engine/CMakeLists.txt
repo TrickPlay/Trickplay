@@ -356,6 +356,18 @@ include_directories(
     ${ENGINE_INCLUDE_DIRS}
 )
 
+#------------------------------------------------------------------------------
+
+if ( TP_NEW_MEDIA )
+
+    add_definitions( -DTP_NEW_MEDIA=1 )
+
+    list( APPEND LB_FILES ${BINDINGS_SRC}/media.lb )
+    list( APPEND ENGINE_SOURCE_FILES
+        ${ENGINE_SRC}/source/media.cpp)
+
+endif ( TP_NEW_MEDIA )
+
 
 #------------------------------------------------------------------------------
 
@@ -446,9 +458,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/tuner.lb
     ${BINDINGS_SRC}/tuners.lb
-    ${BINDINGS_SRC}/media.lb
     ${BINDINGS_SRC}/mediaplayer.lb
-    ${BINDINGS_SRC}/media.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
     ${BINDINGS_SRC}/regex.lb
@@ -560,7 +570,6 @@ list( APPEND
     ${ENGINE_SRC}/source/db.cpp
     ${ENGINE_SRC}/source/sysdb.cpp
     ${ENGINE_SRC}/source/keys.cpp
-    ${ENGINE_SRC}/source/media.cpp
     ${ENGINE_SRC}/source/mediaplayers.cpp
     ${ENGINE_SRC}/source/server.cpp
     ${ENGINE_SRC}/source/images.cpp
