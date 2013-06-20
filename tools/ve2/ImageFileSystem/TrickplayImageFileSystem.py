@@ -162,6 +162,7 @@ class TrickplayImageFileSystem(QWidget):
 
         #self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
+        self.ui.fileSystemTree.setAlternatingRowColors(True)
         #self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
         # id changed
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.fileItemChanged)

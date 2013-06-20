@@ -133,7 +133,7 @@ TEXT_PROP = [
     'h',
     'size',
     'separator_y',
-    'opacity',
+    #'opacity',
     'tile',
     # ButtonPicker
     'window_w',

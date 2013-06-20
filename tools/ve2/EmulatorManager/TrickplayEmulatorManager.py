@@ -412,8 +412,15 @@ class TrickplayEmulatorManager(QWidget):
                                 self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
                                 self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"\")")
                                 self.main.menuCommand = ""
+
                         except:
                             pass
+
+                        if self.main.lastObject :
+                            selItem = self.inspector.search(self.main.lastObject, 'name')
+                            gid = selItem.TPJSON()['gid']
+                            self.inspector.ui.property.clear()
+                            self.inspector.selectItem(selItem, "false")
 
                         if self.main.command == "openFile":
                             self.main.command = ""

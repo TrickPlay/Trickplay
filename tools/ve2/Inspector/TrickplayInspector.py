@@ -434,12 +434,13 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.setModel(self.inspectorModel)
         #self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
 
+        self.ui.inspector.setAlternatingRowColors(True)
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
         self.currentScreenName = "Default"
         #self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;padding-left:10px;}")
-        #self.ui.deleteScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
-
+        #self.ui.deleteScreen.setStyleSheet("QToolButton{border-radius: 6px;padding-top: 0px;padding-bottom:1px;}")
+        self.ui.deleteScreen.setStyleSheet("QToolButton{margin:2px;margin-bottom:0px;border: 1px solid #8f8f91;background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffffff, stop: 1 #dadbde);border-radius:3px;height:18px;padding-top:-2px}")
         self.ui.deleteScreen.clicked.connect(self.removeScreen)
         self.ui.screenCombo.currentIndexChanged.connect(self.screenChanged)
         self.ui.screenCombo.activated.connect(self.screenActivated)
@@ -447,6 +448,10 @@ class TrickplayInspector(QWidget):
 
 
         self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
+        font = QFont()
+        font.setPointSize(9)
+        self.ui.inspector.header().setFont(font)
+
         self.ui.property.setHeaderLabels(['Property', 'Value'])
         self.ui.property.setIndentation(10)
         self.ui.property.setSelectionMode(QAbstractItemView.NoSelection)
@@ -678,6 +683,7 @@ class TrickplayInspector(QWidget):
         source_n = 0
         items_n = 0
         anchor_n = 0
+        opacity_n = 0
         skinItem = None
         neighbors_n = 0
 
@@ -1101,6 +1107,45 @@ class TrickplayInspector(QWidget):
                     else :
                         self.neighbors.ui.leftButton.setIcon(self.icon_left)
 
+                elif p == "opacity":
+                    opacity_n = n
+                    self.opacity_widget = QWidget()
+                    self.vlayout  = QHBoxLayout()
+
+                    #print self.opacity_widget.geometry()
+                    self.sb = QSpinBox()
+                    self.sb.setMinimum(0)
+                    self.sb.setMaximum(255)
+                    self.sb.setValue(data[p])
+                    self.sb.setStyleSheet("QSpinBox{font-size:10px;padding-top:0px;padding-bottom:0px}")
+
+                    self.slider = QSlider(Qt.Horizontal)
+                    self.slider.setGeometry(QRect(0, -15, 150, 40))
+                    self.slider.setRange(0, 255)
+                    self.slider.setValue(data[p])
+                    self.sliderValue = data[p]
+
+                    self.vlayout.insertSpacing(1, -10)
+                    self.vlayout.addWidget(self.sb)
+                    self.vlayout.addWidget(self.slider)
+                    self.opacity_widget.setLayout(self.vlayout)
+
+                    
+                    def sliderReleased():
+                        self.sendData(self.getGid(), "opacity", str(self.sliderValue))
+                        self.sb.setValue(self.sliderValue)
+
+                    def getValueSlider(value):
+                        self.sliderValue = value
+
+                    def getValueSB(value):
+                        self.slider.setValue(value)
+                        self.sendData(self.getGid(), "opacity", str(value))
+
+                    self.slider.valueChanged.connect (getValueSlider)
+                    self.slider.sliderReleased.connect (sliderReleased)
+                    self.sb.valueChanged.connect (getValueSB)
+
                 elif p == "anchor_point":
                     anchor_n = n
                     self.anchor = AnchorPointGraphicSchene(self, data)
@@ -1252,6 +1297,10 @@ class TrickplayInspector(QWidget):
                 #self.ui.property.itemWidget(skinItem,1).setStyleSheet("QComboBox{font-size:10px;padding-top:0px;padding-bottom:0px;width:40px}")
         except:
             pass
+
+        if opacity_n > 0 :
+            self.ui.property.setItemWidget(self.ui.property.topLevelItem(opacity_n), 1, self.opacity_widget)
+            #self.ui.property.itemWidget(self.ui.property.topLevelItem(opacity_n),1).setStyleSheet("QWidget{x;}")
 
         if self.anchor :
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(anchor_n), 1, self.anchor)

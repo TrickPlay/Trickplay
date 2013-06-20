@@ -801,6 +801,10 @@ _VE_.openFile = function(path)
         if util.isLayerObj(j) == true then 
             for l,m in ipairs(j.children) do  
 
+                m.x = math.floor(m.x)
+                m.y = math.floor(m.y)
+                m.z = math.floor(m.z)
+
                 -- Register subscribe_to function
                 m.created = false
                 if m.subscribe_to then

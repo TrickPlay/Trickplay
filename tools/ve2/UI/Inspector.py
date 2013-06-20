@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Inspector-1.ui'
+# Form implementation generated from reading ui file 'Inspector.ui'
 #
-# Created: Wed Jan  2 01:11:10 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Wed Jun 19 12:12:25 2013
+#      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_TrickplayInspector(object):
     def setupUi(self, TrickplayInspector):
@@ -63,9 +72,6 @@ class Ui_TrickplayInspector(object):
         self.gridLayout_3.addWidget(self.inspector, 2, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.deleteScreen = QtGui.QToolButton(self.ObjectInspector)
-        self.deleteScreen.setObjectName(_fromUtf8("deleteScreen"))
-        self.gridLayout_4.addWidget(self.deleteScreen, 0, 2, 1, 1)
         self.screenCombo = QtGui.QComboBox(self.ObjectInspector)
         self.screenCombo.setObjectName(_fromUtf8("screenCombo"))
         self.gridLayout_4.addWidget(self.screenCombo, 0, 1, 1, 1)
@@ -75,10 +81,16 @@ class Ui_TrickplayInspector(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label.setFont(font)
         self.label.setLineWidth(1)
         self.label.setIndent(7)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout_4.addWidget(self.label, 0, 0, 1, 1)
+        self.deleteScreen = QtGui.QToolButton(self.ObjectInspector)
+        self.deleteScreen.setObjectName(_fromUtf8("deleteScreen"))
+        self.gridLayout_4.addWidget(self.deleteScreen, 0, 2, 1, 1)
         self.gridLayout_3.addLayout(self.gridLayout_4, 1, 0, 1, 1)
         self.tabWidget.addTab(self.ObjectInspector, _fromUtf8(""))
         self.PropertyEditor = QtGui.QWidget()
@@ -122,10 +134,10 @@ class Ui_TrickplayInspector(object):
         QtCore.QMetaObject.connectSlotsByName(TrickplayInspector)
 
     def retranslateUi(self, TrickplayInspector):
-        TrickplayInspector.setWindowTitle(QtGui.QApplication.translate("TrickplayInspector", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.deleteScreen.setText(QtGui.QApplication.translate("TrickplayInspector", "-", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("TrickplayInspector", "Screens:   ", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.ObjectInspector), QtGui.QApplication.translate("TrickplayInspector", "Object Inspector", None, QtGui.QApplication.UnicodeUTF8))
-        self.inspectorTitle.setText(QtGui.QApplication.translate("TrickplayInspector", "  Inspector:", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.PropertyEditor), QtGui.QApplication.translate("TrickplayInspector", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
+        TrickplayInspector.setWindowTitle(_translate("TrickplayInspector", "Form", None))
+        self.label.setText(_translate("TrickplayInspector", "Screens:   ", None))
+        self.deleteScreen.setText(_translate("TrickplayInspector", "-", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.ObjectInspector), _translate("TrickplayInspector", "Object Inspector", None))
+        self.inspectorTitle.setText(_translate("TrickplayInspector", "  Inspector:", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.PropertyEditor), _translate("TrickplayInspector", "Property Editor", None))
 

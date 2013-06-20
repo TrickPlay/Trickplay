@@ -274,6 +274,7 @@ class MainWindow(QMainWindow):
             #self._ifilesystem.setGeometry(self.luaEx-335,self.luaEy-25,330,570)
 
         self.path =  None
+        self.lastObject =  None
         self.app = app
         self.command = None
         self.currentProject = None
@@ -738,6 +739,11 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
+        index = self.inspector.selected(self.inspector.ui.inspector)
+        if index :
+            item = self.inspector.inspectorModel.itemFromIndex(index)
+            self.lastObject = item['name']
+
         if self.command == "newLayer" :
             self.setAppPath()
         self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\','"+self.path+"')")
