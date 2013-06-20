@@ -42,6 +42,8 @@ class TrickplayEmulatorManager(QWidget):
 
     def chgStyleName(self, gid, new_name, old_name):
         self.setUIInfo(gid, "style", "WL.Style('"+new_name+"'):set('"+old_name+"')")
+        self.getStInfo()
+        #self.main.sendLuaCommand("refresh", "_VE_.refresh()")
 
     def setStyleInfo(self, style_name, property1, property2, property3=None, value=None):
         if property1 == 'name':
@@ -50,7 +52,8 @@ class TrickplayEmulatorManager(QWidget):
             self.main.sendLuaCommand("WL.Style","WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
             self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
-        #self.getStInfo()
+        #self.main.sendLuaCommand("refresh", "_VE_.refresh()")
+        self.getStInfo()
 
     def setUIInfo(self, gid, property, value, n=None):
         if n:
@@ -334,6 +337,7 @@ class TrickplayEmulatorManager(QWidget):
                             self.inspector.preventChanges = True
                             if self.inspector.cbStyle is not None:
                                 self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+                                self.inspector.expandStyle()
                                 if self.ve_ready == False :
                                     self.unsavedChanges = True
                                 self.ve_ready = False
@@ -389,7 +393,7 @@ class TrickplayEmulatorManager(QWidget):
                                     self.ve_ready = False
                             self.inspector.preventChanges = False
 
-                    if sdata is not None and self.pdata is not None and self.main.command is not "getStInfo" :
+                    if sdata is not None and self.pdata is not None and self.main.command is not "getStInfo" and self.main.command is not "setUIInfo":
                         self.inspector.preventChanges = True
                         self.contentMoveBlock = True
                         self.inspector.clearTree()
@@ -418,9 +422,10 @@ class TrickplayEmulatorManager(QWidget):
 
                         if self.main.lastObject :
                             selItem = self.inspector.search(self.main.lastObject, 'name')
-                            gid = selItem.TPJSON()['gid']
-                            self.inspector.ui.property.clear()
-                            self.inspector.selectItem(selItem, "false")
+                            if selItem :
+                                gid = selItem.TPJSON()['gid']
+                                self.inspector.ui.property.clear()
+                                self.inspector.selectItem(selItem, "false")
 
                         if self.main.command == "openFile":
                             self.main.command = ""

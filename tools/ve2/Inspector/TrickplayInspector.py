@@ -14,7 +14,7 @@ multiSelect = 'false'
 
 CONTAINER_UI = []
 CONTENTS_MOVABLE_CONTAINER_UI = []
-NON_CONTAINER_UI = []
+NON_CONTAINER_UI = ['Rectangle', "Button","ButtonPicker","ProgressBar", "ProgressSpinner","OrbittingDots","Slider","TextInput", "ToastAlert", "ToggleButton","Text", "Image"]
 
 class DnDTreeView(QTreeView):
     def __init__(self, parent=None, insp= None):
@@ -36,9 +36,7 @@ class DnDTreeView(QTreeView):
         if event.type() == QEvent.Drop:
             dropIndex = self.indexAt(event.pos())
             the_item= self.insp.inspectorModel.itemFromIndex(dropIndex)
-            if the_item.text() in ['Rectangle', "Button","ButtonPicker","ProgressBar",
-            "ProgressSpinner","OrbittingDots","Slider","TextInput", "ToastAlert", "ToggleButton","Text",
-            "Image"]:
+            if the_item.text() in NON_CONTAINER_UI:
                 print "[VE] "+the_item.text()+" is not a container UI"
                 event.ignore()
                 self.insp.inspectorModel.preventChanges = False
@@ -428,6 +426,7 @@ class TrickplayInspector(QWidget):
         self.cbStyle = None
         self.screen_textChanged = False
         self.addItemToScreens = False
+        self.expandedItems = []
 
         # Models
         self.inspectorModel = TrickplayElementModel(self)
@@ -472,6 +471,8 @@ class TrickplayInspector(QWidget):
         # For changing UI Element properties
         self.ui.property.itemChanged.connect(self.propertyItemChanged)
         self.ui.property.itemSelectionChanged.connect(self.itemSelectionChanged)
+        self.ui.property.itemExpanded.connect(self.propertyItemExpanded)
+        self.ui.property.itemCollapsed.connect(self.propertyItemClosed)
 
         #icon
         self.icon_up = QIcon()
@@ -661,6 +662,12 @@ class TrickplayInspector(QWidget):
                 currentPropVal = "assets/skins/"+currentPropVal+".json"
             self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(self.style_name)+"').spritesheet_map = '"+currentPropVal+"'")
             self.preventChanges = False
+
+    def expandStyle(self):
+        for itemText in self.expandedItems:
+            item = self.ui.property.findItems(itemText, Qt.MatchRecursive, 0)
+            if item :
+                self.ui.property.expandItem(item[0])
 
     def propertyFill(self, data, styleIndex=None):
 
@@ -1478,9 +1485,12 @@ class TrickplayInspector(QWidget):
         self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
         if self.cbStyle_textChanged == True:
             self.main._emulatorManager.chgStyleName(self.getGid(), self.style_name, self.old_name)
+            self.sendData(self.getGid(), "style", self.style_name)
             self.cbStyle_textChanged = False
         else:
             self.sendData(self.getGid(), "style", self.style_name)
+        theItem = self.search(self.getGid(), 'gid')
+        theItem['style'] = self.style_name
 
     def selectionChanged(self, selected, deselected):
         """
@@ -1745,6 +1755,12 @@ class TrickplayInspector(QWidget):
         self.inspectorModel.insertElement(pItem, theData, pItem.TPJSON(), False, True)
         self.main._emulatorManager.contentMoveBlock = False
         self.ui.inspector.expandAll()
+
+    def propertyItemExpanded(self, item):
+        self.expandedItems.append(item.text(0))
+
+    def propertyItemClosed(self, item):
+        self.expandedItems.remove(item.text(0))
 
     def propertyItemChanged(self, item, col):
         if self.handle_style(item) is True:

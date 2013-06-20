@@ -671,8 +671,9 @@ _VE_.setUIInfo = function(gid, property, value, n)
 	    screen_ui.selected(uiInstance) 
     end 
     if property == 'style' then 
-        _VE_.refresh()
-        _VE_.refreshDone()
+        _VE_.getStInfo()
+        --_VE_.refresh()
+        --_VE_.refreshDone()
     else 
         _VE_.repUIInfo(uiInstance)
     end
