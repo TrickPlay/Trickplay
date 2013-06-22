@@ -139,9 +139,9 @@ class DnDTreeWidget(QTreeWidget):
 class TrickplayImageFileSystem(QWidget):
 
     def __init__(self, main = None, parent = None, f = 0):
-        flags = Qt.Tool | Qt.WindowStaysOnTopHint
+        flags = Qt.Tool | Qt.WindowStaysOnTopHint 
         if sys.platform == "darwin":
-            flags |= Qt.WA_MacAlwaysShowToolWindow
+            flags |= Qt.WA_MacAlwaysShowToolWindow 
         else:
             flags |= Qt.X11BypassWindowManagerHint
         """
@@ -160,7 +160,6 @@ class TrickplayImageFileSystem(QWidget):
         self.ui.fileSystemTree.header().setVisible(False)
         self.ui.fileSystem.addWidget(self.ui.fileSystemTree, 0, 0, 1, 1)
 
-        #self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
         self.ui.fileSystemTree.setAlternatingRowColors(True)
         #self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
@@ -169,6 +168,32 @@ class TrickplayImageFileSystem(QWidget):
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemClicked(QTreeWidgetItem*, int)"), self.itemClicked)
 
         # tool button handlers
+
+        self.ui.buttonsLayout.setAlignment(Qt.AlignLeft)
+
+        def setPushButton(button, tooltip, iconpath):
+            button.setText("")
+
+            icon = QIcon()
+            icon.addPixmap(QPixmap(self.main.apath+iconpath))
+            button.setIcon(icon)
+
+            size = QSize()
+            size.setWidth(30)
+            size.setHeight(30)
+            button.resize(size)
+            button.setToolTip(tooltip)
+
+            sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            button.setSizePolicy(sizePolicy)
+
+            button.setStyleSheet("QPushButton{ border: 0px;margin-top:5px;margin-left:10px;margin-right:10px;margin-bottom:5px}")
+
+
+        setPushButton(self.ui.importButton, "Import", "/Assets/icons-images-import.png")
+        setPushButton(self.ui.deleteButton, "Delete", "/Assets/icons-images-delete.png")
+        setPushButton(self.ui.newFolderButton, "Create New Folder", "/Assets/icons-images-new.png")
+
         QObject.connect(self.ui.importButton, SIGNAL('clicked()'), self.importAsset)
         QObject.connect(self.ui.deleteButton, SIGNAL('clicked()'), self.removeAsset)
         QObject.connect(self.ui.newFolderButton, SIGNAL('clicked()'), self.createNewFolder)
