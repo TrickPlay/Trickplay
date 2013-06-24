@@ -5,4 +5,7 @@
 #endif
 
 #include "clutter/clutter.h"
+
+#ifdef TP_NEW_MEDIA
 #include <clutter-gst/clutter-gst.h>
+#endif
