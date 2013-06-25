@@ -785,6 +785,7 @@ _VE_.openFile = function(path)
     local layer = readfile(layers_file)
     --layer = string.sub(layer, 2, string.len(layer)-1)
     layer = json:stringify(json:parse(layer)[1])
+
     if layer == nil then
         error("Layer '"..layers_file.."' does not exist.",2)
     end
@@ -793,7 +794,7 @@ _VE_.openFile = function(path)
     _VE_.buildVF()
 
     -- Load Layer
-    s = VL.load_layer(layer)
+    s = VL.org_load_layer(layer)
     objectsNames = s.objects
 
     for i,j in ipairs(s.children) do
@@ -954,8 +955,10 @@ local codeGen = function()
             local lowLayerName = string.lower(layerName)
             local contents = readfile(lowLayerName..".lua")
 
-            local contents_header = "local "..lowLayerName.." = ...\n" 
-            local contents_tail = "return "..lowLayerName 
+            --local contents_header = "local "..lowLayerName.." = ...\n" 
+            local contents_header = "-- OBJECT HANDLERS SECTION [ DO NOT CHANGE THIS SECTION ]\nlocal function object_handlers("..lowLayerName..", VL)\n-- END OBJECT HANDLERS SECTION [ DO NOT CHANGE THIS SECTION ]\n\n" 
+            --local contents_tail = "return "..lowLayerName 
+            local contents_tail = "-- RETURN OBJECT HANDLERS SECTION [ DO NOT CHANGE THIS SECTION ]\n\treturn "..lowLayerName.."\nend\nreturn object_handlers\n-- END RETURN OBJECT HANDLERS SECTION [ DO NOT CHANGE THIS SECTION ]"
 
             if contents ~= nil and b.elements ~= nil then 
                 local new_contents = ""
@@ -968,7 +971,7 @@ local codeGen = function()
 
 				local c,d,e,f, contents_last
 				
-                c, d = string.find(contents, contents_header)
+                c, d = string.find(contents, "-- END OBJECT HANDLERS SECTION %[ DO NOT CHANGE THIS SECTION %]\n\n")
 				if d~=nil then 
 					 contents_last = string.sub(contents, d+1, -1)
 				end
@@ -991,7 +994,6 @@ local codeGen = function()
                     temp = string.sub(temp, f+1, -1)
                     c, d = string.find(temp, "[-][-] BEGIN ")
                 end 
-                        
 
                 local temp_first, temp_last, temp_middle
                 for k, l in ipairs(backup_obj) do 

@@ -43,6 +43,9 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(PANGO         REQUIRED    pango)
     pkg_check_modules(COGL                      cogl-1.0)
     pkg_check_modules(CLUTTER       REQUIRED    clutter-1.0)
+    IF( TP_NEW_MEDIA )
+        pkg_check_modules(CLUTTERGST    REQUIRED    clutter-gst-2.0)
+    ENDIF( TP_NEW_MEDIA )
     pkg_check_modules(FONTCONFIG    REQUIRED    fontconfig)
     pkg_check_modules(FREETYPE2     REQUIRED    freetype2)
     pkg_check_modules(LIBPNG        REQUIRED    libpng)
@@ -75,6 +78,7 @@ IF( PKG_CONFIG_FOUND )
         ${PANGO_INCLUDE_DIRS}
         ${COGL_INCLUDE_DIRS}
         ${CLUTTER_INCLUDE_DIRS}
+        ${CLUTTERGST_INCLUDE_DIRS}
         ${FONTCONFIG_INCLUDE_DIRS}
         ${FREETYPE2_INCLUDE_DIRS}
         ${LIBPNG_INCLUDE_DIRS}
@@ -99,6 +103,7 @@ IF( PKG_CONFIG_FOUND )
         ${PANGO_LIBRARIES}
         ${COGL_LIBRARIES}
         ${CLUTTER_LIBRARIES}
+        ${CLUTTERGST_LIBRARIES}
         ${FONTCONFIG_LIBRARIES}
         ${FREETYPE2_LIBRARIES}
         ${LIBPNG_LIBRARIES}
@@ -352,6 +357,18 @@ include_directories(
     ${ENGINE_SRC}/lb/include
     ${ENGINE_INCLUDE_DIRS}
 )
+
+#------------------------------------------------------------------------------
+
+if ( TP_NEW_MEDIA )
+
+    add_definitions( -DTP_NEW_MEDIA=1 )
+
+    list( APPEND LB_FILES ${BINDINGS_SRC}/media.lb )
+    list( APPEND ENGINE_SOURCE_FILES
+        ${ENGINE_SRC}/source/media.cpp)
+
+endif ( TP_NEW_MEDIA )
 
 
 #------------------------------------------------------------------------------

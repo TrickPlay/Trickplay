@@ -79,6 +79,7 @@ extern int luaopen_controllers( lua_State* L );
 extern int luaopen_Controller( lua_State* L );
 extern int luaopen_tuners( lua_State* L );
 extern int luaopen_Tuner( lua_State* L );
+extern int luaopen_Media( lua_State* L );
 extern int luaopen_mediaplayer_module( lua_State* L );
 extern int luaopen_stopwatch( lua_State* L );
 extern int luaopen_json( lua_State* L );
@@ -1221,6 +1222,9 @@ void App::run_part2( const StringSet& allowed_names , RunCallback run_callback )
     luaopen_controllers( L );
     luaopen_Tuner( L );
     luaopen_tuners( L );
+#ifdef TP_NEW_MEDIA
+    luaopen_Media( L );
+#endif
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );

@@ -11,26 +11,28 @@
     "build_systems":
     [
         {
-            "name": "TrickPlay",
-            "working_dir": "$project_path",
-            "env": {
-                "NINJA_STATUS": "[%c/%o: %r+%u -> %f] "
-            },
-            "file_regex":   "^([^\\n:]+):(\\d+):(\\d+):\\s+(?:error|warning):\\s+([^\\n]*)$",
-            "cmd":  [ "cmake", "--build", "build" ],
-
-            "variants": [
-                {
-                    // This doesn't really Run, it just makes the "cmake" command get a keybinding by default
-                    "name": "Run",
-                    "env": {
-                        "CC" : "clang",
-                        "CXX": "clang++"
-                        },
-                    "file_regex":   "^\\s*([^\\n:]+):(\\d+)(?::|\\s+\\(pkg_check_modules\\))",
-                    "cmd": [ "cmake", "-G", "Ninja", "-DTP_WITH_WEBGL=1", "-DTP_PROFILING=1", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", "-H.", "-Bbuild" ]
-                }
-            ]
+            "name": "TP - all",
+            "cmd": ["/opt/local/bin/ninja", "-C", "build", "-f", "build.ninja", "all"],
+            "working_dir": "${project_path}",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"
+        },
+        {
+            "name": "TP - docs",
+            "cmd": ["/opt/local/bin/ninja", "-C", "build", "-f", "build.ninja", "docs"],
+            "working_dir": "${project_path}",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"
+        },
+        {
+            "name": "TP - clean",
+            "cmd": ["/opt/local/bin/ninja", "-C", "build", "-f", "build.ninja", "clean"],
+            "working_dir": "${project_path}",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"
+        },
+        {
+            "name": "TP - rebuild_cache",
+            "cmd": ["/opt/local/bin/ninja", "-C", "build", "-f", "build.ninja", "rebuild_cache"],
+            "working_dir": "${project_path}",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$"
         }
     ],
 
