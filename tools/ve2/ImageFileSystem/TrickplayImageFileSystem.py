@@ -331,15 +331,16 @@ class TrickplayImageFileSystem(QWidget):
     def removeAsset(self) :
         self.main.importCmd = "remove"
         item = self.ui.fileSystemTree.currentItem()
-        itemWhatsThis = item.whatsThis(0)
-        emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
-        self.idsToRemove = ""
+        if item:
+            itemWhatsThis = item.whatsThis(0)
+            emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
+            self.idsToRemove = ""
 
-        self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
+            self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
 
-        self.ui.fileSystemTree.currentItem().removeChild(item)
-        self.idCnt = self.idCnt - 1
-        self.sTread.run()
+            self.ui.fileSystemTree.currentItem().removeChild(item)
+            self.idCnt = self.idCnt - 1
+            self.sTread.run()
 
     def insertImage(self) :
 
@@ -367,10 +368,11 @@ class TrickplayImageFileSystem(QWidget):
             orgId = str(item.whatsThis(0))
 
         self.dialog = QDialog()
+        self.dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.ndirUi = Ui_newFolderDialog()
         self.ndirUi.setupUi(self.dialog)
         #self.dialog.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 400, self.main.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
-        self.dialog.setGeometry(self.main._ifilesystem.geometry().x() + 400, self.main._ifilesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.main._menubar.geometry().x() + 400, self.main.menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
         if self.dialog.exec_():
             dir_name = self.ndirUi.folder_name.text()
             new_path = newFolderParent+dir_name+"/"

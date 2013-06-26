@@ -335,6 +335,16 @@ class MainWindow(QMainWindow):
         self.ui.actionDuplicate.setDisabled(True)
         self.ui.actionDelete.setEnabled(True)
 
+    def openFileDialog(self, title, default_path, file_mode=QFileDialog.Directory):
+        fileDialog = QFileDialog(None,  title, default_path)
+        fileDialog.setDirectory(default_path)
+        fileDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+        fileDialog.setFileMode(file_mode)
+        if fileDialog.exec_():
+            return fileDialog.selectedFiles()[0]
+        else:
+            return 
+
     def menuDisable (self):
         self.ui.action_left.setDisabled(True)
         self.ui.action_right.setDisabled(True)
@@ -380,6 +390,7 @@ class MainWindow(QMainWindow):
 
     def errorMsg(self, eMsg):
         msg = QMessageBox()
+        msg.setWindowFlags(Qt.WindowStaysOnTopHint)
         msg.setText(eMsg)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
@@ -391,6 +402,7 @@ class MainWindow(QMainWindow):
 
     def warningMsg(self):
         msg = QMessageBox()
+        msg.setWindowFlags(Qt.WindowStaysOnTopHint)
         msg.setText('The Project "'+ self.currentProject +'" is changed.')
         msg.setInformativeText('If you don\'t save it, the changes will be permanently lost.')
         msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
@@ -491,15 +503,16 @@ class MainWindow(QMainWindow):
         path = -1
 
         self.bar = QProgressBar()
+        self.bar.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
         self.bar.setWindowTitle("Import Assets...")
-        self.bar.setGeometry(self._ifilesystem.geometry().x() + 200, self._ifilesystem.geometry().y() + 100, 300, 20)
+        self.bar.setGeometry(self._menubar.geometry().x() + 300, self._menubar.geometry().y() + 300, 300, 20)
 
         while path == -1 :
             if self.path is None:
                 self.path = self.apath
-            path = QFileDialog.getExistingDirectory(None, 'Import Asset Images', self.path, QFileDialog.ShowDirsOnly)
+            path = self.openFileDialog('Import Asset Images', self.path)
 
         if path:
             print ("[VE] Import Asset Images ...[%s]"%path)
@@ -516,12 +529,14 @@ class MainWindow(QMainWindow):
                 ret = self.stitcher.waitForStarted()
                 if ret == False :
                     self.processErrorHandler("stitcher")
+        else:
+            return
 
     def chooseDirectoryDialog(self, dir=None):
 
         if self.path is None:
             self.path = self.apath
-        path = QFileDialog.getExistingDirectory(None, 'Import Skin Images', self.path, QFileDialog.ShowDirsOnly)
+        path = self.openFileDialog('Import Skin Images', self.path)
 
         if path :
             self.uiD.directory.setText(path)
@@ -537,6 +552,7 @@ class MainWindow(QMainWindow):
         New app dialog
         """
         self.dialog = QDialog()
+        self.dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.id = ""
         self.name = ""
         self.uiD = Ui_importSkinImages()
@@ -548,7 +564,7 @@ class MainWindow(QMainWindow):
 
         cancelButton = self.uiD.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.uiD.buttonBox.button(QDialogButtonBox.Ok)
-        self.dialog.setGeometry(self._ifilesystem.geometry().x() + 200, self._ifilesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self._menubar.geometry().x() + 200, self._menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
 
         QObject.connect(self.uiD.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
 
@@ -565,6 +581,7 @@ class MainWindow(QMainWindow):
 
     def importSkinErrorMsg(self, sUIs, fUIs):
         msg = QMessageBox()
+        msg.setWindowFlags(Qt.WindowStaysOnTopHint)
         errorMsg = ""
 
         if len (sUIs) is not 0:
@@ -646,6 +663,7 @@ class MainWindow(QMainWindow):
         self.importCmd = "skins"
         self._ifilesystem.imageCommand = "skins"
         self.bar = QProgressBar()
+        self.bar.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.bar.setRange(0, 100)
         self.bar.setValue(0)
         self.bar.setWindowTitle("Import Skin...")
@@ -656,6 +674,9 @@ class MainWindow(QMainWindow):
             print ("[VE] Import Skin Images ...[%s]"%skinPath)
             if self.checkSkinAssetsExist(skinPath) != True :
                 return
+
+        if id == None:
+            return
 
         if os.path.exists(os.path.join(self.path, "assets/skins/"+id+".json")) == True:
             print("[VE] stitcher -rpd -m '"+str(os.path.join(self.path, "assets/skins/"+id+".json"))+"' -o '"+str(os.path.join(self.path, "assets/skins"))+"/'"+id+" "+skinPath)
@@ -716,7 +737,7 @@ class MainWindow(QMainWindow):
         while path == -1 :
             if self.path is None:
                 self.path = self.apath
-            path = QFileDialog.getExistingDirectory(None, 'Open Project', self.path, QFileDialog.ShowDirsOnly)
+            path = self.openFileDialog('Open Project', self.path)
             if path == None or path == "":
                 return
             path = wizard.start(path, True)
@@ -1045,7 +1066,8 @@ class MainWindow(QMainWindow):
 
 
     def backgroundImage(self):
-        path = QFileDialog.getOpenFileName(None, 'Set Background Image Source', str(os.path.join(self.path, 'assets/images')), "*.jpg *.gif *.png")
+        path = self.openFileDialog('Set Background Image Source', str(os.path.join(self.path, 'assets/images')), QFileDialog.ExistingFile)
+
         if len(path) > 0 :
             self.sendLuaCommand("backgroundImage", "_VE_.backgroundImage('"+os.path.dirname(str(path))+"',"+"'"+os.path.basename(str(path))+"')")
         return True

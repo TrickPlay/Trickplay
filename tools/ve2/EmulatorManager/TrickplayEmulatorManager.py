@@ -162,6 +162,7 @@ class TrickplayEmulatorManager(QWidget):
                     elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
                         org_position = int(s[9:])
                         self.GLI_dialog = QDialog()
+                        self.GLI_dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
                         if luaCmd =="openV_GLI":
                             self.GLInspector_ui = Ui_vertGuideDialog()
                         else:
