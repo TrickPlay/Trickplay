@@ -155,9 +155,12 @@ return setmetatable(
         end,
         __newindex =  function(t,k,v)
 
-            error("attempted to set the Widget_Library's index '"..
-                tostring(k).."' to '"..tostring(v).."'",2)
-
+            if k == "editor_mode" then
+                WL_EXT[k] = v
+            else
+                error("attempted to set the Widget_Library's index '"..
+                    tostring(k).."' to '"..tostring(v).."'",2)
+            end
         end,
     }
 )

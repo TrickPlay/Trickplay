@@ -50,7 +50,7 @@ local uielement_properties = {
 -- Yes this is a messy way to set up WidgetGroup, WidgetRectangle, WidgetText,
 -- WidgetImage, and WidgetClone
 --------------------------------------------------------------------------------
-local table_of_envs = {}
+local table_of_envs = setmetatable({},{__mode='k'})
 
 function get_env(w) return table_of_envs[w] end
 
@@ -73,6 +73,8 @@ local function Widgetize(instance)
 
     local mt = getmetatable(instance)
     ----------------------------------------------------------------------------
+    weak_references = setmetatable({instance=instance},{__mode='v'})
+    ----------------------------------------------------------------------------
     -- subscribe_to() / unsubscribe()
 
     local old__newindex = mt.__newindex
@@ -87,7 +89,7 @@ local function Widgetize(instance)
 
             updating = true
 
-            update(instance)
+            update(weak_references.instance)
 
             updating = false
 
@@ -145,7 +147,7 @@ local function Widgetize(instance)
     end)
 
     function instance:on_key_down(key,...)
-        if not instance.enabled then return end
+        if not self.enabled then return end
 
         if key_functions[key] then
 
@@ -225,10 +227,11 @@ local function Widgetize(instance)
     )
 
     ----------------------------------------------------------------------------
+
     local enabled_upval, retval
     local __call = function(t,...)
 
-        enabled_upval = instance.enabled
+        enabled_upval = weak_references.instance.enabled
 
         retval = false
 
@@ -435,7 +438,7 @@ local function Widgetize(instance)
     end
     local subscription = function(style_t)
         --print("herefdffds")
-        mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
+        --mesg("STYLE_SUBSCRIPTIONS",0, (instance.name or instance.gid),"'s style's subscribe_to was called")
         --dumptable(style_t)
         if not style_flags then return end
 
