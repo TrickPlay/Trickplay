@@ -81,7 +81,11 @@ class Wizard():
                         self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file or a "main.lua" file.')
                         return
             else:
-                self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
+                if len(dir) > 0 : 
+                    self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
+                else:
+                    self.warningMsg("Error", 'Select existing project or create new one.')
+                    
                 return
 
         # Get a path from the user
