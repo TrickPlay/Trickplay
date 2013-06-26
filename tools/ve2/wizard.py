@@ -230,7 +230,13 @@ class Wizard():
             directory = dir
 
 
-        return self.mainWindow.openFileDialog('Choose a directory for your app', self.mainWindow.path)
+        path = self.mainWindow.openFileDialog('Choose a directory for your app', self.mainWindow.path)
+        if path:
+            self.ui.directory.setText(path)
+            self.ui.id.setReadOnly(False)
+            self.ui.name.setReadOnly(False)
+            self.new = True
+        return path
 
     # whenever user edit id and name line editor, change the label-selfe.ui.projectDirName.
     def idChanged(self, change):
