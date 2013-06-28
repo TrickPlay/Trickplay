@@ -1003,7 +1003,8 @@ class TrickplayInspector(QWidget):
 
                 if p in TEXT_PROP or p in READ_ONLY :
                     if p == "scale":
-                        i.setText (1, str(data[p][:2])) # second col : property value (text input field)
+                        newScale = "["+str(int((data[p][:2][0])*100))+"%, "+str(int((data[p][:2][1])*100))+"%]" 
+                        i.setText (1, newScale)
                     else:
                         i.setText (1, str(data[p])) # second col : property value (text input field)
 
@@ -1156,6 +1157,17 @@ class TrickplayInspector(QWidget):
                     z = data[p]
                     if p == "items" and data["type"] == "ButtonPicker":
                         pass
+                    elif p == "scale":
+                        idx = 0
+                        for sp in PropertyIter(p):
+                            j = QTreeWidgetItem(i)
+                            sp = str(sp)
+                            j.setWhatsThis (0, sp)
+                            j.setText (0, sp)  
+                            j.setText (1, str(int(z[idx]*100)))
+                            if not p in READ_ONLY and self.editable is True :
+                                j.setFlags(j.flags() ^Qt.ItemIsEditable)
+                            idx += 1
                     elif type(z) ==  list : #size, x_rotation, ...
                         idx = 0
                         for sp in PropertyIter(p):
@@ -1647,11 +1659,16 @@ class TrickplayInspector(QWidget):
                 elif str(pValueString[i]) == "False" :
                     pValueString[i] =  "false"
 
-            pNewValueString = pNewValueString + pValueString[i]
+            if pItem.text(0) == 'scale' and pValueString[i][len(pValueString[i])-1:] != "%":
+                pNewValueString = pNewValueString + pValueString[i] + "%"
+            else :
+                pNewValueString = pNewValueString + pValueString[i]
+
             if i < len(pValueString) - 1 :
                 pNewValueString = pNewValueString+', '
 
         pItem.setText(1, '['+pNewValueString+']')
+            
 
         return '{'+pNewValueString+'}'
 
@@ -1728,7 +1745,6 @@ class TrickplayInspector(QWidget):
         if self.is_this_subItem(item) is True:
             n, pItem = self.getParentInfo(item)
             tValue = self.updateParentItem(pItem, n, str(item.text(1)))
-
             self.sendData(self.getGid(), str(pItem.whatsThis(0)), tValue)
             #item[str(pItem.whatsThis(0))] = tValue
         else :
@@ -1759,7 +1775,22 @@ class TrickplayInspector(QWidget):
                 print("[VE] Error >> Invalid data entered", e.value)
                 return False
 
+        if property == 'scale':
+            value = str(value)
+            p = value.find('%')
+            # x %
+            if p > -1 :
+                n = float(value[1:p])/100
+                value = value.replace(value[1:p+1], str(n))
+            # y %
+            p = value.find('%')
+            if p > -1 :
+                c = value.find(',')
+                n = float(value[c+1:p]) / 100
+                value = value.replace(value[c+1:p+1], " "+str(n))
+
         self.main._emulatorManager.setUIInfo(gid, property, value)
+
         return True
 
     def clearTree(self):
