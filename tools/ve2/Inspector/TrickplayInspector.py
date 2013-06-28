@@ -1408,7 +1408,7 @@ class TrickplayInspector(QWidget):
             return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
-
+        self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.currentScreenName+"\")")                 
         if self.screens.has_key(self.currentScreenName) == False :
             if self.old_screen_name == "":
                 return

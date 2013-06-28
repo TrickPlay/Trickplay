@@ -139,7 +139,8 @@ class TrickplayEmulatorManager(QWidget):
                     self.main.x = str(338)
 
                 self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc("+self.main.x+","+self.main.y+")")
-                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
+                
+                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"  "+self.inspector.currentScreenName+"')")
 
             else:
                 # Output the log line
@@ -415,7 +416,8 @@ class TrickplayEmulatorManager(QWidget):
                         try :
                             if self.main.menuCommand == "newProject" :
                                 self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
-                                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"\")")
+                                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.inspector.currentScreenName+"\")")
+                                
                                 self.main.menuCommand = ""
 
                         except:
