@@ -9,6 +9,7 @@ from Data import dataToModel
 from UI.Inspector import Ui_TrickplayInspector
 from UI.PickerItems import Ui_PickerItemTable
 from UI.Neighbors import Ui_Neighbors
+from UI.NewScene import Ui_newScene
 
 multiSelect = 'false'
 
@@ -382,6 +383,14 @@ class PickerItemTable(QWidget):
             idx = idx + 1
         self.tableSet = True
 
+class NewScene(QWidget):
+    def __init__(self, parent = None):
+
+        QWidget.__init__(self,parent)
+
+        self.ui = Ui_newScene()
+        self.ui.setupUi(self)
+
 class TrickplayInspector(QWidget):
 
     def __init__(self, main = None, parent = None, f = 0):
@@ -398,9 +407,12 @@ class TrickplayInspector(QWidget):
 
         QWidget.__init__(self, parent, flags)
 
+        #self.newui = NewScene(self)
+        #self.newui.move(50,50)
+        #self.newui.hide()
+
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
-
         self.ui.inspector = DnDTreeView(self.ui.ObjectInspector, self)
 
         self.ui.inspector.setDragEnabled(True)
@@ -425,7 +437,7 @@ class TrickplayInspector(QWidget):
         self.cbStyle_textChanged = False
         self.cbStyle = None
         self.screen_textChanged = False
-        self.addItemToScreens = False
+        #self.addItemToScreens = False
         self.expandedItems = []
 
         # Models
@@ -436,7 +448,9 @@ class TrickplayInspector(QWidget):
         #ScreenInspector
         self.ui.screenCombo.addItem("Default")
         self.currentScreenName = "Default"
-        self.ui.deleteScreen.setStyleSheet("QToolButton{margin:2px;margin-bottom:0px;border: 1px solid #8f8f91;background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffffff, stop: 1 #dadbde);border-radius:3px;height:18px;padding-top:-2px}")
+        self.ui.deleteScreen.setStyleSheet("QToolButton{margin:2px;margin-bottom:0px;margin-left:1px;border: 1px solid #8f8f91;background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffffff, stop: 1 #dadbde);border-radius:3px;height:18px;padding-top:-2px}")
+        self.ui.createScreen.setStyleSheet("QToolButton{margin:2px;margin-bottom:0px;margin-right:1px;border: 1px solid #8f8f91;background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffffff, stop: 1 #dadbde);border-radius:3px;height:18px;padding-top:-2px}")
+        self.ui.createScreen.clicked.connect(self.createScreen)
         self.ui.deleteScreen.clicked.connect(self.removeScreen)
         self.ui.screenCombo.currentIndexChanged.connect(self.screenChanged)
         self.ui.screenCombo.activated.connect(self.screenActivated)
@@ -1380,6 +1394,55 @@ class TrickplayInspector(QWidget):
         if self.cbStyle :
             self.cbStyle.setEditable (False)
 
+    def createScreen(self):
+        self.newSceneInput = QWidget()
+        flags = Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+        self.newSceneInput.setWindowFlags(flags)
+        self.newui = NewScene(self.newSceneInput)
+        self.newSceneInput.setGeometry(QRect(self.geometry().x()+48, self.geometry().y()+55, 200, 42))
+        self.newSceneInput.show()
+        self.newui.ui.lineEdit.returnPressed.connect(self.newSceneNameEntered)
+        
+    def newSceneNameEntered(self):
+        newScene = self.newui.ui.lineEdit.text()
+        self.newui.ui.lineEdit.clear()
+        self.newSceneInput.hide()
+
+        self.old_screen_name = self.currentScreenName
+        self.currentScreenName = str(newScene)
+        self.ui.screenCombo.addItem(newScene)
+
+        self.screens[self.currentScreenName] = []
+
+        for layerName in self.screens[self.old_screen_name][:]:
+            self.screens[self.currentScreenName].append(layerName)
+            if self.old_screen_name == "Default":
+                curIdx = self.ui.screenCombo.currentIndex()
+                if self.screens.has_key(self.old_screen_name):
+                    del self.screens[self.old_screen_name]
+                self.ui.screenCombo.removeItem(curIdx-1)
+            # show the screen items
+            self.screenChanging = True
+            self.defaultLayer = None
+            
+            for theLayer in self.screens["_AllScreens"][:] :
+                # the layer is in this selected screen and if it is not checked
+                if len(theLayer) > 0 :
+                    theItem = self.search(str(theLayer), 'name')
+                    if theItem is not None:
+                        if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
+                            if self.defaultLayer is None :
+                                self.defaultLayer = theItem['gid']
+                            self.sendData(theItem['gid'], "is_visible", True)
+                            theItem.setCheckState(Qt.Checked)
+                        # the layer is not in this selected screen and if it is checked
+                        elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
+                            self.sendData(theItem['gid'], "is_visible", False)
+                            theItem.setCheckState(Qt.Unchecked)
+
+            self.screenChanging = False
+            self.ui.screenCombo.setCurrentIndex(self.ui.screenCombo.findText(newScene))
+
     def removeScreen(self):
         if self.currentScreenName != "Default" and self.ui.screenCombo.count() > 1:
             curIdx = self.ui.screenCombo.currentIndex()
@@ -1403,23 +1466,20 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
-
-        if index < 0 or self.addItemToScreens is True:
-            return
+        if index < 0 or self.main._emulatorManager.addItemToScreens  == True :
+            return 
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
         self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.currentScreenName+"\")")                 
         if self.screens.has_key(self.currentScreenName) == False :
-            if self.old_screen_name == "":
-                return
-            self.screens[self.currentScreenName] = []
-            for layerName in self.screens[self.old_screen_name][:]:
-                self.screens[self.currentScreenName].append(layerName)
-            if self.old_screen_name == "Default":
-                curIdx = self.ui.screenCombo.currentIndex()
-                if self.screens.has_key(self.old_screen_name):
-                    del self.screens[self.old_screen_name]
-                self.ui.screenCombo.removeItem(curIdx-1)
+
+            self.screens[self.currentScreenName] = self.screens[self.old_screen_name]
+            curIdx = self.ui.screenCombo.currentIndex()
+            if self.screens.has_key(self.old_screen_name):
+                del self.screens[self.old_screen_name]
+
+            self.ui.screenCombo.removeItem(self.ui.screenCombo.findText(self.old_screen_name))
+
         else:
             # show the screen items
             self.screenChanging = True

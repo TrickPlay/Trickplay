@@ -25,6 +25,7 @@ class TrickplayEmulatorManager(QWidget):
         self.unsavedChanges = False
         self.contentMoveBlock = False
         self.fscontentMoveBlock = False
+        self.addItemToScreens = False
         self.inspector = main._inspector
         self.filesystem = main._ifilesystem
         self._path = os.path.join(self.main.apath, 'VE')
@@ -192,12 +193,12 @@ class TrickplayEmulatorManager(QWidget):
                         fgid, info = getNextInfo(info)
                         focus, info = getNextInfo(info)
                         item = self.inspector.search(str(fgid), 'gid')
-                        if focus[:1] == "T":
-                            item['focused'] = True
-                        else:
-                            item['focused'] = False
-                        index = self.inspector.selected (self.inspector.ui.inspector)
                         try :
+                            if focus[:1] == "T":
+                                item['focused'] = True
+                            else:
+                                item['focused'] = False
+                            index = self.inspector.selected (self.inspector.ui.inspector)
                             item = self.inspector.inspectorModel.itemFromIndex(index)
                             if item['gid'] == fgid :
                                 if self.inspector.main.command is not "setUIInfo" :
@@ -263,6 +264,7 @@ class TrickplayEmulatorManager(QWidget):
                         gid = (s[10:])
                         shift = s[9]
                     elif luaCmd == "scrJSInfo":
+                        self.addItemToScreens = True
                         scrData = json.loads(s[9:])
                         self.inspector.screens = {}
                         screenNames = []
@@ -280,11 +282,11 @@ class TrickplayEmulatorManager(QWidget):
                             curIdx = self.inspector.ui.screenCombo.currentIndex()
                             self.inspector.ui.screenCombo.removeItem(curIdx)
 
-                        self.inspector.addItemToScreens = True
                         for scrName in screenNames:
                             if self.inspector.ui.screenCombo.findText(scrName) < 0 and scrName != "_AllScreens":
                                 self.inspector.ui.screenCombo.addItem(scrName)
-                        self.inspector.addItemToScreens = False
+
+                        self.addItemToScreens = False
 
                     elif luaCmd == "imageInfo":
                         self.imgData = json.loads(s[9:])
@@ -338,8 +340,11 @@ class TrickplayEmulatorManager(QWidget):
                             self.inspector.inspectorModel.styleData = sdata
                             self.inspector.preventChanges = True
                             if self.inspector.cbStyle is not None:
-                                self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
-                                self.inspector.expandStyle()
+                                try:
+                                    self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+                                    self.inspector.expandStyle()
+                                except:
+                                    pass
                                 if self.ve_ready == False :
                                     self.unsavedChanges = True
                                 self.ve_ready = False
