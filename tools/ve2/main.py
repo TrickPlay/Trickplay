@@ -340,9 +340,12 @@ class MainWindow(QMainWindow):
         fileDialog.setDirectory(default_path)
         fileDialog.setWindowFlags(Qt.WindowStaysOnTopHint)
         fileDialog.setFileMode(file_mode)
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         if fileDialog.exec_():
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return fileDialog.selectedFiles()[0]
         else:
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return 
 
     def menuDisable (self):
@@ -396,8 +399,10 @@ class MainWindow(QMainWindow):
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setWindowTitle("Error")
         msg.setGeometry(self._menubar.geometry().x() + 100, self._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         ret = msg.exec_()
         if ret == QMessageBox.Ok:
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return
 
     def warningMsg(self):
@@ -410,11 +415,14 @@ class MainWindow(QMainWindow):
         msg.setDefaultButton(QMessageBox.Cancel)
         msg.setWindowTitle("Warning")
         msg.setGeometry(self._menubar.geometry().x() + 100, self._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         ret = msg.exec_()
         if ret == QMessageBox.Save:
             self.saveProject()
             time.sleep(0.1)
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
         elif ret == QMessageBox.Cancel:
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return False
         return True
 
@@ -571,12 +579,15 @@ class MainWindow(QMainWindow):
         if id is not None:
             self.uiD.id.setText(id)
 
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         if self.dialog.exec_():
             id = str(self.uiD.id.text())
             path = str(self.uiD.directory.text())
 
             if '' == id or '' == name or path == "source image directory" :
+                self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
                 return self.importSkinDialog(path, id, name)
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
         return path, id
 
     def importSkinErrorMsg(self, sUIs, fUIs):
@@ -620,10 +631,13 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
         msg.setDefaultButton(QMessageBox.Yes)
         msg.setWindowTitle("Import Skin Error")
+        self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         ret = msg.exec_()
         if ret == QMessageBox.Yes:
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return True
         else:
+            self.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return False
 
 

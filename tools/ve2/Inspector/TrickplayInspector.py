@@ -437,7 +437,6 @@ class TrickplayInspector(QWidget):
         self.cbStyle_textChanged = False
         self.cbStyle = None
         self.screen_textChanged = False
-        #self.addItemToScreens = False
         self.expandedItems = []
 
         # Models
@@ -1470,7 +1469,8 @@ class TrickplayInspector(QWidget):
             return 
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(index))
-        self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.currentScreenName+"\")")                 
+        if self.main.command != "newProject" and self.main.command != "":
+            self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.currentScreenName+"\")")                 
         if self.screens.has_key(self.currentScreenName) == False :
 
             self.screens[self.currentScreenName] = self.screens[self.old_screen_name]

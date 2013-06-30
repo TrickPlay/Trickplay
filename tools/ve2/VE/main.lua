@@ -902,6 +902,18 @@ end
 _VE_.getScreenLoc = function()
     print("screenLoc"..screen.x..","..screen.y)
 end 
+_VE_.setScreenReactive = function(v)
+
+    screen.reactive = v
+
+    if v == false then 
+        local garigae = Rectangle{name = "garigae", position = {0,0,0}, size = {screen.w, screen.h}, color = {0,0,0,70}, reactive = true}
+        garigae:raise_to_top()
+        screen:add(garigae)
+    else
+        screen:remove(screen:find_child("garigae"))
+    end
+end
 _VE_.setScreenLoc = function(x, y)
     if x == 0 and y == 0  then 
         screen.y = 204

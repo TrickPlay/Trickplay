@@ -52,11 +52,13 @@ class Wizard():
             msg.setWindowTitle(title)
             msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
 
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
             ret = msg.exec_()
             if ret == VE_NEW_PROJECT_ROLE:
                 self.mainWindow.newProject()
             elif ret == VE_OPEN_PROJECT_ROLE:
                 self.mainWindow.openProject()
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return
 
     def start(self, path, openApp=False, newApp=False):
@@ -314,7 +316,9 @@ class Wizard():
         if name is not None:
             self.ui.name.setText(name)
 
+        self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         if self.dialog.exec_():
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             id = str(self.ui.id.text())
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
@@ -391,6 +395,7 @@ class Wizard():
             else:
                 return -1
         else:
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return -1
 
     def quiet_exit(self):
