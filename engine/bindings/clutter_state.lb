@@ -242,21 +242,101 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
     }
     else if (!strcmp("color",k))
     {
+        // Can only animate color on a Rectangle or Text
+        const gchar* type = ClutterUtil::get_actor_type( object );
+        if(g_strcmp0(type, "Rectangle") && g_strcmp0(type, "Text"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE OR TEXT", k);
+        }
+
         if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
         {
             ClutterColor color;
             ClutterUtil::to_clutter_color(L, index, &color);
 
-            //ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
-
             g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
             clutter_value_set_color(&gvalue, &color);
-            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
+
+            if(!g_strcmp0(type, "Rectangle"))
+            {
+                ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "inner");
+                g_assert(inner != NULL);
+
+                clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(inner), "background-color", nmode, &gvalue, pre_delay, post_delay);
+            } else {
+                clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
+            }
+
             g_value_unset(&gvalue);
         }
         else
         {
             return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
+        }
+    }
+    else if (!strcmp("border_color",k))
+    {
+        // Can only animate border_color on a Rectangle
+        const gchar* type = ClutterUtil::get_actor_type( object );
+        if(g_strcmp0(type, "Rectangle"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE", k);
+        }
+
+        if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
+        {
+            ClutterColor color;
+            ClutterUtil::to_clutter_color(L, index, &color);
+
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "bottom");
+            g_assert(top != NULL && left != NULL && right != NULL && bottom != NULL);
+
+            g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
+            clutter_value_set_color(&gvalue, &color);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(top),    "background-color", nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(left),   "background-color", nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(right),  "background-color", nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(bottom), "background-color", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
+        }
+        else
+        {
+            return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
+        }
+    }
+    else if (!strcmp("border_width",k))
+    {
+        // Can only animate border_width on a Rectangle
+        const gchar* type = ClutterUtil::get_actor_type( object );
+        if(g_strcmp0(type, "Rectangle"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE", k);
+        }
+
+        if (lua_type(L, index) == LUA_TNUMBER)
+        {
+            value = lua_tonumber(L, index);
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,value);
+
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(object), "bottom");
+            g_assert(top != NULL && left != NULL && right != NULL && bottom != NULL);
+
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(top),    "height", nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(left),   "width",  nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(right),  "height", nmode, &gvalue, pre_delay, post_delay);
+            clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(bottom), "width",  nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
+        }
+        else
+        {
+            return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
         }
     }
     else if (!strcmp("clip", k))

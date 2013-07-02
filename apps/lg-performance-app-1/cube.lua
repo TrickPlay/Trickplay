@@ -132,15 +132,19 @@ end
 --The left most card in the initial screen
 local function make_live_card(item_data)
 
-    local pip = Sprite{
-        name = "Picture in Picture",
-        sheet = assets,
-        id = "live-image.png",
-    }
-
-    pip.w = pip.w*3/2-20
-    pip.h = pip.h*3/2
-    pip.x = 2
+    if(tuners and #tuners.available > 0) then
+        tuners.available[1]:set_viewport(42, 153, 533, 313)
+    else
+        local pip = Media{
+            name = "Picture in Picture",
+            src = "assets/glee.mp4",
+            w = 533, h = 313,
+            x = 42, y = 153,
+            on_loaded = function(self) self:play() end,
+            on_completed = function(self) self:seek(0) self:play() end,
+        }
+        screen:add(pip)
+    end
 
     local ad = Sprite{
         sheet = assets,
@@ -156,11 +160,11 @@ local function make_live_card(item_data)
         children   = {
             Sprite{
                 sheet = assets,
-                id = "card-live.png",
+                id = "card-live-pip.png",
                 w = card_src_w,
                 h = card_src_h,
             },
-            ad,pip,
+            ad,
             Sprite{
                 sheet = assets,
                 id = "card-shadow.png",
@@ -316,6 +320,14 @@ local next_r = r1
 local again = false
 function cube:rotate(outgoing,incoming,direction)
 
+    if(outgoing == r2) then
+        if(tuners and #tuners.available > 0) then
+            tuners.available[1]:set_viewport(1, 1, 1, 1)
+        else
+            screen:find_child("Picture in Picture"):hide()
+        end
+    end
+
     if animating then return end
     animating = true
 
@@ -391,28 +403,35 @@ function cube:rotate(outgoing,incoming,direction)
     end
     function tl.on_completed()
 
-
         curr_r = incoming
         next_r = outgoing
         outgoing:unparent()
 
-            --repeat if RED was pressed
-            if again then
-                if cube_delay and cube_delay > 0 then
-                    dolater(cube_delay,function()
-                        animating = false
-                        if again then
-                            cube:rotate(curr_r,next_r,direction)
-                        end
-                    end)
-                else
+        if(curr_r == r2) then
+            if(tuners and #tuners.available > 0) then
+                tuners.available[1]:set_viewport(42, 153, 533, 313)
+            else
+                screen:find_child("Picture in Picture"):show()
+            end
+        end
+
+        --repeat if RED was pressed
+        if again then
+            if cube_delay and cube_delay > 0 then
+                dolater(cube_delay,function()
                     animating = false
-                    cube:rotate(curr_r,next_r,direction)
-                end
+                    if again then
+                        cube:rotate(curr_r,next_r,direction)
+                    end
+                end)
             else
                 animating = false
+                cube:rotate(curr_r,next_r,direction)
             end
-            --return again and cube:rotate(curr_r,next_r,direction)
+        else
+            animating = false
+        end
+        --return again and cube:rotate(curr_r,next_r,direction)
 
     end
     rotate_animation:start()

@@ -316,6 +316,13 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
     }
     else if (!strcmp("color",k))
     {
+        // Can only animate color on a Rectangle or Text
+        const gchar* type = ClutterUtil::get_actor_type( source );
+        if(g_strcmp0(type, "Rectangle") && g_strcmp0(type, "Text"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE OR TEXT", k);
+        }
+
         if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
         {
             ClutterColor color;
@@ -325,14 +332,109 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
             g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
             clutter_value_set_color(&gvalue, &color);
 
-            clutter_animator_set_key(animator, G_OBJECT(source), "color", nmode, progress, &gvalue);
-            clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "color", ease_in);
-            clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "color", interpolation);
+            if(!g_strcmp0(type, "Rectangle"))
+            {
+                ClutterActor *inner = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "inner");
+                g_assert(inner != NULL);
+
+                clutter_animator_set_key(animator, G_OBJECT(inner), "background-color", nmode, progress, &gvalue);
+                clutter_animator_property_set_ease_in(animator, G_OBJECT(inner), "background-color", ease_in);
+                clutter_animator_property_set_interpolation(animator, G_OBJECT(inner), "background-color", interpolation);
+            } else {
+                clutter_animator_set_key(animator, G_OBJECT(source), "color", nmode, progress, &gvalue);
+                clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "color", ease_in);
+                clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "color", interpolation);
+            }
+            g_value_unset(&gvalue);
+
+        }
+        else
+        {
+            return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
+        }
+    }
+    else if (!strcmp("border_color",k))
+    {
+        // Can only animate border_color on a Rectangle
+        const gchar* type = ClutterUtil::get_actor_type( source );
+        if(g_strcmp0(type, "Rectangle"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE", k);
+        }
+
+        if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
+        {
+            ClutterColor color;
+            ClutterUtil::to_clutter_color(L, index, &color);
+
+            GValue gvalue={0};
+            g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
+            clutter_value_set_color(&gvalue, &color);
+
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "bottom");
+            g_assert(top != NULL && left != NULL && right != NULL && bottom != NULL);
+
+            clutter_animator_set_key(animator, G_OBJECT(top), "background-color", nmode, progress, &gvalue);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(top), "background-color", ease_in);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(top), "background-color", interpolation);
+            clutter_animator_set_key(animator, G_OBJECT(left), "background-color", nmode, progress, &gvalue);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(left), "background-color", ease_in);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(left), "background-color", interpolation);
+            clutter_animator_set_key(animator, G_OBJECT(right), "background-color", nmode, progress, &gvalue);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(right), "background-color", ease_in);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(right), "background-color", interpolation);
+            clutter_animator_set_key(animator, G_OBJECT(bottom), "background-color", nmode, progress, &gvalue);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(bottom), "background-color", ease_in);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(bottom), "background-color", interpolation);
             g_value_unset(&gvalue);
         }
         else
         {
             return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
+        }
+    }
+    else if (!strcmp("border_width",k))
+    {
+        // Can only animate border_width on a Rectangle
+        const gchar* type = ClutterUtil::get_actor_type( source );
+        if(g_strcmp0(type, "Rectangle"))
+        {
+            return luaL_error(L, "PROPERTY '%s' CAN ONLY BE ANIMATED ON A RECTANGLE", k);
+        }
+
+        if (lua_type(L, index) == LUA_TNUMBER)
+        {
+            GValue gvalue={0};
+
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,lua_tonumber(L, index));
+
+            ClutterActor *top    = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "top");
+            ClutterActor *left   = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "left");
+            ClutterActor *right  = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "right");
+            ClutterActor *bottom = clutter_container_find_child_by_name(CLUTTER_CONTAINER(source), "bottom");
+            g_assert(top != NULL && left != NULL && right != NULL && bottom != NULL);
+
+            clutter_animator_set_key(animator, G_OBJECT(top),    "height", nmode, progress, &gvalue);
+            clutter_animator_set_key(animator, G_OBJECT(left),   "width",  nmode, progress, &gvalue);
+            clutter_animator_set_key(animator, G_OBJECT(right),  "width",  nmode, progress, &gvalue);
+            clutter_animator_set_key(animator, G_OBJECT(bottom), "height", nmode, progress, &gvalue);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(top),    "height", ease_in);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(left),   "width",  ease_in);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(right),  "width",  ease_in);
+            clutter_animator_property_set_ease_in(animator, G_OBJECT(bottom), "height", ease_in);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(top),    "height", interpolation);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(left),   "width",  interpolation);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(right),  "width",  interpolation);
+            clutter_animator_property_set_interpolation(animator, G_OBJECT(bottom), "height", interpolation);
+            g_value_unset(&gvalue);
+        }
+        else
+        {
+            return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : number expected");
         }
     }
     else if (!strcmp("clip", k))

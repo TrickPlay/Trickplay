@@ -1,0 +1,782 @@
+module media_module;
+
+[[
+
+#include "clutter_util.h"
+#include "tp-clutter.h"
+#include "media.h"
+#include "app.h"
+#include "context.h"
+
+class MediaExtra : private Media::Delegate
+{ /* A thin shell to hold a real Media, own a media player and act as its delegate */
+  public:
+
+    MediaExtra( ClutterActor * _actor, lua_State * l )
+        : constructing( false ), actor( _actor ), L( l ), player( NULL ), uri ( NULL )
+    {
+        player = Media::make( App::get( L )->get_context(), this, actor );
+
+        if ( player ) player->add_delegate( this );
+    }
+
+    virtual ~MediaExtra()
+    {
+        if ( player )
+        {
+            player->remove_delegate( this );
+            delete player;
+        }
+    }
+
+    Media * get_player() { return player; }
+
+    static void destroy( MediaExtra * me )
+    {
+        if ( me->uri ) g_free(me->uri);
+        delete me;
+    }
+
+    static MediaExtra* get( ClutterActor * actor, lua_State * l )
+    {
+        if ( !actor ) return NULL;
+
+        MediaExtra* instance = ( MediaExtra* ) g_object_get_data( G_OBJECT( actor ), "tp-media-extra" );
+
+        if ( !instance )
+        {
+            g_assert( l );
+            instance = new MediaExtra( actor, l );
+            g_object_set_data_full( G_OBJECT( actor ), "tp-media-extra", instance, ( GDestroyNotify ) MediaExtra::destroy );
+        }
+
+        return instance;
+    }
+
+    void load_media()
+    {
+        if ( constructing || !uri || ( strlen( uri ) == 0 ) ) return;
+
+        int result = player ? player->load( L, uri , "" ) : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+        if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+    }
+
+    void set_uri( const char * _uri )
+    {
+        if ( uri && _uri && !strcmp( uri, _uri ) ) return;
+
+        if ( uri ) g_free( uri );
+
+        uri = _uri ? g_strdup( _uri ) : NULL;
+    }
+
+    char * get_uri() { return uri; }
+
+    bool  constructing;
+
+  private:
+    ClutterActor * actor;
+    lua_State    * L;
+    Media        * player;
+    char         * uri;
+
+    /* Delegate methods */
+
+    virtual void loaded( Media * player )
+    {
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_loaded", 0, 0 );
+    }
+
+    virtual void error( Media * player, int code, const char * message )
+    {
+        lua_pushinteger( L, code );
+        lua_pushstring( L, message );
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_error", 2, 0 );
+    }
+
+    virtual void end_of_stream( Media * player )
+    {
+        lb_invoke_callbacks( L, G_OBJECT( actor ), "MEDIAPLAYER_METATABLE", "on_end_of_stream", 0, 0 );
+    }
+};
+]]
+
+/*
+    Global: mediaplayer
+
+    The mediaplayer global variable enables a TrickPlay application to play and manage audio and video files. An extended code example that shows how to play a video is described in the <Run a Video in a TrickPlay Application> section.
+*/
+
+class Media [[ClutterActor*]] actor
+{
+    Media(table props = 0 )
+        [[
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_gst_video_texture_new ) );
+
+            ClutterUtil::initialize_actor( L, self, MEDIA_METATABLE );
+
+            MediaExtra * media = MediaExtra::get( self, L );
+
+            media->constructing = TRUE;
+
+            ClutterUtil::set_props_from_table( L, props );
+
+            media->constructing = FALSE;
+
+            media->load_media();
+
+            g_object_unref( self );
+        ]];
+
+    ~Media()
+        [[
+        ]];
+
+/***************************************
+    Property: src
+
+    The src property is a string that references a media file. The string may refer to either a path in your application bundle or a URI.
+
+    Setting the src property also begins the process of loading the media. By default, media loading is performed synchronously. To determine the success or failure of a synchronous load, you can check the <loaded> property immediately after setting the src property.
+
+    Asynchronous media loading is supported by setting the pre_load property prior to setting the src property. For instructions on handling asynchonous media loading, refer to the <pre_load> property.
+
+    *Default Setting:* nil
+
+    *Code Examples:* Create an Meida object and load its associated media synchronously
+
+        (code)
+        local myMedia = Media()
+        myMedia.src = "assets/foo.avi"        -- load media synchronously
+        if myMedia.loaded == false then
+          -- Media not loaded; insert error-handling code here
+        end
+        (end)
+
+        (code)
+        -- Same as above, but combining object creation and
+        -- the setting of the src property in a single statement
+        local myMedia = Media( { src = "assets/foo.avi" } )
+        if myMedia.loaded == false then
+          -- Insert error-handling code here
+        end
+        (end)
+
+    *See Also:* the <loaded>, and <pre_load> properties
+*/
+
+    string src
+        [[
+            src = MediaExtra::get( self, L )->get_uri();
+        ]]
+        [[
+            MediaExtra::get( self, L )->set_uri( src );
+
+            MediaExtra::get( self, L )->load_media();
+        ]];
+
+    /*
+        Note: These state constants are documented in the state property.
+    */
+    const int IDLE    = TP_MEDIAPLAYER_IDLE;
+    const int LOADING = TP_MEDIAPLAYER_LOADING;
+    const int PAUSED  = TP_MEDIAPLAYER_PAUSED;
+    const int PLAYING = TP_MEDIAPLAYER_PLAYING;
+
+/***************************************
+    Property: loaded
+
+    The boolean loaded property indicates the success/true or failure/false of the media's synchronous-load operation.
+
+    The loaded property will also be set to false while a media is loading asynchronously. This may make it tempting to intermittently poll the loaded property to determine if the media has finished loading, but you should not do this because the loaded property can also be set to false due to the load operation failing; in such a scenario, your polling application will wait forever for the property to become true. Instead, you should register an <on_loaded> event handler to notify your application when an asynchronous-load operation has completed.
+
+    *Default Setting:* false
+
+    *Code Example:* To see the loaded property in use, check the code example given in the <src> property.
+
+    *See Also:* the <src> property
+*/
+
+    readonly bool loaded
+        [[
+            loaded = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->get_loaded_flag()
+                   : false;
+        ]];
+
+    /*
+        Property: state
+
+        The state property is an integer value indicating the mediaplayer's current state.
+
+        Possible Media states are listed below. Note: When referencing a state, it must be referenced through the Media variable. See the Code Example for a demonstration.
+
+        IDLE - the mediaplayer is performing no operation
+        LOADING - the mediaplayer is preparing to play a Media resource
+        PAUSED - the mediaplayer has paused playing a Media resource or has finished playing
+        PLAYING - the mediaplayer is playing a Media resource
+
+        *Default Setting:* mediaplayer.IDLE
+
+        *Code Example:*
+
+            (code)
+            -- Is mediaplayer paused?
+            if( Media.state == Media.PAUSED )then
+                -- Resume playing
+                Media:play()
+            end
+            (end)
+
+        *See Also:* the <load>, <pause>, <play> functions
+    */
+
+    readonly int state
+        [[
+            state = MediaExtra::get( self, L )->get_player()
+                  ? MediaExtra::get( self, L )->get_player()->get_state()
+                  : TP_MEDIAPLAYER_IDLE;
+        ]];
+
+    /*
+        Property: playback_position
+
+        The playback_position property specifies the current playback position in seconds. If the mediaplayer is not currently playing a resource, the playback_position property contains 0.
+
+        *Default Setting:* 0
+
+        *See Also:* the <duration> property and the <play> function
+    */
+
+    readonly double playback_position
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->get_position( & playback_position )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) playback_position = 0.0;
+        ]];
+
+    /*
+        Property: duration
+
+        The duration property specifies the total length in seconds of the prepared media resource. If no media resource is currently prepared, the duration property contains a 0.
+
+        *Default Setting:* 0
+
+        *See Also:* the <position> property and the <load> function
+    */
+
+    readonly double duration
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_duration(&duration)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) duration = 0.0;
+        ]];
+
+    /*
+        Property: buffered_duration
+
+        The buffered_duration property is a table that contains time indications (in seconds) of the portion of a media resource that is currently loaded.
+
+        The table contains two integer values: the start buffered position and the end buffered position. Both table values are specified as the number of seconds beyond the resource's beginning. For example, a media resource that is 30 minutes long, may perhaps be loaded and buffered in one-minute chunks. The initial buffer of data would contain the first 60 seconds of data, e.g., buffered_duration = { 0, 60 }; the second buffer would contain the next minute's data ({ 61, 120}), and so on.
+
+        Alternatively, as the mediaplayer loads a large media file, the starting position may remain at 0 and the end position may advance as more of the resource is loaded. Using this information, an application can display a progress bar showing the amount of the resource that has loaded. It may also decide to defer playback until a certain amount of resource has been loaded, in an attempt to prevent pausing playback mid-file due to lack of loaded data.
+
+        If no media resource is currently prepared for playback, the buffered_duration property has a value of nil.
+
+        *Default Setting:* nil
+
+        *See Also:* the <duration> property
+    */
+
+    readonly table buffered_duration
+        [[
+            double start;
+            double end;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_buffered_duration( &start, &end )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                lua_pushnil( L );
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,start);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,end);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+
+    /*
+        Property: video_size
+
+        The video_size property is a table that specifies the original horizontal and vertical resolution in pixels of a prepared video resource. Note: This is the original video resolution of the resource, and not necessarily the resolution of the displayed video; to fit the video into the display viewport, it may need to be scaled to a different resolution.
+
+        The format of the video_size table is { video_width_resolution, video_height_resolution }.
+
+        If no video resource is currently prepared, the video_size property has a value of nil.
+    */
+
+    readonly table video_size
+        [[
+            int width = 0;
+            int height = 0;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_video_size( &width, &height )
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result )
+            {
+                lua_pushnil( L );
+                g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+            }
+            else
+            {
+                lua_newtable(L);
+                lua_pushnumber(L,width);
+                lua_rawseti(L,-2,1);
+                lua_pushnumber(L,height);
+                lua_rawseti(L,-2,2);
+            }
+        ]];
+
+    /*
+        Property: has_video
+
+        The has_video property is a boolean flag indicating whether or not the currently-prepared media resource is a video (true=is video resource).
+
+        *Default Setting:* false
+
+        *See Also:* the <has_audio> property
+    */
+
+    readonly bool has_video
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->has_media_type( &has_video, true )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) has_video = false;
+        ]];
+
+    /*
+        Property: has_audio
+
+        The has_audio property is a boolean flag indicating whether or not the currently-prepared media resource is audio (true=is audio resource).
+
+        *Default Setting:* false
+
+        *See Also:* the <has_video> property
+    */
+
+    readonly bool has_audio
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->has_media_type( &has_audio, false )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) has_audio = false;
+        ]];
+
+    /*
+        Property: tags
+
+        The tags property is a table of key/value pairs, where each entry is a metadata tag contained in the prepared media resource. The key contains the tag name; the value is the tag's value in string format. If the media resource included no metadata tags, the tags table will be empty.
+
+        *Default Setting:* { }, i.e., an empty table
+    */
+
+    readonly table tags
+        [[
+            lua_newtable(L);
+            if ( MediaExtra::get( self, L )->get_player() )
+            {
+                StringPairList tags = MediaExtra::get( self, L )->get_player()->get_tags();
+
+                int i = 1;
+
+                for ( StringPairList::const_iterator it = tags.begin(); it != tags.end(); ++it, ++i )
+                {
+                    lua_pushstring( L, it->first.c_str() );
+                    lua_pushstring( L, it->second.c_str() );
+                    lua_rawset( L,-3 );
+                }
+            }
+        ]];
+
+    /*
+        Property: volume
+
+        The volume property is a value between 0-1, inclusive, that specifies the audio volume. The lowest volume is 0.
+
+        *Default Setting:* 1
+
+        *See Also:* the <mute> property
+    */
+
+    double volume
+        [[
+            int result = MediaExtra::get( self, L )->get_player()
+                         ? MediaExtra::get( self, L )->get_player()->get_audio_volume(&volume)
+                         : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) volume = 0.0;
+
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_volume( volume );
+        ]];
+
+    /*
+        Property: mute
+
+        The mute property is a boolean flag indicating whether or not the audio is muted (true=muted).
+
+        *Default Setting:* false (audio is not muted)
+
+        *See Also:* the <volume> property
+    */
+
+    bool mute
+        [[
+            int m;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->get_audio_mute( &m )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            mute = result ? false : m;
+
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_audio_mute( mute );
+        ]];
+
+    /*
+        Property: loop
+
+        The loop property is a boolean flag indicating whether or not the media playback is repeated (true=repeated).
+
+        *Default Setting:* false (media playback is not repeated)
+    */
+
+    bool loop
+        [[
+            bool l;
+
+            int result = MediaExtra::get( self, L )->get_player()
+                       ? MediaExtra::get( self, L )->get_player()->get_loop_flag( &l )
+                       : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            loop = result ? false : l;
+
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_loop_flag( loop );
+        ]];
+
+    /*
+        Property: keep_aspect_ratio
+
+        The keep_aspect_ratio property is a boolean flag indicating whether or not the media's aspect ratio is preserved during playback. If the property is set to true and the specified resolution has an aspect ratio different from the media, the resolution will be shrinked to keep the media aspect ratio.
+
+        *Default Setting:* false
+    */
+
+    bool keep_aspect_ratio
+        [[
+            keep_aspect_ratio = MediaExtra::get( self, L )->get_player()
+                              ? MediaExtra::get( self, L )->get_player()->get_keep_aspect_ratio()
+                              : false;
+        ]]
+        [[
+            if ( MediaExtra::get( self, L )->get_player() )
+                MediaExtra::get( self, L )->get_player()->set_keep_aspect_ratio( keep_aspect_ratio );
+        ]];
+
+    /*
+        Function: play
+
+        The play() function begins or resumes playing a media resource.
+
+        A media resource must be properly prepared by the <load> function and the application must receive successful notification from the <on_loaded> event before calling the play() function.
+
+        *Arguments:* None
+
+        *Return Value:* If resource started playing, returns 0, else returns a non-zero error value.
+
+        *See Also:* the <pause> and <seek> functions
+    */
+
+    int play()
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->play()
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+        ]];
+
+    /*
+        Function: pause
+
+        The pause() function pauses the playback of a media resource. Playback can resume by calling the <play> function.
+
+        *Arguments:* None
+
+        *Return Value:* If the resource was paused, returns 0, else returns a non-zero error value.
+
+        *See Also:* the <play> function
+    */
+
+    int pause()
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->pause()
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+        ]];
+
+    /*
+        Function: seek
+
+        The seek() function explicitly sets the playback position within a media resource. The playback position is specified in seconds. The seek() function can be called at any time, including when the resource is playing.
+
+        *Arguments:*
+
+            seconds - the playback position in seconds to jump to
+
+        *Return Value:* If the playback position was set successfully, returns 0, else returns a non-zero error value
+
+        *See Also:* the <play> function
+    */
+
+    int seek( double seconds )
+        [[
+            result = MediaExtra::get( self, L )->get_player()
+                   ? MediaExtra::get( self, L )->get_player()->seek( seconds )
+                   : TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+
+            if ( result ) g_warning( "AT %s", Util::where_am_i_lua(L).c_str() );
+        ]];
+
+/***************************************
+    Function: add_onloaded_listener
+
+    The add_onloaded_listener() function registers a handler function for <on_loaded> events.
+
+    *Arguments:*
+
+        f - reference to handler function. The function prototype is described below.
+
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onloaded_listener> function to unregister the handler.
+
+    *Handler Prototype:*
+
+        (code)
+        f( mediaplayer )
+        (end)
+
+    *Handler Arguments:*
+
+        mediaplayer - reference to the mediaplayer variable that prepared the media resource
+
+    *Handler Return Value:* None
+
+    *See Also:* the <on_loaded> event and the <remove_onloaded_listener> function
+*/
+
+    int add_onloaded_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Function: remove_onloaded_listener
+
+    The remove_onloaded_listener() function unregisters the specified event handler.
+
+    *Arguments:*
+
+        ref - handle for event handler to unregister. This handle is returned by the <add_onloaded_listener> function.
+
+    *Return Value:* None
+
+    *See Also:* the <add_onloaded_listener> function
+*/
+
+    remove_onloaded_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Function: add_onerror_listener
+
+    The add_onerror_listener() function registers a handler function for <on_error> events.
+
+    *Arguments:*
+
+        f - reference to handler function. The function prototype is described below.
+
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onerror_listener> function to unregister the handler.
+
+    *Handler Prototype:*
+
+        (code)
+        f( mediaplayer, code, message )
+        (end)
+
+    *Handler Arguments:*
+
+        mediaplayer - reference to the mediaplayer variable that prepared the media resource
+        code - integer error code
+        message - descriptive error message
+
+    *Handler Return Value:* None
+
+    *See Also:* the <on_error> event and the <remove_onerror_listener> function
+*/
+
+    int add_onerror_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_error" , L );
+        ]];
+
+/***************************************
+    Function: remove_onerror_listener
+
+    The remove_onerror_listener() function unregisters the specified event handler.
+
+    *Arguments:*
+
+        ref - handle for event handler to unregister. This handle is returned by the <add_onerror_listener> function.
+
+    *Return Value:* None
+
+    *See Also:* the <add_onerror_listener> function
+*/
+
+    remove_onerror_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_error" , L );
+        ]];
+
+/***************************************
+    Function: add_onendofstream_listener
+
+    The add_onendofstream_listener() function registers a handler function for <on_end_of_stream> events.
+
+    *Arguments:*
+
+        f - reference to handler function. The function prototype is described below.
+
+    *Return Value:* Handle to the registered handler. Pass this handle to the <remove_onendofstream_listener> function to unregister the handler.
+
+    *Handler Prototype:*
+
+        (code)
+        f( mediaplayer )
+        (end)
+
+    *Handler Arguments:*
+
+        mediaplayer - reference to the mediaplayer variable that prepared the media resource
+
+    *Handler Return Value:* None
+
+    *See Also:* the <on_end_of_stream> event and the <remove_onendofstream_listener> function
+*/
+
+    int add_onendofstream_listener( function f )
+        [[
+            result = UserData::get( L )->add_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+/***************************************
+    Function: remove_onendofstream_listener
+
+    The remove_onendofstream_listener() function unregisters the specified event handler.
+
+    *Arguments:*
+
+        ref - handle for event handler to unregister. This handle is returned by the <add_onendofstream_listener> function.
+
+    *Return Value:* None
+
+    *See Also:* the <add_onendofstream_listener> function
+*/
+
+    remove_onendofstream_listener( int ref )
+        [[
+            UserData::get( L )->remove_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+/***************************************
+    Event: on_loaded
+
+    The on_loaded event occurs after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event will be fired, instead.
+
+    *See Also:* the <add_onloaded_listener> function
+*/
+
+    function on_loaded
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_loaded" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_loaded" , L );
+        ]];
+
+/***************************************
+    Event: on_error
+
+    The on_error event occurs after the failure of a media-preparation operation started by the <load> function. If the preparation completed successfully, the <on_loaded> event is fired, instead.
+
+    *See Also:* the <add_onerror_listener> function
+*/
+
+    function on_error
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_error" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_error" , L );
+        ]];
+
+/***************************************
+    Event: on_end_of_stream
+
+    The on_end_of_stream event occurs when a media resource is playing and the end of the resource is reached. Playback is automatically paused.
+
+    Note: The media resource must be playing to fire the on_end_of_stream event
+
+    *See Also:* the <add_onendofstream_listener> function
+*/
+
+    function on_end_of_stream
+        [[
+            return UserData::get( L )->get_last_callback( (char*) "on_end_of_stream" , L );
+        ]]
+        [[
+            UserData::get( L )->set_last_callback( (char*) "on_end_of_stream" , L );
+        ]];
+
+/***************************************
+*/
+}

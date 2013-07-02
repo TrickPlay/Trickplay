@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <sstream>
 #include <stdlib.h>
-
 #include <execinfo.h>
 #include <cxxabi.h>
 
@@ -9,7 +8,6 @@
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig/fontconfig.h"
-
 #include "trickplay/keys.h"
 #include "lb.h"
 #include "context.h"
@@ -36,6 +34,10 @@
 #ifdef TP_WITH_GAMESERVICE
 #include "libgameservice.h"
 #include "gameservice_support.h"
+#endif
+
+#ifdef TP_NEW_MEDIA
+#include "clutter-gst/clutter-gst.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -2749,6 +2751,13 @@ void tp_init_version( int* argc, char** * argv, int major_version, int minor_ver
     {
         g_error( "Failed to initialize Clutter : %d", ce );
     }
+
+#ifdef TP_NEW_MEDIA
+    if ( clutter_gst_init( NULL, NULL ) != CLUTTER_INIT_SUCCESS )
+    {
+        g_error( "Failed to initialize clutter" );
+    }
+#endif
 
     CURLcode co = curl_global_init( CURL_GLOBAL_ALL );
 
