@@ -223,9 +223,13 @@ class TrickplayElementModel(QStandardItemModel):
         # Screen has no is_visible property because changing it
         # causes problems with key presses in the app
         else:
-            del(data['is_visible'])
-            node.setSelectable(False)
-            node.partner().setSelectable(False)
+            try:
+                del(data['is_visible'])
+                node.setSelectable(False)
+                node.partner().setSelectable(False)
+            except:
+                print ("error : is_visible is not exist")
+
 
         partner = node.partner()
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)

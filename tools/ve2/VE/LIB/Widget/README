@@ -1,34 +1,28 @@
 Understanding the Folder / File Layout
 
-    - main.lua & app file: 
-        These files merely exist for testing purposes, they also are
-        necessary in order to use the Visual Debugger (which assumes
-        that you are working on an app)
-    
-    - Widget_Library.lua: 
+    - Widget_Library.lua:
         In order to use this library, the developed must include the line:
             WL = dofile("Widget_Library.lua")
-        "WL" can be any variable name, the dofile/loadfile returns a table 
-        that contains all of the widget constructors and other globals 
+        "WL" can be any variable name, the dofile/loadfile returns a table
+        that contains all of the widget constructors and other globals
         created by the library
         This file performs a lazy loading of all widgets.
-    
-    - load_json.lua: 
-        contains the code tha the visual editor uses to load stored "Layers," 
+
+    - load_json.lua:
+        contains the code tha the visual editor uses to load stored "Layers,"
         which are saved as jsons
-    
-    - __UTILITIES/*.lua : 
+
+    - __UTILITIES/*.lua :
         creates functions that are used by all the widgets
-    
-    - __CORE/*.lua : 
+
+    - __CORE/*.lua :
         creates the base Widget, Style, and ColorScheme Class as
-    
+
     - */* :
-        There is one folder per widget. Each folder is the widget's name. 
-        Each folder contains a file with the same name, which contains the 
-        constructor for that widget. Each file also contains a "test.lua"
-        file which contains an example of how to create that widget.
-    
+        There is one folder per widget. Each folder is the widget's name.
+        Each folder contains a file with the same name, which contains the
+        constructor for that widget.
+
 Understanding the Object Structure:
 
 

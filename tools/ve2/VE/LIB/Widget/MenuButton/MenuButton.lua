@@ -52,9 +52,25 @@ MenuButton = setmetatable(
                     return function(oldf)  return   popup.spacing      end,
                     function(oldf,self,v)    popup.spacing = v end
                 end,
-                horizontal_alignment = function(instance,_ENV)
+                item_alignment = function(instance,_ENV)
                     return nil,
-                    function(oldf,self,v)  oldf(self,v)  popup.horizontal_alignment = v end
+                    function(oldf,self,v)  oldf(self,v)
+                        popup.horizontal_alignment = v
+                    end
+                end,
+                horizontal_alignment = function(instance,_ENV)
+                    return function(oldf)  return   mb_hor_alignment end,
+                    function(oldf,self,v)
+                        reposition_popup = false
+                        mb_hor_alignment = v
+                    end
+                end,
+                vertical_alignment = function(instance,_ENV)
+                    return function(oldf)  return   mb_vert_alignment end,
+                    function(oldf,self,v)
+                        reposition_popup = false
+                        mb_vert_alignment = v
+                    end
                 end,
                 items = function(instance,_ENV)
                     return function(oldf)  return   popup.cells      end,
@@ -152,10 +168,14 @@ MenuButton = setmetatable(
                             t.items[i] = popup.cells[i].attributes
                         end
 
-                        t.direction = instance.direction
+                        t.direction    = instance.direction
                         t.item_spacing = instance.item_spacing
                         t.popup_offset = instance.popup_offset
-                        t.horizontal_alignment = instance.horizontal_alignment
+
+                        t.item_alignment        = instance.item_alignment
+                        t.vertical_alignment    = instance.vertical_alignment
+                        t.horizontal_alignment  = instance.horizontal_alignment
+
 
                         t.type = "MenuButton"
 
@@ -170,15 +190,109 @@ MenuButton = setmetatable(
             position_popup= function(instance,_ENV)
                 local possible_directions = {
                     up    = function()
+                        button.x =
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - button.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - button.w)
+                        button.y = popup.h + popup_offset
+                        popup.x  =
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - popup.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - popup.w)
+                        popup.y = 0
                     end,
                     down  = function()
+                        button.x =
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - button.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - button.w)
+                        button.y = 0
+                        popup.x  =
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - popup.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - popup.w)
+                        popup.y = button.h + popup_offset
                     end,
                     left  = function()
+                        button.x = popup.w + popup_offset
+                        button.y =
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - button.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - button.h)
+                        popup.x = 0
+                        popup.y =
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - popup.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - popup.h)
                     end,
                     right = function()
+                        button.x = 0
+                        button.y =
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - button.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - button.h)
+                        popup.x = button.w + popup_offset
+                        popup.y =
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - popup.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - popup.h)
                     end,
                 }
                 return function()
+                    button.x =
+                        (direction == "left") and (popup.w + popup_offset) or
+                        (direction == "right") and 0 or
+                        --direction == "up" or "down"
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - button.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - button.w)
+                    button.y =
+                        (direction == "up") and (popup.h + popup_offset) or
+                        (direction == "down") and 0 or
+                        --direction == "left" or "right"
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - button.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - button.h)
+
+                    instance.anchor_point = button.position
+
+                    popup.x  =
+                        (direction == "right") and (button.w + popup_offset) or
+                        (direction == "left") and 0 or
+                            (mb_hor_alignment == "left")   and 0 or
+                            (mb_hor_alignment == "center") and
+                                (math.max(popup.w,button.w) - popup.w)/2 or
+                            (mb_hor_alignment == "right")  and
+                                (math.max(popup.w,button.w) - popup.w)
+                    popup.y =
+                        (direction == "down") and (button.h + popup_offset) or
+                        (direction == "up") and 0 or
+                            (mb_vert_alignment == "top")    and 0 or
+                            (mb_vert_alignment == "center") and
+                                (math.max(popup.h,button.h) - popup.h)/2 or
+                            (mb_vert_alignment == "bottom") and
+                                (math.max(popup.h,button.h) - popup.h)
+                    --[[
                     button.x = (direction == "left") and
                         (popup.w + popup_offset)or 0
                     button.y = (direction == "up") and
@@ -187,7 +301,9 @@ MenuButton = setmetatable(
                     popup.x = (direction == "right") and
                         (button.w + popup_offset)or 0
                     popup.y = (direction == "down") and
-                        (button.h + popup_offset)or 0
+                        (button.h + popup_offset) or
+                        (direction ~= "up") or 0
+                    --]]
                 end
             end,
             update = function(instance,_ENV)
@@ -278,11 +394,15 @@ MenuButton = setmetatable(
             style_flags = "restyle_button"
             old_update = update
             new_direction  = "down"
+            mb_vert_alignment = "top"
+            mb_hor_alignment = "left"
             button:add_key_handler(   keys.OK, function() button:click()   end)
 
             old_on_pressed = button.on_pressed
             ---[[
             function button:on_pressed()
+                if not instance.enabled then return end
+                if external.editor_mode then return end
 
                 old_on_pressed(self)
 

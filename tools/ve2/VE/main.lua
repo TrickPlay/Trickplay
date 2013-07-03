@@ -671,8 +671,9 @@ _VE_.setUIInfo = function(gid, property, value, n)
 	    screen_ui.selected(uiInstance) 
     end 
     if property == 'style' then 
-        _VE_.refresh()
-        _VE_.refreshDone()
+        _VE_.getStInfo()
+        --_VE_.refresh()
+        --_VE_.refreshDone()
     else 
         _VE_.repUIInfo(uiInstance)
     end
@@ -801,6 +802,10 @@ _VE_.openFile = function(path)
         if util.isLayerObj(j) == true then 
             for l,m in ipairs(j.children) do  
 
+                m.x = math.floor(m.x)
+                m.y = math.floor(m.y)
+                m.z = math.floor(m.z)
+
                 -- Register subscribe_to function
                 m.created = false
                 if m.subscribe_to then
@@ -897,10 +902,22 @@ end
 _VE_.getScreenLoc = function()
     print("screenLoc"..screen.x..","..screen.y)
 end 
+_VE_.setScreenReactive = function(v)
+
+    screen.reactive = v
+
+    if v == false then 
+        local garigae = Rectangle{name = "garigae", position = {0,0,0}, size = {screen.w, screen.h}, color = {0,0,0,70}, reactive = true}
+        garigae:raise_to_top()
+        screen:add(garigae)
+    else
+        screen:remove(screen:find_child("garigae"))
+    end
+end
 _VE_.setScreenLoc = function(x, y)
     if x == 0 and y == 0  then 
-        screen.y = 300
-        screen.x = 500
+        screen.y = 204
+        screen.x = 338
     else
         screen.y = y
         screen.x = x

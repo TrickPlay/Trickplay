@@ -45,17 +45,20 @@ class Wizard():
     def warningMsg(self, title = "Warning", message=None):
         if message is not None:
             msg = QMessageBox()
+            msg.setWindowFlags(Qt.WindowStaysOnTopHint)
             msg.setText(message)
             msg.addButton("New Project" , VE_NEW_PROJECT_ROLE)
             msg.addButton("Open Project" , VE_OPEN_PROJECT_ROLE)
             msg.setWindowTitle(title)
             msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
 
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
             ret = msg.exec_()
             if ret == VE_NEW_PROJECT_ROLE:
                 self.mainWindow.newProject()
             elif ret == VE_OPEN_PROJECT_ROLE:
                 self.mainWindow.openProject()
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return
 
     def start(self, path, openApp=False, newApp=False):
@@ -80,7 +83,11 @@ class Wizard():
                         self.warningMsg("Error", 'Directory "' + dir + '" does not contain an "app" file or a "main.lua" file.')
                         return
             else:
-                self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
+                if len(dir) > 0 : 
+                    self.warningMsg("Error", 'Directory "' + dir + '" does not exist.')
+                else:
+                    self.warningMsg("Error", 'Select existing project or create new one.')
+                    
                 return
 
         # Get a path from the user
@@ -229,13 +236,8 @@ class Wizard():
             directory = dir
 
 
-        path = QFileDialog.getExistingDirectory(None, 'Choose a directory for your app', directory, QFileDialog.ShowDirsOnly)
-        apath = os.path.dirname(str(path))
-
-        result = self.adjustDialog(path, directory)
-        if result == -4:
-            self.warningMsg("Warning", '\'' + os.path.basename(str(path)) + '\' is not a valid directory. Please select another empty directory to create a new app.')
-        else:
+        path = self.mainWindow.openFileDialog('Choose a directory for your app', self.mainWindow.path)
+        if path:
             self.ui.directory.setText(path)
             self.ui.id.setReadOnly(False)
             self.ui.name.setReadOnly(False)
@@ -289,6 +291,7 @@ class Wizard():
         New app dialog
         """
         self.dialog = MyDialog() #QDialog
+        self.dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.id = ""
         self.name = ""
         self.ui = Ui_newProjectDialog()
@@ -313,7 +316,9 @@ class Wizard():
         if name is not None:
             self.ui.name.setText(name)
 
+        self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(false)")
         if self.dialog.exec_():
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             id = str(self.ui.id.text())
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
@@ -331,6 +336,7 @@ class Wizard():
                         os.mkdir(path)
                     else :
                         msg = QMessageBox()
+                        msg.setWindowFlags(Qt.WindowStaysOnTopHint)
                         msg.setText('Path "' + path + '" is aleady exist. Please select other id or name for the project.')
                         msg.setWindowTitle("Error")
                         msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
@@ -338,6 +344,7 @@ class Wizard():
                         return None
                 except:
                     msg = QMessageBox()
+                    msg.setWindowFlags(Qt.WindowStaysOnTopHint)
                     msg.setText('Path "' + path + '" is not valid. Please select other id or name for the project.')
                     msg.setWindowTitle("Error")
                     msg.setGeometry(self.mainWindow._menubar.geometry().x() + 100, self.mainWindow._menubar.geometry().y() + 200, msg.geometry().width(), msg.geometry().height())
@@ -388,6 +395,7 @@ class Wizard():
             else:
                 return -1
         else:
+            self.mainWindow.sendLuaCommand("setScreenReactive", "_VE_.setScreenReactive(true)")
             return -1
 
     def quiet_exit(self):

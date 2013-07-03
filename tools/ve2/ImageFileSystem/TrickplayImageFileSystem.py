@@ -139,9 +139,9 @@ class DnDTreeWidget(QTreeWidget):
 class TrickplayImageFileSystem(QWidget):
 
     def __init__(self, main = None, parent = None, f = 0):
-        flags = Qt.Tool | Qt.WindowStaysOnTopHint
+        flags = Qt.Tool | Qt.WindowStaysOnTopHint 
         if sys.platform == "darwin":
-            flags |= Qt.WA_MacAlwaysShowToolWindow
+            flags |= Qt.WA_MacAlwaysShowToolWindow 
         else:
             flags |= Qt.X11BypassWindowManagerHint
         """
@@ -160,14 +160,40 @@ class TrickplayImageFileSystem(QWidget):
         self.ui.fileSystemTree.header().setVisible(False)
         self.ui.fileSystem.addWidget(self.ui.fileSystemTree, 0, 0, 1, 1)
 
-        #self.ui.fileSystemTree.setHeaderLabels(['Name'])
         self.ui.fileSystemTree.setIndentation(10)
-        self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
+        self.ui.fileSystemTree.setAlternatingRowColors(True)
+        #self.ui.fileSystemTree.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
         # id changed
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.fileItemChanged)
         QObject.connect(self.ui.fileSystemTree, SIGNAL("itemClicked(QTreeWidgetItem*, int)"), self.itemClicked)
 
         # tool button handlers
+
+        self.ui.buttonsLayout.setAlignment(Qt.AlignLeft)
+
+        def setPushButton(button, tooltip, iconpath):
+            button.setText("")
+
+            icon = QIcon()
+            icon.addPixmap(QPixmap(self.main.apath+iconpath))
+            button.setIcon(icon)
+
+            size = QSize()
+            size.setWidth(30)
+            size.setHeight(30)
+            button.resize(size)
+            button.setToolTip(tooltip)
+
+            sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            button.setSizePolicy(sizePolicy)
+
+            button.setStyleSheet("QPushButton{ border: 0px;margin-top:5px;margin-left:10px;margin-right:10px;margin-bottom:5px}")
+
+
+        setPushButton(self.ui.importButton, "Import", "/Assets/icons-images-import.png")
+        setPushButton(self.ui.deleteButton, "Delete", "/Assets/icons-images-delete.png")
+        setPushButton(self.ui.newFolderButton, "Create New Folder", "/Assets/icons-images-new.png")
+
         QObject.connect(self.ui.importButton, SIGNAL('clicked()'), self.importAsset)
         QObject.connect(self.ui.deleteButton, SIGNAL('clicked()'), self.removeAsset)
         QObject.connect(self.ui.newFolderButton, SIGNAL('clicked()'), self.createNewFolder)
@@ -305,15 +331,16 @@ class TrickplayImageFileSystem(QWidget):
     def removeAsset(self) :
         self.main.importCmd = "remove"
         item = self.ui.fileSystemTree.currentItem()
-        itemWhatsThis = item.whatsThis(0)
-        emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
-        self.idsToRemove = ""
+        if item:
+            itemWhatsThis = item.whatsThis(0)
+            emptyPath = str(os.path.join(self.main.path, "assets/sounds/"))
+            self.idsToRemove = ""
 
-        self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
+            self.sTread = StitcherThread(self, itemWhatsThis, emptyPath)
 
-        self.ui.fileSystemTree.currentItem().removeChild(item)
-        self.idCnt = self.idCnt - 1
-        self.sTread.run()
+            self.ui.fileSystemTree.currentItem().removeChild(item)
+            self.idCnt = self.idCnt - 1
+            self.sTread.run()
 
     def insertImage(self) :
 
@@ -341,10 +368,11 @@ class TrickplayImageFileSystem(QWidget):
             orgId = str(item.whatsThis(0))
 
         self.dialog = QDialog()
+        self.dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.ndirUi = Ui_newFolderDialog()
         self.ndirUi.setupUi(self.dialog)
         #self.dialog.setGeometry(self.main.ui.fileSystemDock.geometry().x() + 400, self.main.ui.fileSystemDock.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
-        self.dialog.setGeometry(self.main._ifilesystem.geometry().x() + 400, self.main._ifilesystem.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
+        self.dialog.setGeometry(self.main._menubar.geometry().x() + 400, self.main.menubar.geometry().y() + 200, self.dialog.geometry().width(), self.dialog.geometry().height())
         if self.dialog.exec_():
             dir_name = self.ndirUi.folder_name.text()
             new_path = newFolderParent+dir_name+"/"

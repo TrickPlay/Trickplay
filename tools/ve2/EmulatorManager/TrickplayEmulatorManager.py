@@ -25,6 +25,7 @@ class TrickplayEmulatorManager(QWidget):
         self.unsavedChanges = False
         self.contentMoveBlock = False
         self.fscontentMoveBlock = False
+        self.addItemToScreens = False
         self.inspector = main._inspector
         self.filesystem = main._ifilesystem
         self._path = os.path.join(self.main.apath, 'VE')
@@ -42,6 +43,8 @@ class TrickplayEmulatorManager(QWidget):
 
     def chgStyleName(self, gid, new_name, old_name):
         self.setUIInfo(gid, "style", "WL.Style('"+new_name+"'):set('"+old_name+"')")
+        self.getStInfo()
+        #self.main.sendLuaCommand("refresh", "_VE_.refresh()")
 
     def setStyleInfo(self, style_name, property1, property2, property3=None, value=None):
         if property1 == 'name':
@@ -50,7 +53,8 @@ class TrickplayEmulatorManager(QWidget):
             self.main.sendLuaCommand("WL.Style","WL.Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
         else:
             self.main.sendLuaCommand("WL.Style", "WL.Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
-        #self.getStInfo()
+        #self.main.sendLuaCommand("refresh", "_VE_.refresh()")
+        self.getStInfo()
 
     def setUIInfo(self, gid, property, value, n=None):
         if n:
@@ -132,11 +136,12 @@ class TrickplayEmulatorManager(QWidget):
                 self.main.y = str(settings.value('y').toInt()[0])
 
                 if self.main.x == None or self.main.y == None:
-                    self.main.y = str(300)
-                    self.main.x = str(500)
+                    self.main.y = str(204)
+                    self.main.x = str(338)
 
                 self.main.sendLuaCommand("setScreenLoc", "_VE_.setScreenLoc("+self.main.x+","+self.main.y+")")
-                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"')")
+                
+                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject("+"'"+os.path.basename(str(self.main.currentProject))+"  "+self.inspector.currentScreenName+"')")
 
             else:
                 # Output the log line
@@ -159,6 +164,7 @@ class TrickplayEmulatorManager(QWidget):
                     elif luaCmd == "openV_GLI" or luaCmd =="openH_GLI":
                         org_position = int(s[9:])
                         self.GLI_dialog = QDialog()
+                        self.GLI_dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
                         if luaCmd =="openV_GLI":
                             self.GLInspector_ui = Ui_vertGuideDialog()
                         else:
@@ -187,12 +193,12 @@ class TrickplayEmulatorManager(QWidget):
                         fgid, info = getNextInfo(info)
                         focus, info = getNextInfo(info)
                         item = self.inspector.search(str(fgid), 'gid')
-                        if focus[:1] == "T":
-                            item['focused'] = True
-                        else:
-                            item['focused'] = False
-                        index = self.inspector.selected (self.inspector.ui.inspector)
                         try :
+                            if focus[:1] == "T":
+                                item['focused'] = True
+                            else:
+                                item['focused'] = False
+                            index = self.inspector.selected (self.inspector.ui.inspector)
                             item = self.inspector.inspectorModel.itemFromIndex(index)
                             if item['gid'] == fgid :
                                 if self.inspector.main.command is not "setUIInfo" :
@@ -258,6 +264,7 @@ class TrickplayEmulatorManager(QWidget):
                         gid = (s[10:])
                         shift = s[9]
                     elif luaCmd == "scrJSInfo":
+                        self.addItemToScreens = True
                         scrData = json.loads(s[9:])
                         self.inspector.screens = {}
                         screenNames = []
@@ -275,11 +282,11 @@ class TrickplayEmulatorManager(QWidget):
                             curIdx = self.inspector.ui.screenCombo.currentIndex()
                             self.inspector.ui.screenCombo.removeItem(curIdx)
 
-                        self.inspector.addItemToScreens = True
                         for scrName in screenNames:
                             if self.inspector.ui.screenCombo.findText(scrName) < 0 and scrName != "_AllScreens":
                                 self.inspector.ui.screenCombo.addItem(scrName)
-                        self.inspector.addItemToScreens = False
+
+                        self.addItemToScreens = False
 
                     elif luaCmd == "imageInfo":
                         self.imgData = json.loads(s[9:])
@@ -333,7 +340,11 @@ class TrickplayEmulatorManager(QWidget):
                             self.inspector.inspectorModel.styleData = sdata
                             self.inspector.preventChanges = True
                             if self.inspector.cbStyle is not None:
-                                self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+                                try:
+                                    self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+                                    self.inspector.expandStyle()
+                                except:
+                                    pass
                                 if self.ve_ready == False :
                                     self.unsavedChanges = True
                                 self.ve_ready = False
@@ -389,7 +400,7 @@ class TrickplayEmulatorManager(QWidget):
                                     self.ve_ready = False
                             self.inspector.preventChanges = False
 
-                    if sdata is not None and self.pdata is not None and self.main.command is not "getStInfo" :
+                    if sdata is not None and self.pdata is not None and self.main.command is not "getStInfo" and self.main.command is not "setUIInfo":
                         self.inspector.preventChanges = True
                         self.contentMoveBlock = True
                         self.inspector.clearTree()
@@ -410,10 +421,19 @@ class TrickplayEmulatorManager(QWidget):
                         try :
                             if self.main.menuCommand == "newProject" :
                                 self.main.sendLuaCommand("openFile", "_VE_.openFile(\""+str(self.main.path+"\")"))
-                                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"\")")
+                                self.main.sendLuaCommand("setCurrentProject", "_VE_.setCurrentProject(\""+os.path.basename(str(self.main.path))+"  "+self.inspector.currentScreenName+"\")")
+                                
                                 self.main.menuCommand = ""
+
                         except:
                             pass
+
+                        if self.main.lastObject :
+                            selItem = self.inspector.search(self.main.lastObject, 'name')
+                            if selItem :
+                                gid = selItem.TPJSON()['gid']
+                                self.inspector.ui.property.clear()
+                                self.inspector.selectItem(selItem, "false")
 
                         if self.main.command == "openFile":
                             self.main.command = ""
