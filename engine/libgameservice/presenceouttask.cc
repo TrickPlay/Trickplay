@@ -12,7 +12,7 @@ using namespace txmpp;
 namespace libgameservice {
 
 XmppReturnStatus
-PresenceOutTask::Send(const Status & s) {
+PresenceOutTask::Send(const GameStatus & s) {
   if (GetState() != STATE_INIT && GetState() != STATE_START)
     return XMPP_RETURN_BADSTATE;
 
@@ -23,7 +23,7 @@ PresenceOutTask::Send(const Status & s) {
 }
 
 XmppReturnStatus
-PresenceOutTask::SendDirected(const Jid & j, const Status & s) {
+PresenceOutTask::SendDirected(const Jid & j, const GameStatus & s) {
   if (GetState() != STATE_INIT && GetState() != STATE_START)
     return XMPP_RETURN_BADSTATE;
 
@@ -60,25 +60,25 @@ PresenceOutTask::ProcessStart() {
 }
 
 XmlElement *
-PresenceOutTask::TranslateStatus(const Status & s) {
+PresenceOutTask::TranslateStatus(const GameStatus & s) {
   XmlElement * result = new XmlElement(QN_PRESENCE);
   if (!s.available()) {
     result->AddAttr(QN_TYPE, STR_UNAVAILABLE);
   }
   else {
-    if (s.show() != Status::SHOW_ONLINE && s.show() != Status::SHOW_OFFLINE) {
+    if (s.show() != GameStatus::SHOW_ONLINE && s.show() != GameStatus::SHOW_OFFLINE) {
       result->AddElement(new XmlElement(QN_SHOW));
       switch (s.show()) {
         default:
           result->AddText(STR_SHOW_AWAY, 1);
           break;
-        case Status::SHOW_XA:
+        case GameStatus::SHOW_XA:
           result->AddText(STR_SHOW_XA, 1);
           break;
-        case Status::SHOW_DND:
+        case GameStatus::SHOW_DND:
           result->AddText(STR_SHOW_DND, 1);
           break;
-        case Status::SHOW_CHAT:
+        case GameStatus::SHOW_CHAT:
           result->AddText(STR_SHOW_CHAT, 1);
           break;
       }

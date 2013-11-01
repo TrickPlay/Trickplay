@@ -16,14 +16,14 @@ class PresencePushTask : public XmppTask {
 public:
   PresencePushTask(Task * parent) : XmppTask(parent, XmppEngine::HL_TYPE) {}
   virtual int ProcessStart();
-  txmpp::signal1<const Status &>SignalStatusUpdate;
+  txmpp::signal1<const GameStatus &>SignalStatusUpdate;
   txmpp::signal1<const XmlElement &> SignalStatusError;
 
 protected:
   virtual bool HandleStanza(const XmlElement * stanza);
 };
 
-  
+
 }
 
 #endif

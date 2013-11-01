@@ -1000,7 +1000,7 @@ void GameServiceSupport::OnCurrentMatchState( const std::string& match_id,
 
 }
 
-void GameServiceSupport::OnStatusUpdate( const Status& status )
+void GameServiceSupport::OnStatusUpdate( const GameStatus& status )
 {
     std::string from = status.jid();
     /*

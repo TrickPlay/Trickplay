@@ -5,9 +5,9 @@
 
 namespace libgameservice {
 
-class Status {
+class GameStatus {
 public:
-  Status()
+  GameStatus()
       : pri_(0),
         show_(SHOW_NONE),
         available_(false),
@@ -20,7 +20,7 @@ public:
         camera_capability_(false) {
   }
 
-  ~Status() {}
+  ~GameStatus() {}
 
   // These are arranged in "priority order", i.e., if we see
   // two statuses at the same priority but with different Shows,
@@ -72,7 +72,7 @@ public:
   void set_feedback_probation(bool f) { feedback_probation_ = f; }
   void set_sent_time(const std::string& time) { sent_time_ = time; }
 
-  void UpdateWith(const Status& new_value) {
+  void UpdateWith(const GameStatus& new_value) {
     if (!new_value.know_capabilities()) {
        bool k = know_capabilities();
        bool p = voice_capability();
@@ -185,7 +185,7 @@ private:
   std::string sent_time_; // from the jabber:x:delay element
 };
 
-class MucStatus : public Status {
+class MucStatus : public GameStatus {
 };
 
 }

@@ -45,8 +45,8 @@ public:
 
 
 	/* Presence */
-	/* Called when someone's Status is updated */
-	virtual void OnStatusUpdate(const Status &status) = 0;
+	/* Called when someone's GameStatus is updated */
+	virtual void OnStatusUpdate(const GameStatus &status) = 0;
 
 	/* Called when a status update results in an error */
 	virtual void OnStatusError(const std::string &error_string) = 0;

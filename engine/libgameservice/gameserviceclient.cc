@@ -607,7 +607,7 @@ public:
 
 
 
-	void SendPresence(const Status & s) {
+	void SendPresence(const GameStatus & s) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		worker_thread_->Post(this, MSG_SEND_PRESENCE, new SendPresenceData(s));
 	}
@@ -943,13 +943,13 @@ private:
 		const txmpp::Jid jid_;
 	};
 
-	void OnStatusUpdateW(const Status &status) {
+	void OnStatusUpdateW(const GameStatus &status) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
 			notify_->OnStatusUpdate(status);
 	}
 
-	void OnStatusUpdate(const Status &status) {
+	void OnStatusUpdate(const GameStatus &status) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
 		main_thread_->Post(this, MSG_STATUS_UPDATE,
 				new SendPresenceData(status));
@@ -1452,7 +1452,7 @@ private:
 		pump_->DoDisconnect();
 	}
 
-	void SendPresenceW(const Status & s) {
+	void SendPresenceW(const GameStatus & s) {
 		assert (txmpp::ThreadManager::CurrentThread() == worker_thread_);
 		PresenceOutTask *pot = new PresenceOutTask(pump_.get()->client());
 		pot->Send(s);
@@ -1464,10 +1464,10 @@ private:
 	}
 
 	struct SendPresenceData: public txmpp::MessageData {
-		SendPresenceData(const Status &s) :
+		SendPresenceData(const GameStatus &s) :
 			s_(s) {
 		}
-		Status s_;
+		GameStatus s_;
 	};
 
 	txmpp::scoped_ptr<txmpp::Thread> main_thread_;
@@ -1497,7 +1497,7 @@ public:
 	 */
 	StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port);
 
-	StatusCode SendPresence(const Status & s);
+	StatusCode SendPresence(const GameStatus & s);
 	// void OpenApp(const std::string &appId);
 
 	const AppId & CurrentApp() const {
@@ -1590,7 +1590,7 @@ StatusCode GameServiceClient::Login(const std::string& user_id, const std::strin
 	return OK;
 }
 
-StatusCode GameServiceClient::SendPresence(const Status & s) {
+StatusCode GameServiceClient::SendPresence(const GameStatus & s) {
 	worker_->SendPresence(s);
 	return OK;
 }

@@ -16,13 +16,13 @@ public:
       : XmppTask(parent) {}
   virtual ~PresenceOutTask() {}
 
-  XmppReturnStatus Send(const Status & s);
-  XmppReturnStatus SendDirected(const Jid & j, const Status & s);
+  XmppReturnStatus Send(const GameStatus & s);
+  XmppReturnStatus SendDirected(const Jid & j, const GameStatus & s);
   XmppReturnStatus SendProbe(const Jid& jid);
 
   virtual int ProcessStart();
 private:
-  XmlElement * TranslateStatus(const Status & s);
+  XmlElement * TranslateStatus(const GameStatus & s);
 };
 
 }

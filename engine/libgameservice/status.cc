@@ -7,7 +7,7 @@ using namespace txmpp;
 
 namespace libgameservice {
 
-std::string Status::QuietStatus() const
+std::string GameStatus::QuietStatus() const
 {
    Jid jid_(jid_str_);
    if (jid_.resource().find("Psi") != std::string::npos) {

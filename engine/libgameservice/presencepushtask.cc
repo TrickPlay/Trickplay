@@ -39,7 +39,7 @@ PresencePushTask::ProcessStart() {
   const XmlElement * stanza = NextStanza();
   if (stanza == NULL)
     return STATE_BLOCKED;
-  Status s;
+  GameStatus s;
 
   s.set_jid(stanza->Attr(QN_FROM));
 
@@ -76,23 +76,23 @@ PresencePushTask::ProcessStart() {
 
     const XmlElement * show = stanza->FirstNamed(QN_SHOW);
     if (show == NULL || show->FirstChild() == NULL) {
-      s.set_show(Status::SHOW_ONLINE);
+      s.set_show(GameStatus::SHOW_ONLINE);
     }
     else {
       if (show->BodyText() == "away") {
-        s.set_show(Status::SHOW_AWAY);
+        s.set_show(GameStatus::SHOW_AWAY);
       }
       else if (show->BodyText() == "xa") {
-        s.set_show(Status::SHOW_XA);
+        s.set_show(GameStatus::SHOW_XA);
       }
       else if (show->BodyText() == "dnd") {
-        s.set_show(Status::SHOW_DND);
+        s.set_show(GameStatus::SHOW_DND);
       }
       else if (show->BodyText() == "chat") {
-        s.set_show(Status::SHOW_CHAT);
+        s.set_show(GameStatus::SHOW_CHAT);
       }
       else {
-        s.set_show(Status::SHOW_ONLINE);
+        s.set_show(GameStatus::SHOW_ONLINE);
       }
     }
 
