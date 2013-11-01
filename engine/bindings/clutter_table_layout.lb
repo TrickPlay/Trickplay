@@ -205,7 +205,7 @@ remove_entry_from_dimension(
     gint dimension_to_be_removed_i,other_dimension_i;
 
     /*need to store all the actors that are to be removed in an array first*/
-    ClutterActor **removed_actors = (ClutterActor **)malloc(n * sizeof(ClutterActor *));
+    ClutterActor **removed_actors = (ClutterActor **)g_malloc(n * sizeof(ClutterActor *));
     for(i=0;i<n;i++) { removed_actors[i] = NULL; }
 
     /*for each child*/
@@ -249,7 +249,7 @@ remove_entry_from_dimension(
         }
         lua_rawseti(L,-2,i+1);
     }
-    free(removed_actors);
+    g_free(removed_actors);
 }
 
 void

@@ -1905,12 +1905,12 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
                     if ( lua_gettop( L ) == 9 || ( lua_gettop( L ) == 10 && lua_isnil( L , 10 ) ) )
                     {
-                        pixels = malloc( bytes_needed );
+                        pixels = g_malloc( bytes_needed );
 
                         if ( pixels )
                         {
                             memset( ( void * ) pixels , 0x00 , bytes_needed );
-                            free_later( ( void * ) pixels , free );
+                            free_later( ( void * ) pixels , g_free );
                         }
                     }
                     else if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , 10 ) )
