@@ -21,7 +21,8 @@
 
 #elif defined(CLUTTER_WINDOWING_OSX)
 
-#import <AppKit/AppKit.h>
+#include <GL/glx.h>
+#import <clutter/osx/clutter-osx.h>
 
 #else
 
