@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -422,6 +423,15 @@ static int init_egl( ApplicationContext* app_context, EGLNativeDisplayType displ
     EGLint     major_version;
     EGLint     minor_version;
     int        config_count;
+    const char *extensions;
+
+    extensions = eglQueryString(egl_display, EGL_EXTENSIONS);
+    if(extensions)
+    {
+        fprintf(stderr, "EGL Extensions: %s\n", extensions);
+    } else {
+        fprintf(stderr, "No EGL Extensions found\n");
+    }
 
 
     egl_display = eglGetDisplay( display_type );
@@ -554,9 +564,18 @@ static int init_egl( ApplicationContext* app_context, EGLNativeDisplayType displ
 }
 
 /*****************************************************************************/
+static int running = 1;
+
+static void
+signal_int(int signum)
+{
+    running = 0;
+}
+
 
 int main( int argc, char** argv )
 {
+    struct sigaction sigint;
 
     EGLNativeDisplayType display_type  = EGL_DEFAULT_DISPLAY;
     EGLNativeWindowType  native_window = 0;
@@ -617,9 +636,13 @@ int main( int argc, char** argv )
         return 4;
     }
 
+    sigint.sa_handler = signal_int;
+    sigemptyset(&sigint.sa_mask);
+    sigaction(SIGINT, &sigint, NULL);
+
     fprintf( stdout, "Press CTRL+C to terminate\n" );
 
-    while ( 1 )
+    while ( running )
     {
         /* Draw the graphics and flush them to the screen */
 
@@ -633,6 +656,7 @@ int main( int argc, char** argv )
         }
     }
 
+    fprintf(stderr,"Shutting down...\n");
     /* Close the local state for this demo */
 
     terminate_gl_state( &app_context );
