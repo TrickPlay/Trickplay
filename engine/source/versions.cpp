@@ -10,7 +10,7 @@
 #include "json-glib/json-glib.h"
 #include "tp-clutter.h"
 #include "ft2build.h"
-#include "freetype/freetype.h"
+#include "freetype.h"
 #include "gif_lib.h"
 #include "tiffio.h"
 #include "jpeglib.h"
